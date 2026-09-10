@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
@@ -27,6 +28,18 @@ const viewerArgs = {
 export const record = internalMutation({
   args: fileFields,
   handler: async (ctx, args) => {
+    if (args.runId !== undefined) {
+      const run = await ctx.db.get(args.runId)
+
+      if (
+        run === null ||
+        run.organizationId !== args.organizationId ||
+        isTerminalRunStatus(run.status)
+      ) {
+        throw new Error("This run is no longer active.")
+      }
+    }
+
     const now = Date.now()
 
     return await ctx.db.insert("files", {

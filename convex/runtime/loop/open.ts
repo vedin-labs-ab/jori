@@ -81,7 +81,10 @@ export const prepare = internalMutation({
     }
 
     if (args.sessionId !== undefined) {
-      const drained = await drainSession(ctx, { sessionId: args.sessionId })
+      const drained = await drainSession(ctx, {
+        sessionId: args.sessionId,
+        runId: args.runId,
+      })
 
       await appendTranscript(ctx, args.runId, drainedBatchMessages(drained))
     }

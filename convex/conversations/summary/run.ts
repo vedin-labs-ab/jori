@@ -26,13 +26,21 @@ export const run = internalAction({
       args
     )) as PendingSummary | null
 
-    if (pending === null || pending.messages.length === 0) {
-      await ctx.runMutation(internal.conversations.summary.data.clear, args)
+    if (pending === null) {
+      return null
+    }
+
+    if (pending.messages.length === 0) {
+      await ctx.runMutation(internal.conversations.summary.data.clear, {
+        ...args,
+        functionId: pending.functionId,
+      })
       return null
     }
 
     await ctx.runMutation(internal.conversations.summary.data.commit, {
       conversationId: args.conversationId,
+      functionId: pending.functionId,
       summarizedAt: pending.readAt,
       summary: await summarizeConversation(pending),
     })

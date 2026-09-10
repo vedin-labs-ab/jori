@@ -1,22 +1,21 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { checkRunBudget } from "../billing/guard"
-import {
-  type ResolvedContext,
-  resolveConsoleContext,
-  resolveConsoleReferences,
-} from "../messages/references"
 import { conversationScope } from "../messages/surface"
-import { nameMentions } from "../references/tokens"
 import { resolveRunAudience } from "../runs/audience"
 import { wakeRun } from "../runs/execution/waiters/data"
 import { startRun } from "../runs/execution/workflow"
-import { executionPrincipalForPerson } from "../runs/principal"
 import { type MessageCauseKind } from "../runs/schema"
 import { createMessageRunSnapshot } from "../runs/snapshot"
-import { findSession, isReusableSession, startSession } from "../sessions/data"
+import { stopRunTree } from "../runs/tree"
+import {
+  findSession,
+  isReusableSession,
+  readPendingMessages,
+  startSession,
+} from "../sessions/data"
 import { insertRow } from "../shared/context"
-import { createSight } from "../visibility/sight"
+import { consoleRunDetails, conversationExecutionPrincipal } from "./execution"
 import { isFreshRunWithoutWaiter } from "./fresh"
 import { findConversation } from "./resolve"
 
@@ -98,6 +97,8 @@ export async function startMessageRun(
         !woken &&
         !(await isFreshRunWithoutWaiter(ctx, activeSession.runId, args.now))
       ) {
+        await stopStaleRun(ctx, activeSession.runId)
+
         return await startNewMessageRun(ctx, args, session)
       }
     }
@@ -138,11 +139,15 @@ async function startNewMessageRun(
   const kind = session === null ? "mention" : "reply"
   const conversation =
     args.conversation ?? (await insertProviderConversation(ctx, args))
-  const runId = await insertRun(ctx, { ...args, conversation, kind })
+  const message =
+    session === null
+      ? args.message
+      : ((await readPendingMessages(ctx, session, 1))[0] ?? args.message)
+  const runId = await insertRun(ctx, { ...args, conversation, message, kind })
 
   const sessionId = await startSession(ctx, {
     conversationId: conversation._id,
-    message: args.message,
+    message,
     runId,
     now: args.now,
   })
@@ -184,11 +189,15 @@ async function insertRun(
     kind: MessageCauseKind
   }
 ) {
+  const principal = conversationExecutionPrincipal(
+    args.conversation,
+    args.createdBy
+  )
   const { context, title } = await consoleRunDetails(
     ctx,
     args.conversation,
     args.message,
-    args.createdBy
+    principal
   )
   const folderId = args.conversation.folderId
 
@@ -199,7 +208,7 @@ async function insertRun(
       messageId: args.message._id,
       kind: args.kind,
     },
-    principal: executionPrincipalForPerson(args.createdBy),
+    principal,
     ...createMessageRunSnapshot({
       context,
       integration: args.integration,
@@ -221,42 +230,10 @@ async function insertRun(
   })
 }
 
-/** What a console conversation was opened about, as the person who
- *  opened it sees it — the context rides on their first message, and
- *  the message's text with its mentions named, for the run's title.
- *  The chat's own folder determines attribution independently of context. */
-async function consoleRunDetails(
-  ctx: MutationCtx,
-  conversation: Doc<"conversations">,
-  message: Doc<"messages">,
-  personId: Id<"persons"> | undefined
-): Promise<{ context: ResolvedContext | undefined; title?: string }> {
-  if (conversation.surface !== "console") {
-    return { context: undefined }
-  }
+async function stopStaleRun(ctx: MutationCtx, runId: Id<"runs">) {
+  const run = await ctx.db.get(runId)
 
-  const first = await ctx.db
-    .query("messages")
-    .withIndex(
-      "by_organization_and_integration_and_conversation_and_created_at",
-      (query) =>
-        query
-          .eq("organizationId", conversation.organizationId)
-          .eq("integrationId", undefined)
-          .eq("conversationId", conversation.externalId)
-    )
-    .order("asc")
-    .first()
-  const sight = createSight(ctx, {
-    organizationId: conversation.organizationId,
-    personId,
-  })
-  const references = await resolveConsoleReferences(ctx, sight, message.data)
-
-  return {
-    context: await resolveConsoleContext(ctx, sight, first?.data),
-    ...(references.length === 0
-      ? {}
-      : { title: nameMentions(message.text ?? "", references) }),
+  if (run !== null) {
+    await stopRunTree(ctx, run)
   }
 }

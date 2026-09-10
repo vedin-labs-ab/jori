@@ -4,11 +4,7 @@ import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { readUserProfile } from "../access/users"
-import {
-  consoleAnswerValidator,
-  consoleMessageData,
-  insertConsoleMessage,
-} from "../messages/console"
+import { consoleAnswerValidator } from "../messages/console"
 import { referenceTargetValidator } from "../messages/references"
 import { consoleAuthor } from "../messages/view"
 import { modelSelectionValidator } from "../model/selection"
@@ -18,16 +14,7 @@ import {
   resolveConsolePerson,
   resolveCurrentPerson,
 } from "../persons/account"
-import { nameMentions } from "../references/tokens"
-import { createPersonActor } from "../shared/actor"
-import { createSight } from "../visibility/sight"
 import { conversationVisibility } from "./access"
-import {
-  createConsoleConversation,
-  normalizeConsoleContext,
-  normalizeConsoleReferences,
-} from "./create"
-import { startMessageRun } from "./data"
 import { listConsoleConversations } from "./list"
 
 export { listConsoleConversations } from "./list"
@@ -37,20 +24,9 @@ import {
   findVisibleConsoleConversation,
   requireVisibleConsoleConversation,
 } from "./resolve"
-import { scheduleConversationSummary } from "./summary/schedule"
+import { sendConsoleMessage } from "./send"
 
-type ConsoleSendArgs = {
-  organizationId: string
-  personId: Id<"persons">
-  profile: { name?: string; email?: string }
-  conversationId?: Id<"conversations">
-  text: string
-  context?: Infer<typeof referenceTargetValidator>
-  /** The resources the text mentions, as `+[kind:id]` tokens in it. */
-  references?: Infer<typeof referenceTargetValidator>[]
-  answer?: Infer<typeof consoleAnswerValidator>
-  model?: Infer<typeof modelSelectionValidator>
-}
+export { sendConsoleMessage } from "./send"
 
 /** A person's message to Jori from the console. The first message opens the
  *  conversation, with the model selection it was sent under; every message
@@ -157,77 +133,6 @@ export const live = query({
     }
   },
 })
-
-export async function sendConsoleMessage(
-  ctx: MutationCtx,
-  args: ConsoleSendArgs
-) {
-  const text = args.text.trim()
-
-  if (text === "") {
-    throw new Error("Message text cannot be empty.")
-  }
-
-  const context =
-    args.context === undefined
-      ? undefined
-      : normalizeConsoleContext(ctx, args.context)
-
-  if (context === null) {
-    throw new Error(`Context id is not a ${args.context?.kind}.`)
-  }
-
-  const references = await normalizeConsoleReferences(
-    ctx,
-    createSight(ctx, {
-      organizationId: args.organizationId,
-      personId: args.personId,
-    }),
-    args.references ?? []
-  )
-  const now = Date.now()
-  const conversation =
-    args.conversationId === undefined
-      ? await createConsoleConversation(ctx, {
-          ...args,
-          text: nameMentions(text, references),
-          now,
-        })
-      : await requireVisibleConsoleConversation(ctx, {
-          conversationId: args.conversationId,
-          organizationId: args.organizationId,
-          personId: args.personId,
-        })
-  const message = await insertConsoleMessage(ctx, {
-    actor: createPersonActor(args.personId, args.profile),
-    conversation,
-    data: consoleMessageData({ ...args, context, references }),
-    mentioned: true,
-    now,
-    text,
-  })
-  const run = await startMessageRun(ctx, {
-    conversation,
-    integration: null,
-    message,
-    createdBy: args.personId,
-    externalId: conversation.externalId,
-    now,
-  })
-
-  // The summary is what the next run in this thread reads of the messages
-  // the recent window no longer holds, so every message that runs is one
-  // it should fold in.
-  if (run.status !== "blocked") {
-    await scheduleConversationSummary(ctx, conversation, now)
-  }
-
-  return {
-    conversationId: conversation._id,
-    messageId: message._id,
-    status: run.status,
-  }
-}
 
 export async function chooseConversationModel(
   ctx: MutationCtx,

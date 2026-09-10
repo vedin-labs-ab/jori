@@ -23,6 +23,7 @@ export type SummaryMessage = {
 
 export type PendingSummary = {
   conversationId: Id<"conversations">
+  functionId: Id<"_scheduled_functions">
   messages: SummaryMessage[]
   priorSummary: string | null
   readAt: number
@@ -43,7 +44,7 @@ export const pending = internalQuery({
   handler: async (ctx, args): Promise<PendingSummary | null> => {
     const conversation = await ctx.db.get(args.conversationId)
 
-    if (conversation === null) {
+    if (conversation?.debounce === undefined) {
       return null
     }
 
@@ -51,6 +52,7 @@ export const pending = internalQuery({
 
     return {
       conversationId: conversation._id,
+      functionId: conversation.debounce.functionId,
       messages: await loadSummaryMessages(ctx, conversation),
       priorSummary: conversation.summary ?? null,
       readAt,
@@ -62,11 +64,14 @@ export const pending = internalQuery({
 export const commit = internalMutation({
   args: {
     conversationId: v.id("conversations"),
+    functionId: v.id("_scheduled_functions"),
     summarizedAt: v.number(),
     summary: v.string(),
   },
   handler: async (ctx, args) => {
-    if ((await ctx.db.get(args.conversationId)) === null) {
+    const conversation = await ctx.db.get(args.conversationId)
+
+    if (conversation?.debounce?.functionId !== args.functionId) {
       return
     }
 
@@ -81,11 +86,14 @@ export const commit = internalMutation({
 })
 
 export const clear = internalMutation({
-  args: { conversationId: v.id("conversations") },
+  args: {
+    conversationId: v.id("conversations"),
+    functionId: v.id("_scheduled_functions"),
+  },
   handler: async (ctx, args) => {
     const conversation = await ctx.db.get(args.conversationId)
 
-    if (conversation === null) {
+    if (conversation?.debounce?.functionId !== args.functionId) {
       return
     }
 

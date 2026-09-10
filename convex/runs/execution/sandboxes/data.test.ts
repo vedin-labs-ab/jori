@@ -10,10 +10,13 @@ import {
   upsertSandbox,
 } from "./data"
 
-test("releases and claims idle sandboxes by conversation", async () => {
+test("releases and claims idle sandboxes within the same session", async () => {
   const { ctx, database, runAfter, runAt } = sandboxContext()
   await database.insert("runs", run("run-1", "running"))
-  await database.insert("sessions", session("run-1", "conversation-1"))
+  const sessionId = await database.insert(
+    "sessions",
+    session("run-1", "conversation-1")
+  )
   const target = {
     externalId: "sandbox-external",
     runId: id<"runs">("run-1"),
@@ -24,7 +27,7 @@ test("releases and claims idle sandboxes by conversation", async () => {
   expect(await findSandboxByExternalId(ctx, target.externalId)).toMatchObject({
     ...target,
     status: "active",
-    conversationId: "conversation-1",
+    sessionId,
   })
 
   const lease = await releaseIdleSandbox(ctx, target)
@@ -32,7 +35,7 @@ test("releases and claims idle sandboxes by conversation", async () => {
   expect(lease?.expiresAt).toBeGreaterThan(Date.now())
   expect(await findSandboxByExternalId(ctx, target.externalId)).toMatchObject({
     status: "idle",
-    conversationId: "conversation-1",
+    sessionId,
   })
   expect(runAt).toHaveBeenCalledExactlyOnceWith(
     lease?.expiresAt,
@@ -42,7 +45,7 @@ test("releases and claims idle sandboxes by conversation", async () => {
   expect(runAfter).not.toHaveBeenCalled()
 
   await database.insert("runs", run("run-2", "running"))
-  await database.insert("sessions", session("run-2", "conversation-1"))
+  await database.patch(sessionId, { runId: id<"runs">("run-2") })
 
   await expect(claimReusableSandbox(ctx, id<"runs">("run-2"))).resolves.toEqual(
     { externalId: "sandbox-external" }
@@ -130,7 +133,7 @@ function sandbox(overrides: Record<string, unknown>) {
     externalId: "sandbox-external",
     createdAt: 0,
     updatedAt: 0,
-    conversationId: id<"conversations">("conversation-1"),
+    sessionId: id<"sessions">("session-1"),
     ...overrides,
   }
 }

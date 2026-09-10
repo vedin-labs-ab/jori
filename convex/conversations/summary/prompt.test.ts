@@ -29,6 +29,7 @@ test("a provider thread's summary drops identifiers as before", () => {
 
 function pending(surface: PendingSummary["surface"]): PendingSummary {
   return {
+    functionId: "scheduled" as PendingSummary["functionId"],
     conversationId: "conversations:1" as Id<"conversations">,
     messages: [
       {

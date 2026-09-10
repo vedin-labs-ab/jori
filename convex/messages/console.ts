@@ -1,11 +1,13 @@
 import { type PaginationOptions, paginationOptsValidator } from "convex/server"
 import { type Infer, v } from "convex/values"
 import { type ReplyPart } from "../../contracts/replies/parts"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx, query } from "../_generated/server"
 import { requireVisibleConsoleConversation } from "../conversations/resolve"
 import { resolveCurrentPerson } from "../persons/account"
 import { clearRunDraft } from "../runs/execution/drafts/data"
+import { findSession } from "../sessions/data"
 import { type Actor } from "../shared/actor"
 import { insertRow, type QueryLikeCtx } from "../shared/context"
 import { type referenceTargetValidator } from "./references"
@@ -130,6 +132,19 @@ export async function insertConsoleReply(
 
   if (conversation === null || conversation.surface !== "console") {
     throw new Error("Console conversation not found.")
+  }
+
+  const [run, session] = await Promise.all([
+    ctx.db.get(args.runId),
+    findSession(ctx, conversation._id),
+  ])
+
+  if (
+    run === null ||
+    isTerminalRunStatus(run.status) ||
+    session?.runId !== args.runId
+  ) {
+    throw new Error("This run is no longer active in the conversation.")
   }
 
   const message = await insertConsoleMessage(ctx, {

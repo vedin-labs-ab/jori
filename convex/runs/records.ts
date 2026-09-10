@@ -69,7 +69,7 @@ async function getMessageInput(ctx: QueryCtx, run: Doc<"runs">) {
     message,
     integration,
     ...(await readInputContext(ctx, run, integrations)),
-    conversation: await recentConversation(ctx, message),
+    conversation: await recentConversation(ctx, message, run.principal),
     place: await readPlaceContext(ctx, message),
   }
 }
