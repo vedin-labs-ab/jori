@@ -1,10 +1,15 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Doc } from "../_generated/dataModel"
 import { internalMutation, internalQuery } from "../_generated/server"
 import { type QueryLikeCtx } from "../shared/context"
+import {
+  createResourceSight,
+  resourceCreation,
+  type ResourceViewer,
+  resourceViewerArgs,
+} from "../visibility/resources"
 import { visibilityValidator } from "../visibility/schema"
-import { createSight } from "../visibility/sight"
-import { canSeeJob, requireVisibleJob } from "./access"
+import { canSeeJob } from "./access"
 import { canExecuteJobRunTools } from "./execution"
 import {
   createJob,
@@ -19,6 +24,7 @@ import { accessInput, jobBinding, jobType, triggerInput } from "./schema"
 export const create = internalMutation({
   args: {
     organizationId: v.string(),
+    runId: v.optional(v.id("runs")),
     ...jobBinding,
     parent: v.optional(
       v.object({
@@ -34,20 +40,27 @@ export const create = internalMutation({
     trigger: triggerInput,
     createdBy: v.optional(v.id("persons")),
   },
-  handler: async (ctx, args) => await createJob(ctx, args),
+  handler: async (ctx, args) => {
+    const { runId, ...input } = args
+    if (runId === undefined) {
+      return await createJob(ctx, input)
+    }
+    const viewer = { organizationId: args.organizationId, runId }
+    const defaults = await resourceCreation(ctx, { ...viewer, visibility: args.visibility })
+    return await createJob(ctx, { ...input, ...defaults, createdBy: defaults.ownerId }, await createResourceSight(ctx, viewer))
+  },
 })
 
 export const search = internalQuery({
   args: {
-    organizationId: v.string(),
-    personId: v.optional(v.id("persons")),
+    ...resourceViewerArgs,
     query: v.optional(v.string()),
     includeCompleted: v.optional(v.boolean()),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const jobs = await searchJobs(ctx, args)
-    const sight = createSight(ctx, args)
+    const sight = await createResourceSight(ctx, args)
     const visible: typeof jobs = []
 
     for (const job of jobs) {
@@ -62,8 +75,7 @@ export const search = internalQuery({
 
 export const read = internalQuery({
   args: {
-    organizationId: v.string(),
-    personId: v.optional(v.id("persons")),
+    ...resourceViewerArgs,
     jobId: v.id("jobs"),
   },
   handler: async (ctx, args) => {
@@ -72,7 +84,7 @@ export const read = internalQuery({
     if (
       job === null ||
       job.organizationId !== args.organizationId ||
-      !(await canSeeJob(createSight(ctx, args), job))
+      !(await canSeeJob(await createResourceSight(ctx, args), job))
     ) {
       return null
     }
@@ -92,8 +104,7 @@ export const canExecuteRunTools = internalQuery({
 
 export const update = internalMutation({
   args: {
-    organizationId: v.string(),
-    personId: v.optional(v.id("persons")),
+    ...resourceViewerArgs,
     jobId: v.id("jobs"),
     name: v.optional(v.string()),
     instructions: v.optional(v.string()),
@@ -111,8 +122,7 @@ export const update = internalMutation({
 
 export const remove = internalMutation({
   args: {
-    organizationId: v.string(),
-    personId: v.optional(v.id("persons")),
+    ...resourceViewerArgs,
     jobId: v.id("jobs"),
   },
   handler: async (ctx, args) => {
@@ -137,11 +147,16 @@ export const cleanupOwned = internalMutation({
 
 async function requireRecordAccess(
   ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    personId?: Id<"persons">
+  args: ResourceViewer & {
     jobId: Doc<"jobs">["_id"]
   }
 ) {
-  await requireVisibleJob(ctx, args)
+  const job = await ctx.db.get(args.jobId)
+
+  if (
+    job === null ||
+    !(await canSeeJob(await createResourceSight(ctx, args), job))
+  ) {
+    throw new Error("Job not found.")
+  }
 }

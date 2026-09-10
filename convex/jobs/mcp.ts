@@ -41,6 +41,7 @@ export async function callJoriJobTool(
   execution: {
     organizationId: string
     createdBy?: Id<"persons">
+    runId?: Id<"runs">
     job?: { id: Id<"jobs">; version?: number }
   },
   request: JoriToolRequest
@@ -54,6 +55,7 @@ export async function callJoriJobTool(
       visibility:
         visibility === undefined ? undefined : visibilityFromInput(visibility),
       organizationId: execution.organizationId,
+      runId: execution.runId,
       createdBy: execution.createdBy,
       parent: input.type === "once" ? execution.job : undefined,
     })
@@ -63,6 +65,7 @@ export async function callJoriJobTool(
     return await ctx.runQuery(internal.jobs.records.search, {
       ...(args as SearchJobsArgs),
       organizationId: execution.organizationId,
+      runId: execution.runId,
       personId: execution.createdBy,
     })
   }
@@ -71,6 +74,7 @@ export async function callJoriJobTool(
     return await ctx.runQuery(internal.jobs.records.read, {
       ...(args as ReadJobArgs),
       organizationId: execution.organizationId,
+      runId: execution.runId,
       personId: execution.createdBy,
     })
   }
@@ -82,6 +86,7 @@ export async function callJoriJobTool(
       visibility:
         visibility === undefined ? undefined : visibilityFromInput(visibility),
       organizationId: execution.organizationId,
+      runId: execution.runId,
       personId: execution.createdBy,
     })
   }
@@ -90,6 +95,7 @@ export async function callJoriJobTool(
     return await ctx.runMutation(internal.jobs.records.remove, {
       ...(args as ReadJobArgs),
       organizationId: execution.organizationId,
+      runId: execution.runId,
       personId: execution.createdBy,
     })
   }

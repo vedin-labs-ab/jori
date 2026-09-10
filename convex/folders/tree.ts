@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
-import { createSight } from "../visibility/sight"
+import { createSight, type Sight } from "../visibility/sight"
 
 // Tree shape rules shared by every folder read and write: depth, ancestry,
 // and the flat organization-wide listing the client builds its tree from.
@@ -69,7 +69,8 @@ export async function requireVisibleFolder(
     organizationId: string
     personId: Id<"persons"> | undefined
     folderId: Id<"folders">
-  }
+  },
+  sight: Sight = createSight(ctx, args)
 ) {
   const folder = await requireOrganizationFolder(
     ctx,
@@ -77,7 +78,7 @@ export async function requireVisibleFolder(
     args.folderId
   )
 
-  if (!(await createSight(ctx, args).canSeeFolder(folder))) {
+  if (!(await sight.canSeeFolder(folder))) {
     throw new Error("Folder was not found.")
   }
 
@@ -93,11 +94,12 @@ export async function resolveCreationFolder(
     organizationId: string
     personId: Id<"persons"> | undefined
     folderId: Id<"folders"> | undefined
-  }
+  },
+  sight: Sight = createSight(ctx, args)
 ) {
   return args.folderId === undefined
     ? undefined
-    : (await requireVisibleFolder(ctx, { ...args, folderId: args.folderId }))
+    : (await requireVisibleFolder(ctx, { ...args, folderId: args.folderId }, sight))
         ._id
 }
 

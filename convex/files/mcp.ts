@@ -31,6 +31,7 @@ export function isJoriFileTool(tool: string) {
 export async function callJoriFileTool(
   ctx: ActionCtx,
   run: {
+    _id?: Id<"runs">
     organizationId: string
     principal: ExecutionPrincipal
   },
@@ -39,6 +40,7 @@ export async function callJoriFileTool(
   const args = readRecord(request.args)
   const viewer = {
     organizationId: run.organizationId,
+    runId: run._id,
     personId: executionPrincipalPersonId(run.principal),
   }
 
@@ -57,13 +59,8 @@ export async function callJoriFileTool(
   }
 
   if (request.tool === "share_file") {
-    if (viewer.personId === undefined) {
-      throw new Error("Sharing files requires an authenticated execution user.")
-    }
-
     return await ctx.runMutation(internal.files.share.mint, {
-      organizationId: viewer.organizationId,
-      personId: viewer.personId,
+      ...viewer,
       fileId: requiredString(args.fileId, "fileId") as Id<"files">,
       expiresInHours: optionalNumber(args.expiresInHours),
     })
