@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react"
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -34,7 +34,18 @@ export function AddRowDialog({
 }) {
   const [draft, setDraft] = useState<RowDraft>({})
   const [isSaving, setIsSaving] = useState(false)
+  const [resetOnOpen, setResetOnOpen] = useState(false)
+  const wasOpen = useRef(isOpen)
   const built = buildRowValues(columns, draft)
+
+  useLayoutEffect(() => {
+    const opening = isOpen && !wasOpen.current
+    wasOpen.current = isOpen
+    if (opening && resetOnOpen) {
+      setDraft({})
+      setResetOnOpen(false)
+    }
+  }, [isOpen, resetOnOpen])
 
   async function submit() {
     if (!built.ok) {
@@ -44,7 +55,7 @@ export function AddRowDialog({
     setIsSaving(true)
 
     if ((await onSubmit(built.values)) !== null) {
-      setDraft({})
+      setResetOnOpen(true)
       onOpenChange(false)
     }
 
