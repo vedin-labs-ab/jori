@@ -83,7 +83,9 @@ test("choosing to delete the contents restates the outcome", () => {
   expect(screen.getByRole("alertdialog").textContent).toContain(
     "Its 3 items are deleted for good."
   )
-  expect(deleteButton().textContent).toBe("Delete folder and contents")
+  expect(
+    screen.getByRole("button", { name: "Delete folder and contents" })
+  ).toBe(deleteButton())
 })
 
 test("an empty folder confirms without the typing", () => {

@@ -13,6 +13,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { StableLabel } from "@/shared/label"
 import { type ManagedFolder } from "../types"
 
 // Deleting a folder takes its whole subtree, so the dialog states the size
@@ -116,7 +117,12 @@ function DeleteFolderForm({
           variant="destructive"
         >
           {isDeleting ? <Loader2 className="animate-spin" /> : null}
-          {deleteResources ? "Delete folder and contents" : "Delete folder"}
+          <StableLabel
+            alternatives={["Delete folder and contents"]}
+            className="justify-items-center"
+          >
+            {deleteResources ? "Delete folder and contents" : "Delete folder"}
+          </StableLabel>
         </AlertDialogAction>
       </AlertDialogFooter>
     </>
