@@ -9,12 +9,16 @@ import {
   rows,
 } from "../../test/convex/conversations"
 import { type Doc, type Id } from "../_generated/dataModel"
+import { listOrganizationViewerIds } from "../visibility/audience"
 import { sendConsoleMessage } from "./console"
 import { readLiveState } from "./live"
 
 // Starting a run hands it to the workflow component, which needs a real
 // backend; these tests are about what the thread reads back.
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
+vi.mock("../visibility/audience", () => ({
+  listOrganizationViewerIds: vi.fn(),
+}))
 
 test("reports the session's run, and how it ended when it did not finish", async () => {
   const { database, ctx } = consoleContext()
@@ -140,3 +144,22 @@ function emptyContext(runId: Id<"runs">) {
     windowTokens: catalogModel(defaultSelection.model).contextLength,
   }
 }
+
+test("live reads hide session context as soon as the execution audience changes", async () => {
+  const { database, ctx } = consoleContext()
+  const personId = await person(database)
+  const teammate = await person(database)
+  vi.mocked(listOrganizationViewerIds).mockResolvedValue([personId, teammate])
+  const sent = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Plan",
+  })
+  await database.patch(sent.conversationId, {
+    visibility: { mode: "organization" },
+    scope: "conversation",
+  })
+  const live = await readLiveState(ctx, await conversationOf(database, sent))
+  expect(live).toEqual({ run: null, context: null, model: defaultSelection })
+})

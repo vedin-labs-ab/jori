@@ -20,21 +20,22 @@ type ScopedRun = Pick<
 export async function runResourceGate(
   ctx: QueryLikeCtx,
   run: ScopedRun
-): Promise<Gate | undefined> {
+): Promise<Gate | null | undefined> {
   if (run.conversationId !== undefined) {
     const conversation = await ctx.db.get(run.conversationId)
     if (
-      conversation?.organizationId === run.organizationId &&
-      conversation.surface === "console"
+      conversation === null ||
+      conversation.organizationId !== run.organizationId
     ) {
+      return null
+    }
+    if (conversation.surface === "console") {
       return conversationGate(conversation)
     }
   }
   if (run.job !== undefined) {
     const job = await ctx.db.get(run.job.id)
-    if (job?.organizationId === run.organizationId) {
-      return jobGate(job)
-    }
+    return job?.organizationId === run.organizationId ? jobGate(job) : null
   }
   const rootId = run.rootId ?? run.parentId
   if (rootId !== undefined) {
@@ -46,6 +47,7 @@ export async function runResourceGate(
         parentId: undefined,
       })
     }
+    return null
   }
   return undefined
 }
@@ -57,10 +59,23 @@ export async function createRunSight(
   run: ScopedRun
 ): Promise<Sight> {
   const gate = await runResourceGate(ctx, run)
+  if (gate === null) {
+    return closedSight(run.organizationId)
+  }
   return gate !== undefined && gate.visibility.mode !== "private"
     ? createAudienceSight(ctx, gate)
     : createSight(ctx, {
         organizationId: run.organizationId,
         personId: executionPrincipalPersonId(run.principal),
       })
+}
+
+function closedSight(organizationId: string): Sight {
+  return {
+    organizationId,
+    personId: undefined,
+    canSee: async () => false,
+    canSeeFolder: async () => false,
+    canShare: async () => false,
+  }
 }

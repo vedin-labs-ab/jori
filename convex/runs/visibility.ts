@@ -1,8 +1,9 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { conversationGate } from "../conversations/access"
+import { conversationVisibility } from "../conversations/access"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 import { runVisibleToPerson } from "./console/filters"
+import { runResourceGate } from "./sight"
 
 /** Console history follows the chat's current audience, including revocation.
  *  Provider conversations keep their existing surface-based run policy. */
@@ -24,13 +25,15 @@ export async function canSeeRun(
     ) {
       return false
     }
-
-    if (conversation.surface === "console") {
-      return await sight.canSee(conversationGate(conversation))
-    }
   }
 
-  return runVisibleToPerson(run, personId)
+  const gate = await runResourceGate(ctx, run)
+  if (gate === null) {
+    return false
+  }
+  return gate !== undefined
+    ? await sight.canSee(gate)
+    : run.job === undefined && runVisibleToPerson(run, personId)
 }
 
 /** The console's facet follows the chat's live personal/workspace setting. */
@@ -48,7 +51,7 @@ export async function runMatchesVisibilityFilter(
       : await ctx.db.get(run.conversationId)
   const shared =
     conversation?.surface === "console"
-      ? conversationGate(conversation).visibility.mode !== "private"
+      ? conversationVisibility(conversation).mode !== "private"
       : run.audience === "organization"
   return filter === "organization" ? shared : !shared
 }
