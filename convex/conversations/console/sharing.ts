@@ -1,10 +1,10 @@
-import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
-import { stopRunTree } from "../runs/tree"
-import { findSession } from "../sessions/data"
-import { createPersonActor } from "../shared/actor"
-import { type StoredVisibility } from "../visibility/schema"
-import { conversationVisibility } from "./access"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { type MutationCtx } from "../../_generated/server"
+import { stopRunTree } from "../../runs/tree"
+import { findSession } from "../../sessions/data"
+import { createPersonActor } from "../../shared/actor"
+import { type StoredVisibility } from "../../visibility/schema"
+import { conversationVisibility } from "../access"
 
 /** Sharing preserves the transcript. Audience changes start a fresh session
  * so cached context and sandboxes stay with the audience that produced them. */

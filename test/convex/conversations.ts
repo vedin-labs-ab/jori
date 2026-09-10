@@ -1,6 +1,6 @@
 import { convexTest } from "convex-test"
 import { vi } from "vitest"
-import { sendConsoleMessage } from "../../convex/conversations/send"
+import { sendConsoleMessage } from "../../convex/conversations/console/send"
 import schema from "../../convex/schema"
 import { databaseContext, type TestDatabase } from "./database"
 

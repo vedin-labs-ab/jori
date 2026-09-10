@@ -2,23 +2,10 @@ import { v } from "convex/values"
 import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { conversationExecutionScope } from "../conversations/execution"
-import { resetConversationExecution } from "../conversations/sharing"
+import { resetConversationExecution } from "../conversations/console/sharing"
 import { stopRunTree } from "../runs/tree"
-import { type QueryLikeCtx } from "../shared/context"
 import { findSession } from "./data"
-
-/** A context is reusable only for the audience that originally populated it. */
-export async function sessionExecutionIsCurrent(
-  ctx: QueryLikeCtx,
-  session: Doc<"sessions">,
-  conversation: Doc<"conversations">
-) {
-  return (
-    session.executionScope ===
-    (await conversationExecutionScope(ctx, conversation))
-  )
-}
+import { runExecutionIsCurrent, sessionExecutionIsCurrent } from "./scope"
 
 export async function currentConversationSession(
   ctx: MutationCtx,
@@ -33,29 +20,6 @@ export async function currentConversationSession(
   }
   await resetConversationExecution(ctx, conversation)
   return null
-}
-
-/** Children share the root session's audience and cannot outlive its scope. */
-export async function runExecutionIsCurrent(
-  ctx: QueryLikeCtx,
-  run: Doc<"runs">
-) {
-  if (run.conversationId === undefined) {
-    return true
-  }
-  const conversation = await ctx.db.get(run.conversationId)
-  if (conversation === null) {
-    return false
-  }
-  if (conversation.surface !== "console") {
-    return true
-  }
-  const session = await findSession(ctx, conversation._id)
-  return (
-    session !== null &&
-    session.runId === (run.rootId ?? run._id) &&
-    (await sessionExecutionIsCurrent(ctx, session, conversation))
-  )
 }
 
 export async function reconcileRunExecution(

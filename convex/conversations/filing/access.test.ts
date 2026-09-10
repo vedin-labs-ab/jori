@@ -4,7 +4,7 @@ import { folderDoc } from "../../../test/convex/folders"
 import { fileResource } from "../../folders/filing"
 import { findSession } from "../../sessions/data"
 import { listOrganizationViewerIds } from "../../visibility/audience"
-import { transitionConversationVisibility } from "../sharing"
+import { transitionConversationVisibility } from "../console/sharing"
 
 vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 vi.mock("../../visibility/audience", () => ({

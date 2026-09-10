@@ -1,6 +1,6 @@
-import { type Doc, type Id } from "../_generated/dataModel"
-import { personDisplay } from "../persons/names"
-import { type QueryLikeCtx } from "../shared/context"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { personDisplay } from "../../persons/names"
+import { type QueryLikeCtx } from "../../shared/context"
 
 export async function consoleAuthor(
   ctx: QueryLikeCtx,

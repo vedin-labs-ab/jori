@@ -10,8 +10,8 @@ import { type Doc } from "../_generated/dataModel"
 import { folderResources } from "../folders/resources"
 import { canSeeRun, runMatchesVisibilityFilter } from "../runs/visibility"
 import { loadTarget } from "../visibility/target"
-import { createConsoleConversation } from "./create"
-import { listConsoleConversations } from "./list"
+import { createConsoleConversation } from "./console/create"
+import { listConsoleConversations } from "./console/list"
 import { findVisibleConsoleConversation } from "./resolve"
 
 const paginationOpts = { cursor: null, numItems: 10 }

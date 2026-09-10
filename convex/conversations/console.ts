@@ -5,8 +5,8 @@ import { type MutationCtx, mutation, query } from "../_generated/server"
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { readUserProfile } from "../access/users"
 import { consoleAnswerValidator } from "../messages/console"
+import { consoleAuthor } from "../messages/console/view"
 import { referenceTargetValidator } from "../messages/references"
-import { consoleAuthor } from "../messages/view"
 import { modelSelectionValidator } from "../model/selection"
 import {
   accountArgs,
@@ -15,18 +15,18 @@ import {
   resolveCurrentPerson,
 } from "../persons/account"
 import { conversationVisibility } from "./access"
-import { listConsoleConversations } from "./list"
+import { listConsoleConversations } from "./console/list"
 
-export { listConsoleConversations } from "./list"
+export { listConsoleConversations } from "./console/list"
 
+import { sendConsoleMessage } from "./console/send"
 import { readLiveState } from "./live"
 import {
   findVisibleConsoleConversation,
   requireVisibleConsoleConversation,
 } from "./resolve"
-import { sendConsoleMessage } from "./send"
 
-export { sendConsoleMessage } from "./send"
+export { sendConsoleMessage } from "./console/send"
 
 /** A person's message to Jori from the console. The first message opens the
  *  conversation, with the model selection it was sent under; every message

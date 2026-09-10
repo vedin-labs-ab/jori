@@ -1,35 +1,12 @@
-import { type Doc, type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+import { type Doc } from "../../_generated/dataModel"
+import { type MutationCtx } from "../../_generated/server"
 import {
   type ResolvedContext,
   resolveConsoleContext,
   resolveConsoleReferences,
-} from "../messages/references"
-import { nameMentions } from "../references/tokens"
-import {
-  type ExecutionPrincipal,
-  executionPrincipalForPerson,
-  executionPrincipalForVisibility,
-} from "../runs/principal"
-import { type QueryLikeCtx } from "../shared/context"
-import { audienceKey } from "../visibility/execution"
-import {
-  conversationGate,
-  conversationVisibility,
-  createConversationSight,
-} from "./access"
-
-export function conversationExecutionPrincipal(
-  conversation: Doc<"conversations">,
-  senderId?: Id<"persons">
-): ExecutionPrincipal {
-  return conversation.surface === "console"
-    ? executionPrincipalForVisibility(
-        conversationVisibility(conversation),
-        conversation.createdBy
-      )
-    : executionPrincipalForPerson(senderId)
-}
+} from "../../messages/references"
+import { nameMentions } from "../../references/tokens"
+import { createConversationSight } from "../access"
 
 /** What a console conversation was opened about, as its current audience
  *  can see it — the context rides on their first message, and
@@ -65,17 +42,4 @@ export async function consoleRunDetails(
       ? {}
       : { title: nameMentions(message.text ?? "", references) }),
   }
-}
-
-export async function conversationExecutionScope(
-  ctx: QueryLikeCtx,
-  conversation: Doc<"conversations">
-) {
-  if (conversation.surface !== "console") {
-    return undefined
-  }
-
-  return conversationVisibility(conversation).mode === "private"
-    ? `person:${conversation.createdBy}`
-    : `audience:${await audienceKey(ctx, conversationGate(conversation))}`
 }

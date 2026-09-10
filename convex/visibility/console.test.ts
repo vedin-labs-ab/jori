@@ -7,7 +7,7 @@ import {
 } from "../../test/convex/conversations"
 import { type api } from "../_generated/api"
 import { type MutationCtx } from "../_generated/server"
-import { createConsoleConversation } from "../conversations/create"
+import { createConsoleConversation } from "../conversations/console/create"
 import { ensureCurrentPerson } from "../persons/account"
 import { set } from "./console"
 

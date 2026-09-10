@@ -17,8 +17,9 @@ import { boundedNumber } from "../shared/input"
 import { defaultDrainLimit, formatRuntimeMessage, maxDrainLimit } from "./batch"
 import { cursorWithMessage, cursorWithReaction } from "./cursor"
 import { readPendingBatch } from "./data"
-import { reconcileRunExecution, runExecutionIsCurrent } from "./execution"
+import { reconcileRunExecution } from "./execution"
 import { emitRecencyContexts, type RecencyEmission } from "./recency"
+import { runExecutionIsCurrent } from "./scope"
 
 export const messages = internalMutation({
   args: {

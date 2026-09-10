@@ -1,9 +1,9 @@
 import { type PaginationOptions } from "convex/server"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { parseCursor, scanPage } from "../runs/console/filters"
-import { type QueryLikeCtx } from "../shared/context"
-import { createSight, type Sight } from "../visibility/sight"
-import { conversationGate, conversationVisibility } from "./access"
+import { type Doc, type Id } from "../../_generated/dataModel"
+import { parseCursor, scanPage } from "../../runs/console/filters"
+import { type QueryLikeCtx } from "../../shared/context"
+import { createSight, type Sight } from "../../visibility/sight"
+import { conversationGate, conversationVisibility } from "../access"
 
 /** The same sighted stream feeds chat navigation and reference pickers. */
 export async function* visibleConsoleConversations(

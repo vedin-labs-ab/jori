@@ -1,9 +1,9 @@
 import { expect, test } from "vitest"
-import { tableDoc } from "../../test/convex/collections"
-import { databaseContext } from "../../test/convex/database"
-import { fileDoc } from "../../test/convex/folders"
-import { type Id } from "../_generated/dataModel"
-import { createSight } from "../visibility/sight"
+import { tableDoc } from "../../../test/convex/collections"
+import { databaseContext } from "../../../test/convex/database"
+import { fileDoc } from "../../../test/convex/folders"
+import { type Id } from "../../_generated/dataModel"
+import { createSight } from "../../visibility/sight"
 import { normalizeConsoleContext, normalizeConsoleReferences } from "./create"
 
 const other = "persons:other" as Id<"persons">

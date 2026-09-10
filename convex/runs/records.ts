@@ -13,7 +13,7 @@ import { readApprovedFacts } from "../organization/profile"
 import { readRequesterContext } from "../persons/profile/context"
 import { readPersonTimezone } from "../persons/profile/timezone"
 import { readPlaceContext } from "../places/context"
-import { runExecutionIsCurrent } from "../sessions/execution"
+import { runExecutionIsCurrent } from "../sessions/scope"
 import {
   hasIntegrationTools,
   isMessageIntegration,

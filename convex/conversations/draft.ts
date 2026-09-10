@@ -4,7 +4,7 @@ import { query } from "../_generated/server"
 import { resolveCurrentPerson } from "../persons/account"
 import { readRunDraft } from "../runs/execution/drafts/data"
 import { findSession } from "../sessions/data"
-import { sessionExecutionIsCurrent } from "../sessions/execution"
+import { sessionExecutionIsCurrent } from "../sessions/scope"
 import { type QueryLikeCtx } from "../shared/context"
 import { findVisibleConsoleConversation } from "./resolve"
 

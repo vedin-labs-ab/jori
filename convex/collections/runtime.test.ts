@@ -4,7 +4,7 @@ import { api, internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { callJoriTool } from "../broker/jori"
-import { transitionConversationVisibility } from "../conversations/sharing"
+import { transitionConversationVisibility } from "../conversations/console/sharing"
 import { listOrganizationViewerIds } from "../visibility/audience"
 import { loadPersonTeamIds } from "../visibility/viewer"
 

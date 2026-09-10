@@ -1,13 +1,13 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { transactionalConsoleContext } from "../../test/convex/conversations"
 import { internal } from "../_generated/api"
+import { transitionConversationVisibility } from "../conversations/console/sharing"
 import { readConversationDraft } from "../conversations/draft"
-import { transitionConversationVisibility } from "../conversations/sharing"
-import { insertConsoleReply } from "../messages/console"
+import { insertConsoleReply } from "../messages/console/records"
 import { writeRunDraft } from "../runs/execution/drafts/data"
 import { listOrganizationViewerIds } from "../visibility/audience"
 import { findSession } from "./data"
-import { runExecutionIsCurrent } from "./execution"
+import { runExecutionIsCurrent } from "./scope"
 
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 vi.mock("../visibility/audience", () => ({
