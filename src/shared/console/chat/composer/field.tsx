@@ -1,7 +1,8 @@
 import { EditorContent } from "@tiptap/react"
 import { X } from "lucide-react"
-import { type ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 import { Badge } from "@/components/ui/badge"
+import { InputGroupAddon } from "@/components/ui/input-group"
 import { MentionSuggestions } from "../../mentions/suggest/listbox"
 import { referencePresentation } from "../presentation"
 import { type ChatReference } from "../types"
@@ -61,6 +62,32 @@ function emptySuggestionMessage({
     case "tool":
       return active.query === "" ? "No tools to mention." : "No matching tools."
   }
+}
+
+/** Keep the context's row after it is cleared so the field stays put. */
+export function ComposerContext({
+  onClear,
+  reference,
+}: {
+  onClear: (() => void) | undefined
+  reference: ChatReference | undefined
+}) {
+  const [hasContext, setHasContext] = useState(reference !== undefined)
+  if (reference !== undefined && !hasContext) {
+    setHasContext(true)
+  }
+
+  if (!hasContext) {
+    return null
+  }
+
+  return (
+    <InputGroupAddon align="block-start" className="min-h-9">
+      {reference === undefined ? null : (
+        <ContextChip onClear={onClear} reference={reference} />
+      )}
+    </InputGroupAddon>
+  )
 }
 
 /** The resource the chat was opened about, named by its kind's icon, with
