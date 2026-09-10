@@ -76,6 +76,9 @@ export async function drive(
     if (options.condition === "warm") {
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 })
       await settle(page)
+      // Repeating a fragment URL can be a same-document navigation. Leave
+      // the primer without clearing this context's warmed asset cache.
+      await page.goto("about:blank", { waitUntil: "commit" })
     }
     shifts.length = 0
     errors.length = 0
