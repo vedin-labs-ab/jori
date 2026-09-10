@@ -172,16 +172,17 @@ function referenceIdLabel(target: MessageContext) {
   return `${noun}Id: ${target.id}`
 }
 
+/** The initial prompt ends at its triggering message. Later arrivals enter
+ * through the session cursor, once, rather than also appearing in history. */
 async function recentMessages(ctx: QueryCtx, message: Doc<"messages">) {
   return await ctx.db
     .query("messages")
-    .withIndex(
-      "by_organization_and_integration_and_conversation_and_created_at",
-      (query) =>
-        query
-          .eq("organizationId", message.organizationId)
-          .eq("integrationId", message.integrationId)
-          .eq("conversationId", message.conversationId)
+    .withIndex("by_conversation", (query) =>
+      query
+        .eq("organizationId", message.organizationId)
+        .eq("integrationId", message.integrationId)
+        .eq("conversationId", message.conversationId)
+        .lte("_creationTime", message._creationTime)
     )
     .order("desc")
     .take(recentConversationLimit + 1)

@@ -225,16 +225,31 @@ export async function openSandbox(
   ctx: ActionCtx,
   args: { runId: Id<"runs">; sandboxId: string | null }
 ): Promise<E2BSandbox> {
+  const allowed = await ctx.runQuery(internal.jobs.records.canExecuteRunTools, {
+    runId: args.runId,
+  })
+
+  if (!allowed) {
+    throw new Error("This run is no longer active.")
+  }
+
   if (args.sandboxId !== null) {
     return await connectSandbox(args.sandboxId)
   }
 
   const sandbox = await createSandbox(args.runId)
 
-  await ctx.runMutation(internal.runs.execution.sandboxes.records.upsert, {
-    externalId: sandbox.sandboxId,
-    runId: args.runId,
-  })
+  const accepted = await ctx.runMutation(
+    internal.runs.execution.sandboxes.records.upsert,
+    {
+      externalId: sandbox.sandboxId,
+      runId: args.runId,
+    }
+  )
+
+  if (!accepted) {
+    throw new Error("This run is no longer active.")
+  }
 
   return sandbox
 }

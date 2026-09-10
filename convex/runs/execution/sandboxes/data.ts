@@ -73,6 +73,13 @@ export async function upsertSandbox(ctx: MutationCtx, args: SandboxRun) {
   } else {
     await ctx.db.patch(existing._id, patch)
   }
+
+  if (isTerminalRunStatus(run.status)) {
+    await ctx.scheduler.runAfter(0, internal.runtime.sandbox.e2b.kill, args)
+    return false
+  }
+
+  return true
 }
 
 export async function releaseIdleSandbox(ctx: MutationCtx, args: SandboxRun) {

@@ -19,12 +19,6 @@ const runId = "runs:1" as Id<"runs">
 test("pages a conversation newest first with each side's role", async () => {
   const { database, ctx } = databaseContext()
   const conversation = await consoleConversation(database)
-  await database.insert("runs", { _id: runId, status: "running" })
-  await database.insert("sessions", {
-    conversationId: conversation._id,
-    runId,
-    updatedAt: 0,
-  })
 
   const question = await insertConsoleMessage(ctx, {
     actor: { kind: "person", personId },
@@ -113,6 +107,12 @@ async function consoleConversation(
     updatedAt: 0,
   })
 
+  await database.insert("runs", { _id: runId, status: "running" })
+  await database.insert("sessions", {
+    conversationId: conversationId,
+    runId,
+    updatedAt: 0,
+  })
   await database.patch(conversationId, { externalId: conversationId })
 
   return (await database.get(conversationId)) as unknown as Doc<"conversations">

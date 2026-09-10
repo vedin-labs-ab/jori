@@ -1,4 +1,7 @@
+import { convexTest } from "convex-test"
 import { vi } from "vitest"
+import { sendConsoleMessage } from "../../convex/conversations/send"
+import schema from "../../convex/schema"
 import { databaseContext, type TestDatabase } from "./database"
 
 type MutationCtx = import("../../convex/_generated/server").MutationCtx
@@ -162,4 +165,53 @@ export async function finishRun(database: TestDatabase) {
   for (const run of await rows<Doc<"runs">>(database, "runs")) {
     await database.patch(run._id, { status: "completed" })
   }
+}
+
+const modules = import.meta.glob("/convex/**/*.{ts,js}")
+
+export async function transactionalConsoleContext() {
+  const t = convexTest(schema, modules)
+  const initial = await t.run(async (ctx) => {
+    const people = await Promise.all(
+      ["Owner", "Teammate"].map(() =>
+        ctx.db.insert("persons", {
+          organizationId,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        })
+      )
+    )
+    const sent = await sendConsoleMessage(ctx, {
+      organizationId,
+      personId: people[0],
+      profile: { name: "Owner" },
+      text: "Prepare the update.",
+    })
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_conversation", (q) =>
+        q.eq("conversationId", sent.conversationId)
+      )
+      .unique()
+
+    if (session?.runId === undefined) {
+      throw new Error("Fixture session missing.")
+    }
+
+    return { ...sent, people, runId: session.runId, sessionId: session._id }
+  })
+  const send = (personId: Id<"persons">, text: string) =>
+    t.run((ctx) =>
+      sendConsoleMessage(ctx, {
+        conversationId: initial.conversationId,
+        organizationId,
+        personId,
+        profile: {
+          name: personId === initial.people[0] ? "Owner" : "Teammate",
+        },
+        text,
+      })
+    )
+
+  return { t, ...initial, send }
 }

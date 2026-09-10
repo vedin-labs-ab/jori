@@ -70,7 +70,7 @@ test("a console message's context and mentions reach the model as lines under it
     createdBy: testOwner,
     updatedAt: 1,
   })
-  const messageId = await consoleMessage(database, {
+  await consoleMessage(database, {
     text: `Which of +[table:${tableId}] are at risk? Also +[job:gone]`,
     data: {
       context: { kind: "folder", id: folderId },
@@ -82,7 +82,7 @@ test("a console message's context and mentions reach the model as lines under it
     createdAt: 1,
   })
 
-  await consoleMessage(database, {
+  const messageId = await consoleMessage(database, {
     text: `See +[chat:${chatId}]`,
     data: {
       context: { kind: "table", id: "collections:404" },
