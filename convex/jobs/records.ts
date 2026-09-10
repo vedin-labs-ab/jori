@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, internalQuery } from "../_generated/server"
-import { runExecutionIsCurrent } from "../sessions/scope"
+import { isRunExecutable } from "../runs/execution/guard"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   createResourceSight,
@@ -11,7 +11,6 @@ import {
 } from "../visibility/resources"
 import { visibilityValidator } from "../visibility/schema"
 import { canSeeJob } from "./access"
-import { canExecuteJobRunTools } from "./execution"
 import {
   createJob,
   fireJob,
@@ -106,11 +105,7 @@ export const canExecuteRunTools = internalQuery({
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
 
-    return (
-      run !== null &&
-      (await runExecutionIsCurrent(ctx, run)) &&
-      (await canExecuteJobRunTools(ctx, run))
-    )
+    return run !== null && (await isRunExecutable(ctx, run))
   },
 })
 

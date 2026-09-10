@@ -1,9 +1,8 @@
 import { type ObjectType, v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { resolveCreationFolder } from "../folders/tree"
-import { canExecuteJobRunTools } from "../jobs/execution"
+import { requireExecutingRun } from "../runs/execution/guard"
 import { createRunSight, runResourceGate } from "../runs/sight"
-import { runExecutionIsCurrent } from "../sessions/scope"
 import { type QueryLikeCtx } from "../shared/context"
 import { normalizeStoredVisibility, type StoredVisibility } from "./schema"
 import { createSight, type Sight } from "./sight"
@@ -63,15 +62,5 @@ async function resourceRun(ctx: QueryLikeCtx, args: ResourceViewer) {
   if (args.runId === undefined) {
     return undefined
   }
-  const run = await ctx.db.get(args.runId)
-  if (
-    run === null ||
-    run.organizationId !== args.organizationId ||
-    !(await canExecuteJobRunTools(ctx, run)) ||
-    !(await runExecutionIsCurrent(ctx, run)) ||
-    (await runResourceGate(ctx, run)) === null
-  ) {
-    throw new Error("Run is no longer active.")
-  }
-  return run
+  return await requireExecutingRun(ctx, { ...args, runId: args.runId })
 }

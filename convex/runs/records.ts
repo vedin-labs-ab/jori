@@ -1,5 +1,4 @@
 import { v } from "convex/values"
-import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc } from "../_generated/dataModel"
 import {
   internalMutation,
@@ -13,11 +12,11 @@ import { readApprovedFacts } from "../organization/profile"
 import { readRequesterContext } from "../persons/profile/context"
 import { readPersonTimezone } from "../persons/profile/timezone"
 import { readPlaceContext } from "../places/context"
-import { runExecutionIsCurrent } from "../sessions/scope"
 import {
   hasIntegrationTools,
   isMessageIntegration,
 } from "../shared/integrations"
+import { isRunExecutable } from "./execution/guard"
 import { executionPrincipalPersonId } from "./principal"
 
 export const getInputByRun = internalQuery({
@@ -179,11 +178,7 @@ export const finish = internalMutation({
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
 
-    if (
-      run === null ||
-      isTerminalRunStatus(run.status) ||
-      !(await runExecutionIsCurrent(ctx, run))
-    ) {
+    if (run === null || !(await isRunExecutable(ctx, run))) {
       return null
     }
 
