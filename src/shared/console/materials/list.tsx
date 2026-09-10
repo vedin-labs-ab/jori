@@ -249,7 +249,7 @@ function MaterialListRow<Row extends MaterialListRow>({
         row={row}
         selection={selection}
       />
-      <TableCell>{kind.nameCell(row)}</TableCell>
+      <TableCell data-row-link>{kind.nameCell(row)}</TableCell>
       {kind.columns.map((column) => (
         <TableCell
           className={cn(column.className, columnTier[column.tier])}

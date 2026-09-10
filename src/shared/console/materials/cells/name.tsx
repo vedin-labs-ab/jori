@@ -26,4 +26,4 @@ export function MaterialNameCell({
 
 /** The class a material name link wears inside `MaterialNameCell`: it is the
  *  one flex item allowed to shrink, ellipsizing instead of overflowing. */
-export const materialNameLinkClassName = "truncate font-medium hover:underline"
+export const materialNameLinkClassName = "truncate font-medium"

@@ -18,6 +18,7 @@ export function StoreNameCell({ store }: { store: StoreSummary }) {
     <MaterialNameCell icon={Database}>
       <ConsoleLink
         className={materialNameLinkClassName}
+        draggable={false}
         params={{ storeId: store.storeId }}
         title={store.name}
         to="/stores/$storeId"

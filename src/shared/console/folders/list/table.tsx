@@ -130,7 +130,7 @@ export function FolderListRow({
         row={folder}
         selection={selection}
       />
-      <TableCell>
+      <TableCell data-row-link>
         <ConsoleLink
           className={nameLinkClassName}
           draggable={false}
