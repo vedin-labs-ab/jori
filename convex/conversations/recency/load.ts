@@ -2,8 +2,8 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { messageIdentifiers } from "../../messages/identifiers"
 import { type Audience } from "../../shared/audience"
-import { createSight } from "../../visibility/sight"
-import { conversationGate } from "../access"
+import { createSight, type Sight } from "../../visibility/sight"
+import { conversationGate, createConversationSight } from "../access"
 import {
   recencyConversationLimit,
   recencyMessageLimit,
@@ -54,6 +54,7 @@ export async function loadRecentActivity(
   const seen = new Set(args.seen)
   const visited = new Set<Id<"conversations">>()
   const personal = args.personId === args.run.personId
+  const sight = await recentSight(ctx, args.run, args.organizationId, personal)
   const entries: RecencyEntry[] = []
   let summaries = 0
 
@@ -67,10 +68,10 @@ export async function loadRecentActivity(
     visited.add(conversation._id)
 
     const includable = await canIncludeConversation(
-      ctx,
       conversation,
       args.run,
-      personal
+      personal,
+      sight
     )
 
     if (!includable) {
@@ -192,21 +193,39 @@ const messageLevelIdentifierPrefixes = [
 ]
 
 async function canIncludeConversation(
-  ctx: QueryCtx,
   conversation: Doc<"conversations">,
   run: RecencyRun,
-  personal: boolean
+  personal: boolean,
+  sight: Sight
 ) {
   if (conversation.surface === "console") {
-    return await createSight(ctx, {
-      organizationId: conversation.organizationId,
-      personId:
-        run.audience === "person" && personal ? run.personId : undefined,
-    }).canSee(conversationGate(conversation))
+    return await sight.canSee(conversationGate(conversation))
   }
   return canIncludeRecentConversation({
     candidateAudience: conversation.scope,
     currentAudience: run.audience,
     personal,
+  })
+}
+
+async function recentSight(
+  ctx: QueryCtx,
+  run: RecencyRun,
+  organizationId: string,
+  personal: boolean
+) {
+  const current =
+    run.conversationId === undefined
+      ? null
+      : await ctx.db.get(run.conversationId)
+  if (
+    current?.surface === "console" &&
+    current.organizationId === organizationId
+  ) {
+    return createConversationSight(ctx, current)
+  }
+  return createSight(ctx, {
+    organizationId,
+    personId: run.audience === "person" && personal ? run.personId : undefined,
   })
 }

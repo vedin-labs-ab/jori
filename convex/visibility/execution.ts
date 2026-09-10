@@ -44,3 +44,12 @@ async function audienceSights(ctx: QueryLikeCtx, gate: Gate) {
   }
   return audience
 }
+
+/** Stable identity of the effective audience, for invalidating execution caches
+ *  after folder or membership changes. Uses exactly the resource-read audience. */
+export async function audienceKey(ctx: QueryLikeCtx, gate: Gate) {
+  const audience = await audienceSights(ctx, gate)
+  return JSON.stringify(
+    audience.map((viewer) => viewer.personId ?? "organization-member").sort()
+  )
+}
