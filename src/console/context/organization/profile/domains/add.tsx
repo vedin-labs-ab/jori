@@ -97,14 +97,14 @@ function AddDomainForm({
 }) {
   return (
     <form
-      className="grid justify-items-end gap-2"
+      className="grid min-w-0 justify-items-end gap-2"
       onSubmit={(event) => {
         event.preventDefault()
         onSubmit()
       }}
     >
-      <ButtonGroup>
-        <InputGroup className="w-44">
+      <ButtonGroup className="min-w-0 max-w-full">
+        <InputGroup className="w-44 min-w-0 shrink">
           <InputGroupInput
             aria-invalid={error !== null}
             aria-label="Domain to add"
@@ -129,7 +129,12 @@ function AddDomainForm({
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>
-        <Button disabled={value.trim() === ""} type="submit" variant="outline">
+        <Button
+          className="shrink-0"
+          disabled={value.trim() === ""}
+          type="submit"
+          variant="outline"
+        >
           <Plus className="size-3.5" /> Add
         </Button>
       </ButtonGroup>
