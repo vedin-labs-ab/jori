@@ -23,7 +23,7 @@ export function RunsPage({ openRunId }: { openRunId?: string }) {
     query: "",
     runFilter: "all",
   })
-  const now = useExecutionClock(state.runs)
+  const now = useExecutionClock(state.runs, state.now)
   const rows = useMemo(
     () => filterRuns(state.runs, filters, now),
     [state.runs, filters, now]

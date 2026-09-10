@@ -1,10 +1,39 @@
-import { expect, test } from "vitest"
+import { createElement } from "react"
+import { renderToString } from "react-dom/server"
+import { expect, test, vi } from "vitest"
 import { makeApproval, makeExecution, makeOffer } from "./fixtures"
-import { displayNowForRun, runClockInterval } from "./time"
+import { displayNowForRun, runClockInterval, useExecutionClock } from "./time"
 import { type ExecutionItem } from "./types"
 
 const now = 1700000065123
 const baseRun = makeExecution()
+
+test("keeps fixture durations identical when server and hydration render later", () => {
+  vi.useFakeTimers()
+  try {
+    vi.setSystemTime(now + 1000)
+    const server = renderToString(createElement(AnchoredClock, { anchor: now }))
+    vi.setSystemTime(now + 4000)
+    const client = renderToString(
+      createElement(AnchoredClock, { anchor: now + 3000 })
+    )
+    expect(server).toBe("<span>240000</span>")
+    expect(client).toBe(server)
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+function AnchoredClock({ anchor }: { anchor: number }) {
+  const run = makeExecution({
+    createdAt: anchor - 240_000,
+    endedAt: undefined,
+    status: "running",
+  })
+  const current = useExecutionClock([run], anchor)
+
+  return createElement("span", null, current - run.createdAt)
+}
 
 test("uses a minute interval and buckets display time for settled runs", () => {
   expect(runClockInterval([baseRun], now)).toBe(60_000)

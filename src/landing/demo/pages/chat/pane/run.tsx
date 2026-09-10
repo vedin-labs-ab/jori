@@ -13,7 +13,7 @@ export function DemoPaneRun({ runId }: { runId: string }) {
     () => (execution === undefined ? [] : [execution]),
     [execution]
   )
-  const now = useExecutionClock(runs)
+  const now = useExecutionClock(runs, state.now)
   const slots = useRunRowSlots(actions, state.activity)
 
   if (execution === undefined) {

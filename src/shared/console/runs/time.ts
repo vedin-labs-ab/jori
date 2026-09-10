@@ -5,9 +5,10 @@ const liveIntervalMs = 1000
 const settledIntervalMs = 60_000
 
 /** The page's clock: to the second while any run on it is live, to the
- *  minute otherwise. */
-export function useExecutionClock(runs: ExecutionItem[]) {
-  const [now, setNow] = useState(() => Date.now())
+ *  minute otherwise. SSR demos start from their fixture anchor so rendering
+ *  time cannot change the first duration before hydration. */
+export function useExecutionClock(runs: ExecutionItem[], initialNow?: number) {
+  const [now, setNow] = useState(() => initialNow ?? Date.now())
   const intervalMs = runClockInterval(runs, now)
 
   useEffect(() => {

@@ -147,7 +147,7 @@ function JobRuns({ jobId }: { jobId: string }) {
     () => state.runs.filter((run) => run.job?.id === jobId),
     [state.runs, jobId]
   )
-  const now = useExecutionClock(runs)
+  const now = useExecutionClock(runs, state.now)
   const pagination = useClientPagination({
     hasFilters: false,
     isReady: true,
