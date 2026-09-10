@@ -18,6 +18,7 @@ export function TableNameCell({ table }: { table: TableSummary }) {
     <MaterialNameCell icon={Table2}>
       <ConsoleLink
         className={materialNameLinkClassName}
+        draggable={false}
         params={{ tableId: table.tableId }}
         title={table.name}
         to="/tables/$tableId"

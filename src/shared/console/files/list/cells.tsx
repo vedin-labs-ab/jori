@@ -16,6 +16,7 @@ export function FileNameCell({ file }: { file: FileRow }) {
     <MaterialNameCell icon={kind.icon}>
       <ConsoleLink
         className={materialNameLinkClassName}
+        draggable={false}
         params={{ fileId: file.fileId }}
         title={file.name}
         to="/files/$fileId"

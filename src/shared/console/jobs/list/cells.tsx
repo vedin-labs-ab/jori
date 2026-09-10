@@ -19,6 +19,7 @@ export function JobNameCell({ job }: { job: Job }) {
     <MaterialNameCell icon={Workflow}>
       <ConsoleLink
         className={materialNameLinkClassName}
+        draggable={false}
         params={{ jobId: job.id }}
         title={job.name}
         to="/jobs/$jobId"

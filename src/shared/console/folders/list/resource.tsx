@@ -58,7 +58,7 @@ export function ResourceListRow({
         row={resource}
         selection={selection}
       />
-      <TableCell>
+      <TableCell data-row-link>
         <ResourceLink resource={resource} />
       </TableCell>
       <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
