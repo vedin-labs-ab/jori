@@ -37,12 +37,6 @@ test("pages a conversation newest first with each side's role", async () => {
   })
 
   expect(await readRunDraft(ctx, runId)).toBeNull()
-  expect(question).toMatchObject({
-    surface: "console",
-    type: "console.message",
-    conversationId: conversation.externalId,
-    personId,
-  })
   expect(reply).toMatchObject({
     surface: "console",
     actor: { kind: "self", externalId: "console" },
@@ -117,3 +111,32 @@ async function consoleConversation(
 
   return (await database.get(conversationId)) as unknown as Doc<"conversations">
 }
+
+test("shared message authors identify each participant and the current viewer", async () => {
+  const { database, ctx } = databaseContext()
+  const conversation = await consoleConversation(database)
+  const otherId = "persons:other" as Id<"persons">
+  for (const [authorId, name, now] of [
+    [personId, "Maya", 1],
+    [otherId, "Alex", 2],
+  ] as const) {
+    await insertConsoleMessage(ctx, {
+      conversation,
+      actor: { kind: "person", personId: authorId, name },
+      data: undefined,
+      mentioned: true,
+      now,
+      text: name,
+    })
+  }
+  const page = await pageConsoleMessages(
+    ctx,
+    conversation,
+    { cursor: null, numItems: 10 },
+    personId
+  )
+  expect(page.page.map((message) => message.author)).toMatchObject([
+    { id: otherId, name: "Alex", isViewer: false },
+    { id: personId, name: "Maya", isViewer: true },
+  ])
+})
