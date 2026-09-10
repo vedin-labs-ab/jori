@@ -74,12 +74,21 @@ function switchTab(name: "Code" | "Form") {
 
 describe("value editor error visibility", () => {
   test("an invalid draft surfaces its error and never writes", async () => {
-    renderEditor({ title: "March", total: 2, paid: false })
+    renderEditor({
+      title: "March",
+      total: 2,
+      paid: false,
+      shipping: { city: "Oslo" },
+      tags: ["ops"],
+    })
+
+    // Empty error strips make the compact cells taller than their key column.
+    expect(screen.queryByRole("alert", { hidden: true })).toBeNull()
 
     const title = screen.getByLabelText("title")
     fireEvent.change(title, { target: { value: "" } })
 
-    expect(screen.queryByRole("alert")).toBeNull()
+    expect(screen.queryByRole("alert", { hidden: true })).toBeNull()
 
     await settle()
 
@@ -88,7 +97,7 @@ describe("value editor error visibility", () => {
 
     fireEvent.change(title, { target: { value: "April" } })
 
-    expect(screen.queryByRole("alert")).toBeNull()
+    expect(screen.queryByRole("alert", { hidden: true })).toBeNull()
   })
 })
 
