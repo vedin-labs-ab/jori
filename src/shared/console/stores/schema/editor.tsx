@@ -31,7 +31,7 @@ export function SchemaEditorSection({
           onErrorClear={editor.clearFieldError}
         />
       )}
-      <FieldError>{submitError}</FieldError>
+      <FieldError reserve>{submitError}</FieldError>
     </div>
   )
 }

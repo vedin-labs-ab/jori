@@ -28,7 +28,9 @@ export function MaterialNameField({
         onChange={(event) => onNameChange(event.target.value)}
         value={name}
       />
-      <FieldError id={`${idPrefix}-name-error`}>{error}</FieldError>
+      <FieldError reserve id={`${idPrefix}-name-error`}>
+        {error}
+      </FieldError>
     </div>
   )
 }

@@ -105,7 +105,7 @@ function OrganizationNameField({
         placeholder="Acme"
         value={name}
       />
-      <FieldError>{error}</FieldError>
+      <FieldError reserve>{error}</FieldError>
     </div>
   )
 }

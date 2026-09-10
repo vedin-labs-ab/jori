@@ -118,7 +118,7 @@ function SchemaFieldRow(props: RowProps) {
   return (
     <div className="grid gap-2">
       <FieldRowControls {...props} error={error} />
-      <FieldError>{error}</FieldError>
+      <FieldError reserve>{error}</FieldError>
       {hasChildFields(field) ? (
         <div className="ml-1.5 border-l pl-3">
           <SchemaFieldList
