@@ -68,8 +68,7 @@ function Band({ children }: { children: ReactNode }) {
   )
 }
 
-/** A figure has no place for a detail it cannot state, so a missing one
- *  leaves the line out rather than filling it with a dash. */
+/** Keep the comparison's line reserved even when there is nothing to state. */
 function Stat({
   detail,
   label,
@@ -95,11 +94,9 @@ function Stat({
       >
         {value ?? "—"}
       </p>
-      {detail === undefined ? null : (
-        <p className="mt-1.5 flex items-center gap-1 text-muted-foreground text-xs/relaxed tabular-nums">
-          {detail}
-        </p>
-      )}
+      <p className="mt-1.5 flex min-h-lh items-center gap-1 text-muted-foreground text-xs/relaxed tabular-nums">
+        {detail}
+      </p>
     </div>
   )
 }
