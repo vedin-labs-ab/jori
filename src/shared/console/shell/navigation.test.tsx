@@ -17,6 +17,11 @@ vi.mock("@tanstack/react-router", async () => ({
 afterEach(() => {
   cleanup()
   window.localStorage.clear()
+
+  if (vi.isFakeTimers()) {
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
+  }
 })
 
 const chats = [
@@ -33,6 +38,26 @@ function renderSidebar(
     onDragStart?: () => void
   } = {}
 ) {
+  function DragSurface({
+    children,
+    onDragStart,
+  }: {
+    children: ReactNode
+    onDragStart?: () => void
+  }) {
+    const sensors = useSensors(
+      useSensor(PointerSensor, {
+        activationConstraint: { distance: dragActivationDistance },
+      })
+    )
+
+    return (
+      <DndContext onDragStart={onDragStart} sensors={sensors}>
+        {children}
+      </DndContext>
+    )
+  }
+
   return render(
     <TooltipProvider>
       <ConsoleNavigationContext.Provider
@@ -54,27 +79,8 @@ function renderSidebar(
   )
 }
 
-export function DragSurface({
-  children,
-  onDragStart,
-}: {
-  children: ReactNode
-  onDragStart?: () => void
-}) {
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: dragActivationDistance },
-    })
-  )
-
-  return (
-    <DndContext onDragStart={onDragStart} sensors={sensors}>
-      {children}
-    </DndContext>
-  )
-}
-
 test("dragging a sidebar chat carries its current folder without navigating", () => {
+  vi.useFakeTimers()
   const onDragStart = vi.fn()
   const navigate = vi.fn()
   const chat = { ...chats[0], folderId: "finance" }
@@ -103,7 +109,7 @@ test("dragging a sidebar chat carries its current folder without navigating", ()
     ],
   })
   fireEvent.pointerUp(document, { pointerId: 1 })
-  fireEvent.click(link)
+  fireEvent.click(link, { detail: 1 })
   expect(navigate).not.toHaveBeenCalled()
 })
 

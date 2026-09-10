@@ -168,13 +168,18 @@ test.each([
   // dnd-kit temporarily blocks document clicks; the row must still
   // reject a trailing click after those listeners have been removed.
   act(() => vi.advanceTimersByTime(50))
-  fireEvent.click(screen.getByText(name))
+  fireEvent.click(screen.getByText(name), { detail: 1 })
   expect(onOpen).not.toHaveBeenCalled()
+
+  // Enter-generated clicks have no pointer click count, and still open
+  // a link after a drag without requiring another pointer interaction.
+  fireEvent.click(screen.getByText("Leads"), { detail: 0 })
+  expect(onOpen).toHaveBeenCalledOnce()
 
   // A later deliberate click still opens the row.
   fireEvent.pointerDown(screen.getByText(name), { button: 0 })
   fireEvent.click(screen.getByText(name))
-  expect(onOpen).toHaveBeenCalledOnce()
+  expect(onOpen).toHaveBeenCalledTimes(2)
 })
 
 test.each([
