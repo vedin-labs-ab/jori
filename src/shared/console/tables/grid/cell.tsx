@@ -1,9 +1,9 @@
-import { type KeyboardEvent, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
 import { displayCellText, formatCellText, parseCellText } from "../cells"
 import { type TableColumn, type TableRow } from "../types"
+import { CellInput } from "./input"
 
 export type CommitCell = (
   row: TableRow,
@@ -58,6 +58,7 @@ export function RowCell({
       onSettle={onSettle}
       row={row}
       spotlight={spotlight}
+      value={value}
     />
   )
 }
@@ -70,6 +71,7 @@ function TextCell({
   onSettle,
   row,
   spotlight,
+  value,
 }: {
   column: TableColumn
   disabled: boolean
@@ -78,14 +80,14 @@ function TextCell({
   onSettle: (() => void) | undefined
   row: TableRow
   spotlight: boolean
+  value: unknown
 }) {
-  const value = row.values[column.id]
   const [draft, setDraft] = useState<string | undefined>(() =>
     spotlight && !disabled ? formatCellText(column, value) : undefined
   )
+  const [error, setError] = useState<string>()
 
-  // A spotlight raised after mount — the row menu's Edit cell — opens the
-  // editor too; the initializer only covers freshly inserted rows.
+  // The row menu also spotlights editors after they have mounted.
   useEffect(() => {
     if (spotlight && !disabled) {
       setDraft((current) => current ?? formatCellText(column, value))
@@ -97,6 +99,7 @@ function TextCell({
   useUnmountCommit({ column, committing, draft, onCommit, row, value })
 
   function close() {
+    setError(undefined)
     setDraft(undefined)
     onSettle?.()
   }
@@ -111,7 +114,7 @@ function TextCell({
     const parsed = parseCellText(column, text)
 
     if (!parsed.ok) {
-      toast.error(parsed.error)
+      setError(parsed.error)
 
       return false
     }
@@ -142,19 +145,17 @@ function TextCell({
     )
   }
 
-  // The editor IS the cell: no chrome of its own, filling the cell to its
-  // edges with the ring drawn inset along them, and the text sitting
-  // exactly where the resting cell shows it.
   return (
-    <Input
-      autoFocus
-      aria-label={`${column.name} value`}
-      className="h-full min-w-24 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
-      onBlur={(event) => void commit(event.target.value)}
-      onChange={(event) => setDraft(event.target.value)}
-      onKeyDown={(event) =>
-        handleEditorKey(event, { close, commit, onAdvance })
-      }
+    <CellInput
+      label={`${column.name} value`}
+      message={error}
+      onAdvance={onAdvance}
+      onChange={(text) => {
+        setError(undefined)
+        setDraft(text)
+      }}
+      onClose={close}
+      onCommit={commit}
       value={draft}
     />
   )
@@ -201,40 +202,6 @@ function useUnmountCommit(state: {
     },
     []
   )
-}
-
-/** Enter commits in place, Escape cancels, and Tab commits then moves
- *  editing along the row; a draft that does not commit keeps the editor
- *  (and any error) where it is. */
-function handleEditorKey(
-  event: KeyboardEvent<HTMLInputElement>,
-  editor: {
-    close: () => void
-    commit: (text: string) => Promise<boolean>
-    onAdvance: ((direction: 1 | -1) => void) | undefined
-  }
-) {
-  const draft = event.currentTarget.value
-
-  if (event.key === "Enter") {
-    void editor.commit(draft)
-  }
-
-  if (event.key === "Escape") {
-    editor.close()
-  }
-
-  if (event.key === "Tab") {
-    event.preventDefault()
-
-    const direction = event.shiftKey ? -1 : 1
-
-    void editor.commit(draft).then((committed) => {
-      if (committed) {
-        editor.onAdvance?.(direction)
-      }
-    })
-  }
 }
 
 function CellButton({

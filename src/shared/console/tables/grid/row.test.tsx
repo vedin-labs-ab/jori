@@ -36,10 +36,10 @@ const row: TableRow = {
   updatedAt: 1,
 }
 
-function renderRow() {
+function renderRow(fields = columns) {
   return render(
     <GridRow
-      columns={columns}
+      columns={fields}
       disabled={false}
       isFresh={false}
       isPending={false}
@@ -87,6 +87,42 @@ test("Tab commits the draft and opens the next text-like cell", async () => {
     // The boolean column in between is skipped.
     expect(screen.getByRole("textbox", { name: "Stage value" })).toBeTruthy()
   })
+  expect(onCommit).toHaveBeenCalledWith(row, "title", "Call Grace")
+})
+
+test("an invalid cell keeps its draft and focus with feedback outside the grid", async () => {
+  const view = renderRow(
+    columns.map((column) =>
+      column.id === "title" ? { ...column, required: true } : column
+    )
+  )
+  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+
+  const editor = screen.getByRole("textbox", { name: "Title value" })
+
+  fireEvent.change(editor, { target: { value: "" } })
+  fireEvent.keyDown(editor, { key: "Tab" })
+
+  await waitFor(() => expect(editor.getAttribute("aria-invalid")).toBe("true"))
+  expect(screen.getByRole("alert").textContent).toBe("Title is required.")
+  expect(editor.getAttribute("aria-describedby")).toBe(
+    screen.getByRole("alert").id
+  )
+  expect(view.container.contains(screen.getByRole("tooltip"))).toBe(false)
+  expect(document.activeElement).toBe(editor)
+  expect((editor as HTMLInputElement).value).toBe("")
+  expect(onCommit).not.toHaveBeenCalled()
+
+  fireEvent.change(editor, { target: { value: "Call Grace" } })
+  expect(screen.queryByRole("alert")).toBeNull()
+  expect(screen.queryByRole("tooltip")).toBeNull()
+  expect(editor.getAttribute("aria-invalid")).toBeNull()
+  expect(editor.getAttribute("aria-describedby")).toBeNull()
+  fireEvent.keyDown(editor, { key: "Tab" })
+
+  await waitFor(() =>
+    expect(screen.getByRole("textbox", { name: "Stage value" })).toBeTruthy()
+  )
   expect(onCommit).toHaveBeenCalledWith(row, "title", "Call Grace")
 })
 

@@ -36,7 +36,7 @@ const schema = {
       properties: { city: { type: "string" } },
       required: ["city"],
     },
-    tags: { type: "array", items: { type: "string" } },
+    tags: { type: "array", items: { type: "string" }, maxItems: 1 },
   },
   required: ["title", "total", "paid"],
 }
@@ -51,7 +51,7 @@ function renderEditor(value: unknown, version = 2) {
     updatedAt: Date.now(),
   } as unknown as StoreDetail
 
-  render(
+  return render(
     <ValueEditorSection
       onWrite={writeValue}
       schema={schema}
@@ -74,7 +74,7 @@ function switchTab(name: "Code" | "Form") {
 
 describe("value editor error visibility", () => {
   test("an invalid draft surfaces its error and never writes", async () => {
-    renderEditor({
+    const view = renderEditor({
       title: "March",
       total: 2,
       paid: false,
@@ -86,6 +86,7 @@ describe("value editor error visibility", () => {
     expect(screen.queryByRole("alert", { hidden: true })).toBeNull()
 
     const title = screen.getByLabelText("title")
+    act(() => title.focus())
     fireEvent.change(title, { target: { value: "" } })
 
     expect(screen.queryByRole("alert", { hidden: true })).toBeNull()
@@ -93,11 +94,21 @@ describe("value editor error visibility", () => {
     await settle()
 
     expect(screen.getByRole("alert").textContent).toBe("is required")
+    expect(title.getAttribute("aria-invalid")).toBe("true")
+    expect(title.getAttribute("aria-describedby")).toBe(
+      screen.getByRole("alert").id
+    )
+    expect(view.container.contains(screen.getByRole("tooltip"))).toBe(false)
+    expect(document.activeElement).toBe(title)
+    expect((title as HTMLInputElement).value).toBe("")
     expect(writeValue).not.toHaveBeenCalled()
 
     fireEvent.change(title, { target: { value: "April" } })
 
     expect(screen.queryByRole("alert", { hidden: true })).toBeNull()
+    expect(screen.queryByRole("tooltip")).toBeNull()
+    expect(title.getAttribute("aria-invalid")).toBeNull()
+    expect(title.getAttribute("aria-describedby")).toBeNull()
   })
 })
 
@@ -127,30 +138,6 @@ describe("value editor submission", () => {
     ])
   })
 
-  test("array items add, edit, and remove as grid rows", async () => {
-    renderEditor({ title: "March", total: 2, paid: false })
-
-    fireEvent.click(screen.getByRole("button", { name: "Add tags" }))
-    fireEvent.click(screen.getByRole("button", { name: "Add tags item" }))
-    fireEvent.click(screen.getByRole("button", { name: "Add tags item" }))
-    fireEvent.change(screen.getByLabelText("tags item 1"), {
-      target: { value: "ops" },
-    })
-    fireEvent.change(screen.getByLabelText("tags item 2"), {
-      target: { value: "billing" },
-    })
-    fireEvent.click(screen.getByRole("button", { name: "Remove tags item 2" }))
-    await settle()
-
-    expect(writeValue).toHaveBeenCalledOnce()
-    expect(writeValue.mock.calls[0]?.[0]).toEqual({
-      title: "March",
-      total: 2,
-      paid: false,
-      tags: ["ops"],
-    })
-  })
-
   test("clearing an optional group omits it again", async () => {
     renderEditor({
       title: "March",
@@ -168,6 +155,45 @@ describe("value editor submission", () => {
       total: 2,
       paid: true,
     })
+  })
+})
+
+test("array validation appears in an overlay and clears after item removal", async () => {
+  renderEditor({ title: "March", total: 2, paid: false })
+
+  fireEvent.click(screen.getByRole("button", { name: "Add tags" }))
+  fireEvent.click(screen.getByRole("button", { name: "Add tags item" }))
+  fireEvent.click(screen.getByRole("button", { name: "Add tags item" }))
+  fireEvent.change(screen.getByLabelText("tags item 1"), {
+    target: { value: "ops" },
+  })
+  fireEvent.change(screen.getByLabelText("tags item 2"), {
+    target: { value: "billing" },
+  })
+  const addItem = screen.getByRole("button", { name: "Add tags item" })
+
+  act(() => addItem.focus())
+  await settle()
+
+  expect(writeValue).not.toHaveBeenCalled()
+  expect(addItem.getAttribute("aria-invalid")).toBe("true")
+  expect(addItem.getAttribute("aria-describedby")).toBe(
+    screen.getByRole("alert").id
+  )
+  expect(screen.getByRole("tooltip")).toBeTruthy()
+  expect(document.activeElement).toBe(addItem)
+
+  fireEvent.click(screen.getByRole("button", { name: "Remove tags item 2" }))
+  expect(screen.queryByRole("alert")).toBeNull()
+  expect(screen.queryByRole("tooltip")).toBeNull()
+  await settle()
+
+  expect(writeValue).toHaveBeenCalledOnce()
+  expect(writeValue.mock.calls[0]?.[0]).toEqual({
+    title: "March",
+    total: 2,
+    paid: false,
+    tags: ["ops"],
   })
 })
 

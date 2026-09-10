@@ -18,12 +18,12 @@ import { type ValueField, type ValueOption } from "./model"
 const cellInputClassName =
   // Square throughout: the grid is full-bleed and has no curved frame, so
   // a rounded ring would draw corners nothing else follows.
-  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent"
+  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent"
 
 /** The same recipe over the select trigger, which also sheds its tactile
  *  depth so it sits flush like every other cell. */
 const cellSelectClassName =
-  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 dark:bg-transparent dark:hover:bg-muted/50"
+  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent dark:hover:bg-muted/50"
 
 /** How every widget reports edits: the replacement state for its node and
  *  the value path that changed, so the editor can clear that path's error. */
@@ -32,6 +32,7 @@ export type ChangeHandler = (next: ValueState, editedPath: string) => void
 /** The widget for one non-nesting field: scalar, enum, or constant. */
 export function LeafControl({
   ariaLabel,
+  describedBy,
   field,
   id,
   invalid,
@@ -41,6 +42,7 @@ export function LeafControl({
   state,
 }: {
   ariaLabel?: string
+  describedBy?: string
   field: ValueField
   id?: string
   invalid: boolean
@@ -50,7 +52,7 @@ export function LeafControl({
   state: ValueState
 }) {
   if (field.kind === "constant") {
-    return <ConstantValue value={field.value} />
+    return <ConstantValue describedBy={describedBy} value={field.value} />
   }
 
   if (field.kind === "enum" && state.kind === "choice") {
@@ -58,6 +60,7 @@ export function LeafControl({
       <ChoiceSelect
         allowUnset={!required}
         ariaLabel={ariaLabel}
+        describedBy={describedBy}
         id={id}
         index={state.index}
         invalid={invalid}
@@ -73,7 +76,9 @@ export function LeafControl({
         <CheckInput
           ariaLabel={ariaLabel}
           checked={state.checked}
+          describedBy={describedBy}
           id={id}
+          invalid={invalid}
           onCheckedChange={(checked) =>
             onChange({ kind: "check", checked }, path)
           }
@@ -86,6 +91,7 @@ export function LeafControl({
     return (
       <ScalarInput
         ariaLabel={ariaLabel}
+        describedBy={describedBy}
         id={id}
         integer={field.kind === "number" && field.integer}
         invalid={invalid}
@@ -101,6 +107,7 @@ export function LeafControl({
 
 function ScalarInput({
   ariaLabel,
+  describedBy,
   id,
   integer,
   invalid,
@@ -109,6 +116,7 @@ function ScalarInput({
   text,
 }: {
   ariaLabel?: string
+  describedBy?: string
   id?: string
   integer?: boolean
   invalid: boolean
@@ -118,6 +126,7 @@ function ScalarInput({
 }) {
   return (
     <Input
+      aria-describedby={describedBy}
       aria-invalid={invalid ? true : undefined}
       aria-label={ariaLabel}
       className={cellInputClassName}
@@ -134,16 +143,22 @@ function ScalarInput({
 function CheckInput({
   ariaLabel,
   checked,
+  describedBy,
   id,
+  invalid,
   onCheckedChange,
 }: {
   ariaLabel?: string
   checked: boolean
+  describedBy?: string
   id?: string
+  invalid: boolean
   onCheckedChange: (checked: boolean) => void
 }) {
   return (
     <Checkbox
+      aria-describedby={describedBy}
+      aria-invalid={invalid ? true : undefined}
       aria-label={ariaLabel}
       checked={checked}
       id={id}
@@ -159,6 +174,7 @@ const unsetChoice = "unset"
 function ChoiceSelect({
   allowUnset,
   ariaLabel,
+  describedBy,
   id,
   index,
   invalid,
@@ -167,6 +183,7 @@ function ChoiceSelect({
 }: {
   allowUnset: boolean
   ariaLabel?: string
+  describedBy?: string
   id?: string
   index: number | undefined
   invalid: boolean
@@ -181,6 +198,7 @@ function ChoiceSelect({
       value={index === undefined ? "" : String(index)}
     >
       <SelectTrigger
+        aria-describedby={describedBy}
         aria-invalid={invalid ? true : undefined}
         aria-label={ariaLabel}
         className={cellSelectClassName}
@@ -210,9 +228,20 @@ function optionLabel(option: ValueOption) {
 
 /** A const (or null-typed) field: the schema fixes the value, so it only
  *  reads back. */
-function ConstantValue({ value }: { value: unknown }) {
+function ConstantValue({
+  describedBy,
+  value,
+}: {
+  describedBy?: string
+  value: unknown
+}) {
   return (
-    <p className="flex h-9 items-center px-3 font-mono text-muted-foreground text-xs">
+    <p
+      aria-describedby={describedBy}
+      aria-invalid={describedBy === undefined ? undefined : true}
+      className="flex h-9 items-center px-3 font-mono text-muted-foreground text-xs outline-none aria-invalid:ring-2 aria-invalid:ring-destructive/20 aria-invalid:ring-inset"
+      tabIndex={describedBy === undefined ? undefined : 0}
+    >
       {JSON.stringify(value)}
     </p>
   )
