@@ -12,7 +12,7 @@ import { createAuth } from "../convex/auth"
  *
  *    cd convex/betterauth
  *    BETTER_AUTH_SECRET=$(openssl rand -base64 32) \
- *    JORI_APP_URL=http://localhost:5173 \
+ *    JORI_APP_URL=http://localhost:8050 \
  *    GOOGLE_CLIENT_ID=generate GOOGLE_CLIENT_SECRET=generate \
  *    MICROSOFT_CLIENT_ID=generate MICROSOFT_CLIENT_SECRET=generate \
  *    npx auth generate --config ../../scripts/betterauth.ts \

@@ -13,7 +13,9 @@ node --experimental-strip-types scripts/layout/chatstate/server.ts
 
 These commands stay running on ports 5178, 5180, 5192 and 5193 respectively.
 Use only the hosts required by the selected manifest. Rebuild a host after
-changing product source. The application on port 5173 is independent.
+changing product source. The application on port 8050 is independent.
+The permission transport maps only the preview has-permission POST Origin to
+http://localhost:8050, which must match the development JORI_APP_URL.
 
 ```sh
 LAYOUT_STORAGE=scripts/layout/reports/session.local pnpm layout scripts/layout/scenarios/shards/lists.json dist/layout-hunt/after/lists

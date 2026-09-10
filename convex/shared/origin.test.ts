@@ -39,7 +39,7 @@ test.each([
 test("keeps unconfigured origins optional and trims configured values", () => {
   expect(readOrigin({})).toBeUndefined()
   expect(readPublicOrigin({ JORI_PUBLIC_ORIGIN: "  " })).toBeUndefined()
-  expect(readOrigin({ JORI_APP_URL: "  http://localhost:5173///  " })).toBe(
-    "http://localhost:5173"
+  expect(readOrigin({ JORI_APP_URL: "  http://localhost:8050///  " })).toBe(
+    "http://localhost:8050"
   )
 })

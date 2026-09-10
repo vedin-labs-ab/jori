@@ -1,6 +1,6 @@
 import { isRegion, parseOrigin, type Region, regions } from "@contracts/region"
 
-const localOrigin = "http://localhost:5173"
+const localOrigin = "http://localhost:8050"
 
 const environmentNames = {
   current: "VITE_JORI_REGION",
