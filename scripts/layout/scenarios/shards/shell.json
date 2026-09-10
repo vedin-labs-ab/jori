@@ -758,10 +758,17 @@
   {
     "id": "shell-error-root",
     "title": "Jori could not load page: error boundary replaces failed view",
-    "path": "/",
+    "path": "/pricing",
     "target": "app",
     "mutating": false,
-    "blocked": "requires controlled error fixture"
+    "anonymous": true,
+    "responses": [
+      {
+        "url": "**/assets/pricing-*.js",
+        "status": 404,
+        "body": "{}"
+      }
+    ]
   },
   {
     "id": "shell-error-root-retry",
@@ -774,10 +781,9 @@
   {
     "id": "shell-error-page",
     "title": "This page did not load: error boundary replaces failed view",
-    "path": "/",
+    "path": "/jobs/layout-invalid",
     "target": "app",
-    "mutating": false,
-    "blocked": "requires controlled error fixture and auth"
+    "mutating": false
   },
   {
     "id": "shell-error-page-retry",
@@ -790,10 +796,28 @@
   {
     "id": "shell-error-stale",
     "title": "This page is out of date: error boundary replaces failed view",
-    "path": "/",
+    "path": "/chat",
     "target": "app",
     "mutating": false,
-    "blocked": "requires controlled error fixture and auth"
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"sidebar-trigger\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/jobs\"] >> nth=0"
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/assets/jobs-*.js",
+        "status": 404,
+        "body": "{}"
+      }
+    ]
   },
   {
     "id": "shell-error-stale-retry",

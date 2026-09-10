@@ -75,9 +75,14 @@
     "mutating": false,
     "steps": [
       {
-        "action": "fill",
+        "action": "press",
         "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
-        "value": ""
+        "value": "ControlOrMeta+A"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Backspace"
       }
     ],
     "setup": [
