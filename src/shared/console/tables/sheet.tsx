@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
+import { useRetained } from "../retain"
 import { ColumnTypeBadge, ColumnTypeSelect } from "./columns"
 import { type ColumnDraft } from "./draft"
 import { type TableColumn, type TableDetail } from "./types"
@@ -54,7 +55,7 @@ export type ColumnSheetForm = {
  *  existing column renames freely, toggles required, or deletes — only its
  *  type is fixed for life. */
 export function ColumnSheet({
-  form,
+  form: currentForm,
   onOpenChange,
   state,
   table,
@@ -64,7 +65,14 @@ export function ColumnSheet({
   state: ColumnSheetState | undefined
   table: TableDetail
 }) {
-  const isCreating = state?.mode === "create"
+  const isOpen =
+    state !== undefined &&
+    (state.mode === "create" || currentForm.column !== undefined)
+  const retained = useRetained(
+    isOpen ? { form: currentForm, state } : undefined
+  )
+  const form = retained?.form ?? currentForm
+  const isCreating = retained?.state?.mode === "create"
 
   return (
     <Sheet
@@ -73,7 +81,7 @@ export function ColumnSheet({
           onOpenChange(open)
         }
       }}
-      open={state !== undefined && (isCreating || form.column !== undefined)}
+      open={isOpen}
     >
       <SheetContent className="flex w-full flex-col gap-0 sm:max-w-sm">
         <SheetHeader>

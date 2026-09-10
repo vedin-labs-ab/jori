@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 import { toast } from "sonner"
 import { showErrorToast } from "../error"
 import {
@@ -34,10 +34,15 @@ export function useColumnSheetForm({
       : undefined
 
   // Reseed whenever the sheet opens or targets another column.
-  useEffect(() => {
-    setDraft(draftFor(state, table))
-    setError(undefined)
-  }, [state, table])
+  useLayoutEffect(() => {
+    if (
+      state !== undefined &&
+      (state.mode === "create" || column !== undefined)
+    ) {
+      setDraft(draftFor(column))
+      setError(undefined)
+    }
+  }, [column, state])
 
   async function save(columns: TableColumn[], success: string) {
     setIsSaving(true)
@@ -82,11 +87,7 @@ export function useColumnSheetForm({
     deleteColumn,
     draft,
     error,
-    isDirty:
-      state?.mode === "edit"
-        ? draft.name !== (column?.name ?? "") ||
-          draft.required !== (column?.required === true)
-        : draft.name.trim() !== "",
+    isDirty: draftChanged(state, column, draft),
     isSaving,
     submit,
     // New input clears the previous submit attempt's error right away.
@@ -97,19 +98,29 @@ export function useColumnSheetForm({
   }
 }
 
-function draftFor(
+function draftChanged(
   state: ColumnSheetState | undefined,
-  table: TableDetail
-): ColumnDraft {
+  column: TableColumn | undefined,
+  draft: ColumnDraft
+) {
   if (state?.mode !== "edit") {
+    return draft.name.trim() !== ""
+  }
+
+  return (
+    draft.name !== (column?.name ?? "") ||
+    draft.required !== (column?.required === true)
+  )
+}
+
+function draftFor(column: TableColumn | undefined): ColumnDraft {
+  if (column === undefined) {
     return newColumnDraft()
   }
 
-  const column = table.columns.find((candidate) => candidate.id === state.id)
-
   return {
-    name: column?.name ?? "",
-    type: column?.type ?? "string",
-    required: column?.required === true,
+    name: column.name,
+    type: column.type,
+    required: column.required === true,
   }
 }
