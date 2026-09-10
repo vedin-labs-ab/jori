@@ -67,19 +67,11 @@ export function IntegrationCard({
             onClick={install.connect}
             disabled={install.isConnecting || disconnect.isDisconnecting}
           >
-            {install.isConnecting ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                {config.loading}
-              </>
-            ) : (
-              <>
-                {isConnected || status?.status === "expired"
-                  ? "Reconnect"
-                  : config.action}
-                <ExternalLink />
-              </>
-            )}
+            <InstallContent
+              config={config}
+              pending={install.isConnecting}
+              reconnect={isConnected || status?.status === "expired"}
+            />
           </Button>
           {isConnected ? (
             <DisconnectDialog
@@ -108,6 +100,45 @@ export function IntegrationCard({
   )
 }
 
+function InstallContent({
+  config,
+  pending,
+  reconnect,
+}: {
+  config: IntegrationCardConfig
+  pending: boolean
+  reconnect: boolean
+}) {
+  const label = pending
+    ? config.loading
+    : reconnect
+      ? "Reconnect"
+      : config.action
+  const labels = [...new Set([config.action, config.loading, "Reconnect"])]
+
+  return (
+    <>
+      <span className="inline-grid">
+        {labels.map((value) => (
+          <span
+            aria-hidden
+            className="invisible col-start-1 row-start-1"
+            key={value}
+          >
+            {value}
+          </span>
+        ))}
+        <span className="col-start-1 row-start-1">{label}</span>
+      </span>
+      {pending ? (
+        <Loader2 className="size-3.5 animate-spin" />
+      ) : (
+        <ExternalLink className="size-3.5" />
+      )}
+    </>
+  )
+}
+
 function IntegrationStatusLine({
   headline,
   status,
@@ -123,7 +154,7 @@ function IntegrationStatusLine({
       <span
         aria-hidden="true"
         className={cn(
-          "size-1.5 rounded-full",
+          "size-1.5 shrink-0 rounded-full",
           status?.status === "active" ? "bg-primary" : "bg-muted-foreground/40"
         )}
       />
@@ -149,7 +180,7 @@ function getStatusLabel(
   headline: string
 ) {
   if (status === undefined) {
-    return headline
+    return "Checking…"
   }
 
   if (status === null || status.status === "disconnected") {
