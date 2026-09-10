@@ -1,13 +1,11 @@
 import { type ObjectType, v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { conversationGate } from "../conversations/access"
+import { type Id } from "../_generated/dataModel"
 import { resolveCreationFolder } from "../folders/tree"
-import { jobGate } from "../jobs/access"
-import { createRunSight } from "../runs/sight"
+import { createRunSight, runResourceGate } from "../runs/sight"
 import { runExecutionIsCurrent } from "../sessions/execution"
 import { type QueryLikeCtx } from "../shared/context"
 import { normalizeStoredVisibility, type StoredVisibility } from "./schema"
-import { createSight, type Gate, type Sight } from "./sight"
+import { createSight, type Sight } from "./sight"
 
 /** Internal resource calls receive a trusted run, or a resolved console person. */
 export const resourceViewerArgs = {
@@ -37,7 +35,7 @@ export async function resourceCreation(
   const run = await resourceRun(ctx, args)
   const sight =
     run === undefined ? createSight(ctx, args) : await createRunSight(ctx, run)
-  const origin = run === undefined ? undefined : await runOrigin(ctx, run)
+  const origin = run === undefined ? undefined : await runResourceGate(ctx, run)
   const visibility = normalizeStoredVisibility(
     args.visibility ?? origin?.visibility ?? { mode: "organization" }
   )
@@ -74,26 +72,4 @@ async function resourceRun(ctx: QueryLikeCtx, args: ResourceViewer) {
     throw new Error("Run is no longer active.")
   }
   return run
-}
-
-async function runOrigin(
-  ctx: QueryLikeCtx,
-  run: Doc<"runs">
-): Promise<Gate | undefined> {
-  if (run.conversationId !== undefined) {
-    const conversation = await ctx.db.get(run.conversationId)
-    if (
-      conversation?.organizationId === run.organizationId &&
-      conversation.surface === "console"
-    ) {
-      return conversationGate(conversation)
-    }
-  }
-  if (run.job !== undefined) {
-    const job = await ctx.db.get(run.job.id)
-    if (job?.organizationId === run.organizationId) {
-      return jobGate(job)
-    }
-  }
-  return undefined
 }
