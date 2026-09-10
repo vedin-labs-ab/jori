@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { ChatVisibilityNotice } from "@/shared/console/chat/access"
+import { chatVisibilityHelp } from "@/shared/console/chat/access"
 import { chatMoveSubject } from "../derive/chat"
 import { type DemoConversation } from "../fixtures/chat"
 import { useDemoWorkspace } from "../workspace"
@@ -33,13 +33,8 @@ export function useDemoChatMenu(conversation: DemoConversation) {
           subject={moving ? chatMoveSubject(conversation) : undefined}
         />
         <DemoVisibilityDialog
+          help={chatVisibilityHelp}
           noun="chat"
-          notice={(value) => (
-            <ChatVisibilityNotice
-              current={conversation.visibility}
-              value={value}
-            />
-          )}
           onOpenChange={setSharing}
           open={sharing}
           target={{ kind: "chat", id: conversation.id }}

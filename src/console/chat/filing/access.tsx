@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { ChatVisibilityNotice } from "@/shared/console/chat/access"
+import { chatVisibilityHelp } from "@/shared/console/chat/access"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { api } from "../../../../convex/_generated/api"
 import { OrganizationVisibilityDialog } from "../../shared/visibility/dialog"
@@ -34,10 +34,8 @@ export function ConversationVisibility({
 
   return (
     <OrganizationVisibilityDialog
+      help={chatVisibilityHelp}
       noun="chat"
-      notice={(draft) => (
-        <ChatVisibilityNotice current={conversation.visibility} value={draft} />
-      )}
       onOpenChange={closeOnDismiss(onClose)}
       open={open}
       organizationId={organizationId}

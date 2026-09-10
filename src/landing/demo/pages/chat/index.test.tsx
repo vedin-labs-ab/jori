@@ -168,7 +168,7 @@ test("the sidebar leads with New chat and lists the conversations under Activity
   ).toBe("false")
 })
 
-test("sharing from the chat menu explains the audience and execution change before saving", async () => {
+test("sharing from the chat menu shows the selected audience and persists it", async () => {
   render(<DemoConsoleAt path={`/chat/${renewalsConversationId}`} />)
   const title = "Which renewals are at risk this month?"
   fireEvent.pointerDown(await screen.findByRole("button", { name: title }), {
@@ -177,16 +177,13 @@ test("sharing from the chat menu explains the audience and execution change befo
   })
   fireEvent.click(await screen.findByRole("menuitem", { name: "Visibility…" }))
   const dialog = await screen.findByRole("dialog")
-  expect(within(dialog).getByText(/Only you can use this chat/)).toBeDefined()
+  expect(within(dialog).getByText("Visible only to you.")).toBeDefined()
   fireEvent.click(within(dialog).getByRole("combobox"))
   fireEvent.click(
     await screen.findByRole("option", { name: "Everyone in the organization" })
   )
   expect(
-    within(dialog).getByText(/Everyone with access can read the full history/)
-  ).toBeDefined()
-  expect(
-    within(dialog).getByText(/Changing visibility stops any running work/)
+    within(dialog).getByText("Visible to everyone in the organization.")
   ).toBeDefined()
   fireEvent.click(within(dialog).getByRole("button", { name: "Save" }))
   fireEvent.pointerDown(await screen.findByRole("button", { name: title }), {
