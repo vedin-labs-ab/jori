@@ -1,5 +1,5 @@
 import { type Page } from "playwright"
-import { type Step } from "./types.ts"
+import { type Readiness, type Step } from "./types.ts"
 
 export async function perform(page: Page, step: Step) {
   const locator = page.locator(step.selector ?? "body")
@@ -16,6 +16,9 @@ export async function perform(page: Page, step: Step) {
     case "fill":
       await locator.fill(step.value ?? "", { timeout: 8000 })
       break
+    case "select":
+      await locator.selectOption(step.value ?? "", { timeout: 8000 })
+      break
     case "press":
       await locator.press(step.value ?? "Escape", { timeout: 8000 })
       break
@@ -31,6 +34,9 @@ export async function perform(page: Page, step: Step) {
         step.value
       )
       break
+    case "scrollIntoView":
+      await locator.evaluate((node) => node.scrollIntoView({ block: "end" }))
+      break
     case "back":
       await page.goBack({ waitUntil: "domcontentloaded" })
       break
@@ -41,6 +47,68 @@ export async function perform(page: Page, step: Step) {
       await drag(page, step)
       break
   }
+}
+
+export async function waitReady(page: Page, conditions: Readiness[] = []) {
+  await Promise.all(
+    conditions.map((condition) => waitCondition(page, condition))
+  )
+}
+
+async function waitCondition(
+  page: Page,
+  { selector, state = "visible", timeout = 15_000 }: Readiness
+) {
+  if (/:(visible|hidden)\b/.test(selector)) {
+    throw new Error(
+      "Use readiness state instead of visibility selector pseudos"
+    )
+  }
+  const start = Date.now()
+  while (Date.now() - start < timeout) {
+    try {
+      const ready = await page
+        .locator(selector)
+        .evaluateAll((nodes, requested) => {
+          // Querying DOM/text is passive; measure visibility only after this
+          // document painted. A locator visibility wait can style-walk too early.
+          if (!performance.getEntriesByType("paint").length) {
+            return false
+          }
+          if (requested === "attached") {
+            return nodes.length > 0
+          }
+          if (requested === "detached") {
+            return nodes.length === 0
+          }
+          const visible = nodes.some((node) => {
+            const rect = node.getBoundingClientRect()
+            const visibility = getComputedStyle(node).visibility
+            return (
+              rect.width > 0 &&
+              rect.height > 0 &&
+              visibility !== "hidden" &&
+              visibility !== "collapse"
+            )
+          })
+          return requested === "visible" ? visible : !visible
+        }, state)
+      if (ready) {
+        return
+      }
+    } catch (error) {
+      if (
+        page.isClosed() ||
+        !/Execution context was destroyed|Cannot find context/.test(
+          String(error)
+        )
+      ) {
+        throw error
+      }
+    }
+    await page.waitForTimeout(25)
+  }
+  throw new Error(`Readiness timed out (${state}): ${selector}`)
 }
 
 async function drag(page: Page, step: Step) {
