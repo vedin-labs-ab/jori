@@ -1,6 +1,7 @@
 import { type ObjectType, v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { resolveCreationFolder } from "../folders/tree"
+import { canExecuteJobRunTools } from "../jobs/execution"
 import { createRunSight, runResourceGate } from "../runs/sight"
 import { runExecutionIsCurrent } from "../sessions/execution"
 import { type QueryLikeCtx } from "../shared/context"
@@ -36,6 +37,9 @@ export async function resourceCreation(
   const sight =
     run === undefined ? createSight(ctx, args) : await createRunSight(ctx, run)
   const origin = run === undefined ? undefined : await runResourceGate(ctx, run)
+  if (origin === null) {
+    throw new Error("The resource that owns this run is no longer available.")
+  }
   const visibility = normalizeStoredVisibility(
     args.visibility ?? origin?.visibility ?? { mode: "organization" }
   )
@@ -66,7 +70,7 @@ async function resourceRun(ctx: QueryLikeCtx, args: ResourceViewer) {
   if (
     run === null ||
     run.organizationId !== args.organizationId ||
-    (run.status !== "running" && run.status !== "queued") ||
+    !(await canExecuteJobRunTools(ctx, run)) ||
     !(await runExecutionIsCurrent(ctx, run))
   ) {
     throw new Error("Run is no longer active.")

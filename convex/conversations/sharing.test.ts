@@ -159,9 +159,7 @@ test("shared audience edits reset context and returning private creates personal
   await f.send(f.people[1], "Workspace turn.")
   const session = await f.t.run((ctx) => findSession(ctx, f.conversationId))
   await change({ mode: "people", personIds: [f.people[1]] })
-  expect(await f.t.run((ctx) => findSession(ctx, f.conversationId))).toEqual(
-    session
-  )
+  expect(await f.t.run((ctx) => findSession(ctx, f.conversationId))).toBeNull()
   await change({ mode: "private" })
   await expect(f.send(f.people[1], "Private now?")).rejects.toThrow(
     "Conversation not found"
