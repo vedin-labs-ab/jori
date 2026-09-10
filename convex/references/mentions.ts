@@ -7,15 +7,18 @@ import { type ReferenceKind } from "../../contracts/replies/parts"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
+import { searchCollections } from "../collections/access"
+import { createConversationSight } from "../conversations/access"
 import { visibleConsoleConversations } from "../conversations/list"
+import { requireVisibleConsoleConversation } from "../conversations/resolve"
 import { visibleFiles } from "../files/data"
 import { listOrganizationFolders } from "../folders/tree"
 import { canSeeJob } from "../jobs/access"
 import { searchJobs } from "../jobs/lifecycle"
 import { resolveCurrentPerson } from "../persons/account"
 import { canSeeRun } from "../runs/visibility"
-import { searchStores } from "../stores/access"
-import { searchTables } from "../tables/access"
+import { storeSpec } from "../stores/spec"
+import { tableSpec } from "../tables/spec"
 import { createSight, type Sight } from "../visibility/sight"
 
 // What a message can mention, for the composer's picker: the resources of
@@ -35,6 +38,7 @@ export const list = query({
   args: {
     organizationId: v.string(),
     query: v.string(),
+    conversationId: v.optional(v.id("conversations")),
   },
   handler: async (ctx, args) => {
     const access = await checkOrganizationAccess(ctx, args.organizationId)
@@ -48,12 +52,16 @@ export const list = query({
     }
 
     const personId = await resolveCurrentPerson(ctx, args.organizationId)
+    const conversation =
+      args.conversationId === undefined
+        ? null
+        : await requireVisibleConsoleConversation(ctx, { ...args, personId })
     const viewer = {
       personId,
-      sight: createSight(ctx, {
-        organizationId: args.organizationId,
-        personId,
-      }),
+      sight:
+        conversation === null
+          ? createSight(ctx, { organizationId: args.organizationId, personId })
+          : createConversationSight(ctx, conversation),
     }
     const search = args.query.trim().toLowerCase()
     const groups = await Promise.all([
@@ -102,10 +110,12 @@ async function listCollections(
     personId: viewer.personId,
     query: search,
   }
-  const collections: Array<{ _id: string; name: string }> =
-    kind === "table"
-      ? await searchTables(ctx, args)
-      : await searchStores(ctx, args)
+  const collections = await searchCollections(
+    ctx,
+    kind === "table" ? tableSpec : storeSpec,
+    args,
+    viewer.sight
+  )
 
   return named(kind, collections, (collection) => collection.name, search)
 }
@@ -174,7 +184,7 @@ async function listRuns(ctx: QueryCtx, viewer: Viewer, search: string) {
 
   return named(
     "run",
-    await visibleRuns(ctx, runs, viewer.personId),
+    await visibleRuns(ctx, runs, viewer.sight),
     (run) => run.snapshot.title,
     search
   )
@@ -198,14 +208,10 @@ function named<Row extends { _id: string }>(
     .slice(0, mentionsPerKind)
 }
 
-async function visibleRuns(
-  ctx: QueryCtx,
-  runs: Doc<"runs">[],
-  personId: Id<"persons">
-) {
+async function visibleRuns(ctx: QueryCtx, runs: Doc<"runs">[], sight: Sight) {
   const visible = []
   for (const run of runs) {
-    if (await canSeeRun(ctx, run, personId)) {
+    if (await canSeeRun(ctx, run, sight.personId, sight)) {
       visible.push(run)
     }
   }

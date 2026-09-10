@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { conversationGate } from "../conversations/access"
 import { type QueryLikeCtx } from "../shared/context"
-import { createSight } from "../visibility/sight"
+import { createSight, type Sight } from "../visibility/sight"
 import { runVisibleToPerson } from "./console/filters"
 
 /** Console history follows the chat's current audience, including revocation.
@@ -9,7 +9,11 @@ import { runVisibleToPerson } from "./console/filters"
 export async function canSeeRun(
   ctx: QueryLikeCtx,
   run: Doc<"runs">,
-  personId: Id<"persons"> | undefined
+  personId: Id<"persons"> | undefined,
+  sight: Sight = createSight(ctx, {
+    organizationId: run.organizationId,
+    personId,
+  })
 ): Promise<boolean> {
   if (run.conversationId !== undefined) {
     const conversation = await ctx.db.get(run.conversationId)
@@ -22,10 +26,7 @@ export async function canSeeRun(
     }
 
     if (conversation.surface === "console") {
-      return await createSight(ctx, {
-        organizationId: run.organizationId,
-        personId,
-      }).canSee(conversationGate(conversation))
+      return await sight.canSee(conversationGate(conversation))
     }
   }
 

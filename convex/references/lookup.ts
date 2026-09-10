@@ -114,7 +114,7 @@ async function loadRun(ctx: QueryLikeCtx, sight: Sight, id: string) {
 
   return run !== null &&
     run.organizationId === sight.organizationId &&
-    (await canSeeRun(ctx, run, sight.personId))
+    (await canSeeRun(ctx, run, sight.personId, sight))
     ? { name: run.snapshot.title, status: run.status }
     : null
 }
@@ -124,11 +124,15 @@ async function loadChat(ctx: QueryLikeCtx, sight: Sight, id: string) {
   const conversation =
     conversationId === null
       ? null
-      : await findVisibleConsoleConversation(ctx, {
-          conversationId,
-          organizationId: sight.organizationId,
-          personId: sight.personId,
-        })
+      : await findVisibleConsoleConversation(
+          ctx,
+          {
+            conversationId,
+            organizationId: sight.organizationId,
+            personId: sight.personId,
+          },
+          sight
+        )
 
   return conversation === null
     ? null

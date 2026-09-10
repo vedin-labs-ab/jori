@@ -81,7 +81,8 @@ export async function searchCollections<K extends CollectionKind>(
     query?: string
     includeArchived?: boolean
     limit?: number
-  }
+  },
+  sight: Sight = createSight(ctx, args)
 ): Promise<CollectionDoc<K>[]> {
   const candidates = await ctx.db
     .query("collections")
@@ -90,7 +91,6 @@ export async function searchCollections<K extends CollectionKind>(
     )
     .order("desc")
     .take(searchLimit)
-  const sight = createSight(ctx, args)
   const query = args.query?.trim().toLowerCase()
   const limit = boundedNumber(args.limit, 25, 1, searchLimit)
   const matches: CollectionDoc<K>[] = []

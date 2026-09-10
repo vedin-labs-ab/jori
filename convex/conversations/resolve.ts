@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
-import { createSight } from "../visibility/sight"
+import { createSight, type Sight } from "../visibility/sight"
 import { conversationGate } from "./access"
 
 type ConversationKey = {
@@ -47,14 +47,15 @@ export async function findVisibleConsoleConversation(
     conversationId: Id<"conversations">
     organizationId: string
     personId: Id<"persons"> | undefined
-  }
+  },
+  sight: Sight = createSight(ctx, args)
 ) {
   const conversation = await ctx.db.get(args.conversationId)
 
   return conversation !== null &&
     conversation.organizationId === args.organizationId &&
     conversation.surface === "console" &&
-    (await createSight(ctx, args).canSee(conversationGate(conversation)))
+    (await sight.canSee(conversationGate(conversation)))
     ? conversation
     : null
 }

@@ -30,12 +30,7 @@ export async function listOrganizationMembers(
   ctx: QueryLikeCtx,
   organizationId: string
 ): Promise<OrganizationMember[]> {
-  const adapter = authComponent.adapter(ctx)(createAdapterOptions())
-  const members = await adapter.findMany<Member>({
-    model: "member",
-    where: [{ field: "organizationId", value: organizationId }],
-    limit: memberLimit,
-  })
+  const members = await organizationMembers(ctx, organizationId)
   const people = await Promise.all(
     members.map((member) => toOrganizationMember(ctx, organizationId, member))
   )
@@ -151,4 +146,32 @@ async function toOrganizationMember(
   const display = await personDisplay(ctx, personId)
 
   return { personId, name: display.name, image: display.image }
+}
+
+/** Includes members who have not opened the console yet. Their plain-member
+ *  sight matters when proving that a shared audience can see a resource. */
+export async function listOrganizationViewerIds(
+  ctx: QueryLikeCtx,
+  organizationId: string
+) {
+  const members = await organizationMembers(ctx, organizationId)
+  return await Promise.all(
+    members.map((member) =>
+      resolvePersonByIdentity(ctx, {
+        organizationId,
+        provider: "auth",
+        externalId: member.userId,
+      })
+    )
+  )
+}
+
+async function organizationMembers(ctx: QueryLikeCtx, organizationId: string) {
+  return await authComponent
+    .adapter(ctx)(createAdapterOptions())
+    .findMany<Member>({
+      model: "member",
+      where: [{ field: "organizationId", value: organizationId }],
+      limit: memberLimit,
+    })
 }

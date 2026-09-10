@@ -31,6 +31,7 @@ async function seed() {
   const chatId = await database.insert("conversations", {
     organizationId: "org",
     surface: "console",
+    visibility: { mode: "private" },
     externalId: "",
     scope: "person",
     title: "Which renewals are at risk?",
