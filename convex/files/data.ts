@@ -1,12 +1,10 @@
 import { v } from "convex/values"
-import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   internalMutation,
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { runExecutionIsCurrent } from "../sessions/execution"
 import { boundedNumber, optionalString } from "../shared/input"
 import {
   createResourceSight,
@@ -25,19 +23,6 @@ export type FileViewer = ResourceViewer
 export const record = internalMutation({
   args: fileFields,
   handler: async (ctx, args) => {
-    if (args.runId !== undefined) {
-      const run = await ctx.db.get(args.runId)
-
-      if (
-        run === null ||
-        run.organizationId !== args.organizationId ||
-        isTerminalRunStatus(run.status) ||
-        !(await runExecutionIsCurrent(ctx, run))
-      ) {
-        throw new Error("This run is no longer active.")
-      }
-    }
-
     const now = Date.now()
 
     return await ctx.db.insert("files", {

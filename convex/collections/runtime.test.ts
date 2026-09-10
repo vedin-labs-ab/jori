@@ -159,6 +159,7 @@ async function sharedRuntime() {
     if (session?.runId === undefined) {
       throw new Error("Missing run")
     }
+    await ctx.db.patch(session.runId, { status: "running" })
     return session.runId
   })
   const context = {
