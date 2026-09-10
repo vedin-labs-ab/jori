@@ -66,6 +66,10 @@ export const commit = internalMutation({
     summary: v.string(),
   },
   handler: async (ctx, args) => {
+    if ((await ctx.db.get(args.conversationId)) === null) {
+      return
+    }
+
     const summary = collapseWhitespace(args.summary)
 
     await ctx.db.patch(args.conversationId, {

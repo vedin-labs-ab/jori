@@ -140,6 +140,7 @@ export const live = query({
     return {
       status: "ready" as const,
       title: conversation.title ?? "",
+      folderId: conversation.folderId,
       ...(await readLiveState(ctx, conversation)),
     }
   },
@@ -255,6 +256,7 @@ function conversationView(conversation: Doc<"conversations">) {
   return {
     id: conversation._id,
     title: conversation.title ?? "",
+    folderId: conversation.folderId,
     updatedAt: conversation.updatedAt ?? conversation._creationTime,
   }
 }

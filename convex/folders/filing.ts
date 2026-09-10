@@ -2,6 +2,11 @@ import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { purgeCollection } from "../collections/records"
+import { purgeConversation } from "../conversations/filing/delete"
+import {
+  conversationGate,
+  fileConversation,
+} from "../conversations/filing/move"
 import { purgeFile } from "../files/records"
 import { jobGate } from "../jobs/access"
 import { removeJob } from "../jobs/lifecycle"
@@ -18,13 +23,19 @@ import { requireOrganizationFolder } from "./tree"
 export const filedResourceType = v.union(
   v.literal("collection"),
   v.literal("file"),
-  v.literal("job")
+  v.literal("job"),
+  v.literal("chat")
 )
 
 export type FiledResourceType = Infer<typeof filedResourceType>
 
 /** The tables whose rows can be filed into a folder. */
-export const filedTables = ["collections", "files", "jobs"] as const
+export const filedTables = [
+  "collections",
+  "files",
+  "jobs",
+  "conversations",
+] as const
 
 type FiledTable = (typeof filedTables)[number]
 
@@ -36,21 +47,44 @@ type FilingEntry = {
   setFolder(
     ctx: MutationCtx,
     row: FiledDoc,
-    folderId: Id<"folders"> | undefined
+    folderId: Id<"folders"> | undefined,
+    defer?: boolean
   ): Promise<void>
   /** Permanent removal of the row and everything only it owns. */
-  purge(ctx: MutationCtx, row: FiledDoc): Promise<void>
+  purge(
+    ctx: MutationCtx,
+    row: FiledDoc,
+    destination?: Id<"folders">
+  ): Promise<void>
 }
 
 const tableByType: Record<FiledResourceType, FiledTable> = {
   collection: "collections",
   file: "files",
   job: "jobs",
+  chat: "conversations",
 }
 
 /** Each entry only ever receives rows from its own table, so the narrowing
  *  casts below hold by construction. */
 const registry: Record<FiledTable, FilingEntry> = {
+  conversations: {
+    load: async (ctx, resourceId) => {
+      const row = (await loadRow(
+        ctx,
+        "conversations",
+        resourceId
+      )) as Doc<"conversations"> | null
+      return row?.surface === "console" && row.createdBy !== undefined
+        ? row
+        : null
+    },
+    gate: (row) => conversationGate(row as Doc<"conversations">),
+    setFolder: (ctx, row, folderId, defer) =>
+      fileConversation(ctx, row as Doc<"conversations">, folderId, defer),
+    purge: (ctx, row, destination) =>
+      purgeConversation(ctx, row as Doc<"conversations">, destination),
+  },
   collections: {
     load: (ctx, resourceId) => loadRow(ctx, "collections", resourceId),
     gate: (row) => row as Doc<"collections">,
@@ -110,7 +144,7 @@ export async function refileRow(
   row: FiledDoc,
   folderId: Id<"folders"> | undefined
 ) {
-  await registry[table].setFolder(ctx, row, folderId)
+  await registry[table].setFolder(ctx, row, folderId, true)
 }
 
 /** Permanently delete one filed row and everything only it owns — the
@@ -118,9 +152,10 @@ export async function refileRow(
 export async function purgeRow(
   ctx: MutationCtx,
   table: FiledTable,
-  row: FiledDoc
+  row: FiledDoc,
+  destination?: Id<"folders">
 ) {
-  await registry[table].purge(ctx, row)
+  await registry[table].purge(ctx, row, destination)
 }
 
 /** File a resource into a folder, or unfile it with a null folderId. The

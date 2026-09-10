@@ -8,7 +8,8 @@ import {
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { folderChildren, folderResources, summarizeTree } from "./contents"
+import { folderChildren, summarizeTree } from "./contents"
+import { folderResources } from "./resources"
 
 const other = "persons:other" as Id<"persons">
 

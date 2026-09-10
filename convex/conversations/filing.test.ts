@@ -7,8 +7,12 @@ import {
   person,
   rows,
 } from "../../test/convex/conversations"
+import { type TestDatabase } from "../../test/convex/database"
 import { folderDoc } from "../../test/convex/folders"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
+import { folderChildren, summarizeTree } from "../folders/contents"
+import { fileResource } from "../folders/filing"
+import { folderResources } from "../folders/resources"
 import { sendConsoleMessage } from "./console"
 
 // Where a console conversation's runs are filed: under the folder the chat
@@ -100,3 +104,112 @@ test("a context whose id is not of its kind is refused before anything is kept",
   ).rejects.toThrow("Context id is not a job.")
   expect(await rows(database, "messages")).toEqual([])
 })
+
+test("unfiling a contextual chat keeps later runs unfiled", async () => {
+  const { database, ctx } = consoleContext()
+  const personId = await person(database)
+  const folderId = await database.insert("folders", folderDoc())
+  const sent = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Plan this folder.",
+    context: { kind: "folder", id: folderId },
+  })
+  expect(await database.get(sent.conversationId)).toMatchObject({ folderId })
+
+  await fileResource(ctx, {
+    organizationId,
+    personId,
+    resourceType: "chat",
+    resourceId: sent.conversationId,
+    folderId: null,
+  })
+  await finishRun(database)
+  await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Keep going.",
+    conversationId: sent.conversationId,
+  })
+
+  expect((await database.get(sent.conversationId))?.folderId).toBeUndefined()
+  expect(
+    (await rows<Doc<"runs">>(database, "runs")).map((run) => run.folderId)
+  ).toEqual([undefined, undefined])
+})
+
+test("filing a chat does not expose it to other folder viewers", async () => {
+  const { database, ctx } = consoleContext()
+  const personId = await person(database)
+  const otherId = await person(database)
+  const unrelatedId = await person(database)
+  const folderId = await database.insert("folders", folderDoc())
+  await seedPrivateChats(database, folderId, unrelatedId)
+  const sent = await sendConsoleMessage(ctx, {
+    organizationId,
+    personId,
+    profile: {},
+    text: "Private launch planning.",
+  })
+  const filing = {
+    organizationId,
+    resourceType: "chat" as const,
+    resourceId: sent.conversationId,
+    folderId,
+  }
+
+  await expect(
+    fileResource(ctx, { ...filing, personId: otherId })
+  ).rejects.toThrow("Resource was not found.")
+  await fileResource(ctx, { ...filing, personId })
+
+  const view = { organizationId, folderId }
+  expect(await folderResources(ctx, { ...view, personId })).toMatchObject([
+    {
+      type: "chat",
+      id: sent.conversationId,
+      ownerId: personId,
+      visibility: "private",
+    },
+  ])
+  expect(await folderResources(ctx, { ...view, personId: otherId })).toEqual([])
+  const ownFolders = await folderChildren(ctx, {
+    organizationId,
+    personId,
+    parentId: undefined,
+  })
+  const otherFolders = await folderChildren(ctx, {
+    organizationId,
+    personId: otherId,
+    parentId: undefined,
+  })
+  expect(ownFolders[0]?.resourceCount).toBe(1)
+  expect(otherFolders[0]?.resourceCount).toBe(0)
+  const folder = (await database.get(folderId)) as Doc<"folders">
+  expect((await summarizeTree(ctx, [folder], personId))[0]?.hasContents).toBe(
+    true
+  )
+  expect((await summarizeTree(ctx, [folder], otherId))[0]?.hasContents).toBe(
+    false
+  )
+})
+
+async function seedPrivateChats(
+  database: TestDatabase,
+  folderId: Id<"folders">,
+  unrelatedId: Id<"persons">
+) {
+  for (let index = 0; index < 200; index += 1) {
+    await database.insert("conversations", {
+      organizationId,
+      folderId,
+      surface: "console",
+      scope: "person",
+      createdBy: unrelatedId,
+      title: "Another person's chat",
+      externalId: String(index),
+    })
+  }
+}

@@ -190,7 +190,7 @@ async function insertRun(
     args.message,
     args.createdBy
   )
-  const folderId = context?.folderId
+  const folderId = args.conversation.folderId
 
   return await ctx.db.insert("runs", {
     organizationId: args.message.organizationId,
@@ -223,9 +223,8 @@ async function insertRun(
 
 /** What a console conversation was opened about, as the person who
  *  opened it sees it — the context rides on their first message, and
- *  every run the conversation starts is filed under its folder, the
- *  folder itself or the one the resource is filed in — and the message's
- *  text with its mentions named, for the run's title. */
+ *  the message's text with its mentions named, for the run's title.
+ *  The chat's own folder determines attribution independently of context. */
 async function consoleRunDetails(
   ctx: MutationCtx,
   conversation: Doc<"conversations">,

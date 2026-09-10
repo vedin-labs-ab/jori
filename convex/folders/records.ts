@@ -235,7 +235,7 @@ async function emptyFolder(
 
     for (const row of rows) {
       if (args.deleteResources) {
-        await purgeRow(ctx, table, row)
+        await purgeRow(ctx, table, row, args.destination)
       } else {
         await refileRow(ctx, table, row, args.destination)
       }

@@ -97,6 +97,8 @@ import type * as conversations_continuation from "../conversations/continuation.
 import type * as conversations_create from "../conversations/create.js";
 import type * as conversations_data from "../conversations/data.js";
 import type * as conversations_draft from "../conversations/draft.js";
+import type * as conversations_filing_delete from "../conversations/filing/delete.js";
+import type * as conversations_filing_move from "../conversations/filing/move.js";
 import type * as conversations_fresh from "../conversations/fresh.js";
 import type * as conversations_intake from "../conversations/intake.js";
 import type * as conversations_limits from "../conversations/limits.js";
@@ -156,6 +158,7 @@ import type * as folders_contents from "../folders/contents.js";
 import type * as folders_filing from "../folders/filing.js";
 import type * as folders_meter from "../folders/meter.js";
 import type * as folders_records from "../folders/records.js";
+import type * as folders_resources from "../folders/resources.js";
 import type * as folders_spend from "../folders/spend.js";
 import type * as folders_tree from "../folders/tree.js";
 import type * as folders_usage from "../folders/usage.js";
@@ -778,6 +781,8 @@ declare const fullApi: ApiFromModules<{
   "conversations/create": typeof conversations_create;
   "conversations/data": typeof conversations_data;
   "conversations/draft": typeof conversations_draft;
+  "conversations/filing/delete": typeof conversations_filing_delete;
+  "conversations/filing/move": typeof conversations_filing_move;
   "conversations/fresh": typeof conversations_fresh;
   "conversations/intake": typeof conversations_intake;
   "conversations/limits": typeof conversations_limits;
@@ -837,6 +842,7 @@ declare const fullApi: ApiFromModules<{
   "folders/filing": typeof folders_filing;
   "folders/meter": typeof folders_meter;
   "folders/records": typeof folders_records;
+  "folders/resources": typeof folders_resources;
   "folders/spend": typeof folders_spend;
   "folders/tree": typeof folders_tree;
   "folders/usage": typeof folders_usage;

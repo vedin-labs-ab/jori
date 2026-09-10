@@ -11,6 +11,7 @@ export type UsageTrigger = Infer<typeof usageTrigger>
 
 export type UsageAttribution = {
   folderId?: Id<"folders">
+  conversationId?: Id<"conversations">
   job?: { id: Id<"jobs">; label: string }
   personId?: Id<"persons">
   surface: ToolSurface
@@ -20,7 +21,7 @@ export type UsageAttribution = {
 }
 
 /** Stands in for a dimension the work has none of — unfiled, not a job's,
- *  or nobody's in particular — so every key has the same six parts. */
+ *  or nobody's in particular — so every key has the same seven parts. */
 const absent = "-"
 
 /** The job's label is deliberately not part of this: a rename must
@@ -29,6 +30,7 @@ export function usageKey(attribution: UsageAttribution) {
   return [
     attribution.folderId ?? absent,
     attribution.job?.id ?? absent,
+    attribution.conversationId ?? absent,
     attribution.personId ?? absent,
     attribution.surface,
     attribution.trigger,

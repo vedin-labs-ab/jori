@@ -1,41 +1,14 @@
-import { type VisibilityMode } from "../../contracts/visibility"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { canSeeJob } from "../jobs/access"
 import { withOwnerDisplays } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 import { filedTables } from "./filing"
+import { sightedResources } from "./resources"
 import { descendantFolderIds, summarizeFolder, treeCap } from "./tree"
 
 // A folder's listing: subfolders plus the filed resources the caller may
 // see. One Sight per request answers every row — a resource whose own
 // visibility or ancestor folders exclude the caller simply does not appear.
-
-/** Per-type ceiling on one folder's listed resources; generous because a
- *  folder is a curated shelf, not an archive — no cross-type pagination. */
-const contentsCap = 200
-
-type Viewer = {
-  organizationId: string
-  personId: Id<"persons">
-  folderId: Id<"folders">
-}
-
-export type FolderResource = {
-  type: "table" | "store" | "file" | "job"
-  id: Id<"collections"> | Id<"files"> | Id<"jobs">
-  name: string
-  visibility: VisibilityMode
-  updatedAt: number
-  /** Who the row belongs to. Absent for the kinds no person owns — an
-   *  job, or a file an agent run saved — which read as Jori's own. */
-  ownerId?: Id<"persons">
-  ownerName?: string
-  ownerImage?: string
-  mimeType?: string
-  size?: number
-  status?: Doc<"jobs">["status"]
-}
 
 /** The folders one level below a parent — the root when none — each carrying
  *  the direct-child counts its listing row shows. Counting reads the same
@@ -115,7 +88,8 @@ async function countChild(
  *  one for subfolders. */
 export async function summarizeTree(
   ctx: QueryLikeCtx,
-  folders: Doc<"folders">[]
+  folders: Doc<"folders">[],
+  personId?: Id<"persons">
 ) {
   const parentIds = new Set(folders.map((folder) => folder.parentId))
 
@@ -124,7 +98,7 @@ export async function summarizeTree(
       ...summarizeFolder(folder),
       hasContents:
         parentIds.has(folder._id) ||
-        (await hasFiledResources(ctx, folder._id)) ||
+        (await hasFiledResources(ctx, folder._id, personId)) ||
         (await hasSubfolders(ctx, folder)),
     }))
   )
@@ -143,8 +117,28 @@ async function hasSubfolders(ctx: QueryLikeCtx, folder: Doc<"folders">) {
   return child !== null
 }
 
-async function hasFiledResources(ctx: QueryLikeCtx, folderId: Id<"folders">) {
+async function hasFiledResources(
+  ctx: QueryLikeCtx,
+  folderId: Id<"folders">,
+  personId: Id<"persons"> | undefined
+) {
   for (const table of filedTables) {
+    if (table === "conversations") {
+      const chat =
+        personId === undefined
+          ? null
+          : await ctx.db
+              .query("conversations")
+              .withIndex("by_folder_and_created_by", (index) =>
+                index.eq("folderId", folderId).eq("createdBy", personId)
+              )
+              .first()
+      if (chat !== null) {
+        return true
+      }
+      continue
+    }
+
     const filed = await ctx.db
       .query(table)
       .withIndex("by_folder", (index) => index.eq("folderId", folderId))
@@ -191,124 +185,6 @@ export async function subtreeImpact(ctx: QueryLikeCtx, folder: Doc<"folders">) {
     parentName: parent?.name ?? null,
     resourceCount,
   }
-}
-
-/** A folder's listed resources. Owner displays are attached here rather
- *  than inside sightedResources, which the child counts also run: counting
- *  needs a length, not a name. */
-export async function folderResources(
-  ctx: QueryLikeCtx,
-  args: Viewer
-): Promise<FolderResource[]> {
-  const resources = await sightedResources(
-    ctx,
-    createSight(ctx, args),
-    args.folderId
-  )
-
-  return await withOwnerDisplays(ctx, resources)
-}
-
-async function sightedResources(
-  ctx: QueryLikeCtx,
-  sight: Sight,
-  folderId: Id<"folders">
-): Promise<FolderResource[]> {
-  const resources = [
-    ...(await folderCollections(ctx, sight, folderId)),
-    ...(await folderFiles(ctx, sight, folderId)),
-    ...(await folderJobs(ctx, sight, folderId)),
-  ]
-
-  return resources.sort(byName)
-}
-
-/** Archived collections stay filed but hidden, matching the default list
- *  views; restoring one brings it back to its folder. */
-async function folderCollections(
-  ctx: QueryLikeCtx,
-  sight: Sight,
-  folderId: Id<"folders">
-): Promise<FolderResource[]> {
-  const rows = await ctx.db
-    .query("collections")
-    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
-    .take(contentsCap)
-  const listed: FolderResource[] = []
-
-  for (const row of rows) {
-    if (row.archivedAt === undefined && (await sight.canSee(row))) {
-      listed.push({
-        type: row.kind === "table" ? "table" : "store",
-        id: row._id,
-        name: row.name,
-        visibility: row.visibility.mode,
-        updatedAt: row.updatedAt,
-        ownerId: row.ownerId,
-      })
-    }
-  }
-
-  return listed
-}
-
-async function folderFiles(
-  ctx: QueryLikeCtx,
-  sight: Sight,
-  folderId: Id<"folders">
-): Promise<FolderResource[]> {
-  const rows = await ctx.db
-    .query("files")
-    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
-    .take(contentsCap)
-  const listed: FolderResource[] = []
-
-  for (const row of rows) {
-    if (await sight.canSee(row)) {
-      listed.push({
-        type: "file",
-        id: row._id,
-        name: row.name,
-        visibility: row.visibility.mode,
-        updatedAt: row.updatedAt,
-        // An agent run saves a file without an owner; it reads as Jori's.
-        ownerId: row.ownerId,
-        mimeType: row.mimeType,
-        size: row.size,
-      })
-    }
-  }
-
-  return listed
-}
-
-/** Jobs carry no owner: a shared one runs as the organization, so
- *  the listing shows every job as Jori's own work. */
-async function folderJobs(
-  ctx: QueryLikeCtx,
-  sight: Sight,
-  folderId: Id<"folders">
-): Promise<FolderResource[]> {
-  const rows = await ctx.db
-    .query("jobs")
-    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
-    .take(contentsCap)
-  const listed: FolderResource[] = []
-
-  for (const row of rows) {
-    if (await canSeeJob(sight, row)) {
-      listed.push({
-        type: "job",
-        id: row._id,
-        name: row.name,
-        visibility: row.visibility.mode,
-        updatedAt: row.updatedAt,
-        status: row.status,
-      })
-    }
-  }
-
-  return listed
 }
 
 function byName(left: { name: string }, right: { name: string }) {
