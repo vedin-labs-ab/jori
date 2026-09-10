@@ -72,6 +72,29 @@ describe("create table form submission", () => {
     })
     expect(createTable.mock.calls[0]?.[0]).not.toHaveProperty("columns")
   })
+
+  test("keeps the saved draft until the next opening", async () => {
+    const onOpenChange = vi.fn()
+    const dialog = (isOpen: boolean) => (
+      <CreateTableDialog
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        organizationId="org-1"
+      />
+    )
+    const view = render(dialog(true))
+    fillName()
+    submitFrom(screen.getByLabelText("Name"))
+
+    await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false))
+    expect((screen.getByLabelText("Name") as HTMLInputElement).value).toBe(
+      "Invoices"
+    )
+
+    view.rerender(dialog(false))
+    view.rerender(dialog(true))
+    expect((screen.getByLabelText("Name") as HTMLInputElement).value).toBe("")
+  })
 })
 
 describe("create table folder field", () => {

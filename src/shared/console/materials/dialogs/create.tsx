@@ -1,6 +1,6 @@
 import { type Visibility } from "@contracts/visibility"
 import { Loader2 } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -58,6 +58,7 @@ export function CreateMaterialDialog({
   const form = useCreateMaterial({
     create,
     initialFolderId: initialFolderId ?? null,
+    isOpen,
     noun,
     onCreated: () => onOpenChange(false),
   })
@@ -116,11 +117,13 @@ export function CreateMaterialDialog({
 function useCreateMaterial({
   create,
   initialFolderId,
+  isOpen,
   noun,
   onCreated,
 }: {
   create: (args: CreateMaterialArgs) => Promise<unknown>
   initialFolderId: string | null
+  isOpen: boolean
   noun: string
   onCreated: () => void
 }) {
@@ -131,6 +134,19 @@ function useCreateMaterial({
   })
   const [folderId, setFolderId] = useState(initialFolderId)
   const [isCreating, setIsCreating] = useState(false)
+  const [resetOnOpen, setResetOnOpen] = useState(false)
+  const wasOpen = useRef(isOpen)
+
+  useLayoutEffect(() => {
+    const opening = isOpen && !wasOpen.current
+    wasOpen.current = isOpen
+    if (opening && resetOnOpen) {
+      setNameState("")
+      setVisibility({ mode: "organization" })
+      setFolderId(initialFolderId)
+      setResetOnOpen(false)
+    }
+  }, [initialFolderId, isOpen, resetOnOpen])
 
   // Validation shows only after a submit attempt; new input clears it.
   function setName(next: string) {
@@ -151,9 +167,7 @@ function useCreateMaterial({
       await create({ name, visibility, folderId: folderId ?? undefined })
 
       toast.success(`Created ${name.trim()}.`)
-      setNameState("")
-      setVisibility({ mode: "organization" })
-      setFolderId(initialFolderId)
+      setResetOnOpen(true)
       onCreated()
     } catch (error) {
       showErrorToast(error, `Could not create the ${noun}.`)
