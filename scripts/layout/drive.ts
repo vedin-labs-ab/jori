@@ -77,12 +77,20 @@ export async function drive(
     shifts.length = 0
     errors.length = 0
     await page.goto(url, { waitUntil: "commit", timeout: 90_000 })
-    await page.waitForFunction(() => Boolean(window.__layout))
+    // Computed-style walks before the render-blocking CSS arrives can
+    // themselves start transitions. Sample the first visible frame.
+    await page.waitForFunction(
+      () => performance.getEntriesByType("paint").length > 0,
+      undefined,
+      { timeout: 90_000 }
+    )
     let before: Snapshot | undefined
     if (scenario.steps?.length) {
-      await settle(page)
-      for (const step of scenario.setup ?? []) {
-        await perform(page, step)
+      if (scenario.setup?.length) {
+        await settle(page)
+        for (const step of scenario.setup) {
+          await perform(page, step)
+        }
       }
       await settle(page)
       before = await page.evaluate(() => window.__layout.snapshot())
