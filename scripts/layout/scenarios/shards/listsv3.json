@@ -1,0 +1,496 @@
+[
+  {
+    "id": "C029-Delete-open",
+    "title": "Folder selection Delete dialog open",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"toolbar\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C074-delete-close",
+    "title": "Column deletion confirmation close",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"alert-dialog-body\"] button:text-is(\"Cancel\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-slot=\"alert-dialog-body\"] button:text-is(\"Cancel\")"
+      }
+    ]
+  },
+  {
+    "id": "C079-form",
+    "title": "Store Code to Form",
+    "path": "/stores/collections_release",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Release state\")"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Code\")"
+      },
+      {
+        "action": "click",
+        "selector": "body:has(.cm-content) header button:has-text(\"Release state\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Form\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Form\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[id=\"value.version\"]"
+      }
+    ]
+  },
+  {
+    "id": "C027-delete-open",
+    "title": "Bulk files Archive confirmation open",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C027-delete-close",
+    "title": "Bulk files Archive confirmation close",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ]
+  },
+  {
+    "id": "C030-files",
+    "title": "Bulk files archive commit",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Archive\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ]
+  },
+  {
+    "id": "C034-visibility",
+    "title": "Table visibility tooltip opens",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"tooltip-trigger\"]:has(> span.sr-only:text-is(\"Specific teams \u00b7 1 team\"))"
+      }
+    ]
+  },
+  {
+    "id": "C034-visibility-close",
+    "title": "Table visibility tooltip closes",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"tooltip-trigger\"]:has(> span.sr-only:text-is(\"Specific teams \u00b7 1 team\"))"
+      }
+    ]
+  },
+  {
+    "id": "C055-job",
+    "title": "Delete job commit",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete job\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Weekly release summary\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C066-copy",
+    "title": "Table context copy cell feedback",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Copy cell\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ],
+    "clipboard": {
+      "text": ""
+    },
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Cell copied.\")"
+      }
+    ]
+  },
+  {
+    "id": "C016-empty",
+    "title": "folders Owner facet no matches",
+    "path": "/folders",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[cmdk-input]",
+        "value": "not-a-member-zzzz"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C016-clear",
+    "title": "folders Owner facet clear selection",
+    "path": "/folders",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C016-all",
+    "title": "folders Owner facet restore All",
+    "path": "/folders",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"All\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C011-desc",
+    "title": "folders sort Name desc",
+    "path": "/folders",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C011-reset",
+    "title": "folders sort Name reset",
+    "path": "/folders",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      },
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C080-check-clear",
+    "title": "Store boolean autosave reverses",
+    "path": "/stores/collections_release",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[id=\"value.frozen\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[id=\"value.frozen\"]"
+      }
+    ]
+  },
+  {
+    "id": "C070-commit-above",
+    "title": "Table inserts a named row above the selected row",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Insert row above\")"
+      },
+      {
+        "action": "fill",
+        "selector": "[role=\"dialog\"] input >> nth=0",
+        "value": "Layout row inserted above Harbor House"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Add row\")"
+      }
+    ]
+  },
+  {
+    "id": "C070-commit-below",
+    "title": "Table inserts a named row below the selected row",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Insert row below\")"
+      },
+      {
+        "action": "fill",
+        "selector": "[role=\"dialog\"] input >> nth=0",
+        "value": "Layout row inserted below Harbor House"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Add row\")"
+      }
+    ]
+  },
+  {
+    "id": "C080-saved-idle",
+    "title": "Store autosave Saved indicator expires back to idle",
+    "path": "/stores/collections_release",
+    "target": "fixture",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[id=\"value.version\"]",
+        "value": "2.15"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "main header :text-is(\"Saved\")",
+        "state": "attached",
+        "timeout": 10000
+      }
+    ],
+    "steps": [],
+    "ready": [
+      {
+        "selector": "main header button:has-text(\"Release state\"):has(> svg)",
+        "timeout": 8000
+      }
+    ]
+  },
+  {
+    "id": "C067-paste-success",
+    "title": "Table pastes supplied clipboard text into a cell",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": true,
+    "clipboard": {
+      "text": "Layout clipboard replacement"
+    },
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Paste\")"
+      }
+    ]
+  },
+  {
+    "id": "C066-copy-expiry",
+    "title": "Copied cell toast expires",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "clipboard": {
+      "text": ""
+    },
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Copy cell\")"
+      },
+      {
+        "action": "hover",
+        "selector": "main"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Cell copied.\")",
+        "timeout": 8000
+      }
+    ],
+    "steps": [],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "hidden",
+        "timeout": 10000
+      }
+    ]
+  }
+]

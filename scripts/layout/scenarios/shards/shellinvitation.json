@@ -1,0 +1,39 @@
+[
+  {
+    "id": "shell-invitation-info-open",
+    "title": "Joining an organization dialog opens/expands",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "button:text-is(\"Joining an existing organization?\")",
+        "value": "Enter"
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-invitation-info-close",
+    "title": "Joining an organization dialog closes/collapses",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "press",
+        "selector": "button:text-is(\"Joining an existing organization?\")",
+        "value": "Enter"
+      }
+    ],
+    "anonymous": true
+  }
+]

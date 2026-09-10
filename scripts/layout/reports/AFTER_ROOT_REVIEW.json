@@ -1,0 +1,235 @@
+{
+  "reviewer": "root, independent of chat and controls fix authors",
+  "recorder": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
+  "profiles": 12,
+  "framesReviewed": 71,
+  "cases": [
+    {
+      "id": "C081-empty",
+      "profile": "warm-375",
+      "status": "verified",
+      "scope": "Single required-number error appears in reserved row; later fields do not move.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/settled.png"
+      ],
+      "nativeEntries": 0,
+      "nativeSum": 0,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "C085-schema-close",
+      "profile": "warm-375",
+      "status": "verified",
+      "scope": "Schema title and populated fields remain during Drawer exit; no blank-body collapse.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/settled.png"
+      ],
+      "nativeEntries": 0,
+      "nativeSum": 0,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "C109-one-time",
+      "profile": "cold-375",
+      "status": "verified",
+      "scope": "One-time fallback and loaded controls keep the same outer bounds. Requested Recurring to One-time replacement changes initial dialog height.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/settled.png"
+      ],
+      "nativeEntries": 1,
+      "nativeSum": 0.04295178237763596,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "C124-create",
+      "profile": "warm-375",
+      "status": "verified",
+      "scope": "Folder draft remains visible through exit; remaining native shift comes from insertion and automatic table layout.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/settled.png"
+      ],
+      "nativeEntries": 1,
+      "nativeSum": 0.012540681533463565,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "C134-mobile-billing-exit",
+      "profile": "warm-375",
+      "status": "verified",
+      "scope": "Billing remains visible during close instead of flashing General.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/settled.png"
+      ],
+      "nativeEntries": 0,
+      "nativeSum": 0,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "C171-timeline-open",
+      "profile": "warm-375",
+      "status": "verified",
+      "scope": "Receipt skeleton and loaded receipt keep the later Kessler row fixed. Initial requested disclosure expansion remains.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/settled.png"
+      ],
+      "nativeEntries": 1,
+      "nativeSum": 0.06270089867100229,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "CHAT-027",
+      "profile": "warm-375",
+      "status": "verified",
+      "scope": "Inline mention insertion keeps composer bounds. Remaining changed rectangles belong to inserted chip and exiting popup.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-027/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-027/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-027/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-027/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-027/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-027/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-027/warm-375/settled.png"
+      ],
+      "nativeEntries": 0,
+      "nativeSum": 0,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "CHAT-043",
+      "profile": "warm-375",
+      "status": "partial",
+      "scope": "Tier trigger width and neighboring toolbar controls stay fixed. Centered internal icon/chevron shift0.84px; arbitrary custom model names remain unverified.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-043/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-043/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-043/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-043/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-043/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-043/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-043/warm-375/settled.png"
+      ],
+      "nativeEntries": 0,
+      "nativeSum": 0,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "CHAT-051",
+      "profile": "warm-375",
+      "status": "limited",
+      "scope": "Reserved Stop slot visible through send and stream. Requested navigation, reply growth and questionnaire arrival remain; recipe is not full completion proof.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-051/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-051/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-051/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-051/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-051/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-051/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-051/warm-375/settled.png"
+      ],
+      "nativeEntries": 4,
+      "nativeSum": 0.0038640102890145356,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "CHAT-106",
+      "profile": "warm-375",
+      "status": "verified",
+      "scope": "Attachment search keeps popup and search input bounds; result list remains scrollable.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-106/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-106/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-106/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-106/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-106/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-106/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-106/warm-375/settled.png"
+      ],
+      "nativeEntries": 0,
+      "nativeSum": 0,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "CHAT-G04",
+      "profile": "cold-1440",
+      "status": "limited",
+      "scope": "Recent and composer resolved geometry present; intermediary arrival absent from PNGs. Remaining SF7 async sidebar Recent insertion causes native0.01154.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-G04/cold-1440/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-G04/cold-1440/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-G04/cold-1440/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-G04/cold-1440/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-G04/cold-1440/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/CHAT-G04/cold-1440/settled.png"
+      ],
+      "nativeEntries": 1,
+      "nativeSum": 0.011539930555555555,
+      "scrollChanges": 0,
+      "driverError": null
+    },
+    {
+      "id": "FILE-022",
+      "profile": "warm-375",
+      "status": "verified",
+      "scope": "Context chip removal retains composer row; heading, field and Recent stay fixed. Existing animated placeholder continues.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/FILE-022/warm-375/record.json",
+      "framesReviewed": [
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/FILE-022/warm-375/before.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/FILE-022/warm-375/0.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/FILE-022/warm-375/250.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/FILE-022/warm-375/1000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/FILE-022/warm-375/3000.png",
+        "/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/FILE-022/warm-375/settled.png"
+      ],
+      "nativeEntries": 0,
+      "nativeSum": 0,
+      "scrollChanges": 0,
+      "driverError": null
+    }
+  ]
+}

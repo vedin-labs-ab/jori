@@ -1,0 +1,1086 @@
+[
+  {
+    "id": "CHAT-S01",
+    "title": "Real useSendMessage pending promise resolves through isolated local service; composer restores after success.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=send-resolve",
+    "target": "app",
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Message\"]",
+        "value": "Confirm the current renewal owners."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "div.whitespace-pre-wrap:text-is(\"Confirm the current renewal owners.\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S02",
+    "title": "Real useSendMessage pending promise rejects; error toast and retained input.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=send-reject",
+    "target": "app",
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Message\"]",
+        "value": "Confirm the current renewal owners."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S03",
+    "title": "Retry rejected send with actual hook; local second attempt resolves.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=send-reject",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Message\"]",
+        "value": "Confirm the current renewal owners."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "div.whitespace-pre-wrap:text-is(\"Confirm the current renewal owners.\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S04",
+    "title": "Error toast timer completion and auto-dismiss after rejected send.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=send-reject",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Message\"]",
+        "value": "Confirm the current renewal owners."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F9"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "hidden",
+        "timeout": 15000
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S05",
+    "title": "Unresolved resource references receive names, folders and types after delayed data arrival.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=reference",
+    "target": "app",
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S06",
+    "title": "Context condensation notice arrives in an existing conversation.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=condensed",
+    "target": "app",
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main :text-is(\"Jori condensed earlier context to keep going\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S07",
+    "title": "Live run becomes failed and displays its two-line error.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=failed",
+    "target": "app",
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main :text-is(\"Jori couldn't finish\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S08",
+    "title": "Show earlier messages pending to 24 prepended turns; existing anchor preserved.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pagination",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "button:text-is(\"Show earlier messages\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Show earlier messages\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main :text-is(\"The current owners and renewal dates are recorded in the customer table.\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S09",
+    "title": "Working activity query undefined becomes actual seeded rows.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=progress",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Working\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main :text-is(\"Model step completed\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S10",
+    "title": "Pending approval callout arrives below existing Working section.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=progress",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "button:text-is(\"Approve\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S11",
+    "title": "Connection offer arrives beside existing approval callout.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=progress",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main :text-is(\"Connect Notion\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S12",
+    "title": "Actual RunApprovals action waits then updates its approved summary.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=progress",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "hover",
+        "selector": "button:text-is(\"Approve\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Approve\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main :text-matches(\"^Approved at \")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S13",
+    "title": "Actual approval action rejects, retaining pending callout and error toast.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=progress-reject",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "hover",
+        "selector": "button:text-is(\"Approve\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Approve\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S14",
+    "title": "Retry actual approval action after isolated first rejection.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=progress-reject",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "hover",
+        "selector": "button:text-is(\"Approve\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Approve\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Approve\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main :text-matches(\"^Approved at \")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S15",
+    "title": "HTML preview loads within actual shared FileBody.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-html",
+    "target": "app",
+    "mutating": false,
+    "setup": [],
+    "steps": [],
+    "ready": [
+      {
+        "selector": "main .opacity-100 > iframe",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S16",
+    "title": "HTML title menu opens Preview and Code controls.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-html",
+    "target": "app",
+    "mutating": false,
+    "setup": [],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main header button:has-text(\"Renewal summary.html\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S17",
+    "title": "HTML Preview switches to real CodeMirror editor.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-html",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "main header button:has-text(\"Renewal summary.html\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Code\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main .cm-content",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S18",
+    "title": "HTML Code switches back to rendered Preview.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-html",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "main header button:has-text(\"Renewal summary.html\")"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Code\")"
+      },
+      {
+        "action": "hover",
+        "selector": ".cm-content"
+      },
+      {
+        "action": "click",
+        "selector": "main header button:has-text(\"Renewal summary.html\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Preview\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main .opacity-100 > iframe",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S19",
+    "title": "Audio native control and metadata load in reserved viewer.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-audio",
+    "target": "app",
+    "mutating": false,
+    "setup": [],
+    "steps": [],
+    "ready": [
+      {
+        "selector": "main .opacity-100 audio",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S20",
+    "title": "Video native control and metadata load in reserved viewer.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-video",
+    "target": "app",
+    "mutating": false,
+    "setup": [],
+    "steps": [],
+    "ready": [
+      {
+        "selector": "main .opacity-100 video",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S21",
+    "title": "Audio play state through native media keyboard control.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-audio",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "audio"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Space"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S22",
+    "title": "Video play state through native media keyboard control.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-video",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "video"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Space"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S23",
+    "title": "Oversized text falls back to actual download prompt.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-oversized",
+    "target": "app",
+    "mutating": false,
+    "setup": [],
+    "steps": [],
+    "ready": [
+      {
+        "selector": "main :text-is(\"Too large to edit here\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S24",
+    "title": "Missing file URL falls back to actual shared unavailable view.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-missing-url",
+    "target": "app",
+    "mutating": false,
+    "setup": [],
+    "steps": [],
+    "ready": [
+      {
+        "selector": "main :text-is(\"Too large to edit here\")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S25",
+    "title": "Current-clock pending request in actual demo run pane, isolated approval callback.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=current-clock&path=%2Fchat%2Fconversations_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Message\"]",
+        "value": "Inspect +[run:runs_tip]."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"run:runs_tip\"] button"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] button:has-text(\"Approve\")"
+      }
+    ],
+    "target": "app",
+    "ready": [
+      {
+        "selector": "main :text-matches(\"^Approved at \")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S26",
+    "title": "Actual approval action denies after pending promise.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=progress",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "hover",
+        "selector": "button:text-is(\"Approve\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Deny\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main :text-matches(\"^Denied at \")",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S27",
+    "title": "Rejected approval toast expires automatically.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=progress-reject",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      },
+      {
+        "action": "hover",
+        "selector": "button:text-is(\"Approve\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Approve\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F9"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "hidden",
+        "timeout": 15000
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S28",
+    "title": "Delayed file reference opens actual shared pane and file editor.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pane-file",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F7"
+      }
+    ],
+    "setup": [],
+    "ready": [
+      {
+        "selector": "main .cm-content",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S29",
+    "title": "Close fully loaded file resource pane.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pane-file",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Close pane\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F7"
+      },
+      {
+        "action": "hover",
+        "selector": ".cm-content"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "aside[aria-label=\"Resources\"]",
+        "state": "hidden",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S30",
+    "title": "Delayed store reference opens actual shared pane and value view.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pane-store",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F7"
+      }
+    ],
+    "setup": [],
+    "ready": [
+      {
+        "selector": "aside[aria-label=\"Resources\"] input",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S31",
+    "title": "Close fully loaded store resource pane.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pane-store",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Close pane\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F7"
+      },
+      {
+        "action": "hover",
+        "selector": "aside[aria-label=\"Resources\"] input >> nth=0"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "aside[aria-label=\"Resources\"]",
+        "state": "hidden",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S32",
+    "title": "Open file provenance menu from actual pane header.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pane-file",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] button[aria-label$=\" menu\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F7"
+      },
+      {
+        "action": "hover",
+        "selector": ".cm-content"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[role=\"menu\"]",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S33",
+    "title": "Open store schema and value menu from actual pane header.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pane-store",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] button[aria-label$=\" menu\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F7"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[role=\"menu\"]",
+        "state": "visible",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S34",
+    "title": "Actual CopyButton resolves isolated clipboard response, shows Copied, and resets after1200ms.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=copy-resolve",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Copy message\"] >> nth=0"
+      }
+    ],
+    "target": "app"
+  },
+  {
+    "id": "CHAT-S35",
+    "title": "Actual CopyButton receives isolated clipboard refusal and stays in its original state.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=copy-reject",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Copy message\"] >> nth=0"
+      }
+    ],
+    "target": "app"
+  },
+  {
+    "id": "CHAT-S36",
+    "title": "Pause already playing audio through the actual viewer Space shortcut; eight-second fixture preserves playing baseline.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-audio-long",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "audio"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Space"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Space"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S37",
+    "title": "Pause already playing video through the actual viewer Space shortcut; eight-second fixture preserves playing baseline.",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-video-long",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "video"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Space"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Space"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S38",
+    "title": "Dismiss file provenance menu in actual resource pane",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pane-file",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F7"
+      },
+      {
+        "action": "hover",
+        "selector": ".cm-content"
+      },
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] button[aria-label$=\" menu\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[role=\"menu\"]",
+        "state": "hidden",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S39",
+    "title": "Dismiss store schema and value menu in actual resource pane",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=pane-store",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F7"
+      },
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] button[aria-label$=\" menu\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[role=\"menu\"]",
+        "state": "hidden",
+        "timeout": 15000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-S40",
+    "title": "Dismiss HTML preview title menu",
+    "path": "http://127.0.0.1:5193/scripts/layout/chatstate/page.html?case=file-html",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "main header button:has-text(\"Renewal summary.html\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[role=\"menu\"]",
+        "state": "hidden",
+        "timeout": 15000
+      }
+    ]
+  }
+]

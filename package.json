@@ -33,6 +33,7 @@
     "db:truncate": "node --experimental-strip-types scripts/env/task.ts truncate",
     "layout": "node --experimental-strip-types scripts/layout/index.ts",
     "layout:fixture": "node --experimental-strip-types scripts/layout/server.ts",
+    "layout:states": "node --experimental-strip-types scripts/layout/states/server.ts",
     "layout:app": "node --experimental-strip-types scripts/layout/app.ts"
   },
   "dependencies": {

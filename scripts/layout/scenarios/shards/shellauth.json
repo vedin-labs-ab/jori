@@ -1,0 +1,28 @@
+[
+  {
+    "id": "shell-auth-boundary-initialization",
+    "title": "Organization person sync completes before console appears",
+    "path": "/chat",
+    "target": "app",
+    "mutating": true
+  },
+  {
+    "id": "shell-auth-boundary-no-org",
+    "title": "No organization resolves membership invitations/create view",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "responses": [
+      {
+        "url": "**/api/auth/organization/get-full-organization*",
+        "status": 200,
+        "body": "null"
+      },
+      {
+        "url": "**/api/auth/organization/list*",
+        "status": 200,
+        "body": "[]"
+      }
+    ]
+  }
+]

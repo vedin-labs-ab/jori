@@ -701,19 +701,60 @@
   },
   {
     "id": "shell-sign-out",
-    "title": "Sign out and resolve loading overlay into sign-in",
-    "path": "/sign-out",
+    "title": "Sign out through actual hook with context-only cookie expiry",
+    "path": "/chat",
     "target": "app",
     "mutating": true,
-    "blocked": "Sign-out invalidates the shared saved backend session. Drive once after all authenticated slices, sequentially."
+    "steps": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/sign-out"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "button[aria-label=\"Mention a resource\"]",
+        "timeout": 45000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "button:text-is(\"Continue with Google\")",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-sign-out"
   },
   {
     "id": "shell-sign-out-back",
-    "title": "Browser back after sign-out remains signed out",
-    "path": "/sign-out",
+    "title": "Browser Back after context-only signout remains signed out",
+    "path": "/chat",
     "target": "app",
     "mutating": false,
-    "blocked": "Sign-out invalidates the shared saved backend session. Drive once after all authenticated slices, sequentially."
+    "steps": [
+      {
+        "action": "back"
+      }
+    ],
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/sign-out"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "button:text-is(\"Continue with Google\")",
+        "timeout": 45000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "button:text-is(\"Continue with Google\")",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-sign-out-back"
   },
   {
     "id": "shell-root-missing",
@@ -732,6 +773,13 @@
       {
         "action": "click",
         "selector": "a:has-text(\"Back to Jori\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "h1:has-text(\"The shared drive\")",
+        "state": "visible",
+        "timeout": 45000
       }
     ]
   },
@@ -753,6 +801,13 @@
         "action": "click",
         "selector": "a:has-text(\"New chat\") >> nth=0"
       }
+    ],
+    "ready": [
+      {
+        "selector": "button[aria-label=\"Mention a resource\"]",
+        "state": "visible",
+        "timeout": 45000
+      }
     ]
   },
   {
@@ -772,11 +827,32 @@
   },
   {
     "id": "shell-error-root-retry",
-    "title": "Jori could not load page: Reload/Try again resolves replacement",
-    "path": "/",
+    "title": "Root error Reload recovers after route chunk returns",
+    "path": "/pricing",
     "target": "app",
     "mutating": false,
-    "blocked": "requires controlled error fixture"
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Reload\")"
+      }
+    ],
+    "anonymous": true,
+    "ready": [
+      {
+        "selector": "h1:text-is(\"One price for the whole organization.\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-error-root-retry",
+    "setupReady": [
+      {
+        "selector": "button:text-is(\"Reload\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ]
   },
   {
     "id": "shell-error-page",
@@ -787,11 +863,31 @@
   },
   {
     "id": "shell-error-page-retry",
-    "title": "This page did not load: Reload/Try again resolves replacement",
-    "path": "/",
+    "title": "Transient job query error Try again recovers",
+    "path": "/jobs/sx7364b01whsmfbqrv9wvc1n3h8e5pmy",
     "target": "app",
     "mutating": false,
-    "blocked": "requires controlled error fixture and auth"
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Try again\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main#main-content:has(:text-is(\"Trigger\")):not(:has(.animate-spin)):not(:has([data-slot=\"skeleton\"]))",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-error-page-retry",
+    "setupReady": [
+      {
+        "selector": "button:text-is(\"Try again\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ]
   },
   {
     "id": "shell-error-stale",
@@ -821,11 +917,41 @@
   },
   {
     "id": "shell-error-stale-retry",
-    "title": "This page is out of date: Reload/Try again resolves replacement",
-    "path": "/",
+    "title": "Stale job route Reload recovers after chunk returns",
+    "path": "/chat",
     "target": "app",
     "mutating": false,
-    "blocked": "requires controlled error fixture and auth"
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Reload\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"sidebar-trigger\"]"
+      },
+      {
+        "action": "click",
+        "selector": "a[href=\"/jobs\"] >> nth=0"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main#main-content a[href=\"/jobs/sx7364b01whsmfbqrv9wvc1n3h8e5pmy\"]",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-error-stale-retry",
+    "setupReady": [
+      {
+        "selector": "button:text-is(\"Reload\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ]
   },
   {
     "id": "shell-mobile-menu-open",
@@ -905,8 +1031,9 @@
     "mutating": false,
     "steps": [
       {
-        "action": "click",
-        "selector": "button:text-is(\"Joining an existing organization?\")"
+        "action": "press",
+        "selector": "button:text-is(\"Joining an existing organization?\")",
+        "value": "Enter"
       }
     ],
     "anonymous": true
@@ -926,8 +1053,9 @@
     ],
     "setup": [
       {
-        "action": "click",
-        "selector": "button:text-is(\"Joining an existing organization?\")"
+        "action": "press",
+        "selector": "button:text-is(\"Joining an existing organization?\")",
+        "value": "Enter"
       }
     ],
     "anonymous": true
@@ -1207,6 +1335,13 @@
         "action": "click",
         "selector": "a[href=\"/#waitlist\"]"
       }
+    ],
+    "ready": [
+      {
+        "selector": "#waitlist input[type=\"email\"]",
+        "state": "visible",
+        "timeout": 45000
+      }
     ]
   },
   {
@@ -1224,6 +1359,20 @@
     "steps": [
       {
         "action": "back"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "#waitlist input[type=\"email\"]",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "h1:text-is(\"Terms of service\")",
+        "state": "visible",
+        "timeout": 45000
       }
     ]
   },
@@ -1335,6 +1484,13 @@
         "body": "{\"status\": \"failed\"}",
         "delay": 4000
       }
+    ],
+    "ready": [
+      {
+        "selector": "#waitlist button[type=\"submit\"]:disabled",
+        "state": "visible",
+        "timeout": 45000
+      }
     ]
   },
   {
@@ -1366,6 +1522,13 @@
         "url": "**/waitlist",
         "body": "{\"status\": \"failed\"}",
         "delay": 850
+      }
+    ],
+    "ready": [
+      {
+        "selector": "#waitlist [data-slot=\"field-error\"]:has-text(\"Something went wrong.\")",
+        "state": "visible",
+        "timeout": 45000
       }
     ]
   },
@@ -1399,6 +1562,13 @@
         "body": "{\"status\": \"throttled\"}",
         "delay": 850
       }
+    ],
+    "ready": [
+      {
+        "selector": "#waitlist [data-slot=\"field-error\"]:has-text(\"That's a lot of signups\")",
+        "state": "visible",
+        "timeout": 45000
+      }
     ]
   },
   {
@@ -1431,6 +1601,13 @@
         "body": "{\"status\": \"rejected\", \"field\": \"email\", \"message\": \"Use your work email address.\"}",
         "delay": 850
       }
+    ],
+    "ready": [
+      {
+        "selector": "#waitlist [data-slot=\"field-error\"]:has-text(\"Use your work email address.\")",
+        "state": "visible",
+        "timeout": 45000
+      }
     ]
   },
   {
@@ -1462,6 +1639,13 @@
         "url": "**/waitlist",
         "body": "{\"status\": \"joined\"}",
         "delay": 850
+      }
+    ],
+    "ready": [
+      {
+        "selector": "#waitlist [role=\"status\"]:has-text(\"You're on the list.\")",
+        "state": "visible",
+        "timeout": 45000
       }
     ]
   },
@@ -1498,6 +1682,20 @@
         "body": "{\"status\":\"joined\"}",
         "delay": 850
       }
+    ],
+    "setupReady": [
+      {
+        "selector": "#waitlist [role=\"status\"]:has-text(\"You're on the list.\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "#waitlist input[type=\"email\"]",
+        "state": "visible",
+        "timeout": 45000
+      }
     ]
   },
   {
@@ -1508,9 +1706,16 @@
     "mutating": true,
     "steps": [
       {
-        "action": "press",
+        "action": "select",
         "selector": "select[name=\"size\"]",
-        "value": "End"
+        "value": "100+"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "select[name=\"size\"] option[value=\"100+\"]:checked",
+        "state": "attached",
+        "timeout": 45000
       }
     ]
   },
@@ -1564,7 +1769,7 @@
     "path": "/",
     "target": "app",
     "mutating": true,
-    "blocked": "requires human-authenticated development OAuth session"
+    "blocked": "Google sign-in was completed by the user-authorized CUA flow and the saved dev session is valid. The external Google OAuth flow was not repeated under four isolated Chromium cache/viewport profiles; no provider credentials or session export were requested. Local post-auth transitions are covered separately."
   },
   {
     "id": "shell-auth-microsoft-pending",
@@ -1616,7 +1821,7 @@
     "path": "/",
     "target": "app",
     "mutating": true,
-    "blocked": "requires human-authenticated development OAuth session"
+    "blocked": "No Microsoft account was supplied or authorized for an external provider sign-in. Local Microsoft pending/error button paths are executable through exact mocked auth responses; post-auth app transitions use the authorized Google dev session."
   },
   {
     "id": "shell-oauth-toast",
@@ -1632,7 +1837,23 @@
     "path": "/sign-in?authProvider=google&error=account_not_linked",
     "target": "app",
     "mutating": false,
-    "anonymous": true
+    "anonymous": true,
+    "setup": [],
+    "steps": [],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "detached",
+        "timeout": 45000
+      }
+    ]
   },
   {
     "id": "shell-region-select",
@@ -1687,8 +1908,15 @@
     "mutating": false,
     "steps": [
       {
-        "action": "click",
-        "selector": "h2:text-is(\"Jobs are just instructions\")"
+        "action": "scrollIntoView",
+        "selector": "main#main-content > section:has(h2:text-is(\"Jobs are just instructions\")) [aria-hidden=\"true\"][class*=\"min-h-\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "button:text-is(\"Create job\")",
+        "state": "visible",
+        "timeout": 45000
       }
     ]
   },
@@ -1721,75 +1949,144 @@
   },
   {
     "id": "shell-auth-boundary-convex",
-    "title": "Convex token unavailable becomes session error",
-    "path": "/",
+    "title": "Outer cached session and raw auth cache disagreement reaches session error",
+    "path": "/chat",
     "target": "app",
     "mutating": false,
-    "blocked": "requires authorized development identity and tailored org state"
+    "ready": [
+      {
+        "selector": "[data-slot=\"alert-title\"]:text-is(\"Couldn't verify your session\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-auth-boundary-convex"
   },
   {
     "id": "shell-auth-boundary-activation",
-    "title": "No active organization automatically activates first membership and reloads",
-    "path": "/",
+    "title": "Missing active-organization response triggers automatic activation and reload",
+    "path": "/chat",
     "target": "app",
-    "mutating": true,
-    "blocked": "requires authorized development identity and tailored org state"
+    "mutating": false,
+    "ready": [
+      {
+        "selector": "button[aria-label=\"Mention a resource\"]",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-auth-boundary-activation"
   },
   {
     "id": "shell-auth-boundary-initialization",
     "title": "Organization person sync completes before console appears",
-    "path": "/",
+    "path": "/chat",
     "target": "app",
-    "mutating": true,
-    "blocked": "requires authorized development identity and tailored org state"
+    "mutating": true
   },
   {
     "id": "shell-auth-boundary-init-failure",
-    "title": "Organization person sync fails into retry alert",
-    "path": "/",
+    "title": "First member initialization sync fails to workspace alert",
+    "path": "/chat",
     "target": "app",
     "mutating": false,
-    "blocked": "requires authorized development identity and tailored org state"
+    "ready": [
+      {
+        "selector": "[data-slot=\"alert-title\"]:text-is(\"Couldn't prepare your workspace\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-auth-boundary-init-failure"
   },
   {
     "id": "shell-auth-boundary-init-retry",
-    "title": "Organization sync retry alert returns to loading and console",
-    "path": "/",
+    "title": "Workspace initialization Try again succeeds",
+    "path": "/chat",
     "target": "app",
     "mutating": true,
-    "blocked": "requires authorized development identity and tailored org state"
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Try again\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "button[aria-label=\"Mention a resource\"]",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-auth-boundary-init-retry",
+    "setupReady": [
+      {
+        "selector": "button:text-is(\"Try again\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ]
   },
   {
     "id": "shell-auth-boundary-no-org",
-    "title": "No organization resolves membership invitations/create view",
-    "path": "/",
+    "title": "No memberships with allowed address reaches organization chooser",
+    "path": "/chat",
     "target": "app",
     "mutating": false,
-    "blocked": "requires authorized development identity and tailored org state"
+    "ready": [
+      {
+        "selector": "h1:text-is(\"Create your organization.\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-auth-boundary-no-org"
   },
   {
     "id": "shell-auth-boundary-launch",
-    "title": "Non-allowlisted account resolves launch waitlist",
-    "path": "/",
+    "title": "Launch gate for authenticated not-yet-allowed account",
+    "path": "/chat",
     "target": "app",
     "mutating": false,
-    "blocked": "requires authorized development identity and tailored org state"
+    "ready": [
+      {
+        "selector": "h1:text-is(\"Jori isn't open yet.\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-auth-boundary-launch"
   },
   {
     "id": "shell-auth-boundary-onboarding",
-    "title": "Organization onboarding state resolves",
-    "path": "/",
+    "title": "Organization welcome modal opens for metadata flag false",
+    "path": "/chat",
     "target": "app",
     "mutating": false,
-    "blocked": "requires authorized development identity and tailored org state"
+    "ready": [
+      {
+        "selector": "[role=\"dialog\"]:has-text(\"Welcome to Jori\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-auth-boundary-onboarding"
   },
   {
     "id": "shell-share-files",
-    "title": "Anonymous files detail resolves public share chrome",
-    "path": "/",
+    "title": "Anonymous fixture file share resolves public chrome",
+    "path": "/files/r170smqxya0f76g8z9xq4zyf718e53tk#share=layout-test-invalid",
     "target": "app",
     "mutating": false,
-    "blocked": "requires actual dev share link; demo only represents material body"
+    "anonymous": true,
+    "ready": [
+      {
+        "selector": "h1:text-is(\"Layout audit.txt\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-share-files"
   },
   {
     "id": "shell-share-files-denied",
@@ -1801,11 +2098,19 @@
   },
   {
     "id": "shell-share-stores",
-    "title": "Anonymous stores detail resolves public share chrome",
-    "path": "/",
+    "title": "Anonymous fixture store share resolves public chrome",
+    "path": "/stores/s178zvfzcbmsjbw21ebftr8z4s8e574s#share=layout-test-invalid",
     "target": "app",
     "mutating": false,
-    "blocked": "requires actual dev share link; demo only represents material body"
+    "anonymous": true,
+    "ready": [
+      {
+        "selector": "h1:text-is(\"Layout audit store\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-share-stores"
   },
   {
     "id": "shell-share-stores-denied",
@@ -1817,11 +2122,19 @@
   },
   {
     "id": "shell-share-tables",
-    "title": "Anonymous tables detail resolves public share chrome",
-    "path": "/",
+    "title": "Anonymous fixture table share resolves metadata and rows",
+    "path": "/tables/s175y1z04ag8dstaegys58e4yn8e5960#share=layout-test-invalid",
     "target": "app",
     "mutating": false,
-    "blocked": "requires actual dev share link; demo only represents material body"
+    "anonymous": true,
+    "ready": [
+      {
+        "selector": "td:text-is(\"Example row\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "transportFixture": "scripts/layout/transport/specs.mjs#shell-share-tables"
   },
   {
     "id": "shell-share-tables-denied",
@@ -1833,19 +2146,44 @@
   },
   {
     "id": "shell-offer",
-    "title": "Integration offer token resolves accepting/invalid/access state",
-    "path": "/",
+    "title": "Invalid development offer reaches expired outcome",
+    "path": "/integrations/offers/layout-test-invalid",
     "target": "app",
     "mutating": false,
-    "blocked": "requires authorized identity and dev offer token"
+    "ready": [
+      {
+        "selector": "h1:text-is(\"Integration offer expired\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ]
   },
   {
     "id": "shell-offer-back",
-    "title": "Return from integration offer to console",
-    "path": "/",
+    "title": "Expired offer View integrations returns to console",
+    "path": "/integrations/offers/layout-test-invalid",
     "target": "app",
     "mutating": false,
-    "blocked": "requires authorized identity and dev offer token"
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a:text-is(\"View integrations\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "h1:text-is(\"Integrations\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "h1:text-is(\"Integration offer expired\")",
+        "state": "visible",
+        "timeout": 45000
+      }
+    ]
   },
   {
     "id": "shell-api-auth",
@@ -1862,5 +2200,39 @@
     "target": "app",
     "mutating": true,
     "blocked": "requires development OAuth transaction; nonvisual server endpoint"
+  },
+  {
+    "id": "shell-live-usage-30-to-7",
+    "title": "Live organization usage Window 30\u21927 days with async query",
+    "path": "/folders/usage",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"combobox\"][aria-label=\"Window\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has-text(\"Last 7 days\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-live-usage-7-to-30",
+    "title": "Live organization usage Window 7\u219230 days with async query",
+    "path": "/folders/usage?days=7",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"combobox\"][aria-label=\"Window\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has-text(\"Last 30 days\")"
+      }
+    ]
   }
 ]

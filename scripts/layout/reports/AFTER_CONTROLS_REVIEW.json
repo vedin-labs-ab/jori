@@ -1,0 +1,789 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "controls agent, independent of shell fix author",
+  "sourceCommit": "2ff0188b",
+  "harnessDigest": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
+  "scope": "One bounded pass, six exact inventory IDs, cold375 and warm1440, twelve captures. No retries or new fixes.",
+  "profiles": [
+    {
+      "id": "C156-personal",
+      "profile": "cold-375",
+      "causeIds": ["SF11-headline"],
+      "status": "residual-confirmed",
+      "detail": "Cold mobile Google Calendar card288 to272px; Outlook y632 to616px, height272 to256px. Native event782ms, value0.0053415516, recentInputfalse. PNG587ms checking to1062ms loaded visibly brackets it.",
+      "limitations": "Original variable loading headline remains intentionally unchanged by the partial fix. No new fix loop.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/250.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/1000.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/0.png",
+          "geometryMs": 70,
+          "pngMs": 266
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/250.png",
+          "geometryMs": 296,
+          "pngMs": 587
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/1000.png",
+          "geometryMs": 1036,
+          "pngMs": 1062
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/3000.png",
+          "geometryMs": 3047,
+          "pngMs": 3055
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/settled.png",
+          "geometryMs": 4131,
+          "pngMs": 4131
+        }
+      ],
+      "nativeEntries": [
+        {
+          "action": "C156-personal",
+          "at": 16914.799999952316,
+          "msAfterAction": 782,
+          "value": 0.005341551602805213,
+          "hadRecentInput": false,
+          "sources": [
+            {
+              "node": "main#main-content > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div[data-slot=\"card\"]:nth-of-type(3) \"Outlook MailNot connectedConnect your Outlook account. This connects only you, n\"",
+              "from": {
+                "x": 15,
+                "y": 631,
+                "width": 345,
+                "height": 181
+              },
+              "to": {
+                "x": 15,
+                "y": 615,
+                "width": 345,
+                "height": 197
+              }
+            },
+            {
+              "node": "main#main-content > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div[data-slot=\"card\"]:nth-of-type(2) > div[data-slot=\"card-header\"]:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > p:nth-of-type(1) \"Connect your Google Calendar. This connects only you, not the whole organization\"",
+              "from": {
+                "x": 84,
+                "y": 460,
+                "width": 92.69,
+                "height": 140
+              },
+              "to": {
+                "x": 84,
+                "y": 444,
+                "width": 92.69,
+                "height": 140
+              }
+            },
+            {
+              "node": "main#main-content > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(2) > div[data-slot=\"card\"]:nth-of-type(2) > div[data-slot=\"card-header\"]:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > span:nth-of-type(1) \"\"",
+              "from": {
+                "x": 84,
+                "y": 425,
+                "width": 6,
+                "height": 6
+              },
+              "to": {
+                "x": 84,
+                "y": 417,
+                "width": 6,
+                "height": 6
+              }
+            }
+          ]
+        }
+      ],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "C156-personal",
+      "profile": "warm-1440",
+      "causeIds": ["SF11-headline"],
+      "status": "not-reproduced-at-this-profile",
+      "detail": "Desktop card geometry stays136px after the Personal page arrives; pending headline is not captured.",
+      "limitations": "Original variable loading headline remains intentionally unchanged by the partial fix. No new fix loop.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/250.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/1000.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/0.png",
+          "geometryMs": 25,
+          "pngMs": 63
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/250.png",
+          "geometryMs": 279,
+          "pngMs": 292
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/1000.png",
+          "geometryMs": 1029,
+          "pngMs": 1043
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/3000.png",
+          "geometryMs": 3031,
+          "pngMs": 3056
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/settled.png",
+          "geometryMs": 3705,
+          "pngMs": 3705
+        }
+      ],
+      "nativeEntries": [],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "C156-return",
+      "profile": "cold-375",
+      "causeIds": ["SF11-action"],
+      "status": "targeted-cause-stable",
+      "detail": "Organization install-label changes keep card and action width fixed. Slack card188px mobile and136px desktop through Checking to Access expired. Native text replacement reports equal from/to rectangles.",
+      "limitations": "Tab navigation replaces the requested page. This verifies action-label sizing, not every connected/disconnected provider variant.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/250.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/1000.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/0.png",
+          "geometryMs": 58,
+          "pngMs": 73
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/250.png",
+          "geometryMs": 423,
+          "pngMs": 435
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/1000.png",
+          "geometryMs": 1051,
+          "pngMs": 1066
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/3000.png",
+          "geometryMs": 3050,
+          "pngMs": 3067
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/settled.png",
+          "geometryMs": 4087,
+          "pngMs": 4087
+        }
+      ],
+      "nativeEntries": [
+        {
+          "action": "C156-return",
+          "at": 17239.69999998808,
+          "msAfterAction": 846,
+          "value": 6.986944599480697e-5,
+          "hadRecentInput": false,
+          "sources": [
+            {
+              "node": "[object Text] \"Reconnect\"",
+              "from": {
+                "x": 216.67,
+                "y": 125.25,
+                "width": 99.33,
+                "height": 16
+              },
+              "to": {
+                "x": 216.67,
+                "y": 125.25,
+                "width": 99.33,
+                "height": 16
+              }
+            }
+          ]
+        }
+      ],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "C156-return",
+      "profile": "warm-1440",
+      "causeIds": ["SF11-action"],
+      "status": "targeted-cause-stable",
+      "detail": "Organization install-label changes keep card and action width fixed. Slack card188px mobile and136px desktop through Checking to Access expired. Native text replacement reports equal from/to rectangles.",
+      "limitations": "Tab navigation replaces the requested page. This verifies action-label sizing, not every connected/disconnected provider variant.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/250.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/1000.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/0.png",
+          "geometryMs": 111,
+          "pngMs": 123
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/250.png",
+          "geometryMs": 343,
+          "pngMs": 349
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/1000.png",
+          "geometryMs": 1065,
+          "pngMs": 1074
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/3000.png",
+          "geometryMs": 3083,
+          "pngMs": 3088
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/settled.png",
+          "geometryMs": 3605,
+          "pngMs": 3605
+        }
+      ],
+      "nativeEntries": [
+        {
+          "action": "C156-return",
+          "at": 5218.799999952316,
+          "msAfterAction": 259,
+          "value": 9.25684799382716e-6,
+          "hadRecentInput": true,
+          "sources": [
+            {
+              "node": "[object Text] \"Reconnect\"",
+              "from": {
+                "x": 693.67,
+                "y": 129.25,
+                "width": 99.33,
+                "height": 16
+              },
+              "to": {
+                "x": 693.67,
+                "y": 129.25,
+                "width": 99.33,
+                "height": 16
+              }
+            }
+          ]
+        }
+      ],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "shell-auth-google-pending",
+      "profile": "cold-375",
+      "causeIds": ["SF16"],
+      "status": "targeted-cause-stable",
+      "detail": "Google SVG/spinner share14px layout slot; text and button keep position. Native0, no scroll. Settled frame has the original sign-in button and fixed-position rejection toast.",
+      "limitations": "The spinner rotation changes its transformed bounding box as intended. Exact POST /api/auth/sign-in/social was fulfilled400 by the recorded CDP fixture; no external OAuth navigation.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/before.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/0.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/0.png",
+          "geometryMs": 29,
+          "pngMs": 41
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/250.png",
+          "geometryMs": 264,
+          "pngMs": 276
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/1000.png",
+          "geometryMs": 1077,
+          "pngMs": 1078
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/3000.png",
+          "geometryMs": 3032,
+          "pngMs": 3043
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/settled.png",
+          "geometryMs": 7550,
+          "pngMs": 7550
+        }
+      ],
+      "nativeEntries": [],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [
+        {
+          "at": "2026-09-10T16:50:36.307Z",
+          "kind": "one-shot-fault",
+          "url": "http://localhost:5178/api/auth/sign-in/social",
+          "method": "POST",
+          "status": 400
+        }
+      ],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "shell-auth-google-pending",
+      "profile": "warm-1440",
+      "causeIds": ["SF16"],
+      "status": "targeted-cause-stable",
+      "detail": "Google SVG/spinner share14px layout slot; text and button keep position. Native0, no scroll. Settled frame has the original sign-in button and fixed-position rejection toast.",
+      "limitations": "The spinner rotation changes its transformed bounding box as intended. Exact POST /api/auth/sign-in/social was fulfilled400 by the recorded CDP fixture; no external OAuth navigation.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/before.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/0.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/0.png",
+          "geometryMs": 53,
+          "pngMs": 402
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/250.png",
+          "geometryMs": 376,
+          "pngMs": 778
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/1000.png",
+          "geometryMs": 1128,
+          "pngMs": 1391
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/3000.png",
+          "geometryMs": 3108,
+          "pngMs": 3375
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/settled.png",
+          "geometryMs": 8069,
+          "pngMs": 8069
+        }
+      ],
+      "nativeEntries": [],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [
+        {
+          "at": "2026-09-10T16:50:53.297Z",
+          "kind": "one-shot-fault",
+          "url": "http://localhost:5178/api/auth/sign-in/social",
+          "method": "POST",
+          "status": 400
+        }
+      ],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "shell-live-usage-30-to-7",
+      "profile": "cold-375",
+      "causeIds": ["SF10"],
+      "status": "targeted-cause-stable-with-existing-motion",
+      "detail": "All four stat slots retain83px height through pending and resolved values; the comparison rows no longer collapse. No scroll delta.",
+      "limitations": "Existing range control width129.13 to120.09px remains a native entry. Query body still replaces charts/lists with loading and then animates bars; this is outside the comparison-slot fix.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/before.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/0.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/0.png",
+          "geometryMs": 36,
+          "pngMs": 92
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/250.png",
+          "geometryMs": 657,
+          "pngMs": 682
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/1000.png",
+          "geometryMs": 1155,
+          "pngMs": 1171
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/3000.png",
+          "geometryMs": 3217,
+          "pngMs": 3223
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/settled.png",
+          "geometryMs": 3682,
+          "pngMs": 3682
+        }
+      ],
+      "nativeEntries": [
+        {
+          "action": "shell-live-usage-30-to-7",
+          "at": 18379.399999976158,
+          "msAfterAction": 845,
+          "value": 0.00014135640879419544,
+          "hadRecentInput": true,
+          "sources": [
+            {
+              "node": "main#main-content > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button[data-slot=\"select-trigger\"]:nth-of-type(1) \"Last 7 days\"",
+              "from": {
+                "x": 229.91,
+                "y": 11.17,
+                "width": 129.13,
+                "height": 28.33
+              },
+              "to": {
+                "x": 238.91,
+                "y": 11.17,
+                "width": 120.09,
+                "height": 28.33
+              }
+            },
+            {
+              "node": "main#main-content > header:nth-of-type(1) > div:nth-of-type(2) \"Last 7 days\"",
+              "from": {
+                "x": 229.88,
+                "y": 9.5,
+                "width": 129.13,
+                "height": 28
+              },
+              "to": {
+                "x": 238.91,
+                "y": 9.5,
+                "width": 120.09,
+                "height": 28
+              }
+            }
+          ]
+        }
+      ],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "shell-live-usage-30-to-7",
+      "profile": "warm-1440",
+      "causeIds": ["SF10"],
+      "status": "targeted-cause-stable-with-existing-motion",
+      "detail": "All four stat slots retain83px height through pending and resolved values; the comparison rows no longer collapse. No scroll delta.",
+      "limitations": "Existing range control width129.13 to120.09px remains a native entry. Query body still replaces charts/lists with loading and then animates bars; this is outside the comparison-slot fix.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/before.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/0.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/0.png",
+          "geometryMs": 170,
+          "pngMs": 975
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/250.png",
+          "geometryMs": 966,
+          "pngMs": 1618
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/1000.png",
+          "geometryMs": 1605,
+          "pngMs": 1715
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/3000.png",
+          "geometryMs": 3558,
+          "pngMs": 3596
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/settled.png",
+          "geometryMs": 4355,
+          "pngMs": 4355
+        }
+      ],
+      "nativeEntries": [
+        {
+          "action": "shell-live-usage-30-to-7",
+          "at": 6289.899999976158,
+          "msAfterAction": 567,
+          "value": 1.8727997202932102e-5,
+          "hadRecentInput": true,
+          "sources": [
+            {
+              "node": "main#main-content > header:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button[data-slot=\"select-trigger\"]:nth-of-type(1) \"Last 7 days\"",
+              "from": {
+                "x": 1286.91,
+                "y": 11.44,
+                "width": 129.13,
+                "height": 28.06
+              },
+              "to": {
+                "x": 1295.91,
+                "y": 11.44,
+                "width": 120.09,
+                "height": 28.06
+              }
+            },
+            {
+              "node": "main#main-content > header:nth-of-type(1) > div:nth-of-type(2) \"Last 7 days\"",
+              "from": {
+                "x": 1286.88,
+                "y": 9.5,
+                "width": 129.13,
+                "height": 28
+              },
+              "to": {
+                "x": 1295.91,
+                "y": 9.5,
+                "width": 120.09,
+                "height": 28
+              }
+            }
+          ]
+        }
+      ],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "shell-route-home-enter",
+      "profile": "cold-375",
+      "causeIds": ["SF1", "SF2"],
+      "status": "targeted-cause-stable",
+      "detail": "No native entries. Visible hero, CTA and demo rows retain position. Warm desktop has no post-first rect changes.",
+      "limitations": "Cold mobile document height changes below the viewport as lazy sections mount, 9374 to11944.5px main height. Content appears within the reserved demo header. This is not a whole-page zero-difference claim.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/0.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/settled.png"
+        }
+      ],
+      "reviewedFrames": 5,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/0.png",
+          "geometryMs": 169,
+          "pngMs": 180
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/250.png",
+          "geometryMs": 354,
+          "pngMs": 364
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/1000.png",
+          "geometryMs": 1095,
+          "pngMs": 1102
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/3000.png",
+          "geometryMs": 3119,
+          "pngMs": 3154
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/settled.png",
+          "geometryMs": 11924,
+          "pngMs": 11927
+        }
+      ],
+      "nativeEntries": [],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "shell-route-home-enter",
+      "profile": "warm-1440",
+      "causeIds": ["SF1", "SF2"],
+      "status": "targeted-cause-stable",
+      "detail": "No native entries. Visible hero, CTA and demo rows retain position. Warm desktop has no post-first rect changes.",
+      "limitations": "This initial entry does not verify execution-clock hydration on other routes.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/0.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/settled.png"
+        }
+      ],
+      "reviewedFrames": 5,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/0.png",
+          "geometryMs": 148,
+          "pngMs": 155
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/250.png",
+          "geometryMs": 323,
+          "pngMs": 342
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/1000.png",
+          "geometryMs": 1091,
+          "pngMs": 1099
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/3000.png",
+          "geometryMs": 3192,
+          "pngMs": 3199
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/settled.png",
+          "geometryMs": 3823,
+          "pngMs": 3823
+        }
+      ],
+      "nativeEntries": [],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "shell-waitlist-email-error",
+      "profile": "cold-375",
+      "causeIds": ["SF14"],
+      "status": "targeted-cause-stable",
+      "detail": "Error appears in reserved19.5px line. Existing fields and form keep rectangles, no native entries or scroll changes.",
+      "limitations": "Only local email validation is sampled; form-level remote error and clear/retry variants remain unverified.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/before.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/0.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/0.png",
+          "geometryMs": 52,
+          "pngMs": 66
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/250.png",
+          "geometryMs": 298,
+          "pngMs": 317
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/1000.png",
+          "geometryMs": 1049,
+          "pngMs": 1065
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/3000.png",
+          "geometryMs": 3048,
+          "pngMs": 3055
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/settled.png",
+          "geometryMs": 3616,
+          "pngMs": 3616
+        }
+      ],
+      "nativeEntries": [],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    },
+    {
+      "id": "shell-waitlist-email-error",
+      "profile": "warm-1440",
+      "causeIds": ["SF14"],
+      "status": "targeted-cause-stable",
+      "detail": "Error appears in reserved19.5px line. Existing fields and form keep rectangles, no native entries or scroll changes.",
+      "limitations": "Only local email validation is sampled; form-level remote error and clear/retry variants remain unverified.",
+      "record": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/record.json",
+      "beforeAfterPairs": [
+        {
+          "before": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/before.png",
+          "after": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/0.png"
+        }
+      ],
+      "reviewedFrames": 6,
+      "actualPngTimes": [
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/0.png",
+          "geometryMs": 38,
+          "pngMs": 134
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/250.png",
+          "geometryMs": 293,
+          "pngMs": 328
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/1000.png",
+          "geometryMs": 1032,
+          "pngMs": 1063
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/3000.png",
+          "geometryMs": 3102,
+          "pngMs": 3153
+        },
+        {
+          "file": "/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/settled.png",
+          "geometryMs": 3565,
+          "pngMs": 3565
+        }
+      ],
+      "nativeEntries": [],
+      "actionScroll": [],
+      "scroll": [[], [], [], []],
+      "transportLog": [],
+      "review": "Every original PNG in the series, settled target state, native entries, action/late rect candidates and scroll deltas reviewed."
+    }
+  ],
+  "reviewedProfiles": 12,
+  "reviewedPngs": 70,
+  "browserClosed": true
+}

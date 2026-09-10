@@ -10,6 +10,7 @@ claims. Read only the guide relevant to the task.
 | [Integrations](integrations.md) | Registration choices, branding and reliable regional delivery. |
 | [Residency](residency.md) | Data boundaries, known exceptions and evidence for customer claims. |
 | [Brand](brand.md) | Logo variants, clear space, browser and app icons, and social image regeneration. |
+| [Layout stability](layout.md) | Loading geometry, changing labels and dialog state during exit. |
 
 These guides record the current engineering decisions. Implementation
 gaps are noted separately; guidance is not proof of production state.

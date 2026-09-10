@@ -3009,7 +3009,7 @@
     "steps": [
       {
         "action": "click",
-        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+        "selector": "[role=\"alertdialog\"] button:text-is(\"Cancel\")"
       }
     ]
   },
@@ -3670,14 +3670,14 @@
   },
   {
     "id": "C027-delete-open",
-    "title": "Bulk files Delete confirmation open",
+    "title": "Bulk files Archive confirmation open",
     "path": "/files",
     "target": "fixture",
     "mutating": false,
     "steps": [
       {
         "action": "click",
-        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
       }
     ],
     "setup": [
@@ -3689,7 +3689,7 @@
   },
   {
     "id": "C027-delete-close",
-    "title": "Bulk files Delete confirmation close",
+    "title": "Bulk files Archive confirmation close",
     "path": "/files",
     "target": "fixture",
     "mutating": false,
@@ -3706,20 +3706,20 @@
       },
       {
         "action": "click",
-        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
       }
     ]
   },
   {
     "id": "C030-files",
-    "title": "Bulk files removal commit",
+    "title": "Bulk files archive commit",
     "path": "/files",
     "target": "fixture",
     "mutating": true,
     "steps": [
       {
         "action": "click",
-        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete\")"
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Archive\")"
       }
     ],
     "setup": [
@@ -3729,7 +3729,7 @@
       },
       {
         "action": "click",
-        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
       }
     ]
   },
@@ -3850,7 +3850,7 @@
     "steps": [
       {
         "action": "hover",
-        "selector": "[aria-label=\"Specific teams \u00b7 1 team\"]"
+        "selector": "[data-slot=\"tooltip-trigger\"]:has(> span.sr-only:text-is(\"Specific teams \u00b7 1 team\"))"
       }
     ]
   },
@@ -3869,7 +3869,7 @@
     "setup": [
       {
         "action": "hover",
-        "selector": "[aria-label=\"Specific teams \u00b7 1 team\"]"
+        "selector": "[data-slot=\"tooltip-trigger\"]:has(> span.sr-only:text-is(\"Specific teams \u00b7 1 team\"))"
       }
     ]
   },
@@ -4082,7 +4082,7 @@
     "steps": [
       {
         "action": "click",
-        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete\")"
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete job\")"
       }
     ],
     "setup": [
