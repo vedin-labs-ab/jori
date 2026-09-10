@@ -4,6 +4,7 @@ import { modelSelectionValidator } from "../model/selection"
 import { audienceValidator } from "../shared/audience"
 import { debounceValidator } from "../shared/debounce"
 import { messageSurfaceValidator } from "../shared/integrations"
+import { visibilityValidator } from "../visibility/schema"
 
 // A conversation is keyed by the surface it happens on. Provider
 // conversations carry their integration row and the provider's thread id as
@@ -15,6 +16,8 @@ export const conversations = defineTable({
   integrationId: v.optional(v.id("integrations")),
   externalId: v.string(),
   scope: audienceValidator,
+  /** Console chats use resource visibility; provider threads use their surface scope. */
+  visibility: v.optional(visibilityValidator),
   // Console conversations: the first message's first line, who opened it,
   // and when it last moved, so a person's list orders by activity.
   title: v.optional(v.string()),
@@ -41,6 +44,11 @@ export const conversations = defineTable({
   ])
   .index("by_folder", ["folderId"])
   .index("by_folder_and_created_by", ["folderId", "createdBy"])
+  .index("by_organization_and_surface_and_updated_at", [
+    "organizationId",
+    "surface",
+    "updatedAt",
+  ])
   .index("by_organization_and_summarized_at", [
     "organizationId",
     "summarizedAt",
