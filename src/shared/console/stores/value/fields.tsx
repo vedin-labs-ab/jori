@@ -170,7 +170,9 @@ function PropertyRows({
           required={property.required}
           state={state}
         />
-        <FieldError className="px-3 pb-2">{errors[path]}</FieldError>
+        <FieldError reserve className="px-3 pb-2">
+          {errors[path]}
+        </FieldError>
       </div>
       {!property.required && hasUnsetAffordance(property.field) ? (
         <RemoveButton
@@ -250,7 +252,9 @@ function NestedRows({
                 required
                 state={item}
               />
-              <FieldError className="px-3 pb-2">{errors[itemPath]}</FieldError>
+              <FieldError reserve className="px-3 pb-2">
+                {errors[itemPath]}
+              </FieldError>
             </>
           )
         }

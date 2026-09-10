@@ -90,7 +90,7 @@ export function FolderNameDialog({
               }}
               value={name}
             />
-            <FieldError>{error}</FieldError>
+            <FieldError reserve>{error}</FieldError>
           </div>
           <DialogFooter>
             <Button disabled={isSaving} type="submit">

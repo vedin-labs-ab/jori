@@ -177,9 +177,12 @@ function FieldError({
   className,
   children,
   errors,
+  reserve = false,
   ...props
 }: React.ComponentProps<"div"> & {
   errors?: Array<{ message?: string } | undefined>
+  /** Keep an empty message line in forms whose validation changes in place. */
+  reserve?: boolean
 }) {
   const content = useMemo(() => {
     if (children) {
@@ -208,18 +211,19 @@ function FieldError({
     )
   }, [children, errors])
 
-  if (!content) {
+  if (!content && !reserve) {
     return null
   }
 
   return (
     <div
       role="alert"
+      aria-hidden={content ? undefined : true}
       data-slot="field-error"
       className={cn("text-xs/relaxed font-normal text-destructive", className)}
       {...props}
     >
-      {content}
+      {content || <span aria-hidden>{"\u00a0"}</span>}
     </div>
   )
 }
