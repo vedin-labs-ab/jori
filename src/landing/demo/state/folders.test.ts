@@ -104,7 +104,7 @@ test("deleting a folder either reparents its chats and costs or removes chats wh
   expect(
     purged.usage.find((row) => row.conversationId === renewalsConversationId)
       ?.folderId
-  ).toBeUndefined()
+  ).toBe(finance)
   expect(usageSpend(purged, undefined)).toBe(usageSpend(initial, undefined))
 })
 

@@ -69,7 +69,7 @@ function deleteFolder(
   const refiled = <Item extends { folderId?: FolderId }>(item: Item): Item =>
     survives(item) ? item : { ...item, folderId: parentId }
   const chats = state.chat.conversations
-  const movedChats = new Set(
+  const movedChats = new Set<string>(
     chats.filter((chat) => !survives(chat)).map((chat) => chat.id)
   )
   const conversations = deleteResources
@@ -94,7 +94,7 @@ function deleteFolder(
       : state.jobs.map(refiled),
     usage: state.usage.map((row) =>
       row.conversationId !== undefined && movedChats.has(row.conversationId)
-        ? { ...row, folderId: deleteResources ? undefined : parentId }
+        ? { ...row, folderId: parentId }
         : row
     ),
   }
