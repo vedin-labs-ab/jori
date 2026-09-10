@@ -1,0 +1,1842 @@
+[
+  {
+    "id": "shell-route-home-enter",
+    "title": "Navigate into /",
+    "path": "/",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-route-home-back",
+    "title": "Return from / using browser back",
+    "path": "/pricing",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-route-pricing-enter",
+    "title": "Navigate into /pricing",
+    "path": "/pricing",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-route-pricing-back",
+    "title": "Return from /pricing using browser back",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/pricing"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-route-trust-enter",
+    "title": "Navigate into /trust",
+    "path": "/trust",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-route-trust-back",
+    "title": "Return from /trust using browser back",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/trust"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-route-privacy-enter",
+    "title": "Navigate into /privacy",
+    "path": "/privacy",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-route-privacy-back",
+    "title": "Return from /privacy using browser back",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/privacy"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-route-terms-enter",
+    "title": "Navigate into /terms",
+    "path": "/terms",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-route-terms-back",
+    "title": "Return from /terms using browser back",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/terms"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-route-sign-in-enter",
+    "title": "Navigate into /sign-in",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": false,
+    "anonymous": true
+  },
+  {
+    "id": "shell-route-sign-in-back",
+    "title": "Return from /sign-in using browser back",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/sign-in"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-protected-01-enter",
+    "title": "Navigate into /chat/$conversationId",
+    "path": "/chat/md70a3a80wscwaekp8tdkw7f8n8e4rr8",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-01-back",
+    "title": "Return from /chat/$conversationId to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/chat/md70a3a80wscwaekp8tdkw7f8n8e4rr8"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-02-enter",
+    "title": "Navigate into /chat",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-02-back",
+    "title": "Return from /chat to prior console route",
+    "path": "/folders",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/chat"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-03-enter",
+    "title": "Navigate into /context",
+    "path": "/context",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-03-back",
+    "title": "Return from /context to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/context"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-04-enter",
+    "title": "Navigate into /context/places",
+    "path": "/context/places",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-04-back",
+    "title": "Return from /context/places to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/context/places"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-05-enter",
+    "title": "Navigate into /context/workstreams",
+    "path": "/context/workstreams",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-05-back",
+    "title": "Return from /context/workstreams to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/context/workstreams"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-06-enter",
+    "title": "Navigate into /files/$fileId",
+    "path": "/files/r170smqxya0f76g8z9xq4zyf718e53tk",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-06-back",
+    "title": "Return from /files/$fileId to prior console route",
+    "path": "/files",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/files/r170smqxya0f76g8z9xq4zyf718e53tk\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-07-enter",
+    "title": "Navigate into /files",
+    "path": "/files",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-07-back",
+    "title": "Return from /files to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/files"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-08-enter",
+    "title": "Navigate into /folders/$folderId",
+    "path": "/folders/sd7cfw7rvqmbyrrdws8ym971sd8e5qs3",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-08-back",
+    "title": "Return from /folders/$folderId to prior console route",
+    "path": "/folders",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/folders/sd7cfw7rvqmbyrrdws8ym971sd8e5qs3\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-09-enter",
+    "title": "Navigate into /folders/$folderId/usage",
+    "path": "/folders/sd7cfw7rvqmbyrrdws8ym971sd8e5qs3/usage",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-09-back",
+    "title": "Return from /folders/$folderId/usage to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/folders/sd7cfw7rvqmbyrrdws8ym971sd8e5qs3/usage"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-10-enter",
+    "title": "Navigate into /folders",
+    "path": "/folders",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-10-back",
+    "title": "Return from /folders to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/folders"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-11-enter",
+    "title": "Navigate into /folders/usage",
+    "path": "/folders/usage",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-11-back",
+    "title": "Return from /folders/usage to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/folders/usage"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-12-enter",
+    "title": "Navigate into /integrations",
+    "path": "/integrations",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-12-back",
+    "title": "Return from /integrations to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/integrations"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-13-enter",
+    "title": "Navigate into /integrations/personal",
+    "path": "/integrations/personal",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-13-back",
+    "title": "Return from /integrations/personal to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/integrations/personal"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-14-enter",
+    "title": "Navigate into /jobs/$jobId",
+    "path": "/jobs/sx7364b01whsmfbqrv9wvc1n3h8e5pmy",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-14-back",
+    "title": "Return from /jobs/$jobId to prior console route",
+    "path": "/jobs",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/jobs/sx7364b01whsmfbqrv9wvc1n3h8e5pmy\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-15-enter",
+    "title": "Navigate into /jobs",
+    "path": "/jobs",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-15-back",
+    "title": "Return from /jobs to prior console route",
+    "path": "/tables",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"sidebar-trigger\"]"
+      },
+      {
+        "action": "click",
+        "selector": "a[href=\"/jobs\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-16-enter",
+    "title": "Navigate into /runs",
+    "path": "/runs",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-16-back",
+    "title": "Return from /runs to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/runs"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-17-enter",
+    "title": "Navigate into /skills",
+    "path": "/skills",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-17-back",
+    "title": "Return from /skills to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/skills"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-18-enter",
+    "title": "Navigate into /stores/$storeId",
+    "path": "/stores/s178zvfzcbmsjbw21ebftr8z4s8e574s",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-18-back",
+    "title": "Return from /stores/$storeId to prior console route",
+    "path": "/stores",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/stores/s178zvfzcbmsjbw21ebftr8z4s8e574s\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-19-enter",
+    "title": "Navigate into /stores",
+    "path": "/stores",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-19-back",
+    "title": "Return from /stores to prior console route",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "navigate",
+        "value": "http://localhost:5178/stores"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-20-enter",
+    "title": "Navigate into /tables/$tableId",
+    "path": "/tables/s175y1z04ag8dstaegys58e4yn8e5960",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-20-back",
+    "title": "Return from /tables/$tableId to prior console route",
+    "path": "/tables",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/tables/s175y1z04ag8dstaegys58e4yn8e5960\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-protected-21-enter",
+    "title": "Navigate into /tables",
+    "path": "/tables",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-21-back",
+    "title": "Return from /tables to prior console route",
+    "path": "/jobs",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"sidebar-trigger\"]"
+      },
+      {
+        "action": "click",
+        "selector": "a[href=\"/tables\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-console-redirect",
+    "title": "Open /console and resolve redirect to /chat",
+    "path": "/console",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-protected-anonymous",
+    "title": "Unauthenticated /chat resolves session and redirects to /sign-in",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false,
+    "anonymous": true
+  },
+  {
+    "id": "shell-sign-out",
+    "title": "Sign out and resolve loading overlay into sign-in",
+    "path": "/sign-out",
+    "target": "app",
+    "mutating": true,
+    "blocked": "Sign-out invalidates the shared saved backend session. Drive once after all authenticated slices, sequentially."
+  },
+  {
+    "id": "shell-sign-out-back",
+    "title": "Browser back after sign-out remains signed out",
+    "path": "/sign-out",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Sign-out invalidates the shared saved backend session. Drive once after all authenticated slices, sequentially."
+  },
+  {
+    "id": "shell-root-missing",
+    "title": "Unknown root route renders Page not found",
+    "path": "/layout-shift-missing",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-root-missing-home",
+    "title": "Unknown root route Back to Jori returns home",
+    "path": "/layout-shift-missing",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a:has-text(\"Back to Jori\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-nested-missing",
+    "title": "Unknown nested workspace path renders workspace Page not found",
+    "path": "/folders/layout-shift-missing/unknown",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-nested-missing-chat",
+    "title": "Workspace Page not found New chat returns chat",
+    "path": "/folders/layout-shift-missing/unknown",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a:has-text(\"New chat\") >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "shell-error-root",
+    "title": "Jori could not load page: error boundary replaces failed view",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires controlled error fixture"
+  },
+  {
+    "id": "shell-error-root-retry",
+    "title": "Jori could not load page: Reload/Try again resolves replacement",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires controlled error fixture"
+  },
+  {
+    "id": "shell-error-page",
+    "title": "This page did not load: error boundary replaces failed view",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires controlled error fixture and auth"
+  },
+  {
+    "id": "shell-error-page-retry",
+    "title": "This page did not load: Reload/Try again resolves replacement",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires controlled error fixture and auth"
+  },
+  {
+    "id": "shell-error-stale",
+    "title": "This page is out of date: error boundary replaces failed view",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires controlled error fixture and auth"
+  },
+  {
+    "id": "shell-error-stale-retry",
+    "title": "This page is out of date: Reload/Try again resolves replacement",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires controlled error fixture and auth"
+  },
+  {
+    "id": "shell-mobile-menu-open",
+    "title": "Landing mobile menu opens/expands",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Open menu\")"
+      }
+    ],
+    "widths": [375]
+  },
+  {
+    "id": "shell-mobile-menu-close",
+    "title": "Landing mobile menu closes/collapses",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Open menu\")"
+      }
+    ],
+    "widths": [375]
+  },
+  {
+    "id": "shell-region-info-open",
+    "title": "About data regions dialog opens/expands",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"What's this?\")"
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-region-info-close",
+    "title": "About data regions dialog closes/collapses",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"What's this?\")"
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-invitation-info-open",
+    "title": "Joining an organization dialog opens/expands",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Joining an existing organization?\")"
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-invitation-info-close",
+    "title": "Joining an organization dialog closes/collapses",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Joining an existing organization?\")"
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-desktop-sidebar-open",
+    "title": "Desktop sidebar opens/expands",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"sidebar-trigger\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"sidebar-trigger\"]"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "shell-desktop-sidebar-close",
+    "title": "Desktop sidebar closes/collapses",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"sidebar-trigger\"]"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "shell-material-menu-open",
+    "title": "Material breadcrumb dropdown opens/expands",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-material-menu-close",
+    "title": "Material breadcrumb dropdown closes/collapses",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-sidebar-resources-open",
+    "title": "Sidebar Resources group opens/expands",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Resources\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Resources\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "shell-sidebar-resources-close",
+    "title": "Sidebar Resources group closes/collapses",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Resources\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "shell-sidebar-chats-open",
+    "title": "Sidebar Chats group opens/expands",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Chats\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Chats\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "shell-sidebar-chats-close",
+    "title": "Sidebar Chats group closes/collapses",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Chats\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "shell-header-hover-in",
+    "title": "Material breadcrumb gains hover padding",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "header button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-header-hover-out",
+    "title": "Material breadcrumb returns to rest padding",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "body"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "header button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-header-focus-in",
+    "title": "Material breadcrumb gains focus padding",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "header button:has-text(\"Customer renewals\")",
+        "value": "Shift"
+      }
+    ]
+  },
+  {
+    "id": "shell-header-focus-out",
+    "title": "Material breadcrumb loses focus padding",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "header button:has-text(\"Customer renewals\")",
+        "value": "Tab"
+      }
+    ],
+    "setup": [
+      {
+        "action": "press",
+        "selector": "header button:has-text(\"Customer renewals\")",
+        "value": "Shift"
+      }
+    ]
+  },
+  {
+    "id": "shell-anchor-waitlist",
+    "title": "Navigate to #waitlist and let nearby lazy content settle",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"#waitlist\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "shell-anchor-waitlist-back",
+    "title": "Browser back after #waitlist restores prior scroll",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[href=\"#waitlist\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-anchor-work",
+    "title": "Navigate to #work and let nearby lazy content settle",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"#work\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "shell-anchor-work-back",
+    "title": "Browser back after #work restores prior scroll",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[href=\"#work\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-legal-waitlist",
+    "title": "Legal page Join the waitlist navigates to home anchor",
+    "path": "/terms",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/#waitlist\"]"
+      }
+    ]
+  },
+  {
+    "id": "shell-legal-waitlist-back",
+    "title": "Return from home waitlist to legal page",
+    "path": "/terms",
+    "target": "app",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/#waitlist\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "back"
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-email-error",
+    "title": "Waitlist email validation error appears",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-email-clear",
+    "title": "Waitlist email validation error clears",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-work-error",
+    "title": "Waitlist work validation error appears",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-work-clear",
+    "title": "Waitlist work validation error clears",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "textarea[name=\"work\"]",
+        "value": "We manually reconcile long release checklists every Thursday."
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      },
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-pending",
+    "title": "Waitlist valid form resolves pending state",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      },
+      {
+        "action": "fill",
+        "selector": "textarea[name=\"work\"]",
+        "value": "We manually reconcile long release checklists every Thursday, including messages, issue tables, and customer renewal notes."
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/waitlist",
+        "body": "{\"status\": \"failed\"}",
+        "delay": 4000
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-failed",
+    "title": "Waitlist valid form resolves failed state",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      },
+      {
+        "action": "fill",
+        "selector": "textarea[name=\"work\"]",
+        "value": "We manually reconcile long release checklists every Thursday, including messages, issue tables, and customer renewal notes."
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/waitlist",
+        "body": "{\"status\": \"failed\"}",
+        "delay": 850
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-throttled",
+    "title": "Waitlist valid form resolves throttled state",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      },
+      {
+        "action": "fill",
+        "selector": "textarea[name=\"work\"]",
+        "value": "We manually reconcile long release checklists every Thursday, including messages, issue tables, and customer renewal notes."
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/waitlist",
+        "body": "{\"status\": \"throttled\"}",
+        "delay": 850
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-rejected",
+    "title": "Waitlist valid form resolves rejected state",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      },
+      {
+        "action": "fill",
+        "selector": "textarea[name=\"work\"]",
+        "value": "We manually reconcile long release checklists every Thursday, including messages, issue tables, and customer renewal notes."
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/waitlist",
+        "body": "{\"status\": \"rejected\", \"field\": \"email\", \"message\": \"Use your work email address.\"}",
+        "delay": 850
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-joined",
+    "title": "Waitlist valid form resolves joined state",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      },
+      {
+        "action": "fill",
+        "selector": "textarea[name=\"work\"]",
+        "value": "We manually reconcile long release checklists every Thursday, including messages, issue tables, and customer renewal notes."
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/waitlist",
+        "body": "{\"status\": \"joined\"}",
+        "delay": 850
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-joined-reset",
+    "title": "Waitlist confirmation returns to form on page reload",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[name=\"email\"]",
+        "value": "layout@example.test"
+      },
+      {
+        "action": "fill",
+        "selector": "textarea[name=\"work\"]",
+        "value": "We manually reconcile long release checklists every Thursday."
+      },
+      {
+        "action": "click",
+        "selector": "form button[type=\"submit\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "reload"
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/waitlist",
+        "body": "{\"status\":\"joined\"}",
+        "delay": 850
+      }
+    ]
+  },
+  {
+    "id": "shell-waitlist-size",
+    "title": "Waitlist team size label changes",
+    "path": "/#waitlist",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "select[name=\"size\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "shell-auth-google-pending",
+    "title": "google sign-in logo swaps to spinner",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Continue with Google\")"
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/api/auth/sign-in/social",
+        "body": "{\"code\": \"LAYOUT_TEST_REJECTION\", \"message\": \"Sign-in temporarily unavailable. Try again.\"}",
+        "status": 400,
+        "delay": 4000
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-auth-google-error",
+    "title": "google sign-in spinner restores provider logo",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Continue with Google\")"
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/api/auth/sign-in/social",
+        "body": "{\"code\": \"LAYOUT_TEST_REJECTION\", \"message\": \"Sign-in temporarily unavailable. Try again.\"}",
+        "status": 400,
+        "delay": 850
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-auth-google-success",
+    "title": "google sign-in external redirect returns authorized app",
+    "path": "/",
+    "target": "app",
+    "mutating": true,
+    "blocked": "requires human-authenticated development OAuth session"
+  },
+  {
+    "id": "shell-auth-microsoft-pending",
+    "title": "microsoft sign-in logo swaps to spinner",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Continue with Microsoft\")"
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/api/auth/sign-in/social",
+        "body": "{\"code\": \"LAYOUT_TEST_REJECTION\", \"message\": \"Sign-in temporarily unavailable. Try again.\"}",
+        "status": 400,
+        "delay": 4000
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-auth-microsoft-error",
+    "title": "microsoft sign-in spinner restores provider logo",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Continue with Microsoft\")"
+      }
+    ],
+    "responses": [
+      {
+        "url": "**/api/auth/sign-in/social",
+        "body": "{\"code\": \"LAYOUT_TEST_REJECTION\", \"message\": \"Sign-in temporarily unavailable. Try again.\"}",
+        "status": 400,
+        "delay": 850
+      }
+    ],
+    "anonymous": true
+  },
+  {
+    "id": "shell-auth-microsoft-success",
+    "title": "microsoft sign-in external redirect returns authorized app",
+    "path": "/",
+    "target": "app",
+    "mutating": true,
+    "blocked": "requires human-authenticated development OAuth session"
+  },
+  {
+    "id": "shell-oauth-toast",
+    "title": "OAuth error toast appears and clears URL feedback",
+    "path": "/sign-in?authProvider=google&error=account_not_linked",
+    "target": "app",
+    "mutating": false,
+    "anonymous": true
+  },
+  {
+    "id": "shell-oauth-toast-dismiss",
+    "title": "OAuth error toast disappears",
+    "path": "/sign-in?authProvider=google&error=account_not_linked",
+    "target": "app",
+    "mutating": false,
+    "anonymous": true
+  },
+  {
+    "id": "shell-region-select",
+    "title": "Region picker changes region and reloads sign-in",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "default local topology is US-only; EU disabled Coming soon"
+  },
+  {
+    "id": "shell-region-reverse",
+    "title": "Region picker returns to previous region",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "default local topology is US-only; EU disabled Coming soon"
+  },
+  {
+    "id": "shell-async-font",
+    "title": "Geist fallback to webfont",
+    "path": "/",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-async-logos",
+    "title": "Integration logos load in fixed icon boxes",
+    "path": "/trust",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-async-signin-canvas",
+    "title": "Sign-in canvas mounts and animates",
+    "path": "/sign-in",
+    "target": "app",
+    "mutating": false,
+    "anonymous": true
+  },
+  {
+    "id": "shell-async-hero-thread",
+    "title": "Hero thread enters and renewals row dims then returns",
+    "path": "/",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "shell-async-editor",
+    "title": "Near-viewport job editor placeholder resolves to lazy fields",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "h2:text-is(\"Jobs are just instructions\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-async-sharing-links",
+    "title": "Client-only Share links placeholder resolves to links body",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "h2:text-is(\"Share it like a drive\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-async-demo-org-logo",
+    "title": "Demo organization logo loads",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false
+  },
+  {
+    "id": "shell-async-demo-header",
+    "title": "Demo route title/breadcrumb and header actions publish after commit",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false
+  },
+  {
+    "id": "shell-auth-boundary-convex",
+    "title": "Convex token unavailable becomes session error",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires authorized development identity and tailored org state"
+  },
+  {
+    "id": "shell-auth-boundary-activation",
+    "title": "No active organization automatically activates first membership and reloads",
+    "path": "/",
+    "target": "app",
+    "mutating": true,
+    "blocked": "requires authorized development identity and tailored org state"
+  },
+  {
+    "id": "shell-auth-boundary-initialization",
+    "title": "Organization person sync completes before console appears",
+    "path": "/",
+    "target": "app",
+    "mutating": true,
+    "blocked": "requires authorized development identity and tailored org state"
+  },
+  {
+    "id": "shell-auth-boundary-init-failure",
+    "title": "Organization person sync fails into retry alert",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires authorized development identity and tailored org state"
+  },
+  {
+    "id": "shell-auth-boundary-init-retry",
+    "title": "Organization sync retry alert returns to loading and console",
+    "path": "/",
+    "target": "app",
+    "mutating": true,
+    "blocked": "requires authorized development identity and tailored org state"
+  },
+  {
+    "id": "shell-auth-boundary-no-org",
+    "title": "No organization resolves membership invitations/create view",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires authorized development identity and tailored org state"
+  },
+  {
+    "id": "shell-auth-boundary-launch",
+    "title": "Non-allowlisted account resolves launch waitlist",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires authorized development identity and tailored org state"
+  },
+  {
+    "id": "shell-auth-boundary-onboarding",
+    "title": "Organization onboarding state resolves",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires authorized development identity and tailored org state"
+  },
+  {
+    "id": "shell-share-files",
+    "title": "Anonymous files detail resolves public share chrome",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires actual dev share link; demo only represents material body"
+  },
+  {
+    "id": "shell-share-files-denied",
+    "title": "Anonymous files invalid/expired share resolves access state",
+    "path": "/files/r170smqxya0f76g8z9xq4zyf718e53tk#share=layout-test-invalid",
+    "target": "app",
+    "mutating": false,
+    "anonymous": true
+  },
+  {
+    "id": "shell-share-stores",
+    "title": "Anonymous stores detail resolves public share chrome",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires actual dev share link; demo only represents material body"
+  },
+  {
+    "id": "shell-share-stores-denied",
+    "title": "Anonymous stores invalid/expired share resolves access state",
+    "path": "/stores/s178zvfzcbmsjbw21ebftr8z4s8e574s#share=layout-test-invalid",
+    "target": "app",
+    "mutating": false,
+    "anonymous": true
+  },
+  {
+    "id": "shell-share-tables",
+    "title": "Anonymous tables detail resolves public share chrome",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires actual dev share link; demo only represents material body"
+  },
+  {
+    "id": "shell-share-tables-denied",
+    "title": "Anonymous tables invalid/expired share resolves access state",
+    "path": "/tables/s175y1z04ag8dstaegys58e4yn8e5960#share=layout-test-invalid",
+    "target": "app",
+    "mutating": false,
+    "anonymous": true
+  },
+  {
+    "id": "shell-offer",
+    "title": "Integration offer token resolves accepting/invalid/access state",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires authorized identity and dev offer token"
+  },
+  {
+    "id": "shell-offer-back",
+    "title": "Return from integration offer to console",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "requires authorized identity and dev offer token"
+  },
+  {
+    "id": "shell-api-auth",
+    "title": "Auth API catchall endpoint delegates to Better Auth; no document UI",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "nonvisual server endpoint"
+  },
+  {
+    "id": "shell-api-callback",
+    "title": "Integration callback GET redirects or emits OAuth handoff result",
+    "path": "/",
+    "target": "app",
+    "mutating": true,
+    "blocked": "requires development OAuth transaction; nonvisual server endpoint"
+  }
+]

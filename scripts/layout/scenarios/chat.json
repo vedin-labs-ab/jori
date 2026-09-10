@@ -1,0 +1,3112 @@
+[
+  {
+    "id": "CHAT-001",
+    "title": "navigate into chat home and wait for its lazy chunk and TipTap mount. Drive console `[href='/chat']`. Evidence `src/landing/demo/pages/router.tsx`, `src/shared/console/chat/composer/editor.ts`.",
+    "path": "/chat",
+    "mutating": false
+  },
+  {
+    "id": "CHAT-002",
+    "title": "return from chat home to prior console page through its navigation. Shared shell remains the same. Mobile fixture intentionally hides sidebar navigation in src/landing/demo/console.tsx; live mobile route navigation belongs to shell coverage.",
+    "path": "/chat",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/runs\"]:visible"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Toggle Sidebar\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "CHAT-003",
+    "title": "open populated conversation from Recent. Drive `[href='/chat/conversations_renewals']`. Evidence `src/shared/console/chat/home.tsx`, `src/landing/demo/pages/chat/index.tsx`.",
+    "path": "/chat",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "section a[href=\"/chat/conversations_renewals\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-004",
+    "title": "return from populated conversation to chat home. Drive `[href='/chat']`. Mobile fixture intentionally hides sidebar navigation in src/landing/demo/console.tsx; live mobile route navigation belongs to shell coverage.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/chat\"]:visible"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Toggle Sidebar\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "CHAT-005",
+    "title": "enter composer text, including enough wrapped lines to reach its 12rem max height, and inspect post-typing settling. Evidence `src/shared/console/chat/composer/editor.ts`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. "
+      }
+    ]
+  },
+  {
+    "id": "CHAT-006",
+    "title": "clear the multiline composer, restoring the placeholder and disabled send button.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": ""
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. A very long line with realistic wrapping. "
+      }
+    ]
+  },
+  {
+    "id": "CHAT-007",
+    "title": "hide desktop shortcut band. Drive button `Hide shortcuts`. Evidence `src/shared/console/chat/composer/footer.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Hide shortcuts\"]"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "CHAT-008",
+    "title": "restore desktop shortcut band. Drive button `Show shortcuts`. Hidden by CSS below `md`; record mobile as not applicable.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Show shortcuts\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Hide shortcuts\"]"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "CHAT-009",
+    "title": "open attachment popover. Drive button `Mention a resource`. Evidence `src/shared/console/chat/composer/attach.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-010",
+    "title": "close attachment popover with Escape.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-011",
+    "title": "attachment kind list to Chats. Drive option `Chats`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Chats\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-012",
+    "title": "Chats items back to kind list. Drive option `All resources`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"All resources\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Chats\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-013",
+    "title": "attachment kind list to Tables. Drive option `Tables`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Tables\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-014",
+    "title": "Tables items back to kind list. Drive option `All resources`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"All resources\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Tables\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-015",
+    "title": "attachment kind list to Files. Drive option `Files`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Files\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-016",
+    "title": "Files items back to kind list. Drive option `All resources`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"All resources\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Files\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-017",
+    "title": "attachment kind list to Stores. Drive option `Stores`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Stores\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-018",
+    "title": "Stores items back to kind list. Drive option `All resources`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"All resources\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Stores\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-019",
+    "title": "attachment kind list to Jobs. Drive option `Jobs`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Jobs\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-020",
+    "title": "Jobs items back to kind list. Drive option `All resources`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"All resources\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Jobs\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-021",
+    "title": "attachment kind list to Folders. Drive option `Folders`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Folders\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-022",
+    "title": "Folders items back to kind list. Drive option `All resources`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"All resources\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Folders\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-023",
+    "title": "attachment kind list to Runs. Drive option `Runs`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Runs\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-024",
+    "title": "Runs items back to kind list. Drive option `All resources`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"All resources\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Runs\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-025",
+    "title": "attachment search resolves to matches, then no matches. Fill placeholder `Search resources\u2026` with `renewal` and unique impossible text as separate marks.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[placeholder=\"Search resources\u2026\"]",
+        "value": "zzzx-nomatches"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "[placeholder=\"Search resources\u2026\"]",
+        "value": "renewal"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-026",
+    "title": "clear attachment search back to all kind rows.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[placeholder=\"Search resources\u2026\"]",
+        "value": ""
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "[placeholder=\"Search resources\u2026\"]",
+        "value": "renewal"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-027",
+    "title": "pick resource from attachment results and close popover with an inline chip inserted. Drive `Tables`, option `Customer renewals`. Demo does not open pane on mention; production does.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has-text(\"Customer renewals\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Tables\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-028",
+    "title": "remove inline resource chip using Backspace and restore text caret. Production releases unpinned pane preview too.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "ControlOrMeta+A"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Backspace"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Mention a resource\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:text-is(\"Tables\")"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-029",
+    "title": "type resource sigil `+` and query to open caret suggestion list. Evidence `src/shared/console/mentions/suggest/listbox.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "+"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-030",
+    "title": "close resource suggestion list with Escape.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "+"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-031",
+    "title": "type integration sigil `@` and inspect its populated/empty suggestion list.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "@"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-032",
+    "title": "dismiss integration suggestion list.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "@"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-033",
+    "title": "type skill sigil `/` and inspect its populated/empty suggestion list.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "/"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-034",
+    "title": "dismiss skill suggestion list.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "/"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-035",
+    "title": "type tool sigil `#` and inspect its populated/empty suggestion list.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "#"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-036",
+    "title": "dismiss tool suggestion list.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "#"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-037",
+    "title": "select a caret suggestion with Enter; popup closes and token becomes chip.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Enter"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "+Customer"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "End"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-038",
+    "title": "open model dropdown. Drive button whose accessible label starts `Model:`. Evidence `src/shared/console/chat/models/index.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-039",
+    "title": "close model dropdown with Escape.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-040",
+    "title": "open vendor submenu OpenAI.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[role=\"menuitem\"]:has-text(\"OpenAI\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-041",
+    "title": "open vendor submenu Anthropic.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[role=\"menuitem\"]:has-text(\"Anthropic\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-042",
+    "title": "open Reasoning submenu.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[role=\"menuitem\"]:has-text(\"Reasoning\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-043",
+    "title": "choose different recommended tier and allow selected label/icon to settle. Local state only in demo, persisted conversation model in production.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:has-text(\"Premium\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-044",
+    "title": "choose a non-recommended model/effort and inspect longer trigger label.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Low\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[role=\"menuitem\"]:has-text(\"Reasoning\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-045",
+    "title": "show context ring tooltip on hover/focus. Drive button label starting `Context:`. Evidence `src/shared/console/chat/context/index.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "button[aria-label^=\"Context:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-046",
+    "title": "dismiss context ring tooltip.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "main header"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "button[aria-label^=\"Context:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-047",
+    "title": "open context breakdown popover by clicking same button.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Context:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-048",
+    "title": "close context breakdown popover with Escape.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Context:\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-049",
+    "title": "send first message from home and observe navigation, pending/working row, reasoning, streamed markdown, stop control, settled reply. Drive composer then `Send message`. Evidence `src/landing/demo/pages/chat/stream.ts`, `src/shared/console/chat/thread/draft.tsx`, `src/shared/console/chat/thread/tail.tsx`.",
+    "path": "/chat",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-050",
+    "title": "send follow-up in existing populated conversation, observing preceding Next steps removal and scroll anchor.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-051",
+    "title": "send a suggestion from home and observe home-to-thread transition. Drive suggestion `Which renewals are at risk?`.",
+    "path": "/chat",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Which renewals are at risk?\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-052",
+    "title": "choose reply Next steps chip, observing chip removal and new turn. Drive `Remind Harbor House`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Remind Harbor House\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-053",
+    "title": "expand Working log during pending/streaming. Drive button `Working`. Evidence `src/shared/console/chat/working.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Working\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-054",
+    "title": "collapse Working log during pending/streaming.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Working\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Working\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-055",
+    "title": "expand streaming Thinking or settled Thought. Evidence `src/shared/console/chat/thread/reasoning.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Thinking\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-056",
+    "title": "collapse Thinking or Thought.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Thinking\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Thinking\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-057",
+    "title": "stop active stream and observe draft-to-stopped notice plus Stop run removal. Drive button `Stop run` before completion.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Stop run\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-058",
+    "title": "scroll conversation up while stream grows and check anchor preservation after scroll ends. Evidence `src/components/ui/message-scroller` and `src/shared/console/chat/thread/tail.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "scroll",
+        "selector": "[aria-label=\"Conversation\"]",
+        "value": "-400"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-059",
+    "title": "activate `Scroll to latest` and inspect settling after its deliberate scroll.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Scroll to latest\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "scroll",
+        "selector": "[aria-label=\"Conversation\"]",
+        "value": "-400"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-060",
+    "title": "send long person text so its eight-line clamp mounts; observe late measurement. Evidence `src/shared/console/chat/thread/message.tsx`, `src/components/ui/expandable-text`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-061",
+    "title": "expand clamped person message through its `show more` control.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[data-slot=\"expandable-text-trigger\"][aria-expanded=\"false\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-062",
+    "title": "collapse clamped person message through its Show less control.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Show less\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. Include the latest owners, dates, and status. "
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[data-slot=\"expandable-text-trigger\"][aria-expanded=\"false\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-063",
+    "title": "hover/focus message to reveal reserved action row and timestamp tooltip.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"expandable-text\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-064",
+    "title": "remove hover/focus from message, hiding actions and tooltip.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "main header"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "button[aria-label=\"Copy message\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-065",
+    "title": "copy message and observe copy/check icon lifecycle. Drive `Copy message` then wait past copied timeout. Evidence `src/shared/console/copy.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Copy message\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-066",
+    "title": "open existing table reference pane. Drive reference card button `Customer renewals` from reply, or inline mention. Observe lazy body. Evidence `src/shared/console/chat/pane/index.tsx`, `src/landing/demo/pages/chat/pane/index.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-067",
+    "title": "close reference pane via `Close pane` and preserve chat scroll. Mobile is full-screen Sheet with scroll lock.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-068",
+    "title": "reopen previously dismissed pane by clicking same reference card.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-069",
+    "title": "pin preview tab. Drive `Pin Customer renewals` or double-click reference card.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-070",
+    "title": "unpin preview tab. Drive `Unpin Customer renewals`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Unpin Customer renewals\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-071",
+    "title": "open tab context menu by right-clicking tab in `Open resources` tablist.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Customer renewals\")",
+        "value": "Shift+F10"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-072",
+    "title": "close tab context menu with Escape.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Customer renewals\")",
+        "value": "Shift+F10"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-073",
+    "title": "switch between pinned resource tabs, retaining chosen content. Requires multiple referenced resources, reachable by sending text containing valid resource tokens.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"tab\"]:has-text(\"Customer renewals\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Compare +[table:collections_renewals] and +[file:files_notes] with +[folder:folders_finance]."
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"table:collections_renewals\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"file:files_notes\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"folder:folders_finance\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Finance\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-074",
+    "title": "close active resource tab and inspect adjacent tab activation.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close Finance\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Compare +[table:collections_renewals] and +[file:files_notes] with +[folder:folders_finance]."
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"table:collections_renewals\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"file:files_notes\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"folder:folders_finance\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Finance\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-075",
+    "title": "close inactive resource tab and inspect active body remains stable.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close Customer renewals\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Compare +[table:collections_renewals] and +[file:files_notes] with +[folder:folders_finance]."
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"table:collections_renewals\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"file:files_notes\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"folder:folders_finance\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Finance\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-076",
+    "title": "use tab menu Close others from multi-tab state.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Close others\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Compare +[table:collections_renewals] and +[file:files_notes] with +[folder:folders_finance]."
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"table:collections_renewals\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"file:files_notes\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"folder:folders_finance\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Finance\"]"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Release notes 2.14.md\")",
+        "value": "Shift+F10"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-077",
+    "title": "disable automatic resource opening via context menu `Open new resources automatically`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemcheckbox\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Customer renewals\")",
+        "value": "Shift+F10"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-078",
+    "title": "enable automatic resource opening via same menu.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemcheckbox\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Customer renewals\")",
+        "value": "Shift+F10"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemcheckbox\"]"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Customer renewals\")",
+        "value": "Shift+F10"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-079",
+    "title": "complete streamed reply with first new job resource and observe automatic desktop pane opening plus one-time hint. Mobile intentionally suppresses automatic Sheet. Evidence `src/shared/console/chat/pane/auto.ts`, `src/shared/console/chat/pane/hint.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-080",
+    "title": "dismiss automatic-pane hint with `Keep this`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Keep this\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "CHAT-081",
+    "title": "dismiss automatic-pane hint with Open manually.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Open manually\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "CHAT-082",
+    "title": "hover/focus pane header page link. Observe arrow width/margin animation. Evidence `src/shared/console/chat/pane/header.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "aside[aria-label=\"Resources\"] a[href=\"/tables/collections_renewals\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-083",
+    "title": "navigate from pane header to resource page.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] a[href=\"/tables/collections_renewals\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-084",
+    "title": "resize desktop pane with pointer and inspect no drift after drag release. Direct dragging is intentional.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "widths": [1440],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "drag",
+        "selector": "[data-slot=\"resizable-handle\"]",
+        "offset": {
+          "x": -100,
+          "y": 0
+        }
+      }
+    ]
+  },
+  {
+    "id": "CHAT-085",
+    "title": "questionnaire first question to next with answer selected. Drive radio `Yes, post it`, Next. Evidence `src/shared/console/chat/thread/question.tsx`, `src/components/ui/questionnaire`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Yes, post it\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-086",
+    "title": "questionnaire second question back to previous.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-previous\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Yes, post it\")"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-087",
+    "title": "questionnaire next without required answer to show validation.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-088",
+    "title": "choose valid answer to clear validation, including freeform `Your own answer` when first question is active.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Your own answer\"]",
+        "value": "Keep this in the renewal channel"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-089",
+    "title": "navigate second to third question.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Yes, post it\")"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Every morning\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-090",
+    "title": "submit Answer on last question, replacing active questionnaire with complete answered summary and author while next run starts.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-submit\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Yes, post it\")"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Every morning\")"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Sent from your address.\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-091",
+    "title": "open chat title menu and dismiss. Share/move dialogs use generic material controls; lead should assign their contents to shared-dialog owner. Evidence `src/landing/demo/pages/chat/filing.tsx`, `src/shared/console/chat/menu.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main header button:has-text(\"Which renewals are at risk this month?\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-092",
+    "title": "return OpenAI submenu to parent menu.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "ArrowLeft"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[role=\"menuitem\"]:has-text(\"OpenAI\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-093",
+    "title": "return Anthropic submenu to parent menu.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "ArrowLeft"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[role=\"menuitem\"]:has-text(\"Anthropic\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-094",
+    "title": "return Reasoning submenu to parent menu.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "ArrowLeft"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[role=\"menuitem\"]:has-text(\"Reasoning\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-095",
+    "title": "restore original model tier selection after CHAT-043.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:has-text(\"Standard\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:has-text(\"Premium\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-096",
+    "title": "restore original model and reasoning effort after CHAT-044.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:has-text(\"Standard\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"Model:\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[role=\"menuitem\"]:has-text(\"Reasoning\")"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Low\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-097",
+    "title": "switch back to previous pinned resource tab.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"tab\"]:has-text(\"Finance\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Compare +[table:collections_renewals] and +[file:files_notes] with +[folder:folders_finance]."
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"table:collections_renewals\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"file:files_notes\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"folder:folders_finance\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Finance\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"tab\"]:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-098",
+    "title": "use tab menu Close to the left from reset multi-tab state.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Close to the left\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Compare +[table:collections_renewals] and +[file:files_notes] with +[folder:folders_finance]."
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"table:collections_renewals\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"file:files_notes\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"folder:folders_finance\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Finance\"]"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Release notes 2.14.md\")",
+        "value": "Shift+F10"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-099",
+    "title": "use tab menu Close to the right from reset multi-tab state.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Close to the right\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Compare +[table:collections_renewals] and +[file:files_notes] with +[folder:folders_finance]."
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"table:collections_renewals\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"file:files_notes\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"folder:folders_finance\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Finance\"]"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Release notes 2.14.md\")",
+        "value": "Shift+F10"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-100",
+    "title": "use tab menu Close all from reset multi-tab state.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Close all\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Compare +[table:collections_renewals] and +[file:files_notes] with +[folder:folders_finance]."
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"table:collections_renewals\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"file:files_notes\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Close pane\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"folder:folders_finance\"] button >> nth=-1"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Pin Finance\"]"
+      },
+      {
+        "action": "press",
+        "selector": "[role=\"tab\"]:has-text(\"Release notes 2.14.md\")",
+        "value": "Shift+F10"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-101",
+    "title": "withdraw hover/focus from pane header page link.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "main header"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      },
+      {
+        "action": "hover",
+        "selector": "aside[aria-label=\"Resources\"] a[href=\"/tables/collections_renewals\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-102",
+    "title": "return from pane header's resource page to conversation via console navigation. Mobile fixture intentionally hides sidebar navigation in src/landing/demo/console.tsx; live mobile route navigation belongs to shell coverage.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has-text(\"Which renewals are at risk this month?\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"turn\"] button:has-text(\"Customer renewals\")"
+      },
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] a[href=\"/tables/collections_renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Toggle Sidebar\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:has-text(\"Chats\"):visible"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "CHAT-103",
+    "title": "navigate third questionnaire question back to second.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-previous\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Yes, post it\")"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-choice\"]:has-text(\"Every morning\")"
+      },
+      {
+        "action": "click",
+        "selector": "[data-slot=\"questionnaire-next\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-104",
+    "title": "open one-time pane hint information popover via `About resources opening beside the chat`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"About resources opening beside the chat\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "CHAT-105",
+    "title": "close one-time pane hint information popover.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"About resources opening beside the chat\"]"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "FILE-001",
+    "title": "Files list to markdown editor, including lazy FilePage, text fetch, CodeMirror module, editor effect, and language arrival. Drive `Release notes 2.14.md`. Evidence `src/shared/console/files/editor/section.tsx`, `src/shared/console/mirror/view.tsx`.",
+    "path": "/files/files_notes",
+    "mutating": false
+  },
+  {
+    "id": "FILE-002",
+    "title": "return markdown editor to Files list.",
+    "path": "/files/files_notes",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header a[href=\"/files\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-003",
+    "title": "edit markdown and blur, observing debounced pending/saving/error-or-success/idle breadcrumb icon lifecycle. Drive `.cm-content[contenteditable=true]`. Demo resolves saves immediately, so production pending/error need controlled fixture. Evidence `src/shared/console/files/editor/autosave.ts`.",
+    "path": "/files/files_notes",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": ".cm-content[contenteditable=\"true\"]",
+        "value": "# Layout check\n\nEdited with long lines and ordinary text.\n"
+      },
+      {
+        "action": "click",
+        "selector": "main header"
+      }
+    ]
+  },
+  {
+    "id": "FILE-004",
+    "title": "Files list to PNG viewer cold load, image dimensions and dock enabling. Drive `Onboarding flow.png`. Evidence `src/shared/console/files/viewer/section.tsx`, `src/shared/console/files/viewer/frame.tsx`.",
+    "path": "/files/files_onboarding",
+    "mutating": false
+  },
+  {
+    "id": "FILE-005",
+    "title": "return PNG viewer to Files list.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header a[href=\"/files\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-006",
+    "title": "zoom PNG in using `Zoom in` and inspect after action.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Zoom in\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"File navigation\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-007",
+    "title": "zoom PNG out using `Zoom out`.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Zoom out\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"File navigation\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Zoom in\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-008",
+    "title": "zoom PNG then reset with `Fit to view`.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Fit to view\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"File navigation\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Zoom in\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-009",
+    "title": "double-click image to zoom.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "doubleclick",
+        "selector": "img[alt=\"Onboarding flow.png\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-010",
+    "title": "pan zoomed image and inspect after pointer release. Direct transform motion is intentional.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "doubleclick",
+        "selector": "img[alt=\"Onboarding flow.png\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "drag",
+        "selector": "img[alt=\"Onboarding flow.png\"]",
+        "offset": {
+          "x": 60,
+          "y": 35
+        }
+      }
+    ]
+  },
+  {
+    "id": "FILE-011",
+    "title": "hover/focus file navigation dock to expand image tools.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"File navigation\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-012",
+    "title": "leave dock to collapse tools. Evidence `src/shared/console/files/dock.tsx`.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "main header"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"File navigation\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-013",
+    "title": "show zoom and file navigation tooltips by hover/focus.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "button[aria-label=\"Zoom in\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"File navigation\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-014",
+    "title": "hide those tooltips.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "main header"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"File navigation\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "button[aria-label=\"Zoom in\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-015",
+    "title": "Files list to PDF iframe, including blob fetch and viewer ready transition. Drive `Launch brief.pdf`.",
+    "path": "/files/files_brief",
+    "mutating": false
+  },
+  {
+    "id": "FILE-016",
+    "title": "return PDF to Files list.",
+    "path": "/files/files_brief",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header a[href=\"/files\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-017",
+    "title": "Files list to unsupported XLSX download fallback. Drive `Q3 forecast.xlsx`.",
+    "path": "/files/files_forecast",
+    "mutating": false
+  },
+  {
+    "id": "FILE-018",
+    "title": "return XLSX fallback to Files list.",
+    "path": "/files/files_forecast",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header a[href=\"/files\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-019",
+    "title": "next sibling file via `Next file` or ArrowRight, including preloaded-cache behavior.",
+    "path": "/files/files_brief",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Next file\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-020",
+    "title": "previous sibling file via `Previous file` or ArrowLeft. Arrow keys in CodeMirror intentionally edit caret instead.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Previous file\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-021",
+    "title": "file page Ask Jori into chat home with context chip.",
+    "path": "/files/files_notes",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[aria-label=\"Ask Jori\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-022",
+    "title": "clear context via `Remove <file name>`, removing context addon from composer.",
+    "path": "/files/files_notes",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Remove Release notes 2.14.md\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "a[aria-label=\"Ask Jori\"]"
+      }
+    ]
+  },
+  {
+    "id": "FILE-023",
+    "title": "file title menu open and close; copy text loaded state and tooltip/copy lifecycle. Generic edit/share/move/delete dialogs belong to shared-dialog slice.",
+    "path": "/files/files_notes",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main header button:has-text(\"Release notes 2.14.md\")"
+      }
+    ]
+  },
+  {
+    "id": "FILE-024",
+    "title": "double-click zoomed image to reset.",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "doubleclick",
+        "selector": "img[alt=\"Onboarding flow.png\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "doubleclick",
+        "selector": "img[alt=\"Onboarding flow.png\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-G01",
+    "title": "authenticated live conversation loading to ready, unauthorized, or not_found. `src/console/chat/thread.tsx` gates the thread on `api.conversations.console.live`; demo missing conversation returns null instead.",
+    "path": "/chat/md70a3a80wscwaekp8tdkw7f8n8e4rr8",
+    "mutating": false,
+    "target": "app"
+  },
+  {
+    "id": "CHAT-G02",
+    "title": "Live conversation first-page loading resolves to existing hello turn. Pagination variant unavailable because this conversation has one turn.",
+    "path": "/chat/md70a3a80wscwaekp8tdkw7f8n8e4rr8",
+    "mutating": false,
+    "target": "app"
+  },
+  {
+    "id": "CHAT-G03",
+    "title": "Live conversation resource-name resolution; existing hello conversation has no resource reference. Verify initial rendering and record absent card variant.",
+    "path": "/chat/md70a3a80wscwaekp8tdkw7f8n8e4rr8",
+    "mutating": false,
+    "target": "app",
+    "blocked": "Authorized hello conversation contains no resource references; demo resolver is synchronous. Late resolver replacement still needs a controlled query fixture."
+  },
+  {
+    "id": "CHAT-G04",
+    "title": "available model list loading/unavailable to composer enabled, reason removed, hints restored, model picker enabled. `src/console/chat/models.ts`, `src/console/chat/thread.tsx`; demo always has full catalog.",
+    "path": "/chat",
+    "mutating": false,
+    "target": "app"
+  },
+  {
+    "id": "CHAT-G05",
+    "title": "send promise pending to resolve and pending to reject with draft kept and error toast. `src/shared/console/chat/composer/input.ts`, `src/console/chat/send.ts`; demo send is synchronous.",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "blocked": "Demo onSend returns synchronously. Pending-resolve/reject requires controlled promise fixture; live chat writes are outside this slice authorization."
+  },
+  {
+    "id": "CHAT-G06",
+    "title": "live progress query loading/empty to ActivityTimeline and late approval/offer callouts. `src/console/chat/progress.tsx`; demo chat has synchronous three-row log with no requests.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "blocked": "Demo chat progress is static without approval/offer queries; authenticated account has no live run. Shared Activity request variants are inventoried by other owner."
+  },
+  {
+    "id": "CHAT-G07",
+    "title": "automatic reasoning tail collapse when text first starts; completed draft replaced by settled message with reasoning/Working removed. Demo stream covers this within CHAT-049/050 but action-time segmentation must retain every occurrence.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Check renewal risks"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-G08",
+    "title": "condensed-context notice arrives and run failed/error notice replaces draft. `src/shared/console/chat/thread/notice.tsx`; only stopped notice is reachable in demo.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "blocked": "Initial demo has no condensed or failed conversation state; only stopped state is driven by CHAT-057."
+  },
+  {
+    "id": "CHAT-G09",
+    "title": "Live chat home recent loading placeholder resolves to the authorized account recent list",
+    "path": "/chat",
+    "target": "app",
+    "mutating": false
+  },
+  {
+    "id": "CHAT-G10",
+    "title": "code fence plaintext fallback to lazy highlighted spans, streaming incomplete fence to completed fence. `src/shared/console/markdown/highlight.tsx`, `parse.ts`. Demo fixed reply has no fence but echoes supplied text inside its markdown reply, so send a multiline fenced code input to exercise it.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Inspect this code:\n```javascript\nconst a = 42;\nconsole.log(a);\n```"
+      },
+      {
+        "action": "click",
+        "selector": "button[aria-label=\"Send message\"]"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-G11",
+    "title": "wide markdown table streaming header/body and horizontal scrollbar. Populated reply has full table; streamed reply can echo markdown input. Markdown image tokens become links and never fetch media, per `src/shared/console/markdown/inline.tsx`.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false
+  },
+  {
+    "id": "CHAT-G12",
+    "title": "Open existing run in resource pane, replacing lazy body placeholder with populated execution detail",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Message\"]",
+        "value": "Inspect +[run:runs_chase]."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"run:runs_chase\"] button"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-G13",
+    "title": "Expand grouped Sent replies activity inside the run resource pane",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Message\"]",
+        "value": "Inspect +[run:runs_chase]."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"run:runs_chase\"] button"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] button:has-text(\"Sent replies\")"
+      }
+    ]
+  },
+  {
+    "id": "CHAT-G14",
+    "title": "Approve pending request in the run resource pane using isolated demo callback",
+    "path": "/chat/conversations_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Message\"]",
+        "value": "Inspect +[run:runs_tip]."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"questionnaire\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[data-mention-target=\"run:runs_tip\"] button"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "aside[aria-label=\"Resources\"] button:has-text(\"Approve\")"
+      }
+    ]
+  },
+  {
+    "id": "FILE-G01",
+    "title": "HTML preview/code view swap in both directions. `src/shared/console/files/viewer/html.tsx`; no HTML demo fixture.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "blocked": "Initial demo file catalog contains markdown, PDF, XLSX and PNG only, no HTML file or file upload action."
+  },
+  {
+    "id": "FILE-G02",
+    "title": "audio/video media metadata and playback readiness, pause/play and dock behavior. `src/shared/console/files/viewer/section.tsx`; no audio/video demo fixture.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "blocked": "Initial demo file catalog contains no audio/video file or file upload action."
+  },
+  {
+    "id": "FILE-G03",
+    "title": "PNG viewer pending load resolves to preview error in the reserved viewport after a test-page asset request failure",
+    "path": "/files/files_onboarding",
+    "mutating": false,
+    "responses": [
+      {
+        "url": "**/demo/onboarding-flow.png",
+        "status": 500,
+        "delay": 1500,
+        "body": "{\"error\":\"Layout probe simulated asset failure\"}"
+      }
+    ]
+  },
+  {
+    "id": "FILE-G04",
+    "title": "oversized text or missing URL download fallback; file authorized/missing/unauthorized data resolution. `src/shared/console/files/body.tsx`, `src/console/files/view.tsx`; no such initial demo fixture.",
+    "path": "/chat/conversations_renewals",
+    "mutating": false,
+    "blocked": "Initial demo file catalog contains no oversized text or missing URL; authenticated account file data is not represented in this slice."
+  },
+  {
+    "id": "CHAT-G15",
+    "title": "Load earlier messages and preserve position across prepended history",
+    "path": "/chat/md70a3a80wscwaekp8tdkw7f8n8e4rr8",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Authorized hello conversation has no earlier history page; demo hard-codes hasMore=false. Existing scroll tests protect prepend behavior but are not browser evidence."
+  }
+]
