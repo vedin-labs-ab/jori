@@ -76,7 +76,8 @@ export async function drive(
     }
     shifts.length = 0
     errors.length = 0
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 })
+    await page.goto(url, { waitUntil: "commit", timeout: 90_000 })
+    await page.waitForFunction(() => Boolean(window.__layout))
     let before: Snapshot | undefined
     if (scenario.steps?.length) {
       await settle(page)

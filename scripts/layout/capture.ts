@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises"
 import path from "node:path"
-import { type Page } from "playwright"
+import { type CDPSession, type Page } from "playwright"
 import { type Snapshot } from "./types.ts"
 
 export async function settle(page: Page) {
@@ -17,14 +17,10 @@ export async function settle(page: Page) {
 export async function screenshot(page: Page, file: string) {
   const cdp = await page.context().newCDPSession(page)
   try {
-    const { data } = await cdp.send("Page.captureScreenshot", {
-      format: "png",
-      captureBeyondViewport: false,
-      fromSurface: true,
-    })
+    const { data } = await capturePng(cdp)
     await writeFile(file, Buffer.from(data, "base64"))
   } finally {
-    await cdp.detach()
+    await cdp.detach().catch(() => {})
   }
 }
 
@@ -50,11 +46,25 @@ async function timedSnapshots(page: Page) {
   )
 }
 
-export async function samples(page: Page, output: string) {
+async function capturePng(cdp: CDPSession) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await cdp.send("Page.captureScreenshot", {
+        format: "png",
+        captureBeyondViewport: false,
+        fromSurface: true,
+      })
+    } catch (error) {
+      if (attempt === 2) {
+        throw error
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50 * (attempt + 1)))
+    }
+  }
+}
+
+async function timedScreenshots(page: Page, output: string) {
   const start = Date.now()
-  const settling = settle(page)
-  // Timers sample geometry independently of PNG encoding and I/O.
-  const snapshots = timedSnapshots(page)
   const images: { screenshot: string; screenshotElapsed: number }[] = []
   for (const ms of [0, 250, 1000, 3000]) {
     await page.waitForTimeout(Math.max(0, start + ms - Date.now()))
@@ -62,11 +72,31 @@ export async function samples(page: Page, output: string) {
     await screenshot(page, file)
     images.push({ screenshot: file, screenshotElapsed: Date.now() - start })
   }
-  const captured = (await snapshots).map((sample, index) => ({
+  return images
+}
+
+function fulfilled<T>(result: PromiseSettledResult<T>) {
+  if (result.status === "rejected") {
+    throw result.reason
+  }
+  return result.value
+}
+
+export async function samples(page: Page, output: string) {
+  const start = Date.now()
+  // Handle every branch immediately. Closing a failed capture must never
+  // leave a timer or the network-idle wait rejecting in the background.
+  const [geometry, pictures, settled] = await Promise.allSettled([
+    timedSnapshots(page),
+    timedScreenshots(page, output),
+    settle(page),
+  ])
+  const images = fulfilled(pictures)
+  const captured = fulfilled(geometry).map((sample, index) => ({
     ...sample,
     ...images[index],
   }))
-  const networkIdle = await settling
+  const networkIdle = fulfilled(settled)
   const snapshot = await page.evaluate(() => window.__layout.snapshot())
   const file = path.join(output, "settled.png")
   await screenshot(page, file)
