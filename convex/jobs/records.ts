@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, internalQuery } from "../_generated/server"
+import { runExecutionIsCurrent } from "../sessions/execution"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   createResourceSight,
@@ -98,7 +99,7 @@ export const canExecuteRunTools = internalQuery({
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
 
-    return run !== null && (await canExecuteJobRunTools(ctx, run))
+    return run !== null && (await runExecutionIsCurrent(ctx, run)) && (await canExecuteJobRunTools(ctx, run))
   },
 })
 

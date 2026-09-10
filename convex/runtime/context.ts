@@ -40,6 +40,7 @@ export async function loadRuntime(
   ctx: ActionCtx,
   runId: Id<"runs">
 ): Promise<LoadedRuntime> {
+  await ctx.runMutation(internal.sessions.execution.reconcile, { runId })
   const { input, session } = await loadRunRecords(ctx, runId)
   const { run } = input
   const skills = await loadRuntimeSkills(ctx, run.organizationId)

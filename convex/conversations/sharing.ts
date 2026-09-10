@@ -1,6 +1,5 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { executesAsOrganization } from "../runs/principal"
 import { stopRunTree } from "../runs/tree"
 import { findSession } from "../sessions/data"
 import { createPersonActor } from "../shared/actor"
@@ -15,27 +14,24 @@ export async function transitionConversationVisibility(
   visibility: StoredVisibility,
   actorId: Id<"persons">
 ) {
-  const changesPrincipal =
-    executesAsOrganization(conversationVisibility(conversation)) !==
-    executesAsOrganization(visibility)
+  const changesScope =
+    JSON.stringify(conversationVisibility(conversation)) !==
+    JSON.stringify(visibility)
 
-  if (changesPrincipal) {
-    await resetConversationSession(ctx, conversation, actorId)
+  if (changesScope) {
+    await resetConversationExecution(ctx, conversation, actorId)
   }
 
   await ctx.db.patch(conversation._id, {
     visibility,
     scope: visibility.mode === "private" ? "person" : "conversation",
-    ...(changesPrincipal
-      ? { summary: undefined, summarizedAt: undefined, debounce: undefined }
-      : {}),
   })
 }
 
-async function resetConversationSession(
+export async function resetConversationExecution(
   ctx: MutationCtx,
   conversation: Doc<"conversations">,
-  actorId: Id<"persons">
+  actorId?: Id<"persons">
 ) {
   const session = await findSession(ctx, conversation._id)
 
@@ -53,4 +49,9 @@ async function resetConversationSession(
   if (conversation.debounce !== undefined) {
     await ctx.scheduler.cancel(conversation.debounce.functionId)
   }
+  await ctx.db.patch(conversation._id, {
+    summary: undefined,
+    summarizedAt: undefined,
+    debounce: undefined,
+  })
 }

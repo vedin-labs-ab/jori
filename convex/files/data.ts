@@ -6,9 +6,11 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
+import { runExecutionIsCurrent } from "../sessions/execution"
 import { boundedNumber, optionalString } from "../shared/input"
 import {
   createResourceSight,
+  resourceCreation,
   type ResourceViewer,
   resourceViewerArgs,
 } from "../visibility/resources"
@@ -29,7 +31,8 @@ export const record = internalMutation({
       if (
         run === null ||
         run.organizationId !== args.organizationId ||
-        isTerminalRunStatus(run.status)
+        isTerminalRunStatus(run.status) ||
+        !(await runExecutionIsCurrent(ctx, run))
       ) {
         throw new Error("This run is no longer active.")
       }
@@ -39,6 +42,9 @@ export const record = internalMutation({
 
     return await ctx.db.insert("files", {
       ...args,
+      ...(args.runId === undefined
+        ? {}
+        : await resourceCreation(ctx, { organizationId: args.organizationId, runId: args.runId })),
       createdAt: now,
       updatedAt: now,
     })

@@ -16,6 +16,7 @@ import { boundedNumber } from "../shared/input"
 import { defaultDrainLimit, formatRuntimeMessage, maxDrainLimit } from "./batch"
 import { cursorWithMessage, cursorWithReaction } from "./cursor"
 import { readPendingBatch } from "./data"
+import { reconcileRunExecution, runExecutionIsCurrent } from "./execution"
 import { emitRecencyContexts, type RecencyEmission } from "./recency"
 
 export const messages = internalMutation({
@@ -41,6 +42,15 @@ export async function drainSession(
   const session = await ctx.db.get(args.sessionId)
 
   if (session?.runId !== args.runId) {
+    return { contexts: [], hasMore: false, interactions: [], messages: [] }
+  }
+
+  const run = await ctx.db.get(args.runId)
+
+  if (run === null || !(await runExecutionIsCurrent(ctx, run))) {
+    if (run !== null) {
+      await reconcileRunExecution(ctx, run)
+    }
     return { contexts: [], hasMore: false, interactions: [], messages: [] }
   }
 
