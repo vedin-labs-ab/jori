@@ -16,6 +16,7 @@ import { markIntegrationOfferCancelled } from "../../integrations/offers/transit
 import { ensureCurrentPerson } from "../../persons/account"
 import { createPersonActor } from "../../shared/actor"
 import { integrationLabel } from "../../shared/integrations"
+import { canSeeRun } from "../visibility"
 
 const consoleOfferArgs = {
   integrationOfferId: v.id("integrationOffers"),
@@ -116,6 +117,17 @@ async function requireConsoleOffer(ctx: MutationCtx, args: ConsoleOfferArgs) {
 
 // Callers must authorize organization access before looking up the offer.
 async function findConsoleOffer(ctx: MutationCtx, args: ConsoleOfferArgs) {
+  const personId = await ensureCurrentPerson(ctx, args.organizationId)
+  const run = await ctx.db.get(args.runId)
+
+  if (
+    run === null ||
+    run.organizationId !== args.organizationId ||
+    !(await canSeeRun(ctx, run, personId))
+  ) {
+    return null
+  }
+
   const offer = await ctx.db.get(args.integrationOfferId)
 
   return offer?.organizationId === args.organizationId &&

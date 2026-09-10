@@ -1,4 +1,5 @@
 import { type MutationCtx } from "../_generated/server"
+import { canonicalPersonId } from "../persons/data"
 import { type IdentityProvider } from "../persons/identity/schema"
 import { resolveActor } from "../persons/resolve"
 import { type Actor } from "../shared/actor"
@@ -15,10 +16,12 @@ export async function resolveApprovalActor(
   const provider = approvalIdentityProvider(args.surface)
 
   if (provider === undefined) {
-    return
+    return "personId" in args.actor
+      ? await canonicalPersonId(ctx, args.actor.personId)
+      : undefined
   }
 
-  await resolveActor(ctx, {
+  return await resolveActor(ctx, {
     actor: args.actor,
     provider,
     organizationId: args.organizationId,
