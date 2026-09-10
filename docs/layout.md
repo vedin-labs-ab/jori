@@ -10,6 +10,9 @@ and scroll jumps. Review screenshots and element geometry alongside the score.
   set of labels and tabular digits for clocks. Let longer content grow naturally.
 - Use `FieldError reserve` where validation appears between existing fields.
   Empty slots stay out of the accessibility tree; real errors remain alerts.
+- In store and table cells, use `CellError` for an anchored validation overlay
+  and a destructive cell ring. Keep error text and reserved error space out of
+  the grid so its rows retain their height.
 - Retain a closing dialog's displayed data until its exit finishes. Seed or
   clear drafts on the next opening. An unrelated data refresh must not erase
   an edited draft.
