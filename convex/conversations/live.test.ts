@@ -118,6 +118,7 @@ test("a thread with no run yet has no context to show", async () => {
   const conversationId = await database.insert("conversations", {
     organizationId,
     surface: "console",
+    visibility: { mode: "private" },
     externalId: "",
     scope: "person",
     createdBy: await person(database),

@@ -47,6 +47,7 @@ test("a thread with no session yet has no draft", async () => {
   const conversationId = await database.insert("conversations", {
     organizationId,
     surface: "console",
+    visibility: { mode: "private" },
     externalId: "",
     scope: "person",
     createdBy: await person(database),
