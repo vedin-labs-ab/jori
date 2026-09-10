@@ -15,14 +15,13 @@ import {
   type RunAudienceFilter,
   type RunFilter,
   runFilterValidator,
-  runMatchesAudienceFilter,
   runMatchesFilter,
   scanPage,
   summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
 import { type RunSummary, summarizeRun } from "./console/summaries"
-import { canSeeRun } from "./visibility"
+import { canSeeRun, runMatchesVisibilityFilter } from "./visibility"
 
 /** What the listing keeps: the runs a person may see, under the facets
  *  and search the page shows. */
@@ -142,7 +141,7 @@ async function matchListing(
 ): Promise<{ row?: RunSummary } | null> {
   if (
     !(await canSeeRun(ctx, run, listing.personId)) ||
-    !runMatchesAudienceFilter(run, listing.audienceFilter) ||
+    !(await runMatchesVisibilityFilter(ctx, run, listing.audienceFilter)) ||
     !runMatchesFilter(run, listing.runFilter)
   ) {
     return null

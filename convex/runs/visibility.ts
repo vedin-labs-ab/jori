@@ -31,3 +31,23 @@ export async function canSeeRun(
 
   return runVisibleToPerson(run, personId)
 }
+
+/** The console's facet follows the chat's live personal/workspace setting. */
+export async function runMatchesVisibilityFilter(
+  ctx: QueryLikeCtx,
+  run: Doc<"runs">,
+  filter: import("./console/filters").RunAudienceFilter
+) {
+  if (filter === "all") {
+    return true
+  }
+  const conversation =
+    run.conversationId === undefined
+      ? null
+      : await ctx.db.get(run.conversationId)
+  const shared =
+    conversation?.surface === "console"
+      ? conversationGate(conversation).visibility.mode !== "private"
+      : run.audience === "organization"
+  return filter === "organization" ? shared : !shared
+}

@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { internalQuery } from "../../_generated/server"
 import { loadActivityData } from "../activity/load"
 import { projectActivity } from "../activity/project"
-import { canSee } from "./access"
+import { canInspectRun } from "./access"
 import {
   matchesActivityFilter,
   normalizeQuery,
@@ -66,12 +66,22 @@ export const searchRunActivity = internalQuery({
       ctx.db.get(targetRunId),
     ])
 
-    if (current === null || target === null || !canSee(current, target)) {
+    if (
+      current === null ||
+      target === null ||
+      !(await canInspectRun(ctx, current, target))
+    ) {
       return { cursor: null, items: [] }
     }
 
     const items = projectActivity(
-      await loadActivityData(ctx, target, current.createdBy)
+      await loadActivityData(
+        ctx,
+        target,
+        current.principal.kind === "person"
+          ? current.principal.personId
+          : undefined
+      )
     ).filter((item) => matchesActivityFilter(item, args.filter))
     const page = pageItems(items, {
       cursor: args.cursor,

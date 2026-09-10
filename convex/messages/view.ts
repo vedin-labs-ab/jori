@@ -47,10 +47,9 @@ export async function consoleMessageViews(
     id: message._id,
     role:
       message.actor?.kind === "self" ? ("jori" as const) : ("person" as const),
-    author:
-      message.personId === undefined
-        ? undefined
-        : authors.get(message.personId),
+    ...(message.personId === undefined
+      ? {}
+      : { author: authors.get(message.personId) }),
     text: message.text ?? "",
     data: message.data,
     createdAt: message.createdAt,

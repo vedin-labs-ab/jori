@@ -2,6 +2,8 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { messageIdentifiers } from "../../messages/identifiers"
 import { type Audience } from "../../shared/audience"
+import { createSight } from "../../visibility/sight"
+import { conversationGate } from "../access"
 import {
   recencyConversationLimit,
   recencyMessageLimit,
@@ -64,11 +66,12 @@ export async function loadRecentActivity(
 
     visited.add(conversation._id)
 
-    const includable = canIncludeRecentConversation({
-      candidateAudience: conversation.scope,
-      currentAudience: args.run.audience,
-      personal,
-    })
+    const includable = await canIncludeConversation(
+      ctx,
+      conversation,
+      args.run,
+      personal
+    )
 
     if (!includable) {
       continue
@@ -187,3 +190,23 @@ const messageLevelIdentifierPrefixes = [
   "linear:thread:",
   "slack:message:",
 ]
+
+async function canIncludeConversation(
+  ctx: QueryCtx,
+  conversation: Doc<"conversations">,
+  run: RecencyRun,
+  personal: boolean
+) {
+  if (conversation.surface === "console") {
+    return await createSight(ctx, {
+      organizationId: conversation.organizationId,
+      personId:
+        run.audience === "person" && personal ? run.personId : undefined,
+    }).canSee(conversationGate(conversation))
+  }
+  return canIncludeRecentConversation({
+    candidateAudience: conversation.scope,
+    currentAudience: run.audience,
+    personal,
+  })
+}
