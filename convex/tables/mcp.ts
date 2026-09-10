@@ -11,6 +11,7 @@ import {
   requiredObject,
   requiredString,
 } from "../shared/input"
+import { type ResourceViewer } from "../visibility/resources"
 import { visibilityFromInput } from "../visibility/schema"
 import { agentTableSummary } from "./access"
 
@@ -29,32 +30,16 @@ export function isJoriTableTool(tool: string) {
   return tableTools.has(tool)
 }
 
-type TablePrincipal = {
-  organizationId: string
-  personId?: Id<"persons">
-  runId?: Id<"runs">
-}
-
 export async function callJoriTableTool(
   ctx: ActionCtx,
-  execution: {
-    organizationId: string
-    createdBy?: Id<"persons">
-    runId?: Id<"runs">
-  },
+  viewer: ResourceViewer,
   request: JoriToolRequest
 ): Promise<unknown> {
   const args = readRecord(request.args)
-  const principal = {
-    organizationId: execution.organizationId,
-    personId: execution.createdBy,
-    runId: execution.runId,
-  }
-
   switch (request.tool) {
     case "search_tables":
       return await ctx.runQuery(internal.tables.queries.search, {
-        ...principal,
+        ...viewer,
         query: optionalString(args.query),
         includeArchived: args.includeArchived === true,
         limit: boundedNumber(args.limit, 25, 1, 100),
@@ -62,7 +47,7 @@ export async function callJoriTableTool(
     case "create_table":
       return agentTableSummary(
         await ctx.runMutation(internal.tables.records.create, {
-          ...principal,
+          ...viewer,
           name: requiredString(args.name, "name"),
           visibility:
             args.visibility === undefined
@@ -73,12 +58,12 @@ export async function callJoriTableTool(
       )
     case "read_table":
       return await ctx.runQuery(internal.tables.queries.read, {
-        ...principal,
+        ...viewer,
         tableId: requiredTableId(args.tableId),
       })
     case "list_table_rows":
       return await ctx.runQuery(internal.tables.rows.page, {
-        ...principal,
+        ...viewer,
         tableId: requiredTableId(args.tableId),
         paginationOpts: {
           numItems: boundedNumber(args.limit, 50, 1, 200),
@@ -88,32 +73,32 @@ export async function callJoriTableTool(
       })
     case "share_table":
       return await ctx.runMutation(internal.tables.share.mint, {
-        ...principal,
+        ...viewer,
         tableId: requiredTableId(args.tableId),
         expiresInHours: optionalNumber(args.expiresInHours),
       })
     default:
-      return await callJoriTableRowTool(ctx, principal, request.tool, args)
+      return await callJoriTableRowTool(ctx, viewer, request.tool, args)
   }
 }
 
 async function callJoriTableRowTool(
   ctx: ActionCtx,
-  principal: TablePrincipal,
+  viewer: ResourceViewer,
   tool: string,
   args: Record<string, unknown>
 ): Promise<unknown> {
   switch (tool) {
     case "insert_table_row":
       return await ctx.runMutation(internal.tables.rows.insert, {
-        ...principal,
+        ...viewer,
         tableId: requiredTableId(args.tableId),
         values: requiredObject(args.values, "values"),
         keyedBy: "name",
       })
     case "update_table_row":
       return await ctx.runMutation(internal.tables.rows.update, {
-        ...principal,
+        ...viewer,
         tableId: requiredTableId(args.tableId),
         rowId: requiredRowId(args.rowId),
         values: requiredObject(args.values, "values"),
@@ -122,7 +107,7 @@ async function callJoriTableRowTool(
       })
     case "delete_table_row":
       return await ctx.runMutation(internal.tables.rows.remove, {
-        ...principal,
+        ...viewer,
         tableId: requiredTableId(args.tableId),
         rowId: requiredRowId(args.rowId),
         expectedVersion: normalizeExpectedVersion(args.expectedVersion),

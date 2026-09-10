@@ -4,11 +4,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu"
-import { ChatMenuItems } from "@/shared/console/chat/menu"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
+import { MaterialFilingItems } from "@/shared/console/materials/actions"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
@@ -66,7 +66,7 @@ function FiledChatMenu({ chat }: { chat: DemoConversation }) {
       <DropdownMenu>
         <RowMenuTrigger name={chat.title} />
         <DropdownMenuContent align="end" className={menuWidth}>
-          <ChatMenuItems {...items} />
+          <MaterialFilingItems {...items} />
         </DropdownMenuContent>
       </DropdownMenu>
       {dialogs}

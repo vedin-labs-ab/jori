@@ -12,6 +12,7 @@ import {
   requiredString,
   requiredStringArray,
 } from "../shared/input"
+import { type ResourceViewer } from "../visibility/resources"
 import { visibilityFromInput } from "../visibility/schema"
 
 const storeTools = new Set([
@@ -28,31 +29,21 @@ export function isJoriStoreTool(tool: string) {
 
 export async function callJoriStoreTool(
   ctx: ActionCtx,
-  execution: {
-    organizationId: string
-    createdBy?: Id<"persons">
-    runId?: Id<"runs">
-  },
+  viewer: ResourceViewer,
   request: JoriToolRequest
 ): Promise<unknown> {
   const args = readRecord(request.args)
-  const principal = {
-    organizationId: execution.organizationId,
-    personId: execution.createdBy,
-    runId: execution.runId,
-  }
-
   switch (request.tool) {
     case "search_stores":
       return await ctx.runQuery(internal.stores.queries.search, {
-        ...principal,
+        ...viewer,
         query: optionalString(args.query),
         includeArchived: args.includeArchived === true,
         limit: boundedNumber(args.limit, 25, 1, 100),
       })
     case "create_store":
       return await ctx.runMutation(internal.stores.records.create, {
-        ...principal,
+        ...viewer,
         name: requiredString(args.name, "name"),
         visibility:
           args.visibility === undefined
@@ -62,19 +53,19 @@ export async function callJoriStoreTool(
       })
     case "read_store":
       return await ctx.runQuery(internal.stores.values.read, {
-        ...principal,
+        ...viewer,
         storeId: requiredStoreId(args.storeId),
       })
     case "write_store":
       return await ctx.runMutation(internal.stores.values.write, {
-        ...principal,
+        ...viewer,
         storeId: requiredStoreId(args.storeId),
         expectedVersion: normalizeExpectedVersion(args.expectedVersion),
         write: normalizeStoreWriteInput(args),
       })
     case "share_store":
       return await ctx.runMutation(internal.stores.share.mint, {
-        ...principal,
+        ...viewer,
         storeId: requiredStoreId(args.storeId),
         expiresInHours: optionalNumber(args.expiresInHours),
       })

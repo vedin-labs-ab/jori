@@ -43,17 +43,22 @@ export async function callJoriTool(
   }
 
   const run = isBrokerContext(context) ? context.run : context
+  const viewer = {
+    organizationId: run.organizationId,
+    personId: executionPrincipalPersonId(run.principal),
+    runId: run._id,
+  }
 
   if (isJoriFileTool(request.tool)) {
-    return await callJoriFileTool(ctx, run, request)
+    return await callJoriFileTool(ctx, viewer, request)
   }
 
   if (isJoriTableTool(request.tool)) {
-    return await callJoriTableTool(ctx, toJoriContext(run), request)
+    return await callJoriTableTool(ctx, viewer, request)
   }
 
   if (isJoriStoreTool(request.tool)) {
-    return await callJoriStoreTool(ctx, toJoriContext(run), request)
+    return await callJoriStoreTool(ctx, viewer, request)
   }
 
   if (request.tool === "web_search" || request.tool === "web_fetch") {
@@ -72,7 +77,17 @@ export async function callJoriTool(
     return await callWorkstreamTool(ctx, run, request)
   }
 
-  return await callJoriJobTool(ctx, toJoriContext(run), request)
+  return await callJoriJobTool(
+    ctx,
+    {
+      ...viewer,
+      job: run.job && {
+        id: run.job.parentId ?? run.job.id,
+        version: run.job.version,
+      },
+    },
+    request
+  )
 }
 
 function isBrokerScopedJoriTool(tool: string) {
@@ -122,21 +137,6 @@ type JoriRunContext = {
     id: Id<"jobs">
     parentId?: Id<"jobs">
     version?: number
-  }
-}
-
-function toJoriContext(run: JoriRunContext) {
-  return {
-    organizationId: run.organizationId,
-    createdBy: executionPrincipalPersonId(run.principal),
-    runId: run._id,
-    job:
-      run.job === undefined
-        ? undefined
-        : {
-            id: run.job.parentId ?? run.job.id,
-            version: run.job.version,
-          },
   }
 }
 

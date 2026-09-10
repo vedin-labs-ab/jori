@@ -8,11 +8,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
-import { ChatMenuItems } from "@/shared/console/chat/menu"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
+import { MaterialFilingItems } from "@/shared/console/materials/actions"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
@@ -54,9 +54,9 @@ function ChatResourceMenu({ actions, resource }: ResourceMenu) {
     <DropdownMenu>
       <RowMenuTrigger name={resource.name} />
       <DropdownMenuContent align="end" className={menuWidth}>
-        <ChatMenuItems
+        <MaterialFilingItems
           onAccess={() => actions.onAccess(resource)}
-          onMove={() => actions.onMove(resource)}
+          onMoveToFolder={() => actions.onMove(resource)}
           onUnfile={() => actions.onUnfile(resource)}
         />
       </DropdownMenuContent>

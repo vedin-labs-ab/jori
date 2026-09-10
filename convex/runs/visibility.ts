@@ -16,17 +16,6 @@ export async function canSeeRun(
     personId,
   })
 ): Promise<boolean> {
-  if (run.conversationId !== undefined) {
-    const conversation = await ctx.db.get(run.conversationId)
-
-    if (
-      conversation === null ||
-      conversation.organizationId !== run.organizationId
-    ) {
-      return false
-    }
-  }
-
   const gate = await runResourceGate(ctx, run)
   if (gate === null) {
     return false

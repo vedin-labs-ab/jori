@@ -15,7 +15,7 @@ export function useDemoChatMenu(conversation: DemoConversation) {
   const items = useMemo(
     () => ({
       onAccess: () => setSharing(true),
-      onMove: () => setMoving(true),
+      onMoveToFolder: () => setMoving(true),
       onUnfile:
         conversation.folderId === undefined
           ? undefined

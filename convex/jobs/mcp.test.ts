@@ -12,7 +12,7 @@ test("job runs own the one-time jobs they create", async () => {
     { runMutation } as unknown as ActionCtx,
     {
       organizationId: "organization",
-      createdBy: "person" as Id<"persons">,
+      personId: "person" as Id<"persons">,
       job: { id: jobId, version: 3 },
     },
     { tool: "add_job", args: jobArgs("once") }
@@ -21,6 +21,7 @@ test("job runs own the one-time jobs they create", async () => {
   expect(runMutation).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({
+      createdBy: "person",
       parent: { id: jobId, version: 3 },
       type: "once",
     })
@@ -33,14 +34,14 @@ test("manual and durable creations stay unowned", async () => {
 
   await callJoriJobTool(
     ctx,
-    { organizationId: "organization", createdBy: "person" as Id<"persons"> },
+    { organizationId: "organization", personId: "person" as Id<"persons"> },
     { tool: "add_job", args: jobArgs("once") }
   )
   await callJoriJobTool(
     ctx,
     {
       organizationId: "organization",
-      createdBy: "person" as Id<"persons">,
+      personId: "person" as Id<"persons">,
       job: { id: "parent" as Id<"jobs"> },
     },
     { tool: "add_job", args: jobArgs("cron") }
@@ -87,20 +88,35 @@ test("an owned run keeps its durable parent after the child fires", async () => 
   )
 })
 
-test("known job IDs remain directly readable", async () => {
+test("known job IDs use the broker's viewer instead of supplied identity", async () => {
   const runQuery = vi.fn(async () => ({ id: "child" }))
   const jobId = "child" as Id<"jobs">
 
-  await callJoriJobTool(
+  await callJoriTool(
     { runQuery } as unknown as ActionCtx,
-    { organizationId: "organization", createdBy: "person" as Id<"persons"> },
-    { tool: "read_job", args: { jobId } }
+    {
+      organizationId: "organization",
+      _id: "runs_shared" as Id<"runs">,
+      principal: { kind: "organization" },
+      job: { id: "parent" as Id<"jobs"> },
+    },
+    {
+      tool: "read_job",
+      args: {
+        jobId,
+        organizationId: "forged",
+        personId: "forged",
+        runId: "forged",
+      },
+    }
   )
 
-  expect(runQuery).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.objectContaining({ jobId, organizationId: "organization" })
-  )
+  expect(runQuery).toHaveBeenCalledWith(expect.anything(), {
+    jobId,
+    organizationId: "organization",
+    personId: undefined,
+    runId: "runs_shared",
+  })
 })
 
 function jobArgs(type: "once" | "cron") {

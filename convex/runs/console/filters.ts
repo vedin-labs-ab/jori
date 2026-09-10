@@ -61,21 +61,6 @@ export function runVisibleToPerson(
   )
 }
 
-/** Conversation runs read as personal: they belong to the thread their
- *  creator was in, not to the organization. */
-export function runMatchesAudienceFilter(
-  run: Doc<"runs">,
-  filter: RunAudienceFilter
-) {
-  if (filter === "all") {
-    return true
-  }
-
-  return filter === "organization"
-    ? run.audience === "organization"
-    : run.audience !== "organization"
-}
-
 export function runMatchesFilter(run: Doc<"runs">, filter: RunFilter) {
   if (filter === "all") {
     return true

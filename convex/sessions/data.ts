@@ -91,10 +91,6 @@ export async function readPendingBatch(
   session: Doc<"sessions">,
   limit = defaultDrainLimit
 ): Promise<PendingBatch> {
-  if (session.conversationId === undefined) {
-    return { hasMore: false, messages: [] }
-  }
-
   const conversation = await ctx.db.get(session.conversationId)
 
   if (conversation === null) {

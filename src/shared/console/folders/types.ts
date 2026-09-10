@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { fileKind } from "@/shared/files/kind"
 import { type api } from "../../../../convex/_generated/api"
+import { type ConsoleDestination } from "../shell/location"
 
 type FolderTreeResult = FunctionReturnType<typeof api.folders.console.tree>
 export type FolderRow = FolderTreeResult["folders"][number]
@@ -77,6 +78,27 @@ export function resourcePresentation(resource: {
       return { icon: Workflow, label: "Job" }
     case "chat":
       return { icon: MessageSquare, label: "Chat" }
+  }
+}
+
+export function resourceDestination(resource: {
+  type: FolderResource["type"]
+  id: string
+}): ConsoleDestination {
+  switch (resource.type) {
+    case "table":
+      return { to: "/tables/$tableId", params: { tableId: resource.id } }
+    case "store":
+      return { to: "/stores/$storeId", params: { storeId: resource.id } }
+    case "file":
+      return { to: "/files/$fileId", params: { fileId: resource.id } }
+    case "job":
+      return { to: "/jobs/$jobId", params: { jobId: resource.id } }
+    case "chat":
+      return {
+        to: "/chat/$conversationId",
+        params: { conversationId: resource.id },
+      }
   }
 }
 
