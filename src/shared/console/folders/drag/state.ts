@@ -152,7 +152,7 @@ function useDragSource(id: string, payload: DragPayload) {
     isDragSource: draggable.isDragging,
     listeners: draggable.listeners,
     onClickCapture: (event: React.MouseEvent) => {
-      if (wasDragged.current) {
+      if (wasDragged.current && event.detail > 0) {
         event.preventDefault()
         event.stopPropagation()
       }
