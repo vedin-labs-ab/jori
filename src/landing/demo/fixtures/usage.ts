@@ -1,3 +1,4 @@
+import { chatRunMicros, renewalsConversationId } from "./chat"
 import { day } from "./clock"
 import { folderId } from "./folders"
 import { jobId } from "./jobs"
@@ -12,6 +13,7 @@ export type UsageRow = {
   date: string
   folderId?: FolderId
   job?: { id: JobId; label: string }
+  conversationId?: string
   micros: number
   ended: number
   failed: number
@@ -133,7 +135,27 @@ export function demoUsage(now: number): UsageRow[] {
     (_, offset) => now - offset * day
   )
 
-  return contributors.flatMap((entry) => contributorRows(entry, days))
+  const rows = contributors.flatMap((entry) => contributorRows(entry, days))
+  const interactive = rows.find(
+    (row) =>
+      row.job === undefined &&
+      row.ended > row.failed &&
+      row.micros >= chatRunMicros
+  )
+
+  if (interactive !== undefined) {
+    interactive.micros -= chatRunMicros
+    interactive.ended -= 1
+    rows.push({
+      conversationId: renewalsConversationId,
+      date: interactive.date,
+      micros: chatRunMicros,
+      ended: 1,
+      failed: 0,
+    })
+  }
+
+  return rows
 }
 
 /** The calendar day a moment falls on, in the zone the rows are kept in. */

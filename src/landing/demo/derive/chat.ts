@@ -2,7 +2,9 @@ import {
   type ChatReference,
   type ReferenceTarget,
 } from "@/shared/console/chat/types"
+import { moveTarget, resourceSubject } from "@/shared/console/folders/types"
 import { type ActivityItem } from "@/shared/console/runs/activity/types"
+import { type DemoConversation } from "../fixtures/chat"
 import { log } from "../fixtures/runs/steps"
 import { type DemoState } from "../state/types"
 import { folderOf, folderTrail } from "./folders"
@@ -23,7 +25,12 @@ export function resolveReference(
 
       return conversation === undefined
         ? undefined
-        : { kind, id, name: conversation.title }
+        : {
+            kind,
+            id,
+            name: conversation.title,
+            detail: trail(state, conversation.folderId),
+          }
     }
     case "folder": {
       const folder = folderOf(state, id)
@@ -59,6 +66,15 @@ export function resolveReference(
           }
     }
   }
+}
+
+export function chatMoveSubject(conversation: DemoConversation) {
+  return resourceSubject([
+    moveTarget("chat", conversation.id, {
+      name: conversation.title,
+      folderId: conversation.folderId,
+    }),
+  ])
 }
 
 /** Where something is filed, as the folders from the root down. */
