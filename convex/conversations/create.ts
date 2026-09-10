@@ -37,6 +37,7 @@ export async function createConsoleConversation(
     surface: "console",
     externalId: "",
     scope: "person",
+    visibility: { mode: "private" },
     title: conversationTitle(args.text),
     folderId: context?.folderId,
     createdBy: args.personId,
