@@ -1,6 +1,5 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { type RunToolSnapshot } from "../agent/tools/snapshot"
 import { getRunOffers } from "./offers"
 
 export async function getRunContext(
@@ -98,24 +97,6 @@ async function getPreparedRun(ctx: QueryCtx, run: Doc<"runs">) {
     .first()
 
   return {
-    tools: readPreparedTools(prepared),
+    tools: prepared?.type === "run.prepared" ? prepared.data.tools : undefined,
   }
-}
-
-function readPreparedTools(
-  prepared: Doc<"traces"> | null
-): RunToolSnapshot | undefined {
-  if (prepared?.type !== "run.prepared") {
-    return undefined
-  }
-
-  return isToolSnapshot(prepared.data.tools) ? prepared.data.tools : undefined
-}
-
-function isToolSnapshot(value: unknown): value is RunToolSnapshot {
-  if (typeof value !== "object" || value === null) {
-    return false
-  }
-
-  return "groups" in value && "webSearch" in value
 }

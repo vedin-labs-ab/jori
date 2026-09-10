@@ -1,30 +1,34 @@
 import { type Doc } from "../../_generated/dataModel"
-import {
-  type ModelUsage,
-  readModelName,
-  readModelReasoning,
-  readModelUsage,
-  readTraceData,
-  readTraceError,
-  traceSequence,
-} from "./read"
+import { optionalString } from "../../shared/input"
+import { type ModelUsage, readModelUsage } from "./read"
 import {
   type ActivityDetail,
   type ActivityItem,
   type ActivityTokenUsage,
 } from "./types"
 
+type ModelTrace = Extract<
+  Doc<"traces">,
+  { type: "model.started" | "model.completed" | "model.failed" }
+>
+type ModelTerminal = Exclude<ModelTrace, { type: "model.started" }>
+
+const modelReasoningCharacterLimit = 1500
+
 export function projectModelTraces(
   traces: Doc<"traces">[],
   isRunLive: boolean
 ): ActivityItem[] {
-  const starts = new Map<string, Doc<"traces">>()
-  const terminals = new Map<string, Doc<"traces">>()
+  const starts = new Map<string, ModelTrace>()
+  const terminals = new Map<string, ModelTerminal>()
 
   for (const trace of traces) {
     if (trace.type === "model.started") {
       starts.set(modelTraceKey(trace), trace)
-    } else if (isTerminalModelTrace(trace)) {
+    } else if (
+      trace.type === "model.completed" ||
+      trace.type === "model.failed"
+    ) {
       terminals.set(modelTraceKey(trace), trace)
     }
   }
@@ -40,7 +44,7 @@ export function projectModelTraces(
 }
 
 function projectModelStart(
-  trace: Doc<"traces">,
+  trace: ModelTrace,
   isRunLive: boolean
 ): ActivityItem {
   return {
@@ -54,26 +58,33 @@ function projectModelStart(
 }
 
 function projectModelTerminal(
-  trace: Doc<"traces">,
-  started: Doc<"traces"> | undefined
+  trace: ModelTerminal,
+  started: ModelTrace | undefined
 ): ActivityItem {
   const failed = trace.type === "model.failed"
-  const data = readTraceData(trace)
-  const usage = readModelUsage(data)
-  const reasoning = failed ? undefined : readModelReasoning(data)
+  const usage = failed ? undefined : readModelUsage(trace.data.usage)
+  const model = failed ? undefined : optionalString(trace.data.model)
+  const reasoning = failed
+    ? undefined
+    : optionalString(trace.data.reasoning)?.slice(
+        0,
+        modelReasoningCharacterLimit
+      )
 
   return {
     id: trace._id,
     kind: "model",
     status: failed ? "failed" : "completed",
     title: failed ? "Model request failed" : "Model step completed",
-    description: failed ? readTraceError(data) : modelSummary(usage),
-    details: modelDetails(usage, readModelName(data)),
+    description: failed
+      ? optionalString(trace.data.error)
+      : modelSummary(usage),
+    details: modelDetails(usage, model),
     durationMs: usage?.durationMs,
     endedAt: trace.timestamp,
     ...(reasoning === undefined ? {} : { reasoning }),
     startedAt: started?.timestamp ?? trace.timestamp,
-    tokenUsage: modelTokenUsage(usage, readModelName(data)),
+    tokenUsage: modelTokenUsage(usage, model),
   }
 }
 
@@ -135,10 +146,6 @@ function metricDetail(
     : { label, value: new Intl.NumberFormat("en").format(value) }
 }
 
-function modelTraceKey(trace: Doc<"traces">) {
-  return String(traceSequence(trace) ?? trace.timestamp)
-}
-
-function isTerminalModelTrace(trace: Doc<"traces">) {
-  return trace.type === "model.completed" || trace.type === "model.failed"
+function modelTraceKey(trace: ModelTrace) {
+  return String(trace.sequence ?? trace.timestamp)
 }

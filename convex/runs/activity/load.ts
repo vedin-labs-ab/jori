@@ -1,8 +1,9 @@
+import { isRecord } from "../../../contracts/json"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
+import { optionalString } from "../../shared/input"
 import { createSight, type Sight } from "../../visibility/sight"
 import { activityMaterialId } from "./metadata/materials"
-import { readToolInput, readToolName, readTraceData } from "./read"
 import { type ActivityData } from "./types"
 
 const traceLimit = 500
@@ -49,12 +50,14 @@ async function loadCollections(
   sight: Sight
 ) {
   const ids = new Set<Id<"collections">>()
+  const toolTraces = traces.filter(
+    (trace) => trace.type === "tool.started" || trace.type === "tool.failed"
+  )
 
-  for (const trace of traces) {
-    const data = readTraceData(trace)
+  for (const trace of toolTraces) {
     const reference = activityMaterialId(
-      readToolName(data),
-      readToolInput(data)
+      optionalString(trace.data.tool.name),
+      isRecord(trace.data.input) ? trace.data.input : undefined
     )
     const id =
       reference === undefined
