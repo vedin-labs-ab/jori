@@ -60,9 +60,9 @@ export function ProviderButton({
       aria-label={display === "icon" ? getProviderName(provider) : undefined}
     >
       {signInSocialPending ? (
-        <Spinner />
+        <Spinner className="size-3.5" />
       ) : ProviderIcon ? (
-        <ProviderIcon className="size-4" />
+        <ProviderIcon />
       ) : null}
 
       {display === "full"
