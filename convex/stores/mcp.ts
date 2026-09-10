@@ -28,53 +28,53 @@ export function isJoriStoreTool(tool: string) {
 
 export async function callJoriStoreTool(
   ctx: ActionCtx,
-  execution: { organizationId: string; createdBy?: Id<"persons"> },
+  execution: {
+    organizationId: string
+    createdBy?: Id<"persons">
+    runId?: Id<"runs">
+  },
   request: JoriToolRequest
 ): Promise<unknown> {
   const args = readRecord(request.args)
-  const personId = execution.createdBy
-
-  if (personId === undefined) {
-    throw new Error("Store tools require an authenticated execution user.")
+  const principal = {
+    organizationId: execution.organizationId,
+    personId: execution.createdBy,
+    runId: execution.runId,
   }
-
-  const organizationId = execution.organizationId
 
   switch (request.tool) {
     case "search_stores":
       return await ctx.runQuery(internal.stores.queries.search, {
-        organizationId,
-        personId,
+        ...principal,
         query: optionalString(args.query),
         includeArchived: args.includeArchived === true,
         limit: boundedNumber(args.limit, 25, 1, 100),
       })
     case "create_store":
       return await ctx.runMutation(internal.stores.records.create, {
-        organizationId,
-        personId,
+        ...principal,
         name: requiredString(args.name, "name"),
-        visibility: visibilityFromInput(args.visibility),
+        visibility:
+          args.visibility === undefined
+            ? undefined
+            : visibilityFromInput(args.visibility),
         schema: args.schema,
       })
     case "read_store":
       return await ctx.runQuery(internal.stores.values.read, {
-        organizationId,
-        personId,
+        ...principal,
         storeId: requiredStoreId(args.storeId),
       })
     case "write_store":
       return await ctx.runMutation(internal.stores.values.write, {
-        organizationId,
-        personId,
+        ...principal,
         storeId: requiredStoreId(args.storeId),
         expectedVersion: normalizeExpectedVersion(args.expectedVersion),
         write: normalizeStoreWriteInput(args),
       })
     case "share_store":
       return await ctx.runMutation(internal.stores.share.mint, {
-        organizationId,
-        personId,
+        ...principal,
         storeId: requiredStoreId(args.storeId),
         expiresInHours: optionalNumber(args.expiresInHours),
       })

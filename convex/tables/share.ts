@@ -19,13 +19,16 @@ import {
 } from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
+import {
+  type ResourceViewer,
+  resourceViewerArgs,
+} from "../visibility/resources"
 import { getAccessibleTable, summarizeRow } from "./access"
 
 export const mint = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
     expiresInHours: v.optional(v.number()),
   },
   handler: async (ctx, args) => await mintTableShare(ctx, args),
@@ -122,10 +125,8 @@ export const rows = query({
 
 export async function mintTableShare(
   ctx: MutationCtx,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     tableId: Id<"collections">
-    personId: Id<"persons">
     expiresInHours?: number
   }
 ): Promise<MintedShare> {
@@ -139,6 +140,7 @@ export async function mintTableShare(
     target: tableTarget(table._id),
     material: table,
     personId: args.personId,
+    runId: args.runId,
     urlPath: `/tables/${table._id}`,
     expiresInHours: args.expiresInHours,
   })
@@ -146,11 +148,9 @@ export async function mintTableShare(
 
 export async function revokeTableShare(
   ctx: MutationCtx,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     tableId: Id<"collections">
     shareId: Id<"shares">
-    personId: Id<"persons">
   }
 ) {
   const table = await getAccessibleTable(ctx, args)

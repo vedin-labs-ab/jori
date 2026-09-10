@@ -29,21 +29,27 @@ export function isJoriTableTool(tool: string) {
   return tableTools.has(tool)
 }
 
-type TablePrincipal = { organizationId: string; personId: Id<"persons"> }
+type TablePrincipal = {
+  organizationId: string
+  personId?: Id<"persons">
+  runId?: Id<"runs">
+}
 
 export async function callJoriTableTool(
   ctx: ActionCtx,
-  execution: { organizationId: string; createdBy?: Id<"persons"> },
+  execution: {
+    organizationId: string
+    createdBy?: Id<"persons">
+    runId?: Id<"runs">
+  },
   request: JoriToolRequest
 ): Promise<unknown> {
   const args = readRecord(request.args)
-  const personId = execution.createdBy
-
-  if (personId === undefined) {
-    throw new Error("Table tools require an authenticated execution user.")
+  const principal = {
+    organizationId: execution.organizationId,
+    personId: execution.createdBy,
+    runId: execution.runId,
   }
-
-  const principal = { organizationId: execution.organizationId, personId }
 
   switch (request.tool) {
     case "search_tables":
@@ -58,7 +64,10 @@ export async function callJoriTableTool(
         await ctx.runMutation(internal.tables.records.create, {
           ...principal,
           name: requiredString(args.name, "name"),
-          visibility: visibilityFromInput(args.visibility),
+          visibility:
+            args.visibility === undefined
+              ? undefined
+              : visibilityFromInput(args.visibility),
           columns: args.columns,
         })
       )

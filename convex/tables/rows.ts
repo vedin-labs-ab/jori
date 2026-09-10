@@ -11,6 +11,7 @@ import {
   writeDocument,
 } from "../collections/documents"
 import { insertPlacementValidator } from "../collections/order"
+import { resourceViewerArgs } from "../visibility/resources"
 import { getAccessibleTable, summarizeRow } from "./access"
 import { tableSpec } from "./spec"
 
@@ -30,9 +31,8 @@ export const rowAnchorValidator = v.object({
 
 export const page = internalQuery({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
     paginationOpts: paginationOptsValidator,
     keyedBy: keyedByValidator,
   },
@@ -51,9 +51,8 @@ export const page = internalQuery({
 
 export const insert = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
     values: v.any(),
     anchor: v.optional(rowAnchorValidator),
     keyedBy: keyedByValidator,
@@ -83,9 +82,8 @@ export const insert = internalMutation({
  *  write, so a batch either lands whole or not at all. */
 export const insertMany = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
     rows: v.array(v.any()),
   },
   handler: async (ctx, args) => {
@@ -106,9 +104,8 @@ export const insertMany = internalMutation({
  *  null clears it, and the merged row revalidates against the schema. */
 export const update = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
     rowId: v.id("documents"),
     values: v.any(),
     expectedVersion: v.optional(v.number()),
@@ -136,9 +133,8 @@ export const update = internalMutation({
 
 export const remove = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     tableId: v.id("collections"),
-    personId: v.id("persons"),
     rowId: v.id("documents"),
     expectedVersion: v.optional(v.number()),
   },

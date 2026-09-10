@@ -7,21 +7,18 @@ import {
 import { type CollectionDoc } from "../collections/spec"
 import { personDisplay } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
+import { type ResourceViewer } from "../visibility/resources"
 import { tableSpec } from "./spec"
 
 type TableDoc = CollectionDoc<"table">
 
-type TableArgs = {
-  organizationId: string
+type TableArgs = ResourceViewer & {
   tableId: Id<"collections">
-  personId: Id<"persons">
 }
 
 export async function searchTables(
   ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    personId: Id<"persons">
+  args: ResourceViewer & {
     query?: string
     includeArchived?: boolean
     limit?: number
@@ -96,5 +93,6 @@ function toCollectionArgs(args: TableArgs) {
     organizationId: args.organizationId,
     collectionId: args.tableId,
     personId: args.personId,
+    runId: args.runId,
   }
 }

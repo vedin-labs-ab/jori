@@ -1,7 +1,11 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { boundedNumber } from "../shared/input"
-import { createSight, type Sight } from "../visibility/sight"
+import {
+  createResourceSight,
+  type ResourceViewer,
+} from "../visibility/resources"
+import { type Sight } from "../visibility/sight"
 import {
   type CollectionDoc,
   type CollectionKind,
@@ -33,10 +37,8 @@ export async function accessibleCollection<K extends CollectionKind>(
   return collection
 }
 
-type CollectionArgs = {
-  organizationId: string
+type CollectionArgs = ResourceViewer & {
   collectionId: Id<"collections">
-  personId: Id<"persons">
 }
 
 /** Load a collection only if it is in the organization, of the spec's kind,
@@ -46,7 +48,7 @@ export async function findAccessibleCollection<K extends CollectionKind>(
   spec: KindSpec<K>,
   args: CollectionArgs
 ): Promise<CollectionDoc<K> | null> {
-  const sight = createSight(ctx, args)
+  const sight = await createResourceSight(ctx, args)
 
   return await accessibleCollection(
     sight,
@@ -75,14 +77,12 @@ export async function getAccessibleCollection<K extends CollectionKind>(
 export async function searchCollections<K extends CollectionKind>(
   ctx: QueryLikeCtx,
   spec: KindSpec<K>,
-  args: {
-    organizationId: string
-    personId: Id<"persons">
+  args: ResourceViewer & {
     query?: string
     includeArchived?: boolean
     limit?: number
   },
-  sight: Sight = createSight(ctx, args)
+  suppliedSight?: Sight
 ): Promise<CollectionDoc<K>[]> {
   const candidates = await ctx.db
     .query("collections")
@@ -91,6 +91,7 @@ export async function searchCollections<K extends CollectionKind>(
     )
     .order("desc")
     .take(searchLimit)
+  const sight = suppliedSight ?? (await createResourceSight(ctx, args))
   const query = args.query?.trim().toLowerCase()
   const limit = boundedNumber(args.limit, 25, 1, searchLimit)
   const matches: CollectionDoc<K>[] = []
