@@ -30,11 +30,9 @@ export function ConsoleListPager({
 
   return (
     <div className="flex flex-col gap-3 @lg/list:flex-row @lg/list:items-center">
-      {pagination.footerLabel ? (
-        <p className="text-muted-foreground text-xs">
-          {pagination.footerLabel}
-        </p>
-      ) : null}
+      <p className="min-h-4 text-muted-foreground text-xs">
+        {pagination.footerLabel}
+      </p>
       <Pagination className="mx-0 w-fit justify-start @lg/list:ml-auto @lg/list:justify-end">
         <PaginationContent className="gap-2">
           <PaginationItem>
