@@ -23,18 +23,26 @@ export function CellError({
 }) {
   const id = useId()
   const [open, setOpen] = useState(false)
+  const [focusOpen, setFocusOpen] = useState(false)
   const invalid = message !== undefined
 
   return (
     <TooltipProvider>
-      <Tooltip open={invalid && open} onOpenChange={setOpen}>
+      <Tooltip open={invalid && (open || focusOpen)} onOpenChange={setOpen}>
         <TooltipTrigger asChild>
           <div
             className={className}
             aria-describedby={undefined}
-            onFocusCapture={() => setOpen(true)}
+            onFocusCapture={(event) => {
+              setFocusOpen(
+                event.target.closest('[data-slot="tooltip-trigger"]') ===
+                  event.currentTarget
+              )
+              setOpen(true)
+            }}
             onBlurCapture={(event) => {
               if (!event.currentTarget.contains(event.relatedTarget)) {
+                setFocusOpen(false)
                 setOpen(false)
               }
             }}
@@ -51,7 +59,12 @@ export function CellError({
           </div>
         </TooltipTrigger>
         {invalid ? (
-          <TooltipContent side="top" align="start" sideOffset={4}>
+          <TooltipContent
+            side="top"
+            align="start"
+            sideOffset={4}
+            onEscapeKeyDown={() => setFocusOpen(false)}
+          >
             {message}
           </TooltipContent>
         ) : null}
