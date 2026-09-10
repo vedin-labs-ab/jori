@@ -43,7 +43,7 @@ export function NewInFolderSub(handlers: NewMenuHandlers) {
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger>
-        <Plus />
+        <Plus className="text-muted-foreground" />
         New
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
@@ -90,7 +90,7 @@ function NewResourceItems({
   return (
     <>
       <DropdownMenuItem onSelect={onNewFolder}>
-        <FolderPlus />
+        <FolderPlus className="text-muted-foreground" />
         {labels === "bare" ? "Subfolder" : "New folder"}
       </DropdownMenuItem>
       {resourceEntries.map((entry) => (
@@ -98,7 +98,7 @@ function NewResourceItems({
           key={entry.creation}
           onSelect={() => onCreate(entry.creation)}
         >
-          <entry.icon />
+          <entry.icon className="text-muted-foreground" />
           {labels === "bare" ? entry.label : `New ${entry.label.toLowerCase()}`}
         </DropdownMenuItem>
       ))}

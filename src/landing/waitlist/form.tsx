@@ -207,12 +207,13 @@ function WorkField({ fieldId, invalid, rejection }: FieldProps) {
       <Textarea
         aria-describedby={describedBy(fieldId, invalid, "work")}
         aria-invalid={invalid === "work"}
+        className="min-h-28 sm:min-h-20"
         id={`${fieldId}-work`}
         maxLength={waitlistLimits.work}
         name="work"
         placeholder="The release checklist. Someone reads every PR and Linear issue on Thursday and writes up what's ready."
         required
-        rows={3}
+        rows={5}
       />
       <FieldError id={errorId(fieldId, "work")}>
         {fieldMessage(rejection, "work")}

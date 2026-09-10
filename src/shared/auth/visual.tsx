@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react"
+import { brandHeadline } from "@/shared/brand/content"
 import { mountShader } from "./shader"
 
 export function SignInVisual() {
@@ -38,11 +39,12 @@ export function SignInVisual() {
 
       <div className="absolute right-12 bottom-11 left-12 max-w-md xl:right-16 xl:bottom-14 xl:left-16">
         <p className="max-w-sm text-balance font-medium text-2xl tracking-tight">
-          Jori writes the Monday pre-read.
+          {brandHeadline}
         </p>
         <p className="mt-3 max-w-sm text-pretty text-foreground/65 text-sm/relaxed">
-          Jori reads the week across Slack, GitHub, and Linear, keeps one live
-          page your team opens before the sync, and asks before it acts.
+          Put the jobs nobody wants next to the tables and files they keep
+          current, in folders shaped like your teams and projects. Who can see a
+          folder, and what it costs to run, come with it.
         </p>
       </div>
     </aside>
