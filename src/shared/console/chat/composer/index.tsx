@@ -8,9 +8,8 @@ import {
   type ReactNode,
   useEffect,
   useId,
-  useState,
 } from "react"
-import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
+import { InputGroup } from "@/components/ui/input-group"
 import { useStoredOpen } from "@/shared/storage"
 import {
   emptyMentionSources,
@@ -23,7 +22,7 @@ import {
   type ResolveReference,
 } from "../types"
 import { useComposerEditor } from "./editor"
-import { ComposerField, ContextChip } from "./field"
+import { ComposerContext, ComposerField } from "./field"
 import { ComposerFooter, HintsPeek } from "./footer"
 
 /** Where the person writes: plain text with the things it mentions as
@@ -92,10 +91,6 @@ export const ChatComposer = memo(function ChatComposer({
 }) {
   const reasonId = useId()
   const hints = useHintsBand()
-  const [hasContext, setHasContext] = useState(context !== undefined)
-  if (context !== undefined && !hasContext) {
-    setHasContext(true)
-  }
   const shownReason =
     disabled && reason !== undefined
       ? { id: reasonId, text: reason }
@@ -126,13 +121,7 @@ export const ChatComposer = memo(function ChatComposer({
         className="bg-background"
         onClick={(event) => focusFromFrame(event, composer.editor)}
       >
-        {hasContext ? (
-          <InputGroupAddon align="block-start" className="min-h-9">
-            {context === undefined ? null : (
-              <ContextChip onClear={onClearContext} reference={context} />
-            )}
-          </InputGroupAddon>
-        ) : null}
+        <ComposerContext onClear={onClearContext} reference={context} />
         <ComposerField
           composer={composer}
           onSelect={composer.selectSuggestion}
