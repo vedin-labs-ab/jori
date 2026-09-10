@@ -34,6 +34,7 @@ import {
 import { cn } from "@/lib/utils"
 import { RevealArrow } from "@/shared/console/dot"
 import { absoluteTime } from "@/shared/console/time"
+import { StableLabel } from "@/shared/label"
 import { type BillingOverview } from "./actions"
 import { BillingActivityEmpty } from "./empty"
 
@@ -200,7 +201,9 @@ function KindHeader({ column }: { column: Column<ActivityRow> }) {
           variant="ghost"
         >
           <Filter className={value === "" ? "" : "text-foreground"} />
-          {value === "" ? "What" : kindLabels[value]}
+          <StableLabel alternatives={Object.values(kindLabels)}>
+            {value === "" ? "What" : kindLabels[value]}
+          </StableLabel>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
