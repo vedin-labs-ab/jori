@@ -96,7 +96,7 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
         })}
         <div className="grid gap-2">
           <VisibilityField
-            help="Only-me jobs run with your context and connected accounts; every shared mode runs with organization context and shared integrations only."
+            help="Private jobs use personal connections. Shared jobs use workspace connections."
             id="job-visibility"
             noun="job"
             onChange={actions.updateVisibility}

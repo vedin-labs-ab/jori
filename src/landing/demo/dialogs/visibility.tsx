@@ -1,5 +1,5 @@
 import { type Visibility } from "@contracts/visibility"
-import { type ReactNode, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { AudienceLine } from "@/shared/console/visibility/audience"
 import { VisibilityDialog } from "@/shared/console/visibility/dialog"
 import { VisibilityField } from "@/shared/console/visibility/field"
@@ -11,15 +11,15 @@ import { useDemoWorkspace } from "../workspace"
 /** The sharing dialog over the workspace: a draft of who may see the
  *  target, said back as the people it reaches, saved in place. */
 export function DemoVisibilityDialog({
+  help,
   noun,
-  notice,
   onOpenChange,
   open,
   target,
   value,
 }: {
+  help?: string
   noun: string
-  notice?: (draft: Visibility) => ReactNode
   onOpenChange: (open: boolean) => void
   open: boolean
   target: VisibilityTarget
@@ -40,6 +40,7 @@ export function DemoVisibilityDialog({
       canEdit
       field={
         <VisibilityField
+          help={help}
           id={`${target.kind}-visibility`}
           noun={noun}
           onChange={setDraft}
@@ -49,7 +50,6 @@ export function DemoVisibilityDialog({
       }
       isSaving={false}
       noun={noun}
-      notice={notice?.(draft)}
       onOpenChange={onOpenChange}
       onSave={() => {
         actions.setVisibility(target, draft)

@@ -23,6 +23,6 @@ ends stale work and discards cached execution context. Visible chat history
 remains available under the new access setting. Personal sandbox state and
 internal summaries do not become shared execution context.
 
-Direct sharing changes explain these effects before saving. Folder and team
+Visibility field help explains these effects. Folder and team
 membership changes still use the common visibility resolver. They do not create
 a separate chat permission system.

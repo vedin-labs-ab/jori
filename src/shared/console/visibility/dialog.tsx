@@ -20,7 +20,6 @@ export function VisibilityDialog({
   field,
   isSaving,
   noun,
-  notice,
   onOpenChange,
   onSave,
   open,
@@ -32,8 +31,6 @@ export function VisibilityDialog({
   field: ReactNode
   isSaving: boolean
   noun: string
-  /** Resource-specific consequences of the visibility being saved. */
-  notice?: ReactNode
   onOpenChange: (open: boolean) => void
   onSave: () => void
   open: boolean
@@ -55,7 +52,6 @@ export function VisibilityDialog({
           </DialogDescription>
         </DialogHeader>
         <VisibilityFields audience={audience} canEdit={canEdit} field={field} />
-        {notice}
         <DialogFooter>
           <Button
             onClick={() => onOpenChange(false)}
