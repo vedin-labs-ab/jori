@@ -8,6 +8,7 @@ import {
   type ReactNode,
   useEffect,
   useId,
+  useState,
 } from "react"
 import { InputGroup, InputGroupAddon } from "@/components/ui/input-group"
 import { useStoredOpen } from "@/shared/storage"
@@ -91,6 +92,10 @@ export const ChatComposer = memo(function ChatComposer({
 }) {
   const reasonId = useId()
   const hints = useHintsBand()
+  const [hasContext, setHasContext] = useState(context !== undefined)
+  if (context !== undefined && !hasContext) {
+    setHasContext(true)
+  }
   const shownReason =
     disabled && reason !== undefined
       ? { id: reasonId, text: reason }
@@ -121,11 +126,13 @@ export const ChatComposer = memo(function ChatComposer({
         className="bg-background"
         onClick={(event) => focusFromFrame(event, composer.editor)}
       >
-        {context === undefined ? null : (
-          <InputGroupAddon align="block-start">
-            <ContextChip onClear={onClearContext} reference={context} />
+        {hasContext ? (
+          <InputGroupAddon align="block-start" className="min-h-9">
+            {context === undefined ? null : (
+              <ContextChip onClear={onClearContext} reference={context} />
+            )}
           </InputGroupAddon>
-        )}
+        ) : null}
         <ComposerField
           composer={composer}
           onSelect={composer.selectSuggestion}
