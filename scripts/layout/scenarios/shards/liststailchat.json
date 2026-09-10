@@ -1,0 +1,626 @@
+[
+  {
+    "id": "C080-check",
+    "title": "Store boolean autosave",
+    "path": "/stores/collections_release",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[id=\"value.frozen\"]"
+      }
+    ]
+  },
+  {
+    "id": "C005-return",
+    "title": "Finance folder to root",
+    "path": "/folders/folders_finance",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header a[href=\"/folders\"]"
+      }
+    ]
+  },
+  {
+    "id": "C005-parent",
+    "title": "Nested Renewals to Finance",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header a[href=\"/folders/folders_finance\"]"
+      }
+    ]
+  },
+  {
+    "id": "C016-owner-open",
+    "title": "Folder Owner facet open",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C024-select",
+    "title": "Folder selection dock appears",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C024-clear",
+    "title": "Folder selection dock clears",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Clear selection\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C025-move-close",
+    "title": "Bulk tables move dialog close",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ]
+  },
+  {
+    "id": "C030-tables",
+    "title": "Bulk tables removal commit",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Archive\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ]
+  },
+  {
+    "id": "C026-move-close",
+    "title": "Bulk stores move dialog close",
+    "path": "/stores",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ]
+  },
+  {
+    "id": "C026-delete-close",
+    "title": "Bulk stores Archive confirmation close",
+    "path": "/stores",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ]
+  },
+  {
+    "id": "C027-move-open",
+    "title": "Bulk files move dialog open",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C027-delete-open",
+    "title": "Bulk files Delete confirmation open",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C030-files",
+    "title": "Bulk files removal commit",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C028-move-close",
+    "title": "Bulk jobs move dialog close",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ]
+  },
+  {
+    "id": "C028-delete-close",
+    "title": "Bulk jobs Delete confirmation close",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C034-visibility",
+    "title": "Table visibility tooltip opens",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"Specific teams \u00b7 1 team\"]"
+      }
+    ]
+  },
+  {
+    "id": "C038-table-open",
+    "title": "Table title menu open",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "C038-table-close",
+    "title": "Table title menu close",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "C039-tables",
+    "title": "Rename tables long name",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      },
+      {
+        "action": "fill",
+        "selector": "#table-edit-name",
+        "value": "Layout hunt long resource name with finance and customer success details"
+      }
+    ]
+  },
+  {
+    "id": "C039-files",
+    "title": "Rename files long name",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      },
+      {
+        "action": "fill",
+        "selector": "#file-edit-name",
+        "value": "Layout hunt long resource name with finance and customer success details"
+      }
+    ]
+  },
+  {
+    "id": "C053-table-move",
+    "title": "Move table to another folder",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has-text(\"Engineering\")"
+      }
+    ]
+  },
+  {
+    "id": "C058-share-open",
+    "title": "Material share links dialog open",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Share\"]"
+      }
+    ]
+  },
+  {
+    "id": "C063-invalid",
+    "title": "Table numeric cell invalid edit",
+    "path": "/tables/collections_flaky",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Failures value\"]",
+        "value": "Enter"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Failures\"] >> nth=0"
+      },
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Failures value\"]",
+        "value": "invalid-number"
+      }
+    ]
+  },
+  {
+    "id": "C065-menu-close",
+    "title": "Table row context menu close",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C065-cancel",
+    "title": "Table context inline edit cancels",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Customer value\"]",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Edit cell\")"
+      }
+    ]
+  },
+  {
+    "id": "C067-paste",
+    "title": "Table context paste clipboard failure feedback",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Paste\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C070-insert-below",
+    "title": "Table context insert below dialog",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Insert row below\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C071-row-open",
+    "title": "Table row delete confirmation open",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete row\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C072-row",
+    "title": "Table row delete commit",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete row\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete row\")"
+      }
+    ]
+  },
+  {
+    "id": "C029-Move-close",
+    "title": "Folder selection Move dialog close",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"toolbar\"] button:text-is(\"Move\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C029-Delete-close",
+    "title": "Folder selection Delete dialog close",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"toolbar\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ]
+  }
+]

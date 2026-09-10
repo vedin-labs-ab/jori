@@ -1,0 +1,36 @@
+[
+  {
+    "id": "shell-live-usage-30-to-7",
+    "title": "Live organization usage Window 30\u21927 days with async query",
+    "path": "/folders/usage",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"combobox\"][aria-label=\"Window\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has-text(\"Last 7 days\")"
+      }
+    ]
+  },
+  {
+    "id": "shell-live-usage-7-to-30",
+    "title": "Live organization usage Window 7\u219230 days with async query",
+    "path": "/folders/usage?days=7",
+    "target": "app",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"combobox\"][aria-label=\"Window\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has-text(\"Last 30 days\")"
+      }
+    ]
+  }
+]

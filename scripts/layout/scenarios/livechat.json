@@ -1,0 +1,91 @@
+[
+  {
+    "id": "CHAT-L01",
+    "title": "Signed-in isolated dev chat: first send pending, real streamed reply, and final anchoring",
+    "target": "app",
+    "path": "/chat",
+    "mutating": true,
+    "setupReady": [
+      {
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "timeout": 60000
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "This is an isolated layout stability check. Do not use tools, contact anyone, create jobs, or change external data. Reply with one short sentence about keeping interfaces stable, followed by the exact text LAYOUT_FIRST_COMPLETE."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[class~=\"group/message\"]:not([aria-busy]) > [data-slot=\"turn\"]:has-text(\"LAYOUT_FIRST_COMPLETE\")",
+        "state": "visible",
+        "timeout": 120000
+      },
+      {
+        "selector": "[aria-label=\"Stop run\"]",
+        "state": "hidden",
+        "timeout": 120000
+      }
+    ]
+  },
+  {
+    "id": "CHAT-L02",
+    "title": "Signed-in isolated dev chat: follow-up reply completes Markdown paragraphs, table, and fenced code with final anchoring",
+    "target": "app",
+    "path": "/chat",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "This is an isolated layout stability check. Do not use tools, contact anyone, create jobs, or change external data. Reply with one short sentence about keeping interfaces stable, followed by the exact text LAYOUT_FIRST_COMPLETE."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[class~=\"group/message\"]:not([aria-busy]) > [data-slot=\"turn\"]:has-text(\"LAYOUT_FIRST_COMPLETE\")",
+        "state": "visible",
+        "timeout": 120000
+      },
+      {
+        "selector": "[aria-label=\"Stop run\"]",
+        "state": "hidden",
+        "timeout": 120000
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[role=\"textbox\"][aria-label=\"Message\"]",
+        "value": "Continue this isolated layout stability check. Do not use tools, contact anyone, create jobs, or change external data. Return only a Markdown response with: a short heading; two paragraphs of about 50 words each about stable interfaces; a three-row table with columns Component, Reserved space, and Loading behavior; a valid fenced javascript code block containing const stable = true; and, on the final line, the exact text LAYOUT_REPLY_COMPLETE."
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Send message\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[class~=\"group/message\"]:not([aria-busy]) > [data-slot=\"turn\"]:has-text(\"LAYOUT_REPLY_COMPLETE\")",
+        "state": "visible",
+        "timeout": 120000
+      },
+      {
+        "selector": "[aria-label=\"Stop run\"]",
+        "state": "hidden",
+        "timeout": 120000
+      }
+    ]
+  }
+]

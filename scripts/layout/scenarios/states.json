@@ -1,0 +1,1353 @@
+[
+  {
+    "id": "C031-ready",
+    "title": "Isolated shared TableList initial loading resolves to ready. Data outcome is simulated; source views and ConsoleListBody are unchanged.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=load-ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "ready": [
+      {
+        "selector": ":text-is(\"Showing 1\\u201312 of 29 tables\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C031-empty",
+    "title": "Isolated shared TableList initial loading resolves to empty. Data outcome is simulated; source views and ConsoleListBody are unchanged.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=load-empty",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "ready": [
+      {
+        "selector": ":text-is(\"No tables yet\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C031-unauthorized",
+    "title": "Isolated shared TableList initial loading resolves to unauthorized. Data outcome is simulated; source views and ConsoleListBody are unchanged.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=load-unauthorized",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "ready": [
+      {
+        "selector": ":text-is(\"You do not have access to these tables.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C032-next",
+    "title": "List Next enters loading-more state, resolves to the second page and preserves the viewport. 29 local records.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Next\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": ":text-is(\"Showing 13\\u201324 of 29 tables\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C032-previous",
+    "title": "List Previous returns from the second page.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Previous\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Next\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": ":text-is(\"Showing 13\\u201324 of 29 tables\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": ":text-is(\"Showing 1\\u201312 of 29 tables\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C033-selected-remove",
+    "title": "External subscription update removes a selected row after 1100 ms; observe selection, row slots and footer. F8 is a test-only data trigger.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "tbody [role=\"checkbox\"] >> nth=0"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": ":text-is(\"1 selected\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": ":text-is(\"Showing 1\\u201312 of 28 tables\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": ":text-is(\"1 selected\")",
+        "state": "hidden",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-save-success",
+    "title": "Material edit pending spinner resolves to success. Real useMaterialUpdate hook and EditMaterialDialog, delayed local service outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=save-success",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Save changes\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Table updated.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-save-error",
+    "title": "Material edit pending spinner resolves to error. Real useMaterialUpdate hook and EditMaterialDialog, delayed local service outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=save-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Save changes\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Layout fixture simulated update failure\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C077-grid-load",
+    "title": "Real RowGrid initial loading resolves to150 local rows with normal virtualization.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-loading",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "ready": [
+      {
+        "selector": "[aria-label=\"Customer column details\"]",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C077-grid-more",
+    "title": "Scroll near the end of150 rows; load-more band resolves to300 rows and final New row affordance.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-more",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "scroll",
+        "selector": "main div.overflow-auto >> nth=0",
+        "value": "4800"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "main button:text-is(\"New row\")",
+        "state": "attached",
+        "timeout": 20000
+      },
+      {
+        "selector": "main :text-is(\"Loading more rows\u2026\")",
+        "state": "hidden",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C078-cell-error",
+    "title": "Actual useRowWrites and RowGrid delayed error response, retain draft and viewport.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Enter"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=10"
+      },
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Layout audit customer"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[aria-label=\"Customer value\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not update the row.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[aria-label=\"Customer value\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C078-cell-error-retry",
+    "title": "Retry after error; delayed success updates row and exits cell editor.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Enter"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=10"
+      },
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Layout audit customer"
+      },
+      {
+        "action": "press",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Enter"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not update the row.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[aria-label=\"Customer value\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Edit Customer\"]:has-text(\"Layout audit customer\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[aria-label=\"Customer value\"]",
+        "state": "hidden",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C078-cell-conflict",
+    "title": "Actual useRowWrites and RowGrid delayed conflict response, retain draft and viewport.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-conflict",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Enter"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=10"
+      },
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Layout audit customer"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[aria-label=\"Customer value\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"The row changed elsewhere. It has been refreshed - try again.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[aria-label=\"Customer value\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C078-cell-conflict-retry",
+    "title": "Retry after conflict; delayed success updates row and exits cell editor.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-conflict",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Enter"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=10"
+      },
+      {
+        "action": "fill",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Layout audit customer"
+      },
+      {
+        "action": "press",
+        "selector": "[aria-label=\"Customer value\"]",
+        "value": "Enter"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"The row changed elsewhere. It has been refreshed - try again.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[aria-label=\"Customer value\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Edit Customer\"]:has-text(\"Layout audit customer\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[aria-label=\"Customer value\"]",
+        "state": "hidden",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C078-column-error",
+    "title": "Actual column form pending write rejects, preserving draft and showing error toast.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-column-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Save\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "#column-sheet-name",
+        "value": "Customer account"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "#column-sheet-name",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not save the column.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C078-column-retry",
+    "title": "Retry actual column form after failure; delayed success updates column and closes sheet.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-column-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Save\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "#column-sheet-name",
+        "value": "Customer account"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Save\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not save the column.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Customer account column details\"]",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C077-inspected-column-removed",
+    "title": "Independent subscription removes the inspected column after1100ms; observe sheet close and grid.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=grid-column-removed",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "#column-sheet-name",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Customer column details\"]",
+        "state": "detached",
+        "timeout": 20000
+      },
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C056-archive-pending",
+    "title": "Shared table lifecycle archive delayed success using actual menu, confirmation and useMaterialRemoval; local data outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=active-ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "tbody tr:first-child button[data-slot=\"dropdown-menu-trigger\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Archive\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Archive table\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Archived 01 Customer renewals\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": ":text-is(\"Showing 1\\u201312 of 28 tables\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-archive-error",
+    "title": "Shared table lifecycle archive delayed failure using actual menu, confirmation and useMaterialRemoval; local data outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=active-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "tbody tr:first-child button[data-slot=\"dropdown-menu-trigger\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Archive\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Archive table\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not update the table.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C056-restore-pending",
+    "title": "Shared table lifecycle restore delayed success using actual menu, confirmation and useMaterialRemoval; local data outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=archived-ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "tbody tr:first-child button[data-slot=\"dropdown-menu-trigger\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Restore\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Restored 01 Customer renewals\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-restore-error",
+    "title": "Shared table lifecycle restore delayed failure using actual menu, confirmation and useMaterialRemoval; local data outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=archived-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "tbody tr:first-child button[data-slot=\"dropdown-menu-trigger\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Restore\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not update the table.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C056-delete-pending",
+    "title": "Shared table lifecycle delete delayed success using actual menu, confirmation and useMaterialRemoval; local data outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=archived-ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "tbody tr:first-child button[data-slot=\"dropdown-menu-trigger\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Delete table\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Deleted 01 Customer renewals\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": ":text-is(\"Showing 1\\u201312 of 28 tables\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-delete-error",
+    "title": "Shared table lifecycle delete delayed failure using actual menu, confirmation and useMaterialRemoval; local data outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=archived-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "tbody tr:first-child button[data-slot=\"dropdown-menu-trigger\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Delete table\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not update the table.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C033-count-all",
+    "title": "Existing selection bar count changes from one row to all rows on the larger page.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "tbody [role=\"checkbox\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "thead [role=\"checkbox\"]"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": ":text-is(\"1 selected\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": ":text-is(\"12 selected\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C033-count-one",
+    "title": "Existing selection bar count decreases by one after selecting the whole larger page.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=ready",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "thead [role=\"checkbox\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "tbody [role=\"checkbox\"] >> nth=0"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": ":text-is(\"12 selected\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": ":text-is(\"11 selected\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-save-success-dismiss",
+    "title": "Automatic dismissal of the save-success toast after the delayed material save outcome; no-op F9 marks the remaining timer.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=save-success",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Save changes\")"
+      },
+      {
+        "action": "hover",
+        "selector": "body:has([data-sonner-toast]:has-text(\"Table updated.\")) header"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F9"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Table updated.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "detached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-save-error-dismiss",
+    "title": "Automatic dismissal of the save-error toast after the delayed material save outcome; no-op F9 marks the remaining timer.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=save-error",
+    "target": "app",
+    "mutating": true,
+    "anonymous": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Save changes\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F9"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Layout fixture simulated update failure\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]",
+        "state": "detached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-create-success",
+    "title": "Actual CreateMaterialDialog pending creation success with delayed local service outcome. Original C051 separately covers insertion into the list.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=create-success",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input#table-create-name",
+        "value": "Long customer renewal table for the regional operations team"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has-text(\"Create table\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "input#table-create-name",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Created Long customer renewal table\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-create-error",
+    "title": "Actual CreateMaterialDialog pending creation error with delayed local service outcome. Original C051 separately covers insertion into the list.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=create-error",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input#table-create-name",
+        "value": "Long customer renewal table for the regional operations team"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has-text(\"Create table\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "input#table-create-name",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Layout fixture simulated creation failure\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Create table\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-create-retry",
+    "title": "Actual CreateMaterialDialog pending creation retry with delayed local service outcome. Original C051 separately covers insertion into the list.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=create-error",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input#table-create-name",
+        "value": "Long customer renewal table for the regional operations team"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has-text(\"Create table\")"
+      },
+      {
+        "action": "hover",
+        "selector": "[role=\"dialog\"] button:text-is(\"Create table\"):enabled"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has-text(\"Create table\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Layout fixture simulated creation failure\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Create table\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Created Long customer renewal table\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C049-load-resolve",
+    "title": "Actual OrganizationVisibilityDialog resolves delayed audience, grantees and owner permissions from local Convex query values: load.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=access-load",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "ready": [
+      {
+        "selector": "[role=\"dialog\"]:has-text(\"Customer renewals and regional account operations\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C049-people-resolve",
+    "title": "Actual OrganizationVisibilityDialog resolves delayed audience, grantees and owner permissions from local Convex query values: people.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=access-people",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "ready": [
+      {
+        "selector": "[role=\"dialog\"]:has-text(\"Customer renewals and regional account operations\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C049-owner-resolve",
+    "title": "Actual OrganizationVisibilityDialog resolves delayed audience, grantees and owner permissions from local Convex query values: owner.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=access-owner",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "ready": [
+      {
+        "selector": "[role=\"dialog\"]:has-text(\"Customer renewals and regional account operations\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": ":text-is(\"Only the owner can change who sees this table.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-visibility-success",
+    "title": "Actual visibility mutation binding pending success with local delayed service outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=access-success",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-visibility-error",
+    "title": "Actual visibility mutation binding pending error with local delayed service outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=access-error",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not update who can see this table.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C057-visibility-retry",
+    "title": "Actual visibility mutation binding pending retry with local delayed service outcome.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=access-error",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\")"
+      },
+      {
+        "action": "hover",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\"):enabled"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-sonner-toast]:has-text(\"Could not update who can see this table.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C054-folder-load",
+    "title": "Actual MoveDialog folder skeleton resolves to the populated folder tree from a delayed local query result.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=move-loading",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "ready": [
+      {
+        "selector": "[role=\"dialog\"] button:has(> span:text-is(\"Engineering\"))",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C054-audience-request",
+    "title": "Actual useMoveConfirmation resolves pending audience comparison and opens MovePrompt; local audience data.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=move-confirm",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has(> span:text-is(\"Engineering\"))"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-slot=\"alert-dialog-body\"]:has-text(\"3 people will lose access.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C054-audience-cancel",
+    "title": "Cancel the actual audience-change prompt, returning to the existing MoveDialog.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=move-confirm",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has(> span:text-is(\"Engineering\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\")"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"alert-dialog-body\"] button:text-is(\"Cancel\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"alert-dialog-body\"] button:text-is(\"Cancel\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-slot=\"alert-dialog-body\"]:has-text(\"3 people will lose access.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[data-slot=\"alert-dialog-body\"]",
+        "state": "detached",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C054-audience-confirm",
+    "title": "Confirm audience change, observe real confirmation hook teardown and delayed move completion.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=move-confirm",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has(> span:text-is(\"Engineering\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\")"
+      },
+      {
+        "action": "hover",
+        "selector": "[data-slot=\"alert-dialog-body\"] button:text-is(\"Cancel\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"alert-dialog-body\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[data-slot=\"alert-dialog-body\"]:has-text(\"3 people will lose access.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C054-audience-unchanged",
+    "title": "Actual confirmation hook resolves unchanged audience and automatically runs the delayed local move.",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=move-unchanged",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has(> span:text-is(\"Engineering\"))"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  }
+]

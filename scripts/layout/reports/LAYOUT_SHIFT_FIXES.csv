@@ -1,0 +1,33 @@
+cause,commits,change,verificationLimit
+LF-09,d9f5e536,Create drafts reset on the next opening,verified representative
+LF-12,ce1b4f16,Saved row values survive dialog exit,verified representative
+LF-04,f9768966,Rename drafts survive dialog exit,verified representative
+LF-03,b63336ea,Facet clear footer keeps its space,verified representative; table anchor remains
+LF-15,c3338129,Empty narrow lists retain pager label height,verified representative
+LF-13,3dc330ee,Column sheets retain drafts and mode through exit,verified representative
+CHAT-F03 / SF3,171cfc74 f2a13674,Reserve Recent list footprint,implemented; arrival not isolated by after frames
+CHAT-F04 / SF4,77f9f6ef,Keep composer hints and footer space through readiness,implemented; arrival not isolated by after frames
+CHAT-F02,6db5e38a,Reserve duration label width with tabular digits,implemented; focused browser pass omitted clock rollover
+CHAT-F06,ebda140b,Align mention chips inside the existing line height,verified representative
+CHAT-F07,6c6e7f3a,Reserve tier and reasoning label space,partial; internal icon movement and long custom names remain
+CHAT-F09,74c6c265,Reserve Stop button space,partial verification; full stream completion not repeated
+CHAT-F15,64486c9c 41674d27,Retain context row after chip removal,verified representative
+CHAT-F01,90319d41,Keep attachment results in a stable scrollable popup,verified representative
+SF1,9b814d99,Keep first painted font when Geist is late,verified visible homepage representative
+SF2,b9644e36,Animate sidebar groups only after user toggles,implemented; broad sidebar arrival remains separate
+SF6,f03fa83f,Use fixture anchor for demo execution clocks,SSR regression tested
+SF9,210ed7a2,Match Activity description wrapping during loading,partial; lane count remains
+SF10,f83c696c,Reserve usage comparison lines,verified representative; range label still varies
+SF11 / CF-15,2b1c3474 038dc2b8,Stabilize integration action and icon slots,partial; personal provider headline wrapping remains
+SF14,dff18bbe,Reserve waitlist validation and request error bands,representative validation checked
+SF16,b0cdabda 5ce4cc0d,Match provider icon and pending spinner size,representative pending state checked
+CF-25,1b9ee2b0,Keep selected Settings view during exit,verified Billing representative
+CF-02,6611462a,Retain schema dialog content during exit,verified representative
+CF-21,315c546e,Retain context detail during sheet exit,implemented; focused after pass omitted close
+CF-11,3181f070,Reset successful folder draft on next opening,verified representative; table reflow remains
+CF-06,de7588c9,Match responsive one-time schedule fallback,verified mobile cold representative
+CF-20,201366b8,Reserve billing kind labels with shared StableLabel,implemented; table column distribution remains separate
+CF-01 / LF-08,ce8405d8,Reserve accessible validation message slots,verified single-error representative; multiline errors can grow
+CF-13,1ae48481,Reserve folder deletion label width,implemented; focused after pass omitted deletion pending
+CF-19,3582cc1e,Allow inline domain input to shrink,implemented; focused after pass omitted domain editing
+CF-23,2ff0188b,Reserve receipt rows while loading,verified one-receipt mobile representative; long headers unverified

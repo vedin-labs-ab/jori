@@ -1,0 +1,550 @@
+[
+  {
+    "id": "C114-additional-open",
+    "title": "Job additional access opens tools dialog",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Select all read tools\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C114-additional-close",
+    "title": "Job additional access closes tools dialog",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Close\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Select all read tools\"]",
+        "state": "detached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C114-additional-remove",
+    "title": "Job additional access removes final additional integration",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Remove additional GitHub access\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label^=\"GitHub additional access:\"]",
+        "state": "detached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C114-additional-read-all",
+    "title": "Job additional access selects all tools and updates parent badge",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all read tools\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Clear read tools\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C114-additional-read-clear",
+    "title": "Job additional access clears tools and updates parent badge",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all read tools\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Clear read tools\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Select all read tools\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C114-policy-reload",
+    "title": "Job tools permissions loaded to pending to loaded",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F8"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[aria-label=\"Select all read tools\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Select all read tools\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C114-policy-error",
+    "title": "Job tools permissions loaded to pending to unavailable",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F9"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[aria-label=\"Select all read tools\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": ":text-is(\"Tool permissions are unavailable right now.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C114-policy-restore",
+    "title": "Job tools permissions unavailable to loaded",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      },
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F9"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "F10"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": ":text-is(\"Tool permissions are unavailable right now.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Select all read tools\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C115-load",
+    "title": "Job tool schema request enters pending then opens",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"View the Search issues and PRs schema\"]"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Schema direction\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C115-close",
+    "title": "Job tool schema closes retaining its data",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"View the Search issues and PRs schema\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[aria-label=\"Schema direction\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Schema direction\"]",
+        "state": "detached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C115-request",
+    "title": "Job tool response schema switches to request",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"View the Search issues and PRs schema\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Schema direction\"] button:text-is(\"Request\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[aria-label=\"Schema direction\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Schema direction\"] button:text-is(\"Request\")[data-state=\"on\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C115-response",
+    "title": "Job tool request schema switches to response",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-access",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button[aria-label^=\"GitHub additional access:\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"View the Search issues and PRs schema\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Schema direction\"] button:text-is(\"Request\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Schema direction\"] button:text-is(\"Response\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": "[aria-label=\"Schema direction\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "[aria-label=\"Schema direction\"] button:text-is(\"Response\")[data-state=\"on\"]",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C120-success",
+    "title": "Job save enters pending then succeeds",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-save-success",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": "body:not(:has([role=\"dialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C120-error",
+    "title": "Job save enters pending then shows field error",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-save-error",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "ready": [
+      {
+        "selector": ":text-is(\"Choose at least one tool for each mentioned integration.\")",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C120-retry",
+    "title": "Job save retries after service validation error",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-save-error",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": ":text-is(\"Choose at least one tool for each mentioned integration.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "body:not(:has([role=\"dialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C120-clear",
+    "title": "Job typing clears service validation error",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-save-error",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#job-name",
+        "value": "Updated draft job"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": ":text-is(\"Choose at least one tool for each mentioned integration.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": ":text-is(\"Choose at least one tool for each mentioned integration.\")",
+        "state": "detached",
+        "timeout": 20000
+      }
+    ]
+  },
+  {
+    "id": "C120-error-close",
+    "title": "Job closes retaining service validation error",
+    "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=jobs-save-error",
+    "target": "app",
+    "anonymous": true,
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setupReady": [
+      {
+        "selector": ":text-is(\"Choose at least one tool for each mentioned integration.\")",
+        "state": "visible",
+        "timeout": 20000
+      },
+      {
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\"):enabled",
+        "state": "visible",
+        "timeout": 20000
+      }
+    ],
+    "ready": [
+      {
+        "selector": "body:not(:has([role=\"dialog\"]))",
+        "state": "attached",
+        "timeout": 20000
+      }
+    ]
+  }
+]
