@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { transactionalConsoleContext } from "../../test/convex/conversations"
-import { internal } from "../_generated/api"
+import { api, internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { callJoriTool } from "../broker/jori"
@@ -85,6 +85,41 @@ test("a sender override cannot expose private data and stale runs cannot create 
       runId: f.runId,
     })
   ).rejects.toThrow("no longer active")
+})
+
+test("workspace share links retain their audience gate after the issuing run ends", async () => {
+  const f = await sharedRuntime()
+  const table = (await f.call("create_table", { name: "Shared report" })) as {
+    tableId: Id<"collections">
+  }
+  const link = (await f.call("share_table", { tableId: table.tableId })) as {
+    urlPath: string
+  }
+  const args = {
+    tableId: table.tableId,
+    secret: link.urlPath.split("#share=")[1],
+  }
+  expect(await f.t.query(api.tables.share.get, args)).toMatchObject({
+    name: "Shared report",
+  })
+  await f.t.run((ctx) => ctx.db.patch(f.runId, { status: "completed" }))
+  expect(await f.t.query(api.tables.share.get, args)).not.toBeNull()
+  await f.t.run((ctx) =>
+    ctx.db.patch(table.tableId, { visibility: { mode: "private" } })
+  )
+  expect(await f.t.query(api.tables.share.get, args)).toBeNull()
+})
+
+test("audience changes invalidate an otherwise live resource call", async () => {
+  const f = await sharedRuntime()
+  await f.t.run((ctx) =>
+    ctx.db.patch(f.conversationId, {
+      visibility: { mode: "people", personIds: [f.people[0]] },
+    })
+  )
+  await expect(f.call("create_store", { name: "Old context" })).rejects.toThrow(
+    "no longer active"
+  )
 })
 
 async function sharedRuntime() {
