@@ -46,7 +46,8 @@ type FilingEntry = {
     ctx: MutationCtx,
     row: FiledDoc,
     folderId: Id<"folders"> | undefined,
-    defer?: boolean
+    defer?: boolean,
+    actorId?: Id<"persons">
   ): Promise<void>
   /** Permanent removal of the row and everything only it owns. */
   purge(
@@ -78,8 +79,14 @@ const registry: Record<FiledTable, FilingEntry> = {
         : null
     },
     gate: (row) => conversationGate(row as Doc<"conversations">),
-    setFolder: (ctx, row, folderId, defer) =>
-      fileConversation(ctx, row as Doc<"conversations">, folderId, defer),
+    setFolder: (ctx, row, folderId, defer, actorId) =>
+      fileConversation(
+        ctx,
+        row as Doc<"conversations">,
+        folderId,
+        defer,
+        actorId
+      ),
     purge: (ctx, row, destination) =>
       purgeConversation(ctx, row as Doc<"conversations">, destination),
   },
@@ -184,7 +191,7 @@ export async function fileResource(
 
   // Refiling is organization, not content: updatedAt stays untouched so
   // recency-ordered lists keep meaning "content changed".
-  await entry.setFolder(ctx, row, folderId)
+  await entry.setFolder(ctx, row, folderId, false, args.personId)
 }
 
 async function loadRow(
