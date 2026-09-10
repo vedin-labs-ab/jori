@@ -6,7 +6,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { countLabel } from "@/shared/console/count"
 import { SeparatorDot } from "@/shared/console/dot"
@@ -16,7 +15,7 @@ import { api } from "../../../../../convex/_generated/api"
 import { Paged } from "../../paging"
 import { ContextSectionTitle } from "../../section"
 import { groupByDay, type TimelineDay } from "./grouping"
-import { Receipt } from "./receipt"
+import { Receipt, ReceiptSkeleton } from "./receipt"
 
 type TimelineItem = NonNullable<
   FunctionReturnType<typeof api.workstreams.queries.timeline>
@@ -204,7 +203,7 @@ function EntryReceipts({
     <div className="flex flex-col gap-1">
       <ContextSectionTitle count={item.receipts}>Receipts</ContextSectionTitle>
       {receipts === undefined ? (
-        <Skeleton className="h-12 w-full" />
+        <ReceiptSkeleton count={item.receipts} />
       ) : (
         <Paged initialCount={2} items={receipts}>
           {(visible) => (
