@@ -1,6 +1,36 @@
 import { expect, test } from "vitest"
 import { activityData, traceDoc } from "../../../../test/convex/console"
 import { projectActivity } from "../project"
+import { type ToolResult } from "../read"
+
+test.each<ToolResult>([
+  { kind: "array", size: Number.NaN },
+  { kind: "object", size: Number.POSITIVE_INFINITY },
+  { kind: "number", preview: " " },
+  { kind: "string", preview: " ", length: 1 },
+  { kind: "string", preview: "text", length: Number.NEGATIVE_INFINITY },
+])("omits unusable result details for $kind summaries", (result) => {
+  const items = projectActivity(
+    activityData({
+      traces: [
+        traceDoc({
+          callId: "call-1",
+          data: {
+            provider: null,
+            result,
+            tool: { access: "read", name: "read", route: "sandbox" },
+          },
+          sequence: 1,
+          timestamp: 24,
+          type: "tool.completed",
+        }),
+      ],
+    })
+  )
+
+  expect(items).toHaveLength(1)
+  expect(items[0]).toMatchObject({ details: [], status: "completed" })
+})
 
 test.each([
   {

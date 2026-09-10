@@ -175,7 +175,14 @@ function toolTraces() {
                 {
                   access: "read",
                   description: "Read a file.",
-                  label: "Read file",
+                  label: "  Read file  ",
+                  tool: " read ",
+                },
+                {
+                  access: "write",
+                  description:
+                    "An empty label must not replace the prepared label.",
+                  label: " ",
                   tool: "read",
                 },
               ],
@@ -191,7 +198,7 @@ function toolTraces() {
       callId: "call-1",
       data: {
         input: { path: "src/app.tsx" },
-        tool: { access: "read", name: "read", route: "sandbox" },
+        tool: { access: "read", name: " read ", route: "sandbox" },
       },
       timestamp: 10,
       type: "tool.started",

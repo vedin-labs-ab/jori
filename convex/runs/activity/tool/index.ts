@@ -1,17 +1,10 @@
+import { isRecord } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
+import { optionalString } from "../../../shared/input"
 import { humanizeToolName } from "../../../shared/tools/names"
 import { inputDescription, inputDetails } from "../format"
 import { toolMetadata } from "../metadata"
-import {
-  readPreparedTools,
-  readToolAccess,
-  readToolInput,
-  readToolName,
-  readToolResult,
-  readTraceData,
-  readTraceError,
-  traceSequence,
-} from "../read"
+import { readPreparedTools, readToolResult, type ToolResult } from "../read"
 import {
   type ActivityData,
   type ActivityDetail,
@@ -21,7 +14,11 @@ import {
 } from "../types"
 
 const hiddenToolNames = new Set(["finish_run", "start_agent"])
-const toolTerminalTypes = new Set(["tool.completed", "tool.failed"])
+
+type ToolTrace = Extract<
+  Doc<"traces">,
+  { type: "tool.started" | "tool.waiting" | "tool.completed" | "tool.failed" }
+>
 
 type ToolProjectionContext = {
   agents: Doc<"runs">[]
@@ -43,12 +40,16 @@ export function projectToolTraces(
       collections.map((material) => [material._id as string, material.name])
     ),
   }
-  const groups = new Map<string, Doc<"traces">[]>()
+  const groups = new Map<string, ToolTrace[]>()
 
   for (const trace of traces) {
-    const name = groupedToolName(trace)
+    if (!isToolTrace(trace)) {
+      continue
+    }
 
-    if (name === undefined) {
+    const name = optionalString(trace.data.tool.name)
+
+    if (name === undefined || hiddenToolNames.has(name)) {
       continue
     }
 
@@ -60,28 +61,35 @@ export function projectToolTraces(
 }
 
 function projectToolGroup(
-  group: Doc<"traces">[],
+  group: ToolTrace[],
   context: ToolProjectionContext
 ): ActivityItem {
   const { agents, isRunLive, labels, materialNames } = context
   const started = group.find((trace) => trace.type === "tool.started")
   const waiting = group.find((trace) => trace.type === "tool.waiting")
-  const terminal = group.find((trace) => toolTerminalTypes.has(trace.type))
+  const terminal = group.find(
+    (trace) => trace.type === "tool.completed" || trace.type === "tool.failed"
+  )
   const trace = terminal ?? waiting ?? started ?? group[0]
-  const traceData = readTraceData(trace)
-  const startedData = started === undefined ? undefined : readTraceData(started)
-  const terminalData =
-    terminal === undefined ? undefined : readTraceData(terminal)
-  const name = readToolName(traceData) ?? "tool"
+  const input = isRecord(started?.data.input) ? started.data.input : undefined
+  const result =
+    terminal?.type === "tool.completed"
+      ? readToolResult(terminal.data.result)
+      : undefined
+  const error =
+    terminal?.type === "tool.failed"
+      ? optionalString(terminal.data.error)
+      : undefined
+  const name = optionalString(trace.data.tool.name) ?? "tool"
   const label = labels.get(name)
   const status = toolStatus(trace)
   const startedAt = started?.timestamp ?? trace.timestamp
   const endedAt = (waiting ?? terminal)?.timestamp
   const metadata = toolMetadata({
     agents,
-    input: readToolInput(startedData),
+    input,
     materialNames,
-    result: readToolResult(terminalData),
+    result,
     tool: name,
   })
 
@@ -90,9 +98,9 @@ function projectToolGroup(
     kind: "tool",
     status,
     title: toolTitle(name, label, status),
-    access: label?.access ?? readToolAccess(traceData),
-    description: toolDescription(startedData, terminalData, metadata),
-    details: toolDetails(startedData, terminalData),
+    access: label?.access ?? trace.data.tool.access,
+    description: toolDescription(input, error, metadata),
+    details: toolDetails(input, result, error),
     durationMs: endedAt === undefined ? undefined : endedAt - startedAt,
     endedAt,
     isLive: status === "running" && isRunLive,
@@ -113,12 +121,10 @@ function toolTitle(
 }
 
 function toolDescription(
-  started: unknown,
-  terminal: unknown,
+  input: Record<string, unknown> | undefined,
+  error: string | undefined,
   metadata: ReturnType<typeof toolMetadata>
 ) {
-  const error = readTraceError(terminal)
-
   if (error !== undefined) {
     return error
   }
@@ -127,25 +133,29 @@ function toolDescription(
     return undefined
   }
 
-  return inputDescription(readToolInput(started))
+  return inputDescription(input)
 }
 
-function toolDetails(started: unknown, terminal: unknown) {
+function toolDetails(
+  input: Record<string, unknown> | undefined,
+  result: ToolResult | undefined,
+  error: string | undefined
+) {
   return [
-    ...inputDetails(readToolInput(started)),
-    ...resultDetails(readToolResult(terminal)),
-    ...errorDetails(readTraceError(terminal)),
+    ...inputDetails(input),
+    ...resultDetails(result),
+    ...errorDetails(error),
   ]
 }
 
-function resultDetails(result: ReturnType<typeof readToolResult>) {
+function resultDetails(result: ToolResult | undefined) {
   if (result === undefined) {
     return []
   }
 
   return [
     { label: "Result", value: result.kind },
-    result.kind !== "string" || result.length === undefined
+    result.kind !== "string"
       ? undefined
       : { label: "Result length", value: String(result.length) },
     "size" in result
@@ -158,7 +168,7 @@ function errorDetails(error: string | undefined): ActivityDetail[] {
   return error === undefined ? [] : [{ label: "Error", value: error }]
 }
 
-function toolStatus(trace: Doc<"traces">): ActivityStatus {
+function toolStatus(trace: ToolTrace): ActivityStatus {
   if (trace.type === "tool.failed") {
     return "failed"
   }
@@ -170,25 +180,24 @@ function toolStatus(trace: Doc<"traces">): ActivityStatus {
   return trace.type === "tool.completed" ? "completed" : "running"
 }
 
-function groupedToolName(trace: Doc<"traces">) {
-  if (
-    trace.type !== "tool.started" &&
-    trace.type !== "tool.waiting" &&
-    !toolTerminalTypes.has(trace.type)
-  ) {
-    return undefined
-  }
-
-  const name = readToolName(readTraceData(trace))
-
-  return name === undefined || hiddenToolNames.has(name) ? undefined : name
+function isToolTrace(trace: Doc<"traces">): trace is ToolTrace {
+  return (
+    trace.type === "tool.started" ||
+    trace.type === "tool.waiting" ||
+    trace.type === "tool.completed" ||
+    trace.type === "tool.failed"
+  )
 }
 
 function toolLabels(traces: Doc<"traces">[]) {
   const labels = new Map<string, ToolLabel>()
 
   for (const trace of traces) {
-    for (const tool of readPreparedTools(readTraceData(trace))) {
+    if (trace.type !== "run.prepared") {
+      continue
+    }
+
+    for (const tool of readPreparedTools(trace.data.tools)) {
       labels.set(tool.tool, tool)
     }
   }
@@ -196,10 +205,6 @@ function toolLabels(traces: Doc<"traces">[]) {
   return labels
 }
 
-function toolTraceKey(trace: Doc<"traces">, name: string) {
-  return traceCallId(trace) ?? `${traceSequence(trace) ?? 0}:${name}`
-}
-
-function traceCallId(trace: Doc<"traces">) {
-  return "callId" in trace ? trace.callId : undefined
+function toolTraceKey(trace: ToolTrace, name: string) {
+  return trace.callId ?? `${trace.sequence ?? 0}:${name}`
 }

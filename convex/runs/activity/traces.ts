@@ -1,7 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { getActorDisplayName } from "../../shared/actor"
+import { optionalString } from "../../shared/input"
 import { projectModelTraces } from "./model"
-import { readTraceError } from "./read"
 import { projectToolTraces } from "./tool"
 import {
   type ActivityData,
@@ -38,7 +38,7 @@ function projectRunTraces(
     if (trace.type === "run.failed") {
       return [
         traceItem(trace, "run", "failed", "Run failed", {
-          description: readTraceError(trace.data),
+          description: optionalString(trace.data.error),
         }),
       ]
     }
