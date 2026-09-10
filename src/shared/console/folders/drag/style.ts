@@ -9,11 +9,9 @@ export type RowDrag = DragSource & {
   isSettling?: boolean
 }
 
-/** Drag styling for a listing row, mirroring the sidebar's: the row
- *  offers the open hand — its links and buttons keep their own cursors —
- *  the source dims, the hovered valid target takes the accent, plain
- *  hover goes quiet while a drag runs, and a landed move fades the row in
- *  where it settled — unless the user prefers reduced motion. */
+/** The row and its primary link share the grab cursor. Separate links and
+ *  controls keep their own cursors; the drag provider switches to grabbing
+ *  once movement activates a drag. */
 export function rowDragClasses(drag: {
   isDragActive: boolean
   isDragSource: boolean
@@ -21,7 +19,7 @@ export function rowDragClasses(drag: {
   isSettling?: boolean
 }) {
   return cn(
-    "cursor-grab [&_a]:cursor-pointer [&_button]:cursor-default",
+    "cursor-grab [&_a]:cursor-pointer [&_[data-row-link]_a]:cursor-grab [&_button]:cursor-default",
     drag.isDragActive && !drag.isDropTarget && "hover:bg-transparent",
     drag.isDragSource && "opacity-50",
     drag.isDropTarget && "bg-accent",
