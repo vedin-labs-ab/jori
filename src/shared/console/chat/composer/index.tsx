@@ -147,9 +147,7 @@ export const ChatComposer = memo(function ChatComposer({
           usage={usage}
         />
       </InputGroup>
-      {shownReason === undefined ? (
-        <HintsPeek hintsId={hints.id} onShow={hints.show} />
-      ) : null}
+      <HintsPeek hintsId={hints.id} onShow={hints.show} />
     </form>
   )
 })
