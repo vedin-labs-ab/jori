@@ -3,6 +3,9 @@ import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { moveUsageBucket } from "../../usage/record"
+import { audienceKey } from "../../visibility/execution"
+import { conversationGate, conversationVisibility } from "../access"
+import { resetConversationExecution } from "../sharing"
 
 const batchSize = 100
 
@@ -10,8 +13,10 @@ export async function fileConversation(
   ctx: MutationCtx,
   conversation: Doc<"conversations">,
   folderId: Id<"folders"> | undefined,
-  defer = false
+  defer = false,
+  actorId?: Id<"persons">
 ) {
+  await resetChangedAudience(ctx, conversation, folderId, actorId)
   await ctx.db.patch(conversation._id, { folderId })
   const args = { conversationId: conversation._id, folderId }
 
@@ -124,4 +129,26 @@ async function outsideFolder(
     .take(batchSize - before.length)
 
   return [...before, ...after]
+}
+
+async function resetChangedAudience(
+  ctx: MutationCtx,
+  conversation: Doc<"conversations">,
+  folderId: Id<"folders"> | undefined,
+  actorId: Id<"persons"> | undefined
+) {
+  if (
+    conversation.folderId === folderId ||
+    conversationVisibility(conversation).mode === "private"
+  ) {
+    return
+  }
+  const gate = conversationGate(conversation)
+  const [before, after] = await Promise.all([
+    audienceKey(ctx, gate),
+    audienceKey(ctx, { ...gate, folderId }),
+  ])
+  if (before !== after) {
+    await resetConversationExecution(ctx, conversation, actorId)
+  }
 }
