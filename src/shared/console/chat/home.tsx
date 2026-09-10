@@ -133,11 +133,7 @@ function Suggestions({
  *  line and the rows it shows, as skeletons. */
 function RecentPlaceholder() {
   return (
-    <div
-      aria-busy
-      aria-hidden
-      className="grid gap-1"
-    >
+    <div aria-busy aria-hidden className="grid gap-1">
       <div className="flex h-7 items-center">
         <Skeleton className="h-3 w-12" />
       </div>
@@ -165,10 +161,7 @@ function RecentConversations({
   const shown = recent.slice(0, shownRecent)
 
   return (
-    <section
-      aria-labelledby="chat-recent"
-      className="grid gap-1"
-    >
+    <section aria-labelledby="chat-recent" className="grid gap-1">
       <div className="flex h-7 items-center justify-between">
         <h3
           className="font-medium text-muted-foreground text-xs"
