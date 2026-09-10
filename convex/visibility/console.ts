@@ -1,7 +1,7 @@
 import { type Infer, v } from "convex/values"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import { transitionConversationVisibility } from "../conversations/sharing"
+import { transitionConversationVisibility } from "../conversations/console/sharing"
 import { filedResourceType, loadFiledGate } from "../folders/filing"
 import {
   ensureCurrentPerson,

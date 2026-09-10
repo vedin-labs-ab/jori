@@ -1,19 +1,19 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { transactionalConsoleContext } from "../../test/convex/conversations"
-import { internal } from "../_generated/api"
-import { insertConsoleReply } from "../messages/console"
+import { transactionalConsoleContext } from "../../../test/convex/conversations"
+import { internal } from "../../_generated/api"
+import { insertConsoleReply } from "../../messages/console/records"
 import {
   claimReusableSandbox,
   upsertSandbox,
-} from "../runs/execution/sandboxes/data"
-import { createInstructionRun } from "../runs/instruction"
-import { findSession } from "../sessions/data"
-import { drainSession } from "../sessions/drain"
-import { listOrganizationViewerIds } from "../visibility/audience"
+} from "../../runs/execution/sandboxes/data"
+import { createInstructionRun } from "../../runs/instruction"
+import { findSession } from "../../sessions/data"
+import { drainSession } from "../../sessions/drain"
+import { listOrganizationViewerIds } from "../../visibility/audience"
 import { transitionConversationVisibility } from "./sharing"
 
-vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
-vi.mock("../visibility/audience", () => ({
+vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))
+vi.mock("../../visibility/audience", () => ({
   listOrganizationViewerIds: vi.fn(),
 }))
 afterEach(() => vi.useRealTimers())

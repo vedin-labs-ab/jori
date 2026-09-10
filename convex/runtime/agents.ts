@@ -6,7 +6,7 @@ import { resolveSubtaskAccess } from "../runs/access"
 import { createInstructionRun } from "../runs/instruction"
 import { runStatus } from "../runs/schema"
 import { stopRunTree } from "../runs/tree"
-import { runExecutionIsCurrent } from "../sessions/execution"
+import { runExecutionIsCurrent } from "../sessions/scope"
 
 const maxAgents = 20
 

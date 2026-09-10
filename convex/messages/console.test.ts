@@ -3,11 +3,8 @@ import { type ReplyPart } from "../../contracts/replies/parts"
 import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { readRunDraft, writeRunDraft } from "../runs/execution/drafts/data"
-import {
-  insertConsoleMessage,
-  insertConsoleReply,
-  pageConsoleMessages,
-} from "./console"
+import { pageConsoleMessages } from "./console"
+import { insertConsoleMessage, insertConsoleReply } from "./console/records"
 
 const personId = "persons:1" as Id<"persons">
 const parts: ReplyPart[] = [

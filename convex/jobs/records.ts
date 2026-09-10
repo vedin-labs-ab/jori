@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, internalQuery } from "../_generated/server"
-import { runExecutionIsCurrent } from "../sessions/execution"
+import { runExecutionIsCurrent } from "../sessions/scope"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   createResourceSight,

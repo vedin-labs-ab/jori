@@ -6,7 +6,7 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
-import { conversationExecutionScope } from "../conversations/execution"
+import { conversationExecutionScope } from "../conversations/console/principal"
 import { messageReplyTargetIdentifier } from "../messages/identifiers"
 import { type QueryLikeCtx } from "../shared/context"
 import {

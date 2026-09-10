@@ -16,7 +16,8 @@ import {
 } from "../sessions/data"
 import { currentConversationSession } from "../sessions/execution"
 import { insertRow } from "../shared/context"
-import { consoleRunDetails, conversationExecutionPrincipal } from "./execution"
+import { consoleRunDetails } from "./console/execution"
+import { conversationExecutionPrincipal } from "./console/principal"
 import { isFreshRunWithoutWaiter } from "./fresh"
 import { findConversation } from "./resolve"
 

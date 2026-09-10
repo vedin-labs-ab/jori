@@ -3,7 +3,7 @@ import { type Id } from "../_generated/dataModel"
 import { resolveCreationFolder } from "../folders/tree"
 import { canExecuteJobRunTools } from "../jobs/execution"
 import { createRunSight, runResourceGate } from "../runs/sight"
-import { runExecutionIsCurrent } from "../sessions/execution"
+import { runExecutionIsCurrent } from "../sessions/scope"
 import { type QueryLikeCtx } from "../shared/context"
 import { normalizeStoredVisibility, type StoredVisibility } from "./schema"
 import { createSight, type Sight } from "./sight"
@@ -37,9 +37,6 @@ export async function resourceCreation(
   const sight =
     run === undefined ? createSight(ctx, args) : await createRunSight(ctx, run)
   const origin = run === undefined ? undefined : await runResourceGate(ctx, run)
-  if (origin === null) {
-    throw new Error("The resource that owns this run is no longer available.")
-  }
   const visibility = normalizeStoredVisibility(
     args.visibility ?? origin?.visibility ?? { mode: "organization" }
   )
@@ -71,7 +68,8 @@ async function resourceRun(ctx: QueryLikeCtx, args: ResourceViewer) {
     run === null ||
     run.organizationId !== args.organizationId ||
     !(await canExecuteJobRunTools(ctx, run)) ||
-    !(await runExecutionIsCurrent(ctx, run))
+    !(await runExecutionIsCurrent(ctx, run)) ||
+    (await runResourceGate(ctx, run)) === null
   ) {
     throw new Error("Run is no longer active.")
   }

@@ -1,12 +1,12 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { transactionalConsoleContext } from "../../test/convex/conversations"
-import { recentConversation } from "../messages/history"
-import { listOrganizationViewerIds } from "../visibility/audience"
+import { transactionalConsoleContext } from "../../../test/convex/conversations"
+import { recentConversation } from "../../messages/history"
+import { listOrganizationViewerIds } from "../../visibility/audience"
 import { sendConsoleMessage } from "./send"
 import { transitionConversationVisibility } from "./sharing"
 
-vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
-vi.mock("../visibility/audience", () => ({
+vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))
+vi.mock("../../visibility/audience", () => ({
   listOrganizationViewerIds: vi.fn(),
 }))
 afterEach(() => vi.useRealTimers())

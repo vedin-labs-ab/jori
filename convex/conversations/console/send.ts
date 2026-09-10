@@ -1,25 +1,25 @@
 import { type Infer } from "convex/values"
-import { type Id } from "../_generated/dataModel"
-import { type MutationCtx } from "../_generated/server"
+import { type Id } from "../../_generated/dataModel"
+import { type MutationCtx } from "../../_generated/server"
 import {
   type consoleAnswerValidator,
   consoleMessageData,
-  insertConsoleMessage,
-} from "../messages/console"
-import { type referenceTargetValidator } from "../messages/references"
-import { type modelSelectionValidator } from "../model/selection"
-import { nameMentions } from "../references/tokens"
-import { createPersonActor } from "../shared/actor"
-import { createSight } from "../visibility/sight"
-import { createConversationSight } from "./access"
+} from "../../messages/console"
+import { insertConsoleMessage } from "../../messages/console/records"
+import { type referenceTargetValidator } from "../../messages/references"
+import { type modelSelectionValidator } from "../../model/selection"
+import { nameMentions } from "../../references/tokens"
+import { createPersonActor } from "../../shared/actor"
+import { createSight } from "../../visibility/sight"
+import { createConversationSight } from "../access"
+import { startMessageRun } from "../data"
+import { requireVisibleConsoleConversation } from "../resolve"
+import { scheduleConversationSummary } from "../summary/schedule"
 import {
   createConsoleConversation,
   normalizeConsoleContext,
   normalizeConsoleReferences,
 } from "./create"
-import { startMessageRun } from "./data"
-import { requireVisibleConsoleConversation } from "./resolve"
-import { scheduleConversationSummary } from "./summary/schedule"
 
 export type ConsoleSendArgs = {
   organizationId: string
