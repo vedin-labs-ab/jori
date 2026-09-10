@@ -110,6 +110,7 @@ test("a visibility transition rejects late replies and summaries from the old ex
       })
     )
   ).rejects.toThrow("no longer active")
+  await expectLateRequestsRejected(f)
   await f.t.mutation(internal.runs.records.finish, {
     runId: f.runId,
     result: "Late personal outcome",
@@ -181,3 +182,28 @@ test("shared audience edits reset context and returning private creates personal
     })
   })
 })
+
+async function expectLateRequestsRejected(
+  f: Awaited<ReturnType<typeof transactionalConsoleContext>>
+) {
+  await expect(
+    f.t.mutation(internal.approvals.approvals.create, {
+      organizationId: "org",
+      runId: f.runId,
+      surface: "jori",
+      tool: "read_file",
+      inputJson: "{}",
+      summary: "Late request",
+      code: "STALE123",
+      requestedBy: { kind: "person", personId: f.people[0] },
+    })
+  ).rejects.toThrow("no longer active")
+  await expect(
+    f.t.mutation(internal.integrations.offers.records.create, {
+      organizationId: "org",
+      integration: "slack",
+      summary: "Late offer",
+      source: { surface: "jori", runId: f.runId },
+    })
+  ).rejects.toThrow("no longer active")
+}

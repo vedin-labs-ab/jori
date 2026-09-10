@@ -4,6 +4,7 @@ import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { requireExecutingRun } from "../runs/execution/guard"
 import { canSeeRun } from "../runs/visibility"
 import { actorValidator } from "../shared/actor"
 import {
@@ -35,6 +36,7 @@ export const create = internalMutation({
     requestedBy: actorValidator,
   },
   handler: async (ctx, args) => {
+    await requireExecutingRun(ctx, args)
     await resolveApprovalActor(ctx, {
       actor: args.requestedBy,
       surface: args.surface,
