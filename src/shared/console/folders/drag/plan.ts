@@ -25,7 +25,7 @@ export type FolderDragItem = {
 }
 
 export type ResourceDragItem = {
-  type: "table" | "store" | "file" | "job"
+  type: "table" | "store" | "file" | "job" | "chat"
   id: string
   name: string
   mimeType?: string

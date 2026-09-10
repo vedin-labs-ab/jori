@@ -9,6 +9,7 @@ import { ChatsPicker } from "../shell/chats"
 import { ConsoleLink } from "../shell/link"
 import { conversationDestination } from "../shell/routes"
 import { relativeTime } from "../time"
+import { useChatDrag } from "./drag"
 import { type ChatSuggestion } from "./suggestions"
 import { chatColumnClassName } from "./thread"
 import { type ChatConversation } from "./types"
@@ -188,23 +189,49 @@ function RecentConversations({
       </div>
       <ul className="divide-y">
         {shown.map((conversation) => (
-          <li key={conversation.id}>
-            <ConsoleLink
-              className={rowClassName}
-              {...conversationDestination(conversation.id)}
-            >
-              <span className="min-w-0 flex-1 truncate">
-                {conversation.title}
-              </span>
-              <span className="shrink-0 text-muted-foreground text-xs">
-                {relativeTime(conversation.updatedAt, now)}
-              </span>
-              <RowArrow />
-            </ConsoleLink>
-          </li>
+          <RecentConversation
+            conversation={conversation}
+            key={conversation.id}
+            now={now}
+          />
         ))}
       </ul>
     </section>
+  )
+}
+
+function RecentConversation({
+  conversation,
+  now,
+}: {
+  conversation: ChatConversation
+  now: number
+}) {
+  const drag = useChatDrag(conversation, "recent")
+
+  return (
+    <li>
+      <ConsoleLink
+        {...conversationDestination(conversation.id)}
+        {...drag.attributes}
+        {...drag.listeners}
+        className={cn(
+          rowClassName,
+          "cursor-grab",
+          drag.isDragSource && "opacity-50"
+        )}
+        draggable={false}
+        onClickCapture={drag.onClickCapture}
+        onPointerDownCapture={drag.onPointerDownCapture}
+        ref={drag.setNodeRef}
+      >
+        <span className="min-w-0 flex-1 truncate">{conversation.title}</span>
+        <span className="shrink-0 text-muted-foreground text-xs">
+          {relativeTime(conversation.updatedAt, now)}
+        </span>
+        <RowArrow />
+      </ConsoleLink>
+    </li>
   )
 }
 

@@ -63,8 +63,16 @@ function useRemoveEntry(organizationId: string) {
   const removeStore = useMutation(api.stores.console.remove)
   const removeFile = useMutation(api.files.console.remove)
   const removeJob = useMutation(api.jobs.console.remove)
+  const fileResource = useMutation(api.folders.console.file)
   const removeResource = (resource: FolderResource) => {
     switch (resource.type) {
+      case "chat":
+        return fileResource({
+          organizationId,
+          resourceType: "chat",
+          resourceId: resource.id,
+          folderId: null,
+        })
       case "table":
         return removeTable({
           organizationId,

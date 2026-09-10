@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { scrollFadeViewport } from "@/shared/fade"
+import { useChatDrag } from "../chat/drag"
 import { type ChatConversation } from "../chat/types"
 import { ChatsMenu } from "./chats"
 import { CollapsibleGroup } from "./group"
@@ -143,25 +144,48 @@ function ChatsGroup({
       <ChatsScroll clamp={chats.length > visibleChats}>
         <SidebarMenu>
           {chats.map((chat) => (
-            <SidebarMenuItem key={chat.id}>
-              <SidebarMenuButton
-                asChild
-                isActive={isNavigationActive(
-                  pathname,
-                  conversationPathname(chat.id),
-                  true
-                )}
-                tooltip={chat.title}
-              >
-                <ConsoleLink {...conversationDestination(chat.id)}>
-                  <span>{chat.title}</span>
-                </ConsoleLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            <SidebarChat chat={chat} key={chat.id} pathname={pathname} />
           ))}
         </SidebarMenu>
       </ChatsScroll>
     </CollapsibleGroup>
+  )
+}
+
+function SidebarChat({
+  chat,
+  pathname,
+}: {
+  chat: ChatConversation
+  pathname: string
+}) {
+  const drag = useChatDrag(chat, "sidebar")
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        asChild
+        isActive={isNavigationActive(
+          pathname,
+          conversationPathname(chat.id),
+          true
+        )}
+        tooltip={chat.title}
+      >
+        <ConsoleLink
+          {...conversationDestination(chat.id)}
+          {...drag.attributes}
+          {...drag.listeners}
+          className={cn("cursor-grab", drag.isDragSource && "opacity-50")}
+          draggable={false}
+          onClickCapture={drag.onClickCapture}
+          onPointerDownCapture={drag.onPointerDownCapture}
+          ref={drag.setNodeRef}
+        >
+          <span>{chat.title}</span>
+        </ConsoleLink>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   )
 }
 

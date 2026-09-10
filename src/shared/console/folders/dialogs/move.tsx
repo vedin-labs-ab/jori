@@ -83,6 +83,11 @@ function MoveDialogBody({
         <DialogDescription>
           Choose the folder {subjectSize(subject) > 1 ? "they" : "it"} should
           live in.
+          {subject.resources.some(
+            (resource) => resource.resourceType === "chat"
+          )
+            ? " Chats stay private to you. Their runs and usage follow the folder."
+            : null}
         </DialogDescription>
       </DialogHeader>
       {folders === undefined ? (

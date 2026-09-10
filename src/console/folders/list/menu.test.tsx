@@ -113,6 +113,27 @@ test("a job still being resolved offers only what the filing knows", () => {
   expect(itemLabels()).toEqual(["Move to folder…", "Remove from folder"])
 })
 
+test("a filed chat opens its conversation and can move without deleting its history", () => {
+  const actions = stubActions()
+  const resource = {
+    type: "chat",
+    id: "chat-1",
+    name: "Renewals at risk",
+    visibility: "private",
+    updatedAt: Date.now(),
+  }
+
+  renderRows({ resources: [resource] }, { actions })
+
+  expect(
+    screen.getByRole("link", { name: /Renewals at risk/ }).getAttribute("href")
+  ).toBe("/chat/chat-1")
+  openActions("Renewals at risk")
+  expect(itemLabels()).toEqual(["Move to folder…", "Remove from folder"])
+  fireEvent.click(screen.getByRole("menuitem", { name: "Remove from folder" }))
+  expect(actions.onUnfile).toHaveBeenCalledWith(resource)
+})
+
 const folderRow = {
   folderId: "folder-1",
   name: "Guides",

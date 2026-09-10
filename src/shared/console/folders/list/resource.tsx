@@ -122,64 +122,43 @@ const statusMarks: Partial<
 /** The resource's own surface. */
 function ResourceLink({ resource }: { resource: FolderResource }) {
   const Icon = resourcePresentation(resource).icon
-  const label = (
-    <>
+
+  return (
+    <ConsoleLink
+      {...resourceDestination(resource)}
+      className={nameLinkClassName}
+      draggable={false}
+      title={resource.name}
+    >
       <Icon className="size-4 shrink-0 text-muted-foreground" />
       <span className="truncate">{resource.name}</span>
       {resource.visibility === "organization" ? null : (
         <VisibilityMark visibility={resource.visibility} />
       )}
-    </>
+    </ConsoleLink>
   )
+}
 
+function resourceDestination(resource: FolderResource) {
   switch (resource.type) {
     case "table":
-      return (
-        <ConsoleLink
-          className={nameLinkClassName}
-          draggable={false}
-          params={{ tableId: resource.id }}
-          title={resource.name}
-          to="/tables/$tableId"
-        >
-          {label}
-        </ConsoleLink>
-      )
+      return {
+        to: "/tables/$tableId",
+        params: { tableId: resource.id },
+      } as const
     case "store":
-      return (
-        <ConsoleLink
-          className={nameLinkClassName}
-          draggable={false}
-          params={{ storeId: resource.id }}
-          title={resource.name}
-          to="/stores/$storeId"
-        >
-          {label}
-        </ConsoleLink>
-      )
+      return {
+        to: "/stores/$storeId",
+        params: { storeId: resource.id },
+      } as const
     case "file":
-      return (
-        <ConsoleLink
-          className={nameLinkClassName}
-          draggable={false}
-          params={{ fileId: resource.id }}
-          title={resource.name}
-          to="/files/$fileId"
-        >
-          {label}
-        </ConsoleLink>
-      )
+      return { to: "/files/$fileId", params: { fileId: resource.id } } as const
     case "job":
-      return (
-        <ConsoleLink
-          className={nameLinkClassName}
-          draggable={false}
-          params={{ jobId: resource.id }}
-          title={resource.name}
-          to="/jobs/$jobId"
-        >
-          {label}
-        </ConsoleLink>
-      )
+      return { to: "/jobs/$jobId", params: { jobId: resource.id } } as const
+    case "chat":
+      return {
+        to: "/chat/$conversationId",
+        params: { conversationId: resource.id },
+      } as const
   }
 }

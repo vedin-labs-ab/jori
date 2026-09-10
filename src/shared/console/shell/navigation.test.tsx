@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
+import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { type ReactNode } from "react"
 import { afterEach, expect, test, vi } from "vitest"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { dragActivationDistance } from "../folders/drag/plan"
 import { ConsoleNavigationContext } from "./location"
 import { ConsoleSidebar } from "./navigation"
 
@@ -24,26 +27,85 @@ const chats = [
 function renderSidebar(
   pathname: string,
   conversations = chats,
-  options: { open?: boolean; navigate?: (href: string) => void } = {}
+  options: {
+    open?: boolean
+    navigate?: (href: string) => void
+    onDragStart?: () => void
+  } = {}
 ) {
   return render(
     <TooltipProvider>
       <ConsoleNavigationContext.Provider
         value={{ navigate: options.navigate ?? (() => undefined), pathname }}
       >
-        <SidebarProvider open={options.open ?? true}>
-          <ConsoleSidebar
-            account={null}
-            chats={conversations}
-            folders={null}
-            organization={null}
-            pathname={pathname}
-          />
-        </SidebarProvider>
+        <DragSurface onDragStart={options.onDragStart}>
+          <SidebarProvider open={options.open ?? true}>
+            <ConsoleSidebar
+              account={null}
+              chats={conversations}
+              folders={null}
+              organization={null}
+              pathname={pathname}
+            />
+          </SidebarProvider>
+        </DragSurface>
       </ConsoleNavigationContext.Provider>
     </TooltipProvider>
   )
 }
+
+export function DragSurface({
+  children,
+  onDragStart,
+}: {
+  children: ReactNode
+  onDragStart?: () => void
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: dragActivationDistance },
+    })
+  )
+
+  return (
+    <DndContext onDragStart={onDragStart} sensors={sensors}>
+      {children}
+    </DndContext>
+  )
+}
+
+test("dragging a sidebar chat carries its current folder without navigating", () => {
+  const onDragStart = vi.fn()
+  const navigate = vi.fn()
+  const chat = { ...chats[0], folderId: "finance" }
+
+  renderSidebar("/chat", [chat], { onDragStart, navigate })
+  const link = screen.getByRole("link", { name: chat.title })
+
+  fireEvent.pointerDown(link, {
+    button: 0,
+    clientX: 10,
+    clientY: 10,
+    isPrimary: true,
+    pointerId: 1,
+  })
+  fireEvent.pointerMove(document, {
+    clientX: 10 + dragActivationDistance + 1,
+    clientY: 10,
+    pointerId: 1,
+  })
+
+  expect(onDragStart).toHaveBeenCalledOnce()
+  expect(onDragStart.mock.calls[0]?.[0].active.data.current).toEqual({
+    folders: [],
+    resources: [
+      { type: "chat", id: chat.id, name: chat.title, folderId: "finance" },
+    ],
+  })
+  fireEvent.pointerUp(document, { pointerId: 1 })
+  fireEvent.click(link)
+  expect(navigate).not.toHaveBeenCalled()
+})
 
 test.each([
   "/chat/conversations_flaky",

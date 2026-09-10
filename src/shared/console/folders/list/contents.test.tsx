@@ -256,3 +256,43 @@ test("removing a selection names what happens to each part of it", () => {
     resources: [expect.objectContaining({ id: "table-1" })],
   })
 })
+
+test("filed chats join bulk moves and removal keeps their history", () => {
+  const chat = {
+    type: "chat" as const,
+    id: "chat-1",
+    name: "Renewals at risk",
+    visibility: "private" as const,
+    updatedAt: Date.now(),
+  }
+  const actions = { isBusy: false, onMove: vi.fn(), onRemove: vi.fn() }
+
+  renderContents({ status: "ready", folders: [], resources: [chat] }, actions)
+  fireEvent.click(
+    screen.getByRole("checkbox", { name: "Select Renewals at risk" })
+  )
+  fireEvent.click(screen.getByRole("button", { name: "Move" }))
+  expect(actions.onMove).toHaveBeenCalledWith({
+    folders: [],
+    resources: [
+      {
+        resourceType: "chat",
+        resourceId: "chat-1",
+        name: chat.name,
+        folderId: "folder-0",
+      },
+    ],
+  })
+  expect(screen.queryByRole("button", { name: "Delete" })).toBeNull()
+  fireEvent.click(screen.getByRole("button", { name: "Remove" }))
+  expect(
+    screen.getByText(
+      /Chats are removed from the folder and stay in your chat history/
+    )
+  ).toBeDefined()
+  fireEvent.click(screen.getByRole("button", { name: "Remove" }))
+  expect(actions.onRemove).toHaveBeenCalledWith({
+    folders: [],
+    resources: [chat],
+  })
+})

@@ -98,11 +98,12 @@ export function useFolderRowDrag(
  *  the drag carries the whole selection. */
 export function useResourceRowDrag(
   item: ResourceDragItem,
-  selected: DragPayload
+  selected: DragPayload,
+  zone = "resource"
 ) {
   const { active } = useContext(FolderDragContext)
   const source = useDragSource(
-    `resource-${item.type}-${item.id}`,
+    `${zone}-${item.type}-${item.id}`,
     carriedPayload(resourcePayload(item), selected)
   )
 
