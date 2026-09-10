@@ -174,9 +174,8 @@ export const runs = defineTable({
   /** Outcome returned via finish_run; parents read it from wait_for_agents. */
   result: v.optional(v.string()),
   createdBy: v.optional(v.id("persons")),
-  /** The folder whose usage this run's cost answers to, resolved once from
-   *  the job's filing when the run is created. Absent for interactive
-   *  work, which is filed nowhere and rolls up unfiled. */
+  /** The folder whose usage this run costs. Chat filing moves its history;
+   *  job runs keep the folder stamped when they started. */
   folderId: v.optional(v.id("folders")),
   /** Prompt tokens of the run's latest model turn, cached inclusive: how
    *  much of the model's window the run is using. The trace layer writes
@@ -193,6 +192,7 @@ export const runs = defineTable({
   .index("by_organization", ["organizationId"])
   .index("by_parent", ["parentId"])
   .index("by_root", ["rootId"])
+  .index("by_conversation_and_folder", ["conversationId", "folderId"])
   .index("by_conversation_and_created_at", ["conversationId", "createdAt"])
   .index("by_organization_and_audience_and_created_at", [
     "organizationId",

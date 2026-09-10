@@ -12,6 +12,7 @@ import {
 
 const folderId = "folder-1" as Id<"folders">
 const jobId = "job-1" as Id<"jobs">
+const conversationId = "chat-1" as Id<"conversations">
 const personId = "person-1" as Id<"persons">
 
 function attribution(
@@ -30,18 +31,19 @@ test("the key names every dimension a breakdown can group by, the model last", (
     usageKey(
       attribution({
         folderId,
+        conversationId,
         job: { id: jobId, label: "Morning digest" },
         personId,
         surface: "slack",
         trigger: "message",
       })
     )
-  ).toBe("folder-1:job-1:person-1:slack:message:openai/gpt-x")
+  ).toBe("folder-1:job-1:chat-1:person-1:slack:message:openai/gpt-x")
 })
 
 test("work with no folder, job, or person keys as unfiled", () => {
   expect(usageKey(attribution({ trigger: "manual" }))).toBe(
-    "-:-:-:jori:manual:openai/gpt-x"
+    "-:-:-:-:jori:manual:openai/gpt-x"
   )
 })
 

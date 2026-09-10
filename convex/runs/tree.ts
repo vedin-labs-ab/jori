@@ -17,9 +17,7 @@ export async function stopRunTree(
   run: Doc<"runs">,
   stoppedBy?: Actor
 ) {
-  if (!isTerminalRunStatus(run.status)) {
-    await stopRun(ctx, run, stoppedBy)
-  }
+  await stopRun(ctx, run, stoppedBy)
 
   await stopRunChildren(ctx, run._id, stoppedBy)
 }
@@ -40,11 +38,16 @@ export async function stopRunChildren(
   }
 }
 
-async function stopRun(
+/** Stops this run only; callers scanning a whole conversation own traversal. */
+export async function stopRun(
   ctx: MutationCtx,
   run: Doc<"runs">,
-  stoppedBy: Actor | undefined
+  stoppedBy?: Actor
 ) {
+  if (isTerminalRunStatus(run.status)) {
+    return
+  }
+
   const now = Date.now()
 
   await recordTrace(ctx, {

@@ -80,17 +80,21 @@ export async function reparentUsage(
     .take(args.budget)
 
   for (const row of rows) {
-    await moveBucket(ctx, row, args.destination)
+    await moveUsageBucket(ctx, row, args.destination)
   }
 
   return rows.length
 }
 
-async function moveBucket(
+export async function moveUsageBucket(
   ctx: MutationCtx,
   row: Doc<"usage">,
   destination: Id<"folders"> | undefined
 ) {
+  if (row.folderId === destination) {
+    return
+  }
+
   const key = usageKey({ ...row, folderId: destination })
   const target = await findBucket(ctx, { ...row, key })
 
@@ -156,16 +160,21 @@ function findBucket(ctx: MutationCtx, identity: BucketIdentity) {
     .unique()
 }
 
-/** Read off the run, never joined at read time: a run carries the folder it
- *  was filed under when it was created, and the job carries its own
- *  label because the job row may already be gone. */
+/** Live chat filing wins while older runs are still being moved. Job
+ *  runs keep their creation folder and a label that survives deletion. */
 async function resolveAttribution(
   ctx: MutationCtx,
   run: Doc<"runs">,
   model: string
 ): Promise<UsageAttribution> {
+  const conversation =
+    run.conversationId === undefined
+      ? null
+      : await ctx.db.get(run.conversationId)
+
   return {
-    folderId: run.folderId,
+    folderId: conversation === null ? run.folderId : conversation.folderId,
+    conversationId: run.conversationId,
     job: await resolveJob(ctx, run),
     personId: run.createdBy,
     surface: run.snapshot.source.surface ?? "jori",

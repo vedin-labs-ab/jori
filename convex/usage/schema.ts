@@ -30,9 +30,11 @@ export const usage = defineTable({
   /** Derived from the attribution tuple (usage/key.ts); the row's identity
    *  for the increment path, since a bucket is found before it is patched. */
   key: v.string(),
-  /** Absent is the unfiled bucket: interactive work, and work whose folder
-   *  was deleted with no ancestor left to inherit it. */
+  /** Absent is the unfiled bucket, including work whose folder was deleted
+   *  with no ancestor left to inherit it. */
   folderId: v.optional(v.id("folders")),
+  /** Separates a chat's history so filing it never moves another chat's costs. */
+  conversationId: v.optional(v.id("conversations")),
   /** Carries its own label because jobs are hard-deleted — one-shot
    *  ones as soon as they fire. The id alone would leave an unnamed row. */
   job: v.optional(v.object({ id: v.id("jobs"), label: v.string() })),
@@ -50,5 +52,6 @@ export const usage = defineTable({
 })
   .index("by_organization_and_key_and_date", ["organizationId", "key", "date"])
   .index("by_organization_and_date", ["organizationId", "date"])
+  .index("by_conversation_and_folder", ["conversationId", "folderId"])
   .index("by_folder_and_date", ["folderId", "date"])
   .index("by_job_and_date", ["job.id", "date"])

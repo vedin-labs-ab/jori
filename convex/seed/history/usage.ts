@@ -68,6 +68,7 @@ async function attribute(ctx: MutationCtx, run: Doc<"runs">) {
   return {
     date: usageDate(run.createdAt, seedTimezone),
     folderId: run.folderId,
+    conversationId: run.conversationId,
     job:
       run.job === undefined
         ? undefined

@@ -2,10 +2,11 @@ import { type Infer } from "convex/values"
 import { type MessageContext } from "../../contracts/replies/answers"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { resolveConsoleContext } from "../messages/references"
 import { type modelSelectionValidator } from "../model/selection"
 import { loadReference, referenceTable } from "../references/lookup"
 import { insertRow, type QueryLikeCtx } from "../shared/context"
-import { type Sight } from "../visibility/sight"
+import { createSight, type Sight } from "../visibility/sight"
 
 const titleMaxLength = 80
 
@@ -18,16 +19,26 @@ export async function createConsoleConversation(
     organizationId: string
     personId: Id<"persons">
     text: string
+    context?: MessageContext
     model?: Infer<typeof modelSelectionValidator>
     now: number
   }
 ) {
+  const context = await resolveConsoleContext(
+    ctx,
+    createSight(ctx, {
+      organizationId: args.organizationId,
+      personId: args.personId,
+    }),
+    { context: args.context }
+  )
   const conversation = await insertRow(ctx, "conversations", {
     organizationId: args.organizationId,
     surface: "console",
     externalId: "",
     scope: "person",
     title: conversationTitle(args.text),
+    folderId: context?.folderId,
     createdBy: args.personId,
     updatedAt: args.now,
     ...(args.model === undefined ? {} : { model: args.model }),

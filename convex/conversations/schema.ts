@@ -18,6 +18,8 @@ export const conversations = defineTable({
   // Console conversations: the first message's first line, who opened it,
   // and when it last moved, so a person's list orders by activity.
   title: v.optional(v.string()),
+  /** The folder this chat and all of its runs belong to. */
+  folderId: v.optional(v.id("folders")),
   createdBy: v.optional(v.id("persons")),
   updatedAt: v.optional(v.number()),
   /** The model and effort the conversation's next run uses; absent, the
@@ -37,6 +39,8 @@ export const conversations = defineTable({
     "createdBy",
     "updatedAt",
   ])
+  .index("by_folder", ["folderId"])
+  .index("by_folder_and_created_by", ["folderId", "createdBy"])
   .index("by_organization_and_summarized_at", [
     "organizationId",
     "summarizedAt",

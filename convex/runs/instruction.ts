@@ -28,6 +28,12 @@ export async function createInstructionRun(
   }
 ) {
   const parent = args.parent
+  const conversation =
+    parent?.conversationId === undefined
+      ? null
+      : await ctx.db.get(parent.conversationId)
+  const folderId =
+    conversation === null ? parent?.folderId : conversation.folderId
 
   // Child runs ride on their parent's budget; only fresh work is gated.
   if (parent === undefined) {
@@ -44,7 +50,8 @@ export async function createInstructionRun(
       : {
           parentId: parent._id,
           rootId: parent.rootId ?? parent._id,
-          ...inheritedJobExecution(parent),
+          ...(parent.job === undefined ? {} : { job: parent.job }),
+          ...(folderId === undefined ? {} : { folderId }),
         }),
     cause: { type: "manual", personId: args.createdBy },
     principal:
@@ -67,16 +74,4 @@ export async function createInstructionRun(
   await startRun(ctx, runId)
 
   return runId
-}
-
-function inheritedJobExecution(parent: Doc<"runs">) {
-  if (parent.job === undefined) {
-    return {}
-  }
-
-  return {
-    job: parent.job,
-    // Delegated work costs the folder its parent costs.
-    ...(parent.folderId === undefined ? {} : { folderId: parent.folderId }),
-  }
 }
