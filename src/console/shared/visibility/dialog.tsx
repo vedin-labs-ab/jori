@@ -1,7 +1,7 @@
 import { type Visibility } from "@contracts/visibility"
 import { useMutation, useQuery } from "convex/react"
 import { type FunctionArgs } from "convex/server"
-import { useEffect, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { VisibilityDialog } from "@/shared/console/visibility/dialog"
 import { api } from "../../../../convex/_generated/api"
@@ -17,6 +17,7 @@ export type VisibilityTarget = SetVisibilityArgs["target"]
  *  it. Owned targets accept changes from their owner only. */
 export function OrganizationVisibilityDialog({
   noun,
+  notice,
   onOpenChange,
   open,
   organizationId,
@@ -25,6 +26,7 @@ export function OrganizationVisibilityDialog({
   value,
 }: {
   noun: string
+  notice?: (draft: Visibility) => ReactNode
   onOpenChange: (open: boolean) => void
   open: boolean
   organizationId: string
@@ -89,6 +91,7 @@ export function OrganizationVisibilityDialog({
       }
       isSaving={isSaving}
       noun={noun}
+      notice={notice?.(draft)}
       onOpenChange={onOpenChange}
       onSave={() => void save()}
       open={open}

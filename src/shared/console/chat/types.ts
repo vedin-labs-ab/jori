@@ -3,6 +3,7 @@ import {
   type MessageContext,
 } from "@contracts/replies/answers"
 import { type ReferenceKind, type ReplyPart } from "@contracts/replies/parts"
+import { type VisibilityMode } from "@contracts/visibility"
 
 // What the chat views read. The console maps its rows to these and the
 // landing page's demo builds them from fixtures; the views know only
@@ -13,6 +14,8 @@ export type ChatRole = "person" | "jori"
 export type ChatMessage = {
   id: string
   role: ChatRole
+  /** The person who sent this message, resolved for the current viewer. */
+  author?: { id: string; name: string; image?: string; isViewer: boolean }
   /** Markdown for Jori's messages, plain text for a person's. */
   text: string
   parts: ReplyPart[]
@@ -30,6 +33,7 @@ export type ChatConversation = {
   title: string
   updatedAt: number
   folderId?: string
+  visibility: VisibilityMode
 }
 
 export type ChatRunStatus =

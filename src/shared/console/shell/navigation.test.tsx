@@ -25,8 +25,18 @@ afterEach(() => {
 })
 
 const chats = [
-  { id: "conversations_renewals", title: "Renewals at risk", updatedAt: 2 },
-  { id: "conversations_flaky", title: "Flaky payroll test", updatedAt: 1 },
+  {
+    id: "conversations_renewals",
+    title: "Renewals at risk",
+    updatedAt: 2,
+    visibility: "organization" as const,
+  },
+  {
+    id: "conversations_flaky",
+    title: "Flaky payroll test",
+    updatedAt: 1,
+    visibility: "organization" as const,
+  },
 ]
 
 function renderSidebar(

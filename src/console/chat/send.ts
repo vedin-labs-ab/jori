@@ -4,6 +4,7 @@ import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { useCallback } from "react"
 import { toast } from "sonner"
+import { type ChatMessage } from "@/shared/console/chat/types"
 import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../convex/_generated/api"
 
@@ -19,7 +20,10 @@ const blockedMessage = budgetSentence("out-of-usage", "this message waits")
  *  reads; the reply follows through the conversation's live state. A
  *  blocked budget keeps the message and says so; a failure says why and
  *  rejects, so the composer keeps the draft for another try. */
-export function useSendMessage(organizationId: string) {
+export function useSendMessage(
+  organizationId: string,
+  author?: ChatMessage["author"]
+) {
   const send = useMutation(api.conversations.console.send).withOptimisticUpdate(
     (localStore, args) => {
       if (args.conversationId === undefined) {
@@ -36,6 +40,7 @@ export function useSendMessage(organizationId: string) {
         item: {
           id: crypto.randomUUID() as GenericId<"messages">,
           role: "person",
+          ...(author === undefined ? {} : { author }),
           text: args.text,
           data: {
             ...(args.context === undefined ? {} : { context: args.context }),

@@ -35,7 +35,7 @@ export function useConversation(
     autoOpen,
     choose: useChooseModel(organizationId, conversationId),
     mentioned,
-    mentions: useMentionSources(organizationId),
+    mentions: useMentionSources(organizationId, conversationId),
     openTarget,
     page,
     pane,
@@ -45,7 +45,7 @@ export function useConversation(
       page.messages,
       mentioned.targets
     ),
-    send: useLatestCallback(useSendMessage(organizationId)),
+    send: useLatestCallback(useSendMessage(organizationId, live.viewer)),
     stop: useStopRun(organizationId, live.run),
   }
 }

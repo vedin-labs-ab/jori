@@ -20,6 +20,7 @@ export type ChooseHandler = (
  *  bundle wherever the reply stands, and its chips after the latest
  *  reply only. Chips are next steps, so they leave with the next message. */
 export function ReplyParts({
+  answerAuthor,
   answered,
   message,
   onChoose,
@@ -27,6 +28,7 @@ export function ReplyParts({
   resolveReference,
   showChips,
 }: {
+  answerAuthor?: ChatMessage["author"]
   answered: Map<string, Map<number, string[]>>
   message: ChatMessage
   onChoose: ChooseHandler
@@ -58,6 +60,7 @@ export function ReplyParts({
       )}
       {questions.length === 0 ? null : (
         <QuestionBundle
+          author={answerAuthor}
           answers={answered.get(message.id)}
           onAnswer={(answers, text) => onChoose(message.id, answers, text)}
           questions={questions}

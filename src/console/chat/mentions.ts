@@ -1,5 +1,6 @@
 import { integrations } from "@contracts/integrations"
 import { useQuery } from "convex/react"
+import { type GenericId } from "convex/values"
 import { useEffect, useMemo, useState } from "react"
 import {
   type MentionResource,
@@ -15,13 +16,17 @@ const searchDelay = 150
  *  resources the person can see — looked up only while a search is on,
  *  narrowed to what is searched for, the last answer standing while the
  *  next loads. */
-export function useMentionSources(organizationId: string): MentionSources {
+export function useMentionSources(
+  organizationId: string,
+  conversationId?: GenericId<"conversations">
+): MentionSources {
   const [query, setQuery] = useState<string | null>(null)
   const skills = useQuery(api.skills.catalog.list, { organizationId })
   const permissions = useQuery(api.permissions.tools.list, { organizationId })
   const { resources, searching } = useRetainedResources(
     organizationId,
-    useSettledQuery(query)
+    useSettledQuery(query),
+    conversationId
   )
 
   return useMemo(
@@ -69,10 +74,14 @@ function useSettledQuery(query: string | null) {
 
 /** The resources found, skipping the lookup while nothing is searched
  *  for and keeping the last answer while the next is on its way. */
-function useRetainedResources(organizationId: string, query: string | null) {
+function useRetainedResources(
+  organizationId: string,
+  query: string | null,
+  conversationId: GenericId<"conversations"> | undefined
+) {
   const listed = useQuery(
     api.references.mentions.list,
-    query === null ? "skip" : { organizationId, query }
+    query === null ? "skip" : { organizationId, query, conversationId }
   )
   const [retained, setRetained] = useState<MentionResource[]>([])
 

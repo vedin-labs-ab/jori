@@ -2,6 +2,7 @@
 import { act, renderHook } from "@testing-library/react"
 import { useQuery } from "convex/react"
 import { type FunctionReference, getFunctionName } from "convex/server"
+import { type GenericId } from "convex/values"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { useMentionSources } from "./mentions"
 
@@ -51,4 +52,19 @@ test("looks resources up only while a search is on, a moment after the last keys
   // The search ending lets the lookup go, at once.
   search(null)
   expect(lastLookup()).toBe("skip")
+})
+
+test("an existing chat scopes resource suggestions to its execution context", () => {
+  const conversationId = "conversations_shared" as GenericId<"conversations">
+  const { result } = renderHook(() =>
+    useMentionSources("org_1", conversationId)
+  )
+
+  act(() => result.current.onSearch?.(""))
+
+  expect(lastLookup()).toEqual({
+    organizationId: "org_1",
+    conversationId,
+    query: "",
+  })
 })

@@ -84,12 +84,18 @@ export function ComposerFooter({
           {usage === undefined || usage === null ? null : (
             <ContextIndicator usage={usage} />
           )}
-          <SendControl
-            canSend={canSend}
-            isLive={isLive}
-            onStop={onStop}
-            pending={pending}
-          />
+          {isLive ? (
+            <InputGroupButton
+              aria-label="Stop run"
+              onClick={onStop}
+              size="icon-sm"
+              type="button"
+              variant="ghost"
+            >
+              <Square className="fill-current" />
+            </InputGroupButton>
+          ) : null}
+          <SendControl canSend={canSend} pending={pending} />
         </span>
       </InputGroupAddon>
       {/* The sigils on the quiet band the job field has, where a phone's
@@ -125,33 +131,14 @@ export function ComposerFooter({
   )
 }
 
-/** The footer's last control: the stop while a run is live, the spinner
- *  while a send is on its way, the send otherwise. One box for all
- *  three, so nothing beside it moves. */
+/** The last control sends a message, or holds its place while it lands. */
 function SendControl({
   canSend,
-  isLive,
-  onStop,
   pending,
 }: {
   canSend: boolean
-  isLive: boolean
-  onStop: () => void
   pending: boolean
 }) {
-  if (isLive) {
-    return (
-      <InputGroupButton
-        aria-label="Stop run"
-        onClick={onStop}
-        size="icon-sm"
-        variant="default"
-      >
-        <Square className="fill-current" />
-      </InputGroupButton>
-    )
-  }
-
   if (pending) {
     return (
       <span className="grid size-7 place-items-center text-muted-foreground">

@@ -75,3 +75,25 @@ test("the time reads relative, and holds the moment for a hover or a keyboard", 
     absoluteTime(ask.createdAt)
   )
 })
+
+test("person messages identify the sender and reserve You for the viewer", () => {
+  const author = { id: "maya", name: "Maya Lund", isViewer: false }
+
+  render(
+    <TooltipProvider>
+      <PersonMessage
+        context={undefined}
+        message={{ ...ask, author }}
+        now={now}
+      />
+      <PersonMessage
+        context={undefined}
+        message={{ ...ask, id: "mine", author: { ...author, isViewer: true } }}
+        now={now}
+      />
+    </TooltipProvider>
+  )
+
+  expect(screen.getByText("Maya Lund")).toBeDefined()
+  expect(screen.getByText("You")).toBeDefined()
+})

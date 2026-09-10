@@ -20,6 +20,7 @@ import {
   QuestionnaireTitle,
 } from "@/components/ui/questionnaire"
 import { cn } from "@/lib/utils"
+import { type ChatMessage } from "../types"
 import { answerLabels, choiceValue, composeAnswers } from "./answers"
 
 /** A question of a reply's, with the index of its part in the reply. */
@@ -31,11 +32,13 @@ export type BundleQuestion = { index: number; part: ReplyQuestion }
  *  each question with what was chosen and stays that way. */
 export function QuestionBundle({
   answers,
+  author,
   onAnswer,
   questions,
 }: {
   /** The values each part received, once the bundle has been answered. */
   answers: Map<number, string[]> | undefined
+  author?: ChatMessage["author"]
   onAnswer: (answers: PartAnswer[], text: string) => void
   questions: BundleQuestion[]
 }) {
@@ -49,6 +52,11 @@ export function QuestionBundle({
             values={answers.get(index) ?? []}
           />
         ))}
+        {author === undefined ? null : (
+          <p className="text-muted-foreground text-xs">
+            Answered by {author.isViewer ? "you" : author.name}
+          </p>
+        )}
       </div>
     )
   }

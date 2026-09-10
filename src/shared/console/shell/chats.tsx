@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar"
 import { scrollFade } from "@/shared/fade"
 import { type ChatConversation } from "../chat/types"
+import { VisibilityMark } from "../visibility/badge"
 import { useConsoleNavigate } from "./location"
 import {
   conversationDestination,
@@ -63,7 +64,10 @@ export function ChatsPicker({
                   }}
                   value={`${chat.title} ${chat.id}`}
                 >
-                  <span className="truncate">{chat.title}</span>
+                  <span className="min-w-0 flex-1 truncate">{chat.title}</span>
+                  {chat.visibility === "organization" ? null : (
+                    <VisibilityMark visibility={chat.visibility} />
+                  )}
                 </CommandItem>
               ))}
             </CommandGroup>

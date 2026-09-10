@@ -136,16 +136,17 @@ test("shortcut controls name their band and remember visibility after remounting
   expect(screen.queryByRole("button", { name: "Show shortcuts" })).toBeNull()
 })
 
-test("while a run is live the control stops it instead of sending", async () => {
+test("follow-ups can be sent while Jori works, and stopping stays separate", async () => {
   const onStop = vi.fn()
   const { field, onSend } = await renderComposer({ isLive: true, onStop })
 
-  expect(screen.queryByRole("button", { name: "Send message" })).toBeNull()
+  expect(screen.getByRole("button", { name: "Send message" })).toBeDefined()
 
   typeInto(field, "Also this")
   fireEvent.keyDown(field, { key: "Enter" })
 
-  expect(onSend).not.toHaveBeenCalled()
+  expect(onSend).toHaveBeenCalledWith("Also this", [])
+  expect(field.textContent).toBe("")
 
   fireEvent.click(screen.getByRole("button", { name: "Stop run" }))
 
