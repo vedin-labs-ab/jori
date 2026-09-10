@@ -10,11 +10,11 @@ import { type MessageCauseKind } from "../runs/schema"
 import { createMessageRunSnapshot } from "../runs/snapshot"
 import { stopRunTree } from "../runs/tree"
 import {
-  findSession,
   isReusableSession,
   readPendingMessages,
   startSession,
 } from "../sessions/data"
+import { currentConversationSession } from "../sessions/execution"
 import { insertRow } from "../shared/context"
 import { consoleRunDetails, conversationExecutionPrincipal } from "./execution"
 import { isFreshRunWithoutWaiter } from "./fresh"
@@ -80,7 +80,9 @@ export async function startMessageRun(
 ) {
   const conversation = args.conversation
   const session =
-    conversation === null ? null : await findSession(ctx, conversation._id)
+    conversation === null
+      ? null
+      : await currentConversationSession(ctx, conversation)
   const activeSession =
     session === null || args.replaceActiveSession === true
       ? null
@@ -210,8 +212,7 @@ async function insertRun(
   const { context, title } = await consoleRunDetails(
     ctx,
     args.conversation,
-    args.message,
-    principal
+    args.message
   )
   const folderId = args.conversation.folderId
 

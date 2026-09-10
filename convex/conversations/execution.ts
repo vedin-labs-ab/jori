@@ -10,10 +10,14 @@ import {
   type ExecutionPrincipal,
   executionPrincipalForPerson,
   executionPrincipalForVisibility,
-  executionPrincipalPersonId,
 } from "../runs/principal"
-import { createSight } from "../visibility/sight"
-import { conversationVisibility } from "./access"
+import { type QueryLikeCtx } from "../shared/context"
+import { audienceKey } from "../visibility/execution"
+import {
+  conversationGate,
+  conversationVisibility,
+  createConversationSight,
+} from "./access"
 
 export function conversationExecutionPrincipal(
   conversation: Doc<"conversations">,
@@ -27,15 +31,14 @@ export function conversationExecutionPrincipal(
     : executionPrincipalForPerson(senderId)
 }
 
-/** What a console conversation was opened about, as the person who
- *  opened it sees it — the context rides on their first message, and
+/** What a console conversation was opened about, as its current audience
+ *  can see it — the context rides on their first message, and
  *  the message's text with its mentions named, for the run's title.
  *  The chat's own folder determines attribution independently of context. */
 export async function consoleRunDetails(
   ctx: MutationCtx,
   conversation: Doc<"conversations">,
-  message: Doc<"messages">,
-  principal: ExecutionPrincipal
+  message: Doc<"messages">
 ): Promise<{ context: ResolvedContext | undefined; title?: string }> {
   if (conversation.surface !== "console") {
     return { context: undefined }
@@ -53,10 +56,7 @@ export async function consoleRunDetails(
     )
     .order("asc")
     .first()
-  const sight = createSight(ctx, {
-    organizationId: conversation.organizationId,
-    personId: executionPrincipalPersonId(principal),
-  })
+  const sight = createConversationSight(ctx, conversation)
   const references = await resolveConsoleReferences(ctx, sight, message.data)
 
   return {
@@ -65,4 +65,17 @@ export async function consoleRunDetails(
       ? {}
       : { title: nameMentions(message.text ?? "", references) }),
   }
+}
+
+export async function conversationExecutionScope(
+  ctx: QueryLikeCtx,
+  conversation: Doc<"conversations">
+) {
+  if (conversation.surface !== "console") {
+    return undefined
+  }
+
+  return conversationVisibility(conversation).mode === "private"
+    ? `person:${conversation.createdBy}`
+    : `audience:${await audienceKey(ctx, conversationGate(conversation))}`
 }

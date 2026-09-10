@@ -6,6 +6,7 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
+import { conversationExecutionScope } from "../conversations/execution"
 import { messageReplyTargetIdentifier } from "../messages/identifiers"
 import { type QueryLikeCtx } from "../shared/context"
 import {
@@ -40,7 +41,12 @@ export async function startSession(
   }
 ) {
   const existing = await findSession(ctx, args.conversationId)
+  const conversation = await ctx.db.get(args.conversationId)
   const patch = {
+    executionScope:
+      conversation === null
+        ? undefined
+        : await conversationExecutionScope(ctx, conversation),
     cursor: initialCursor(args.message, args.now),
     recency: initialRecency(args.message),
     runId: args.runId,

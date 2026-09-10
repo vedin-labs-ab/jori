@@ -6,6 +6,7 @@ import { resolveSubtaskAccess } from "../runs/access"
 import { createInstructionRun } from "../runs/instruction"
 import { runStatus } from "../runs/schema"
 import { stopRunTree } from "../runs/tree"
+import { runExecutionIsCurrent } from "../sessions/execution"
 
 const maxAgents = 20
 
@@ -22,7 +23,11 @@ export const create = internalMutation({
   handler: async (ctx, args): Promise<{ runId: Id<"runs"> }> => {
     const parent = await ctx.db.get(args.parentId)
 
-    if (parent === null) {
+    if (
+      parent === null ||
+      parent.status !== "running" ||
+      !(await runExecutionIsCurrent(ctx, parent))
+    ) {
       throw new Error("Parent run not found.")
     }
 

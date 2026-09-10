@@ -5,6 +5,7 @@ import {
 import { resourceToken } from "../../contracts/replies/parts"
 import { type Doc } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
+import { createConversationSight } from "../conversations/access"
 import { findMessageConversation } from "../conversations/resolve"
 import { reactionSummariesForMessages } from "../reactions/summary"
 import {
@@ -16,7 +17,7 @@ import {
   getActorDisplayName,
   getActorKind,
 } from "../shared/actor"
-import { createSight } from "../visibility/sight"
+import { createSight, type Sight } from "../visibility/sight"
 import { messageActorIds, messageIdentifiers } from "./identifiers"
 import {
   type ResolvedContext,
@@ -55,6 +56,14 @@ export async function recentConversation(
   message: Doc<"messages">,
   principal: ExecutionPrincipal
 ): Promise<RecentConversation> {
+  const conversation = await findMessageConversation(ctx, message)
+  const sight =
+    conversation?.surface === "console"
+      ? createConversationSight(ctx, conversation)
+      : createSight(ctx, {
+          organizationId: message.organizationId,
+          personId: executionPrincipalPersonId(principal),
+        })
   const messages = await recentMessages(ctx, message)
   const reactions = await reactionSummariesForMessages(ctx, messages)
   const entries = await Promise.all(
@@ -64,12 +73,10 @@ export async function recentConversation(
         messageEntry(
           entry,
           reactions.get(entry._id),
-          await messageContextLine(ctx, entry, principal)
+          await messageContextLine(ctx, entry, sight)
         )
       )
   )
-
-  const conversation = await findMessageConversation(ctx, message)
 
   return {
     entries: mergeRecentConversation(entries),
@@ -104,23 +111,19 @@ export function mergeRecentConversation(entries: ConversationEntry[]) {
     .slice(-recentConversationLimit)
 }
 
-/** The lines a console message's context and mentions make, read as the
- *  person who sent it sees the targets; nothing for a message sent about
+/** The lines a console message's context and mentions make, read with the
+ *  current run's resource visibility; nothing for a message sent about
  *  nothing that mentions nothing. */
 async function messageContextLine(
   ctx: QueryCtx,
   message: Doc<"messages">,
-  principal: ExecutionPrincipal
+  sight: Sight
 ) {
   if (message.surface !== "console") {
     return undefined
   }
 
   const context = readMessageContext(message.data)
-  const sight = createSight(ctx, {
-    organizationId: message.organizationId,
-    personId: executionPrincipalPersonId(principal),
-  })
   const lines = [
     ...(context === undefined
       ? []

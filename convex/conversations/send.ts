@@ -9,16 +9,15 @@ import {
 import { type referenceTargetValidator } from "../messages/references"
 import { type modelSelectionValidator } from "../model/selection"
 import { nameMentions } from "../references/tokens"
-import { executionPrincipalPersonId } from "../runs/principal"
 import { createPersonActor } from "../shared/actor"
 import { createSight } from "../visibility/sight"
+import { createConversationSight } from "./access"
 import {
   createConsoleConversation,
   normalizeConsoleContext,
   normalizeConsoleReferences,
 } from "./create"
 import { startMessageRun } from "./data"
-import { conversationExecutionPrincipal } from "./execution"
 import { requireVisibleConsoleConversation } from "./resolve"
 import { scheduleConversationSummary } from "./summary/schedule"
 
@@ -123,12 +122,7 @@ async function prepareMessage(
     }))
   await normalizeConsoleReferences(
     ctx,
-    createSight(ctx, {
-      organizationId: args.organizationId,
-      personId: executionPrincipalPersonId(
-        conversationExecutionPrincipal(conversation)
-      ),
-    }),
+    createConversationSight(ctx, conversation),
     references
   )
   return { conversation, context, references }

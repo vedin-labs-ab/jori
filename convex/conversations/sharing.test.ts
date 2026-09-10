@@ -9,14 +9,17 @@ import {
 import { createInstructionRun } from "../runs/instruction"
 import { findSession } from "../sessions/data"
 import { drainSession } from "../sessions/drain"
+import { listOrganizationViewerIds } from "../visibility/audience"
 import { transitionConversationVisibility } from "./sharing"
 
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
+vi.mock("../visibility/audience", () => ({listOrganizationViewerIds: vi.fn()}))
 afterEach(() => vi.useRealTimers())
 
 test("sharing ends personal execution and descendants without carrying context into the new session", async () => {
   vi.useFakeTimers()
   const f = await transactionalConsoleContext()
+  vi.mocked(listOrganizationViewerIds).mockResolvedValue(f.people)
   const childId = await f.t.run(async (ctx) => {
     const conversation = await ctx.db.get(f.conversationId)
     const parent = await ctx.db.get(f.runId)
@@ -77,6 +80,7 @@ test("sharing ends personal execution and descendants without carrying context i
 test("a visibility transition rejects late replies and summaries from the old execution", async () => {
   vi.useFakeTimers()
   const f = await transactionalConsoleContext()
+  vi.mocked(listOrganizationViewerIds).mockResolvedValue(f.people)
   const pending = await f.t.query(internal.conversations.summary.data.pending, {
     conversationId: f.conversationId,
   })
@@ -130,9 +134,10 @@ test("a visibility transition rejects late replies and summaries from the old ex
   })
 })
 
-test("shared audience edits preserve the active organization session and returning private creates personal execution", async () => {
+test("shared audience edits reset context and returning private creates personal execution", async () => {
   vi.useFakeTimers()
   const f = await transactionalConsoleContext()
+  vi.mocked(listOrganizationViewerIds).mockResolvedValue(f.people)
   const change = (
     visibility: Parameters<typeof transitionConversationVisibility>[2]
   ) =>

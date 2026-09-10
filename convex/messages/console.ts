@@ -8,6 +8,7 @@ import { requireVisibleConsoleConversation } from "../conversations/resolve"
 import { resolveCurrentPerson } from "../persons/account"
 import { clearRunDraft } from "../runs/execution/drafts/data"
 import { findSession } from "../sessions/data"
+import { runExecutionIsCurrent } from "../sessions/execution"
 import { type Actor } from "../shared/actor"
 import { insertRow, type QueryLikeCtx } from "../shared/context"
 import { type referenceTargetValidator } from "./references"
@@ -142,7 +143,8 @@ export async function insertConsoleReply(
   if (
     run === null ||
     isTerminalRunStatus(run.status) ||
-    session?.runId !== args.runId
+    session?.runId !== args.runId ||
+    !(await runExecutionIsCurrent(ctx, run))
   ) {
     throw new Error("This run is no longer active in the conversation.")
   }
