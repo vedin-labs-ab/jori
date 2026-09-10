@@ -116,7 +116,7 @@ function UsageBody({
       <ConsoleEmptyState
         description={
           scoped
-            ? "Runs from jobs filed here will show up as they spend."
+            ? "Runs from jobs and chats filed here will show up as they spend."
             : "Runs from your jobs will show up here as they spend."
         }
         icon={ChartNoAxesColumn}

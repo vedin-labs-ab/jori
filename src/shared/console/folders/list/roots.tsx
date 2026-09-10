@@ -62,7 +62,7 @@ export function RootFolderList({
               New folder
             </Button>
           }
-          description="Folders organize the tables, stores, files, and jobs your team shares."
+          description="Folders organize your chats and the tables, stores, files, and jobs your team shares."
           icon={Folder}
           title="No folders yet"
         />
@@ -81,7 +81,7 @@ export function RootFolderList({
         {list.folders.length === 0 ? (
           <EmptyRow colSpan={folderTableColumns}>
             <FilterableEmptyState
-              description="Folders organize the tables, stores, files, and jobs your team shares."
+              description="Folders organize your chats and the tables, stores, files, and jobs your team shares."
               hasFilters
               icon={Folder}
               noun="folders"

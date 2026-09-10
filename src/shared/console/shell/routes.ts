@@ -28,7 +28,7 @@ type ConsoleGroup = {
  * The sidebar's structure. New chat and Activity stand alone at the top:
  * the place to ask, then the daily surface, and neither a member of any
  * category. The person's own chats follow them, then "Resources", which
- * holds exactly the four types that can be filed into folders. The platform
+ * lists the jobs, tables, stores, and files that can be filed into folders. The platform
  * group renders at the sidebar's bottom, above the user button —
  * low-frequency setup and reference surfaces earn the quiet slot, not a
  * louder label.

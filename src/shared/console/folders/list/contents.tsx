@@ -75,7 +75,7 @@ export function FolderContents({
       <ConsoleListContent>
         <ConsoleEmptyState
           action={newMenu}
-          description="File tables, stores, files, and jobs here, or add a subfolder."
+          description="File chats, tables, stores, files, and jobs here, or add a subfolder."
           icon={Folder}
           title="Empty folder"
         />
@@ -165,7 +165,7 @@ function FolderContentRows({
     return (
       <EmptyRow colSpan={folderTableColumns}>
         <FilterableEmptyState
-          description="File tables, stores, files, and jobs here, or add a subfolder."
+          description="File chats, tables, stores, files, and jobs here, or add a subfolder."
           hasFilters
           icon={Folder}
           noun="items"

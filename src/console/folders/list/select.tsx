@@ -22,7 +22,7 @@ import { MoveToFolderDialog } from "../move"
 /** What a folder listing's selection bar does here: the move opens the
  *  shared dialog over the whole selection, and a removal takes each row
  *  the way its own menu would — folders with their subfolders, tables
- *  and stores into the archive, files and jobs for good. */
+ *  and stores into the archive, files and jobs for good, chats out of the folder. */
 export function useFolderSelectionActions(organizationId: string): {
   actions: FolderSelectionActions
   dialog: ReactNode
