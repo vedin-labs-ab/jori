@@ -194,9 +194,7 @@ export function AddItemRow({
           <Plus aria-hidden className="size-3.5" />
           Add item
         </button>
-        <FieldError reserve className="px-3 pb-2">
-          {error}
-        </FieldError>
+        <FieldError className="px-3 pb-2">{error}</FieldError>
       </div>
     </div>
   )
@@ -230,7 +228,7 @@ export function ErrorRow({ message }: { message: string | undefined }) {
 
   return (
     <div className="border-b px-3 py-2">
-      <FieldError reserve>{message}</FieldError>
+      <FieldError>{message}</FieldError>
     </div>
   )
 }
