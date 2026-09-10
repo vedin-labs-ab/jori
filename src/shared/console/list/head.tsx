@@ -228,7 +228,7 @@ function FacetMenu({
   )
 }
 
-/** Pinned below the option list while anything is selected: one press
+/** Reserved below the option list: while anything is selected, one press
  *  empties the selection, so picking a single option is Clear + click
  *  instead of deselecting everything else. */
 function ClearFooter({
@@ -242,17 +242,17 @@ function ClearFooter({
     (facet) => facetSelection(controls, facet.key, facet.options).length > 0
   )
 
-  if (!hasSelection) {
-    return null
-  }
-
   return (
     // The Command root pads all around; breaking out of it lets the
     // separator run edge to edge while the button keeps the same 4px
     // breathing room on every side.
-    <div className="-mx-1 -mb-1 border-t p-1">
+    <div
+      aria-hidden={!hasSelection}
+      className={cn("-mx-1 -mb-1 border-t p-1", !hasSelection && "invisible")}
+    >
       <Button
         className="w-full"
+        disabled={!hasSelection}
         onClick={() => {
           for (const facet of facets) {
             controls.setFacet(facet.key, [])
