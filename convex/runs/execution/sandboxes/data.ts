@@ -160,7 +160,7 @@ export async function claimReusableSandbox(
 
   const session = await findSessionByRun(ctx, runId)
 
-  if (session?.conversationId === undefined) {
+  if (session === null) {
     return null
   }
 

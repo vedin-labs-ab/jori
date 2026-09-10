@@ -2,6 +2,7 @@ import { expect, test, vi } from "vitest"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
+import { callJoriTool } from "../broker/jori"
 import { callJoriFileTool, isJoriFileTool } from "./mcp"
 
 const personId = "person-id" as Id<"persons">
@@ -19,18 +20,28 @@ test("dispatches search_files with the run principal as viewer", async () => {
   const runQuery = vi.fn(async () => [])
   const ctx = { runQuery } as unknown as ActionCtx
 
-  await callJoriFileTool(
+  await callJoriTool(
     ctx,
     {
       organizationId: "organization",
       principal: { kind: "person", personId },
     },
-    { tool: "search_files", args: { query: "report", limit: 5 } }
+    {
+      tool: "search_files",
+      args: {
+        query: "report",
+        limit: 5,
+        organizationId: "forged",
+        personId: "forged",
+        runId: "forged",
+      },
+    }
   )
 
   expect(runQuery).toHaveBeenCalledWith(internal.files.data.search, {
     organizationId: "organization",
     personId,
+    runId: undefined,
     query: "report",
     limit: 5,
   })
@@ -40,7 +51,7 @@ test("dispatches read_file without a person for organization runs", async () => 
   const runQuery = vi.fn(async () => null)
   const ctx = { runQuery } as unknown as ActionCtx
 
-  await callJoriFileTool(
+  await callJoriTool(
     ctx,
     { organizationId: "organization", principal: { kind: "organization" } },
     { tool: "read_file", args: { fileId: "file-id" } }
@@ -57,7 +68,7 @@ test("dispatches share_file to the share mint with the person", async () => {
   const runMutation = vi.fn(async () => ({ url: "u", expiresAt: 1 }))
   const ctx = { runMutation } as unknown as ActionCtx
 
-  await callJoriFileTool(
+  await callJoriTool(
     ctx,
     { organizationId: "organization", principal: { kind: "person", personId } },
     { tool: "share_file", args: { fileId: "file-id", expiresInHours: 24 } }
@@ -75,7 +86,7 @@ test("shared file tools use the trusted run audience instead of a supplied viewe
   const runId = "shared-run" as Id<"runs">
   const runMutation = vi.fn(async () => ({ url: "u", expiresAt: 1 }))
   const ctx = { runMutation } as unknown as ActionCtx
-  await callJoriFileTool(
+  await callJoriTool(
     ctx,
     {
       _id: runId,
@@ -102,7 +113,7 @@ test("rejects unknown file tools", async () => {
   await expect(
     callJoriFileTool(
       ctx,
-      { organizationId: "organization", principal: { kind: "organization" } },
+      { organizationId: "organization" },
       { tool: "read_asset", args: {} }
     )
   ).rejects.toThrow("Unknown Jori file tool: read_asset")

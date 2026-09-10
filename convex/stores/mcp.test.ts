@@ -6,7 +6,7 @@ import { callJoriStoreTool, normalizeStoreWriteInput } from "./mcp"
 
 const execution = {
   organizationId: "organization",
-  createdBy: "person" as Id<"persons">,
+  personId: "person" as Id<"persons">,
 }
 
 describe("store tool dispatch", () => {
@@ -84,10 +84,22 @@ describe("store tool dispatch", () => {
 
 test("workspace executions pass their trusted run without a personal identity", async () => {
   const runQuery = vi.fn(async () => null)
-  await callJoriStoreTool(
+  await callJoriTool(
     { runQuery } as unknown as ActionCtx,
-    { organizationId: "organization", runId: "runs_shared" as Id<"runs"> },
-    { tool: "read_store", args: { storeId: "store" } }
+    {
+      organizationId: "organization",
+      _id: "runs_shared" as Id<"runs">,
+      principal: { kind: "organization" },
+    },
+    {
+      tool: "read_store",
+      args: {
+        storeId: "store",
+        organizationId: "forged",
+        personId: "forged",
+        runId: "forged",
+      },
+    }
   )
   expect(runQuery).toHaveBeenCalledWith(expect.anything(), {
     organizationId: "organization",

@@ -37,11 +37,6 @@ async function continueSession(
     return
   }
 
-  if (session.conversationId === undefined) {
-    await stopSession(ctx, session, now)
-    return
-  }
-
   const conversation = await ctx.db.get(session.conversationId)
 
   if (conversation === null) {

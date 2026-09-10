@@ -13,7 +13,7 @@ export async function activeSessionIntegration(
 } | null> {
   const session = await ctx.db.get(args.sessionId)
 
-  if (session?.runId === undefined || session.conversationId === undefined) {
+  if (session?.runId === undefined) {
     return null
   }
 

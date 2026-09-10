@@ -26,10 +26,6 @@ export async function readPendingReactions(
   session: Doc<"sessions">,
   limit = defaultReactionDrainLimit
 ) {
-  if (session.conversationId === undefined) {
-    return { hasMore: false, reactions: [] }
-  }
-
   const conversation = await ctx.db.get(session.conversationId)
 
   // Only provider surfaces carry reactions.

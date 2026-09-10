@@ -2,15 +2,12 @@ import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import {
-  type ExecutionPrincipal,
-  executionPrincipalPersonId,
-} from "../runs/principal"
-import {
   type JoriToolRequest,
   optionalNumber,
   readRecord,
   requiredString,
 } from "../shared/input"
+import { type ResourceViewer } from "../visibility/resources"
 
 type SearchFilesArgs = {
   query?: string
@@ -30,20 +27,10 @@ export function isJoriFileTool(tool: string) {
 
 export async function callJoriFileTool(
   ctx: ActionCtx,
-  run: {
-    _id?: Id<"runs">
-    organizationId: string
-    principal: ExecutionPrincipal
-  },
+  viewer: ResourceViewer,
   request: JoriToolRequest
 ): Promise<unknown> {
   const args = readRecord(request.args)
-  const viewer = {
-    organizationId: run.organizationId,
-    runId: run._id,
-    personId: executionPrincipalPersonId(run.principal),
-  }
-
   if (request.tool === "search_files") {
     return await ctx.runQuery(internal.files.data.search, {
       ...(args as SearchFilesArgs),

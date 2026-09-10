@@ -18,7 +18,11 @@ import { VisibilityMark } from "../../visibility/badge"
 import { type DragPayload } from "../drag/plan"
 import { DraggableTableRow } from "../drag/row"
 import { useResourceRowDrag } from "../drag/state"
-import { type FolderResource, resourcePresentation } from "../types"
+import {
+  type FolderResource,
+  resourceDestination,
+  resourcePresentation,
+} from "../types"
 import { type FolderListEntry, resourceDragItem } from "./controls"
 import { nameLinkClassName } from "./style"
 
@@ -137,28 +141,4 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
       )}
     </ConsoleLink>
   )
-}
-
-function resourceDestination(resource: FolderResource) {
-  switch (resource.type) {
-    case "table":
-      return {
-        to: "/tables/$tableId",
-        params: { tableId: resource.id },
-      } as const
-    case "store":
-      return {
-        to: "/stores/$storeId",
-        params: { storeId: resource.id },
-      } as const
-    case "file":
-      return { to: "/files/$fileId", params: { fileId: resource.id } } as const
-    case "job":
-      return { to: "/jobs/$jobId", params: { jobId: resource.id } } as const
-    case "chat":
-      return {
-        to: "/chat/$conversationId",
-        params: { conversationId: resource.id },
-      } as const
-  }
 }

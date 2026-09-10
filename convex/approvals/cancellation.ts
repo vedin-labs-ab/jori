@@ -29,10 +29,6 @@ export async function resolveCancellationActor(
     return null
   }
 
-  if (session.conversationId === undefined) {
-    return null
-  }
-
   const conversation = await ctx.db.get(session.conversationId)
 
   if (

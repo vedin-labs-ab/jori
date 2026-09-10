@@ -12,7 +12,7 @@ const reactionSubcursor = v.object({
 })
 
 export const sessions = defineTable({
-  conversationId: v.optional(v.id("conversations")),
+  conversationId: v.id("conversations"),
   runId: v.optional(v.id("runs")),
   /** The effective resource audience this execution context was built for. */
   executionScope: v.optional(v.string()),
