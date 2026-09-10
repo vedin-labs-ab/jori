@@ -3,7 +3,12 @@ import {
   type ChatMessage,
   isLiveRun,
 } from "@/shared/console/chat/types"
-import { chatRunMicros, type DemoConversation } from "../fixtures/chat"
+import {
+  chatRunMicros,
+  type DemoConversation,
+  demoChatAuthor,
+} from "../fixtures/chat"
+import { viewerId } from "../fixtures/people"
 import { usageDate } from "../fixtures/usage"
 import { type DemoAction, type DemoChat, type DemoState } from "./types"
 
@@ -65,6 +70,7 @@ function sent(
   const message: ChatMessage = {
     id: action.messageId,
     role: "person",
+    author: demoChatAuthor,
     text: action.text,
     parts: [],
     context: action.context,
@@ -80,6 +86,8 @@ function sent(
       ? {
           id: action.conversationId as DemoConversation["id"],
           title: action.text,
+          createdBy: viewerId,
+          visibility: { mode: "private" },
           updatedAt: action.at,
           messages: [message],
         }
@@ -94,12 +102,52 @@ function sent(
       conversation,
       ...chat.conversations.filter((other) => other.id !== conversation.id),
     ],
-    live: {
-      conversationId: conversation.id,
-      run: { id: action.runId, status: "running" },
-      reply: action.reply,
-      startedAt: action.at,
-      revealed: -1,
+    live:
+      chat.live?.conversationId === conversation.id && isLiveRun(chat.live.run)
+        ? {
+            ...chat.live,
+            pending: [...(chat.live.pending ?? []), action.reply],
+          }
+        : {
+            conversationId: conversation.id,
+            run: { id: action.runId, status: "running" },
+            reply: action.reply,
+            startedAt: action.at,
+            revealed: -1,
+          },
+  }
+}
+
+/** Changing between personal and shared execution ends the old run. */
+export function setChatVisibility(
+  state: DemoState,
+  action: Extract<DemoAction, { type: "setVisibility" }>
+): DemoState {
+  const conversation = state.chat.conversations.find(
+    (chat) => chat.id === action.target.id
+  )
+
+  if (conversation === undefined) {
+    return state
+  }
+
+  const changesContext =
+    JSON.stringify(conversation.visibility) !==
+    JSON.stringify(action.visibility)
+  const next =
+    changesContext && state.chat.live?.conversationId === conversation.id
+      ? reduceChat(state, { type: "stopChatRun", at: action.at })
+      : state
+
+  return {
+    ...next,
+    chat: {
+      ...next.chat,
+      conversations: next.chat.conversations.map((chat) =>
+        chat.id === conversation.id
+          ? { ...chat, visibility: action.visibility, updatedAt: action.at }
+          : chat
+      ),
     },
   }
 }
@@ -126,7 +174,7 @@ function stopped(chat: DemoChat, at: number): DemoChat {
 function advanced(chat: DemoChat, at: number): DemoChat {
   const { live } = chat
 
-  if (live === null) {
+  if (live === null || !isLiveRun(live.run)) {
     return chat
   }
 
@@ -137,7 +185,7 @@ function advanced(chat: DemoChat, at: number): DemoChat {
   }
 
   const reply: ChatMessage = {
-    id: `${live.run.id}:reply`,
+    id: `${live.run.id}:reply:${chat.conversations.find((chat) => chat.id === live.conversationId)?.messages.length}`,
     role: "jori",
     text: live.reply.text,
     parts: live.reply.parts,
@@ -154,7 +202,14 @@ function advanced(chat: DemoChat, at: number): DemoChat {
           }
         : conversation
     ),
-    live: null,
+    live: live.pending?.length
+      ? {
+          ...live,
+          reply: live.pending[0],
+          pending: live.pending.slice(1),
+          revealed: -1,
+        }
+      : null,
   }
 }
 

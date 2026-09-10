@@ -50,15 +50,16 @@ export type DemoLiveReply = {
   conversationId: string
   run: ChatRun
   reply: DemoReply
+  pending?: DemoReply[]
   startedAt: number
   /** Characters of the reply revealed so far, its thinking before its
    *  text; negative while working. */
   revealed: number
 }
 
-/** What a visibility applies to: a folder, a material, or a job. */
+/** What a visibility applies to in the workspace. */
 export type VisibilityTarget = {
-  kind: "folder" | "table" | "store" | "file" | "job"
+  kind: "folder" | "table" | "store" | "file" | "job" | "chat"
   id: string
 }
 

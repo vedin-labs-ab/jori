@@ -38,7 +38,11 @@ type CreateJobArgs = {
   createdBy?: Id<"persons">
 }
 
-export async function createJob(ctx: MutationCtx, args: CreateJobArgs, sight?: Sight) {
+export async function createJob(
+  ctx: MutationCtx,
+  args: CreateJobArgs,
+  sight?: Sight
+) {
   const now = Date.now()
   const prepared = await prepareJob(ctx, args, now, sight)
   const existing = await keyedJob(ctx, prepared)
@@ -63,7 +67,12 @@ export async function createJob(ctx: MutationCtx, args: CreateJobArgs, sight?: S
   return { ...(await getRequiredJob(ctx, jobId)), created: true }
 }
 
-async function prepareJob(ctx: MutationCtx, args: CreateJobArgs, now: number, sight?: Sight) {
+async function prepareJob(
+  ctx: MutationCtx,
+  args: CreateJobArgs,
+  now: number,
+  sight?: Sight
+) {
   const visibility = normalizeStoredVisibility(
     args.visibility ??
       defaultVisibilityForIntegrations(
@@ -96,11 +105,15 @@ async function prepareJob(ctx: MutationCtx, args: CreateJobArgs, now: number, si
     instructions: normalizeRequiredText(args.instructions, "instructions"),
     visibility,
     principal,
-    folderId: await resolveCreationFolder(ctx, {
-      organizationId: args.organizationId,
-      personId: args.createdBy,
-      folderId: args.folderId,
-    }, sight),
+    folderId: await resolveCreationFolder(
+      ctx,
+      {
+        organizationId: args.organizationId,
+        personId: args.createdBy,
+        folderId: args.folderId,
+      },
+      sight
+    ),
     type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,

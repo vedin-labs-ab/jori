@@ -26,7 +26,7 @@ import { ActivityTimeline } from "@/shared/console/runs/activity/item"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
-import { liveActivity, resolveReference } from "../../derive/chat"
+import { chatViews, liveActivity, resolveReference } from "../../derive/chat"
 import { mentionSources } from "../../derive/mentions"
 import {
   chatContext,
@@ -90,7 +90,7 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
       }
       now={now}
       onSuggestion={send}
-      recent={state.chat.conversations}
+      recent={chatViews(state)}
       suggestions={suggestions.slice(0, shownSuggestions)}
     />
   )

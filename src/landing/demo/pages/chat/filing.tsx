@@ -1,9 +1,8 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { ChatTitleMenu } from "@/shared/console/chat/menu"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
-import { chatMoveSubject } from "../../derive/chat"
 import { folderDetail } from "../../derive/folders"
-import { DemoMoveDialog } from "../../dialogs/move"
+import { useDemoChatMenu } from "../../dialogs/chat"
 import { type DemoConversation } from "../../fixtures/chat"
 import { useDemoWorkspace } from "../../workspace"
 
@@ -12,8 +11,8 @@ export function DemoChatFiling({
 }: {
   conversation: DemoConversation
 }) {
-  const { actions, state } = useDemoWorkspace()
-  const [moving, setMoving] = useState(false)
+  const { state } = useDemoWorkspace()
+  const { dialogs, items } = useDemoChatMenu(conversation)
 
   useMaterialTrail(
     useMemo(() => {
@@ -24,29 +23,16 @@ export function DemoChatFiling({
 
       return {
         name: conversation.title,
+        visibility: conversation.visibility,
         trail: folder?.path.map((segment) => ({
           name: segment.name,
           to: "/folders/$folderId",
           params: { folderId: segment.folderId },
         })),
-        menu: (
-          <ChatTitleMenu
-            onMove={() => setMoving(true)}
-            onUnfile={
-              conversation.folderId === undefined
-                ? undefined
-                : () => actions.fileResource("chat", conversation.id, null)
-            }
-          />
-        ),
+        menu: <ChatTitleMenu {...items} />,
       }
-    }, [actions, conversation, state])
+    }, [conversation, items, state])
   )
 
-  return (
-    <DemoMoveDialog
-      onOpenChange={setMoving}
-      subject={moving ? chatMoveSubject(conversation) : undefined}
-    />
-  )
+  return dialogs
 }

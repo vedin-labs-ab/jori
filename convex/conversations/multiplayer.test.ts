@@ -7,7 +7,9 @@ import { listOrganizationViewerIds } from "../visibility/audience"
 import { transitionConversationVisibility } from "./sharing"
 
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
-vi.mock("../visibility/audience", () => ({listOrganizationViewerIds: vi.fn()}))
+vi.mock("../visibility/audience", () => ({
+  listOrganizationViewerIds: vi.fn(),
+}))
 afterEach(() => vi.useRealTimers())
 
 test("simultaneous participants feed one ordered session with each message's author", async () => {

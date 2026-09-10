@@ -5,8 +5,8 @@ import { runExecutionIsCurrent } from "../sessions/execution"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   createResourceSight,
-  resourceCreation,
   type ResourceViewer,
+  resourceCreation,
   resourceViewerArgs,
 } from "../visibility/resources"
 import { visibilityValidator } from "../visibility/schema"
@@ -47,8 +47,15 @@ export const create = internalMutation({
       return await createJob(ctx, input)
     }
     const viewer = { organizationId: args.organizationId, runId }
-    const defaults = await resourceCreation(ctx, { ...viewer, visibility: args.visibility })
-    return await createJob(ctx, { ...input, ...defaults, createdBy: defaults.ownerId }, await createResourceSight(ctx, viewer))
+    const defaults = await resourceCreation(ctx, {
+      ...viewer,
+      visibility: args.visibility,
+    })
+    return await createJob(
+      ctx,
+      { ...input, ...defaults, createdBy: defaults.ownerId },
+      await createResourceSight(ctx, viewer)
+    )
   },
 })
 
@@ -99,7 +106,11 @@ export const canExecuteRunTools = internalQuery({
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
 
-    return run !== null && (await runExecutionIsCurrent(ctx, run)) && (await canExecuteJobRunTools(ctx, run))
+    return (
+      run !== null &&
+      (await runExecutionIsCurrent(ctx, run)) &&
+      (await canExecuteJobRunTools(ctx, run))
+    )
   },
 })
 

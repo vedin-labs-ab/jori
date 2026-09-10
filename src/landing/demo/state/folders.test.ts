@@ -129,3 +129,48 @@ test("new replies charge their chat's folder once, including a stopped reply", (
       .reduce((sum, row) => sum + row.ended, 0)
   ).toBe(3)
 })
+
+test("sharing a filed private chat keeps its filing, stops old work, and charges it once", () => {
+  const destination = folderId("engineering")
+  let state = startReply(fileChat(createWorkspace(now), destination), "private")
+  const before = usageSpend(state, destination)
+  state = reduceWorkspace(state, {
+    type: "setVisibility",
+    at: now + 100,
+    target: { kind: "chat", id: renewalsConversationId },
+    visibility: { mode: "organization" },
+  })
+
+  expect(state.chat.conversations[0]).toMatchObject({
+    folderId: destination,
+    visibility: { mode: "organization" },
+  })
+  expect(state.chat.live?.run.status).toBe("stopped")
+  expect(usageSpend(state, destination)).toBe(before + chatRunMicros)
+  const messages = state.chat.conversations[0].messages
+  state = reduceWorkspace(state, { type: "advanceChatReply", at: now + 1000 })
+  expect(state.chat.conversations[0].messages).toEqual(messages)
+  expect(usageSpend(state, destination)).toBe(before + chatRunMicros)
+})
+
+test("a follow-up joins the current demo run without discarding either reply", () => {
+  let state = startReply(createWorkspace(now), "first")
+  state = startReply(state, "followup")
+  expect(state.chat.live?.run.id).toBe("first")
+  expect(state.chat.live?.pending).toHaveLength(1)
+  state = reduceWorkspace(state, { type: "advanceChatReply", at: now + 1000 })
+  expect(state.chat.live?.run.id).toBe("first")
+  state = reduceWorkspace(state, { type: "advanceChatReply", at: now + 2000 })
+  expect(state.chat.live).toBeNull()
+  const messages = state.chat.conversations[0].messages.slice(-4)
+  expect(messages.map((message) => message.role)).toEqual([
+    "person",
+    "person",
+    "jori",
+    "jori",
+  ])
+  expect(new Set(messages.map((message) => message.id)).size).toBe(4)
+  expect(
+    state.usage.filter((row) => row.conversationId === renewalsConversationId)
+  ).toHaveLength(2)
+})

@@ -4,9 +4,9 @@ import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { useCallback } from "react"
 import { toast } from "sonner"
-import { type ChatMessage } from "@/shared/console/chat/types"
 import { showErrorToast } from "@/shared/console/error"
 import { api } from "../../../convex/_generated/api"
+import { type MessageRow } from "./messages"
 
 type SendArgs = Omit<
   FunctionArgs<typeof api.conversations.console.send>,
@@ -22,7 +22,7 @@ const blockedMessage = budgetSentence("out-of-usage", "this message waits")
  *  rejects, so the composer keeps the draft for another try. */
 export function useSendMessage(
   organizationId: string,
-  author?: ChatMessage["author"]
+  author?: MessageRow["author"]
 ) {
   const send = useMutation(api.conversations.console.send).withOptimisticUpdate(
     (localStore, args) => {

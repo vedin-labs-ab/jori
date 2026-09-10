@@ -1,4 +1,5 @@
 import {
+  type ChatConversation,
   type ChatReference,
   type ReferenceTarget,
 } from "@/shared/console/chat/types"
@@ -8,6 +9,16 @@ import { type DemoConversation } from "../fixtures/chat"
 import { log } from "../fixtures/runs/steps"
 import { type DemoState } from "../state/types"
 import { folderOf, folderTrail } from "./folders"
+
+export function chatViews(state: DemoState): ChatConversation[] {
+  return state.chat.conversations.map((chat) => ({
+    id: chat.id,
+    title: chat.title,
+    folderId: chat.folderId,
+    updatedAt: chat.updatedAt,
+    visibility: chat.visibility.mode,
+  }))
+}
 
 /** A reply's target as the workspace resolves it: the material, job,
  *  folder, run, or chat by that id, with where it is filed as the detail. */

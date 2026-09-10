@@ -14,17 +14,31 @@ import { hour, minute } from "./clock"
 import { demoId } from "./ids"
 import { jobId } from "./jobs"
 import { renewalsTableId } from "./materials/tables"
-import { type ConversationId, type FolderId } from "./types"
+import { personName, viewerId } from "./people"
+import {
+  type ConversationId,
+  type FolderId,
+  type PersonId,
+  type StoredVisibility,
+} from "./types"
 
 /** A conversation as the workspace keeps it: its listing and its turns. */
-export type DemoConversation = ChatConversation & {
+export type DemoConversation = Omit<ChatConversation, "visibility"> & {
   id: ConversationId
   folderId?: FolderId
+  createdBy: PersonId
+  visibility: StoredVisibility
   messages: ChatMessage[]
 }
 
 /** Each completed demo reply uses the same illustrative run cost. */
 export const chatRunMicros = 84_000
+
+export const demoChatAuthor = {
+  id: viewerId,
+  name: personName(viewerId) ?? "Maya Lund",
+  isViewer: true,
+}
 
 /** What Jori answers with: the thinking first, then the text, and the
  *  parts after it. */
@@ -67,11 +81,14 @@ export function demoConversations(now: number): DemoConversation[] {
     {
       id: renewalsConversationId,
       title: "Which renewals are at risk this month?",
+      createdBy: viewerId,
+      visibility: { mode: "private" },
       updatedAt: asked + 40_000,
       messages: [
         {
           id: demoId("messages", "renewals-ask"),
           role: "person",
+          author: demoChatAuthor,
           text: `Which renewals in +[table:${renewalsTableId}] are at risk this month?`,
           parts: [],
           context: { kind: "table", id: renewalsTableId },

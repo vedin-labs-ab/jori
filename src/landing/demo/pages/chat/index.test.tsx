@@ -143,7 +143,7 @@ test("the sidebar leads with New chat and lists the conversations under Activity
   expect(links.slice(0, 3)).toEqual([
     "New chat",
     "Activity",
-    "Which renewals are at risk this month?",
+    "Which renewals are at risk this month?Only me",
   ])
   expect(
     screen.getByRole("link", { name: "New chat" }).getAttribute("data-active")
@@ -160,10 +160,41 @@ test("the sidebar leads with New chat and lists the conversations under Activity
   // sidebar's row is the link that moves.
   expect(
     screen
-      .getByRole("link", { name: "Summarize last week", current: false })
+      .getByRole("link", { name: /Summarize last week/, current: false })
       .getAttribute("data-active")
   ).toBe("true")
   expect(
     screen.getByRole("link", { name: "New chat" }).getAttribute("data-active")
   ).toBe("false")
+})
+
+test("sharing from the chat menu explains the audience and execution change before saving", async () => {
+  render(<DemoConsoleAt path={`/chat/${renewalsConversationId}`} />)
+  const title = "Which renewals are at risk this month?"
+  fireEvent.pointerDown(await screen.findByRole("button", { name: title }), {
+    button: 0,
+    ctrlKey: false,
+  })
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Visibility…" }))
+  const dialog = await screen.findByRole("dialog")
+  expect(within(dialog).getByText(/Only you can use this chat/)).toBeDefined()
+  fireEvent.click(within(dialog).getByRole("combobox"))
+  fireEvent.click(
+    await screen.findByRole("option", { name: "Everyone in the organization" })
+  )
+  expect(
+    within(dialog).getByText(/Everyone with access can read the full history/)
+  ).toBeDefined()
+  expect(
+    within(dialog).getByText(/Changing visibility stops any running work/)
+  ).toBeDefined()
+  fireEvent.click(within(dialog).getByRole("button", { name: "Save" }))
+  fireEvent.pointerDown(await screen.findByRole("button", { name: title }), {
+    button: 0,
+    ctrlKey: false,
+  })
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Visibility…" }))
+  expect(
+    within(await screen.findByRole("dialog")).getByRole("combobox").textContent
+  ).toBe("Everyone in the organization")
 })

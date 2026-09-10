@@ -13,7 +13,9 @@ import { listOrganizationViewerIds } from "../visibility/audience"
 import { transitionConversationVisibility } from "./sharing"
 
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
-vi.mock("../visibility/audience", () => ({listOrganizationViewerIds: vi.fn()}))
+vi.mock("../visibility/audience", () => ({
+  listOrganizationViewerIds: vi.fn(),
+}))
 afterEach(() => vi.useRealTimers())
 
 test("sharing ends personal execution and descendants without carrying context into the new session", async () => {

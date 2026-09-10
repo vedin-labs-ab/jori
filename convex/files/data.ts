@@ -10,8 +10,8 @@ import { runExecutionIsCurrent } from "../sessions/execution"
 import { boundedNumber, optionalString } from "../shared/input"
 import {
   createResourceSight,
-  resourceCreation,
   type ResourceViewer,
+  resourceCreation,
   resourceViewerArgs,
 } from "../visibility/resources"
 import { type Sight } from "../visibility/sight"
@@ -44,7 +44,10 @@ export const record = internalMutation({
       ...args,
       ...(args.runId === undefined
         ? {}
-        : await resourceCreation(ctx, { organizationId: args.organizationId, runId: args.runId })),
+        : await resourceCreation(ctx, {
+            organizationId: args.organizationId,
+            runId: args.runId,
+          })),
       createdAt: now,
       updatedAt: now,
     })
