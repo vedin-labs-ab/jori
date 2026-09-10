@@ -7,7 +7,7 @@
   "scripts": {
     "brand": "node --experimental-strip-types scripts/brand/index.ts",
     "brand:social": "node --experimental-strip-types scripts/brand/capture.ts",
-    "dev": "node --experimental-strip-types scripts/dev.ts",
+    "dev": "pnpm dev:convex --start \"pnpm dev:web\"",
     "dev:web": "vite",
     "dev:convex": "node --experimental-strip-types scripts/env/index.ts dev -- npx convex dev",
     "build": "vite build",
