@@ -21,7 +21,6 @@ import {
   type ResolveReference,
 } from "@/shared/console/chat/types"
 import { ChatWorking } from "@/shared/console/chat/working"
-import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { type MentionSources } from "@/shared/console/mentions/sources"
 import { ActivityTimeline } from "@/shared/console/runs/activity/item"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
@@ -37,6 +36,7 @@ import {
 import { type DemoLiveReply, type DemoState } from "../../state/types"
 import { useDemoWorkspace } from "../../workspace"
 import { DemoDraft } from "./draft"
+import { DemoChatFiling } from "./filing"
 import { DemoPaneBody } from "./pane"
 import { useReplyStream } from "./stream"
 
@@ -122,7 +122,6 @@ function Conversation({ conversationId }: { conversationId: string }) {
   const { autoOpen, openTarget, pane } = usePaneTabs()
 
   useReplyStream(live, actions)
-  useMaterialBreadcrumb(conversation?.title ?? "")
   useReplyReferences(
     conversationId,
     conversation?.messages ?? noMessages,
@@ -134,41 +133,46 @@ function Conversation({ conversationId }: { conversationId: string }) {
   }
 
   return (
-    <ChatPane
-      {...pane}
-      body={(target) => (
-        <DemoPaneBody onOpenReference={openTarget} target={target} />
-      )}
-      composer={
-        <DemoComposer
-          conversationId={conversationId}
-          mentions={mentions}
-          resolve={resolve}
-          run={run}
-        />
-      }
-      resolve={resolve}
-    >
-      <ChatThread
-        draft={<DemoDraft chat={state.chat} conversationId={conversationId} />}
-        hasMore={false}
-        isLoading={false}
-        live={run}
-        mentions={mentions}
-        messages={conversation.messages}
-        now={now}
-        onChoose={(messageId, answers, text) =>
-          actions.sendChatMessage(text, conversationId, {
-            answer: { messageId, answers },
-          })
+    <>
+      <DemoChatFiling conversation={conversation} />
+      <ChatPane
+        {...pane}
+        body={(target) => (
+          <DemoPaneBody onOpenReference={openTarget} target={target} />
+        )}
+        composer={
+          <DemoComposer
+            conversationId={conversationId}
+            mentions={mentions}
+            resolve={resolve}
+            run={run}
+          />
         }
-        onLoadMore={() => {}}
-        onOpenReference={openTarget}
-        progress={<LiveProgress live={live} now={now} />}
-        resolveReference={resolve}
-        usage={chatContext}
-      />
-    </ChatPane>
+        resolve={resolve}
+      >
+        <ChatThread
+          draft={
+            <DemoDraft chat={state.chat} conversationId={conversationId} />
+          }
+          hasMore={false}
+          isLoading={false}
+          live={run}
+          mentions={mentions}
+          messages={conversation.messages}
+          now={now}
+          onChoose={(messageId, answers, text) =>
+            actions.sendChatMessage(text, conversationId, {
+              answer: { messageId, answers },
+            })
+          }
+          onLoadMore={() => {}}
+          onOpenReference={openTarget}
+          progress={<LiveProgress live={live} now={now} />}
+          resolveReference={resolve}
+          usage={chatContext}
+        />
+      </ChatPane>
+    </>
   )
 }
 

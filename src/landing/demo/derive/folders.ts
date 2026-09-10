@@ -11,7 +11,7 @@ import {
   type FolderRow,
 } from "@/shared/console/folders/types"
 import { type FolderNames } from "@/shared/console/materials/folders"
-import { personName } from "../fixtures/people"
+import { personName, viewerId } from "../fixtures/people"
 import { type DemoFolder, type FolderId } from "../fixtures/types"
 import { type DemoState } from "../state/types"
 
@@ -100,7 +100,9 @@ export function folderImpact(state: DemoState, folderId: string): FolderImpact {
     parentName:
       parentId === undefined ? null : (folderOf(state, parentId)?.name ?? null),
     resourceCount:
-      state.materials.filter(filed).length + state.jobs.filter(filed).length,
+      state.materials.filter(filed).length +
+      state.jobs.filter(filed).length +
+      state.chat.conversations.filter(filed).length,
   }
 }
 
@@ -159,14 +161,30 @@ function folderResources(state: DemoState, folderId: FolderId) {
       })
     )
 
-  return [...materials, ...jobs].sort(byName)
+  const chats = state.chat.conversations
+    .filter((chat) => chat.folderId === folderId)
+    .map(
+      (chat): FolderResource => ({
+        type: "chat",
+        id: chat.id,
+        name: chat.title,
+        visibility: "private",
+        updatedAt: chat.updatedAt,
+        ownerId: viewerId,
+        ownerName: personName(viewerId),
+        ownerImage: undefined,
+      })
+    )
+
+  return [...materials, ...jobs, ...chats].sort(byName)
 }
 
 function hasContents(state: DemoState, folderId: FolderId) {
   return (
     state.folders.some((folder) => folder.parentId === folderId) ||
     state.materials.some((material) => material.folderId === folderId) ||
-    state.jobs.some((job) => job.folderId === folderId)
+    state.jobs.some((job) => job.folderId === folderId) ||
+    state.chat.conversations.some((chat) => chat.folderId === folderId)
   )
 }
 

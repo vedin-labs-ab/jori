@@ -1,5 +1,10 @@
-import { type ChatDraft, type ChatMessage } from "@/shared/console/chat/types"
-import { type DemoConversation } from "../fixtures/chat"
+import {
+  type ChatDraft,
+  type ChatMessage,
+  isLiveRun,
+} from "@/shared/console/chat/types"
+import { chatRunMicros, type DemoConversation } from "../fixtures/chat"
+import { usageDate } from "../fixtures/usage"
 import { type DemoAction, type DemoChat, type DemoState } from "./types"
 
 /** How many characters of the reply each tick reveals. */
@@ -10,11 +15,44 @@ export function reduceChat(state: DemoState, action: DemoAction): DemoState {
     case "sendChatMessage":
       return { ...state, chat: sent(state.chat, action) }
     case "advanceChatReply":
-      return { ...state, chat: advanced(state.chat, action.at) }
+      return settled(state, advanced(state.chat, action.at), action.at)
     case "stopChatRun":
-      return { ...state, chat: stopped(state.chat, action.at) }
+      return settled(state, stopped(state.chat, action.at), action.at)
     default:
       return state
+  }
+}
+
+/** A finished reply contributes one run and its illustrative cost. */
+function settled(state: DemoState, chat: DemoChat, at: number): DemoState {
+  const live = state.chat.live
+
+  if (
+    live === null ||
+    !isLiveRun(live.run) ||
+    isLiveRun(chat.live?.run ?? null)
+  ) {
+    return { ...state, chat }
+  }
+
+  const conversation = chat.conversations.find(
+    (chat) => chat.id === live.conversationId
+  )
+
+  return {
+    ...state,
+    chat,
+    usage: [
+      ...state.usage,
+      {
+        conversationId: live.conversationId,
+        folderId: conversation?.folderId,
+        date: usageDate(at),
+        micros: chatRunMicros,
+        ended: 1,
+        failed: 0,
+      },
+    ],
   }
 }
 
@@ -40,7 +78,7 @@ function sent(
   const conversation: DemoConversation =
     existing === undefined
       ? {
-          id: action.conversationId,
+          id: action.conversationId as DemoConversation["id"],
           title: action.text,
           updatedAt: action.at,
           messages: [message],

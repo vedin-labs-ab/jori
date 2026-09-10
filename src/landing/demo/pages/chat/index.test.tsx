@@ -1,6 +1,12 @@
 /* @vitest-environment jsdom */
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
 import { typeInto } from "../../../../../test/editor"
@@ -31,9 +37,10 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   // The console moves to the new conversation, named in the header, where
   // the ask stands and the run works under it with its log folded away.
   expect(await screen.findByText("Working")).toBeDefined()
-  expect(screen.getByRole("link", { current: "page" }).textContent).toBe(
-    "Chase the unpaid renewals"
-  )
+  expect(
+    screen.getByRole("button", { name: "Chase the unpaid renewals" })
+      .textContent
+  ).toBe("Chase the unpaid renewals")
   expect(
     screen.getByText("Chase the unpaid renewals", { selector: "div" })
   ).toBeDefined()
@@ -64,6 +71,38 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   expect(
     await screen.findAllByRole("listitem", { current: true })
   ).toHaveLength(3)
+})
+
+test("files a chat from its title menu, shows its folder trail, and unfiles it from the folder", async () => {
+  render(<DemoConsoleAt path={`/chat/${renewalsConversationId}`} />)
+  const title = "Which renewals are at risk this month?"
+  fireEvent.pointerDown(await screen.findByRole("button", { name: title }), {
+    button: 0,
+    ctrlKey: false,
+  })
+  fireEvent.click(
+    await screen.findByRole("menuitem", { name: "Move to folder…" })
+  )
+  const dialog = await screen.findByRole("dialog")
+  fireEvent.click(within(dialog).getByRole("button", { name: "Engineering" }))
+  fireEvent.click(within(dialog).getByRole("button", { name: "Move" }))
+  fireEvent.click(await screen.findByRole("link", { name: "Engineering" }))
+  const row = (
+    await screen.findByRole("link", { name: new RegExp(title) })
+  ).closest("tr")
+  expect(row?.textContent).toContain("Chat")
+  expect(row?.textContent).toContain("Only me")
+  fireEvent.pointerDown(
+    screen.getByRole("button", { name: `Open actions for ${title}` }),
+    {
+      button: 0,
+      ctrlKey: false,
+    }
+  )
+  fireEvent.click(
+    await screen.findByRole("menuitem", { name: "Remove from folder" })
+  )
+  expect(screen.queryByRole("link", { name: new RegExp(title) })).toBeNull()
 })
 
 test("stopping the run leaves a quiet notice under the ask", async () => {

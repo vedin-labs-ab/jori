@@ -14,11 +14,17 @@ import { hour, minute } from "./clock"
 import { demoId } from "./ids"
 import { jobId } from "./jobs"
 import { renewalsTableId } from "./materials/tables"
+import { type ConversationId, type FolderId } from "./types"
 
 /** A conversation as the workspace keeps it: its listing and its turns. */
 export type DemoConversation = ChatConversation & {
+  id: ConversationId
+  folderId?: FolderId
   messages: ChatMessage[]
 }
+
+/** Each completed demo reply uses the same illustrative run cost. */
+export const chatRunMicros = 84_000
 
 /** What Jori answers with: the thinking first, then the text, and the
  *  parts after it. */

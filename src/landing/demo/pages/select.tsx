@@ -26,15 +26,22 @@ export function useDemoFolderSelection(): {
     }
 
     for (const resource of selection.resources) {
-      const job =
-        resource.type === "job"
-          ? state.jobs.find((candidate) => candidate.id === resource.id)
-          : undefined
+      switch (resource.type) {
+        case "chat":
+          actions.fileResource("chat", resource.id, null)
+          break
+        case "job": {
+          const job = state.jobs.find(
+            (candidate) => candidate.id === resource.id
+          )
 
-      if (job !== undefined) {
-        actions.deleteJob(job)
-      } else if (resource.type !== "job") {
-        actions.removeMaterial(resource.id)
+          if (job !== undefined) {
+            actions.deleteJob(job)
+          }
+          break
+        }
+        default:
+          actions.removeMaterial(resource.id)
       }
     }
 

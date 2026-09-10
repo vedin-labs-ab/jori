@@ -68,9 +68,23 @@ function deleteFolder(
     item.folderId === undefined || !doomed.has(item.folderId)
   const refiled = <Item extends { folderId?: FolderId }>(item: Item): Item =>
     survives(item) ? item : { ...item, folderId: parentId }
+  const chats = state.chat.conversations
+  const movedChats = new Set(
+    chats.filter((chat) => !survives(chat)).map((chat) => chat.id)
+  )
+  const conversations = deleteResources
+    ? chats.filter(survives)
+    : chats.map(refiled)
 
   return {
     ...state,
+    chat: {
+      conversations,
+      live:
+        deleteResources && movedChats.has(state.chat.live?.conversationId ?? "")
+          ? null
+          : state.chat.live,
+    },
     folders: state.folders.filter((folder) => !doomed.has(folder.folderId)),
     materials: deleteResources
       ? state.materials.filter(survives)
@@ -78,6 +92,11 @@ function deleteFolder(
     jobs: deleteResources
       ? state.jobs.filter(survives)
       : state.jobs.map(refiled),
+    usage: state.usage.map((row) =>
+      row.conversationId !== undefined && movedChats.has(row.conversationId)
+        ? { ...row, folderId: deleteResources ? undefined : parentId }
+        : row
+    ),
   }
 }
 
@@ -86,6 +105,21 @@ function fileResource(
   action: Extract<DemoAction, { type: "fileResource" }>
 ): DemoState {
   const folderId = action.folderId ?? undefined
+
+  if (action.resourceType === "chat") {
+    return {
+      ...state,
+      chat: {
+        ...state.chat,
+        conversations: state.chat.conversations.map((chat) =>
+          chat.id === action.id ? { ...chat, folderId } : chat
+        ),
+      },
+      usage: state.usage.map((row) =>
+        row.conversationId === action.id ? { ...row, folderId } : row
+      ),
+    }
+  }
 
   if (action.resourceType === "job") {
     return {
