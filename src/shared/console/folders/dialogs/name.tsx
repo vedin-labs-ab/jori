@@ -35,6 +35,16 @@ export function FolderNameDialog({
   const [name, setName] = useState(initialName)
   const [error, setError] = useState<string>()
   const [isSaving, setIsSaving] = useState(false)
+  const [wasOpen, setWasOpen] = useState(isOpen)
+
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen)
+
+    if (isOpen) {
+      setName(initialName)
+      setError(undefined)
+    }
+  }
 
   async function submit() {
     if (name.trim() === "") {
@@ -47,7 +57,6 @@ export function FolderNameDialog({
 
     try {
       await onSubmit(name.trim())
-      setName(initialName)
       onOpenChange(false)
     } catch (submitError) {
       showErrorToast(submitError, "Could not save the folder.")
