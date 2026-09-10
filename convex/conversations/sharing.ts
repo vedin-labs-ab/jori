@@ -6,8 +6,8 @@ import { createPersonActor } from "../shared/actor"
 import { type StoredVisibility } from "../visibility/schema"
 import { conversationVisibility } from "./access"
 
-/** Membership changes preserve the transcript. A different execution identity
- * starts a fresh session so personal context and sandboxes cannot carry over. */
+/** Sharing preserves the transcript. Audience changes start a fresh session
+ * so cached context and sandboxes stay with the audience that produced them. */
 export async function transitionConversationVisibility(
   ctx: MutationCtx,
   conversation: Doc<"conversations">,

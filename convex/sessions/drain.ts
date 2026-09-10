@@ -3,6 +3,7 @@ import {
   type DrainedSessionBatch,
   type RuntimeMessage,
 } from "../../contracts/runtime/context"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import {
@@ -47,7 +48,11 @@ export async function drainSession(
 
   const run = await ctx.db.get(args.runId)
 
-  if (run === null || !(await runExecutionIsCurrent(ctx, run))) {
+  if (
+    run === null ||
+    isTerminalRunStatus(run.status) ||
+    !(await runExecutionIsCurrent(ctx, run))
+  ) {
     if (run !== null) {
       await reconcileRunExecution(ctx, run)
     }
