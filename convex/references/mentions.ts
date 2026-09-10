@@ -55,7 +55,11 @@ export const list = query({
     const conversation =
       args.conversationId === undefined
         ? null
-        : await requireVisibleConsoleConversation(ctx, { ...args, personId })
+        : await requireVisibleConsoleConversation(ctx, {
+            organizationId: args.organizationId,
+            conversationId: args.conversationId,
+            personId,
+          })
     const viewer = {
       personId,
       sight:
@@ -110,12 +114,10 @@ async function listCollections(
     personId: viewer.personId,
     query: search,
   }
-  const collections = await searchCollections(
-    ctx,
-    kind === "table" ? tableSpec : storeSpec,
-    args,
-    viewer.sight
-  )
+  const collections =
+    kind === "table"
+      ? await searchCollections(ctx, tableSpec, args, viewer.sight)
+      : await searchCollections(ctx, storeSpec, args, viewer.sight)
 
   return named(kind, collections, (collection) => collection.name, search)
 }
