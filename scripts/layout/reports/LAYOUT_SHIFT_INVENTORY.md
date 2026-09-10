@@ -1,0 +1,748 @@
+# Layout shift inventory
+
+## Context
+
+- Stack: React 19, TanStack Start and file router, Vite 8, Convex subscriptions, Better Auth with React Query, shadcn/ui over Radix and Base UI, Tailwind 4. Geist variable Latin WOFF2 is preloaded by the root document and uses `font-display: swap`. Motion uses Tailwind transitions, tw-animate-css, and explicit chat scrolling/stream timers. Existing reduced-motion rules retain slow spinners.
+- Local workflow: `pnpm dev` starts Convex before `pnpm dev:web`, URL http://localhost:5173. Existing processes occupy that port. This hunt serves the task's frontend on 5178 with matching public/US origin overrides and a separate fixture entry on 127.0.0.1:5180. No deployment is needed.
+- Sign-in: Google or Microsoft OAuth only. No test credentials, password auth, dev bypass, or magic-link log flow exists in the environment example. Organization creation is access controlled. Saved developer storage can be supplied through `LAYOUT_STORAGE`; no authenticated state was provided. The user authorized Google sign-in and completed 2-Step Verification. A localhost session for the populated Vedin Labs development workspace is saved as ignored session.local with mode 0600. All live measurements use isolated contexts; live writes, payments, invites, and provider authorization are not exercised.
+- Data: `pnpm db:seed dev --organization <id>` fills an existing development organization, replacing previous fixture records; Slack-dependent data needs a connected integration. The hunt uses existing populated `src/landing/demo` fixtures with isolated in-memory state and the actual shared console views. This covers long messages, markdown, code, materials, jobs, folders, runs, and local mutations without touching shared backend data. It does not prove Convex/auth boundary stability.
+- Chromium automation: Playwright 1.63 already installed. Shared immutable probe and driver in `scripts/layout`. Empty cache, 150ms latency, 200KB/s down, 90KB/s up, 4x CPU for cold; unthrottled second visit for warm. Screenshots and rects at approximately 0, 250, 1000, 3000ms plus a network-idle and 3s settled sample. All CLS entries retained, including recent input. DOM paths plus node identities detect replacements, and every scroll container is sampled.
+- Viewports: 1440x900 desktop and 375x812 narrow. No minimum supported width stated; 375 is the brief's default. Styles use sm/md breakpoints; demo deliberately omits mobile sidebar/filter sheet triggers, recorded as a coverage limitation.
+- Checks: `pnpm check` runs compiled content, structure, dependency boundaries, versions, entrypoint guards, typecheck, Biome and bundle compilation. `pnpm test` runs Vitest behind machine-wide lock. Focused tests use `pnpm test <paths>`.
+- Workflow: primary checkout `.`; `pnpm task layout-stability` created `<worktree>/layout-stability`, branch `task/layout-stability`. Repo task script owns the branch prefix. Agents use separate task worktrees. Commit per cause, integrate, then `pnpm land layout-stability` from primary with all checks enabled.
+- Files: durable tooling under `scripts/layout`; inventory, findings, reports, records and screenshots together under `scripts/layout/reports`. Raw captures are local evidence, not production code. No README or `.github` CI configuration exists. `docs/index.md`, AGENTS, package scripts, environment example and existing tests supply the workflow. No PRODUCT.md/DESIGN.md exists; this hunt preserves the existing design and infers product context from source as explicitly requested.
+
+- Built run: `pnpm layout:app --build` loads only development settings, builds the real TanStack/Nitro app and serves it on localhost:5178. `pnpm layout:fixture` builds the existing shared console/demo into `dist/layout`, then serves gzip-compressed assets on127.0.0.1:5180. Both were built before any product fixes. No devtools, HMR or development module graph is present during the hunt.
+- Isolation: two independent Chromium worker processes per slice, with a fresh context and fixture workspace per item. Cold cache clearing cannot affect a warm worker. Authenticated items only read the shared development backend. Raw captures may contain development account data and stay ignored by Git. Each record includes the measurement source digest, concurrency, actual sampling times and completion timestamps.
+- The probe has a Chromium positive-control test that verifies recent-input movement, pure resizing, same-slot DOM replacement, scroll deltas, opacity invisibility, and ancestor clipping. Snapshots run independently of PNG encoding; CDP captures screenshots without waiting for fonts. Shifts are retained through document navigations.
+
+## Inventory
+
+Every line gets cold1440, warm1440, cold375, and warm375 records. Source evidence is in [shell.md](shell.md), [chat.md](chat.md), and [controls.md](controls.md). Full manifests live in ../scenarios; execution shards are shell, chat, lists C001-C080, and remaining controls. Fixture writes are isolated; external form outcomes are intercepted.
+
+### shell
+
+- [ ] `shell-route-home-enter` read-only, app: Navigate into /
+- [ ] `shell-route-home-back` read-only, app: Return from / using browser back
+- [ ] `shell-route-pricing-enter` read-only, app: Navigate into /pricing
+- [ ] `shell-route-pricing-back` read-only, app: Return from /pricing using browser back
+- [ ] `shell-route-trust-enter` read-only, app: Navigate into /trust
+- [ ] `shell-route-trust-back` read-only, app: Return from /trust using browser back
+- [ ] `shell-route-privacy-enter` read-only, app: Navigate into /privacy
+- [ ] `shell-route-privacy-back` read-only, app: Return from /privacy using browser back
+- [ ] `shell-route-terms-enter` read-only, app: Navigate into /terms
+- [ ] `shell-route-terms-back` read-only, app: Return from /terms using browser back
+- [ ] `shell-route-sign-in-enter` read-only, app: Navigate into /sign-in
+- [ ] `shell-route-sign-in-back` read-only, app: Return from /sign-in using browser back
+- [ ] `shell-protected-01-enter` read-only, app: Navigate into /chat/$conversationId
+- [ ] `shell-protected-01-back` read-only, app: Return from /chat/$conversationId to prior console route
+- [ ] `shell-protected-02-enter` read-only, app: Navigate into /chat
+- [ ] `shell-protected-02-back` read-only, app: Return from /chat to prior console route
+- [ ] `shell-protected-03-enter` read-only, app: Navigate into /context
+- [ ] `shell-protected-03-back` read-only, app: Return from /context to prior console route
+- [ ] `shell-protected-04-enter` read-only, app: Navigate into /context/places
+- [ ] `shell-protected-04-back` read-only, app: Return from /context/places to prior console route
+- [ ] `shell-protected-05-enter` read-only, app: Navigate into /context/workstreams
+- [ ] `shell-protected-05-back` read-only, app: Return from /context/workstreams to prior console route
+- [ ] `shell-protected-06-enter` read-only, app: Navigate into /files/$fileId
+- [ ] `shell-protected-06-back` read-only, app: Return from /files/$fileId to prior console route
+- [ ] `shell-protected-07-enter` read-only, app: Navigate into /files
+- [ ] `shell-protected-07-back` read-only, app: Return from /files to prior console route
+- [ ] `shell-protected-08-enter` read-only, app: Navigate into /folders/$folderId
+- [ ] `shell-protected-08-back` read-only, app: Return from /folders/$folderId to prior console route
+- [ ] `shell-protected-09-enter` read-only, app: Navigate into /folders/$folderId/usage
+- [ ] `shell-protected-09-back` read-only, app: Return from /folders/$folderId/usage to prior console route
+- [ ] `shell-protected-10-enter` read-only, app: Navigate into /folders
+- [ ] `shell-protected-10-back` read-only, app: Return from /folders to prior console route
+- [ ] `shell-protected-11-enter` read-only, app: Navigate into /folders/usage
+- [ ] `shell-protected-11-back` read-only, app: Return from /folders/usage to prior console route
+- [ ] `shell-protected-12-enter` read-only, app: Navigate into /integrations
+- [ ] `shell-protected-12-back` read-only, app: Return from /integrations to prior console route
+- [ ] `shell-protected-13-enter` read-only, app: Navigate into /integrations/personal
+- [ ] `shell-protected-13-back` read-only, app: Return from /integrations/personal to prior console route
+- [ ] `shell-protected-14-enter` read-only, app: Navigate into /jobs/$jobId
+- [ ] `shell-protected-14-back` read-only, app: Return from /jobs/$jobId to prior console route
+- [ ] `shell-protected-15-enter` read-only, app: Navigate into /jobs
+- [ ] `shell-protected-15-back` read-only, app: Return from /jobs to prior console route
+- [ ] `shell-protected-16-enter` read-only, app: Navigate into /runs
+- [ ] `shell-protected-16-back` read-only, app: Return from /runs to prior console route
+- [ ] `shell-protected-17-enter` read-only, app: Navigate into /skills
+- [ ] `shell-protected-17-back` read-only, app: Return from /skills to prior console route
+- [ ] `shell-protected-18-enter` read-only, app: Navigate into /stores/$storeId
+- [ ] `shell-protected-18-back` read-only, app: Return from /stores/$storeId to prior console route
+- [ ] `shell-protected-19-enter` read-only, app: Navigate into /stores
+- [ ] `shell-protected-19-back` read-only, app: Return from /stores to prior console route
+- [ ] `shell-protected-20-enter` read-only, app: Navigate into /tables/$tableId
+- [ ] `shell-protected-20-back` read-only, app: Return from /tables/$tableId to prior console route
+- [ ] `shell-protected-21-enter` read-only, app: Navigate into /tables
+- [ ] `shell-protected-21-back` read-only, app: Return from /tables to prior console route
+- [ ] `shell-console-redirect` read-only, app: Open /console and resolve redirect to /chat
+- [ ] `shell-protected-anonymous` read-only, app: Unauthenticated /chat resolves session and redirects to /sign-in
+- [ ] `shell-sign-out` mutating, app: Sign out and resolve loading overlay into sign-in. Unavailable: Sign-out invalidates the shared saved backend session. Drive once after all authenticated slices, sequentially.
+- [ ] `shell-sign-out-back` read-only, app: Browser back after sign-out remains signed out. Unavailable: Sign-out invalidates the shared saved backend session. Drive once after all authenticated slices, sequentially.
+- [ ] `shell-root-missing` read-only, app: Unknown root route renders Page not found
+- [ ] `shell-root-missing-home` read-only, app: Unknown root route Back to Jori returns home
+- [ ] `shell-nested-missing` read-only, app: Unknown nested workspace path renders workspace Page not found
+- [ ] `shell-nested-missing-chat` read-only, app: Workspace Page not found New chat returns chat
+- [ ] `shell-error-root` read-only, app: Jori could not load page: error boundary replaces failed view. Unavailable: requires controlled error fixture
+- [ ] `shell-error-root-retry` read-only, app: Jori could not load page: Reload/Try again resolves replacement. Unavailable: requires controlled error fixture
+- [ ] `shell-error-page` read-only, app: This page did not load: error boundary replaces failed view. Unavailable: requires controlled error fixture and auth
+- [ ] `shell-error-page-retry` read-only, app: This page did not load: Reload/Try again resolves replacement. Unavailable: requires controlled error fixture and auth
+- [ ] `shell-error-stale` read-only, app: This page is out of date: error boundary replaces failed view. Unavailable: requires controlled error fixture and auth
+- [ ] `shell-error-stale-retry` read-only, app: This page is out of date: Reload/Try again resolves replacement. Unavailable: requires controlled error fixture and auth
+- [ ] `shell-mobile-menu-open` read-only, app: Landing mobile menu opens/expands. Visible widths: 375
+- [ ] `shell-mobile-menu-close` read-only, app: Landing mobile menu closes/collapses. Visible widths: 375
+- [ ] `shell-region-info-open` read-only, app: About data regions dialog opens/expands
+- [ ] `shell-region-info-close` read-only, app: About data regions dialog closes/collapses
+- [ ] `shell-invitation-info-open` read-only, app: Joining an organization dialog opens/expands
+- [ ] `shell-invitation-info-close` read-only, app: Joining an organization dialog closes/collapses
+- [ ] `shell-desktop-sidebar-open` read-only, fixture: Desktop sidebar opens/expands. Visible widths: 1440
+- [ ] `shell-desktop-sidebar-close` read-only, fixture: Desktop sidebar closes/collapses. Visible widths: 1440
+- [ ] `shell-material-menu-open` read-only, fixture: Material breadcrumb dropdown opens/expands
+- [ ] `shell-material-menu-close` read-only, fixture: Material breadcrumb dropdown closes/collapses
+- [ ] `shell-sidebar-resources-open` read-only, fixture: Sidebar Resources group opens/expands. Visible widths: 1440
+- [ ] `shell-sidebar-resources-close` read-only, fixture: Sidebar Resources group closes/collapses. Visible widths: 1440
+- [ ] `shell-sidebar-chats-open` read-only, fixture: Sidebar Chats group opens/expands. Visible widths: 1440
+- [ ] `shell-sidebar-chats-close` read-only, fixture: Sidebar Chats group closes/collapses. Visible widths: 1440
+- [ ] `shell-header-hover-in` read-only, fixture: Material breadcrumb gains hover padding
+- [ ] `shell-header-hover-out` read-only, fixture: Material breadcrumb returns to rest padding
+- [ ] `shell-header-focus-in` read-only, fixture: Material breadcrumb gains focus padding
+- [ ] `shell-header-focus-out` read-only, fixture: Material breadcrumb loses focus padding
+- [ ] `shell-anchor-waitlist` read-only, app: Navigate to #waitlist and let nearby lazy content settle
+- [ ] `shell-anchor-waitlist-back` read-only, app: Browser back after #waitlist restores prior scroll
+- [ ] `shell-anchor-work` read-only, app: Navigate to #work and let nearby lazy content settle
+- [ ] `shell-anchor-work-back` read-only, app: Browser back after #work restores prior scroll
+- [ ] `shell-legal-waitlist` read-only, app: Legal page Join the waitlist navigates to home anchor
+- [ ] `shell-legal-waitlist-back` read-only, app: Return from home waitlist to legal page
+- [ ] `shell-waitlist-email-error` mutating, app: Waitlist email validation error appears
+- [ ] `shell-waitlist-email-clear` mutating, app: Waitlist email validation error clears
+- [ ] `shell-waitlist-work-error` mutating, app: Waitlist work validation error appears
+- [ ] `shell-waitlist-work-clear` mutating, app: Waitlist work validation error clears
+- [ ] `shell-waitlist-pending` mutating, app: Waitlist valid form resolves pending state
+- [ ] `shell-waitlist-failed` mutating, app: Waitlist valid form resolves failed state
+- [ ] `shell-waitlist-throttled` mutating, app: Waitlist valid form resolves throttled state
+- [ ] `shell-waitlist-rejected` mutating, app: Waitlist valid form resolves rejected state
+- [ ] `shell-waitlist-joined` mutating, app: Waitlist valid form resolves joined state
+- [ ] `shell-waitlist-joined-reset` mutating, app: Waitlist confirmation returns to form on page reload
+- [ ] `shell-waitlist-size` mutating, app: Waitlist team size label changes
+- [ ] `shell-auth-google-pending` mutating, app: google sign-in logo swaps to spinner
+- [ ] `shell-auth-google-error` mutating, app: google sign-in spinner restores provider logo
+- [ ] `shell-auth-google-success` mutating, app: google sign-in external redirect returns authorized app. Unavailable: requires human-authenticated development OAuth session
+- [ ] `shell-auth-microsoft-pending` mutating, app: microsoft sign-in logo swaps to spinner
+- [ ] `shell-auth-microsoft-error` mutating, app: microsoft sign-in spinner restores provider logo
+- [ ] `shell-auth-microsoft-success` mutating, app: microsoft sign-in external redirect returns authorized app. Unavailable: requires human-authenticated development OAuth session
+- [ ] `shell-oauth-toast` read-only, app: OAuth error toast appears and clears URL feedback
+- [ ] `shell-oauth-toast-dismiss` read-only, app: OAuth error toast disappears
+- [ ] `shell-region-select` read-only, app: Region picker changes region and reloads sign-in. Unavailable: default local topology is US-only; EU disabled Coming soon
+- [ ] `shell-region-reverse` read-only, app: Region picker returns to previous region. Unavailable: default local topology is US-only; EU disabled Coming soon
+- [ ] `shell-async-font` read-only, app: Geist fallback to webfont
+- [ ] `shell-async-logos` read-only, app: Integration logos load in fixed icon boxes
+- [ ] `shell-async-signin-canvas` read-only, app: Sign-in canvas mounts and animates
+- [ ] `shell-async-hero-thread` read-only, app: Hero thread enters and renewals row dims then returns
+- [ ] `shell-async-editor` read-only, app: Near-viewport job editor placeholder resolves to lazy fields
+- [ ] `shell-async-sharing-links` read-only, app: Client-only Share links placeholder resolves to links body
+- [ ] `shell-async-demo-org-logo` read-only, fixture: Demo organization logo loads
+- [ ] `shell-async-demo-header` read-only, fixture: Demo route title/breadcrumb and header actions publish after commit
+- [ ] `shell-auth-boundary-convex` read-only, app: Convex token unavailable becomes session error. Unavailable: requires authorized development identity and tailored org state
+- [ ] `shell-auth-boundary-activation` mutating, app: No active organization automatically activates first membership and reloads. Unavailable: requires authorized development identity and tailored org state
+- [ ] `shell-auth-boundary-initialization` mutating, app: Organization person sync completes before console appears. Unavailable: requires authorized development identity and tailored org state
+- [ ] `shell-auth-boundary-init-failure` read-only, app: Organization person sync fails into retry alert. Unavailable: requires authorized development identity and tailored org state
+- [ ] `shell-auth-boundary-init-retry` mutating, app: Organization sync retry alert returns to loading and console. Unavailable: requires authorized development identity and tailored org state
+- [ ] `shell-auth-boundary-no-org` read-only, app: No organization resolves membership invitations/create view. Unavailable: requires authorized development identity and tailored org state
+- [ ] `shell-auth-boundary-launch` read-only, app: Non-allowlisted account resolves launch waitlist. Unavailable: requires authorized development identity and tailored org state
+- [ ] `shell-auth-boundary-onboarding` read-only, app: Organization onboarding state resolves. Unavailable: requires authorized development identity and tailored org state
+- [ ] `shell-share-files` read-only, app: Anonymous files detail resolves public share chrome. Unavailable: requires actual dev share link; demo only represents material body
+- [ ] `shell-share-files-denied` read-only, app: Anonymous files invalid/expired share resolves access state
+- [ ] `shell-share-stores` read-only, app: Anonymous stores detail resolves public share chrome. Unavailable: requires actual dev share link; demo only represents material body
+- [ ] `shell-share-stores-denied` read-only, app: Anonymous stores invalid/expired share resolves access state
+- [ ] `shell-share-tables` read-only, app: Anonymous tables detail resolves public share chrome. Unavailable: requires actual dev share link; demo only represents material body
+- [ ] `shell-share-tables-denied` read-only, app: Anonymous tables invalid/expired share resolves access state
+- [ ] `shell-offer` read-only, app: Integration offer token resolves accepting/invalid/access state. Unavailable: requires authorized identity and dev offer token
+- [ ] `shell-offer-back` read-only, app: Return from integration offer to console. Unavailable: requires authorized identity and dev offer token
+- [ ] `shell-api-auth` read-only, app: Auth API catchall endpoint delegates to Better Auth; no document UI. Unavailable: nonvisual server endpoint
+- [ ] `shell-api-callback` mutating, app: Integration callback GET redirects or emits OAuth handoff result. Unavailable: requires development OAuth transaction; nonvisual server endpoint
+
+### chat
+
+- [ ] `CHAT-001` read-only, fixture: navigate into chat home and wait for its lazy chunk and TipTap mount. Drive console `[href='/chat']`. Evidence `src/landing/demo/pages/router.tsx`, `src/shared/console/chat/composer/editor.ts`.
+- [ ] `CHAT-002` read-only, fixture: return from chat home to prior console page through its navigation. Shared shell remains the same. Mobile fixture intentionally hides sidebar navigation in src/landing/demo/console.tsx; live mobile route navigation belongs to shell coverage.. Visible widths: 1440
+- [ ] `CHAT-003` read-only, fixture: open populated conversation from Recent. Drive `[href='/chat/conversations_renewals']`. Evidence `src/shared/console/chat/home.tsx`, `src/landing/demo/pages/chat/index.tsx`.
+- [ ] `CHAT-004` read-only, fixture: return from populated conversation to chat home. Drive `[href='/chat']`. Mobile fixture intentionally hides sidebar navigation in src/landing/demo/console.tsx; live mobile route navigation belongs to shell coverage.. Visible widths: 1440
+- [ ] `CHAT-005` read-only, fixture: enter composer text, including enough wrapped lines to reach its 12rem max height, and inspect post-typing settling. Evidence `src/shared/console/chat/composer/editor.ts`.
+- [ ] `CHAT-006` read-only, fixture: clear the multiline composer, restoring the placeholder and disabled send button.
+- [ ] `CHAT-007` read-only, fixture: hide desktop shortcut band. Drive button `Hide shortcuts`. Evidence `src/shared/console/chat/composer/footer.tsx`.. Visible widths: 1440
+- [ ] `CHAT-008` read-only, fixture: restore desktop shortcut band. Drive button `Show shortcuts`. Hidden by CSS below `md`; record mobile as not applicable.. Visible widths: 1440
+- [ ] `CHAT-009` read-only, fixture: open attachment popover. Drive button `Mention a resource`. Evidence `src/shared/console/chat/composer/attach.tsx`.
+- [ ] `CHAT-010` read-only, fixture: close attachment popover with Escape.
+- [ ] `CHAT-011` read-only, fixture: attachment kind list to Chats. Drive option `Chats`.
+- [ ] `CHAT-012` read-only, fixture: Chats items back to kind list. Drive option `All resources`.
+- [ ] `CHAT-013` read-only, fixture: attachment kind list to Tables. Drive option `Tables`.
+- [ ] `CHAT-014` read-only, fixture: Tables items back to kind list. Drive option `All resources`.
+- [ ] `CHAT-015` read-only, fixture: attachment kind list to Files. Drive option `Files`.
+- [ ] `CHAT-016` read-only, fixture: Files items back to kind list. Drive option `All resources`.
+- [ ] `CHAT-017` read-only, fixture: attachment kind list to Stores. Drive option `Stores`.
+- [ ] `CHAT-018` read-only, fixture: Stores items back to kind list. Drive option `All resources`.
+- [ ] `CHAT-019` read-only, fixture: attachment kind list to Jobs. Drive option `Jobs`.
+- [ ] `CHAT-020` read-only, fixture: Jobs items back to kind list. Drive option `All resources`.
+- [ ] `CHAT-021` read-only, fixture: attachment kind list to Folders. Drive option `Folders`.
+- [ ] `CHAT-022` read-only, fixture: Folders items back to kind list. Drive option `All resources`.
+- [ ] `CHAT-023` read-only, fixture: attachment kind list to Runs. Drive option `Runs`.
+- [ ] `CHAT-024` read-only, fixture: Runs items back to kind list. Drive option `All resources`.
+- [ ] `CHAT-025` read-only, fixture: attachment search resolves to matches, then no matches. Fill placeholder `Search resources…` with `renewal` and unique impossible text as separate marks.
+- [ ] `CHAT-026` read-only, fixture: clear attachment search back to all kind rows.
+- [ ] `CHAT-027` read-only, fixture: pick resource from attachment results and close popover with an inline chip inserted. Drive `Tables`, option `Customer renewals`. Demo does not open pane on mention; production does.
+- [ ] `CHAT-028` read-only, fixture: remove inline resource chip using Backspace and restore text caret. Production releases unpinned pane preview too.
+- [ ] `CHAT-029` read-only, fixture: type resource sigil `+` and query to open caret suggestion list. Evidence `src/shared/console/mentions/suggest/listbox.tsx`.
+- [ ] `CHAT-030` read-only, fixture: close resource suggestion list with Escape.
+- [ ] `CHAT-031` read-only, fixture: type integration sigil `@` and inspect its populated/empty suggestion list.
+- [ ] `CHAT-032` read-only, fixture: dismiss integration suggestion list.
+- [ ] `CHAT-033` read-only, fixture: type skill sigil `/` and inspect its populated/empty suggestion list.
+- [ ] `CHAT-034` read-only, fixture: dismiss skill suggestion list.
+- [ ] `CHAT-035` read-only, fixture: type tool sigil `#` and inspect its populated/empty suggestion list.
+- [ ] `CHAT-036` read-only, fixture: dismiss tool suggestion list.
+- [ ] `CHAT-037` read-only, fixture: select a caret suggestion with Enter; popup closes and token becomes chip.
+- [ ] `CHAT-038` read-only, fixture: open model dropdown. Drive button whose accessible label starts `Model:`. Evidence `src/shared/console/chat/models/index.tsx`.
+- [ ] `CHAT-039` read-only, fixture: close model dropdown with Escape.
+- [ ] `CHAT-040` read-only, fixture: open vendor submenu OpenAI.
+- [ ] `CHAT-041` read-only, fixture: open vendor submenu Anthropic.
+- [ ] `CHAT-042` read-only, fixture: open Reasoning submenu.
+- [ ] `CHAT-043` mutating, fixture: choose different recommended tier and allow selected label/icon to settle. Local state only in demo, persisted conversation model in production.
+- [ ] `CHAT-044` mutating, fixture: choose a non-recommended model/effort and inspect longer trigger label.
+- [ ] `CHAT-045` read-only, fixture: show context ring tooltip on hover/focus. Drive button label starting `Context:`. Evidence `src/shared/console/chat/context/index.tsx`.
+- [ ] `CHAT-046` read-only, fixture: dismiss context ring tooltip.
+- [ ] `CHAT-047` read-only, fixture: open context breakdown popover by clicking same button.
+- [ ] `CHAT-048` read-only, fixture: close context breakdown popover with Escape.
+- [ ] `CHAT-049` mutating, fixture: send first message from home and observe navigation, pending/working row, reasoning, streamed markdown, stop control, settled reply. Drive composer then `Send message`. Evidence `src/landing/demo/pages/chat/stream.ts`, `src/shared/console/chat/thread/draft.tsx`, `src/shared/console/chat/thread/tail.tsx`.
+- [ ] `CHAT-050` mutating, fixture: send follow-up in existing populated conversation, observing preceding Next steps removal and scroll anchor.
+- [ ] `CHAT-051` mutating, fixture: send a suggestion from home and observe home-to-thread transition. Drive suggestion `Which renewals are at risk?`.
+- [ ] `CHAT-052` mutating, fixture: choose reply Next steps chip, observing chip removal and new turn. Drive `Remind Harbor House`.
+- [ ] `CHAT-053` read-only, fixture: expand Working log during pending/streaming. Drive button `Working`. Evidence `src/shared/console/chat/working.tsx`.
+- [ ] `CHAT-054` read-only, fixture: collapse Working log during pending/streaming.
+- [ ] `CHAT-055` read-only, fixture: expand streaming Thinking or settled Thought. Evidence `src/shared/console/chat/thread/reasoning.tsx`.
+- [ ] `CHAT-056` read-only, fixture: collapse Thinking or Thought.
+- [ ] `CHAT-057` mutating, fixture: stop active stream and observe draft-to-stopped notice plus Stop run removal. Drive button `Stop run` before completion.
+- [ ] `CHAT-058` read-only, fixture: scroll conversation up while stream grows and check anchor preservation after scroll ends. Evidence `src/components/ui/message-scroller` and `src/shared/console/chat/thread/tail.tsx`.
+- [ ] `CHAT-059` read-only, fixture: activate `Scroll to latest` and inspect settling after its deliberate scroll.
+- [ ] `CHAT-060` mutating, fixture: send long person text so its eight-line clamp mounts; observe late measurement. Evidence `src/shared/console/chat/thread/message.tsx`, `src/components/ui/expandable-text`.
+- [ ] `CHAT-061` read-only, fixture: expand clamped person message through its `show more` control.
+- [ ] `CHAT-062` read-only, fixture: collapse clamped person message through its Show less control.
+- [ ] `CHAT-063` read-only, fixture: hover/focus message to reveal reserved action row and timestamp tooltip.
+- [ ] `CHAT-064` read-only, fixture: remove hover/focus from message, hiding actions and tooltip.
+- [ ] `CHAT-065` read-only, fixture: copy message and observe copy/check icon lifecycle. Drive `Copy message` then wait past copied timeout. Evidence `src/shared/console/copy.tsx`.
+- [ ] `CHAT-066` read-only, fixture: open existing table reference pane. Drive reference card button `Customer renewals` from reply, or inline mention. Observe lazy body. Evidence `src/shared/console/chat/pane/index.tsx`, `src/landing/demo/pages/chat/pane/index.tsx`.
+- [ ] `CHAT-067` read-only, fixture: close reference pane via `Close pane` and preserve chat scroll. Mobile is full-screen Sheet with scroll lock.
+- [ ] `CHAT-068` read-only, fixture: reopen previously dismissed pane by clicking same reference card.
+- [ ] `CHAT-069` read-only, fixture: pin preview tab. Drive `Pin Customer renewals` or double-click reference card.
+- [ ] `CHAT-070` read-only, fixture: unpin preview tab. Drive `Unpin Customer renewals`.
+- [ ] `CHAT-071` read-only, fixture: open tab context menu by right-clicking tab in `Open resources` tablist.
+- [ ] `CHAT-072` read-only, fixture: close tab context menu with Escape.
+- [ ] `CHAT-073` read-only, fixture: switch between pinned resource tabs, retaining chosen content. Requires multiple referenced resources, reachable by sending text containing valid resource tokens.
+- [ ] `CHAT-074` read-only, fixture: close active resource tab and inspect adjacent tab activation.
+- [ ] `CHAT-075` read-only, fixture: close inactive resource tab and inspect active body remains stable.
+- [ ] `CHAT-076` read-only, fixture: use tab menu Close others from multi-tab state.
+- [ ] `CHAT-077` read-only, fixture: disable automatic resource opening via context menu `Open new resources automatically`.
+- [ ] `CHAT-078` read-only, fixture: enable automatic resource opening via same menu.
+- [ ] `CHAT-079` mutating, fixture: complete streamed reply with first new job resource and observe automatic desktop pane opening plus one-time hint. Mobile intentionally suppresses automatic Sheet. Evidence `src/shared/console/chat/pane/auto.ts`, `src/shared/console/chat/pane/hint.tsx`.
+- [ ] `CHAT-080` read-only, fixture: dismiss automatic-pane hint with `Keep this`.. Visible widths: 1440
+- [ ] `CHAT-081` read-only, fixture: dismiss automatic-pane hint with Open manually.. Visible widths: 1440
+- [ ] `CHAT-082` read-only, fixture: hover/focus pane header page link. Observe arrow width/margin animation. Evidence `src/shared/console/chat/pane/header.tsx`.
+- [ ] `CHAT-083` read-only, fixture: navigate from pane header to resource page.
+- [ ] `CHAT-084` read-only, fixture: resize desktop pane with pointer and inspect no drift after drag release. Direct dragging is intentional.. Visible widths: 1440
+- [ ] `CHAT-085` read-only, fixture: questionnaire first question to next with answer selected. Drive radio `Yes, post it`, Next. Evidence `src/shared/console/chat/thread/question.tsx`, `src/components/ui/questionnaire`.
+- [ ] `CHAT-086` read-only, fixture: questionnaire second question back to previous.
+- [ ] `CHAT-087` read-only, fixture: questionnaire next without required answer to show validation.
+- [ ] `CHAT-088` read-only, fixture: choose valid answer to clear validation, including freeform `Your own answer` when first question is active.
+- [ ] `CHAT-089` read-only, fixture: navigate second to third question.
+- [ ] `CHAT-090` mutating, fixture: submit Answer on last question, replacing active questionnaire with complete answered summary and author while next run starts.
+- [ ] `CHAT-091` read-only, fixture: open chat title menu and dismiss. Share/move dialogs use generic material controls; lead should assign their contents to shared-dialog owner. Evidence `src/landing/demo/pages/chat/filing.tsx`, `src/shared/console/chat/menu.tsx`.
+- [ ] `CHAT-092` read-only, fixture: return OpenAI submenu to parent menu.
+- [ ] `CHAT-093` read-only, fixture: return Anthropic submenu to parent menu.
+- [ ] `CHAT-094` read-only, fixture: return Reasoning submenu to parent menu.
+- [ ] `CHAT-095` mutating, fixture: restore original model tier selection after CHAT-043.
+- [ ] `CHAT-096` mutating, fixture: restore original model and reasoning effort after CHAT-044.
+- [ ] `CHAT-097` read-only, fixture: switch back to previous pinned resource tab.
+- [ ] `CHAT-098` read-only, fixture: use tab menu Close to the left from reset multi-tab state.
+- [ ] `CHAT-099` read-only, fixture: use tab menu Close to the right from reset multi-tab state.
+- [ ] `CHAT-100` read-only, fixture: use tab menu Close all from reset multi-tab state.
+- [ ] `CHAT-101` read-only, fixture: withdraw hover/focus from pane header page link.
+- [ ] `CHAT-102` read-only, fixture: return from pane header's resource page to conversation via console navigation. Mobile fixture intentionally hides sidebar navigation in src/landing/demo/console.tsx; live mobile route navigation belongs to shell coverage.. Visible widths: 1440
+- [ ] `CHAT-103` read-only, fixture: navigate third questionnaire question back to second.
+- [ ] `CHAT-104` read-only, fixture: open one-time pane hint information popover via `About resources opening beside the chat`.. Visible widths: 1440
+- [ ] `CHAT-105` read-only, fixture: close one-time pane hint information popover.. Visible widths: 1440
+- [ ] `FILE-001` read-only, fixture: Files list to markdown editor, including lazy FilePage, text fetch, CodeMirror module, editor effect, and language arrival. Drive `Release notes 2.14.md`. Evidence `src/shared/console/files/editor/section.tsx`, `src/shared/console/mirror/view.tsx`.
+- [ ] `FILE-002` read-only, fixture: return markdown editor to Files list.
+- [ ] `FILE-003` mutating, fixture: edit markdown and blur, observing debounced pending/saving/error-or-success/idle breadcrumb icon lifecycle. Drive `.cm-content[contenteditable=true]`. Demo resolves saves immediately, so production pending/error need controlled fixture. Evidence `src/shared/console/files/editor/autosave.ts`.
+- [ ] `FILE-004` read-only, fixture: Files list to PNG viewer cold load, image dimensions and dock enabling. Drive `Onboarding flow.png`. Evidence `src/shared/console/files/viewer/section.tsx`, `src/shared/console/files/viewer/frame.tsx`.
+- [ ] `FILE-005` read-only, fixture: return PNG viewer to Files list.
+- [ ] `FILE-006` read-only, fixture: zoom PNG in using `Zoom in` and inspect after action.
+- [ ] `FILE-007` read-only, fixture: zoom PNG out using `Zoom out`.
+- [ ] `FILE-008` read-only, fixture: zoom PNG then reset with `Fit to view`.
+- [ ] `FILE-009` read-only, fixture: double-click image to zoom.
+- [ ] `FILE-010` read-only, fixture: pan zoomed image and inspect after pointer release. Direct transform motion is intentional.
+- [ ] `FILE-011` read-only, fixture: hover/focus file navigation dock to expand image tools.
+- [ ] `FILE-012` read-only, fixture: leave dock to collapse tools. Evidence `src/shared/console/files/dock.tsx`.
+- [ ] `FILE-013` read-only, fixture: show zoom and file navigation tooltips by hover/focus.
+- [ ] `FILE-014` read-only, fixture: hide those tooltips.
+- [ ] `FILE-015` read-only, fixture: Files list to PDF iframe, including blob fetch and viewer ready transition. Drive `Launch brief.pdf`.
+- [ ] `FILE-016` read-only, fixture: return PDF to Files list.
+- [ ] `FILE-017` read-only, fixture: Files list to unsupported XLSX download fallback. Drive `Q3 forecast.xlsx`.
+- [ ] `FILE-018` read-only, fixture: return XLSX fallback to Files list.
+- [ ] `FILE-019` read-only, fixture: next sibling file via `Next file` or ArrowRight, including preloaded-cache behavior.
+- [ ] `FILE-020` read-only, fixture: previous sibling file via `Previous file` or ArrowLeft. Arrow keys in CodeMirror intentionally edit caret instead.
+- [ ] `FILE-021` read-only, fixture: file page Ask Jori into chat home with context chip.
+- [ ] `FILE-022` read-only, fixture: clear context via `Remove <file name>`, removing context addon from composer.
+- [ ] `FILE-023` read-only, fixture: file title menu open and close; copy text loaded state and tooltip/copy lifecycle. Generic edit/share/move/delete dialogs belong to shared-dialog slice.
+- [ ] `FILE-024` read-only, fixture: double-click zoomed image to reset.
+- [ ] `CHAT-G01` read-only, app: authenticated live conversation loading to ready, unauthorized, or not_found. `src/console/chat/thread.tsx` gates the thread on `api.conversations.console.live`; demo missing conversation returns null instead.
+- [ ] `CHAT-G02` read-only, app: Live conversation first-page loading resolves to existing hello turn. Pagination variant unavailable because this conversation has one turn.
+- [ ] `CHAT-G03` read-only, app: Live conversation resource-name resolution; existing hello conversation has no resource reference. Verify initial rendering and record absent card variant.. Unavailable: Authorized hello conversation contains no resource references; demo resolver is synchronous. Late resolver replacement still needs a controlled query fixture.
+- [ ] `CHAT-G04` read-only, app: available model list loading/unavailable to composer enabled, reason removed, hints restored, model picker enabled. `src/console/chat/models.ts`, `src/console/chat/thread.tsx`; demo always has full catalog.
+- [ ] `CHAT-G05` mutating, fixture: send promise pending to resolve and pending to reject with draft kept and error toast. `src/shared/console/chat/composer/input.ts`, `src/console/chat/send.ts`; demo send is synchronous.. Unavailable: Demo onSend returns synchronously. Pending-resolve/reject requires controlled promise fixture; live chat writes are outside this slice authorization.
+- [ ] `CHAT-G06` read-only, fixture: live progress query loading/empty to ActivityTimeline and late approval/offer callouts. `src/console/chat/progress.tsx`; demo chat has synchronous three-row log with no requests.. Unavailable: Demo chat progress is static without approval/offer queries; authenticated account has no live run. Shared Activity request variants are inventoried by other owner.
+- [ ] `CHAT-G07` read-only, fixture: automatic reasoning tail collapse when text first starts; completed draft replaced by settled message with reasoning/Working removed. Demo stream covers this within CHAT-049/050 but action-time segmentation must retain every occurrence.
+- [ ] `CHAT-G08` read-only, fixture: condensed-context notice arrives and run failed/error notice replaces draft. `src/shared/console/chat/thread/notice.tsx`; only stopped notice is reachable in demo.. Unavailable: Initial demo has no condensed or failed conversation state; only stopped state is driven by CHAT-057.
+- [ ] `CHAT-G09` read-only, app: Live chat home recent loading placeholder resolves to the authorized account recent list
+- [ ] `CHAT-G10` read-only, fixture: code fence plaintext fallback to lazy highlighted spans, streaming incomplete fence to completed fence. `src/shared/console/markdown/highlight.tsx`, `parse.ts`. Demo fixed reply has no fence but echoes supplied text inside its markdown reply, so send a multiline fenced code input to exercise it.
+- [ ] `CHAT-G11` read-only, fixture: wide markdown table streaming header/body and horizontal scrollbar. Populated reply has full table; streamed reply can echo markdown input. Markdown image tokens become links and never fetch media, per `src/shared/console/markdown/inline.tsx`.
+- [ ] `CHAT-G12` mutating, fixture: Open existing run in resource pane, replacing lazy body placeholder with populated execution detail
+- [ ] `CHAT-G13` mutating, fixture: Expand grouped Sent replies activity inside the run resource pane
+- [ ] `CHAT-G14` mutating, fixture: Approve pending request in the run resource pane using isolated demo callback
+- [ ] `FILE-G01` read-only, fixture: HTML preview/code view swap in both directions. `src/shared/console/files/viewer/html.tsx`; no HTML demo fixture.. Unavailable: Initial demo file catalog contains markdown, PDF, XLSX and PNG only, no HTML file or file upload action.
+- [ ] `FILE-G02` read-only, fixture: audio/video media metadata and playback readiness, pause/play and dock behavior. `src/shared/console/files/viewer/section.tsx`; no audio/video demo fixture.. Unavailable: Initial demo file catalog contains no audio/video file or file upload action.
+- [ ] `FILE-G03` read-only, fixture: PNG viewer pending load resolves to preview error in the reserved viewport after a test-page asset request failure
+- [ ] `FILE-G04` read-only, fixture: oversized text or missing URL download fallback; file authorized/missing/unauthorized data resolution. `src/shared/console/files/body.tsx`, `src/console/files/view.tsx`; no such initial demo fixture.. Unavailable: Initial demo file catalog contains no oversized text or missing URL; authenticated account file data is not represented in this slice.
+- [ ] `CHAT-G15` read-only, app: Load earlier messages and preserve position across prepended history. Unavailable: Authorized hello conversation has no earlier history page; demo hard-codes hasMore=false. Existing scroll tests protect prepend behavior but are not browser evidence.
+
+### controls
+
+- [ ] `C001-forward` read-only, fixture: tables list to detail
+- [ ] `C001-return` read-only, fixture: tables detail to list
+- [ ] `C006-tables-hover` read-only, fixture: tables sort header hover
+- [ ] `C006-tables-blur` read-only, fixture: tables sort header pointer leave
+- [ ] `C007-asc` read-only, fixture: tables sort Name asc
+- [ ] `C007-desc` read-only, fixture: tables sort Name desc
+- [ ] `C007-reset` read-only, fixture: tables sort Name reset
+- [ ] `C012-owner-open` read-only, fixture: tables Owner facet open. Visible widths: 1440
+- [ ] `C012-owner-close` read-only, fixture: tables Owner facet close. Visible widths: 1440
+- [ ] `C012-empty` read-only, fixture: tables Owner facet no matches. Visible widths: 1440
+- [ ] `C012-clear` read-only, fixture: tables Owner facet clear selection. Visible widths: 1440
+- [ ] `C012-all` read-only, fixture: tables Owner facet restore All. Visible widths: 1440
+- [ ] `C020-one` read-only, fixture: tables select one row
+- [ ] `C020-all` read-only, fixture: tables select all rows
+- [ ] `C020-clear` read-only, fixture: tables clear row selection
+- [ ] `C035-menu-open` read-only, fixture: tables row menu open
+- [ ] `C035-menu-close` read-only, fixture: tables row menu close
+- [ ] `C035-edit-open` read-only, fixture: Edit table open
+- [ ] `C035-edit-close` read-only, fixture: Edit table close
+- [ ] `C049-tables-open` read-only, fixture: tables Visibility dialog open
+- [ ] `C049-tables-close` read-only, fixture: tables Visibility dialog close
+- [ ] `C052-tables-open` read-only, fixture: tables Move dialog open
+- [ ] `C052-tables-close` read-only, fixture: tables Move dialog close
+- [ ] `C002-forward` read-only, fixture: stores list to detail
+- [ ] `C002-return` read-only, fixture: stores detail to list
+- [ ] `C006-stores-hover` read-only, fixture: stores sort header hover
+- [ ] `C006-stores-blur` read-only, fixture: stores sort header pointer leave
+- [ ] `C008-asc` read-only, fixture: stores sort Name asc
+- [ ] `C008-desc` read-only, fixture: stores sort Name desc
+- [ ] `C008-reset` read-only, fixture: stores sort Name reset
+- [ ] `C013-owner-open` read-only, fixture: stores Owner facet open. Visible widths: 1440
+- [ ] `C013-owner-close` read-only, fixture: stores Owner facet close. Visible widths: 1440
+- [ ] `C013-empty` read-only, fixture: stores Owner facet no matches. Visible widths: 1440
+- [ ] `C013-clear` read-only, fixture: stores Owner facet clear selection. Visible widths: 1440
+- [ ] `C013-all` read-only, fixture: stores Owner facet restore All. Visible widths: 1440
+- [ ] `C021-one` read-only, fixture: stores select one row
+- [ ] `C021-all` read-only, fixture: stores select all rows
+- [ ] `C021-clear` read-only, fixture: stores clear row selection
+- [ ] `C036-menu-open` read-only, fixture: stores row menu open
+- [ ] `C036-menu-close` read-only, fixture: stores row menu close
+- [ ] `C036-edit-open` read-only, fixture: Edit store open
+- [ ] `C036-edit-close` read-only, fixture: Edit store close
+- [ ] `C049-stores-open` read-only, fixture: stores Visibility dialog open
+- [ ] `C049-stores-close` read-only, fixture: stores Visibility dialog close
+- [ ] `C052-stores-open` read-only, fixture: stores Move dialog open
+- [ ] `C052-stores-close` read-only, fixture: stores Move dialog close
+- [ ] `C003-forward` read-only, fixture: files list to detail
+- [ ] `C003-return` read-only, fixture: files detail to list
+- [ ] `C006-files-hover` read-only, fixture: files sort header hover
+- [ ] `C006-files-blur` read-only, fixture: files sort header pointer leave
+- [ ] `C009-asc` read-only, fixture: files sort Name asc
+- [ ] `C009-desc` read-only, fixture: files sort Name desc
+- [ ] `C009-reset` read-only, fixture: files sort Name reset
+- [ ] `C014-owner-open` read-only, fixture: files Owner facet open. Visible widths: 1440
+- [ ] `C014-owner-close` read-only, fixture: files Owner facet close. Visible widths: 1440
+- [ ] `C014-empty` read-only, fixture: files Owner facet no matches. Visible widths: 1440
+- [ ] `C014-clear` read-only, fixture: files Owner facet clear selection. Visible widths: 1440
+- [ ] `C014-all` read-only, fixture: files Owner facet restore All. Visible widths: 1440
+- [ ] `C022-one` read-only, fixture: files select one row
+- [ ] `C022-all` read-only, fixture: files select all rows
+- [ ] `C022-clear` read-only, fixture: files clear row selection
+- [ ] `C037-menu-open` read-only, fixture: files row menu open
+- [ ] `C037-menu-close` read-only, fixture: files row menu close
+- [ ] `C037-edit-open` read-only, fixture: Edit file open
+- [ ] `C037-edit-close` read-only, fixture: Edit file close
+- [ ] `C049-files-open` read-only, fixture: files Visibility dialog open
+- [ ] `C049-files-close` read-only, fixture: files Visibility dialog close
+- [ ] `C052-files-open` read-only, fixture: files Move dialog open
+- [ ] `C052-files-close` read-only, fixture: files Move dialog close
+- [ ] `C004-forward` read-only, fixture: jobs list to detail
+- [ ] `C004-return` read-only, fixture: jobs detail to list
+- [ ] `C006-jobs-hover` read-only, fixture: jobs sort header hover
+- [ ] `C006-jobs-blur` read-only, fixture: jobs sort header pointer leave
+- [ ] `C010-asc` read-only, fixture: jobs sort Name asc
+- [ ] `C010-desc` read-only, fixture: jobs sort Name desc
+- [ ] `C010-reset` read-only, fixture: jobs sort Name reset
+- [ ] `C015-owner-open` read-only, fixture: jobs Owner facet open. Visible widths: 1440
+- [ ] `C015-owner-close` read-only, fixture: jobs Owner facet close. Visible widths: 1440
+- [ ] `C015-empty` read-only, fixture: jobs Owner facet no matches. Visible widths: 1440
+- [ ] `C015-clear` read-only, fixture: jobs Owner facet clear selection. Visible widths: 1440
+- [ ] `C015-all` read-only, fixture: jobs Owner facet restore All. Visible widths: 1440
+- [ ] `C023-one` read-only, fixture: jobs select one row
+- [ ] `C023-all` read-only, fixture: jobs select all rows
+- [ ] `C023-clear` read-only, fixture: jobs clear row selection
+- [ ] `C106-menu-open` read-only, fixture: jobs row menu open
+- [ ] `C106-menu-close` read-only, fixture: jobs row menu close
+- [ ] `C106-edit-open` read-only, fixture: Edit job open
+- [ ] `C106-edit-close` read-only, fixture: Edit job close
+- [ ] `C049-jobs-open` read-only, fixture: jobs Visibility dialog open
+- [ ] `C049-jobs-close` read-only, fixture: jobs Visibility dialog close
+- [ ] `C052-jobs-open` read-only, fixture: jobs Move dialog open
+- [ ] `C052-jobs-close` read-only, fixture: jobs Move dialog close
+- [ ] `C017-matches` read-only, fixture: tables search matching rows. Visible widths: 1440
+- [ ] `C017-empty` read-only, fixture: tables search no matches. Visible widths: 1440
+- [ ] `C017-clear` read-only, fixture: tables search clear. Visible widths: 1440
+- [ ] `C018-matches` read-only, fixture: stores search matching rows. Visible widths: 1440
+- [ ] `C018-empty` read-only, fixture: stores search no matches. Visible widths: 1440
+- [ ] `C018-clear` read-only, fixture: stores search clear. Visible widths: 1440
+- [ ] `C019-matches` read-only, fixture: jobs search matching rows. Visible widths: 1440
+- [ ] `C019-empty` read-only, fixture: jobs search no matches. Visible widths: 1440
+- [ ] `C019-clear` read-only, fixture: jobs search clear. Visible widths: 1440
+- [ ] `C040-open` read-only, fixture: Create table dialog open
+- [ ] `C040-close` read-only, fixture: Create table dialog close
+- [ ] `C042-table-error` read-only, fixture: table empty submit validation
+- [ ] `C042-table-clear` read-only, fixture: table clear name validation
+- [ ] `C043-table-open` read-only, fixture: Advanced settings table open
+- [ ] `C043-table-close` read-only, fixture: Advanced settings table close
+- [ ] `C051-table` mutating, fixture: Create table commit
+- [ ] `C041-open` read-only, fixture: Create store dialog open
+- [ ] `C041-close` read-only, fixture: Create store dialog close
+- [ ] `C042-store-error` read-only, fixture: store empty submit validation
+- [ ] `C042-store-clear` read-only, fixture: store clear name validation
+- [ ] `C043-store-open` read-only, fixture: Advanced settings store open
+- [ ] `C043-store-close` read-only, fixture: Advanced settings store close
+- [ ] `C051-store` mutating, fixture: Create store commit
+- [ ] `C044-folder-open` read-only, fixture: Create material Folder picker open
+- [ ] `C044-folder-close` read-only, fixture: Create material Folder picker close
+- [ ] `C044-select` read-only, fixture: Select nested folder
+- [ ] `C045-mode-open` read-only, fixture: Visibility mode select open
+- [ ] `C045-mode-close` read-only, fixture: Visibility mode select close
+- [ ] `C045-people` read-only, fixture: Visibility Specific people
+- [ ] `C045-people-return` read-only, fixture: Visibility Specific people to organization
+- [ ] `C045-teams` read-only, fixture: Visibility Specific teams
+- [ ] `C045-teams-return` read-only, fixture: Visibility Specific teams to organization
+- [ ] `C045-private` read-only, fixture: Visibility Only me
+- [ ] `C045-private-return` read-only, fixture: Visibility Only me to organization
+- [ ] `C046-picker-open` read-only, fixture: Choose people picker open
+- [ ] `C046-picker-close` read-only, fixture: Choose people picker close
+- [ ] `C046-empty` read-only, fixture: Choose people no search matches
+- [ ] `C046-select` read-only, fixture: Choose people select first option
+- [ ] `C046-deselect` read-only, fixture: Choose people deselect first option
+- [ ] `C047-picker-open` read-only, fixture: Choose teams picker open
+- [ ] `C047-picker-close` read-only, fixture: Choose teams picker close
+- [ ] `C047-empty` read-only, fixture: Choose teams no search matches
+- [ ] `C047-select` read-only, fixture: Choose teams select first option
+- [ ] `C047-deselect` read-only, fixture: Choose teams deselect first option
+- [ ] `C048-help-show` read-only, fixture: Visibility help tooltip open
+- [ ] `C048-help-hide` read-only, fixture: Visibility help tooltip close
+- [ ] `C059-grid` read-only, fixture: Grid initial virtual viewport
+- [ ] `C060-hover` read-only, fixture: Grid gutter hover
+- [ ] `C061-edit` read-only, fixture: Table cell starts editing
+- [ ] `C061-cancel` read-only, fixture: Table cell cancels editing
+- [ ] `C062-save` mutating, fixture: Table cell saves changed long text
+- [ ] `C062-tab` read-only, fixture: Table cell advances to next column
+- [ ] `C062-shifttab` read-only, fixture: Table cell returns to prior column
+- [ ] `C064-check` mutating, fixture: Table checkbox enable
+- [ ] `C064-uncheck` mutating, fixture: Table checkbox disable
+- [ ] `C068-add-open` read-only, fixture: Add row dialog open
+- [ ] `C068-add-close` read-only, fixture: Add row dialog close
+- [ ] `C069-add` mutating, fixture: Add row commit
+- [ ] `C073-new-open` read-only, fixture: New column sheet open
+- [ ] `C073-new-close` read-only, fixture: New column sheet close
+- [ ] `C074-details-open` read-only, fixture: Existing column details sheet open
+- [ ] `C074-details-close` read-only, fixture: Existing column details sheet close
+- [ ] `C073-type-open` read-only, fixture: Column type select open
+- [ ] `C073-type-close` read-only, fixture: Column type select close
+- [ ] `C073-type-number` read-only, fixture: New column type changes
+- [ ] `C074-required` read-only, fixture: Existing column Required toggles
+- [ ] `C074-delete-open` read-only, fixture: Column deletion confirmation open
+- [ ] `C074-delete-close` read-only, fixture: Column deletion confirmation close
+- [ ] `C075-duplicate` read-only, fixture: Duplicate column validation
+- [ ] `C076-create` mutating, fixture: Add column commit
+- [ ] `C076-rename` mutating, fixture: Rename column commit
+- [ ] `C071-bulk-open` read-only, fixture: Bulk row delete confirmation open
+- [ ] `C071-bulk-close` read-only, fixture: Bulk row delete confirmation close
+- [ ] `C072-delete` mutating, fixture: Delete selected rows commit
+- [ ] `C079-code` read-only, fixture: Store Form to Code lazy editor
+- [ ] `C079-form` read-only, fixture: Store Code to Form
+- [ ] `C080-scalar` mutating, fixture: Store scalar autosave
+- [ ] `C080-check` mutating, fixture: Store boolean autosave
+- [ ] `C081-empty` read-only, fixture: Store required number validation
+- [ ] `C081-clear` mutating, fixture: Store required number validation clears
+- [ ] `C082-unset` mutating, fixture: Store unset optional array
+- [ ] `C082-add` mutating, fixture: Store add optional array
+- [ ] `C083-add` mutating, fixture: Store append array item
+- [ ] `C083-remove` mutating, fixture: Store remove array item
+- [ ] `C085-schema-open` read-only, fixture: Store schema dialog open
+- [ ] `C085-schema-close` read-only, fixture: Store schema dialog close
+- [ ] `C086-add` read-only, fixture: Schema adds field
+- [ ] `C086-remove` read-only, fixture: Schema removes field
+- [ ] `C087-type-open` read-only, fixture: Schema Field type select open
+- [ ] `C087-type-close` read-only, fixture: Schema Field type select close
+- [ ] `C087-object` read-only, fixture: Schema scalar to object inserts nested controls
+- [ ] `C087-required` read-only, fixture: Schema required toggle
+- [ ] `C088-error` read-only, fixture: Schema blank field validation
+- [ ] `C088-clear` read-only, fixture: Schema validation clears on typing
+- [ ] `C089-remove` mutating, fixture: Remove schema commit and read-only value
+- [ ] `C092-copy` read-only, fixture: Store copy value toast
+- [ ] `C104-filter-open` read-only, fixture: Jobs filter panel open. Visible widths: 1440
+- [ ] `C104-filter-close` read-only, fixture: Jobs filter panel close. Visible widths: 1440
+- [ ] `C105-paused` read-only, fixture: Jobs status Paused filter. Visible widths: 1440
+- [ ] `C105-reset` read-only, fixture: Jobs filter reset. Visible widths: 1440
+- [ ] `C106-new-open` read-only, fixture: New job editor open
+- [ ] `C106-new-close` read-only, fixture: New job editor close
+- [ ] `C107-error` read-only, fixture: New job validation
+- [ ] `C108-advanced-open` read-only, fixture: Job advanced settings open
+- [ ] `C108-advanced-close` read-only, fixture: Job advanced settings close
+- [ ] `C109-one-time` read-only, fixture: Job schedule Recurring to One-time
+- [ ] `C109-one-time-back` read-only, fixture: Job schedule One-time to Recurring
+- [ ] `C109-event` read-only, fixture: Job schedule Recurring to Event
+- [ ] `C109-event-back` read-only, fixture: Job schedule Event to Recurring
+- [ ] `C110-daily` read-only, fixture: Job repeat Daily
+- [ ] `C110-weekly` read-only, fixture: Job repeat Weekly
+- [ ] `C110-monthly` read-only, fixture: Job repeat Monthly
+- [ ] `C110-custom` read-only, fixture: Job repeat Custom
+- [ ] `C111-error` read-only, fixture: Custom cron validation
+- [ ] `C111-clear` read-only, fixture: Custom cron validation clears
+- [ ] `C112-date-open` read-only, fixture: One-time calendar open
+- [ ] `C112-date-close` read-only, fixture: One-time calendar close
+- [ ] `C114-web-enable` read-only, fixture: Job web search enable
+- [ ] `C114-web-disable` read-only, fixture: Job web search disable
+- [ ] `C117-pause` mutating, fixture: Pause active job
+- [ ] `C117-resume` mutating, fixture: Resume paused job
+- [ ] `C118-delete-open` read-only, fixture: Delete job confirmation open
+- [ ] `C118-delete-close` read-only, fixture: Delete job confirmation close
+- [ ] `C121-finance-open` read-only, fixture: Sidebar Finance folder branch open. Visible widths: 1440
+- [ ] `C121-finance-close` read-only, fixture: Sidebar Finance folder branch close. Visible widths: 1440
+- [ ] `C122-new-open` read-only, fixture: Folder New resource menu open
+- [ ] `C122-new-close` read-only, fixture: Folder New resource menu close
+- [ ] `C123-new-open` read-only, fixture: New folder dialog open
+- [ ] `C123-new-close` read-only, fixture: New folder dialog close
+- [ ] `C123-error` read-only, fixture: New folder validation
+- [ ] `C123-clear` read-only, fixture: New folder validation clears
+- [ ] `C124-create` mutating, fixture: Create folder commit
+- [ ] `C125-menu-open` read-only, fixture: Folder title menu open
+- [ ] `C125-menu-close` read-only, fixture: Folder title menu close
+- [ ] `C126-delete-open` read-only, fixture: Delete populated folder confirmation open
+- [ ] `C126-delete-close` read-only, fixture: Delete populated folder confirmation close
+- [ ] `C126-contents` read-only, fixture: Folder deletion contents switch
+- [ ] `C126-contents-back` read-only, fixture: Folder deletion contents switch returns
+- [ ] `C130-hover` read-only, fixture: Usage hint hover. Visible widths: 1440
+- [ ] `C130-leave` read-only, fixture: Usage hint pointer leave. Visible widths: 1440
+- [ ] `C131-window-open` read-only, fixture: Usage window select open
+- [ ] `C131-window-close` read-only, fixture: Usage window select close
+- [ ] `C031` read-only, app: List initial loading → rows, empty, unauthorized, error. Demo passes isLoading=false and fixture arrays.. Unavailable: Live populated list loads are covered by explicit app-load cases; empty/unauthorized/error results require isolated response states not available in this account.
+- [ ] `C032` read-only, app: List next page → loading spinner appended to Next label → new rows/count → previous page; preserve scroll anchor. Demo initial fixtures fit one page; create enough local items for D paging if needed.. Unavailable: Initial fixtures and live account lists do not fill a page. Requires enough isolated records to activate pagination; no shared backend seeding performed.
+- [ ] `C033` read-only, app: Refetch while list has visible rows → updated/removed rows and footer count, including selected row disappearing.. Unavailable: Requires concurrent backend writes/removals while subscribed; shared account is inspected read-only.
+- [ ] `C054` read-only, app: Move prompt asynchronous visibility consequences → confirmation → cancel; `src/console/folders/move/{prompt,confirm}.tsx`.. Unavailable: Requires isolated resources with conflicting inherited grants and backend-derived visibility impact; shared account moves are not submitted.
+- [ ] `C056` mutating, app: Table/store archive → archived menu → Restore pending → restored row; archived permanent delete → pending → removed.. Unavailable: Archived fixture state does not retain restore/permanent-delete actions; requires isolated backend archived material and mutation permission.
+- [ ] `C057` read-only, app: Create/edit/visibility/move/delete pending spinner inserted beside label → success/error/rest; failure toast appears → dismisses.. Unavailable: Fixture operations resolve synchronously; sustained save/error transitions require an isolated backend or deterministic response fixture.
+- [ ] `C077` read-only, app: Grid initial load → rows; load-more band → new virtual rows → New row affordance; deleting inspected column concurrently closes sheet.. Unavailable: Initial and load-more grid queries need enough backend rows beyond loaded fixture page; concurrent column removal requires isolated writes.
+- [ ] `C078` read-only, app: Cell/row/column write failure and version conflict → error feedback → recovery without losing viewport or focus.. Unavailable: Version conflicts and write failures require isolated conflicting or faulted backend writes.
+- [ ] `C084` read-only, fixture: Enum dropdown open → close; select → unset or previous choice where enum schema exists. Fixture needs schema addition first.. Unavailable: No enum value schema exists in demo fixtures. Schema builder intentionally cannot author enums; requires API-provisioned isolated store.
+- [ ] `C091` read-only, app: Unsupported schema → read-only JSON schema with explanation; archived store → read-only value; write conflict → upstream reseed → toast; subscription refetch while editing.. Unavailable: Unsupported/archived/upstream-conflicted schemas are absent from supplied fixtures; subscription conflicts require isolated backend writes.
+- [ ] `C099` read-only, app: File fetch error → download fallback; oversized text fallback; media error notice; dynamic signed URL refresh must retain cached displayed URL.. Unavailable: Fixture assets succeed and are small; error/oversize/signed-URL refresh states require representative fixtures or controlled endpoint responses.
+- [ ] `C100` read-only, app: HTML Preview ↔ Code and toolbar/dock changes; lazy CodeMirror mount; reload preview after save.. Unavailable: No HTML file exists in supplied demo assets or inspected account; requires isolated HTML upload.
+- [ ] `C101` read-only, app: Audio/video metadata loading → player, playback controls show/hide, keyboard Space play/pause; media geometry.. Unavailable: No audio/video media exists in supplied demo assets; requires representative isolated uploads.
+- [ ] `C103` mutating, app: File upload dialog open → drag/drop active → file queue → uploading → done/error; retry/remove queue entries → close; full/small/many-file lists.. Unavailable: Demo upload action only emits toast; live uploads would change shared account and require isolated file fixtures.
+- [ ] `C115` read-only, app: Tool schema warm fetch → pending icon → schema dialog; Request → Response → Request; close, including nested dialogs and focus return. Demo lacks ToolReferenceContext host.. Unavailable: Demo lacks ToolReferenceContext host. Requires live authorized tool with schema and nested reference host, then read-only schema request.
+- [ ] `C119` read-only, app: Event integration select → connected trigger choices → resource/parameter options loading → results/error → query clear; trigger scope switches and matching fields add/remove.. Unavailable: Current live integrations are disconnected or expired; valid connected event integration is required for resource/parameter choices.
+- [ ] `C120` read-only, app: Job permissions and skills async resolution update instruction pills, tool counts, scope issues and editor controls; pending submission failure → error → correction.. Unavailable: Demo permissions resolve synchronously. Live pending skill resolution and failed save require isolated backend state.
+- [ ] `C128` read-only, app: Delete impact loading sentence → counts/name-confirmation fields; concurrent deleted folder → already gone state.. Unavailable: Demo delete impact is synchronous; concurrent folder deletion requires isolated backend writes.
+- [ ] `C133` read-only, app: Usage loading skeleton stats/spinner → chart/data or empty; window refetch → replacement; usage hint undefined → amount arrival.. Unavailable: Demo usage is already resolved; live app usage-load cases cover available query state. Empty usage/window refresh requires account with corresponding data.
+- [ ] `C137` mutating, app: Account name edit → pending → saved; avatar upload/remove → pending → image/fallback; email invalid → error → corrected submit → pending/success toast.. Unavailable: Account is live and shared; profile/avatar/email submissions would mutate it. Password/email form is not present for current Google account.
+- [ ] `C138` read-only, app: Security linked-accounts pending → set-password or change-password form; password reveal on → off; invalid/valid password and confirmation errors appear/clear.. Unavailable: Current Google account Security screen exposes active sessions only, with no password/linked-account form.
+- [ ] `C139` mutating, app: Change password/request reset → pending → success/error; active sessions loading skeletons → devices; revoke other session → spinner → row removal.. Unavailable: Active sessions load covered by Security open; revoke/password/reset commits would mutate shared identity.
+- [ ] `C141` mutating, app: Save organization profile/timezone/logo → pending → success/error → resolved label; name/slug long value and restore.. Unavailable: Organization profile/logo/timezone writes would alter shared Vedin Labs state; draft edit/open controls are covered separately.
+- [ ] `C143` read-only, app: Leave/Delete organization alert open → cancel; required name/password validation and pending control sizes. Destructive confirmation requires isolated disposable organization.. Unavailable: Live organization General renders Danger zone heading without Leave/Delete action buttons after identity/profile load; confirmation controls are unavailable for current account. Destructive submission requires disposable organization.
+- [ ] `C146` read-only, app: Member row menu open → close; role menu open → close; Remove member alert open → Cancel; own Leave alert open → Cancel.. Unavailable: Live People table still showed membership skeleton after 15 seconds, while Invitations resolved to empty. No member row actions were exposed; row-menu/removal confirmations require resolved membership and permission controls.
+- [ ] `C147` mutating, app: Change role → spinner → label; Remove member → pending → row removal; invitation cancel → pending → row removal. Isolated local account/workspace needed.. Unavailable: Role/removal/invitation cancellation would mutate shared membership; requires disposable organization/member.
+- [ ] `C148` read-only, app: User invitations loading rows → invitations/empty; Accept/Reject pending label and avatar/organization logo arrival. Accept/Reject are mutations.. Unavailable: Current account has no pending organization invitations; accept/reject require disposable invitation.
+- [ ] `C150` mutating, app: Create/rename/delete team → pending → table row/count; Add/remove member in roster popover → count/avatar list updates; reverse where supported.. Unavailable: Current Teams is empty; create/rename/delete/roster mutations require an isolated organization.
+- [ ] `C154` read-only, app: Auto top-up switch off → on reveals amount/threshold fields → off hides; amount/threshold invalid → corrected; pending save/rejection. Real configuration commit is M and was not driven.. Unavailable: Trial organization has Auto top-up unavailable; requires subscribed disposable billing account. Save would mutate billing.
+- [ ] `C157` read-only, app: Provider Connect/Reconnect pending button text/icon → error/status; do not complete external OAuth; disconnect confirmation open → Cancel close.. Unavailable: Current cards expose Connect/Reconnect OAuth actions; initiating would start external authorization. No disconnect control until a valid connected provider exists.
+- [ ] `C158` mutating, app: Provider disconnect/reconnect callback status → card controls/counts/tool section update; isolated dev provider only.. Unavailable: Provider callback/disconnect changes require isolated active provider connection.
+- [ ] `C161` read-only, app: Integration option picker dialog/popover open → close; search → loading → options/no matches/error → query clear; selected option/chip then removal.. Unavailable: No active provider connection supplies integration option choices in current account.
+- [ ] `C162` read-only, app: Integration offer claiming → accepted/expired/error outcome; success/error toast appears → dismiss; callback loader → outcome route.. Unavailable: No pending integration offer URL/token exists in current account.
+- [ ] `C164` read-only, app: Organization onboarding welcome → website form → discovery progress → ready/error/retry; dialogs close only at allowed stages; validation issue appears/clears.. Unavailable: Existing Vedin Labs organization is already onboarded; welcome/discovery states require a new isolated organization.
+- [ ] `C167` mutating, app: Add/remove domain and timezone change → pending spinner → profile row/label; errors toast and recover.. Unavailable: Domain/timezone submissions would mutate shared organization profile; draft controls are measured separately.
+- [ ] `C168` read-only, app: Review proposed update dialog open → close; proposal sections expand → collapse; added/removed/changed field groups; Approve/Discard pending label changes are M.. Unavailable: Current profile is approved and has no proposed update to review; approval/discard requires isolated proposal.
+- [ ] `C172` mutating, app: Workstream confirm/reject/archive/reopen/restore → pending → status/action/card changes. Isolated dev workspace needed.. Unavailable: Workstream actions require suitable isolated live workstream and backend mutation authorization.
+- [ ] `C134-account-open` read-only, app: Account settings open. Visible widths: 1440
+- [ ] `C134-account-close` read-only, app: Account settings close. Visible widths: 1440
+- [ ] `C134-security` read-only, app: Account to Security. Visible widths: 1440
+- [ ] `C134-return` read-only, app: Security to Account. Visible widths: 1440
+- [ ] `C135-organization-open` read-only, app: Organization settings open. Visible widths: 1440
+- [ ] `C135-organization-close` read-only, app: Organization settings close. Visible widths: 1440
+- [ ] `C135-people` read-only, app: General to People. Visible widths: 1440
+- [ ] `C135-people-return` read-only, app: People to General. Visible widths: 1440
+- [ ] `C135-teams` read-only, app: General to Teams. Visible widths: 1440
+- [ ] `C135-teams-return` read-only, app: Teams to General. Visible widths: 1440
+- [ ] `C135-billing` read-only, app: General to Billing. Visible widths: 1440
+- [ ] `C135-billing-return` read-only, app: Billing to General. Visible widths: 1440
+- [ ] `C136-avatar` read-only, app: Account Avatar loading. Visible widths: 1440
+- [ ] `C140-general` read-only, app: Organization General loading. Visible widths: 1440
+- [ ] `C142-create-open` read-only, app: Create organization dialog open. Visible widths: 1440
+- [ ] `C142-create-close` read-only, app: Create organization dialog close. Visible widths: 1440
+- [ ] `C142-empty` read-only, app: Create organization name validation. Visible widths: 1440
+- [ ] `C144-people` read-only, app: Organization people tables loading. Visible widths: 1440
+- [ ] `C145-invite-open` read-only, app: Invite member dialog open. Visible widths: 1440
+- [ ] `C145-invite-close` read-only, app: Invite member dialog close. Visible widths: 1440
+- [ ] `C149-teams` read-only, app: Teams empty state loading. Visible widths: 1440
+- [ ] `C151-billing` read-only, app: Billing overview query resolves. Visible widths: 1440
+- [ ] `C152-plan-open` read-only, app: Choose a plan dialog open. Visible widths: 1440
+- [ ] `C152-plan-close` read-only, app: Choose a plan dialog close. Visible widths: 1440
+- [ ] `C152-annual` read-only, app: Plan monthly to annual. Visible widths: 1440
+- [ ] `C152-monthly` read-only, app: Plan annual to monthly. Visible widths: 1440
+- [ ] `C153-unavailable` read-only, app: Top-up unavailable trial toast. Visible widths: 1440
+- [ ] `C134-mobile-account` read-only, app: Mobile settings Account. Visible widths: 375
+- [ ] `C134-mobile-security` read-only, app: Mobile settings Security. Visible widths: 375
+- [ ] `C135-mobile-general` read-only, app: Mobile organization settings General. Visible widths: 375
+- [ ] `C135-mobile-people` read-only, app: Mobile organization settings People. Visible widths: 375
+- [ ] `C135-mobile-teams` read-only, app: Mobile organization settings Teams. Visible widths: 375
+- [ ] `C135-mobile-billing` read-only, app: Mobile organization settings Billing. Visible widths: 375
+- [ ] `C104-live-mobile` read-only, app: Live jobs mobile Filters sheet open. Visible widths: 375
+- [ ] `C104-live-mobile-close` read-only, app: Live jobs mobile Filters sheet close. Visible widths: 375
+- [ ] `C005-forward` read-only, fixture: Folder root to Finance
+- [ ] `C005-return` read-only, fixture: Finance folder to root
+- [ ] `C005-nested` read-only, fixture: Finance to nested Renewals
+- [ ] `C005-parent` read-only, fixture: Nested Renewals to Finance
+- [ ] `C011-sort` read-only, fixture: Folder list sort Name
+- [ ] `C016-owner-open` read-only, fixture: Folder Owner facet open. Visible widths: 1440
+- [ ] `C016-owner-close` read-only, fixture: Folder Owner facet close. Visible widths: 1440
+- [ ] `C024-select` read-only, fixture: Folder selection dock appears
+- [ ] `C024-clear` read-only, fixture: Folder selection dock clears
+- [ ] `C025-move-open` read-only, fixture: Bulk tables move dialog open
+- [ ] `C025-move-close` read-only, fixture: Bulk tables move dialog close
+- [ ] `C025-delete-open` read-only, fixture: Bulk tables Archive confirmation open
+- [ ] `C025-delete-close` read-only, fixture: Bulk tables Archive confirmation close
+- [ ] `C030-tables` mutating, fixture: Bulk tables removal commit
+- [ ] `C026-move-open` read-only, fixture: Bulk stores move dialog open
+- [ ] `C026-move-close` read-only, fixture: Bulk stores move dialog close
+- [ ] `C026-delete-open` read-only, fixture: Bulk stores Archive confirmation open
+- [ ] `C026-delete-close` read-only, fixture: Bulk stores Archive confirmation close
+- [ ] `C030-stores` mutating, fixture: Bulk stores removal commit
+- [ ] `C027-move-open` read-only, fixture: Bulk files move dialog open
+- [ ] `C027-move-close` read-only, fixture: Bulk files move dialog close
+- [ ] `C027-delete-open` read-only, fixture: Bulk files Delete confirmation open
+- [ ] `C027-delete-close` read-only, fixture: Bulk files Delete confirmation close
+- [ ] `C030-files` mutating, fixture: Bulk files removal commit
+- [ ] `C028-move-open` read-only, fixture: Bulk jobs move dialog open
+- [ ] `C028-move-close` read-only, fixture: Bulk jobs move dialog close
+- [ ] `C028-delete-open` read-only, fixture: Bulk jobs Delete confirmation open
+- [ ] `C028-delete-close` read-only, fixture: Bulk jobs Delete confirmation close
+- [ ] `C030-jobs` mutating, fixture: Bulk jobs removal commit
+- [ ] `C034-visibility` read-only, fixture: Table visibility tooltip opens
+- [ ] `C034-visibility-close` read-only, fixture: Table visibility tooltip closes
+- [ ] `C038-table-open` read-only, fixture: Table title menu open
+- [ ] `C038-table-close` read-only, fixture: Table title menu close
+- [ ] `C038-store-open` read-only, fixture: Store title menu open
+- [ ] `C038-store-close` read-only, fixture: Store title menu close
+- [ ] `C039-tables` mutating, fixture: Rename tables long name
+- [ ] `C039-stores` mutating, fixture: Rename stores long name
+- [ ] `C039-files` mutating, fixture: Rename files long name
+- [ ] `C050-save` mutating, fixture: Visibility dialog save local draft
+- [ ] `C053-table-move` mutating, fixture: Move table to another folder
+- [ ] `C055-job` mutating, fixture: Delete job commit
+- [ ] `C058-share-open` read-only, fixture: Material share links dialog open
+- [ ] `C058-share-close` read-only, fixture: Material share links dialog close
+- [ ] `C063-invalid` read-only, fixture: Table numeric cell invalid edit
+- [ ] `C065-menu-open` read-only, fixture: Table row context menu open
+- [ ] `C065-menu-close` read-only, fixture: Table row context menu close
+- [ ] `C065-edit` read-only, fixture: Table context menu to inline edit
+- [ ] `C065-cancel` read-only, fixture: Table context inline edit cancels
+- [ ] `C066-copy` read-only, fixture: Table context copy cell feedback
+- [ ] `C067-paste` read-only, fixture: Table context paste clipboard failure feedback
+- [ ] `C070-insert-above` read-only, fixture: Table context insert above dialog
+- [ ] `C070-insert-below` read-only, fixture: Table context insert below dialog
+- [ ] `C070-duplicate` mutating, fixture: Table duplicate row commit
+- [ ] `C071-row-open` read-only, fixture: Table row delete confirmation open
+- [ ] `C071-row-close` read-only, fixture: Table row delete confirmation close
+- [ ] `C072-row` mutating, fixture: Table row delete commit
+- [ ] `C093-notes` read-only, fixture: File notes async view load
+- [ ] `C093-brief` read-only, fixture: File brief async view load
+- [ ] `C093-forecast` read-only, fixture: File forecast async view load
+- [ ] `C093-onboarding` read-only, fixture: File onboarding async view load
+- [ ] `C094-next` read-only, fixture: File next sibling
+- [ ] `C094-previous` read-only, fixture: File previous sibling
+- [ ] `C094-keyboard` read-only, fixture: File next keyboard sibling
+- [ ] `C095-unfold` read-only, fixture: File dock tools unfold. Visible widths: 1440
+- [ ] `C095-fold` read-only, fixture: File dock tools fold. Visible widths: 1440
+- [ ] `C096-zoom` read-only, fixture: Image zoom in
+- [ ] `C096-fit` read-only, fixture: Image zoom returns to fit
+- [ ] `C096-double` read-only, fixture: Image doubleclick zoom
+- [ ] `C097-tooltip` read-only, fixture: Next file tooltip show
+- [ ] `C097-tooltip-close` read-only, fixture: Next file tooltip hide
+- [ ] `C098-edit` mutating, fixture: Markdown file text autosave
+- [ ] `C102-upload` read-only, fixture: Demo upload feedback toast
+- [ ] `C113-suggest` read-only, fixture: Job instructions mention suggestions
+- [ ] `C113-dismiss` read-only, fixture: Job mention suggestions dismissed
+- [ ] `C116-detail` read-only, fixture: Job detail markdown load
+- [ ] `C127-delete` mutating, fixture: Delete populated folder keeping contents
+- [ ] `C129-drag` mutating, fixture: Folder drag toward adjacent folder
+- [ ] `C132-drill` read-only, fixture: Usage drill into Finance subfolder
+- [ ] `C156-load` read-only, app: Integration provider status and logo load
+- [ ] `C156-personal` read-only, app: Organization integrations to Personal
+- [ ] `C156-return` read-only, app: Personal integrations to Organization
+- [ ] `C159-permissions-open` read-only, app: Built-in permissions collapsible open
+- [ ] `C159-permissions-close` read-only, app: Built-in permissions collapsible close
+- [ ] `C160-permission-open` read-only, app: Tool permission select open
+- [ ] `C160-permission-close` read-only, app: Tool permission select close
+- [ ] `C163-load` read-only, app: Context organization profile loads
+- [ ] `C163-workstreams` read-only, app: Context Organization to workstreams
+- [ ] `C163-workstreams-return` read-only, app: Context workstreams to Organization
+- [ ] `C163-places` read-only, app: Context Organization to places
+- [ ] `C163-places-return` read-only, app: Context places to Organization
+- [ ] `C165-edit-open` read-only, app: Organization website edit dialog open
+- [ ] `C165-edit-close` read-only, app: Organization website edit dialog close
+- [ ] `C166-source` read-only, app: Show more organization sources
+- [ ] `C166-source-return` read-only, app: Show fewer organization sources
+- [ ] `C166-domain-open` read-only, app: Add domain draft control open
+- [ ] `C166-domain-close` read-only, app: Add domain draft control close
+- [ ] `C166-timezone-open` read-only, app: Organization timezone list open
+- [ ] `C166-timezone-close` read-only, app: Organization timezone list close
+- [ ] `C166-timezone-empty` read-only, app: Timezone search no matches
+- [ ] `C170-load` read-only, app: Workstreams populated or empty list load
+- [ ] `C169-load` read-only, app: Places populated or empty list load
+- [ ] `C029-Move-open` read-only, fixture: Folder selection Move dialog open
+- [ ] `C029-Move-close` read-only, fixture: Folder selection Move dialog close
+- [ ] `C029-Delete-open` read-only, fixture: Folder selection Delete dialog open
+- [ ] `C029-Delete-close` read-only, fixture: Folder selection Delete dialog close
+- [ ] `C090-load` mutating, fixture: New unwritten store no schema state
+- [ ] `C090-open` mutating, fixture: New unwritten store Add schema open
+- [ ] `C090-close` mutating, fixture: New unwritten store Add schema close
+- [ ] `C155-open` read-only, app: Billing activity kind menu open. Visible widths: 1440
+- [ ] `C155-close` read-only, app: Billing activity kind menu close. Visible widths: 1440
+- [ ] `C155-Runs` read-only, app: Billing activity filter Runs. Visible widths: 1440
+- [ ] `C155-Runs-return` read-only, app: Billing activity filter returns from Runs. Visible widths: 1440
+- [ ] `C155-Allowances` read-only, app: Billing activity filter Allowances. Visible widths: 1440
+- [ ] `C155-Allowances-return` read-only, app: Billing activity filter returns from Allowances. Visible widths: 1440
+- [ ] `C155-Top-ups` read-only, app: Billing activity filter Top-ups. Visible widths: 1440
+- [ ] `C155-Top-ups-return` read-only, app: Billing activity filter returns from Top-ups. Visible widths: 1440
+- [ ] `C155-sort-When` read-only, app: Billing activity sort When and reverse. Visible widths: 1440
+- [ ] `C155-sort-Amount` read-only, app: Billing activity sort Amount and reverse. Visible widths: 1440
+- [ ] `C171-open` read-only, app: Workstream detail sheet query resolves
+- [ ] `C171-close` read-only, app: Workstream detail sheet close
+- [ ] `C171-timeline-open` read-only, app: Workstream timeline entry expands and receipts resolve
+- [ ] `C171-timeline-close` read-only, app: Workstream timeline entry collapses
+- [ ] `C169-open` read-only, app: Place context detail sheet open
+- [ ] `C169-close` read-only, app: Place context detail sheet close
+

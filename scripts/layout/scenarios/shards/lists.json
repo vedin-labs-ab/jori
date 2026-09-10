@@ -1,0 +1,4478 @@
+[
+  {
+    "id": "C001-forward",
+    "title": "tables list to detail",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main a[href=\"/tables/collections_renewals\"]"
+      }
+    ]
+  },
+  {
+    "id": "C001-return",
+    "title": "tables detail to list",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/tables\"]:visible >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C006-tables-hover",
+    "title": "tables sort header hover",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C006-tables-blur",
+    "title": "tables sort header pointer leave",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "header"
+      }
+    ]
+  },
+  {
+    "id": "C007-asc",
+    "title": "tables sort Name asc",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C007-desc",
+    "title": "tables sort Name desc",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C007-reset",
+    "title": "tables sort Name reset",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      },
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C012-owner-open",
+    "title": "tables Owner facet open",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C012-owner-close",
+    "title": "tables Owner facet close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C012-empty",
+    "title": "tables Owner facet no matches",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[cmdk-input]",
+        "value": "not-a-member-zzzz"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C012-clear",
+    "title": "tables Owner facet clear selection",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C012-all",
+    "title": "tables Owner facet restore All",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"All\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C020-one",
+    "title": "tables select one row",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select Customer renewals\"]"
+      }
+    ]
+  },
+  {
+    "id": "C020-all",
+    "title": "tables select all rows",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C020-clear",
+    "title": "tables clear row selection",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Clear selection\"]"
+      }
+    ]
+  },
+  {
+    "id": "C035-menu-open",
+    "title": "tables row menu open",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      }
+    ]
+  },
+  {
+    "id": "C035-menu-close",
+    "title": "tables row menu close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C035-edit-open",
+    "title": "Edit table open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C035-edit-close",
+    "title": "Edit table close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C049-tables-open",
+    "title": "tables Visibility dialog open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Visibility\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C049-tables-close",
+    "title": "tables Visibility dialog close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Visibility\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C052-tables-open",
+    "title": "tables Move dialog open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C052-tables-close",
+    "title": "tables Move dialog close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C002-forward",
+    "title": "stores list to detail",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main a[href=\"/stores/collections_release\"]"
+      }
+    ]
+  },
+  {
+    "id": "C002-return",
+    "title": "stores detail to list",
+    "path": "/stores/collections_release",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/stores\"]:visible >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C006-stores-hover",
+    "title": "stores sort header hover",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C006-stores-blur",
+    "title": "stores sort header pointer leave",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "header"
+      }
+    ]
+  },
+  {
+    "id": "C008-asc",
+    "title": "stores sort Name asc",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C008-desc",
+    "title": "stores sort Name desc",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C008-reset",
+    "title": "stores sort Name reset",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      },
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C013-owner-open",
+    "title": "stores Owner facet open",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C013-owner-close",
+    "title": "stores Owner facet close",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C013-empty",
+    "title": "stores Owner facet no matches",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[cmdk-input]",
+        "value": "not-a-member-zzzz"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C013-clear",
+    "title": "stores Owner facet clear selection",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C013-all",
+    "title": "stores Owner facet restore All",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"All\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C021-one",
+    "title": "stores select one row",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select Release state\"]"
+      }
+    ]
+  },
+  {
+    "id": "C021-all",
+    "title": "stores select all rows",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C021-clear",
+    "title": "stores clear row selection",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Clear selection\"]"
+      }
+    ]
+  },
+  {
+    "id": "C036-menu-open",
+    "title": "stores row menu open",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      }
+    ]
+  },
+  {
+    "id": "C036-menu-close",
+    "title": "stores row menu close",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C036-edit-open",
+    "title": "Edit store open",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C036-edit-close",
+    "title": "Edit store close",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C049-stores-open",
+    "title": "stores Visibility dialog open",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Visibility\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C049-stores-close",
+    "title": "stores Visibility dialog close",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Visibility\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C052-stores-open",
+    "title": "stores Move dialog open",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C052-stores-close",
+    "title": "stores Move dialog close",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C003-forward",
+    "title": "files list to detail",
+    "path": "/files",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main a[href=\"/files/files_notes\"]"
+      }
+    ]
+  },
+  {
+    "id": "C003-return",
+    "title": "files detail to list",
+    "path": "/files/files_notes",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/files\"]:visible >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C006-files-hover",
+    "title": "files sort header hover",
+    "path": "/files",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C006-files-blur",
+    "title": "files sort header pointer leave",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "header"
+      }
+    ]
+  },
+  {
+    "id": "C009-asc",
+    "title": "files sort Name asc",
+    "path": "/files",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C009-desc",
+    "title": "files sort Name desc",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C009-reset",
+    "title": "files sort Name reset",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      },
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C014-owner-open",
+    "title": "files Owner facet open",
+    "path": "/files",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C014-owner-close",
+    "title": "files Owner facet close",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C014-empty",
+    "title": "files Owner facet no matches",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[cmdk-input]",
+        "value": "not-a-member-zzzz"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C014-clear",
+    "title": "files Owner facet clear selection",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C014-all",
+    "title": "files Owner facet restore All",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"All\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C022-one",
+    "title": "files select one row",
+    "path": "/files",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select Release notes 2.14.md\"]"
+      }
+    ]
+  },
+  {
+    "id": "C022-all",
+    "title": "files select all rows",
+    "path": "/files",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C022-clear",
+    "title": "files clear row selection",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Clear selection\"]"
+      }
+    ]
+  },
+  {
+    "id": "C037-menu-open",
+    "title": "files row menu open",
+    "path": "/files",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      }
+    ]
+  },
+  {
+    "id": "C037-menu-close",
+    "title": "files row menu close",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C037-edit-open",
+    "title": "Edit file open",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C037-edit-close",
+    "title": "Edit file close",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C049-files-open",
+    "title": "files Visibility dialog open",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Visibility\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C049-files-close",
+    "title": "files Visibility dialog close",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Visibility\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C052-files-open",
+    "title": "files Move dialog open",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C052-files-close",
+    "title": "files Move dialog close",
+    "path": "/files",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C004-forward",
+    "title": "jobs list to detail",
+    "path": "/jobs",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main a[href=\"/jobs/jobs_release\"]"
+      }
+    ]
+  },
+  {
+    "id": "C004-return",
+    "title": "jobs detail to list",
+    "path": "/jobs/jobs_release",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "a[href=\"/jobs\"]:visible >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C006-jobs-hover",
+    "title": "jobs sort header hover",
+    "path": "/jobs",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C006-jobs-blur",
+    "title": "jobs sort header pointer leave",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "header"
+      }
+    ]
+  },
+  {
+    "id": "C010-asc",
+    "title": "jobs sort Name asc",
+    "path": "/jobs",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C010-desc",
+    "title": "jobs sort Name desc",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C010-reset",
+    "title": "jobs sort Name reset",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      },
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C015-owner-open",
+    "title": "jobs Owner facet open",
+    "path": "/jobs",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C015-owner-close",
+    "title": "jobs Owner facet close",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C015-empty",
+    "title": "jobs Owner facet no matches",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[cmdk-input]",
+        "value": "not-a-member-zzzz"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C015-clear",
+    "title": "jobs Owner facet clear selection",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C015-all",
+    "title": "jobs Owner facet restore All",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Clear selection\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"popover-content\"] button:text-is(\"All\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C023-one",
+    "title": "jobs select one row",
+    "path": "/jobs",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select Weekly release summary\"]"
+      }
+    ]
+  },
+  {
+    "id": "C023-all",
+    "title": "jobs select all rows",
+    "path": "/jobs",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C023-clear",
+    "title": "jobs clear row selection",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Clear selection\"]"
+      }
+    ]
+  },
+  {
+    "id": "C049-jobs-open",
+    "title": "jobs Visibility dialog open",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Weekly release summary\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Edit\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ]
+  },
+  {
+    "id": "C049-jobs-close",
+    "title": "jobs Visibility dialog close",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Weekly release summary\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Edit\")"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ]
+  },
+  {
+    "id": "C052-jobs-open",
+    "title": "jobs Move dialog open",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Weekly release summary\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C052-jobs-close",
+    "title": "jobs Move dialog close",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Weekly release summary\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C017-matches",
+    "title": "tables search matching rows",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search tables\"]",
+        "value": "Flaky"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C017-empty",
+    "title": "tables search no matches",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search tables\"]",
+        "value": "nonexistent-zzzz"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C017-clear",
+    "title": "tables search clear",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search tables\"]",
+        "value": "nonexistent-zzzz"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search tables\"]",
+        "value": ""
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C018-matches",
+    "title": "stores search matching rows",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search stores\"]",
+        "value": "Release"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C018-empty",
+    "title": "stores search no matches",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search stores\"]",
+        "value": "nonexistent-zzzz"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C018-clear",
+    "title": "stores search clear",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search stores\"]",
+        "value": "nonexistent-zzzz"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search stores\"]",
+        "value": ""
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C019-matches",
+    "title": "jobs search matching rows",
+    "path": "/jobs",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search jobs\"]",
+        "value": "Weekly"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C019-empty",
+    "title": "jobs search no matches",
+    "path": "/jobs",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search jobs\"]",
+        "value": "nonexistent-zzzz"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C019-clear",
+    "title": "jobs search clear",
+    "path": "/jobs",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search jobs\"]",
+        "value": "nonexistent-zzzz"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Search jobs\"]",
+        "value": ""
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C040-open",
+    "title": "Create table dialog open",
+    "path": "/tables",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      }
+    ]
+  },
+  {
+    "id": "C040-close",
+    "title": "Create table dialog close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C042-table-error",
+    "title": "table empty submit validation",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Create table\")"
+      }
+    ]
+  },
+  {
+    "id": "C042-table-clear",
+    "title": "table clear name validation",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Create table\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#table-create-name",
+        "value": "A long account record with several departments and follow-up notes"
+      }
+    ]
+  },
+  {
+    "id": "C043-table-open",
+    "title": "Advanced settings table open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ]
+  },
+  {
+    "id": "C043-table-close",
+    "title": "Advanced settings table close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ]
+  },
+  {
+    "id": "C051-table",
+    "title": "Create table commit",
+    "path": "/tables",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "#table-create-name",
+        "value": "A long account record with several departments and follow-up notes"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Create table\")"
+      }
+    ]
+  },
+  {
+    "id": "C041-open",
+    "title": "Create store dialog open",
+    "path": "/stores",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New store\"]"
+      }
+    ]
+  },
+  {
+    "id": "C041-close",
+    "title": "Create store dialog close",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New store\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C042-store-error",
+    "title": "store empty submit validation",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New store\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Create store\")"
+      }
+    ]
+  },
+  {
+    "id": "C042-store-clear",
+    "title": "store clear name validation",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New store\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Create store\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "#store-create-name",
+        "value": "A long account record with several departments and follow-up notes"
+      }
+    ]
+  },
+  {
+    "id": "C043-store-open",
+    "title": "Advanced settings store open",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New store\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ]
+  },
+  {
+    "id": "C043-store-close",
+    "title": "Advanced settings store close",
+    "path": "/stores",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New store\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ]
+  },
+  {
+    "id": "C051-store",
+    "title": "Create store commit",
+    "path": "/stores",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New store\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "#store-create-name",
+        "value": "A long account record with several departments and follow-up notes"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Create store\")"
+      }
+    ]
+  },
+  {
+    "id": "C044-folder-open",
+    "title": "Create material Folder picker open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "#table-create-folder"
+      }
+    ]
+  },
+  {
+    "id": "C044-folder-close",
+    "title": "Create material Folder picker close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-folder"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C044-select",
+    "title": "Select nested folder",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-folder"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[data-slot=\"popover-content\"] button:has-text(\"Renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "C045-mode-open",
+    "title": "Visibility mode select open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      }
+    ]
+  },
+  {
+    "id": "C045-mode-close",
+    "title": "Visibility mode select close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C045-people",
+    "title": "Visibility Specific people",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific people\"))"
+      }
+    ]
+  },
+  {
+    "id": "C045-people-return",
+    "title": "Visibility Specific people to organization",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific people\"))"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Everyone in the organization\"))"
+      }
+    ]
+  },
+  {
+    "id": "C045-teams",
+    "title": "Visibility Specific teams",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific teams\"))"
+      }
+    ]
+  },
+  {
+    "id": "C045-teams-return",
+    "title": "Visibility Specific teams to organization",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific teams\"))"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Everyone in the organization\"))"
+      }
+    ]
+  },
+  {
+    "id": "C045-private",
+    "title": "Visibility Only me",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Only me\"))"
+      }
+    ]
+  },
+  {
+    "id": "C045-private-return",
+    "title": "Visibility Only me to organization",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Only me\"))"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Everyone in the organization\"))"
+      }
+    ]
+  },
+  {
+    "id": "C046-picker-open",
+    "title": "Choose people picker open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific people\"))"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose people\"]"
+      }
+    ]
+  },
+  {
+    "id": "C046-picker-close",
+    "title": "Choose people picker close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific people\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose people\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C046-empty",
+    "title": "Choose people no search matches",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific people\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose people\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[cmdk-input]",
+        "value": "zzzz-no-match"
+      }
+    ]
+  },
+  {
+    "id": "C046-select",
+    "title": "Choose people select first option",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific people\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose people\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[cmdk-item] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C046-deselect",
+    "title": "Choose people deselect first option",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific people\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose people\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[cmdk-item] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[cmdk-item] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C047-picker-open",
+    "title": "Choose teams picker open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific teams\"))"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose teams\"]"
+      }
+    ]
+  },
+  {
+    "id": "C047-picker-close",
+    "title": "Choose teams picker close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific teams\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose teams\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C047-empty",
+    "title": "Choose teams no search matches",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific teams\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose teams\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[cmdk-input]",
+        "value": "zzzz-no-match"
+      }
+    ]
+  },
+  {
+    "id": "C047-select",
+    "title": "Choose teams select first option",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific teams\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose teams\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[cmdk-item] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C047-deselect",
+    "title": "Choose teams deselect first option",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-create-visibility"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Specific teams\"))"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Choose teams\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[cmdk-item] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[cmdk-item] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C048-help-show",
+    "title": "Visibility help tooltip open",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"Visibility help\"]"
+      }
+    ]
+  },
+  {
+    "id": "C048-help-hide",
+    "title": "Visibility help tooltip close",
+    "path": "/tables",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "button:text-is(\"Advanced settings\")"
+      },
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"Visibility help\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[role=\"dialog\"] h2"
+      }
+    ]
+  },
+  {
+    "id": "C059-grid",
+    "title": "Grid initial virtual viewport",
+    "path": "/tables/collections_renewals",
+    "mutating": false
+  },
+  {
+    "id": "C060-hover",
+    "title": "Grid gutter hover",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C061-edit",
+    "title": "Table cell starts editing",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C061-cancel",
+    "title": "Table cell cancels editing",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Customer value\"]",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C062-save",
+    "title": "Table cell saves changed long text",
+    "path": "/tables/collections_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Customer value\"]",
+        "value": "Harbor House long customer record with several departments and a very long follow-up note"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Customer value\"]",
+        "value": "Enter"
+      }
+    ]
+  },
+  {
+    "id": "C062-tab",
+    "title": "Table cell advances to next column",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Customer value\"]",
+        "value": "Tab"
+      }
+    ]
+  },
+  {
+    "id": "C062-shifttab",
+    "title": "Table cell returns to prior column",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Renews\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Renews value\"]",
+        "value": "Shift+Tab"
+      }
+    ]
+  },
+  {
+    "id": "C064-check",
+    "title": "Table checkbox enable",
+    "path": "/tables/collections_renewals",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Paid for this row\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C064-uncheck",
+    "title": "Table checkbox disable",
+    "path": "/tables/collections_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Paid for this row\"] >> nth=0"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Paid for this row\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C068-add-open",
+    "title": "Add row dialog open",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New row\")"
+      }
+    ]
+  },
+  {
+    "id": "C068-add-close",
+    "title": "Add row dialog close",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New row\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C069-add",
+    "title": "Add row commit",
+    "path": "/tables/collections_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New row\")"
+      },
+      {
+        "action": "fill",
+        "selector": "#row-field-customer",
+        "value": "New long customer account row for the layout hunt"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Add row\")"
+      }
+    ]
+  },
+  {
+    "id": "C073-new-open",
+    "title": "New column sheet open",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New column\")"
+      }
+    ]
+  },
+  {
+    "id": "C073-new-close",
+    "title": "New column sheet close",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New column\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C074-details-open",
+    "title": "Existing column details sheet open",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      }
+    ]
+  },
+  {
+    "id": "C074-details-close",
+    "title": "Existing column details sheet close",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C073-type-open",
+    "title": "Column type select open",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New column\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Column type\"]"
+      }
+    ]
+  },
+  {
+    "id": "C073-type-close",
+    "title": "Column type select close",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New column\")"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Column type\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C073-type-number",
+    "title": "New column type changes",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New column\")"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Column type\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"option\"]:has(:text-is(\"Integer\"))"
+      }
+    ]
+  },
+  {
+    "id": "C074-required",
+    "title": "Existing column Required toggles",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "#column-sheet-required"
+      }
+    ]
+  },
+  {
+    "id": "C074-delete-open",
+    "title": "Column deletion confirmation open",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C074-delete-close",
+    "title": "Column deletion confirmation close",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ]
+  },
+  {
+    "id": "C075-duplicate",
+    "title": "Duplicate column validation",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New column\")"
+      },
+      {
+        "action": "fill",
+        "selector": "#column-sheet-name",
+        "value": "Customer"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Add column\")"
+      }
+    ]
+  },
+  {
+    "id": "C076-create",
+    "title": "Add column commit",
+    "path": "/tables/collections_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "button:text-is(\"New column\")"
+      },
+      {
+        "action": "fill",
+        "selector": "#column-sheet-name",
+        "value": "Long added column with contextual details"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Add column\")"
+      }
+    ]
+  },
+  {
+    "id": "C076-rename",
+    "title": "Rename column commit",
+    "path": "/tables/collections_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Customer column details\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "#column-sheet-name",
+        "value": "A much longer customer column name"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\")"
+      }
+    ]
+  },
+  {
+    "id": "C071-bulk-open",
+    "title": "Bulk row delete confirmation open",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all loaded rows\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C071-bulk-close",
+    "title": "Bulk row delete confirmation close",
+    "path": "/tables/collections_renewals",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all loaded rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ]
+  },
+  {
+    "id": "C072-delete",
+    "title": "Delete selected rows commit",
+    "path": "/tables/collections_renewals",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all loaded rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C079-code",
+    "title": "Store Form to Code lazy editor",
+    "path": "/stores/collections_release",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Release state\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Code\")"
+      }
+    ]
+  },
+  {
+    "id": "C079-form",
+    "title": "Store Code to Form",
+    "path": "/stores/collections_release",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Release state\")"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Code\")"
+      },
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Release state\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitemradio\"]:text-is(\"Form\")"
+      }
+    ]
+  },
+  {
+    "id": "C080-scalar",
+    "title": "Store scalar autosave",
+    "path": "/stores/collections_release",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "fill",
+        "selector": "[id=\"value.version\"]",
+        "value": "Version 2.14 with an extended label for the layout hunt"
+      }
+    ]
+  },
+  {
+    "id": "C080-check",
+    "title": "Store boolean autosave",
+    "path": "/stores/collections_release",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[id=\"value.frozen\"]"
+      }
+    ]
+  },
+  {
+    "id": "C031",
+    "title": "List initial loading \u2192 rows, empty, unauthorized, error. Demo passes isLoading=false and fixture arrays.",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Live populated list loads are covered by explicit app-load cases; empty/unauthorized/error results require isolated response states not available in this account."
+  },
+  {
+    "id": "C032",
+    "title": "List next page \u2192 loading spinner appended to Next label \u2192 new rows/count \u2192 previous page; preserve scroll anchor. Demo initial fixtures fit one page; create enough local items for D paging if needed.",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Initial fixtures and live account lists do not fill a page. Requires enough isolated records to activate pagination; no shared backend seeding performed."
+  },
+  {
+    "id": "C033",
+    "title": "Refetch while list has visible rows \u2192 updated/removed rows and footer count, including selected row disappearing.",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Requires concurrent backend writes/removals while subscribed; shared account is inspected read-only."
+  },
+  {
+    "id": "C054",
+    "title": "Move prompt asynchronous visibility consequences \u2192 confirmation \u2192 cancel; `src/console/folders/move/{prompt,confirm}.tsx`.",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Requires isolated resources with conflicting inherited grants and backend-derived visibility impact; shared account moves are not submitted."
+  },
+  {
+    "id": "C056",
+    "title": "Table/store archive \u2192 archived menu \u2192 Restore pending \u2192 restored row; archived permanent delete \u2192 pending \u2192 removed.",
+    "path": "/",
+    "target": "app",
+    "mutating": true,
+    "blocked": "Archived fixture state does not retain restore/permanent-delete actions; requires isolated backend archived material and mutation permission."
+  },
+  {
+    "id": "C057",
+    "title": "Create/edit/visibility/move/delete pending spinner inserted beside label \u2192 success/error/rest; failure toast appears \u2192 dismisses.",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Fixture operations resolve synchronously; sustained save/error transitions require an isolated backend or deterministic response fixture."
+  },
+  {
+    "id": "C077",
+    "title": "Grid initial load \u2192 rows; load-more band \u2192 new virtual rows \u2192 New row affordance; deleting inspected column concurrently closes sheet.",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Initial and load-more grid queries need enough backend rows beyond loaded fixture page; concurrent column removal requires isolated writes."
+  },
+  {
+    "id": "C078",
+    "title": "Cell/row/column write failure and version conflict \u2192 error feedback \u2192 recovery without losing viewport or focus.",
+    "path": "/",
+    "target": "app",
+    "mutating": false,
+    "blocked": "Version conflicts and write failures require isolated conflicting or faulted backend writes."
+  },
+  {
+    "id": "C005-forward",
+    "title": "Folder root to Finance",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main a[href=\"/folders/folders_finance\"]"
+      }
+    ]
+  },
+  {
+    "id": "C005-return",
+    "title": "Finance folder to root",
+    "path": "/folders/folders_finance",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header a[href=\"/folders\"]"
+      }
+    ]
+  },
+  {
+    "id": "C005-nested",
+    "title": "Finance to nested Renewals",
+    "path": "/folders/folders_finance",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "main a[href=\"/folders/folders_renewals\"]"
+      }
+    ]
+  },
+  {
+    "id": "C005-parent",
+    "title": "Nested Renewals to Finance",
+    "path": "/folders/folders_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header a[href=\"/folders/folders_finance\"]"
+      }
+    ]
+  },
+  {
+    "id": "C011-sort",
+    "title": "Folder list sort Name",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Name\")"
+      }
+    ]
+  },
+  {
+    "id": "C016-owner-open",
+    "title": "Folder Owner facet open",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C016-owner-close",
+    "title": "Folder Owner facet close",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "th button:text-is(\"Owner\")"
+      }
+    ],
+    "widths": [1440]
+  },
+  {
+    "id": "C024-select",
+    "title": "Folder selection dock appears",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C024-clear",
+    "title": "Folder selection dock clears",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Clear selection\"]"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C025-move-open",
+    "title": "Bulk tables move dialog open",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C025-move-close",
+    "title": "Bulk tables move dialog close",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ]
+  },
+  {
+    "id": "C025-delete-open",
+    "title": "Bulk tables Archive confirmation open",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C025-delete-close",
+    "title": "Bulk tables Archive confirmation close",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ]
+  },
+  {
+    "id": "C030-tables",
+    "title": "Bulk tables removal commit",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Archive\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ]
+  },
+  {
+    "id": "C026-move-open",
+    "title": "Bulk stores move dialog open",
+    "path": "/stores",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C026-move-close",
+    "title": "Bulk stores move dialog close",
+    "path": "/stores",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ]
+  },
+  {
+    "id": "C026-delete-open",
+    "title": "Bulk stores Archive confirmation open",
+    "path": "/stores",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C026-delete-close",
+    "title": "Bulk stores Archive confirmation close",
+    "path": "/stores",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ]
+  },
+  {
+    "id": "C030-stores",
+    "title": "Bulk stores removal commit",
+    "path": "/stores",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Archive\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Archive\")"
+      }
+    ]
+  },
+  {
+    "id": "C027-move-open",
+    "title": "Bulk files move dialog open",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C027-move-close",
+    "title": "Bulk files move dialog close",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ]
+  },
+  {
+    "id": "C027-delete-open",
+    "title": "Bulk files Delete confirmation open",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C027-delete-close",
+    "title": "Bulk files Delete confirmation close",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C030-files",
+    "title": "Bulk files removal commit",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C028-move-open",
+    "title": "Bulk jobs move dialog open",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C028-move-close",
+    "title": "Bulk jobs move dialog close",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Move\")"
+      }
+    ]
+  },
+  {
+    "id": "C028-delete-open",
+    "title": "Bulk jobs Delete confirmation open",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ]
+  },
+  {
+    "id": "C028-delete-close",
+    "title": "Bulk jobs Delete confirmation close",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C030-jobs",
+    "title": "Bulk jobs removal commit",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Selection actions\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C034-visibility",
+    "title": "Table visibility tooltip opens",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"Specific teams \u00b7 1 team\"]"
+      }
+    ]
+  },
+  {
+    "id": "C034-visibility-close",
+    "title": "Table visibility tooltip closes",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "hover",
+        "selector": "header"
+      }
+    ],
+    "setup": [
+      {
+        "action": "hover",
+        "selector": "[aria-label=\"Specific teams \u00b7 1 team\"]"
+      }
+    ]
+  },
+  {
+    "id": "C038-table-open",
+    "title": "Table title menu open",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "C038-table-close",
+    "title": "Table title menu close",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Customer renewals\")"
+      }
+    ]
+  },
+  {
+    "id": "C038-store-open",
+    "title": "Store title menu open",
+    "path": "/stores/collections_release",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Release state\")"
+      }
+    ]
+  },
+  {
+    "id": "C038-store-close",
+    "title": "Store title menu close",
+    "path": "/stores/collections_release",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "header button:has-text(\"Release state\")"
+      }
+    ]
+  },
+  {
+    "id": "C039-tables",
+    "title": "Rename tables long name",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      },
+      {
+        "action": "fill",
+        "selector": "#table-edit-name",
+        "value": "Layout hunt long resource name with finance and customer success details"
+      }
+    ]
+  },
+  {
+    "id": "C039-stores",
+    "title": "Rename stores long name",
+    "path": "/stores",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release state\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      },
+      {
+        "action": "fill",
+        "selector": "#store-edit-name",
+        "value": "Layout hunt long resource name with finance and customer success details"
+      }
+    ]
+  },
+  {
+    "id": "C039-files",
+    "title": "Rename files long name",
+    "path": "/files",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save changes\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Release notes 2.14.md\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Rename\u2026\")"
+      },
+      {
+        "action": "fill",
+        "selector": "#file-edit-name",
+        "value": "Layout hunt long resource name with finance and customer success details"
+      }
+    ]
+  },
+  {
+    "id": "C050-save",
+    "title": "Visibility dialog save local draft",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Save\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Visibility\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C053-table-move",
+    "title": "Move table to another folder",
+    "path": "/tables",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:text-is(\"Move\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Customer renewals\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"dialog\"] button:has-text(\"Engineering\")"
+      }
+    ]
+  },
+  {
+    "id": "C055-job",
+    "title": "Delete job commit",
+    "path": "/jobs",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for Weekly release summary\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C058-share-open",
+    "title": "Material share links dialog open",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Share\"]"
+      }
+    ]
+  },
+  {
+    "id": "C058-share-close",
+    "title": "Material share links dialog close",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Share\"]"
+      }
+    ]
+  },
+  {
+    "id": "C063-invalid",
+    "title": "Table numeric cell invalid edit",
+    "path": "/tables/collections_flaky",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Failures value\"]",
+        "value": "Enter"
+      }
+    ],
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Edit Failures\"] >> nth=0"
+      },
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Failures value\"]",
+        "value": "invalid-number"
+      }
+    ]
+  },
+  {
+    "id": "C065-menu-open",
+    "title": "Table row context menu open",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C065-menu-close",
+    "title": "Table row context menu close",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C065-edit",
+    "title": "Table context menu to inline edit",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Edit cell\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C065-cancel",
+    "title": "Table context inline edit cancels",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Customer value\"]",
+        "value": "Escape"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Edit cell\")"
+      }
+    ]
+  },
+  {
+    "id": "C066-copy",
+    "title": "Table context copy cell feedback",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Copy cell\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C067-paste",
+    "title": "Table context paste clipboard failure feedback",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Paste\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C070-insert-above",
+    "title": "Table context insert above dialog",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Insert row above\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C070-insert-below",
+    "title": "Table context insert below dialog",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Insert row below\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C070-duplicate",
+    "title": "Table duplicate row commit",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Duplicate row\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C071-row-open",
+    "title": "Table row delete confirmation open",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete row\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      }
+    ]
+  },
+  {
+    "id": "C071-row-close",
+    "title": "Table row delete confirmation close",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": false,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete row\")"
+      }
+    ]
+  },
+  {
+    "id": "C072-row",
+    "title": "Table row delete commit",
+    "path": "/tables/collections_renewals",
+    "target": "fixture",
+    "mutating": true,
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Delete row\")"
+      }
+    ],
+    "setup": [
+      {
+        "action": "contextclick",
+        "selector": "[aria-label=\"Edit Customer\"] >> nth=0"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Delete row\")"
+      }
+    ]
+  },
+  {
+    "id": "C029-Move-open",
+    "title": "Folder selection Move dialog open",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"toolbar\"] button:text-is(\"Move\")"
+      }
+    ]
+  },
+  {
+    "id": "C029-Move-close",
+    "title": "Folder selection Move dialog close",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"toolbar\"] button:text-is(\"Move\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
+      }
+    ]
+  },
+  {
+    "id": "C029-Delete-open",
+    "title": "Folder selection Delete dialog open",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": "[role=\"toolbar\"] button:text-is(\"Delete\")"
+      }
+    ]
+  },
+  {
+    "id": "C029-Delete-close",
+    "title": "Folder selection Delete dialog close",
+    "path": "/folders",
+    "target": "fixture",
+    "mutating": false,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Select all rows\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"toolbar\"] button:text-is(\"Delete\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "click",
+        "selector": ":is([role=\"dialog\"],[role=\"alertdialog\"]) button:text-is(\"Cancel\")"
+      }
+    ]
+  }
+]

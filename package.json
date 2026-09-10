@@ -30,7 +30,10 @@
     "skills": "node --experimental-strip-types scripts/env/task.ts skills",
     "sandbox": "node --experimental-strip-types scripts/env/task.ts sandbox",
     "db:seed": "node --experimental-strip-types scripts/env/task.ts seed",
-    "db:truncate": "node --experimental-strip-types scripts/env/task.ts truncate"
+    "db:truncate": "node --experimental-strip-types scripts/env/task.ts truncate",
+    "layout": "node --experimental-strip-types scripts/layout/index.ts",
+    "layout:fixture": "node --experimental-strip-types scripts/layout/server.ts",
+    "layout:app": "node --experimental-strip-types scripts/layout/app.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
