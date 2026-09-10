@@ -90,7 +90,7 @@ export function AttachMenu({
             placeholder="Search resources…"
             value={query}
           />
-          <CommandList>
+          <CommandList className="h-[min(18rem,calc(var(--radix-popover-content-available-height)-2.75rem))]">
             {query !== "" ? (
               <SearchResults
                 onPick={pick}
