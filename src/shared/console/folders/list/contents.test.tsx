@@ -259,12 +259,12 @@ test("removing a selection names what happens to each part of it", () => {
 
 test("filed chats join bulk moves and removal keeps their history", () => {
   const chat = {
-    type: "chat" as const,
+    type: "chat",
     id: "chat-1",
     name: "Renewals at risk",
-    visibility: "private" as const,
+    visibility: "private",
     updatedAt: Date.now(),
-  }
+  } as FolderResource
   const actions = { isBusy: false, onMove: vi.fn(), onRemove: vi.fn() }
 
   renderContents({ status: "ready", folders: [], resources: [chat] }, actions)
