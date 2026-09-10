@@ -4,6 +4,7 @@ import { personDisplayName } from "../../../persons/names"
 import { getActorDisplayName } from "../../../shared/actor"
 import { summarizeApproval } from "../../view/approval"
 import { runTask, triggerLabel } from "../../view/labels"
+import { runMatchesVisibilityFilter } from "../../visibility"
 import { getRunContext } from "../context"
 import { runDetails } from "../details"
 import { summarizeRunOffer } from "../offers"
@@ -43,7 +44,7 @@ export async function summarizeRun(
   return {
     id: run._id,
     status: run.status,
-    audience: runAudienceFacet(run),
+    audience: await runAudienceFacet(ctx, run),
     title,
     source,
     job: runJob(context.job),
@@ -87,8 +88,8 @@ function activeWaiter(waiter: Doc<"waiters"> | null) {
 
 /** The console's two-way facet: conversation runs read as personal, since
  *  they belong to the thread their creator was in. */
-function runAudienceFacet(run: Doc<"runs">) {
-  return run.audience === "organization"
+async function runAudienceFacet(ctx: QueryCtx, run: Doc<"runs">) {
+  return (await runMatchesVisibilityFilter(ctx, run, "organization"))
     ? ("organization" as const)
     : ("personal" as const)
 }

@@ -7,7 +7,7 @@ import {
   projectRunSummary,
   type RunSummary,
 } from "../view/summary"
-import { canSee } from "./access"
+import { canInspectRun } from "./access"
 import {
   compareRuns,
   isAfterCursor,
@@ -39,7 +39,9 @@ export async function pageRunMatches(
 
   const search = runSearchKey(filters.current, filters)
   const cursor = readRunCursor(args.cursor, search)
-  const runs = matchingRuns(filters).filter((run) => isAfterCursor(run, cursor))
+  const runs = (await matchingRuns(ctx, filters)).filter((run) =>
+    isAfterCursor(run, cursor)
+  )
   const limit =
     filters.mode === "ids" ? 50 : boundedNumber(args.limit, 15, 1, 50)
 
@@ -70,10 +72,17 @@ export async function pageRunMatches(
   }
 }
 
-function matchingRuns(filters: RunFilters) {
-  return uniqueRuns(filters.candidates)
-    .filter((run) => matchesRun(filters.current, run, filters))
-    .sort(compareRuns)
+async function matchingRuns(ctx: QueryCtx, filters: RunFilters) {
+  const matches = []
+  for (const run of uniqueRuns(filters.candidates)) {
+    if (
+      matchesRun(run, filters) &&
+      (await canInspectRun(ctx, filters.current, run))
+    ) {
+      matches.push(run)
+    }
+  }
+  return matches.sort(compareRuns)
 }
 
 async function projectMatchingSummaries(
@@ -135,13 +144,8 @@ export function normalizeTimestamp(value: number | undefined) {
   return value
 }
 
-function matchesRun(
-  current: Doc<"runs">,
-  run: Doc<"runs">,
-  filters: RunFilters
-) {
+function matchesRun(run: Doc<"runs">, filters: RunFilters) {
   return (
-    canSee(current, run) &&
     matchesStatus(run, filters.status) &&
     matchesSource(run, filters.source) &&
     matchesTime(run, filters.since, filters.until)
