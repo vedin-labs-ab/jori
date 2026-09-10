@@ -9,6 +9,7 @@ import {
 import { requireOrganizationAccess } from "../../access"
 import { readUserProfile } from "../../access/users"
 import { ensureCurrentPerson } from "../../persons/account"
+import { canSeeRun } from "../../runs/visibility"
 import { createPersonActor } from "../../shared/actor"
 import { integrationValidator } from "../../shared/integrations"
 import {
@@ -202,6 +203,14 @@ async function requireClaimableOffer(
   offer: Doc<"integrationOffers">,
   args: { now: number; personId: Doc<"persons">["_id"] }
 ) {
+  if (offer.runId !== undefined) {
+    const run = await ctx.db.get(offer.runId)
+
+    if (run === null || !(await canSeeRun(ctx, run, args.personId))) {
+      throw new Error("Integration offer not found.")
+    }
+  }
+
   if (offer.status === "cancelled") {
     throw new Error("This integration offer was cancelled.")
   }

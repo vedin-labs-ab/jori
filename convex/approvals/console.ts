@@ -4,6 +4,7 @@ import { action, internalQuery } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { readUserProfile } from "../access/users"
 import { ensureCurrentPersonFromAction } from "../persons/account"
+import { canSeeRun } from "../runs/visibility"
 import { createPersonActor } from "../shared/actor"
 import { decideApproval } from "./runtime"
 
@@ -15,11 +16,16 @@ export const decide = action({
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
+    const personId = await ensureCurrentPersonFromAction(
+      ctx,
+      args.organizationId
+    )
     const target = await ctx.runQuery(
       internal.approvals.console.getDecisionTarget,
       {
         approvalId: args.approvalId,
         organizationId: args.organizationId,
+        personId,
       }
     )
 
@@ -27,10 +33,6 @@ export const decide = action({
       throw new Error("Approval not found.")
     }
 
-    const personId = await ensureCurrentPersonFromAction(
-      ctx,
-      args.organizationId
-    )
     const result = await decideApproval(ctx, {
       approval: target,
       decidedBy: createPersonActor(personId, readUserProfile(identity)),
@@ -48,6 +50,7 @@ export const getDecisionTarget = internalQuery({
   args: {
     approvalId: v.id("approvals"),
     organizationId: v.string(),
+    personId: v.id("persons"),
   },
   handler: async (ctx, args) => {
     const approval = await ctx.db.get(args.approvalId)
@@ -56,6 +59,10 @@ export const getDecisionTarget = internalQuery({
       return null
     }
 
-    return approval
+    const run = await ctx.db.get(approval.runId)
+
+    return run !== null && (await canSeeRun(ctx, run, args.personId))
+      ? approval
+      : null
   },
 })

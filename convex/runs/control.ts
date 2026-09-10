@@ -5,6 +5,7 @@ import { readUserProfile } from "../access/users"
 import { accountArgs, ensureAccountPerson } from "../persons/account"
 import { createPersonActor } from "../shared/actor"
 import { stopRunTree } from "./tree"
+import { canSeeRun } from "./visibility"
 
 export const stop = mutation({
   args: {
@@ -19,7 +20,11 @@ export const stop = mutation({
     )
     const run = await ctx.db.get(args.runId)
 
-    if (run === null || run.organizationId !== args.organizationId) {
+    if (
+      run === null ||
+      run.organizationId !== args.organizationId ||
+      !(await canSeeRun(ctx, run, personId))
+    ) {
       throw new Error("Run not found.")
     }
 

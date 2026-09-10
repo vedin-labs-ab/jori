@@ -4,6 +4,7 @@ import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { canSeeRun } from "../runs/visibility"
 import { actorValidator } from "../shared/actor"
 import {
   slackMessageDeliveryValidator,
@@ -128,6 +129,17 @@ export const decide = internalMutation({
       return { status: "missing" as const }
     }
 
+    const run = await ctx.db.get(approval.runId)
+    const personId = await resolveApprovalActor(ctx, {
+      actor: args.decidedBy,
+      surface: approval.surface,
+      organizationId: approval.organizationId,
+    })
+
+    if (run === null || !(await canSeeRun(ctx, run, personId))) {
+      return { status: "missing" as const }
+    }
+
     if (args.expectedConnection !== undefined) {
       const integration = await ctx.db.get(
         args.expectedConnection.integrationId
@@ -153,17 +165,10 @@ export const decide = internalMutation({
       return { status: "expired" as const, approval: updated ?? approval }
     }
 
-    const run = await ctx.db.get(approval.runId)
-
-    if (run === null || isTerminalRunStatus(run.status)) {
+    if (isTerminalRunStatus(run.status)) {
       return { status: "closed" as const, approval }
     }
 
-    await resolveApprovalActor(ctx, {
-      actor: args.decidedBy,
-      surface: approval.surface,
-      organizationId: approval.organizationId,
-    })
     const updated = await markApprovalDecided(ctx, approval, {
       decidedBy: args.decidedBy,
       decision: args.decision,
