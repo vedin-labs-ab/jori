@@ -11,8 +11,8 @@ import {
   Type,
   X,
 } from "lucide-react"
-import { FieldError } from "@/components/ui/field"
 import { cn } from "@/lib/utils"
+import { CellError } from "@/shared/cell"
 import { type ValueField, type ValueProperty } from "./model"
 
 // Row dressing for the value form's hairline key/value grid: key cells
@@ -184,18 +184,23 @@ export function AddItemRow({
   return (
     <div className={valueRowClassName}>
       <BlankCell depth={depth} />
-      <div className="min-w-0 flex-1">
-        <button
-          aria-label={`Add ${label} item`}
-          className={ghostCellClassName}
-          onClick={onAdd}
-          type="button"
-        >
-          <Plus aria-hidden className="size-3.5" />
-          Add item
-        </button>
-        <FieldError className="px-3 pb-2">{error}</FieldError>
-      </div>
+      <CellError className="min-w-0 flex-1" message={error}>
+        {(attributes) => (
+          <button
+            {...attributes}
+            aria-label={`Add ${label} item`}
+            className={cn(
+              ghostCellClassName,
+              "aria-invalid:ring-2 aria-invalid:ring-destructive/20 aria-invalid:ring-inset aria-invalid:focus-visible:ring-destructive/20"
+            )}
+            onClick={onAdd}
+            type="button"
+          >
+            <Plus aria-hidden className="size-3.5" />
+            Add item
+          </button>
+        )}
+      </CellError>
     </div>
   )
 }
@@ -217,18 +222,5 @@ export function RemoveButton({
     >
       <X aria-hidden className="size-3.5" />
     </button>
-  )
-}
-
-/** A full-width strip for errors reported at a group's own path. */
-export function ErrorRow({ message }: { message: string | undefined }) {
-  if (message === undefined) {
-    return null
-  }
-
-  return (
-    <div className="border-b px-3 py-2">
-      <FieldError>{message}</FieldError>
-    </div>
   )
 }

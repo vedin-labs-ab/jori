@@ -1,10 +1,9 @@
-import { FieldError } from "@/components/ui/field"
+import { CellError } from "@/shared/cell"
 import { ArrayFields } from "./arrays"
 import { emptyState, hasUnsetAffordance, type ValueState } from "./convert"
 import { type ChangeHandler, LeafControl } from "./inputs"
 import { type ValueField, type ValueProperty } from "./model"
 import {
-  ErrorRow,
   GroupRow,
   KeyCell,
   RemoveButton,
@@ -67,27 +66,34 @@ function ObjectRows({
   state: ObjectState
 }) {
   return (
-    <>
-      {field.properties.length === 0 ? (
-        <p className="border-b px-3 py-2 text-muted-foreground text-xs">
-          The schema declares no fields, so the value is an empty object.
-        </p>
-      ) : null}
-      {field.properties.map((property) => (
-        <PropertyRows
-          depth={depth}
-          errors={errors}
-          key={property.name}
-          onChildChange={(child, editedPath) =>
-            onChange(withChild(state, property.name, child), editedPath)
-          }
-          path={`${path}.${property.name}`}
-          property={property}
-          state={state.children[property.name]}
-        />
-      ))}
-      <ErrorRow message={errors[path]} />
-    </>
+    <CellError message={errors[path]}>
+      {(attributes) => (
+        <div
+          {...attributes}
+          className="outline-none aria-invalid:ring-2 aria-invalid:ring-destructive/20 aria-invalid:ring-inset"
+          tabIndex={errors[path] === undefined ? undefined : 0}
+        >
+          {field.properties.length === 0 ? (
+            <p className="border-b px-3 py-2 text-muted-foreground text-xs">
+              The schema declares no fields, so the value is an empty object.
+            </p>
+          ) : null}
+          {field.properties.map((property) => (
+            <PropertyRows
+              depth={depth}
+              errors={errors}
+              key={property.name}
+              onChildChange={(child, editedPath) =>
+                onChange(withChild(state, property.name, child), editedPath)
+              }
+              path={`${path}.${property.name}`}
+              property={property}
+              state={state.children[property.name]}
+            />
+          ))}
+        </div>
+      )}
+    </CellError>
   )
 }
 
@@ -160,18 +166,20 @@ function PropertyRows({
   return (
     <div className={valueRowClassName}>
       <KeyCell depth={depth} htmlFor={path} property={property} />
-      <div className="min-w-0 flex-1">
-        <LeafControl
-          field={property.field}
-          id={path}
-          invalid={errors[path] !== undefined}
-          onChange={onChildChange}
-          path={path}
-          required={property.required}
-          state={state}
-        />
-        <FieldError className="px-3 pb-2">{errors[path]}</FieldError>
-      </div>
+      <CellError className="min-w-0 flex-1" message={errors[path]}>
+        {(attributes) => (
+          <LeafControl
+            describedBy={attributes["aria-describedby"]}
+            field={property.field}
+            id={path}
+            invalid={errors[path] !== undefined}
+            onChange={onChildChange}
+            path={path}
+            required={property.required}
+            state={state}
+          />
+        )}
+      </CellError>
       {!property.required && hasUnsetAffordance(property.field) ? (
         <RemoveButton
           label={`Unset ${property.name}`}
@@ -240,18 +248,20 @@ function NestedRows({
               state={item}
             />
           ) : (
-            <>
-              <LeafControl
-                ariaLabel={itemLabel}
-                field={field.items}
-                invalid={errors[itemPath] !== undefined}
-                onChange={onItemChange}
-                path={itemPath}
-                required
-                state={item}
-              />
-              <FieldError className="px-3 pb-2">{errors[itemPath]}</FieldError>
-            </>
+            <CellError message={errors[itemPath]}>
+              {(attributes) => (
+                <LeafControl
+                  ariaLabel={itemLabel}
+                  describedBy={attributes["aria-describedby"]}
+                  field={field.items}
+                  invalid={errors[itemPath] !== undefined}
+                  onChange={onItemChange}
+                  path={itemPath}
+                  required
+                  state={item}
+                />
+              )}
+            </CellError>
           )
         }
         state={state}
