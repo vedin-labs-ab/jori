@@ -110,6 +110,10 @@ test("a visibility transition rejects late replies and summaries from the old ex
       })
     )
   ).rejects.toThrow("no longer active")
+  await f.t.mutation(internal.runs.records.finish, {
+    runId: f.runId,
+    result: "Late personal outcome",
+  })
   const storageId = await f.t.run((ctx) =>
     ctx.storage.store(new Blob(["late result"]))
   )
@@ -132,6 +136,7 @@ test("a visibility transition rejects late replies and summaries from the old ex
   })
   await f.t.run(async (ctx) => {
     expect((await ctx.db.get(f.conversationId))?.summary).toBeUndefined()
+    expect((await ctx.db.get(f.runId))?.result).toBeUndefined()
     expect(await ctx.db.query("messages").take(10)).toHaveLength(1)
   })
 })

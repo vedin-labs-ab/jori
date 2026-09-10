@@ -17,6 +17,10 @@ afterEach(() => vi.useRealTimers())
 
 test("membership changes revoke cached execution before another step or reply", async () => {
   const f = await sharedFixture()
+  await f.t.mutation(internal.runs.records.finish, {
+    runId: f.sharedRunId,
+    result: "Published while current",
+  })
   await f.t.run((ctx) =>
     writeRunDraft(ctx, {
       runId: f.sharedRunId,
@@ -47,6 +51,13 @@ test("membership changes revoke cached execution before another step or reply", 
       })
     )
   ).rejects.toThrow("no longer active")
+  await f.t.mutation(internal.runs.records.finish, {
+    runId: f.sharedRunId,
+    result: "Late result for the old audience",
+  })
+  expect((await f.t.run((ctx) => ctx.db.get(f.sharedRunId)))?.result).toBe(
+    "Published while current"
+  )
   await f.t.mutation(internal.sessions.execution.reconcile, {
     runId: f.sharedRunId,
   })

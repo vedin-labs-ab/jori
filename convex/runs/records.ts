@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc } from "../_generated/dataModel"
 import {
   internalMutation,
@@ -12,6 +13,7 @@ import { readApprovedFacts } from "../organization/profile"
 import { readRequesterContext } from "../persons/profile/context"
 import { readPersonTimezone } from "../persons/profile/timezone"
 import { readPlaceContext } from "../places/context"
+import { runExecutionIsCurrent } from "../sessions/execution"
 import {
   hasIntegrationTools,
   isMessageIntegration,
@@ -175,6 +177,16 @@ export const finish = internalMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const run = await ctx.db.get(args.runId)
+
+    if (
+      run === null ||
+      isTerminalRunStatus(run.status) ||
+      !(await runExecutionIsCurrent(ctx, run))
+    ) {
+      return null
+    }
+
     await ctx.db.patch(args.runId, { result: args.result })
 
     return null
