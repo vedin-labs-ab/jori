@@ -7,7 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { BrandMark } from "@/shared/brand"
+import { BrandLink } from "@/shared/brand/link"
 
 /**
  * A whole-page state: not found, or an error the app could not recover from.
@@ -35,12 +35,9 @@ export function RootStateFrame({
     // is the same in every full-page view Jori serves.
     <main className="flex min-h-svh flex-col px-6 py-7 sm:px-10 sm:py-9">
       <header className="flex items-center">
-        {/* A plain anchor, not a router link: this frame renders the root
-            error boundary, so the way home must not depend on the router
-            being in a state that can navigate. */}
-        <a aria-label="Jori home" className="rounded-md" href="/">
-          <BrandMark />
-        </a>
+        {/* BrandLink uses a plain anchor, so the way home also works when
+            the router cannot recover from an error. */}
+        <BrandLink />
       </header>
       {/* Optically centred: the bottom padding lifts the block off the true
           middle, which is what reads as centred to the eye. */}
