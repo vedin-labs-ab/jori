@@ -35,21 +35,24 @@ function SettingsDialog<Value extends string>({
   views,
 }: SettingsDialogProps<Value>) {
   const [view, setView] = useState(initialView)
-  const activeView = views.find((item) => item.value === view) ?? views[0]
+  const [wasOpen, setWasOpen] = useState(open)
 
-  function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen) {
+  if (open !== wasOpen) {
+    setWasOpen(open)
+
+    if (open) {
       setView(initialView)
     }
-    onOpenChange(nextOpen)
   }
+
+  const activeView = views.find((item) => item.value === view) ?? views[0]
 
   if (!activeView) {
     return null
   }
 
   return (
-    <Dialog onOpenChange={handleOpenChange} open={open}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent
         bodyClassName="flex flex-1 overflow-hidden p-0"
         className="h-[calc(100svh-2rem)] sm:h-[min(44rem,calc(100svh-2rem))] sm:max-w-[calc(100%-2rem)] md:max-w-4xl lg:max-w-5xl"
