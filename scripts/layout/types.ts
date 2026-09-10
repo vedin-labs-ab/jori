@@ -6,6 +6,8 @@ export type Step = {
     | "hover"
     | "navigate"
     | "scroll"
+    | "scrollIntoView"
+    | "select"
     | "back"
     | "reload"
     | "doubleclick"
@@ -16,6 +18,12 @@ export type Step = {
   offset?: { x: number; y: number }
 }
 
+export type Readiness = {
+  selector: string
+  state?: "visible" | "hidden" | "attached" | "detached"
+  timeout?: number
+}
+
 export type Scenario = {
   id: string
   title: string
@@ -24,7 +32,11 @@ export type Scenario = {
   mutating: boolean
   anonymous?: boolean
   setup?: Step[]
+  setupReady?: Readiness[]
   steps?: Step[]
+  ready?: Readiness[]
+  transportFixture?: string
+  clipboard?: { text?: string; readError?: boolean; writeError?: boolean }
   blocked?: string
   responses?: { url: string; body: string; status?: number; delay?: number }[]
   widths?: number[]

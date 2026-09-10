@@ -1,25 +1,55 @@
 import { writeFile } from "node:fs/promises"
 import path from "node:path"
 import { type CDPSession, type Page } from "playwright"
-import { type Snapshot } from "./types.ts"
+import { waitReady } from "./actions.ts"
+import { settle } from "./measurement/network.ts"
+import { type Readiness, type Snapshot } from "./types.ts"
 
-export async function settle(page: Page) {
-  let networkIdle = true
-  try {
-    await page.waitForLoadState("networkidle", { timeout: 15_000 })
-  } catch {
-    networkIdle = false
+export { settle } from "./measurement/network.ts"
+
+/** Guard and walk in one evaluation, including documents replaced mid-capture. */
+export async function snapshot(page: Page): Promise<Snapshot> {
+  const start = Date.now()
+  while (Date.now() - start < 90_000) {
+    try {
+      const captured = await page.evaluate(() => {
+        if (!window.__layout || !performance.getEntriesByType("paint").length) {
+          return null
+        }
+        return window.__layout.snapshot()
+      })
+      if (captured) {
+        return captured
+      }
+    } catch (error) {
+      if (
+        page.isClosed() ||
+        !/Execution context was destroyed|Cannot find context/.test(
+          String(error)
+        )
+      ) {
+        throw error
+      }
+    }
+    await page.waitForTimeout(16)
   }
-  await page.waitForTimeout(3000)
-  return networkIdle
+  throw new Error("No painted document with an initialized layout probe")
 }
 
-export async function screenshot(page: Page, file: string) {
+export async function screenshot(page: Page, file: string, timeoutMs = 20_000) {
   const cdp = await page.context().newCDPSession(page)
+  let timer: ReturnType<typeof setTimeout> | undefined
   try {
-    const { data } = await capturePng(cdp)
+    const deadline = new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`Screenshot deadline exceeded: ${file}`))
+        void cdp.detach().catch(() => {})
+      }, timeoutMs)
+    })
+    const { data } = await Promise.race([capturePng(cdp), deadline])
     await writeFile(file, Buffer.from(data, "base64"))
   } finally {
+    clearTimeout(timer)
     await cdp.detach().catch(() => {})
   }
 }
@@ -31,17 +61,8 @@ async function timedSnapshots(page: Page) {
       await new Promise((resolve) =>
         setTimeout(resolve, Math.max(0, start + delay - Date.now()))
       )
-      let snapshot: Snapshot
-      try {
-        snapshot = await page.evaluate(() => window.__layout.snapshot())
-      } catch {
-        // A redirect can replace the document between two samples.
-        await page.waitForFunction(() => Boolean(window.__layout), undefined, {
-          timeout: 15000,
-        })
-        snapshot = await page.evaluate(() => window.__layout.snapshot())
-      }
-      return { elapsed: Date.now() - start, snapshot }
+      const captured = await snapshot(page)
+      return { elapsed: Date.now() - start, snapshot: captured }
     })
   )
 }
@@ -82,14 +103,15 @@ function fulfilled<T>(result: PromiseSettledResult<T>) {
   return result.value
 }
 
-export async function samples(page: Page, output: string) {
+export async function samples(page: Page, output: string, ready?: Readiness[]) {
   const start = Date.now()
   // Handle every branch immediately. Closing a failed capture must never
   // leave a timer or the network-idle wait rejecting in the background.
-  const [geometry, pictures, settled] = await Promise.allSettled([
+  const [geometry, pictures, settled, completed] = await Promise.allSettled([
     timedSnapshots(page),
     timedScreenshots(page, output),
     settle(page),
+    waitReady(page, ready),
   ])
   const images = fulfilled(pictures)
   const captured = fulfilled(geometry).map((sample, index) => ({
@@ -97,12 +119,13 @@ export async function samples(page: Page, output: string) {
     ...images[index],
   }))
   const networkIdle = fulfilled(settled)
-  const snapshot = await page.evaluate(() => window.__layout.snapshot())
+  fulfilled(completed)
+  const finalSnapshot = await snapshot(page)
   const file = path.join(output, "settled.png")
   await screenshot(page, file)
   captured.push({
     elapsed: Date.now() - start,
-    snapshot,
+    snapshot: finalSnapshot,
     screenshot: file,
     screenshotElapsed: Date.now() - start,
   })

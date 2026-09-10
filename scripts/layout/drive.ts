@@ -1,10 +1,12 @@
 import { readFile } from "node:fs/promises"
 import path from "node:path"
 import { type Browser, type Page } from "playwright"
-import { perform } from "./actions.ts"
-import { samples, screenshot, settle } from "./capture.ts"
+import { perform, waitReady } from "./actions.ts"
+import { samples, screenshot, settle, snapshot } from "./capture.ts"
 import { compare } from "./diff.ts"
-import { type Scenario, type Shift, type Snapshot } from "./types.ts"
+import { trackNetwork } from "./measurement/network.ts"
+import { installClipboard, installResponses } from "./measurement/transport.ts"
+import { type Scenario, type Shift } from "./types.ts"
 
 export type RunOptions = {
   condition: "cold" | "warm"
@@ -21,7 +23,12 @@ function urlFor(scenario: Scenario, options: RunOptions) {
     : `${options.fixture}/scripts/layout/page.html?path=${encodeURIComponent(scenario.path)}`
 }
 
-async function configure(page: Page, scenario: Scenario, options: RunOptions) {
+async function configure(
+  page: Page,
+  scenario: Scenario,
+  options: RunOptions,
+  errors: string[]
+) {
   const probe = await readFile(
     path.join(import.meta.dirname, "probe.js"),
     "utf8"
@@ -29,16 +36,10 @@ async function configure(page: Page, scenario: Scenario, options: RunOptions) {
   await page.addInitScript({
     content: `${probe}\nwindow.__mark(${JSON.stringify(scenario.id)})`,
   })
-  for (const response of scenario.responses ?? []) {
-    await page.route(response.url, async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, response.delay ?? 0))
-      await route.fulfill({
-        contentType: "application/json",
-        status: response.status ?? 200,
-        body: response.body,
-      })
-    })
-  }
+  await installClipboard(page, scenario.clipboard)
+  const responses = await installResponses(page, scenario, (message) =>
+    errors.push(message)
+  )
   if (options.condition === "cold") {
     const cdp = await page.context().newCDPSession(page)
     await cdp.send("Network.enable")
@@ -52,6 +53,7 @@ async function configure(page: Page, scenario: Scenario, options: RunOptions) {
     })
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 })
   }
+  return responses
 }
 
 export async function drive(
@@ -62,13 +64,14 @@ export async function drive(
   const context = await createContext(browser, scenario, options)
   try {
     const page = await context.newPage()
+    trackNetwork(page)
     const errors: string[] = []
     const shifts: Shift[] = []
     await page.exposeFunction("__layoutRecord", (entry: Shift) => {
       shifts.push(entry)
     })
     page.on("pageerror", (error) => errors.push(error.message))
-    await configure(page, scenario, options)
+    const responses = await configure(page, scenario, options, errors)
     const url = urlFor(scenario, options)
     if (options.condition === "warm") {
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 })
@@ -76,6 +79,7 @@ export async function drive(
     }
     shifts.length = 0
     errors.length = 0
+    responses.length = 0
     await page.goto(url, { waitUntil: "commit", timeout: 90_000 })
     // Computed-style walks before the render-blocking CSS arrives can
     // themselves start transitions. Sample the first visible frame.
@@ -84,27 +88,8 @@ export async function drive(
       undefined,
       { timeout: 90_000 }
     )
-    let before: Snapshot | undefined
-    if (scenario.steps?.length) {
-      if (scenario.setup?.length) {
-        await settle(page)
-        for (const step of scenario.setup) {
-          await perform(page, step)
-        }
-      }
-      await settle(page)
-      before = await page.evaluate(() => window.__layout.snapshot())
-      await screenshot(page, path.join(options.output, "before.png"))
-      await page.evaluate((id) => {
-        window.__layout.shifts.length = 0
-        window.__mark(id)
-      }, scenario.id)
-      shifts.length = 0
-      for (const step of scenario.steps) {
-        await perform(page, step)
-      }
-    }
-    const captured = await samples(page, options.output)
+    const before = await act(page, scenario, options.output, shifts)
+    const captured = await samples(page, options.output, scenario.ready)
     const first = captured.samples[0].snapshot
     return {
       ...captured,
@@ -112,6 +97,7 @@ export async function drive(
       actionDelta: before ? compare(before, first) : undefined,
       url: page.url(),
       errors,
+      responses,
       shifts,
       diffs: captured.samples
         .slice(1)
@@ -120,6 +106,43 @@ export async function drive(
   } finally {
     await context.close()
   }
+}
+
+async function act(
+  page: Page,
+  scenario: Scenario,
+  output: string,
+  shifts: Shift[]
+) {
+  if (
+    !scenario.steps?.length &&
+    !scenario.setup?.length &&
+    !scenario.setupReady?.length
+  ) {
+    return undefined
+  }
+  if (scenario.setup?.length || scenario.steps?.length) {
+    await settle(page)
+  }
+  for (const step of scenario.setup ?? []) {
+    await perform(page, step)
+  }
+  if (scenario.setupReady?.length) {
+    await waitReady(page, scenario.setupReady)
+  } else if (scenario.setup?.length) {
+    await settle(page)
+  }
+  const before = await snapshot(page)
+  await screenshot(page, path.join(output, "before.png"))
+  await page.evaluate((id) => {
+    window.__layout.shifts.length = 0
+    window.__mark(id)
+  }, scenario.id)
+  shifts.length = 0
+  for (const step of scenario.steps ?? []) {
+    await perform(page, step)
+  }
+  return before
 }
 
 async function createContext(

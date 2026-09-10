@@ -24,6 +24,8 @@ const sources = await Promise.all(
     "actions.ts",
     "diff.ts",
     "types.ts",
+    "measurement/network.ts",
+    "measurement/transport.ts",
   ].map((file) => readFile(path.join(import.meta.dirname, file)))
 )
 const digest = createHash("sha256").update(Buffer.concat(sources)).digest("hex")
@@ -37,13 +39,24 @@ const jobs = scenarios.flatMap((scenario) =>
   )
 )
 type Job = (typeof jobs)[number]
+let interrupted = false
+for (const signal of ["SIGINT", "SIGTERM"] as const) {
+  process.on(signal, () => {
+    interrupted = true
+    process.exitCode = 130
+  })
+}
 await Promise.all(Array.from({ length: concurrency }, () => worker()))
 
 async function worker() {
   // Separate Chromium processes keep cold cache clearing away from warm runs.
   const browser = await chromium.launch()
   try {
-    for (let job = jobs.shift(); job; job = jobs.shift()) {
+    for (
+      let job = jobs.shift();
+      job && !interrupted && browser.isConnected();
+      job = jobs.shift()
+    ) {
       await record(browser, job)
     }
   } finally {
@@ -64,6 +77,11 @@ async function measure(
       : undefined)
   if (blocked) {
     return { blocked }
+  }
+  if (scenario.transportFixture) {
+    return {
+      error: `Transport fixture requires its wrapper: ${scenario.transportFixture}`,
+    }
   }
   try {
     return await drive(browser, scenario, {

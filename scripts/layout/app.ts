@@ -13,6 +13,7 @@ if (!env.CONVEX_DEPLOYMENT?.startsWith("dev:")) {
 Object.assign(process.env, env, {
   VITE_JORI_PUBLIC_ORIGIN: "http://localhost:5178",
   VITE_JORI_US_ORIGIN: "http://localhost:5178",
+  VITE_JORI_US_SITE_URL: env.VITE_CONVEX_SITE_URL,
 })
 const session = path.resolve("scripts/layout/reports/session.local")
 if (process.argv.includes("--build")) {
