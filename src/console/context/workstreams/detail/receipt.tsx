@@ -1,5 +1,6 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { ExpandableText } from "@/components/ui/expandable-text"
+import { Skeleton } from "@/components/ui/skeleton"
 import { SeparatorDot } from "@/shared/console/dot"
 import { flushRowClassName } from "@/shared/console/flush"
 import { relativeTime } from "@/shared/console/time"
@@ -12,6 +13,24 @@ type ReceiptRow = {
   why: string
   observedAt: number
   url?: string
+}
+
+const receiptClassName = "flex flex-col gap-0.5 py-2.5 last:pb-0"
+
+export function ReceiptSkeleton({ count }: { count: number }) {
+  return (
+    <div aria-hidden className="flex flex-col gap-1">
+      <ul className="flex flex-col divide-y">
+        {["first", "second"].slice(0, count).map((slot) => (
+          <li className={receiptClassName} key={slot}>
+            <Skeleton className="h-5 w-full max-sm:h-9.5" />
+            <Skeleton className="h-[2lh] w-full text-sm" />
+          </li>
+        ))}
+      </ul>
+      {count > 2 ? <Skeleton className="h-5 w-24" /> : null}
+    </div>
+  )
 }
 
 // One cited source record: the header row links out to the app when the
@@ -40,7 +59,7 @@ export function Receipt({ receipt }: { receipt: ReceiptRow }) {
   )
 
   return (
-    <li className="flex flex-col gap-0.5 py-2.5 last:pb-0">
+    <li className={receiptClassName}>
       {receipt.url === undefined ? (
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
           {header}
@@ -57,7 +76,7 @@ export function Receipt({ receipt }: { receipt: ReceiptRow }) {
           {header}
         </a>
       )}
-      <div className="text-muted-foreground text-sm">
+      <div className="min-h-[2lh] text-muted-foreground text-sm">
         <ExpandableText maxLines={2}>{receipt.why}</ExpandableText>
       </div>
     </li>
