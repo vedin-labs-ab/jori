@@ -1,0 +1,9 @@
+# Local builds and layout test captures.
+/dist/
+/.output/
+/.tanstack/
+
+# Local configuration and saved sessions.
+*.local
+.env*
+!.env.*.example
