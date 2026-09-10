@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { checkRunBudget } from "../billing/guard"
+import { resolveMessageOwner } from "../messages/data"
 import { conversationScope } from "../messages/surface"
 import { resolveRunAudience } from "../runs/audience"
 import { wakeRun } from "../runs/execution/waiters/data"
@@ -143,7 +144,20 @@ async function startNewMessageRun(
     session === null
       ? args.message
       : ((await readPendingMessages(ctx, session, 1))[0] ?? args.message)
-  const runId = await insertRun(ctx, { ...args, conversation, message, kind })
+  const runId = await insertRun(ctx, {
+    ...args,
+    conversation,
+    message,
+    kind,
+    createdBy:
+      message._id === args.message._id
+        ? args.createdBy
+        : await resolveMessageOwner(ctx, {
+            message,
+            surface: message.surface,
+            organizationId: message.organizationId,
+          }),
+  })
 
   const sessionId = await startSession(ctx, {
     conversationId: conversation._id,

@@ -33,11 +33,9 @@ export const upsert = internalMutation({
     externalId: v.string(),
     runId: v.id("runs"),
   },
-  returns: v.null(),
+  returns: v.boolean(),
   handler: async (ctx, args) => {
-    await upsertSandbox(ctx, args)
-
-    return null
+    return await upsertSandbox(ctx, args)
   },
 })
 
