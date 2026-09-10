@@ -206,6 +206,7 @@ async function seedPrivateChats(
       organizationId,
       folderId,
       surface: "console",
+      visibility: { mode: "private" },
       scope: "person",
       createdBy: unrelatedId,
       title: "Another person's chat",

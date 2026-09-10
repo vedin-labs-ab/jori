@@ -1,5 +1,6 @@
 import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
+import { conversationGate } from "../conversations/access"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Gate } from "./sight"
 
@@ -11,7 +12,8 @@ export const targetValidator = v.union(
   v.object({ kind: v.literal("table"), id: v.id("collections") }),
   v.object({ kind: v.literal("store"), id: v.id("collections") }),
   v.object({ kind: v.literal("file"), id: v.id("files") }),
-  v.object({ kind: v.literal("folder"), id: v.id("folders") })
+  v.object({ kind: v.literal("folder"), id: v.id("folders") }),
+  v.object({ kind: v.literal("chat"), id: v.id("conversations") })
 )
 
 export type VisibilityTarget = Infer<typeof targetValidator>
@@ -29,7 +31,7 @@ export function folderGate(folder: Doc<"folders">): Gate {
 }
 
 type LoadedTarget = {
-  id: Id<"collections"> | Id<"files"> | Id<"folders">
+  id: Id<"collections"> | Id<"files"> | Id<"folders"> | Id<"conversations">
   gate: Gate
   /** The person whose consent a change needs; folders answer with their
    *  creator, ownerless materials with nothing. */
@@ -57,13 +59,29 @@ export async function loadTarget(
     }
   }
 
+  if (target.kind === "chat") {
+    const conversation = await ctx.db.get(target.id)
+    if (
+      conversation === null ||
+      conversation.organizationId !== organizationId ||
+      conversation.surface !== "console"
+    ) {
+      throw new Error("Not found.")
+    }
+    return {
+      id: conversation._id,
+      gate: conversationGate(conversation),
+      owner: conversation.createdBy,
+    }
+  }
+
   return await loadMaterialTarget(ctx, organizationId, target)
 }
 
 async function loadMaterialTarget(
   ctx: QueryLikeCtx,
   organizationId: string,
-  target: Exclude<VisibilityTarget, { kind: "folder" }>
+  target: Exclude<VisibilityTarget, { kind: "folder" | "chat" }>
 ): Promise<LoadedTarget> {
   const material = await ctx.db.get(target.id)
 

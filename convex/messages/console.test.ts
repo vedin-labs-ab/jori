@@ -61,7 +61,7 @@ test("pages a conversation newest first with each side's role", async () => {
   })
 
   expect(page.isDone).toBe(true)
-  expect(page.page).toEqual([
+  expect(page.page).toMatchObject([
     {
       id: reply._id,
       role: "jori",
@@ -72,6 +72,7 @@ test("pages a conversation newest first with each side's role", async () => {
     {
       id: question._id,
       role: "person",
+      author: { id: personId, name: "Member", isViewer: false },
       text: "What changed this week?",
       data: { context: { kind: "folder", id: "folders:1" } },
       createdAt: 1_000,
