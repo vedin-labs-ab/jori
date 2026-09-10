@@ -114,7 +114,7 @@ async function listCollections(
     personId: viewer.personId,
     query: search,
   }
-  const collections =
+  const collections: Array<{ _id: string; name: string }> =
     kind === "table"
       ? await searchCollections(ctx, tableSpec, args, viewer.sight)
       : await searchCollections(ctx, storeSpec, args, viewer.sight)
