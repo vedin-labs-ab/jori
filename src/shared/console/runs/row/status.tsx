@@ -164,7 +164,7 @@ export function MetaPill({
   return (
     <span className="inline-flex items-center gap-1 text-muted-foreground text-xs">
       <Icon className="size-3.5" />
-      {label}
+      <span className="min-w-[9ch] tabular-nums">{label}</span>
     </span>
   )
 }
