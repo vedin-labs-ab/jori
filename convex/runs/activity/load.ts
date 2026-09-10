@@ -11,12 +11,12 @@ const relationLimit = 100
 export async function loadActivityData(
   ctx: QueryCtx,
   run: Doc<"runs">,
-  personId: Id<"persons"> | undefined
-): Promise<ActivityData> {
-  const sight = createSight(ctx, {
+  personId: Id<"persons"> | undefined,
+  sight: Sight = createSight(ctx, {
     organizationId: run.organizationId,
     personId,
   })
+): Promise<ActivityData> {
   const [traces, approvals, offers, waiters, agents, files] = await Promise.all(
     [
       loadTraces(ctx, run._id),

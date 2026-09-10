@@ -1,7 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
 import { conversationGate } from "../../conversations/access"
 import { type QueryLikeCtx } from "../../shared/context"
-import { createSight } from "../../visibility/sight"
+import { executionPrincipalPersonId } from "../principal"
+import { createRunSight } from "../sight"
 
 export function canSee(current: Doc<"runs">, candidate: Doc<"runs">) {
   const audience = candidate.audience
@@ -49,17 +50,15 @@ export async function canInspectRun(
       if (candidate.conversationId === current.conversationId) {
         return true
       }
-      return await createSight(ctx, {
-        organizationId: current.organizationId,
-        personId:
-          current.principal.kind === "person"
-            ? current.principal.personId
-            : undefined,
-      }).canSee(conversationGate(conversation))
+      return await (await createRunSight(ctx, current)).canSee(
+        conversationGate(conversation)
+      )
     }
   }
   return (
     canSee(current, candidate) &&
-    (candidate.audience !== "person" || current.audience === "person")
+    (candidate.audience !== "person" ||
+      (candidate.createdBy !== undefined &&
+        candidate.createdBy === executionPrincipalPersonId(current.principal)))
   )
 }

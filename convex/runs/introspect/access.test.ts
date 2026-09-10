@@ -1,7 +1,14 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import { databaseContext, id } from "../../../test/convex/database"
 import { type Doc } from "../../_generated/dataModel"
 import { canInspectRun, canSee } from "./access"
+
+vi.mock("../../visibility/audience", () => ({
+  listOrganizationViewerIds: async () => [
+    id<"persons">("owner"),
+    id<"persons">("member"),
+  ],
+}))
 
 test("allows organization runs and only matching private buckets", () => {
   const current = run({
@@ -79,7 +86,7 @@ test("chat inspection shares its own historical runs and checks other chats with
     surface: "console",
     externalId: "chat",
     scope: "conversation",
-    visibility: { mode: "people", personIds: [owner] },
+    visibility: { mode: "people", personIds: [id<"persons">("member")] },
     createdBy: owner,
   })
   const current = run({

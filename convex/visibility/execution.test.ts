@@ -3,7 +3,7 @@ import { databaseContext, id } from "../../test/convex/database"
 import { folderDoc } from "../../test/convex/folders"
 import { type Id } from "../_generated/dataModel"
 import { listOrganizationViewerIds } from "./audience"
-import { createAudienceSight } from "./execution"
+import { audienceKey, createAudienceSight } from "./execution"
 import { type Gate } from "./sight"
 
 vi.mock("./audience", () => ({ listOrganizationViewerIds: vi.fn() }))
@@ -89,4 +89,22 @@ test("members without console identities and empty audiences cannot widen access
   expect(
     await createAudienceSight(ctx, organization).canSee(organization)
   ).toBe(false)
+})
+
+test("execution audience keys change with effective membership, independent of member order", async () => {
+  const { ctx } = databaseContext()
+  const organization = {
+    ...gate,
+    visibility: { mode: "organization" as const },
+  }
+  vi.mocked(listOrganizationViewerIds).mockResolvedValue([owner, member])
+  const first = await audienceKey(ctx, organization)
+  vi.mocked(listOrganizationViewerIds).mockResolvedValue([member, owner])
+  expect(await audienceKey(ctx, organization)).toBe(first)
+  vi.mocked(listOrganizationViewerIds).mockResolvedValue([
+    owner,
+    member,
+    outsider,
+  ])
+  expect(await audienceKey(ctx, organization)).not.toBe(first)
 })

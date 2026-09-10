@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internalQuery } from "../../_generated/server"
 import { loadActivityData } from "../activity/load"
 import { projectActivity } from "../activity/project"
+import { createRunSight } from "../sight"
 import { canInspectRun } from "./access"
 import {
   matchesActivityFilter,
@@ -80,7 +81,8 @@ export const searchRunActivity = internalQuery({
         target,
         current.principal.kind === "person"
           ? current.principal.personId
-          : undefined
+          : undefined,
+        await createRunSight(ctx, current)
       )
     ).filter((item) => matchesActivityFilter(item, args.filter))
     const page = pageItems(items, {
