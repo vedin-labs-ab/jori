@@ -4,7 +4,7 @@ import {
   createMentionCatalog,
   emptyMentionSources,
 } from "../../mentions/sources"
-import { parseComposerText, serializeComposerDocument } from "./codec"
+import { parseComposerLine, serializeComposerDocument } from "./codec"
 
 const catalog = createMentionCatalog({
   ...emptyMentionSources,
@@ -12,30 +12,40 @@ const catalog = createMentionCatalog({
   skills: ["triage"],
 })
 
-test("a message's text opens as paragraphs with its tokens as chips, and closes back to the same text", () => {
-  const text =
-    "Look at +[table:k17abc] and +[job:j1]\nthen /triage it via @Slack\n\n+[table:k17abc] again"
-  const document = parseComposerText(text, catalog)
+test("parsed mention lines serialize with blank lines and deduplicated references", () => {
+  const firstLine = parseComposerLine(
+    "Look at +[table:k17abc] and +[job:j1]",
+    catalog
+  )
+  const document = {
+    type: "doc",
+    content: [
+      { type: "paragraph", content: firstLine },
+      {
+        type: "paragraph",
+        content: parseComposerLine("then /triage it via @Slack", catalog),
+      },
+      { type: "paragraph" },
+      {
+        type: "paragraph",
+        content: parseComposerLine("+[table:k17abc] again", catalog),
+      },
+    ],
+  }
 
-  expect(document.content?.map((paragraph) => paragraph.type)).toEqual([
-    "paragraph",
-    "paragraph",
-    "paragraph",
-    "paragraph",
-  ])
-  expect(document.content?.[0]?.content).toEqual([
+  expect(firstLine).toEqual([
     { type: "text", text: "Look at " },
     { attrs: { id: "table:k17abc", kind: "resource" }, type: mentionNodeName },
     { type: "text", text: " and " },
     { attrs: { id: "job:j1", kind: "resource" }, type: mentionNodeName },
   ])
-  expect(document.content?.[2]).toEqual({ type: "paragraph" })
+  expect(parseComposerLine("", catalog)).toEqual([])
   expect(serializeComposerDocument(document)).toEqual({
     references: [
       { kind: "table", id: "k17abc" },
       { kind: "job", id: "j1" },
     ],
-    text,
+    text: "Look at +[table:k17abc] and +[job:j1]\nthen /triage it via @Slack\n\n+[table:k17abc] again",
   })
 })
 

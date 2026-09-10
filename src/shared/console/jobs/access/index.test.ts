@@ -3,7 +3,6 @@ import { describe, expect, test } from "vitest"
 import { type ToolPermission } from "@/shared/console/tools/model"
 import {
   createJobMentionCatalog,
-  findActiveJobMention,
   findCompletedJobMention,
   getJobMentionSuggestions,
   readJobMentions,
@@ -64,30 +63,6 @@ describe("completed mention detection", () => {
     })
     expect(findCompletedJobMention("Open github", catalog)).toBeNull()
     expect(findCompletedJobMention("Run /meeting-prp", catalog)).toBeNull()
-  })
-})
-
-describe("active mention autocomplete", () => {
-  test("enables job sigils and leaves resource mentions inactive", () => {
-    expect(findActiveJobMention("Look at +ren", 12)).toBeNull()
-    expect(findActiveJobMention("Send to @li", 11)).toEqual({
-      end: 11,
-      kind: "integration",
-      query: "li",
-      start: 8,
-    })
-    expect(findActiveJobMention("Run /mee", 8)).toEqual({
-      end: 8,
-      kind: "skill",
-      query: "mee",
-      start: 4,
-    })
-    expect(findActiveJobMention("Use #sha", 8)).toEqual({
-      end: 8,
-      kind: "tool",
-      query: "sha",
-      start: 4,
-    })
   })
 })
 

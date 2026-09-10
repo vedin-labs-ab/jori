@@ -1,7 +1,4 @@
-import {
-  type ActiveMention,
-  findActiveMention,
-} from "@/shared/console/mentions/active"
+import { type ActiveMention } from "@/shared/console/mentions/active"
 import {
   maxSuggestions,
   normalizeFuzzyAlias,
@@ -14,7 +11,6 @@ import {
   jobSurfaceIntegrations,
 } from "./catalog"
 import { getIntegrationSuggestionScore } from "./fuzzy"
-import { isJobMentionKind, type JobMentionKind, jobMentionKinds } from "./scan"
 import { type JobToolAccess, resolveJobToolAccess } from "./tools"
 
 type JobMentionSuggestionBase = {
@@ -51,20 +47,6 @@ export type JobMentionSources = {
   skills: readonly string[]
   surfaces?: readonly JobSurfaceFormValue[]
   webSearch?: boolean
-}
-
-export type ActiveJobMention = ActiveMention & { kind: JobMentionKind }
-
-/** The sigil-started token the cursor is inside, if any. */
-export function findActiveJobMention(
-  text: string,
-  cursor: number
-): ActiveJobMention | null {
-  const active = findActiveMention(text, cursor, jobMentionKinds)
-
-  return active !== null && isJobMentionKind(active.kind)
-    ? { ...active, kind: active.kind }
-    : null
 }
 
 export function getJobMentionSuggestions(
