@@ -62,7 +62,7 @@ export function ProviderButton({
       {signInSocialPending ? (
         <Spinner />
       ) : ProviderIcon ? (
-        <ProviderIcon />
+        <ProviderIcon className="size-4" />
       ) : null}
 
       {display === "full"
