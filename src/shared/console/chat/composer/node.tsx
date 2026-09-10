@@ -21,7 +21,7 @@ export function ComposerMentionView({
   return (
     <NodeViewWrapper
       as="span"
-      className="inline-flex align-middle"
+      className="inline-flex align-top"
       contentEditable={false}
     >
       <ChatMentionChip

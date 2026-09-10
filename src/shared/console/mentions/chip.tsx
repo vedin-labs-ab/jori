@@ -5,10 +5,9 @@ import { type MentionKind } from "./scan"
 import { mentionTones } from "./tone"
 
 /** The pill every mention wears: a fixed-height, tinted, bordered inline
- *  box that sits on the text's baseline, in the editor and in the message
- *  alike. */
+ *  box aligned within the line, in the editor and in the message alike. */
 export const mentionChipClassName =
-  "mx-0.5 inline-flex h-5 items-center overflow-hidden rounded-sm border align-middle text-[0.625rem]/none"
+  "mx-0.5 inline-flex h-5 items-center overflow-hidden rounded-sm border align-top text-[0.625rem]/none"
 
 type MentionChipProps = Omit<ComponentProps<"span">, "children"> & {
   icon: ReactNode
