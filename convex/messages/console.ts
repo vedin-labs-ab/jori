@@ -9,6 +9,7 @@ import { clearRunDraft } from "../runs/execution/drafts/data"
 import { type Actor } from "../shared/actor"
 import { insertRow, type QueryLikeCtx } from "../shared/context"
 import { type referenceTargetValidator } from "./references"
+import { consoleMessageViews } from "./view"
 
 // Console messages: what a person types to Jori in the web console and what
 // Jori writes back. They live in the same `messages` table as provider
@@ -79,14 +80,20 @@ export const page = query({
       personId,
     })
 
-    return await pageConsoleMessages(ctx, conversation, args.paginationOpts)
+    return await pageConsoleMessages(
+      ctx,
+      conversation,
+      args.paginationOpts,
+      personId
+    )
   },
 })
 
 export async function pageConsoleMessages(
   ctx: QueryLikeCtx,
   conversation: Doc<"conversations">,
-  paginationOpts: PaginationOptions
+  paginationOpts: PaginationOptions,
+  viewerId?: Id<"persons">
 ) {
   const result = await ctx.db
     .query("messages")
@@ -101,7 +108,10 @@ export async function pageConsoleMessages(
     .order("desc")
     .paginate(paginationOpts)
 
-  return { ...result, page: result.page.map(consoleMessageView) }
+  return {
+    ...result,
+    page: await consoleMessageViews(ctx, result.page, viewerId),
+  }
 }
 
 /** Jori's reply into a console conversation, written as the self actor. The
@@ -164,15 +174,4 @@ export async function insertConsoleMessage(
   await ctx.db.patch(input.conversation._id, { updatedAt: input.now })
 
   return message
-}
-
-function consoleMessageView(message: Doc<"messages">) {
-  return {
-    id: message._id,
-    role:
-      message.actor?.kind === "self" ? ("jori" as const) : ("person" as const),
-    text: message.text ?? "",
-    data: message.data,
-    createdAt: message.createdAt,
-  }
 }

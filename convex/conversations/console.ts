@@ -10,6 +10,7 @@ import {
   insertConsoleMessage,
 } from "../messages/console"
 import { referenceTargetValidator } from "../messages/references"
+import { consoleAuthor } from "../messages/view"
 import { modelSelectionValidator } from "../model/selection"
 import {
   accountArgs,
@@ -128,13 +129,14 @@ export const live = query({
       return { status: "unauthorized" as const, message: access.message }
     }
 
+    const personId = await resolveConsolePerson(
+      ctx,
+      args.organizationId,
+      access.identity
+    )
     const conversation = await findVisibleConsoleConversation(ctx, {
       ...args,
-      personId: await resolveConsolePerson(
-        ctx,
-        args.organizationId,
-        access.identity
-      ),
+      personId,
     })
 
     if (conversation === null) {
@@ -147,6 +149,10 @@ export const live = query({
       folderId: conversation.folderId,
       visibility: conversationVisibility(conversation),
       createdBy: conversation.createdBy,
+      viewer:
+        personId === undefined
+          ? null
+          : await consoleAuthor(ctx, personId, personId),
       ...(await readLiveState(ctx, conversation)),
     }
   },

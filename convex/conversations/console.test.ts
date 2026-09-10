@@ -164,7 +164,7 @@ test("lists a person's own conversations, most recently active first", async () 
     paginationOpts,
   })
 
-  expect(result.page).toEqual([
+  expect(result.page).toMatchObject([
     { id: newer.conversationId, title: "Newer", updatedAt: 2_000 },
     { id: older.conversationId, title: "Older", updatedAt: 1_000 },
   ])

@@ -1,6 +1,7 @@
 import { type Infer, v } from "convex/values"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
+import { transitionConversationVisibility } from "../conversations/sharing"
 import { filedResourceType, loadFiledGate } from "../folders/filing"
 import {
   ensureCurrentPerson,
@@ -208,7 +209,20 @@ export const set = mutation({
       throw new Error("Only the owner can change who may see this.")
     }
 
-    await ctx.db.patch(target.id, { visibility })
+    if (args.target.kind === "chat") {
+      const conversation = await ctx.db.get(args.target.id)
+      if (conversation === null) {
+        throw new Error("Not found.")
+      }
+      await transitionConversationVisibility(
+        ctx,
+        conversation,
+        visibility,
+        personId
+      )
+    } else {
+      await ctx.db.patch(target.id, { visibility })
+    }
 
     return null
   },
