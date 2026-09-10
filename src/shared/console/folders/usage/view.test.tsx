@@ -80,7 +80,9 @@ test("a window with nothing in it explains itself instead of drawing zeroes", ()
 
   expect(screen.getByText("No usage in this window")).toBeDefined()
   expect(
-    screen.getByText("Runs from jobs filed here will show up as they spend.")
+    screen.getByText(
+      "Runs from jobs and chats filed here will show up as they spend."
+    )
   ).toBeDefined()
   expect(screen.queryByTestId("charts")).toBeNull()
 })
