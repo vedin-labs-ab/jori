@@ -7,7 +7,7 @@ import { accessibleCollection } from "../collections/access"
 import { findVisibleConsoleConversation } from "../conversations/resolve"
 import { getOrganizationFolder } from "../folders/tree"
 import { canSeeJob } from "../jobs/access"
-import { runVisibleToPerson } from "../runs/console/filters"
+import { canSeeRun } from "../runs/visibility"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Sight } from "../visibility/sight"
 
@@ -114,7 +114,7 @@ async function loadRun(ctx: QueryLikeCtx, sight: Sight, id: string) {
 
   return run !== null &&
     run.organizationId === sight.organizationId &&
-    runVisibleToPerson(run, sight.personId)
+    (await canSeeRun(ctx, run, sight.personId))
     ? { name: run.snapshot.title, status: run.status }
     : null
 }

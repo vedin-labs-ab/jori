@@ -1,5 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
+import { createSight } from "../visibility/sight"
+import { conversationGate } from "./access"
 
 type ConversationKey = {
   externalId: string
@@ -38,8 +40,7 @@ export async function findMessageConversation(
   })
 }
 
-/** A console conversation is its creator's alone: anything else, foreign,
- *  provider-backed, or missing, reads as not found. */
+/** Console chats use the same resource and folder gate as their contents. */
 export async function findVisibleConsoleConversation(
   ctx: QueryLikeCtx,
   args: {
@@ -53,8 +54,7 @@ export async function findVisibleConsoleConversation(
   return conversation !== null &&
     conversation.organizationId === args.organizationId &&
     conversation.surface === "console" &&
-    args.personId !== undefined &&
-    conversation.createdBy === args.personId
+    (await createSight(ctx, args).canSee(conversationGate(conversation)))
     ? conversation
     : null
 }

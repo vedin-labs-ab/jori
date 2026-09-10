@@ -1,6 +1,7 @@
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
+import { canSeeRun } from "../visibility"
 import {
   countMatches,
   normalizeQuery,
@@ -9,7 +10,6 @@ import {
   type RunFilter,
   runMatchesAudienceFilter,
   runMatchesFilter,
-  runVisibleToPerson,
   scanPage,
   summaryMatchesSearch,
 } from "./filters"
@@ -96,7 +96,7 @@ async function* pendingApprovalRuns(
     seenRunIds.add(run._id)
 
     if (
-      runVisibleToPerson(run, scope.personId) &&
+      (await canSeeRun(ctx, run, scope.personId)) &&
       runMatchesAudienceFilter(run, scope.audienceFilter) &&
       runMatchesFilter(run, scope.runFilter)
     ) {

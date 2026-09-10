@@ -17,12 +17,12 @@ import {
   runFilterValidator,
   runMatchesAudienceFilter,
   runMatchesFilter,
-  runVisibleToPerson,
   scanPage,
   summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
 import { type RunSummary, summarizeRun } from "./console/summaries"
+import { canSeeRun } from "./visibility"
 
 /** What the listing keeps: the runs a person may see, under the facets
  *  and search the page shows. */
@@ -107,7 +107,7 @@ export const stats = query({
               async (run) => (await matchListing(ctx, run, listing)) !== null
             ),
       totalCount: await countMatches(runs(), async (run) =>
-        runVisibleToPerson(run, personId)
+        canSeeRun(ctx, run, personId)
       ),
     }
   },
@@ -141,7 +141,7 @@ async function matchListing(
   listing: Listing
 ): Promise<{ row?: RunSummary } | null> {
   if (
-    !runVisibleToPerson(run, listing.personId) ||
+    !(await canSeeRun(ctx, run, listing.personId)) ||
     !runMatchesAudienceFilter(run, listing.audienceFilter) ||
     !runMatchesFilter(run, listing.runFilter)
   ) {

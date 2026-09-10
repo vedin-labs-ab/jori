@@ -3,19 +3,8 @@ import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { moveUsageBucket } from "../../usage/record"
-import { type Gate } from "../../visibility/sight"
 
 const batchSize = 100
-
-/** Filing organizes a chat without sharing its private conversation. */
-export function conversationGate(conversation: Doc<"conversations">): Gate {
-  return {
-    organizationId: conversation.organizationId,
-    ownerId: conversation.createdBy,
-    visibility: { mode: "private" },
-    folderId: conversation.folderId,
-  }
-}
 
 export async function fileConversation(
   ctx: MutationCtx,

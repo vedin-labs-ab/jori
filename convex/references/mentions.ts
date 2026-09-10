@@ -7,12 +7,13 @@ import { type ReferenceKind } from "../../contracts/replies/parts"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
+import { visibleConsoleConversations } from "../conversations/list"
 import { visibleFiles } from "../files/data"
 import { listOrganizationFolders } from "../folders/tree"
 import { canSeeJob } from "../jobs/access"
 import { searchJobs } from "../jobs/lifecycle"
 import { resolveCurrentPerson } from "../persons/account"
-import { runVisibleToPerson } from "../runs/console/filters"
+import { canSeeRun } from "../runs/visibility"
 import { searchStores } from "../stores/access"
 import { searchTables } from "../tables/access"
 import { createSight, type Sight } from "../visibility/sight"
@@ -70,19 +71,20 @@ export const list = query({
 })
 
 async function listChats(ctx: QueryCtx, viewer: Viewer, search: string) {
-  const conversations = await ctx.db
-    .query("conversations")
-    .withIndex("by_organization_and_created_by_and_updated_at", (index) =>
-      index
-        .eq("organizationId", viewer.sight.organizationId)
-        .eq("createdBy", viewer.personId)
-    )
-    .order("desc")
-    .take(readLimit(search))
+  const conversations = []
+  for await (const conversation of visibleConsoleConversations(
+    ctx,
+    viewer.sight
+  )) {
+    conversations.push(conversation)
+    if (conversations.length >= readLimit(search)) {
+      break
+    }
+  }
 
   return named(
     "chat",
-    conversations.filter((conversation) => conversation.surface === "console"),
+    conversations,
     (conversation) => conversation.title ?? "",
     search
   )
@@ -172,7 +174,7 @@ async function listRuns(ctx: QueryCtx, viewer: Viewer, search: string) {
 
   return named(
     "run",
-    runs.filter((run) => runVisibleToPerson(run, viewer.personId)),
+    await visibleRuns(ctx, runs, viewer.personId),
     (run) => run.snapshot.title,
     search
   )
@@ -194,4 +196,18 @@ function named<Row extends { _id: string }>(
     .map((row) => ({ kind, id: row._id, name: nameOf(row) }))
     .filter((resource) => resource.name.toLowerCase().includes(search))
     .slice(0, mentionsPerKind)
+}
+
+async function visibleRuns(
+  ctx: QueryCtx,
+  runs: Doc<"runs">[],
+  personId: Id<"persons">
+) {
+  const visible = []
+  for (const run of runs) {
+    if (await canSeeRun(ctx, run, personId)) {
+      visible.push(run)
+    }
+  }
+  return visible
 }

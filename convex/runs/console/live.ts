@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { query } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
 import { resolveConsolePerson } from "../../persons/account"
-import { runVisibleToPerson } from "./filters"
+import { canSeeRun } from "../visibility"
 import { summarizeRun } from "./summaries"
 
 /** One run as the Activity page would list it, for a surface following
@@ -25,7 +25,7 @@ export const get = query({
     if (
       run === null ||
       run.organizationId !== args.organizationId ||
-      !runVisibleToPerson(run, personId)
+      !(await canSeeRun(ctx, run, personId))
     ) {
       return null
     }

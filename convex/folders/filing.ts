@@ -2,11 +2,9 @@ import { type Infer, v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { purgeCollection } from "../collections/records"
+import { conversationGate } from "../conversations/access"
 import { purgeConversation } from "../conversations/filing/delete"
-import {
-  conversationGate,
-  fileConversation,
-} from "../conversations/filing/move"
+import { fileConversation } from "../conversations/filing/move"
 import { purgeFile } from "../files/records"
 import { jobGate } from "../jobs/access"
 import { removeJob } from "../jobs/lifecycle"

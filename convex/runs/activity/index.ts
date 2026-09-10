@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { query } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
 import { resolveConsolePerson } from "../../persons/account"
-import { runVisibleToPerson } from "../console/filters"
+import { canSeeRun } from "../visibility"
 import { loadActivityData } from "./load"
 import { projectActivity } from "./project"
 
@@ -24,7 +24,7 @@ export const list = query({
     if (
       run === null ||
       run.organizationId !== args.organizationId ||
-      !runVisibleToPerson(run, personId)
+      !(await canSeeRun(ctx, run, personId))
     ) {
       return { items: [], status: "missing" as const }
     }
