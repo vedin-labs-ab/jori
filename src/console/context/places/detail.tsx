@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { CopyableCodeBlock } from "@/shared/console/copy"
+import { useRetained } from "@/shared/console/retain"
 import { relativeTime, useNow } from "@/shared/console/time"
 import { scrollFade } from "@/shared/fade"
 import { ContextSectionTitle } from "../section"
@@ -30,6 +31,8 @@ export function PlaceDetail({
   place: Place | null
   onClose: () => void
 }) {
+  const retainedPlace = useRetained(place ?? undefined)
+
   return (
     <Sheet
       open={place !== null}
@@ -40,7 +43,9 @@ export function PlaceDetail({
       }}
     >
       <SheetContent className="flex w-full flex-col gap-0 data-[side=right]:sm:max-w-lg">
-        {place === null ? null : <DetailBody place={place} />}
+        {retainedPlace === undefined ? null : (
+          <DetailBody place={retainedPlace} />
+        )}
       </SheetContent>
     </Sheet>
   )

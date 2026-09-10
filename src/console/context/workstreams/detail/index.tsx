@@ -17,6 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { useRetained } from "@/shared/console/retain"
 import { relativeTime, useNow } from "@/shared/console/time"
 import { scrollFade } from "@/shared/fade"
 import { IntegrationChips } from "@/shared/logo/integration"
@@ -36,6 +37,8 @@ export function WorkstreamDetail({
   workstream: Workstream | null
   onClose: () => void
 }) {
+  const retainedWorkstream = useRetained(workstream ?? undefined)
+
   return (
     <Sheet
       open={workstream !== null}
@@ -46,8 +49,11 @@ export function WorkstreamDetail({
       }}
     >
       <SheetContent className="flex w-full flex-col gap-0 data-[side=right]:sm:max-w-lg">
-        {workstream === null ? null : (
-          <DetailBody organizationId={organizationId} workstream={workstream} />
+        {retainedWorkstream === undefined ? null : (
+          <DetailBody
+            organizationId={organizationId}
+            workstream={retainedWorkstream}
+          />
         )}
       </SheetContent>
     </Sheet>
