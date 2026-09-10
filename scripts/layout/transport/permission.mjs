@@ -1,11 +1,11 @@
 /** Test-only transport correction for the separate localhost layout preview.
- * The shared dev backend trusts localhost:5173. Permission checks are reads
+ * The shared dev backend trusts localhost:8050. Permission checks are reads
  * carried over POST, and localhost:5178 would otherwise receive INVALID_ORIGIN.
  * Only this endpoint's Origin changes; responses and role data stay real.
  */
 const permissionUrl =
   "http://localhost:5178/api/auth/organization/has-permission"
-const approvedOrigin = "http://localhost:5173"
+const approvedOrigin = "http://localhost:8050"
 
 export const permissionOriginPatterns = [
   { urlPattern: permissionUrl, requestStage: "Request" },

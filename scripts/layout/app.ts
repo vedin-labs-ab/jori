@@ -53,7 +53,7 @@ if (process.argv.includes("--build")) {
               })
               .catch(() => {
                 response.statusCode = 401
-                response.end("Sign in to localhost:5173 first")
+                response.end("Sign in to localhost:8050 first")
               })
           })
         },
@@ -85,7 +85,7 @@ async function saveSession(header: string) {
     ]
   })
   if (cookies.length === 0) {
-    throw new Error("Sign in to localhost:5173 first")
+    throw new Error("Sign in to localhost:8050 first")
   }
   await mkdir(path.dirname(session), { recursive: true })
   await writeFile(session, JSON.stringify({ cookies, origins: [] }), {

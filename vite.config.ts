@@ -54,14 +54,14 @@ const config = defineConfig({
     write: !bundleCheck,
   },
   server: {
-    port: 5173,
+    port: 8050,
     strictPort: true,
   },
   // A build inlines VITE_JORI_* at compile time, so a preview only works
   // when it is served from the origin those values name. Nitro would
   // otherwise pick its own port and every origin check would fail.
   preview: {
-    port: 5173,
+    port: 8050,
     strictPort: true,
   },
   resolve: {

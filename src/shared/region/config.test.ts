@@ -6,8 +6,8 @@ test("uses a simple US-only localhost setup during development", () => {
 
   expect(config.current).toBe("us")
   expect([...config.enabled]).toEqual(["us"])
-  expect(config.publicOrigin).toBe("http://localhost:5173")
-  expect(requireRegionOrigin(config, "us")).toBe("http://localhost:5173")
+  expect(config.publicOrigin).toBe("http://localhost:8050")
+  expect(requireRegionOrigin(config, "us")).toBe("http://localhost:8050")
   expect(config.origins.eu).toBeUndefined()
 })
 
