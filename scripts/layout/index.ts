@@ -5,8 +5,7 @@ import { type Browser, chromium } from "playwright"
 import { drive } from "./drive.ts"
 import { type Scenario } from "./types.ts"
 
-const [manifest, output = "scripts/layout/reports/before"] =
-  process.argv.slice(2)
+const [manifest, output = "dist/layout-hunt/before"] = process.argv.slice(2)
 if (!manifest) {
   throw new Error(
     "Usage: pnpm layout <manifest.json> <output-directory>. LAYOUT_APP, LAYOUT_FIXTURE and LAYOUT_STORAGE configure the run."
@@ -15,7 +14,7 @@ if (!manifest) {
 const scenarios = JSON.parse(await readFile(manifest, "utf8")) as Scenario[]
 const concurrency = Math.min(
   4,
-  Math.max(1, Number(process.env.LAYOUT_CONCURRENCY ?? 2))
+  Math.max(1, Number(process.env.LAYOUT_CONCURRENCY ?? 1))
 )
 const sources = await Promise.all(
   [
