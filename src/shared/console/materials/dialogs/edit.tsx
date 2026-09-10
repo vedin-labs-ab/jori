@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -87,9 +87,11 @@ function useMaterialEdit(material: EditableMaterial | undefined, noun: string) {
   const [name, setName] = useState("")
   const [nameError, setNameError] = useState<string>()
 
-  useEffect(() => {
-    setName(material?.name ?? "")
-    setNameError(undefined)
+  useLayoutEffect(() => {
+    if (material !== undefined) {
+      setName(material.name)
+      setNameError(undefined)
+    }
   }, [material])
 
   return {
