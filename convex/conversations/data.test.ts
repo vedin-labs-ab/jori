@@ -13,6 +13,7 @@ import { startMessageRun } from "./data"
 // Starting a run hands it to the workflow component, which needs a real
 // backend; these tests are about the rows the start writes.
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
+vi.mock("../runs/tree", () => ({ stopRunTree: vi.fn() }))
 
 const expectedCursor = {
   message: { createdAt: 0, messageId: "message" },

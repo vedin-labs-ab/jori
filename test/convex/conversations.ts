@@ -85,6 +85,10 @@ function queryResult(
       (row) => rowTable(row, table) && matches(row, filters)
     ) ?? null
   const result = {
+    take: async (limit: number) =>
+      [...rows.values()]
+        .filter((row) => rowTable(row, table) && matches(row, filters))
+        .slice(0, limit),
     first: find,
     unique: find,
     order: (_direction: "asc" | "desc") => result,

@@ -52,8 +52,7 @@ export async function upsertSandbox(ctx: MutationCtx, args: SandboxRun) {
   }
 
   const now = Date.now()
-  const conversationId = (await findSessionByRun(ctx, args.runId))
-    ?.conversationId
+  const sessionId = (await findSessionByRun(ctx, args.runId))?._id
   const patch = {
     error: undefined,
     expiresAt: undefined,
@@ -61,7 +60,7 @@ export async function upsertSandbox(ctx: MutationCtx, args: SandboxRun) {
     status: "active" as const,
     organizationId: run.organizationId,
     updatedAt: now,
-    conversationId,
+    sessionId,
   }
   const existing = await findSandboxByExternalId(ctx, args.externalId)
 
@@ -83,7 +82,7 @@ export async function releaseIdleSandbox(ctx: MutationCtx, args: SandboxRun) {
     existing === null ||
     existing.runId !== args.runId ||
     existing.status !== "active" ||
-    existing.conversationId === undefined
+    existing.sessionId === undefined
   ) {
     return null
   }
@@ -119,7 +118,7 @@ export async function settleRunSandbox(ctx: MutationCtx, run: Doc<"runs">) {
   }
 
   const released =
-    run.status === "completed" && sandbox.conversationId !== undefined
+    run.status === "completed" && sandbox.sessionId !== undefined
       ? await releaseIdleSandbox(ctx, {
           externalId: sandbox.externalId,
           runId: run._id,
@@ -140,27 +139,27 @@ export async function claimReusableSandbox(
   ctx: MutationCtx,
   runId: Id<"runs">
 ) {
+  const run = await ctx.db.get(runId)
+
+  if (run === null || isTerminalRunStatus(run.status)) {
+    return null
+  }
+
   const active = await findActiveSandbox(ctx, runId)
 
   if (active !== null) {
     return { externalId: active.externalId }
   }
 
-  const run = await ctx.db.get(runId)
   const session = await findSessionByRun(ctx, runId)
 
-  if (
-    run === null ||
-    session?.conversationId === undefined ||
-    isTerminalRunStatus(run.status)
-  ) {
+  if (session?.conversationId === undefined) {
     return null
   }
 
   const reusable = await findReusableSandbox(ctx, {
     now: Date.now(),
-    organizationId: run.organizationId,
-    conversationId: session.conversationId,
+    sessionId: session._id,
   })
 
   if (reusable === null) {
@@ -189,20 +188,16 @@ async function findReusableSandbox(
   ctx: MutationCtx,
   args: {
     now: number
-    organizationId: string
-    conversationId: Id<"conversations">
+    sessionId: Id<"sessions">
   }
 ) {
   return await ctx.db
     .query("sandboxes")
-    .withIndex(
-      "by_organization_and_conversation_and_status_and_expires_at",
-      (query) =>
-        query
-          .eq("organizationId", args.organizationId)
-          .eq("conversationId", args.conversationId)
-          .eq("status", "idle")
-          .gt("expiresAt", args.now)
+    .withIndex("by_session_and_status_and_expires_at", (query) =>
+      query
+        .eq("sessionId", args.sessionId)
+        .eq("status", "idle")
+        .gt("expiresAt", args.now)
     )
     .order("desc")
     .first()

@@ -22,6 +22,7 @@ export const messages = internalMutation({
   args: {
     limit: v.optional(v.number()),
     sessionId: v.id("sessions"),
+    runId: v.id("runs"),
   },
   returns: v.any(),
   handler: async (ctx, args) => {
@@ -34,11 +35,12 @@ export async function drainSession(
   args: {
     limit?: number
     sessionId: Id<"sessions">
+    runId: Id<"runs">
   }
 ): Promise<DrainedSessionBatch> {
   const session = await ctx.db.get(args.sessionId)
 
-  if (session?.runId === undefined) {
+  if (session?.runId !== args.runId) {
     return { contexts: [], hasMore: false, interactions: [], messages: [] }
   }
 

@@ -1,4 +1,7 @@
-import { type DrainedSessionBatch } from "../../contracts/runtime/context"
+import {
+  type DrainedSessionBatch,
+  type RuntimeContext,
+} from "../../contracts/runtime/context"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
@@ -28,11 +31,15 @@ const reactionSnapshotSources: ReactionSnapshotSource[] = [
  *  of the batch the model sees. */
 export async function drainRunSession(
   ctx: ActionCtx,
-  sessionId: Id<"sessions">
+  sessionId: Id<"sessions">,
+  runId: Id<"runs">
 ): Promise<DrainedSessionBatch> {
   await syncSessionReactions(ctx, sessionId)
 
-  return await ctx.runMutation(internal.sessions.drain.messages, { sessionId })
+  return await ctx.runMutation(internal.sessions.drain.messages, {
+    sessionId,
+    runId,
+  })
 }
 
 export async function syncSessionReactions(
@@ -119,4 +126,18 @@ function combineReactionSyncStatus(
   }
 
   return "skipped"
+}
+
+export async function retargetRunSession(
+  ctx: ActionCtx,
+  context: RuntimeContext,
+  target: string
+) {
+  if (context.session !== null) {
+    await ctx.runMutation(internal.sessions.data.retarget, {
+      runId: context.run.id,
+      sessionId: context.session.id,
+      target,
+    })
+  }
 }

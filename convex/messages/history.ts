@@ -8,6 +8,10 @@ import { type QueryCtx } from "../_generated/server"
 import { findMessageConversation } from "../conversations/resolve"
 import { reactionSummariesForMessages } from "../reactions/summary"
 import {
+  type ExecutionPrincipal,
+  executionPrincipalPersonId,
+} from "../runs/principal"
+import {
   type ActorKind,
   getActorDisplayName,
   getActorKind,
@@ -48,18 +52,21 @@ export type RecentConversation = {
 
 export async function recentConversation(
   ctx: QueryCtx,
-  message: Doc<"messages">
+  message: Doc<"messages">,
+  principal: ExecutionPrincipal
 ): Promise<RecentConversation> {
   const messages = await recentMessages(ctx, message)
   const reactions = await reactionSummariesForMessages(ctx, messages)
   const entries = await Promise.all(
-    messages.map(async (entry) =>
-      messageEntry(
-        entry,
-        reactions.get(entry._id),
-        await messageContextLine(ctx, entry)
+    messages
+      .reverse()
+      .map(async (entry) =>
+        messageEntry(
+          entry,
+          reactions.get(entry._id),
+          await messageContextLine(ctx, entry, principal)
+        )
       )
-    )
   )
 
   const conversation = await findMessageConversation(ctx, message)
@@ -93,17 +100,18 @@ export function messageEntry(
 
 export function mergeRecentConversation(entries: ConversationEntry[]) {
   return [...entries]
-    .sort(
-      (left, right) =>
-        left.createdAt - right.createdAt || left.id.localeCompare(right.id)
-    )
+    .sort((left, right) => left.createdAt - right.createdAt)
     .slice(-recentConversationLimit)
 }
 
 /** The lines a console message's context and mentions make, read as the
  *  person who sent it sees the targets; nothing for a message sent about
  *  nothing that mentions nothing. */
-async function messageContextLine(ctx: QueryCtx, message: Doc<"messages">) {
+async function messageContextLine(
+  ctx: QueryCtx,
+  message: Doc<"messages">,
+  principal: ExecutionPrincipal
+) {
   if (message.surface !== "console") {
     return undefined
   }
@@ -111,7 +119,7 @@ async function messageContextLine(ctx: QueryCtx, message: Doc<"messages">) {
   const context = readMessageContext(message.data)
   const sight = createSight(ctx, {
     organizationId: message.organizationId,
-    personId: message.personId,
+    personId: executionPrincipalPersonId(principal),
   })
   const lines = [
     ...(context === undefined

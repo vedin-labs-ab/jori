@@ -117,9 +117,16 @@ export const retarget = internalMutation({
   args: {
     sessionId: v.id("sessions"),
     target: v.string(),
+    runId: v.id("runs"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
+    const session = await ctx.db.get(args.sessionId)
+
+    if (session?.runId !== args.runId) {
+      return null
+    }
+
     await ctx.db.patch(args.sessionId, {
       target: args.target,
       updatedAt: Date.now(),

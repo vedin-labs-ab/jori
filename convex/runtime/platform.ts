@@ -27,7 +27,7 @@ import { type TranscriptMessage } from "../runs/execution/transcript/schema"
 import { type LoadedRuntime } from "./context"
 import { RemoteSandbox } from "./sandbox/remote"
 import { type SandboxRuntime } from "./sandbox/types"
-import { drainRunSession } from "./sessions"
+import { drainRunSession, retargetRunSession } from "./sessions"
 import { sendRunReply } from "./surface"
 import { addRunReaction } from "./surface/reactions"
 import {
@@ -56,7 +56,10 @@ type ApprovalRef = { approvalId: RuntimeId<"approvals"> }
 type ApprovalConsumption = ApprovalRef & { message?: TranscriptMessage }
 type OfferRef = { integrationOfferId: RuntimeId<"integrationOffers"> }
 type ChildRunArgs = { parentId: RunId; runId: RunId }
-type AgentRunsArgs = { parentId: RunId; runIds: RunId[] }
+type AgentRunsArgs = {
+  parentId: RunId
+  runIds: RuntimeId<"runs">[]
+}
 type CloneArgs = RunRef & { owner: string; repo: string }
 type ParkArgs = {
   condition?: WaiterCondition
@@ -184,7 +187,8 @@ export class ActionPlatform implements RuntimePlatform {
   createAgentRun = (args: AgentRunArgs) =>
     this.mutation(internal.runtime.agents.create, args)
 
-  drainSession = (args: SessionRef) => drainRunSession(this.ctx, args.sessionId)
+  drainSession = (args: SessionRef) =>
+    drainRunSession(this.ctx, args.sessionId, this.runId)
 
   executeApproval = (args: ApprovalRef & RunRef) =>
     executeRunApproval(this.ctx, args)
@@ -256,16 +260,8 @@ export class ActionPlatform implements RuntimePlatform {
     await this.mutation(internal.runs.execution.waiters.records.resolve, args)
   }
 
-  retarget = async (args: { target: string }) => {
-    const session = this.context.session
-
-    if (session !== null) {
-      await this.mutation(internal.sessions.data.retarget, {
-        sessionId: session.id,
-        target: args.target,
-      })
-    }
-  }
+  retarget = (args: { target: string }) =>
+    retargetRunSession(this.ctx, this.context, args.target)
 
   sendReply = (args: ReplyArgs) => sendRunReply(this.ctx, args)
 

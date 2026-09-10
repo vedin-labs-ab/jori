@@ -65,6 +65,7 @@ test("a console message's context and mentions reach the model as lines under it
     surface: "console",
     externalId: "",
     scope: "person",
+    visibility: { mode: "private" },
     title: "Renewals",
     createdBy: testOwner,
     updatedAt: 1,
@@ -92,7 +93,10 @@ test("a console message's context and mentions reach the model as lines under it
 
   const message = (await database.get(messageId)) as unknown as Doc<"messages">
 
-  const { entries } = await recentConversation(ctx, message)
+  const { entries } = await recentConversation(ctx, message, {
+    kind: "person",
+    personId: testOwner,
+  })
 
   expect(entries.map((entry) => entry.context)).toEqual([
     [
