@@ -3,7 +3,7 @@ import { withOwnerDisplays } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 import { filedTables } from "./filing"
-import { sightedResources } from "./resources"
+import { folderChats, sightedResources } from "./resources"
 import { descendantFolderIds, summarizeFolder, treeCap } from "./tree"
 
 // A folder's listing: subfolders plus the filed resources the caller may
@@ -98,7 +98,7 @@ export async function summarizeTree(
       ...summarizeFolder(folder),
       hasContents:
         parentIds.has(folder._id) ||
-        (await hasFiledResources(ctx, folder._id, personId)) ||
+        (await hasFiledResources(ctx, folder, personId)) ||
         (await hasSubfolders(ctx, folder)),
     }))
   )
@@ -119,21 +119,21 @@ async function hasSubfolders(ctx: QueryLikeCtx, folder: Doc<"folders">) {
 
 async function hasFiledResources(
   ctx: QueryLikeCtx,
-  folderId: Id<"folders">,
+  folder: Doc<"folders">,
   personId: Id<"persons"> | undefined
 ) {
+  const folderId = folder._id
   for (const table of filedTables) {
     if (table === "conversations") {
-      const chat =
-        personId === undefined
-          ? null
-          : await ctx.db
-              .query("conversations")
-              .withIndex("by_folder_and_created_by", (index) =>
-                index.eq("folderId", folderId).eq("createdBy", personId)
-              )
-              .first()
-      if (chat !== null) {
+      const chats = await folderChats(
+        ctx,
+        createSight(ctx, {
+          organizationId: folder.organizationId,
+          personId,
+        }),
+        folderId
+      )
+      if (chats.length > 0) {
         return true
       }
       continue

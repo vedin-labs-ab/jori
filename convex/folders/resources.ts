@@ -1,6 +1,9 @@
 import { type VisibilityMode } from "../../contracts/visibility"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { conversationGate } from "../conversations/filing/move"
+import {
+  conversationGate,
+  conversationVisibility,
+} from "../conversations/access"
 import { canSeeJob } from "../jobs/access"
 import { withOwnerDisplays } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
@@ -151,24 +154,17 @@ async function folderJobs(
   return listed
 }
 
-async function folderChats(
+export async function folderChats(
   ctx: QueryLikeCtx,
   sight: Sight,
   folderId: Id<"folders">
 ): Promise<FolderResource[]> {
-  if (sight.personId === undefined) {
-    return []
-  }
-
-  const rows = await ctx.db
+  const rows = ctx.db
     .query("conversations")
-    .withIndex("by_folder_and_created_by", (index) =>
-      index.eq("folderId", folderId).eq("createdBy", sight.personId)
-    )
-    .take(contentsCap)
+    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
   const listed: FolderResource[] = []
 
-  for (const row of rows) {
+  for await (const row of rows) {
     if (
       row.surface === "console" &&
       (await sight.canSee(conversationGate(row)))
@@ -177,10 +173,13 @@ async function folderChats(
         type: "chat",
         id: row._id,
         name: row.title || "New chat",
-        visibility: "private",
+        visibility: conversationVisibility(row).mode,
         updatedAt: row.updatedAt ?? row._creationTime,
         ownerId: row.createdBy,
       })
+      if (listed.length >= contentsCap) {
+        break
+      }
     }
   }
 

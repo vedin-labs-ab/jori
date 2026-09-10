@@ -1,6 +1,6 @@
-import { type PaginationOptions, paginationOptsValidator } from "convex/server"
+import { paginationOptsValidator } from "convex/server"
 import { type Infer, v } from "convex/values"
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Id } from "../_generated/dataModel"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { checkOrganizationAccess, requireOrganizationAccess } from "../access"
 import { readUserProfile } from "../access/users"
@@ -19,14 +19,18 @@ import {
 } from "../persons/account"
 import { nameMentions } from "../references/tokens"
 import { createPersonActor } from "../shared/actor"
-import { type QueryLikeCtx } from "../shared/context"
 import { createSight } from "../visibility/sight"
+import { conversationVisibility } from "./access"
 import {
   createConsoleConversation,
   normalizeConsoleContext,
   normalizeConsoleReferences,
 } from "./create"
 import { startMessageRun } from "./data"
+import { listConsoleConversations } from "./list"
+
+export { listConsoleConversations } from "./list"
+
 import { readLiveState } from "./live"
 import {
   findVisibleConsoleConversation,
@@ -141,6 +145,8 @@ export const live = query({
       status: "ready" as const,
       title: conversation.title ?? "",
       folderId: conversation.folderId,
+      visibility: conversationVisibility(conversation),
+      createdBy: conversation.createdBy,
       ...(await readLiveState(ctx, conversation)),
     }
   },
@@ -229,34 +235,4 @@ export async function chooseConversationModel(
   const conversation = await requireVisibleConsoleConversation(ctx, args)
 
   await ctx.db.patch(conversation._id, { model: args.model })
-}
-
-export async function listConsoleConversations(
-  ctx: QueryLikeCtx,
-  args: {
-    organizationId: string
-    paginationOpts: PaginationOptions
-    personId: Id<"persons">
-  }
-) {
-  const result = await ctx.db
-    .query("conversations")
-    .withIndex("by_organization_and_created_by_and_updated_at", (query) =>
-      query
-        .eq("organizationId", args.organizationId)
-        .eq("createdBy", args.personId)
-    )
-    .order("desc")
-    .paginate(args.paginationOpts)
-
-  return { ...result, page: result.page.map(conversationView) }
-}
-
-function conversationView(conversation: Doc<"conversations">) {
-  return {
-    id: conversation._id,
-    title: conversation.title ?? "",
-    folderId: conversation.folderId,
-    updatedAt: conversation.updatedAt ?? conversation._creationTime,
-  }
 }
