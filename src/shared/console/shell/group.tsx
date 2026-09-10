@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react"
-import { type ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Collapsible,
@@ -38,12 +38,17 @@ export function CollapsibleGroup({
   name: string
 }) {
   const [open, setOpen] = useStoredOpen(`jori.sidebar.${name}`)
+  // An already open SSR group starts at its natural height.
+  const [hasToggled, setHasToggled] = useState(false)
   const { state } = useSidebar()
 
   return (
     <Collapsible
       asChild
-      onOpenChange={setOpen}
+      onOpenChange={(nextOpen) => {
+        setHasToggled(true)
+        setOpen(nextOpen)
+      }}
       open={open || state === "collapsed"}
     >
       <SidebarGroup>
@@ -71,7 +76,13 @@ export function CollapsibleGroup({
           </CollapsibleTrigger>
         </SidebarGroupLabel>
         <CollapsibleContent asChild>
-          <SidebarGroupContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+          <SidebarGroupContent
+            className={cn(
+              "overflow-hidden",
+              hasToggled &&
+                "data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down"
+            )}
+          >
             {children}
           </SidebarGroupContent>
         </CollapsibleContent>
