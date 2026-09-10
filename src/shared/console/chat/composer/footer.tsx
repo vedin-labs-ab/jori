@@ -61,7 +61,7 @@ export function ComposerFooter({
   return (
     <>
       <InputGroupAddon align="block-end" className="justify-between gap-2">
-        <span className="flex min-w-0 items-center gap-1">
+        <span className="flex min-h-7 min-w-0 items-center gap-1">
           {reason === undefined ? (
             <AttachMenu onPick={onPick} sources={mentions} />
           ) : (
@@ -100,33 +100,31 @@ export function ComposerFooter({
       </InputGroupAddon>
       {/* The sigils on the quiet band the job field has, where a phone's
           keyboard would only cover them; a click folds the band away. */}
-      {reason === undefined ? (
-        <div
-          aria-hidden={onHideHints === undefined}
-          className={cn(
-            "order-last hidden w-full rounded-b-[inherit] transition-[grid-template-rows,opacity] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:grid",
-            onHideHints === undefined
-              ? "grid-rows-[0fr] opacity-0"
-              : "grid-rows-[1fr] opacity-100"
-          )}
-          inert={onHideHints === undefined}
-        >
-          <div className="min-h-0 overflow-hidden rounded-b-[inherit]">
-            <button
-              aria-controls={hintsId}
-              aria-expanded={onHideHints !== undefined}
-              aria-label="Hide shortcuts"
-              className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-b-[inherit] border-t bg-muted/30 px-2 py-1.5 text-muted-foreground text-xs outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 motion-reduce:transition-none"
-              disabled={onHideHints === undefined}
-              onClick={onHideHints}
-              type="button"
-            >
-              <SigilHints hints={sigilHints} id={hintsId} />
-              <ChevronDown aria-hidden className="size-3 shrink-0" />
-            </button>
-          </div>
+      <div
+        aria-hidden={onHideHints === undefined}
+        className={cn(
+          "order-last hidden w-full rounded-b-[inherit] transition-[grid-template-rows,opacity] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none md:grid",
+          onHideHints === undefined
+            ? "grid-rows-[0fr] opacity-0"
+            : "grid-rows-[1fr] opacity-100"
+        )}
+        inert={onHideHints === undefined}
+      >
+        <div className="min-h-0 overflow-hidden rounded-b-[inherit]">
+          <button
+            aria-controls={hintsId}
+            aria-expanded={onHideHints !== undefined}
+            aria-label="Hide shortcuts"
+            className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-b-[inherit] border-t bg-muted/30 px-2 py-1.5 text-muted-foreground text-xs outline-none transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 motion-reduce:transition-none"
+            disabled={onHideHints === undefined}
+            onClick={onHideHints}
+            type="button"
+          >
+            <SigilHints hints={sigilHints} id={hintsId} />
+            <ChevronDown aria-hidden className="size-3 shrink-0" />
+          </button>
         </div>
-      ) : null}
+      </div>
     </>
   )
 }
