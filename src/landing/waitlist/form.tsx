@@ -112,9 +112,11 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
           {status === "submitting" ? <Spinner /> : null}
           Join the waitlist
         </Button>
-        {rejection?.kind === "form" ? (
-          <FieldError className="mt-3">{rejection.message}</FieldError>
-        ) : null}
+        <div className="mt-3 min-h-[2lh] text-xs/relaxed sm:min-h-lh">
+          {rejection?.kind === "form" ? (
+            <FieldError>{rejection.message}</FieldError>
+          ) : null}
+        </div>
       </div>
     </form>
   )
@@ -167,9 +169,11 @@ function EmailField({
         required
         type="email"
       />
-      <FieldError id={errorId(fieldId, "email")}>
-        {fieldMessage(rejection, "email")}
-      </FieldError>
+      <div className="min-h-lh text-xs/relaxed">
+        <FieldError id={errorId(fieldId, "email")}>
+          {fieldMessage(rejection, "email")}
+        </FieldError>
+      </div>
     </Field>
   )
 }
@@ -191,9 +195,11 @@ function SizeField({ fieldId, invalid, rejection }: FieldProps) {
           </NativeSelectOption>
         ))}
       </NativeSelect>
-      <FieldError id={errorId(fieldId, "size")}>
-        {fieldMessage(rejection, "size")}
-      </FieldError>
+      <div className="min-h-lh text-xs/relaxed">
+        <FieldError id={errorId(fieldId, "size")}>
+          {fieldMessage(rejection, "size")}
+        </FieldError>
+      </div>
     </Field>
   )
 }
@@ -215,9 +221,11 @@ function WorkField({ fieldId, invalid, rejection }: FieldProps) {
         required
         rows={5}
       />
-      <FieldError id={errorId(fieldId, "work")}>
-        {fieldMessage(rejection, "work")}
-      </FieldError>
+      <div className="min-h-lh text-xs/relaxed">
+        <FieldError id={errorId(fieldId, "work")}>
+          {fieldMessage(rejection, "work")}
+        </FieldError>
+      </div>
     </Field>
   )
 }
