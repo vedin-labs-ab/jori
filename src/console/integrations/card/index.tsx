@@ -180,7 +180,7 @@ function getStatusLabel(
   headline: string
 ) {
   if (status === undefined) {
-    return "Checking…"
+    return headline
   }
 
   if (status === null || status.status === "disconnected") {
