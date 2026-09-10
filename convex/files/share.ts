@@ -18,13 +18,16 @@ import {
 } from "../collections/shares"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
+import {
+  type ResourceViewer,
+  resourceViewerArgs,
+} from "../visibility/resources"
 import { requireViewableFile } from "./records"
 
 export const mint = internalMutation({
   args: {
-    organizationId: v.string(),
+    ...resourceViewerArgs,
     fileId: v.id("files"),
-    personId: v.id("persons"),
     expiresInHours: v.optional(v.number()),
   },
   handler: async (ctx, args) => await mintFileShare(ctx, args),
@@ -114,10 +117,8 @@ export const get = query({
 
 export async function mintFileShare(
   ctx: MutationCtx,
-  args: {
-    organizationId: string
+  args: ResourceViewer & {
     fileId: Id<"files">
-    personId: Id<"persons">
     expiresInHours?: number
   }
 ): Promise<MintedShare> {
@@ -127,6 +128,7 @@ export async function mintFileShare(
     target: fileTarget(file._id),
     material: file,
     personId: args.personId,
+    runId: args.runId,
     urlPath: `/files/${file._id}`,
     expiresInHours: args.expiresInHours,
   })

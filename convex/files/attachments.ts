@@ -48,6 +48,7 @@ async function readAttachment(
 ): Promise<FileAttachment> {
   const file = await context.ctx.runQuery(internal.files.data.getVisible, {
     organizationId: context.run.organizationId,
+    runId: context.run._id,
     personId: executionPrincipalPersonId(context.run.principal),
     fileId: input.fileId as Id<"files">,
   })

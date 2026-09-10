@@ -71,16 +71,25 @@ test("dispatches share_file to the share mint with the person", async () => {
   })
 })
 
-test("refuses share_file without an execution person", async () => {
-  const ctx = { runMutation: vi.fn() } as unknown as ActionCtx
-
-  await expect(
-    callJoriFileTool(
-      ctx,
-      { organizationId: "organization", principal: { kind: "organization" } },
-      { tool: "share_file", args: { fileId: "file-id" } }
-    )
-  ).rejects.toThrow("authenticated execution user")
+test("shared file tools use the trusted run audience instead of a supplied viewer", async () => {
+  const runId = "shared-run" as Id<"runs">
+  const runMutation = vi.fn(async () => ({ url: "u", expiresAt: 1 }))
+  const ctx = { runMutation } as unknown as ActionCtx
+  await callJoriFileTool(ctx, {
+    _id: runId,
+    organizationId: "organization",
+    principal: { kind: "organization" },
+  }, {
+    tool: "share_file",
+    args: { fileId: "file-id", personId, runId: "forged" },
+  })
+  expect(runMutation).toHaveBeenCalledWith(internal.files.share.mint, {
+    organizationId: "organization",
+    personId: undefined,
+    runId,
+    fileId: "file-id",
+    expiresInHours: undefined,
+  })
 })
 
 test("rejects unknown file tools", async () => {

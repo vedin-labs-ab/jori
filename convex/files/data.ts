@@ -7,23 +7,18 @@ import {
   type QueryCtx,
 } from "../_generated/server"
 import { boundedNumber, optionalString } from "../shared/input"
-import { createSight, type Sight } from "../visibility/sight"
+import {
+  createResourceSight,
+  type ResourceViewer,
+  resourceViewerArgs,
+} from "../visibility/resources"
+import { type Sight } from "../visibility/sight"
 import { fileFields } from "./schema"
 
 const maxFileSearchResults = 100
 const maxFilesScanned = 500
 
-/** Who is looking; visibility/sight.ts resolves what they may see. A
- *  missing personId is an organization-principal execution. */
-export type FileViewer = {
-  organizationId: string
-  personId?: Id<"persons">
-}
-
-const viewerArgs = {
-  organizationId: v.string(),
-  personId: v.optional(v.id("persons")),
-}
+export type FileViewer = ResourceViewer
 
 export const record = internalMutation({
   args: fileFields,
@@ -52,7 +47,7 @@ export const record = internalMutation({
 
 export const search = internalQuery({
   args: {
-    ...viewerArgs,
+    ...resourceViewerArgs,
     query: v.optional(v.string()),
     mimeType: v.optional(v.string()),
     limit: v.optional(v.number()),
@@ -68,7 +63,7 @@ export const search = internalQuery({
       )
       .order("desc")
       .take(maxFilesScanned)
-    const sight = createSight(ctx, args)
+    const sight = await createResourceSight(ctx, args)
     const matches: Doc<"files">[] = []
 
     for (const file of scanned) {
@@ -92,7 +87,7 @@ export const search = internalQuery({
 })
 
 const viewerFileArgs = {
-  ...viewerArgs,
+  ...resourceViewerArgs,
   fileId: v.id("files"),
 }
 
@@ -137,7 +132,7 @@ export async function canViewFile(
   file: Doc<"files">,
   viewer: FileViewer
 ) {
-  return await createSight(ctx, viewer).canSee(file)
+  return await (await createResourceSight(ctx, viewer)).canSee(file)
 }
 
 /** Filter form for list surfaces that already hold a Sight. */
