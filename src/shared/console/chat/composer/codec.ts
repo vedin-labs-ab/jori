@@ -22,21 +22,6 @@ export type ComposerDraft = {
   text: string
 }
 
-/** The document a text opens as: a paragraph per line, its mentions as
- *  nodes wherever the catalog recognizes them. */
-export function parseComposerText(
-  text: string,
-  catalog: MentionCatalog
-): JSONContent {
-  return {
-    type: "doc",
-    content: text.split("\n").map((line) => ({
-      type: "paragraph",
-      ...(line === "" ? {} : { content: parseComposerLine(line, catalog) }),
-    })),
-  }
-}
-
 /** The text a document sends, trimmed, with each chip as its token, and
  *  the resources those tokens name. */
 export function serializeComposerDocument(

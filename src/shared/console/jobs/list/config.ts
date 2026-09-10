@@ -27,9 +27,6 @@ export function jobListConfig(
   }
 }
 
-export const jobDeleteDescription =
-  "This permanently deletes the job and cancels its upcoming runs. Past runs are kept."
-
 /** How the selection bar names deleting jobs: outright, unlike the
  *  materials' archive step. */
 export const jobBulkRemoval: SelectionRemoval = {

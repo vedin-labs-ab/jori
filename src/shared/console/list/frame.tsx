@@ -25,23 +25,6 @@ export function ConsoleListLayout({
   )
 }
 
-/** Filter row above the table, padded to the page frame and closed off
- *  with a hairline before the table header starts. */
-export function ConsoleListToolbar({
-  className,
-  ...props
-}: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn(
-        "flex flex-wrap items-center gap-x-4 gap-y-3 border-b px-4 py-3 @3xl/inset:px-6",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
 /** Padded fallback region for the states that replace the table: loading
  *  skeletons, empty states, and errors. */
 export function ConsoleListContent({
