@@ -1,7 +1,7 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { databaseContext, id } from "../../test/convex/database"
 import { folderDoc } from "../../test/convex/folders"
-import { type Id } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { listOrganizationViewerIds } from "./audience"
 import { audienceKey, createAudienceSight } from "./execution"
 import { type Gate } from "./sight"
@@ -62,7 +62,9 @@ test("a team folder narrows the shared audience without denying its common resou
       visibility: { mode: "organization" },
     })
   ).toBe(true)
-  expect(await sight.canSeeFolder({ ...folder, _id: folderId })).toBe(true)
+  expect(
+    await sight.canSeeFolder((await database.get(folderId)) as Doc<"folders">)
+  ).toBe(true)
   expect(
     await sight.canSee({
       organizationId,
