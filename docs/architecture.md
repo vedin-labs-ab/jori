@@ -35,4 +35,4 @@ credentials, locations, retention and failure handling for Albin to decide.
 
 Resolve routine implementation choices autonomously. Do not build stricter
 editions or custom deployments without a concrete customer need. Prioritize
-regional event reliability and the E2B/Exa residency gaps over shared routing.
+regional event reliability and the remaining search and provider residency gaps over shared routing.

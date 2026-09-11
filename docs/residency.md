@@ -25,12 +25,13 @@ processing and access locations with providers, including any edge services.
 
 ## Known gaps
 
-Repository evidence reviewed 9 September 2026; this is not a fresh production
-audit or proof of provider contracts.
+Sandbox configuration updated 11 September 2026. Other provider findings date
+from 9 September; this is not proof of provider contracts.
 
-- **E2B:** EU workloads currently execute in the US, including customer files.
-  The [Blaxel trial](sandboxes.md) replaces execution on an isolated branch;
-  this does not change production or establish a broader processing guarantee.
+- **Blaxel:** sandbox execution and file transfers use Frankfurt for EU and
+  North Virginia for US, with separate workspace credentials. See
+  [Sandboxes](sandboxes.md). Provider control-plane metadata, internal telemetry,
+  backups and access remain subject to the applicable provider terms and evidence.
 - **Exa:** global processing covers search, fetching and background website
   crawling. A replacement must cover every caller, not only the visible tool.
 - **Stripe:** long-term billing exception. Keep prompts/documents out of billing
@@ -39,7 +40,7 @@ audit or proof of provider contracts.
   and PostHog configuration is recorded. Verify backups, retention and access.
   Vercel/PostHog edge and provider operations remain separately scoped exceptions.
 - **Email and images:** recipient mail systems are outside Jori's control.
-  Google image abuse monitoring has separate retention terms; images also reach E2B.
+  Google image abuse monitoring has separate retention terms; images also reach the regional Blaxel sandbox.
 - **Legal:** public privacy/terms pages were placeholders at review. Executed
   agreements and complete retention rules are not established by this repository.
 
