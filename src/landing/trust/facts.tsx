@@ -113,10 +113,9 @@ export function DataSection() {
     >
       <FactList>
         <Definition icon={MapPin} term="Stored in your region">
-          Choose an <Region region="eu" /> or <Region region="us" /> workspace
-          and Jori keeps your chats, files and workspace records there. Code
-          runs in the same region. Web search, page fetching and billing use
-          global services.
+          Jori stores your workspace data and runs code in your chosen{" "}
+          <Region region="eu" /> or <Region region="us" /> region. Web search,
+          page fetching and billing use global services.
         </Definition>
         <Definition icon={Share2} term="Subprocessors and service providers">
           <Subprocessors />
