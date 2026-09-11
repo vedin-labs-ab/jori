@@ -101,7 +101,7 @@ class LocalSandbox implements SandboxRuntime {
 
     this.held = result
 
-    return { pid: 4321, token: "command-token" }
+    return { pid: "4321", token: "command-token" }
   }
 
   async finishCommand(

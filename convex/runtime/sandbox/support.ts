@@ -1,16 +1,13 @@
 "use node"
 
+import { SandboxInstance, settings } from "@blaxel/core"
 import {
-  CommandExitError,
-  type CommandHandle,
-  type CommandResult,
-  FileNotFoundError,
-  Sandbox,
-} from "e2b"
-import { type Id } from "../../_generated/dataModel"
-import { sandboxConnection, sandboxTemplate } from "./e2b/connection"
+  assertSandboxRegion,
+  sandboxConnection,
+  sandboxImage,
+} from "./blaxel/connection"
 import { compactFailure } from "./output"
-import { sandboxClonePath } from "./path"
+import { sandboxClonePath, shellQuote } from "./path"
 import {
   commandDirectory,
   gitCloneCommand,
@@ -22,119 +19,157 @@ import {
   type SandboxCloneRepositoryInput,
   type SandboxCommandInput,
   type SandboxCommandResult,
+  type SandboxWriteFile,
 } from "./types"
 
-export type E2BSandbox = Awaited<ReturnType<typeof Sandbox.create>>
-
+export type BlaxelSandbox = SandboxInstance
 export const defaultCommandTimeoutMs = 20 * 60 * 1000
 export const sandboxCleanupFailure =
-  "Sandbox cleanup failed. Check this deployment's E2B connection and retry cleanup."
+  "Sandbox cleanup failed. Check this deployment's Blaxel connection and retry cleanup."
 
-const defaultSandboxTimeoutMs = 60 * 60 * 1000
-/** The exit code GNU timeout reports, so a command cut short reads the way a
- *  shell user would expect it to. */
-const timedOutExitCode = 124
-
-export async function createSandbox(runId: Id<"runs">) {
-  const sandbox = await Sandbox.create(sandboxTemplate(), {
-    ...sandboxConnection(),
-    allowInternetAccess: true,
-    lifecycle: {
-      autoResume: true,
-      onTimeout: "pause",
-    },
-    metadata: {
-      app: "jori",
-      runId,
-    },
-    timeoutMs: defaultSandboxTimeoutMs,
-  })
-
-  // Only a fresh sandbox needs this: the workspace survives every reconnect
-  // to one that already ran it.
-  const bootstrap = await runSandboxCommand(sandbox, {
-    command: workspaceBootstrapCommand(),
-  })
-
-  if (bootstrap.exitCode !== 0) {
-    throw new Error(compactFailure(normalizeCommandResult(bootstrap)))
-  }
-
-  return sandbox
-}
-
-export async function connectSandbox(sandboxId: string) {
-  return await Sandbox.connect(sandboxId, {
-    ...sandboxConnection(),
-    timeoutMs: defaultSandboxTimeoutMs,
-  })
-}
-
-export async function killSandbox(sandboxId: string) {
+function configure() {
   const connection = sandboxConnection()
-  try {
-    // The SDK returns false for an absent sandbox. Authentication, transport
-    // and provider errors must fail so the caller cannot mark it cleaned.
-    await Sandbox.kill(sandboxId, { ...connection, requestTimeoutMs: 30_000 })
-  } catch {
-    // Provider error text may contain sandbox metadata or credentials.
-    throw new Error(sandboxCleanupFailure)
-  }
+  settings.setConfig({
+    apiKey: connection.apiKey,
+    workspace: connection.workspace,
+    disableH2: true,
+  })
+  return connection
 }
 
-export async function runSandboxCommand(
-  sandbox: E2BSandbox,
-  input: SandboxCommandInput
-): Promise<CommandResult> {
+export async function createSandbox() {
+  const connection = configure()
+  // Opaque names keep workspace and customer identifiers out of control-plane metadata.
+  const sandbox = await SandboxInstance.create({
+    name: `${connection.prefix}${crypto.randomUUID()}`,
+    image: sandboxImage(),
+    region: connection.region,
+    memory: 4096,
+    lifecycle: {
+      expirationPolicies: [{ type: "ttl-idle", value: "1h", action: "delete" }],
+      terminatedRetention: "5m",
+    },
+  })
   try {
-    return await sandbox.commands.run(input.command, {
-      cwd: input.cwd,
-      timeoutMs: input.timeoutMs ?? defaultCommandTimeoutMs,
+    assertSandboxRegion(sandbox, connection)
+    const bootstrap = await runSandboxCommand(sandbox, {
+      command: workspaceBootstrapCommand(),
     })
-  } catch (error) {
-    if (error instanceof CommandExitError) {
-      return {
-        error: error.error,
-        exitCode: error.exitCode,
-        stderr: error.stderr,
-        stdout: error.stdout,
-      }
+    if (bootstrap.exitCode !== 0) {
+      throw new Error(compactFailure(bootstrap))
     }
-
+    return regionalClient(sandbox)
+  } catch (error) {
+    await sandbox.delete()
     throw error
   }
 }
 
-export function normalizeCommandResult(
-  result: CommandResult
-): SandboxCommandResult {
-  return {
-    exitCode: result.exitCode,
-    stderr: result.stderr,
-    stdout: result.stdout,
+export async function connectSandbox(sandboxId: string) {
+  const connection = configure()
+  if (!sandboxId.startsWith(connection.prefix)) {
+    throw new Error("Sandbox does not belong to this deployment's region.")
+  }
+  const sandbox = await SandboxInstance.get(sandboxId)
+  assertSandboxRegion(sandbox, connection)
+  return regionalClient(sandbox)
+}
+
+export async function killSandbox(sandboxId: string) {
+  configure()
+  try {
+    const sandbox = await connectSandbox(sandboxId)
+    await sandbox.delete()
+  } catch (error) {
+    if (isNotFound(error)) {
+      return
+    }
+    throw new Error(sandboxCleanupFailure)
   }
 }
 
-/** Resolves once the command finished, or false once the grace window closed
- *  and the run should park on it instead. */
-export async function waitForCommand(
-  handle: CommandHandle,
-  graceMs: number
-): Promise<boolean> {
-  let timer: ReturnType<typeof setTimeout> | undefined
-  const grace = new Promise<false>((resolve) => {
-    timer = setTimeout(() => resolve(false), graceMs)
+export async function startSandboxCommand(
+  sandbox: BlaxelSandbox,
+  input: SandboxCommandInput
+) {
+  return await sandbox.process.exec({
+    name: crypto.randomUUID(),
+    command: `bash -c ${shellQuote(input.command)}`,
+    workingDir: input.cwd,
+    keepAlive: true,
+    timeout: Math.ceil((input.timeoutMs ?? defaultCommandTimeoutMs) / 1000),
+    waitForCompletion: false,
+    restartOnFailure: false,
   })
+}
 
-  try {
-    return await Promise.race([awaitCommand(handle), grace])
-  } finally {
-    clearTimeout(timer)
+export async function runSandboxCommand(
+  sandbox: BlaxelSandbox,
+  input: SandboxCommandInput
+): Promise<SandboxCommandResult> {
+  const process = await startSandboxCommand(sandbox, input)
+  const result = await sandbox.process.wait(process.pid, {
+    maxWait: (input.timeoutMs ?? defaultCommandTimeoutMs) + 30_000,
+    interval: 250,
+  })
+  return normalizeCommandResult(result)
+}
+
+export function normalizeCommandResult(result: {
+  exitCode: number
+  stdout: string
+  stderr: string
+  status?: string
+}): SandboxCommandResult {
+  return result.status === "killed"
+    ? {
+        exitCode: 124,
+        stdout: result.stdout,
+        stderr: result.stderr,
+        timedOut: true,
+      }
+    : {
+        exitCode: result.exitCode,
+        stdout: result.stdout,
+        stderr: result.stderr,
+      }
+}
+
+export async function waitForCommand(
+  sandbox: BlaxelSandbox,
+  pid: string,
+  graceMs: number
+) {
+  const deadline = Date.now() + graceMs
+  while (Date.now() < deadline) {
+    const process = await sandbox.process.get(pid)
+    if (process.status !== "running") {
+      return true
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500))
+  }
+  return false
+}
+
+export async function readSandboxFile(sandbox: BlaxelSandbox, path: string) {
+  return new Uint8Array(await (await sandbox.fs.readBinary(path)).arrayBuffer())
+}
+
+export async function writeSandboxFiles(
+  sandbox: BlaxelSandbox,
+  files: SandboxWriteFile[]
+) {
+  for (const file of files) {
+    if (typeof file.content === "string") {
+      await sandbox.fs.write(file.path, file.content)
+    } else {
+      await sandbox.fs.writeBinary(file.path, file.content)
+    }
   }
 }
 
 export async function collectCommandOutput(
-  sandbox: E2BSandbox,
+  sandbox: BlaxelSandbox,
   token: string
 ): Promise<SandboxCommandResult> {
   const directory = commandDirectory(token)
@@ -145,16 +180,32 @@ export async function collectCommandOutput(
   ])
   const exitCode = Number.parseInt(exit ?? "", 10)
   const output = { stderr: stderr ?? "", stdout: stdout ?? "" }
-
-  // The exit file is written last, so a missing one means the command never
-  // reached its end: it was killed at its deadline.
   return Number.isInteger(exitCode)
     ? { ...output, exitCode }
-    : { ...output, exitCode: timedOutExitCode, timedOut: true }
+    : { ...output, exitCode: 124, timedOut: true }
 }
 
+async function readCommandFile(sandbox: BlaxelSandbox, path: string) {
+  try {
+    return await sandbox.fs.read(path)
+  } catch (error) {
+    if (isNotFound(error)) {
+      return null
+    }
+    throw error
+  }
+}
+
+function isNotFound(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (("status" in error && error.status === 404) ||
+      ("code" in error && error.code === 404))
+  )
+}
 export async function cloneIntoSandbox(
-  sandbox: E2BSandbox,
+  sandbox: BlaxelSandbox,
   input: SandboxCloneRepositoryInput
 ) {
   const directory = sandboxClonePath({
@@ -164,10 +215,10 @@ export async function cloneIntoSandbox(
   const tokenPath = temporaryGitCredentialPath("token")
   const helperPath = temporaryGitCredentialPath("helper")
 
-  await sandbox.files.write([
-    { data: input.token, path: tokenPath },
+  await writeSandboxFiles(sandbox, [
+    { content: input.token, path: tokenPath },
     {
-      data: gitCredentialHelperScript(tokenPath, input.username),
+      content: gitCredentialHelperScript(tokenPath, input.username),
       path: helperPath,
     },
   ])
@@ -197,29 +248,20 @@ export async function cloneIntoSandbox(
   }
 }
 
-async function awaitCommand(handle: CommandHandle) {
-  try {
-    await handle.wait()
-  } catch (error) {
-    // The wrapper always exits 0 and its files describe what ran either way,
-    // so nothing here is worth failing the step over. Swallowing it also
-    // keeps the abandoned side of the race from rejecting unobserved.
-    if (!(error instanceof CommandExitError)) {
-      console.warn("Sandbox command did not report its exit", error)
-    }
-  }
-
-  return true
+function regionalClient(sandbox: BlaxelSandbox) {
+  return new SandboxInstance({
+    metadata: sandbox.metadata,
+    spec: sandbox.spec,
+    status: sandbox.status,
+    forceUrl: sandbox.metadata.url,
+    headers: settings.headers,
+  })
 }
 
-async function readCommandFile(sandbox: E2BSandbox, path: string) {
-  try {
-    return await sandbox.files.read(path, { format: "text" })
-  } catch (error) {
-    if (error instanceof FileNotFoundError) {
-      return null
-    }
-
-    throw error
+export function sandboxName(sandbox: BlaxelSandbox) {
+  const name = sandbox.metadata.name
+  if (!name) {
+    throw new Error("Sandbox response is missing its name.")
   }
+  return name
 }

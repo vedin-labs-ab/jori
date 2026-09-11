@@ -27,7 +27,7 @@ test("exports by run and path without transporting file bytes", async () => {
     })
   ).resolves.toEqual(file)
   expect(runAction).toHaveBeenCalledExactlyOnceWith(
-    internal.runtime.sandbox.e2b.exports.file,
+    internal.runtime.sandbox.blaxel.exports.file,
     {
       runId: "runs:1",
       path: "large.bin",
@@ -37,7 +37,7 @@ test("exports by run and path without transporting file bytes", async () => {
   )
   await sandbox.writeFiles([{ path: "note.txt", content: "saved" }])
   expect(runAction.mock.calls[1]).toEqual([
-    internal.runtime.sandbox.e2b.write,
+    internal.runtime.sandbox.blaxel.write,
     {
       runId: "runs:1",
       sandboxId: "sandbox-1",
@@ -58,7 +58,7 @@ test("imports by file reference and remembers the run-owned sandbox", async () =
     path: "image.png",
   })
   expect(runAction).toHaveBeenCalledWith(
-    internal.runtime.sandbox.e2b.imports.file,
+    internal.runtime.sandbox.blaxel.imports.file,
     {
       runId: "runs:1",
       fileId: "files:1",
@@ -67,7 +67,7 @@ test("imports by file reference and remembers the run-owned sandbox", async () =
   )
   await sandbox.writeFiles([{ path: "note.txt", content: "saved" }])
   expect(runAction).toHaveBeenLastCalledWith(
-    internal.runtime.sandbox.e2b.write,
+    internal.runtime.sandbox.blaxel.write,
     {
       runId: "runs:1",
       sandboxId: "sandbox-1",

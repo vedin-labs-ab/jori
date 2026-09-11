@@ -1,12 +1,14 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { id } from "../../../test/convex/database"
 import { type ActionCtx } from "../../_generated/server"
-import { openSandbox } from "./e2b"
+import { openSandbox } from "./blaxel"
 import { connectSandbox, createSandbox } from "./support"
 
 vi.mock("./support", () => ({
   connectSandbox: vi.fn(),
   createSandbox: vi.fn(),
+  sandboxName: (sandbox: { metadata: { name: string } }) =>
+    sandbox.metadata.name,
 }))
 beforeEach(() => vi.clearAllMocks())
 
@@ -24,7 +26,7 @@ test("a stopped run cannot reconnect to its old sandbox", async () => {
 
 test("a sandbox created during a stop is not handed back to the old step", async () => {
   vi.mocked(createSandbox).mockResolvedValue({
-    sandboxId: "late-sandbox",
+    metadata: { name: "late-sandbox" },
   } as Awaited<ReturnType<typeof createSandbox>>)
   const ctx = {
     runQuery: vi.fn(async () => true),

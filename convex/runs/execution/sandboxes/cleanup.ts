@@ -28,7 +28,7 @@ export async function reserveSandboxCleanup(
   })
   // Actions are not automatically retried. This watchdog is committed with
   // the lease and recovers both reported failures and interrupted actions.
-  await ctx.scheduler.runAt(expiresAt, internal.runtime.sandbox.e2b.kill, {
+  await ctx.scheduler.runAt(expiresAt, internal.runtime.sandbox.blaxel.kill, {
     externalId: args.externalId,
     runId: args.runId,
   })

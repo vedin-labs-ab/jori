@@ -3,10 +3,10 @@ import { maxFileBytes } from "../../../../contracts/runtime/files"
 import { internal } from "../../../_generated/api"
 import { type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
-import { openSandbox } from "../e2b"
+import { openSandbox } from "../blaxel"
 import { file } from "./imports"
 
-vi.mock("../e2b", () => ({ openSandbox: vi.fn() }))
+vi.mock("../blaxel", () => ({ openSandbox: vi.fn() }))
 
 const args = {
   fileId: "files:1" as Id<"files">,
@@ -26,8 +26,8 @@ const write = vi.fn()
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(openSandbox).mockResolvedValue({
-    sandboxId: "sandbox-1",
-    files: { write },
+    metadata: { name: "sandbox-1" },
+    fs: { writeBinary: write },
   } as unknown as Awaited<ReturnType<typeof openSandbox>>)
 })
 
@@ -50,7 +50,7 @@ test("imports more than 5 MiB directly from regional storage with run ownership"
   })
   expect(write).toHaveBeenCalledWith(
     "/home/user/workspace/generated-images/image.png",
-    expect.any(ArrayBuffer)
+    expect.any(Uint8Array)
   )
   expect(write.mock.calls[0]?.[1].byteLength).toBe(blob.size)
 })

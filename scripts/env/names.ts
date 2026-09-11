@@ -50,20 +50,22 @@ export function environmentFile(target: Target) {
  *  waitlist, and agent runs. Sign-in requires both social providers because
  *  `createAuth` resolves every credential on each auth request, so a missing
  *  Microsoft secret breaks Google sign-in too. Runs execute inside the
- *  deployment, so they need the model key to deduce and the E2B key and
- *  template name to open a sandbox. Stripe is optional for deployment: its
+ *  deployment, so they need the model key and the Blaxel workspace, key and
+ *  image to open a sandbox. Stripe is optional for deployment: its
  *  server-side edge rejects billing operations until all billing settings
  *  exist. A deploy is not approval to charge customers. */
 export const deploymentNames = [
   "BETTER_AUTH_SECRET",
   "BIRD_API_KEY",
   "BIRD_WORKSPACE_ID",
-  "E2B_API_KEY",
+  "BL_API_KEY",
+  "BL_WORKSPACE",
+  "DO_NOT_TRACK",
   "EXA_API_KEY",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
   "JORI_APP_URL",
-  "JORI_E2B_TEMPLATE",
+  "JORI_BLAXEL_IMAGE",
   "JORI_PUBLIC_ORIGIN",
   "JORI_REGION",
   "MICROSOFT_CLIENT_ID",

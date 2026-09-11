@@ -17,7 +17,7 @@ export type SandboxCommandResult = {
 /** A command still running in the sandbox: the pid to kill it by, and the
  *  secret its wrapper posts back with once it finishes. */
 export type SandboxCommandHandle = {
-  pid: number
+  pid: string
   token: string
 }
 

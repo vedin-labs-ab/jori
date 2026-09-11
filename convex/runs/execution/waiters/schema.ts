@@ -17,7 +17,7 @@ export const waiterSubject = v.union(
 
 export const waiterCondition = v.union(
   v.object({ kind: v.literal("runs"), runIds: v.array(v.id("runs")) }),
-  v.object({ kind: v.literal("command"), pid: v.number() })
+  v.object({ kind: v.literal("command"), pid: v.string() })
 )
 
 /** The value the workflow event carries, so the resumed step knows why it

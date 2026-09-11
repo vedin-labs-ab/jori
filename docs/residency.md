@@ -29,7 +29,8 @@ Repository evidence reviewed 9 September 2026; this is not a fresh production
 audit or proof of provider contracts.
 
 - **E2B:** EU workloads currently execute in the US, including customer files.
-  Regionalize or replace execution before claiming regional core processing.
+  The [Blaxel trial](sandboxes.md) replaces execution on an isolated branch;
+  this does not change production or establish a broader processing guarantee.
 - **Exa:** global processing covers search, fetching and background website
   crawling. A replacement must cover every caller, not only the visible tool.
 - **Stripe:** long-term billing exception. Keep prompts/documents out of billing

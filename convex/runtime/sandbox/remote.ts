@@ -10,7 +10,7 @@ import {
   type SandboxWriteFile,
 } from "./types"
 
-/** The E2B SDK only runs in Node, so every sandbox call crosses into an action
+/** The Blaxel SDK only runs in Node, so every sandbox call crosses into an action
  *  there. Those actions are stateless: this holds the sandbox they answer with
  *  and hands it to the next one, so a run creates at most one. */
 export class RemoteSandbox implements SandboxRuntime {
@@ -22,7 +22,7 @@ export class RemoteSandbox implements SandboxRuntime {
 
   async runCommand(input: SandboxCommandInput) {
     return this.remember(
-      await this.ctx.runAction(internal.runtime.sandbox.e2b.command, {
+      await this.ctx.runAction(internal.runtime.sandbox.blaxel.command, {
         ...this.target,
         input,
       })
@@ -31,7 +31,7 @@ export class RemoteSandbox implements SandboxRuntime {
 
   async startCommand(input: SandboxCommandInput) {
     const outcome = this.remember(
-      await this.ctx.runAction(internal.runtime.sandbox.e2b.start, {
+      await this.ctx.runAction(internal.runtime.sandbox.blaxel.start, {
         ...this.target,
         input,
         token: commandToken(),
@@ -48,7 +48,7 @@ export class RemoteSandbox implements SandboxRuntime {
     options: { kill: boolean }
   ) {
     return this.remember(
-      await this.ctx.runAction(internal.runtime.sandbox.e2b.finish, {
+      await this.ctx.runAction(internal.runtime.sandbox.blaxel.finish, {
         ...this.target,
         handle,
         kill: options.kill,
@@ -58,7 +58,7 @@ export class RemoteSandbox implements SandboxRuntime {
 
   async readFile(path: string) {
     const outcome = this.remember(
-      await this.ctx.runAction(internal.runtime.sandbox.e2b.read, {
+      await this.ctx.runAction(internal.runtime.sandbox.blaxel.read, {
         ...this.target,
         path,
       })
@@ -69,7 +69,7 @@ export class RemoteSandbox implements SandboxRuntime {
 
   async writeFiles(files: SandboxWriteFile[]) {
     this.remember(
-      await this.ctx.runAction(internal.runtime.sandbox.e2b.write, {
+      await this.ctx.runAction(internal.runtime.sandbox.blaxel.write, {
         ...this.target,
         files: files.map((file) => ({
           content: wireContent(file.content),
@@ -81,7 +81,7 @@ export class RemoteSandbox implements SandboxRuntime {
 
   async importFile(input: { fileId: Id<"files">; path: string }) {
     this.remember(
-      await this.ctx.runAction(internal.runtime.sandbox.e2b.imports.file, {
+      await this.ctx.runAction(internal.runtime.sandbox.blaxel.imports.file, {
         runId: this.runId,
         ...input,
       })
@@ -90,7 +90,7 @@ export class RemoteSandbox implements SandboxRuntime {
 
   async exportFile(input: SandboxExportFileInput) {
     return this.remember(
-      await this.ctx.runAction(internal.runtime.sandbox.e2b.exports.file, {
+      await this.ctx.runAction(internal.runtime.sandbox.blaxel.exports.file, {
         runId: this.runId,
         ...input,
       })
@@ -99,7 +99,7 @@ export class RemoteSandbox implements SandboxRuntime {
 
   async cloneRepository(input: SandboxCloneRepositoryInput) {
     return this.remember(
-      await this.ctx.runAction(internal.runtime.sandbox.e2b.clone, {
+      await this.ctx.runAction(internal.runtime.sandbox.blaxel.clone, {
         ...this.target,
         input,
       })
