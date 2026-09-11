@@ -115,7 +115,7 @@ export function DataSection() {
         <Definition icon={MapPin} term="Stored in your region">
           Jori stores your workspace data and runs code in your chosen{" "}
           <Region region="eu" /> or <Region region="us" /> region. Web search,
-          page fetching and billing use global services.
+          page fetching and billing can process data outside that region.
         </Definition>
         <Definition icon={Share2} term="Subprocessors and service providers">
           <Subprocessors />

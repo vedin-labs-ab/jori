@@ -13,10 +13,15 @@ Each Convex deployment owns `PARALLEL_API_KEY`, `PARALLEL_SEARCH_BASE_URL` and
 The adapter uses `/v1/search` and `/v1/extract`, aborts after 30 seconds and
 rejects redirects. It does not retry or fall back to another endpoint.
 
-One Parallel organization can hold separate preview or deployment keys.
+One Parallel organization holds separate apps and keys for development, EU
+production and US production. Retire preview keys after verification.
 Organization names and separate keys do not establish residency. Never let a
-user, tool argument or result choose the API origin. Before production, confirm
-the selected endpoints and their coverage with Parallel.
+user, tool argument or result choose the API origin.
+
+| Deployment | Search origin | Extract origin |
+| --- | --- | --- |
+| Development and US production | `https://api.parallel.ai` | `https://api.parallel.ai` |
+| EU production | `https://eu.parallel.ai` | `https://api.parallel.ai` |
 
 ## Residency gate
 
@@ -24,7 +29,7 @@ As reviewed on 11 September 2026, Parallel's [privacy policy](https://parallel.a
 explicitly describes EU processing and no content retention for Search requests
 sent to its EU endpoint. It does not establish the same coverage for Extract.
 Live testing found `https://eu.parallel.ai/v1/search` accepts the existing
-self-serve key without extra setup. The EU preview uses this route. Both
+self-serve key without extra setup. EU deployments use this route. Both
 `/v1/extract` and legacy `/v1beta/extract` return 404 on that host, so fetching
 still uses the default API. The SDK and public OpenAPI list only the default
 origin; the account has no visible residency switch.
@@ -33,7 +38,9 @@ A successful EU Search call verifies access, not account entitlement or the
 complete processing boundary. The default API is not a verified US-only
 endpoint either.
 
-Keep search and fetching disclosed as global until Parallel confirms:
+Parallel is the selected provider with these known limits. Search and fetching
+remain disclosed as processing that can leave the workspace region until
+Parallel confirms:
 
 - Whether the discovered EU route activates the policy's residency option,
   its account/key requirements, and any US-only endpoint.
