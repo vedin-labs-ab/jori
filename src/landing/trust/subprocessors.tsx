@@ -18,9 +18,9 @@ const subprocessors = [
     purpose: "Hosts the application and serves requests through its CDN.",
   },
   {
-    logo: "/logos/subprocessors/e2b.png",
-    name: "E2B",
-    url: "https://e2b.dev",
+    logo: "/logos/subprocessors/blaxel.svg",
+    name: "Blaxel",
+    url: "https://blaxel.ai",
     purpose: "Runs sandboxed work.",
   },
   {

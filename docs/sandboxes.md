@@ -2,20 +2,16 @@
 
 [Docs index](index.md) · [Residency](residency.md)
 
-Blaxel replaces E2B on this trial branch. Production remains on E2B until a
-separate rollout is approved.
-
-An existing E2B deployment needs a deliberate cutover. Stop its old runs and
-clean up their sandboxes first. Stored command waiters use numeric E2B process
-IDs; migrate those historical values before deploying this branch's string-ID
-schema. Do not try to resume an E2B process through Blaxel.
+Blaxel runs Jori's sandbox workloads. Development and each production region
+use separate workspaces and service-account credentials.
 
 ## Regional setup
 
 | Jori deployment | Blaxel sandbox region | Credentials |
 | --- | --- | --- |
-| EU | Frankfurt (`eu-fra-1`) | EU workspace service account |
-| US | North Virginia (`us-was-1`) | US workspace service account |
+| EU production | Frankfurt (`eu-fra-1`) | `jori-eu` service account |
+| US production | North Virginia (`us-was-1`) | `jori-us` service account |
+| Development | Selected by `JORI_REGION` | `jori` service account |
 
 Use separate workspaces and service accounts. Set `BL_WORKSPACE`, `BL_API_KEY`,
 `JORI_BLAXEL_IMAGE` and `DO_NOT_TRACK=1` on each Convex deployment. `JORI_REGION`
@@ -65,4 +61,4 @@ Keep the [residency claim](residency.md) scoped to evidence and the applicable D
 
 Separate workspaces require sufficient account quota. Blaxel currently ties tier
 eligibility to recent credit top-ups; monitor quota and credential expiry before
-promoting or extending a trial.
+extending previews or changing account billing.
