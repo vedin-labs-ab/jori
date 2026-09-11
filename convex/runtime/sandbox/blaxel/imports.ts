@@ -7,8 +7,9 @@ import {
 } from "../../../../contracts/runtime/files"
 import { internal } from "../../../_generated/api"
 import { internalAction } from "../../../_generated/server"
-import { openSandbox } from "../e2b"
+import { openSandbox } from "../blaxel"
 import { sandboxFilePath } from "../path"
+import { sandboxName } from "../support"
 
 /** Keep large bytes in storage, never in a Convex action argument or result. */
 export const file = internalAction({
@@ -28,7 +29,7 @@ export const file = internalAction({
       throw new Error(fileTooLargeError)
     }
     // storage.get resolves only this deployment's blob ID. No URL is accepted,
-    // minted, exposed to E2B, or followed by this transfer.
+    // minted, exposed to Blaxel, or followed by this transfer.
     const blob = await ctx.storage.get(source.storageId)
     if (blob === null) {
       throw new Error("Stored file was not found.")
@@ -44,7 +45,7 @@ export const file = internalAction({
       runId: args.runId,
       sandboxId: retained?.externalId ?? null,
     })
-    await sandbox.files.write(path, await blob.arrayBuffer())
-    return { sandboxId: sandbox.sandboxId }
+    await sandbox.fs.writeBinary(path, new Uint8Array(await blob.arrayBuffer()))
+    return { sandboxId: sandboxName(sandbox) }
   },
 })

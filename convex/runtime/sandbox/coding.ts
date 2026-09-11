@@ -42,7 +42,7 @@ export function isParkedCommand(value: unknown): value is ParkedCommand {
   return (
     isRecord(value) &&
     isRecord(value.parked) &&
-    typeof value.parked.pid === "number"
+    typeof value.parked.pid === "string"
   )
 }
 

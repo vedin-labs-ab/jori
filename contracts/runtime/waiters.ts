@@ -23,7 +23,7 @@ export type WaiterSubject =
  *  terminal; a command resolves when the sandbox reports its pid finished. */
 export type WaiterCondition =
   | { kind: "runs"; runIds: RuntimeId<"runs">[] }
-  | { kind: "command"; pid: number }
+  | { kind: "command"; pid: string }
 
 export type WaiterWake = {
   reason: WaiterWakeReason

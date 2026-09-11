@@ -7,10 +7,22 @@ import {
 import { internal } from "../../../_generated/api"
 import { type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
-import { openSandbox } from "../e2b"
+import { openSandbox } from "../blaxel"
+import { readSandboxFile } from "../support"
+
+vi.mock("../support", () => ({
+  readSandboxFile: vi.fn(),
+  sandboxName: (sandbox: { metadata: { name: string } }) =>
+    sandbox.metadata.name,
+}))
+
+import { sandboxFileInfo } from "./files"
+
+vi.mock("./files", () => ({ sandboxFileInfo: vi.fn() }))
+
 import { file } from "./exports"
 
-vi.mock("../e2b", () => ({ openSandbox: vi.fn() }))
+vi.mock("../blaxel", () => ({ openSandbox: vi.fn() }))
 
 const args = {
   runId: "runs:1" as Id<"runs">,
@@ -51,9 +63,10 @@ test.each([
     runId: args.runId,
     sandboxId: "sandbox-1",
   })
-  expect(read).toHaveBeenCalledWith("/home/user/workspace/output.bin", {
-    format: "bytes",
-  })
+  expect(read).toHaveBeenCalledWith(
+    expect.anything(),
+    "/home/user/workspace/output.bin"
+  )
   expect(storage.store.mock.calls[0]?.[0].size).toBe(size)
   expect(runMutation).toHaveBeenNthCalledWith(2, internal.files.data.record, {
     organizationId: "organization-1",
@@ -125,7 +138,7 @@ test.each([
   "/home/user/workspace/output.bin",
 ])("rejects a symlink at %s before reading bytes", async (path) => {
   const { ctx, getInfo, read, storage } = fixture(1)
-  getInfo.mockImplementation(async (current) => ({
+  getInfo.mockImplementation(async (_sandbox, current) => ({
     size: 1,
     type: current.endsWith(".bin") ? "file" : "dir",
     ...(current === path ? { symlinkTarget: "/outside/fixture" } : {}),
@@ -167,8 +180,9 @@ function fileMetadata(size: number) {
 }
 
 function fixture(size: number) {
-  const getInfo = vi.fn(
+  const getInfo = vi.mocked(sandboxFileInfo).mockImplementation(
     async (
+      _sandbox: unknown,
       path: string
     ): Promise<{
       size: number
@@ -176,10 +190,11 @@ function fixture(size: number) {
       symlinkTarget?: string
     }> => ({ size, type: path.endsWith(".bin") ? "file" : "dir" })
   )
-  const read = vi.fn(async () => new Uint8Array(size))
+  const read = vi
+    .mocked(readSandboxFile)
+    .mockImplementation(async () => new Uint8Array(size))
   vi.mocked(openSandbox).mockResolvedValue({
-    sandboxId: "sandbox-1",
-    files: { getInfo, read },
+    metadata: { name: "sandbox-1" },
   } as unknown as Awaited<ReturnType<typeof openSandbox>>)
   const storage = {
     store: vi.fn(async (_blob: Blob) => "storage-1"),

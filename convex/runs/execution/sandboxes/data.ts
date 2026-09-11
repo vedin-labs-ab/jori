@@ -75,7 +75,7 @@ export async function upsertSandbox(ctx: MutationCtx, args: SandboxRun) {
   }
 
   if (isTerminalRunStatus(run.status)) {
-    await ctx.scheduler.runAfter(0, internal.runtime.sandbox.e2b.kill, args)
+    await ctx.scheduler.runAfter(0, internal.runtime.sandbox.blaxel.kill, args)
     return false
   }
 
@@ -103,7 +103,7 @@ export async function releaseIdleSandbox(ctx: MutationCtx, args: SandboxRun) {
   })
   // The lease and the kill that ends it are set together, so an idle sandbox
   // never outlives the row that claims it.
-  await ctx.scheduler.runAt(expiresAt, internal.runtime.sandbox.e2b.kill, {
+  await ctx.scheduler.runAt(expiresAt, internal.runtime.sandbox.blaxel.kill, {
     externalId: args.externalId,
     runId: args.runId,
     expiresAt,
@@ -133,7 +133,7 @@ export async function settleRunSandbox(ctx: MutationCtx, run: Doc<"runs">) {
       : null
 
   if (released === null) {
-    await ctx.scheduler.runAfter(0, internal.runtime.sandbox.e2b.kill, {
+    await ctx.scheduler.runAfter(0, internal.runtime.sandbox.blaxel.kill, {
       externalId: sandbox.externalId,
       runId: run._id,
     })

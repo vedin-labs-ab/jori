@@ -3,7 +3,7 @@ import { isTarget, type Target, targets } from "./names.ts"
 /** The named tasks a package script binds to a target. Each is a fixed
  *  command; whatever follows the target is handed to it unchanged. */
 const commands = {
-  sandbox: ["node", "--experimental-strip-types", "scripts/e2b.ts"],
+  sandbox: ["node", "--experimental-strip-types", "scripts/blaxel.ts"],
   seed: ["node", "--experimental-strip-types", "scripts/db/seed.ts"],
   skills: ["npx", "convex", "run", "skills/catalog:syncGlobalSkills"],
   truncate: ["node", "--experimental-strip-types", "scripts/db/truncate.ts"],

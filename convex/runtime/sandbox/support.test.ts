@@ -1,40 +1,42 @@
-import { Sandbox } from "e2b"
-import { afterEach, expect, test, vi } from "vitest"
-import { killSandbox } from "./support"
+import { SandboxInstance } from "@blaxel/core"
+import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { connectSandbox, killSandbox, sandboxCleanupFailure } from "./support"
 
+beforeEach(() => {
+  vi.stubEnv("JORI_REGION", "eu")
+  vi.stubEnv("BL_API_KEY", "secret-test-key")
+  vi.stubEnv("BL_WORKSPACE", "preview-eu")
+})
 afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllEnvs()
 })
 
-test.each([
-  true,
-  false,
-])("cleanup succeeds for killed or absent sandbox: %s", async (result) => {
-  vi.stubEnv("E2B_API_KEY", "test-key")
-  const kill = vi.spyOn(Sandbox, "kill").mockResolvedValue(result)
-  await expect(killSandbox("test-sandbox")).resolves.toBeUndefined()
-  expect(kill).toHaveBeenCalledWith(
-    "test-sandbox",
-    expect.objectContaining({ apiKey: "test-key" })
+test("a foreign region is rejected before querying the provider", async () => {
+  const get = vi.spyOn(SandboxInstance, "get")
+  await expect(connectSandbox("jori-us-foreign")).rejects.toThrow("region")
+  expect(get).not.toHaveBeenCalled()
+})
+
+test("cleanup tolerates an absent sandbox", async () => {
+  vi.spyOn(SandboxInstance, "get").mockRejectedValue({ code: 404 })
+  await expect(killSandbox("jori-eu-missing")).resolves.toBeUndefined()
+})
+
+test("cleanup failures omit provider secrets and cannot be marked successful", async () => {
+  vi.spyOn(SandboxInstance, "get").mockRejectedValue(
+    new Error("secret-test-key private-metadata")
+  )
+  await expect(killSandbox("jori-eu-test")).rejects.toThrow(
+    sandboxCleanupFailure
   )
 })
 
-test("cleanup failure is actionable without copying sensitive provider text", async () => {
-  vi.stubEnv("E2B_API_KEY", "secret-test-key")
-  vi.spyOn(Sandbox, "kill").mockRejectedValue(
-    new Error("secret-test-key private-sandbox-metadata")
+test("missing credentials fail without a provider request", async () => {
+  vi.stubEnv("BL_API_KEY", undefined)
+  const get = vi.spyOn(SandboxInstance, "get")
+  await expect(killSandbox("jori-eu-test")).rejects.toThrow(
+    "Missing BL_API_KEY"
   )
-  await expect(killSandbox("test-sandbox")).rejects.toThrow(
-    "Sandbox cleanup failed. Check this deployment's E2B connection and retry cleanup."
-  )
-})
-
-test("missing deployment credentials fail without an E2B request", async () => {
-  vi.stubEnv("E2B_API_KEY", undefined)
-  const kill = vi.spyOn(Sandbox, "kill")
-  await expect(killSandbox("test-sandbox")).rejects.toThrow(
-    "Missing E2B_API_KEY"
-  )
-  expect(kill).not.toHaveBeenCalled()
+  expect(get).not.toHaveBeenCalled()
 })

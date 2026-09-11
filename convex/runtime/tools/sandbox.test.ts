@@ -25,13 +25,13 @@ test("bash parks on a slow command and collects it on the wake", async () => {
   expect(isParked(parked)).toBe(true)
   expect(runtime.platform.park).toHaveBeenCalledWith(
     expect.objectContaining({
-      condition: { kind: "command", pid: 4321 },
+      condition: { kind: "command", pid: "4321" },
       token: "command-token",
     })
   )
 
   runtime.platform.readWaiter = vi.fn(async () => ({
-    condition: { kind: "command" as const, pid: 4321 },
+    condition: { kind: "command" as const, pid: "4321" },
     token: "command-token",
   }))
 

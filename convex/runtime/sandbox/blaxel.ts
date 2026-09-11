@@ -6,25 +6,26 @@ import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../../_generated/server"
 import { commandWrapperScript } from "./script"
 import {
+  type BlaxelSandbox,
   cloneIntoSandbox,
   collectCommandOutput,
   connectSandbox,
   createSandbox,
   defaultCommandTimeoutMs,
-  type E2BSandbox,
   killSandbox,
   normalizeCommandResult,
+  readSandboxFile,
   runSandboxCommand,
   sandboxCleanupFailure,
+  sandboxName,
+  startSandboxCommand,
   waitForCommand,
+  writeSandboxFiles,
 } from "./support"
 
 /** How long a command may hold its action open before the run parks on it.
  *  Most tool commands finish well inside this. */
 const commandGraceMs = 120_000
-/** Room for the callback and the collection after the command's own deadline,
- *  so the sandbox does not pause with the output still unread. */
-const sandboxHeadroomMs = 5 * 60 * 1000
 
 const sandboxTarget = {
   runId: v.id("runs"),
@@ -41,7 +42,7 @@ const commandResult = v.object({
   stdout: v.string(),
   timedOut: v.optional(v.literal(true)),
 })
-const commandHandle = v.object({ pid: v.number(), token: v.string() })
+const commandHandle = v.object({ pid: v.string(), token: v.string() })
 
 export const command = internalAction({
   args: { ...sandboxTarget, input: commandInput },
@@ -52,7 +53,7 @@ export const command = internalAction({
 
     return {
       result: normalizeCommandResult(result),
-      sandboxId: sandbox.sandboxId,
+      sandboxId: sandboxName(sandbox),
     }
   },
 })
@@ -66,22 +67,19 @@ export const start = internalAction({
   handler: async (ctx, args) => {
     const sandbox = await openSandbox(ctx, args)
     const timeoutMs = args.input.timeoutMs ?? defaultCommandTimeoutMs
-    const sandboxId = sandbox.sandboxId
+    const sandboxId = sandboxName(sandbox)
 
-    await sandbox.setTimeout(timeoutMs + sandboxHeadroomMs)
-
-    const handle = await sandbox.commands.run(
-      commandWrapperScript({
+    const handle = await startSandboxCommand(sandbox, {
+      command: commandWrapperScript({
         callbackUrl: commandCallbackUrl(),
         command: args.input.command,
         token: args.token,
       }),
-      { background: true, cwd: args.input.cwd, timeoutMs }
-    )
+      cwd: args.input.cwd,
+      timeoutMs,
+    })
 
-    if (!(await waitForCommand(handle, commandGraceMs))) {
-      await handle.disconnect()
-
+    if (!(await waitForCommand(sandbox, handle.pid, commandGraceMs))) {
       return { handle: { pid: handle.pid, token: args.token }, sandboxId }
     }
 
@@ -99,12 +97,12 @@ export const finish = internalAction({
     const sandbox = await openSandbox(ctx, args)
 
     if (args.kill) {
-      await sandbox.commands.kill(args.handle.pid)
+      await sandbox.process.kill(args.handle.pid)
     }
 
     return {
       result: await collectCommandOutput(sandbox, args.handle.token),
-      sandboxId: sandbox.sandboxId,
+      sandboxId: sandboxName(sandbox),
     }
   },
 })
@@ -114,11 +112,11 @@ export const read = internalAction({
   returns: v.object({ content: v.bytes(), sandboxId: v.string() }),
   handler: async (ctx, args) => {
     const sandbox = await openSandbox(ctx, args)
-    const content = await sandbox.files.read(args.path, { format: "bytes" })
+    const content = await readSandboxFile(sandbox, args.path)
 
     return {
       content: new Uint8Array(content).buffer,
-      sandboxId: sandbox.sandboxId,
+      sandboxId: sandboxName(sandbox),
     }
   },
 })
@@ -134,11 +132,18 @@ export const write = internalAction({
   handler: async (ctx, args) => {
     const sandbox = await openSandbox(ctx, args)
 
-    await sandbox.files.write(
-      args.files.map((file) => ({ data: file.content, path: file.path }))
+    await writeSandboxFiles(
+      sandbox,
+      args.files.map((file) => ({
+        path: file.path,
+        content:
+          typeof file.content === "string"
+            ? file.content
+            : new Uint8Array(file.content),
+      }))
     )
 
-    return { sandboxId: sandbox.sandboxId }
+    return { sandboxId: sandboxName(sandbox) }
   },
 })
 
@@ -169,7 +174,7 @@ export const clone = internalAction({
 
     return {
       result: await cloneIntoSandbox(sandbox, args.input),
-      sandboxId: sandbox.sandboxId,
+      sandboxId: sandboxName(sandbox),
     }
   },
 })
@@ -224,7 +229,7 @@ async function reserveCleanup(
 export async function openSandbox(
   ctx: ActionCtx,
   args: { runId: Id<"runs">; sandboxId: string | null }
-): Promise<E2BSandbox> {
+): Promise<BlaxelSandbox> {
   const allowed = await ctx.runQuery(internal.jobs.records.canExecuteRunTools, {
     runId: args.runId,
   })
@@ -237,12 +242,12 @@ export async function openSandbox(
     return await connectSandbox(args.sandboxId)
   }
 
-  const sandbox = await createSandbox(args.runId)
+  const sandbox = await createSandbox()
 
   const accepted = await ctx.runMutation(
     internal.runs.execution.sandboxes.records.upsert,
     {
-      externalId: sandbox.sandboxId,
+      externalId: sandboxName(sandbox),
       runId: args.runId,
     }
   )

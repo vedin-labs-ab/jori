@@ -28,7 +28,7 @@ They load `.env.local` for dev and `.env.<target>.local` for production.
 | --- | --- |
 | `pnpm ship <target> [--yes]` | Dev: deploy Convex and skills. Production: deploy Convex, frontend, and skills. |
 | `pnpm skills <target>` | Sync the skill catalog. |
-| `pnpm sandbox <target>` | Build the E2B template. |
+| `pnpm sandbox <target>` | Build the Blaxel sandbox image. |
 | `pnpm db:seed dev`, `pnpm db:truncate dev` | Manage development data only. |
 
 - Deploy shared dev and production only from the primary checkout.

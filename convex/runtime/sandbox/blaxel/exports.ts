@@ -9,9 +9,10 @@ import {
 import { internal } from "../../../_generated/api"
 import { internalAction } from "../../../_generated/server"
 import { uploadRunFile } from "../../../files/upload"
-import { openSandbox } from "../e2b"
+import { openSandbox } from "../blaxel"
 import { sandboxFilePath } from "../path"
-import { type E2BSandbox } from "../support"
+import { type BlaxelSandbox, readSandboxFile, sandboxName } from "../support"
+import { sandboxFileInfo } from "./files"
 
 /** File bytes stay in Node and regional storage, never an action result. */
 export const file = internalAction({
@@ -54,7 +55,7 @@ export const file = internalAction({
       sandboxId: retained.externalId,
     })
     assertFileSize(await regularFileSize(sandbox, path))
-    const bytes = await sandbox.files.read(path, { format: "bytes" })
+    const bytes = await readSandboxFile(sandbox, path)
     assertFileSize(bytes.byteLength)
     const saved = await uploadRunFile(ctx, {
       bytes,
@@ -63,17 +64,17 @@ export const file = internalAction({
       organizationId: run.organizationId,
       runId: args.runId,
     })
-    return { sandboxId: sandbox.sandboxId, file: saved }
+    return { sandboxId: sandboxName(sandbox), file: saved }
   },
 })
 
 /** Check parents as well as the leaf: a parent symlink also escapes the path. */
-async function regularFileSize(sandbox: E2BSandbox, path: string) {
+async function regularFileSize(sandbox: BlaxelSandbox, path: string) {
   let current = ""
   let size = 0
   for (const component of path.split("/").filter(Boolean)) {
     current += `/${component}`
-    const info = await sandbox.files.getInfo(current)
+    const info = await sandboxFileInfo(sandbox, current)
     if (info.symlinkTarget !== undefined) {
       throw new Error("Cannot export files through symbolic links.")
     }

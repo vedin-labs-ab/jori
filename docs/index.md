@@ -8,6 +8,8 @@ claims. Read only the guide relevant to the task.
 | [Architecture](architecture.md) | Product priorities, regional defaults and when to revisit a decision. |
 | [Chats](chats.md) | Filing, shared participation, execution identity and resource access. |
 | [Integrations](integrations.md) | Registration choices, branding and reliable regional delivery. |
+| [Sandboxes](sandboxes.md) | Regional sandbox setup, execution, cleanup and verification. |
+| [Previews](previews.md) | Isolated regional Convex deployments for branch verification. |
 | [Residency](residency.md) | Data boundaries, known exceptions and evidence for customer claims. |
 | [Brand](brand.md) | Logo variants, clear space, browser and app icons, and social image regeneration. |
 | [Layout stability](layout.md) | Loading geometry, changing labels and dialog state during exit. |
