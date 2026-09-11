@@ -34,8 +34,10 @@ from 9 September; this is not proof of provider contracts.
   backups and access remain subject to the applicable provider terms and evidence.
 - **Parallel:** handles search, fetching and background website crawling.
   EU Search uses the tested EU endpoint; fetching uses the default API.
-  Keep the global disclosure until account entitlement and
-  both operations' processing boundaries are verified. See [Web search](search.md).
+  Describe the EU Search route without promising full regional coverage until
+  account entitlement and processing boundaries are verified. Fetching remains
+  global; the default Search API has no verified US-only boundary.
+  See [Web search](search.md).
 - **Stripe:** long-term billing exception. Keep prompts/documents out of billing
   metadata. Duplicate accounts do not create regional processing guarantees.
 - **Other providers:** regional Convex, Vercel, OpenRouter, Google images, Bird
@@ -64,8 +66,8 @@ safeguards. Documenting an exception does not make it lawful or satisfy an EU-on
 customer contract. See [IMY transfer guidance](https://www.imy.se/verksamhet/dataskydd/det-har-galler-enligt-gdpr/overforing-till-tredje-land/)
 and [EDPB processor responsibilities](https://www.edpb.europa.eu/sme/learn-the-basics/data-controller-or-data-processor_en).
 
-Scope claims to verified workspace storage and regional code execution. Disclose
-global web search, page fetching and billing, plus the separately scoped provider
-operations above. Avoid "all data stays in your region",
+Scope claims to verified workspace storage, regional code execution and the
+configured EU Search route. Disclose global page fetching and billing, and keep
+the separately scoped search and provider-operation limits above. Avoid "all data stays in your region",
 "EU-only", "EU sovereign", or an undefined "regional core infrastructure*".
 Use EU, EEA and Europe precisely. An internal policy is not a signed agreement.
