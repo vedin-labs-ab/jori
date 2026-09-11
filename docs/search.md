@@ -14,7 +14,12 @@ The adapter uses `/v1/search` and `/v1/extract`, aborts after 30 seconds and
 rejects redirects. It does not retry or fall back to another endpoint.
 
 One Parallel organization holds separate apps and keys for development, EU
-production and US production. Retire preview keys after verification.
+production and US production. EU production currently uses the original
+`Default Key` in the app named `Jori preview`. This is a production credential;
+do not revoke it during preview cleanup. New keys returned 401 on the EU
+endpoint during rollout, while this key continued to work. Replace it only
+after the replacement passes an EU Search call. Dev and US use `Jori Development`
+and `Jori US`. Retire unused preview keys after verification.
 Organization names and separate keys do not establish residency. Never let a
 user, tool argument or result choose the API origin.
 
