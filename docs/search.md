@@ -38,9 +38,10 @@ A successful EU Search call verifies access, not account entitlement or the
 complete processing boundary. The default API is not a verified US-only
 endpoint either.
 
-Parallel is the selected provider with these known limits. Search and fetching
-remain disclosed as processing that can leave the workspace region until
-Parallel confirms:
+Parallel is the selected provider with these known limits. Public wording may
+describe the EU Search route, but must not promise that all search processing
+stays regional. Page fetching remains a global exception. Before strengthening
+these claims, confirm:
 
 - Whether the discovered EU route activates the policy's residency option,
   its account/key requirements, and any US-only endpoint.
