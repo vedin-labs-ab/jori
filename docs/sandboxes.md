@@ -7,11 +7,11 @@ use separate workspaces and service-account credentials.
 
 ## Regional setup
 
-| Jori deployment | Blaxel sandbox region | Credentials |
+| Jori deployment | Blaxel sandbox region | Blaxel workspace |
 | --- | --- | --- |
-| EU production | Frankfurt (`eu-fra-1`) | `jori-eu` service account |
-| US production | North Virginia (`us-was-1`) | `jori-us` service account |
-| Development | Selected by `JORI_REGION` | `jori` service account |
+| EU production | Frankfurt (`eu-fra-1`) | `jori-eu` |
+| US production | North Virginia (`us-was-1`) | `jori-us` |
+| Development | Selected by `JORI_REGION` | `jori-development` |
 
 Use separate workspaces and service accounts. Set `BL_WORKSPACE`, `BL_API_KEY`,
 `JORI_BLAXEL_IMAGE` and `DO_NOT_TRACK=1` on each Convex deployment. `JORI_REGION`
