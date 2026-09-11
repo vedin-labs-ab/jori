@@ -33,11 +33,11 @@ test("summarizes tool result values", () => {
 test("captures provider request metadata on completed tool results", () => {
   expect(
     toolTraceDetails({
-      provider: { name: "exa", requestId: "request-1" },
+      provider: { name: "parallel", requestId: "request-1" },
       results: [{ title: "Private title" }],
     })
   ).toEqual({
-    provider: { name: "exa", request: "request-1" },
+    provider: { name: "parallel", request: "request-1" },
     result: { kind: "array", size: 1 },
   })
 })

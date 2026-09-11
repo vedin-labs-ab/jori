@@ -47,7 +47,7 @@ function webToolResult(): JsonSchema {
       provider: objectSchema({
         description: "Trace of the provider request.",
         properties: {
-          name: constProperty("exa", "Search provider."),
+          name: constProperty("parallel", "Search provider."),
           operation: enumProperty(
             ["search", "contents"],
             "Provider operation."
