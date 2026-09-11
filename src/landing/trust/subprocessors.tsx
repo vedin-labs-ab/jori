@@ -21,7 +21,7 @@ const subprocessors = [
     logo: "/logos/subprocessors/blaxel.svg",
     name: "Blaxel",
     url: "https://blaxel.ai",
-    purpose: "Runs sandboxed work.",
+    purpose: "Runs sandboxed code in your workspace's region.",
   },
   {
     logo: "/logos/subprocessors/bird.svg",
