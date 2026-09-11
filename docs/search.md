@@ -23,7 +23,7 @@ user, tool argument or result choose the API origin.
 | Development and US production | `https://api.parallel.ai` | `https://api.parallel.ai` |
 | EU production | `https://eu.parallel.ai` | `https://api.parallel.ai` |
 
-## Residency gate
+## Residency and provider follow-up
 
 As reviewed on 11 September 2026, Parallel's [privacy policy](https://parallel.ai/privacy-policy)
 explicitly describes EU processing and no content retention for Search requests
@@ -38,10 +38,9 @@ A successful EU Search call verifies access, not account entitlement or the
 complete processing boundary. The default API is not a verified US-only
 endpoint either.
 
-Parallel is the selected provider with these known limits. Public wording may
-describe the EU Search route, but must not promise that all search processing
-stays regional. Page fetching remains a global exception. Before strengthening
-these claims, confirm:
+Albin has approved treating EU Search as regional for this rollout and will
+confirm provider terms and DPAs. Page fetching remains a global exception.
+Track the following as outstanding verification, not established contract terms:
 
 - Whether the discovered EU route activates the policy's residency option,
   its account/key requirements, and any US-only endpoint.
@@ -49,9 +48,9 @@ these claims, confirm:
   backups, support access and downstream processors.
 - Retention and contractual terms for the actual account.
 
-Then configure each operation independently, verify it live, and update the
-adapter's processing declaration and public claims together. An EU Convex
-preview proves where Jori runs, not where Parallel processes a request.
+Keep each operation independently configured and verify credentials on its
+actual endpoint before rotation. The adapter's conservative processing marker
+remains global until the combined Search/Extract boundary is established.
 
 ## Behavior to preserve
 
