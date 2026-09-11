@@ -30,9 +30,9 @@ const subprocessors = [
     purpose: "Delivers Jori's email.",
   },
   {
-    logo: "/logos/subprocessors/exa.svg",
-    name: "Exa",
-    url: "https://exa.ai/docs/reference/security",
+    logo: "/logos/subprocessors/parallel.svg",
+    name: "Parallel",
+    url: "https://trust.parallel.ai",
     purpose: "Processes web-search queries and fetches requested pages.",
   },
   {

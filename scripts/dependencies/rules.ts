@@ -50,15 +50,15 @@ export const ruleSet = {
       },
     },
     {
-      name: "exa-stays-in-search-adapter",
+      name: "parallel-stays-in-search-adapter",
       severity: "error",
       comment:
-        "Search consumers use the regional provider-neutral client, not Exa SDK types or transport.",
+        "Search consumers use the regional provider-neutral client, not Parallel SDK types or transport.",
       from: {
         path: "^convex/",
-        pathNot: "^convex/search/(?:exa|response)[.]ts$",
+        pathNot: "^convex/search/(?:parallel|response)[.]ts$",
       },
-      to: { path: "^node_modules/exa-js(?:/|$)" },
+      to: { path: "^node_modules/parallel-web(?:/|$)" },
     },
     {
       name: "integrations-do-not-import-broker",
