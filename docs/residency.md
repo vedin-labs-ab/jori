@@ -32,9 +32,9 @@ from 9 September; this is not proof of provider contracts.
   North Virginia for US, with separate workspace credentials. See
   [Sandboxes](sandboxes.md). Provider control-plane metadata, internal telemetry,
   backups and access remain subject to the applicable provider terms and evidence.
-- **Parallel:** this branch replaces global search, fetching and background
-  website crawling. EU Search works through an EU endpoint in preview; fetching
-  uses the default API. Keep the global disclosure until account entitlement and
+- **Parallel:** handles search, fetching and background website crawling.
+  EU Search uses the tested EU endpoint; fetching uses the default API.
+  Keep the global disclosure until account entitlement and
   both operations' processing boundaries are verified. See [Web search](search.md).
 - **Stripe:** long-term billing exception. Keep prompts/documents out of billing
   metadata. Duplicate accounts do not create regional processing guarantees.
