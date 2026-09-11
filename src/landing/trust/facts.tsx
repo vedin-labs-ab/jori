@@ -113,10 +113,9 @@ export function DataSection() {
     >
       <FactList>
         <Definition icon={MapPin} term="Stored in your region">
-          Jori stores your workspace data and runs code in your chosen{" "}
-          <Region region="eu" /> or <Region region="us" /> region. EU web
-          searches use Parallel&apos;s EU service. Page fetching and billing use
-          global services.
+          Jori keeps your workspace data, web searches and code execution in
+          your chosen <Region region="eu" /> or <Region region="us" /> region.
+          Page fetching and billing use global services.
         </Definition>
         <Definition icon={Share2} term="Subprocessors and service providers">
           <Subprocessors />
