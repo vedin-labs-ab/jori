@@ -34,7 +34,7 @@ export function ThemePreview({
 }
 
 function Surface({
-  cardFrom = "left-[22%]",
+  cardFrom = "left-[18%]",
   className,
   scheme,
 }: {
@@ -56,7 +56,7 @@ function Surface({
     <span className="relative block size-full bg-muted">
       <span
         className={cn(
-          "absolute top-[34%] right-0 bottom-0 block rounded-tl-lg border-t border-l bg-background pt-[6%] pl-[8%] font-semibold text-[length:clamp(0.625rem,15cqw,1.125rem)] text-foreground leading-none",
+          "absolute top-[28%] right-0 bottom-0 block rounded-tl-lg border-t border-l bg-background pt-[7%] pl-[9%] font-semibold text-[length:clamp(0.5625rem,13cqw,1rem)] text-foreground leading-none",
           cardFrom
         )}
       >
