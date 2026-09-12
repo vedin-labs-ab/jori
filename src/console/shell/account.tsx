@@ -18,6 +18,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { usePrivacyChoices } from "@/shared/analytics/context"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { useSession } from "@/shared/session/auth"
 import { AccountDialog } from "./settings"
@@ -27,6 +28,7 @@ export function SidebarUserButton() {
   const { data: session } = useSession()
   const [managing, setManaging] = useState(false)
   const signOut = useSignOutFlow()
+  const privacy = usePrivacyChoices()
   const user = session?.user
 
   if (signOut.isSigningOut) {
@@ -65,6 +67,11 @@ export function SidebarUserButton() {
                 <ShieldUser />
                 Account
               </DropdownMenuItem>
+              {privacy === undefined ? null : (
+                <DropdownMenuItem onSelect={privacy.open}>
+                  Privacy choices
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={signOut.signOut}>
