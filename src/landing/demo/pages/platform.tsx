@@ -8,7 +8,7 @@ const platformSurfaces: Record<
 > = {
   context: {
     description:
-      "What Jori knows about the company: the profile, the websites, the workstreams.",
+      "What Jori knows about the company: the profile and the websites.",
     icon: Layers,
     title: "Context is set in the console",
   },
