@@ -86,13 +86,15 @@ export function IntegrationLogoStack({
   return (
     <span className="inline-flex shrink-0 items-center">
       <span className="-space-x-1 inline-flex">
+        {/* The backdrop sits on a wrapper, not the mark: an ink mark
+            inverts on a dark ground, and its backdrop must not. */}
         {visibleIntegrations.map((integration) => (
-          <IntegrationLogo
-            className="rounded-sm bg-background ring-2 ring-card"
-            integration={integration}
+          <span
+            className="inline-flex rounded-sm bg-background ring-2 ring-card"
             key={integration}
-            size={size}
-          />
+          >
+            <IntegrationLogo integration={integration} size={size} />
+          </span>
         ))}
       </span>
       {hiddenIntegrations.length > 0 ? (
