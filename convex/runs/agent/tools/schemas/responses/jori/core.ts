@@ -14,7 +14,6 @@ import {
 import { brokerJoriToolResponseSchemas } from "./broker"
 import { runJoriToolResponseSchemas } from "./runs"
 import { shareLinkSchema } from "./visibility"
-import { workstreamJoriToolResponseSchemas } from "./workstreams"
 
 function fileSummaryProperties() {
   return {
@@ -139,7 +138,6 @@ export const coreJoriToolResponseSchemas = {
     ],
   },
   ...runJoriToolResponseSchemas,
-  ...workstreamJoriToolResponseSchemas,
   save_file: objectSchema({
     required: ["fileId", "mimeType", "name", "size", "url"],
     properties: {
