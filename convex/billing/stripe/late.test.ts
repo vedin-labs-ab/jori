@@ -143,3 +143,22 @@ test("mismatched ownership remains visible and is retried without canceling anyt
     (await t.query(internal.billing.stripe.cancellation.read, { id }))?.nextAt
   ).toBeGreaterThan(Date.now())
 })
+
+test("cancellation retries retain only the HTTP status from provider failures", async () => {
+  const { t, id } = await setup()
+  const fetch = vi.fn(async () =>
+    Response.json(
+      { error: { message: "Reflected private customer value" } },
+      { status: 401 }
+    )
+  )
+  vi.stubGlobal("fetch", fetch)
+  await t.action(internal.billing.stripe.late.cancel, { id })
+  const pending = await t.query(internal.billing.stripe.cancellation.read, {
+    id,
+  })
+  expect(pending?.error).toBe("Stripe request failed (HTTP 401)")
+  expect(pending?.canceledAt).toBeUndefined()
+  expect(pending?.nextAt).toBeGreaterThan(Date.now())
+  expect(fetch).toHaveBeenCalledTimes(1)
+})

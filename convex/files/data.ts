@@ -14,6 +14,7 @@ import {
   resourceViewerArgs,
 } from "../visibility/resources"
 import { type Sight } from "../visibility/sight"
+import { requireUnusedUpload } from "./blobs"
 import { fileFields } from "./schema"
 
 const maxFileSearchResults = 100
@@ -25,6 +26,7 @@ export const record = internalMutation({
   args: fileFields,
   handler: async (ctx, args) => {
     await assertWorkspaceAvailable(ctx, args.organizationId)
+    await requireUnusedUpload(ctx, args.storageId)
     const now = Date.now()
 
     return await ctx.db.insert("files", {

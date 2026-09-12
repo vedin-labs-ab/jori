@@ -8,6 +8,7 @@ import {
   normalizeStoredVisibility,
   type StoredVisibility,
 } from "../visibility/schema"
+import { deleteUnusedBlob, requireUnusedUpload } from "./blobs"
 import { canViewFile, type FileViewer } from "./data"
 import { normalizeFileName } from "./names"
 
@@ -73,7 +74,7 @@ export async function patchFileDetails(
 
 /** Swaps the file's content for a freshly uploaded blob: the row keeps its
  *  identity while storage id, size, and updatedAt follow the new upload.
- *  Last write wins; the replaced blob has no other owner, so it goes. */
+ *  Last write wins; the replaced blob goes when no other row references it. */
 export async function swapFileBlob(
   ctx: MutationCtx,
   viewer: FileViewer,
@@ -82,12 +83,12 @@ export async function swapFileBlob(
   const file = await requireViewableFile(ctx, viewer, args.fileId)
   const metadata = await requireUnusedUpload(ctx, args.storageId)
 
-  await ctx.storage.delete(file.storageId)
   await ctx.db.patch(file._id, {
     storageId: args.storageId,
     size: metadata.size,
     updatedAt: Date.now(),
   })
+  await deleteUnusedBlob(ctx, file.storageId)
 }
 
 export async function removeFileWithBlob(
@@ -98,13 +99,12 @@ export async function removeFileWithBlob(
   await purgeFile(ctx, await requireViewableFile(ctx, viewer, fileId))
 }
 
-/** The blob has no owner besides the row and a share link is a capability
- *  for this one file, so all three go together. Reached through the console
- *  and through a folder deletion that takes its contents with it. */
+/** Remove the row and its share capabilities, then its unreferenced blob.
+ * Reached through console, folder, and workspace deletion. */
 export async function purgeFile(ctx: MutationCtx, file: Doc<"files">) {
-  await ctx.storage.delete(file.storageId)
   await ctx.db.delete(file._id)
   await deleteTargetShares(ctx, { kind: "file", id: file._id })
+  await deleteUnusedBlob(ctx, file.storageId)
 }
 
 export async function requireViewableFile(
@@ -119,24 +119,4 @@ export async function requireViewableFile(
   }
 
   return file
-}
-
-/** An upload can belong to only one file. Accepting an already linked blob
- * lets another caller claim it and later delete its original owner's content. */
-async function requireUnusedUpload(
-  ctx: MutationCtx,
-  storageId: Id<"_storage">
-) {
-  const metadata = await ctx.db.system.get(storageId)
-  if (metadata === null) {
-    throw new Error("Uploaded file was not found in storage")
-  }
-  const existing = await ctx.db
-    .query("files")
-    .withIndex("by_storageId", (index) => index.eq("storageId", storageId))
-    .first()
-  if (existing !== null) {
-    throw new Error("Uploaded file is already in use")
-  }
-  return metadata
 }
