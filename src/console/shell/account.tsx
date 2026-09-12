@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut, ShieldUser, SunMoon } from "lucide-react"
+import { ChevronsUpDown, LogOut, ShieldUser } from "lucide-react"
 import { useState } from "react"
 import { useSignOutFlow } from "@/components/auth/sign-out"
 import { UserView } from "@/components/auth/user/user-view"
@@ -21,12 +21,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { usePrivacyChoices } from "@/shared/analytics/context"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { useSession } from "@/shared/session/auth"
-import { AccountDialog, type AccountSettingsView } from "./settings"
+import { ThemeMenu } from "@/shared/theme/menu"
+import { AccountDialog } from "./settings"
 
 export function SidebarUserButton() {
   const { isMobile } = useSidebar()
   const { data: session } = useSession()
-  const [managing, setManaging] = useState<AccountSettingsView>()
+  const [managing, setManaging] = useState(false)
   const signOut = useSignOutFlow()
   const privacy = usePrivacyChoices()
   const user = session?.user
@@ -63,13 +64,9 @@ export function SidebarUserButton() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onSelect={() => setManaging("account")}>
+              <DropdownMenuItem onSelect={() => setManaging(true)}>
                 <ShieldUser />
                 Account
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setManaging("appearance")}>
-                <SunMoon />
-                Appearance
               </DropdownMenuItem>
               {privacy === undefined ? null : (
                 <DropdownMenuItem onSelect={privacy.open}>
@@ -78,21 +75,20 @@ export function SidebarUserButton() {
               )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="pb-0 text-muted-foreground text-xs">
+                Theme
+              </DropdownMenuLabel>
+              <ThemeMenu />
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={signOut.signOut}>
               <LogOut />
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <AccountDialog
-          initialView={managing}
-          onOpenChange={(open) => {
-            if (!open) {
-              setManaging(undefined)
-            }
-          }}
-          open={managing !== undefined}
-        />
+        <AccountDialog onOpenChange={setManaging} open={managing} />
       </SidebarMenuItem>
     </SidebarMenu>
   )

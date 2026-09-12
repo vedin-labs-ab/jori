@@ -1,8 +1,12 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu"
 import { ThemeProvider } from "../theme"
-import { ThemePicker } from "./picker"
+import { ThemeMenu } from "./menu"
 
 vi.mock("@tanstack/react-router", () => ({ ScriptOnce: () => null }))
 
@@ -20,21 +24,22 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-test("picking a card checks it, applies the theme, and remembers it", () => {
+test("choosing a card in the menu checks it, applies the theme, and remembers it", () => {
   render(
     <ThemeProvider storageKey="theme">
-      <ThemePicker />
+      <DropdownMenu open>
+        <DropdownMenuContent>
+          <ThemeMenu />
+        </DropdownMenuContent>
+      </DropdownMenu>
     </ThemeProvider>
   )
-  const radio = (name: string) =>
-    screen.getByRole("radio", { name }) as HTMLInputElement
+  const item = (name: string) => screen.getByRole("menuitemradio", { name })
 
-  expect(radio("System").checked).toBe(true)
+  expect(item("System").getAttribute("aria-checked")).toBe("true")
 
-  fireEvent.click(radio("Dark"))
+  fireEvent.click(item("Dark"))
 
-  expect(radio("Dark").checked).toBe(true)
-  expect(radio("System").checked).toBe(false)
   expect(document.documentElement.classList.contains("dark")).toBe(true)
   expect(window.localStorage.getItem("theme")).toBe("dark")
 })
