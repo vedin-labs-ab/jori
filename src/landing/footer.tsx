@@ -84,22 +84,25 @@ export function LandingFooter() {
           </div>
           <div className="mt-16 flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t pt-6 text-muted-foreground text-sm">
             <p className="py-1">© {new Date().getFullYear()} Vedin Labs AB</p>
-            <ThemeSwitcher className="order-last sm:order-none sm:ml-auto" />
-            <ul className="-mx-2.5 flex flex-wrap items-center">
-              {legalLinks.map((link) => (
-                <li key={link.label}>
-                  <PageLink className="px-2.5" link={link} />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <ul className="-mx-2.5 flex flex-wrap items-center">
+                {legalLinks.map((link) => (
+                  <li key={link.label}>
+                    <PageLink className="px-2.5" link={link} />
+                  </li>
+                ))}
+                <li>
+                  <PrivacyChoices
+                    className={cn(
+                      pageLinkClassName,
+                      "h-auto px-2.5 font-normal text-muted-foreground text-sm hover:no-underline"
+                    )}
+                  />
                 </li>
-              ))}
-              <li>
-                <PrivacyChoices
-                  className={cn(
-                    pageLinkClassName,
-                    "h-auto px-2.5 font-normal text-muted-foreground text-sm hover:no-underline"
-                  )}
-                />
-              </li>
-            </ul>
+              </ul>
+              <span aria-hidden="true">·</span>
+              <ThemeSwitcher />
+            </div>
           </div>
         </div>
         <Wordmark />

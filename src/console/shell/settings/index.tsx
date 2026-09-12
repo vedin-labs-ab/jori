@@ -3,12 +3,15 @@ import {
   CreditCard,
   Group,
   Shield,
+  SunMoon,
   UserRound,
   Users,
 } from "lucide-react"
 import { lazy, Suspense } from "react"
 
+import { Section, SectionHeader } from "@/components/ui/section"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ThemePicker } from "@/shared/theme/picker"
 import { SettingsDialog } from "./shell"
 import { type SettingsDialogView } from "./types"
 
@@ -71,11 +74,12 @@ type SettingsDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
-type AccountSettingsView = "account" | "security"
+export type AccountSettingsView = "account" | "appearance" | "security"
 type OrganizationSettingsView = "general" | "people" | "teams" | "billing"
 
 const accountViews = [
   { icon: UserRound, label: "Account", value: "account" },
+  { icon: SunMoon, label: "Appearance", value: "appearance" },
   { icon: Shield, label: "Security", value: "security" },
 ] as const satisfies readonly SettingsDialogView<AccountSettingsView>[]
 
@@ -87,11 +91,15 @@ const organizationViews = [
 ] as const satisfies readonly SettingsDialogView<OrganizationSettingsView>[]
 
 /** The signed-in member's settings, using the shared settings shell. */
-export function AccountDialog({ open, onOpenChange }: SettingsDialogProps) {
+export function AccountDialog({
+  initialView = "account",
+  open,
+  onOpenChange,
+}: SettingsDialogProps & { initialView?: AccountSettingsView }) {
   return (
     <SettingsDialog
       description="Manage your account."
-      initialView="account"
+      initialView={initialView}
       navigationLabel="Account settings"
       onOpenChange={onOpenChange}
       open={open}
@@ -152,6 +160,16 @@ function AccountSettingsContent({ view }: { view: AccountSettingsView }) {
   switch (view) {
     case "account":
       return <AccountSettings className="max-w-2xl" />
+    case "appearance":
+      return (
+        <Section>
+          <SectionHeader
+            description="How Jori looks to you. System follows your device."
+            title="Theme"
+          />
+          <ThemePicker />
+        </Section>
+      )
     case "security":
       return <SecuritySettings className="max-w-2xl" />
   }

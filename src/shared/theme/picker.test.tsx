@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { ThemeProvider } from "../theme"
-import { ThemeSwitcher } from "./switcher"
+import { ThemePicker } from "./picker"
 
 vi.mock("@tanstack/react-router", () => ({ ScriptOnce: () => null }))
 
@@ -20,27 +20,21 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-test("each press moves to the next theme, applies it, and remembers it", () => {
+test("picking a card checks it, applies the theme, and remembers it", () => {
   render(
     <ThemeProvider storageKey="theme">
-      <ThemeSwitcher />
+      <ThemePicker />
     </ThemeProvider>
   )
-  const button = () => screen.getByRole("button", { name: /^Theme:/ })
+  const radio = (name: string) =>
+    screen.getByRole("radio", { name }) as HTMLInputElement
 
-  expect(button().getAttribute("aria-label")).toBe(
-    "Theme: System. Switch to light"
-  )
+  expect(radio("System").checked).toBe(true)
 
-  fireEvent.click(button())
-  expect(button().textContent).toBe("Light")
-  expect(document.documentElement.classList.contains("dark")).toBe(false)
+  fireEvent.click(radio("Dark"))
 
-  fireEvent.click(button())
-  expect(button().textContent).toBe("Dark")
+  expect(radio("Dark").checked).toBe(true)
+  expect(radio("System").checked).toBe(false)
   expect(document.documentElement.classList.contains("dark")).toBe(true)
   expect(window.localStorage.getItem("theme")).toBe("dark")
-
-  fireEvent.click(button())
-  expect(button().textContent).toBe("System")
 })

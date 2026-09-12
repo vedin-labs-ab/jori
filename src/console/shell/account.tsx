@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut, ShieldUser } from "lucide-react"
+import { ChevronsUpDown, LogOut, ShieldUser, SunMoon } from "lucide-react"
 import { useState } from "react"
 import { useSignOutFlow } from "@/components/auth/sign-out"
 import { UserView } from "@/components/auth/user/user-view"
@@ -9,9 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -24,19 +21,14 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { usePrivacyChoices } from "@/shared/analytics/context"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { useSession } from "@/shared/session/auth"
-import { useTheme } from "@/shared/theme/context"
-import { ThemeRadioGroup } from "@/shared/theme/options"
-import { themeOption } from "@/shared/theme/scheme"
-import { AccountDialog } from "./settings"
+import { AccountDialog, type AccountSettingsView } from "./settings"
 
 export function SidebarUserButton() {
   const { isMobile } = useSidebar()
   const { data: session } = useSession()
-  const [managing, setManaging] = useState(false)
+  const [managing, setManaging] = useState<AccountSettingsView>()
   const signOut = useSignOutFlow()
   const privacy = usePrivacyChoices()
-  const { theme } = useTheme()
-  const ThemeIcon = themeOption(theme).icon
   const user = session?.user
 
   if (signOut.isSigningOut) {
@@ -71,19 +63,14 @@ export function SidebarUserButton() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onSelect={() => setManaging(true)}>
+              <DropdownMenuItem onSelect={() => setManaging("account")}>
                 <ShieldUser />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <ThemeIcon />
-                  Theme
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  <ThemeRadioGroup />
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
+              <DropdownMenuItem onSelect={() => setManaging("appearance")}>
+                <SunMoon />
+                Appearance
+              </DropdownMenuItem>
               {privacy === undefined ? null : (
                 <DropdownMenuItem onSelect={privacy.open}>
                   Privacy choices
@@ -97,7 +84,15 @@ export function SidebarUserButton() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <AccountDialog onOpenChange={setManaging} open={managing} />
+        <AccountDialog
+          initialView={managing}
+          onOpenChange={(open) => {
+            if (!open) {
+              setManaging(undefined)
+            }
+          }}
+          open={managing !== undefined}
+        />
       </SidebarMenuItem>
     </SidebarMenu>
   )

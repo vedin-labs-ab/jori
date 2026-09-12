@@ -12,6 +12,9 @@ const fragmentSource = `
   uniform vec2 resolution;
   uniform vec2 pointer;
   uniform float time;
+  uniform vec3 paper;
+  uniform vec3 sage;
+  uniform vec3 deepSage;
 
   float hash(vec2 point) {
     return fract(sin(dot(point, vec2(127.1, 311.7))) * 43758.5453);
@@ -58,9 +61,6 @@ const fragmentSource = `
       }
     }
 
-    vec3 paper = vec3(0.918, 0.936, 0.895);
-    vec3 sage = vec3(0.395, 0.490, 0.401);
-    vec3 deepSage = vec3(0.255, 0.340, 0.280);
     vec3 color = paper;
     color = mix(color, sage, lines * 0.32);
     color = mix(color, deepSage, anchorLines * 0.16);
@@ -69,6 +69,26 @@ const fragmentSource = `
     gl_FragColor = vec4(color + grain, 1.0);
   }
 `
+
+/** The ground and the two line tints, as RGB in 0 to 1. */
+export type ShaderPalette = {
+  paper: [number, number, number]
+  sage: [number, number, number]
+  deepSage: [number, number, number]
+}
+
+export const lightPalette: ShaderPalette = {
+  paper: [0.918, 0.936, 0.895],
+  sage: [0.395, 0.49, 0.401],
+  deepSage: [0.255, 0.34, 0.28],
+}
+
+/** The same lines on a dark ground: the tints lighten instead of darken. */
+export const darkPalette: ShaderPalette = {
+  paper: [0.11, 0.13, 0.115],
+  sage: [0.47, 0.57, 0.48],
+  deepSage: [0.62, 0.72, 0.63],
+}
 
 type ShaderRenderer = {
   destroy(): void
@@ -87,8 +107,8 @@ type PointerTracker = {
   update(): void
 }
 
-export function mountShader(canvas: HTMLCanvasElement) {
-  const renderer = createRenderer(canvas)
+export function mountShader(canvas: HTMLCanvasElement, palette: ShaderPalette) {
+  const renderer = createRenderer(canvas, palette)
 
   if (!renderer) {
     return
@@ -97,7 +117,10 @@ export function mountShader(canvas: HTMLCanvasElement) {
   return runRenderer(canvas, renderer)
 }
 
-function createRenderer(canvas: HTMLCanvasElement): ShaderRenderer | undefined {
+function createRenderer(
+  canvas: HTMLCanvasElement,
+  palette: ShaderPalette
+): ShaderRenderer | undefined {
   const context = canvas.getContext("webgl", {
     alpha: false,
     antialias: false,
@@ -109,7 +132,7 @@ function createRenderer(canvas: HTMLCanvasElement): ShaderRenderer | undefined {
   }
 
   try {
-    return buildRenderer(canvas, context)
+    return buildRenderer(canvas, context, palette)
   } catch (error) {
     console.warn("Jori sign-in shader could not start.", error)
     return
@@ -118,7 +141,8 @@ function createRenderer(canvas: HTMLCanvasElement): ShaderRenderer | undefined {
 
 function buildRenderer(
   canvas: HTMLCanvasElement,
-  context: WebGLRenderingContext
+  context: WebGLRenderingContext,
+  palette: ShaderPalette
 ): ShaderRenderer {
   const program = createProgram(context)
   const buffer = context.createBuffer()
@@ -143,6 +167,9 @@ function buildRenderer(
 
   context.enableVertexAttribArray(position)
   context.vertexAttribPointer(position, 2, context.FLOAT, false, 0, 0)
+  for (const name of ["paper", "sage", "deepSage"] as const) {
+    context.uniform3fv(context.getUniformLocation(program, name), palette[name])
+  }
 
   return {
     destroy() {
