@@ -2,7 +2,22 @@
 // choice is a class on the root, because `dark:` and `inverted` resolve
 // against the nearest theme scope rather than a media query.
 
+import { Moon, Sun, SunMoon } from "lucide-react"
+
 export type Theme = "light" | "dark" | "system"
+
+export const themeOptions: { icon: typeof Sun; label: string; value: Theme }[] =
+  [
+    { value: "system", label: "System", icon: SunMoon },
+    { value: "light", label: "Light", icon: Sun },
+    { value: "dark", label: "Dark", icon: Moon },
+  ]
+
+export function themeOption(theme: Theme) {
+  return (
+    themeOptions.find((option) => option.value === theme) ?? themeOptions[0]
+  )
+}
 
 export const themeStorageKey = "jori.theme"
 

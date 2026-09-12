@@ -9,6 +9,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -21,6 +24,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { usePrivacyChoices } from "@/shared/analytics/context"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import { useSession } from "@/shared/session/auth"
+import { useTheme } from "@/shared/theme/context"
+import { ThemeRadioGroup } from "@/shared/theme/options"
+import { themeOption } from "@/shared/theme/scheme"
 import { AccountDialog } from "./settings"
 
 export function SidebarUserButton() {
@@ -29,6 +35,8 @@ export function SidebarUserButton() {
   const [managing, setManaging] = useState(false)
   const signOut = useSignOutFlow()
   const privacy = usePrivacyChoices()
+  const { theme } = useTheme()
+  const ThemeIcon = themeOption(theme).icon
   const user = session?.user
 
   if (signOut.isSigningOut) {
@@ -67,6 +75,15 @@ export function SidebarUserButton() {
                 <ShieldUser />
                 Account
               </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <ThemeIcon />
+                  Theme
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <ThemeRadioGroup />
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               {privacy === undefined ? null : (
                 <DropdownMenuItem onSelect={privacy.open}>
                   Privacy choices

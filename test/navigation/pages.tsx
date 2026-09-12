@@ -3,12 +3,15 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { ConsolePage } from "@/console/page"
 import { ConsoleHeaderActions } from "@/shared/console/layout"
 import { FullscreenLoadingProvider } from "@/shared/loading"
+import { ThemeProvider } from "@/shared/theme"
 
 export function Document({ children }: { children: ReactNode }) {
   return (
-    <FullscreenLoadingProvider>
-      <TooltipProvider>{children}</TooltipProvider>
-    </FullscreenLoadingProvider>
+    <ThemeProvider>
+      <FullscreenLoadingProvider>
+        <TooltipProvider>{children}</TooltipProvider>
+      </FullscreenLoadingProvider>
+    </ThemeProvider>
   )
 }
 

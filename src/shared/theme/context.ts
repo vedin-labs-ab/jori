@@ -6,16 +6,13 @@ export type ThemeContextValue = {
   setTheme: (theme: Theme) => void
 }
 
-export const ThemeContext = createContext<ThemeContextValue | undefined>(
-  undefined
-)
+/** Outside the provider, in fixtures and tests, the page is on the default
+ *  and the choice goes nowhere. */
+export const ThemeContext = createContext<ThemeContextValue>({
+  theme: "system",
+  setTheme: () => {},
+})
 
 export function useTheme() {
-  const context = useContext(ThemeContext)
-
-  if (context === undefined) {
-    throw new Error("useTheme must be used within a ThemeProvider")
-  }
-
-  return context
+  return useContext(ThemeContext)
 }

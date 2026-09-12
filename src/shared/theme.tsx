@@ -2,9 +2,9 @@ import { ScriptOnce } from "@tanstack/react-router"
 import {
   type ReactNode,
   useCallback,
-  useEffect,
+  useLayoutEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
 } from "react"
 import { readStorage, writeStorage } from "./storage"
 import { ThemeContext } from "./theme/context"
@@ -16,17 +16,32 @@ import {
   themeStorageKey,
 } from "./theme/scheme"
 
+// The choice is read from storage on every render through an external
+// store, so the server renders the default and hydration swaps in the stored
+// choice without a mismatch. A choice made while storage refuses writes
+// still holds for the page.
+let chosen: Theme | undefined
+const listeners = new Set<() => void>()
+
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+  window.addEventListener("storage", listener)
+
+  return () => {
+    listeners.delete(listener)
+    window.removeEventListener("storage", listener)
+  }
+}
+
 function readTheme(storageKey: string, fallback: Theme): Theme {
-  const stored =
-    typeof window === "undefined" ? undefined : readStorage(storageKey)
+  const stored = chosen ?? readStorage(storageKey)
 
   return stored === "light" || stored === "dark" || stored === "system"
     ? stored
     : fallback
 }
 
-/** Keeps the root's `dark` class current. Nothing offers the choice yet;
- *  the provider is here so a toggle is one control away. */
+/** Keeps the root's `dark` class current with the device or the choice. */
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -36,11 +51,15 @@ export function ThemeProvider({
   defaultTheme?: Theme
   storageKey?: string
 }) {
-  const [theme, setThemeState] = useState(() =>
-    readTheme(storageKey, defaultTheme)
+  const theme = useSyncExternalStore(
+    subscribe,
+    () => readTheme(storageKey, defaultTheme),
+    () => defaultTheme
   )
 
-  useEffect(() => {
+  // Before paint, so the hydration render's default never shows through
+  // when a stored choice replaces it a moment later.
+  useLayoutEffect(() => {
     const media = window.matchMedia(darkQuery)
     const apply = () => {
       document.documentElement.classList.toggle(
@@ -60,8 +79,11 @@ export function ThemeProvider({
 
   const setTheme = useCallback(
     (next: Theme) => {
+      chosen = next
       writeStorage(storageKey, next)
-      setThemeState(next)
+      for (const listener of listeners) {
+        listener()
+      }
     },
     [storageKey]
   )

@@ -6,6 +6,7 @@ import { wordmarkPaths } from "@/shared/brand/lettering"
 import { BrandLink } from "@/shared/brand/link"
 import { regionConfig } from "@/shared/region/config"
 import { RegionFlag, StarRing } from "@/shared/region/flags"
+import { ThemeSwitcher } from "@/shared/theme/switcher"
 import { PageLink, type PageLinkTarget, pageLinkClassName } from "./link"
 
 const signInUrl = new URL("/sign-in", regionConfig.publicOrigin).toString()
@@ -83,6 +84,7 @@ export function LandingFooter() {
           </div>
           <div className="mt-16 flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t pt-6 text-muted-foreground text-sm">
             <p className="py-1">© {new Date().getFullYear()} Vedin Labs AB</p>
+            <ThemeSwitcher className="order-last sm:order-none sm:ml-auto" />
             <ul className="-mx-2.5 flex flex-wrap items-center">
               {legalLinks.map((link) => (
                 <li key={link.label}>
