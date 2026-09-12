@@ -16,7 +16,9 @@
     U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-@custom-variant dark (&:is(.dark *));
+/* Dark is the nearest theme scope, not the root: an `inverted` surface on a
+   light page is dark, and the same surface on a dark page is light. */
+@custom-variant dark (&:is(.dark *, .inverted *):not(.dark .inverted *));
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -71,7 +73,8 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
+:root,
+.dark .inverted {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -145,7 +148,10 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+/* `inverted` takes the opposite theme of the page it sits on. It does not
+   nest: an inverted surface inside an inverted surface stays inverted. */
+.dark,
+.inverted:not(.dark *) {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

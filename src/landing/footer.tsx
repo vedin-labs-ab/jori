@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { type ReactNode } from "react"
+import { type ReactNode, useId } from "react"
 import { cn } from "@/lib/utils"
 import { PrivacyChoices } from "@/shared/analytics/preferences"
 import { brandHeadline } from "@/shared/brand/content"
@@ -49,17 +49,18 @@ const footerLinkClassName =
   "inline-flex items-center py-1 transition-colors hover:text-foreground"
 
 /**
- * The page ends as a sheet resting on the footer: the strip at
- * the top is the page's own ground with its bottom corners rounded off, and
- * everything under it is the console's dark theme. Scoping `dark` here is what
- * inverts the mark, the flags, and every token in one place, so the footer
- * never names a colour the rest of the site does not have.
+ * The page ends as a sheet resting on the footer: the strip at the top is the
+ * page's own ground with its bottom corners rounded off, and everything under
+ * it is the opposite theme. The strip is positioned so it paints over the
+ * footer's ground, which starts behind it, and `inverted` is what flips the
+ * mark, the flags, and every token in one place, whichever theme the page is
+ * in.
  */
 export function LandingFooter() {
   return (
-    <footer className="bg-foreground">
-      <div className="h-8 rounded-b-3xl bg-background" />
-      <div className="dark text-foreground">
+    <footer>
+      <div className="relative h-8 rounded-b-3xl bg-background" />
+      <div className="inverted -mt-8 bg-background pt-8 text-foreground">
         <div className="mx-auto w-full max-w-6xl px-6 pt-16 md:pt-20">
           <div className="flex flex-col gap-12 md:flex-row md:justify-between md:gap-16">
             <div className="max-w-xs">
@@ -207,23 +208,52 @@ function GdprBadge() {
 
 /** The letters of the wordmark, cropped a little above the baseline so the
  *  page ends on the name without a second logo. Set in glyph coordinates
- *  rather than the mark's, which is why no transform applies. The stroke
- *  paints under the fill: the outline stays a hairline outside each letter,
- *  and the seams where the font's contours overlap never show. */
-const wordmarkCrop = "2.9 -34.4 79.5 29"
+ *  rather than the mark's, which is why no transform applies. The fill is
+ *  the ground with a little ink mixed in, so it is a shade off in either
+ *  theme, and the stroke paints under it: the outline stays a hairline
+ *  outside each letter, and the seams where the font's contours overlap
+ *  never show. A faint grain, clipped to the letters, keeps the fill from
+ *  reading as flat print. */
+const wordmarkCrop = { x: 2.9, y: -34.4, width: 79.5, height: 29 }
 
 function Wordmark() {
+  const id = useId()
+  const grain = `${id}grain`
+  const letters = `${id}letters`
+  const paths = wordmarkPaths.map((path) => (
+    <path d={path} key={path} vectorEffect="non-scaling-stroke" />
+  ))
+
   return (
     <div className="mx-auto mt-14 w-full max-w-6xl px-6 md:mt-20">
       <svg
         aria-hidden="true"
-        className="block w-full fill-card stroke-foreground/30 [paint-order:stroke]"
+        className="block w-full fill-[color-mix(in_oklch,var(--background),var(--foreground)_7%)] stroke-foreground/30 [paint-order:stroke]"
         strokeWidth="2"
-        viewBox={wordmarkCrop}
+        viewBox={Object.values(wordmarkCrop).join(" ")}
       >
-        {wordmarkPaths.map((path) => (
-          <path d={path} key={path} vectorEffect="non-scaling-stroke" />
-        ))}
+        <defs>
+          {/* Frequencies are in glyph units, so the grain is a few pixels
+              wide on a desktop and finer on a phone. */}
+          <filter id={grain}>
+            <feTurbulence
+              baseFrequency="3"
+              numOctaves="3"
+              stitchTiles="stitch"
+              type="fractalNoise"
+            />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+          <clipPath id={letters}>{paths}</clipPath>
+        </defs>
+        {paths}
+        <rect
+          {...wordmarkCrop}
+          clipPath={`url(#${letters})`}
+          filter={`url(#${grain})`}
+          opacity="0.12"
+          stroke="none"
+        />
       </svg>
     </div>
   )
