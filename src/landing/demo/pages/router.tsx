@@ -11,7 +11,6 @@ import { FolderPage, RootFoldersPage } from "./folders"
 import { JobsPage } from "./jobs/list"
 import { FilesPage, StoresPage, TablesPage } from "./lists"
 import { TablePage } from "./materials/table"
-import { PlatformPage } from "./platform"
 import { RunsPage } from "./runs"
 import { UsagePage } from "./usage"
 
@@ -88,7 +87,7 @@ export function DemoPage({
   const material = materialSurfaces[surface]
 
   if (material === undefined) {
-    return <PlatformPage surface={surface} />
+    return null
   }
 
   return id === undefined ? (

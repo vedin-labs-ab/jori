@@ -4,13 +4,23 @@ import {
   useHasPermission,
 } from "@better-auth-ui/react"
 import { useConvex } from "convex/react"
-import { Download } from "lucide-react"
+import { HardDriveDownload } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card"
 import { Section, SectionHeader } from "@/components/ui/section"
 import { saveExport, workspaceExport } from "./download"
 
+/** The workspace's data as a download, for whoever may delete the
+ *  workspace: one row in the construction the danger zone uses, since
+ *  export is what comes before leaving. The file is NDJSON with files
+ *  embedded as base64, which the download itself shows. */
 export function WorkspaceExport({
   organizationId,
 }: {
@@ -23,9 +33,11 @@ export function WorkspaceExport({
     { permissions: { organization: ["delete"] } }
   )
   const [pending, setPending] = useState(false)
+
   if (!permission?.success) {
     return null
   }
+
   async function download() {
     setPending(true)
     try {
@@ -40,27 +52,29 @@ export function WorkspaceExport({
       setPending(false)
     }
   }
+
   return (
     <Section>
-      <SectionHeader
-        title="Export workspace data"
-        icon={<Download />}
-        description="Download the chats, jobs, folders, tables, stores and files you can access. For a complete business export, including other members' private content, contact support."
-        action={
+      <SectionHeader icon={<HardDriveDownload />} title="Data" />
+      <Card className="gap-0 py-0">
+        <CardContent className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <CardTitle>Export data</CardTitle>
+            <CardDescription className="mt-0.5">
+              Download the chats, jobs, folders, tables, stores, and files you
+              can access. Keep this page open until it finishes.
+            </CardDescription>
+          </div>
           <Button
-            size="sm"
-            variant="outline"
             disabled={pending}
             onClick={download}
+            size="sm"
+            variant="outline"
           >
-            {pending ? "Preparing…" : "Export data"}
+            {pending ? "Preparing…" : "Export"}
           </Button>
-        }
-      />
-      <p className="text-xs text-muted-foreground">
-        The download uses NDJSON with files embedded as base64. Keep this page
-        open until it finishes.
-      </p>
+        </CardContent>
+      </Card>
     </Section>
   )
 }

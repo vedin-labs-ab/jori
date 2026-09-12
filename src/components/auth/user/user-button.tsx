@@ -151,7 +151,7 @@ export function UserButton({
         aria-label={size === "icon" ? localization.auth.account : undefined}
         className={
           size === "icon"
-            ? cn("rounded-full", className)
+            ? cn("rounded-avatar", className)
             : cn(
                 buttonVariants({ variant, size: "lg" }),
                 "py-2.5 h-auto font-normal",

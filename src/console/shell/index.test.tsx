@@ -58,6 +58,7 @@ vi.mock("@/shared/console/shell/navigation", () => ({
       <a href="/runs">Activity</a>
     </nav>
   ),
+  PlatformNavigation: () => null,
 }))
 
 afterEach(cleanup)

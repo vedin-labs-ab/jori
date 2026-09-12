@@ -18,15 +18,13 @@ function OrganizationView({ organizationId }: { organizationId: string }) {
   const sources = useQuery(api.organization.sources.list, { organizationId })
 
   return (
-    <div className="mx-auto w-full max-w-4xl">
-      <ContextProfile
-        discovery={discovery}
-        profile={profile}
-        sources={sources}
-        organizationId={organizationId}
-        website={readPrimaryWebsite(sources)}
-      />
-    </div>
+    <ContextProfile
+      discovery={discovery}
+      profile={profile}
+      sources={sources}
+      organizationId={organizationId}
+      website={readPrimaryWebsite(sources)}
+    />
   )
 }
 

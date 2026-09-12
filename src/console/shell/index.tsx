@@ -1,7 +1,10 @@
 import { useRouterState } from "@tanstack/react-router"
 import { type ReactNode } from "react"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
-import { ConsoleSidebar } from "@/shared/console/shell/navigation"
+import {
+  ConsoleSidebar,
+  PlatformNavigation,
+} from "@/shared/console/shell/navigation"
 import { mainContentId, SkipToContent } from "@/shared/skip"
 import { useSidebarChats } from "../chat/recent"
 import { ConsoleFolderDrag } from "../folders/drag/context"
@@ -38,6 +41,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             folders={<SidebarFolders pathname={pathname} />}
             organization={<SidebarOrganizationSwitcher />}
             pathname={pathname}
+            platform={<PlatformNavigation pathname={pathname} />}
           />
         }
       >

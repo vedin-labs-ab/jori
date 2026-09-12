@@ -1,7 +1,9 @@
+import { type Integration, integrationLabel } from "@contracts/integrations"
 import { ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { brandHeadline } from "@/shared/brand/content"
+import { IntegrationLogo } from "@/shared/logo/integration"
 import { GetStarted } from "../../cta"
 import { DemoConsole } from "../../demo/console"
 import { folderId } from "../../demo/fixtures/folders"
@@ -35,9 +37,9 @@ export function Hero() {
             already inside the text and the chip's own padding, which read as
             a wider space than the ones between the words after it. */}
         <p className="text-muted-foreground text-sm">
-          <Mention /> answers in <Surface logo="slack" name="Slack" />,{" "}
-          <Surface logo="github" name="GitHub" />,{" "}
-          <Surface logo="linear" name="Linear" />, and more
+          <Mention /> answers in <Surface integration="slack" />,{" "}
+          <Surface integration="github" />, <Surface integration="linear" />,
+          and more
         </p>
         <h1 className="mt-5 font-medium text-5xl text-balance tracking-tight sm:text-6xl lg:text-7xl">
           {brandHeadline}
@@ -80,15 +82,15 @@ export function Hero() {
 
 /** A surface Jori answers on, named beside its own mark so the three read
  *  as the products they are rather than a list of words. */
-function Surface({ logo, name }: { logo: string; name: string }) {
+function Surface({ integration }: { integration: Integration }) {
   return (
     <span className="whitespace-nowrap text-foreground">
-      <img
-        alt=""
+      <IntegrationLogo
         className="mr-1 inline-block size-3.5 rounded-sm align-[-0.2em]"
-        src={`/logos/integrations/${logo}.svg`}
+        decorative
+        integration={integration}
       />
-      {name}
+      {integrationLabel(integration)}
     </span>
   )
 }

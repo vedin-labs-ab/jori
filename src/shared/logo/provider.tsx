@@ -1,6 +1,9 @@
+import { isIntegration } from "@contracts/integrations"
 import { JoriLogo } from "@/shared/brand"
-import { providerLogoPath } from "./path"
+import { IntegrationLogo } from "./integration"
 
+/** The mark of the surface a tool or run belongs to: Jori's own, or the
+ *  integration's. Decorative, since the surface's name stands beside it. */
 export function ProviderLogo({
   className = "size-3",
   surface,
@@ -19,11 +22,11 @@ export function ProviderLogo({
     )
   }
 
-  const logo = providerLogoPath(surface)
-
-  if (logo === undefined) {
+  if (surface === undefined || !isIntegration(surface)) {
     return null
   }
 
-  return <img alt="" className={`${className} shrink-0`} src={logo} />
+  return (
+    <IntegrationLogo className={className} decorative integration={surface} />
+  )
 }

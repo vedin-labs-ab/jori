@@ -81,6 +81,7 @@ function renderSidebar(
               folders={null}
               organization={null}
               pathname={pathname}
+              platform={null}
             />
           </SidebarProvider>
         </DragSurface>

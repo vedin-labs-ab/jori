@@ -13,7 +13,7 @@ export function Organization({ className }: { className?: string }) {
     >
       <img
         alt=""
-        className="mr-1 inline-block size-[0.95em] rounded-[0.2em] align-[-0.15em]"
+        className="mr-1 inline-block size-[0.95em] rounded-avatar align-[-0.15em]"
         src={organization.logo}
       />
       {organization.name}

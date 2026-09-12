@@ -169,8 +169,9 @@ function OrganizationSettingsContent({
       return (
         <div className="flex flex-col gap-6">
           <RetentionNotice organizationId={organizationId} />
-          <WorkspaceExport organizationId={organizationId} />
-          <OrganizationSettings />
+          <OrganizationSettings>
+            <WorkspaceExport organizationId={organizationId} />
+          </OrganizationSettings>
         </div>
       )
     case "people":

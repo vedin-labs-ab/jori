@@ -33,16 +33,18 @@ import {
 /** The console's sidebar: the workspace navigation with the person's
  *  chats after its first group, the folder tree, and the platform group
  *  in the quiet bottom slot, between the organization at its head and
- *  the account in its footer. The three parts that know who is signed in
- *  arrive as slots; the chats arrive as rows, since the sidebar draws
- *  them the way it draws its own items. A labelled group closes from its
- *  label, for the room. */
+ *  the account in its footer. The parts that know who is signed in, and
+ *  the platform group, which only the real console has pages for, arrive
+ *  as slots; the chats arrive as rows, since the sidebar draws them the
+ *  way it draws its own items. A labelled group closes from its label,
+ *  for the room. */
 export function ConsoleSidebar({
   account,
   chats,
   folders,
   organization,
   pathname,
+  platform,
 }: {
   account: ReactNode
   /** The person's conversations, most recent first. */
@@ -50,6 +52,8 @@ export function ConsoleSidebar({
   folders: ReactNode
   organization: ReactNode
   pathname: string
+  /** The `PlatformNavigation`, or nothing, which gives the folder tree the room. */
+  platform: ReactNode
 }) {
   const { setOpenMobile } = useSidebar()
   const previousPath = useRef(pathname)
@@ -89,18 +93,7 @@ export function ConsoleSidebar({
           </Fragment>
         ))}
         {folders}
-        {/* The quiet bottom slot: low-frequency setup and reference
-            surfaces, above the user button, held in place by the folder
-            tree taking whatever height is left. */}
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupContent>
-            <NavigationMenu
-              items={consolePlatformNavigation}
-              pathname={pathname}
-              size="sm"
-            />
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {platform}
       </SidebarContent>
       <SidebarFooter>{account}</SidebarFooter>
       <SidebarRail />
@@ -213,6 +206,23 @@ function ChatsScroll({
     <ScrollArea className={cn(scrollFadeViewport, "h-24")}>
       {children}
     </ScrollArea>
+  )
+}
+
+/** The quiet bottom slot: low-frequency setup and reference surfaces,
+ *  above the user button, held in place by the folder tree taking
+ *  whatever height is left. */
+export function PlatformNavigation({ pathname }: { pathname: string }) {
+  return (
+    <SidebarGroup className="mt-auto">
+      <SidebarGroupContent>
+        <NavigationMenu
+          items={consolePlatformNavigation}
+          pathname={pathname}
+          size="sm"
+        />
+      </SidebarGroupContent>
+    </SidebarGroup>
   )
 }
 

@@ -15,7 +15,9 @@ import { organization } from "./fixtures/organization"
 import { useDemoFolders, useDemoWorkspace } from "./workspace"
 
 /** The console's sidebar over the workspace: Copperline at its head, the
- *  navigation, and the folder tree with the dialogs its rows raise. */
+ *  navigation, and the folder tree with the dialogs its rows raise. No
+ *  platform group: the demo has nothing to set up there, and the folders
+ *  are what the box has room to show. */
 export function DemoSidebar({ pathname }: { pathname: string }) {
   const folders = useDemoFolders()
   const { state } = useDemoWorkspace()
@@ -40,6 +42,7 @@ export function DemoSidebar({ pathname }: { pathname: string }) {
         }
         organization={<SidebarOrganization organization={organization} />}
         pathname={pathname}
+        platform={null}
       />
       <DemoFolderDialogs dialog={dialog} onClose={() => setDialog(undefined)} />
       <DemoCreationDialogs

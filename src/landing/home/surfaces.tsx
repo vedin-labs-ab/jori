@@ -80,7 +80,7 @@ function GitHubMention() {
     >
       <div className="px-5 py-4">
         <p className="flex flex-wrap items-center gap-x-1.5 text-sm">
-          <CircleDot className="size-3.5 shrink-0 text-[#1a7f37]" />
+          <CircleDot className="size-3.5 shrink-0 text-[#1a7f37] dark:text-[#3fb950]" />
           <span className="font-medium">Payroll sync test is flaky on CI</span>
           <span className="text-muted-foreground">#491</span>
         </p>

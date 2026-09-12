@@ -22,7 +22,7 @@ export type UserAvatarProps = {
 /**
  * Display a user's avatar using session information or an explicit user prop.
  *
- * Renders a circular avatar that shows the user's image when available, a fallback node if provided, or the user's first two initials; while the session is loading (or when `isPending` is true) and no `user` prop is supplied, renders a skeleton placeholder.
+ * Renders an avatar that shows the user's image when available, a fallback node if provided, or the user's first two initials; while the session is loading (or when `isPending` is true) and no `user` prop is supplied, renders a skeleton placeholder.
  *
  * @param className - Additional CSS classes applied to the avatar container
  * @param user - Optional user object to display instead of the session user
@@ -43,7 +43,7 @@ export function UserAvatar({
   )
 
   if ((isPending || sessionPending) && !user) {
-    return <Skeleton className={cn("size-8 rounded-full", className)} />
+    return <Skeleton className={cn("size-8 rounded-avatar", className)} />
   }
 
   const resolvedUser = user ?? session?.user
@@ -58,10 +58,7 @@ export function UserAvatar({
 
   return (
     <Avatar
-      className={cn(
-        "size-8 bg-muted text-foreground text-sm rounded-full",
-        className
-      )}
+      className={cn("size-8 bg-muted text-foreground text-sm", className)}
     >
       <AvatarImage
         src={resolvedUser?.image ?? undefined}

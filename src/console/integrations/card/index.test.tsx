@@ -72,6 +72,5 @@ const config: IntegrationCardConfig = {
   installPath: "/github/install",
   label: "GitHub",
   loading: "Connecting",
-  logo: { src: "/logos/integrations/github.svg", alt: "GitHub" },
   integration: "github",
 }

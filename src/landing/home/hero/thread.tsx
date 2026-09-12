@@ -112,7 +112,7 @@ function ThreadMessage({
     <div className={cn("flex gap-3", className)}>
       <span
         className={cn(
-          "flex size-7 shrink-0 items-center justify-center rounded-lg",
+          "flex size-7 shrink-0 items-center justify-center rounded-avatar",
           isJori
             ? undefined
             : "bg-secondary font-medium text-secondary-foreground text-xs"

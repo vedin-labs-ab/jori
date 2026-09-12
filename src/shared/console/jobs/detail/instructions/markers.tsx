@@ -71,7 +71,7 @@ export function SurfaceMarker({
       <span
         className={cn(
           "inline-flex items-center gap-1 px-1 font-medium",
-          tone.scopeIcon
+          tone.icon
         )}
       >
         <Icon className="size-3" />

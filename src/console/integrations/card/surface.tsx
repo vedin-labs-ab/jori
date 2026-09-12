@@ -1,3 +1,4 @@
+import { type Integration } from "@contracts/integrations"
 import { type ReactNode } from "react"
 import {
   Card,
@@ -6,11 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { IntegrationLogo } from "@/shared/logo/integration"
 
 export type SurfaceLogo =
   | {
-      alt: string
-      src: string
+      integration: Integration
     }
   | {
       mark: ReactNode
@@ -67,15 +68,10 @@ function IntegrationLogoMark({ logo }: { logo: SurfaceLogo }) {
   const containerClassName =
     "flex size-10 shrink-0 items-center justify-center rounded-md border bg-muted"
 
-  if ("src" in logo) {
+  if ("integration" in logo) {
     return (
       <div className={containerClassName}>
-        <img
-          alt={logo.alt}
-          className="size-6 object-contain"
-          referrerPolicy="no-referrer"
-          src={logo.src}
-        />
+        <IntegrationLogo className="size-6" integration={logo.integration} />
       </div>
     )
   }

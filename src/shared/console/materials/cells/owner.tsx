@@ -11,7 +11,8 @@ export type MaterialOwner =
 
 /** Owner cell shared by the material lists: the person's sign-in avatar
  *  (initials when none links) plus their name, or the brand mark plus
- *  "Jori". `compact` slims the avatar and gap to the height of a
+ *  "Jori", the two at one size and shape so a column of owners reads as
+ *  one column. `compact` slims the avatar and gap to the height of a
  *  detail-frame header row. Both variants cap their own width, so a long
  *  name truncates instead of widening the column — table cells ignore
  *  max-width during column sizing. */
@@ -30,7 +31,7 @@ export function MaterialOwnerCell({
   if (owner.kind === "jori") {
     return (
       <div className={rowClassName}>
-        <BrandIcon className="size-5 shrink-0" />
+        <BrandIcon className={compact ? "size-5" : "size-6"} />
         <span className="truncate">Jori</span>
       </div>
     )

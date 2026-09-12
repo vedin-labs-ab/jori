@@ -70,7 +70,7 @@ export function AvatarField({
       <div className="flex items-center gap-3">
         <Button
           aria-label={changeLabel}
-          className="h-auto w-auto rounded-full p-0"
+          className="h-auto w-auto rounded-avatar p-0"
           disabled={disabled || isPending}
           onClick={chooseFile}
           type="button"

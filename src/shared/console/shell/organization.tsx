@@ -41,9 +41,8 @@ export function SidebarOrganization({
   )
 }
 
-/** Logo and name, the compact organization row: organizations square off
- *  with softened corners, so each rounded layer of the avatar is
- *  overridden, and a nameless one falls back to a briefcase. */
+/** Logo and name, the compact organization row; a nameless one falls
+ *  back to a briefcase. */
 function OrganizationRow({
   organization,
 }: {
@@ -53,13 +52,12 @@ function OrganizationRow({
 
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <Avatar className="rounded-md after:rounded-md size-6 [&_[data-slot=avatar-fallback]]:text-xs">
+      <Avatar className="size-6 [&_[data-slot=avatar-fallback]]:text-xs">
         <AvatarImage
           alt={organization.name}
-          className="rounded-md"
           src={logoSource(organization.logo)}
         />
-        <AvatarFallback className="rounded-md text-muted-foreground! text-sm">
+        <AvatarFallback className="text-muted-foreground! text-sm">
           {initials === "" ? <Briefcase className="size-4" /> : initials}
         </AvatarFallback>
       </Avatar>

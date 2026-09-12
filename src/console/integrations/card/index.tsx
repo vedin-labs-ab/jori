@@ -10,7 +10,7 @@ import { useIntegrationDisconnect } from "../disconnect/controller"
 import { integrationsRouteFor } from "../routes"
 import { type IntegrationCardStatus } from "./headline"
 import { useIntegrationInstall } from "./install"
-import { IntegrationCardSurface, type SurfaceLogo } from "./surface"
+import { IntegrationCardSurface } from "./surface"
 
 export type IntegrationCardConfig = {
   action: string
@@ -20,7 +20,6 @@ export type IntegrationCardConfig = {
   installPath: string
   label: string
   loading: string
-  logo: SurfaceLogo
   integration: Exclude<ToolSurface, "jori">
 }
 
@@ -84,7 +83,7 @@ export function IntegrationCard({
         </div>
       }
       description={isConnected ? config.connectedDetail : config.emptyDetail}
-      logo={config.logo}
+      logo={{ integration: config.integration }}
       status={<IntegrationStatusLine headline={headline} status={status} />}
       title={config.label}
     >

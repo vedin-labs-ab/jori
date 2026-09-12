@@ -153,7 +153,7 @@ function JobSurfaceMarker({
         accessLabel={getJobSurfaceAccessLabel(access)}
         blocked={blocked}
         count={count}
-        iconClassName={toneClassNames.scopeIcon}
+        iconClassName={toneClassNames.icon}
         issue={issue}
         onOpen={onOpenTools}
         toolSurfaceLabel={toolSurfaceLabel}

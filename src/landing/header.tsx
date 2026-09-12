@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { BrandLink } from "@/shared/brand/link"
+import { IntegrationLogo } from "@/shared/logo/integration"
 import { regionConfig } from "@/shared/region/config"
 import { GetStarted } from "./cta"
 import { PageLink } from "./link"
@@ -80,11 +81,7 @@ function MobileNav() {
         ))}
         <DropdownMenuItem asChild>
           <a href={githubUrl} rel="noreferrer" target="_blank">
-            <img
-              alt=""
-              className="size-4 dark:invert"
-              src="/logos/integrations/github.svg"
-            />
+            <IntegrationLogo decorative integration="github" />
             GitHub
           </a>
         </DropdownMenuItem>
@@ -106,11 +103,10 @@ function HeaderActions({ onWaitlistPage }: { onWaitlistPage: boolean }) {
         variant="outline"
       >
         <a href={githubUrl} rel="noreferrer" target="_blank">
-          <img
-            alt=""
-            className="size-4 dark:invert"
+          <IntegrationLogo
             data-icon="inline-start"
-            src="/logos/integrations/github.svg"
+            decorative
+            integration="github"
           />
           GitHub
           <ArrowUpRight aria-hidden="true" data-icon="inline-end" />

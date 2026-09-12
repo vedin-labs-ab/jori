@@ -1,4 +1,5 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
+import { type ComponentProps } from "react"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -6,7 +7,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { providerLogoPath } from "./path"
+import { LogoImage } from "./image"
+import { providerLogo } from "./registry"
 
 type IntegrationLogoSize = "sm" | "md"
 
@@ -42,24 +44,25 @@ export function IntegrationLogo({
   decorative = false,
   integration,
   size = "sm",
-}: {
-  className?: string
+  ...props
+}: Omit<ComponentProps<"img">, "alt" | "src"> & {
   decorative?: boolean
   integration: Integration
   size?: IntegrationLogoSize
 }) {
-  const logo = providerLogoPath(integration)
+  const logo = providerLogo(integration)
 
   if (logo === undefined) {
     return null
   }
 
   return (
-    <img
+    <LogoImage
       alt={decorative ? "" : integrationLabel(integration)}
       aria-hidden={decorative}
-      className={cn(logoSizeClassName(size), "shrink-0", className)}
-      src={logo}
+      className={cn(logoSizeClassName(size), className)}
+      {...logo}
+      {...props}
     />
   )
 }

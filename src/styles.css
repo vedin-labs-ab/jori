@@ -71,6 +71,9 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* The brand mark's corner, 12 of its 52, so an avatar beside it reads as
+     the same shape at any size. */
+  --radius-avatar: 23%;
 }
 
 :root,
