@@ -1,69 +1,66 @@
-# Guidelines
+# Jori
 
-## Architecture
-
-Start with [the docs index](docs/index.md) before adding a provider or changing
-integration registrations, permissions or regional delivery. Follow the
-integration decision tree and verify current provider capabilities.
+Jori is the shared drive an organization's AI works out of. Folders hold
+tables, stores, files, and jobs; sharing and spend attach to the folder tree.
+The console and the Slack app are the surfaces, Convex is the backend, and
+runs execute in regional sandboxes so EU and US data stay apart.
 
 ## Workflow
 
-- For repository changes, run `pnpm task <name>` from the primary checkout.
-  Use a separate worktree and branch for each task or agent.
-- Run focused tests for behavior changes with `pnpm test <paths>`.
-  Commit on the task branch, then run `pnpm land <name>` from the primary
-  checkout. Landing runs or reuses `pnpm check` and `pnpm test`.
-- For documentation-only changes that cannot affect runtime behavior, review
-  the diff and land with `--no-verify`; no builds or tests are needed.
-  Prompts and skills are runtime inputs, not documentation.
-- Otherwise, do not weaken or bypass checks unless asked.
-  `pnpm check:fix` formats code and regenerates compiled content.
-
-## Targets
-
-Deployment and environment commands take `dev`, `prod-us`, or `prod-eu`.
-They load `.env.local` for dev and `.env.<target>.local` for production.
-
-| Command | Purpose |
-| --- | --- |
-| `pnpm ship <target> [--yes]` | Dev: deploy Convex and skills. Production: deploy Convex, frontend, and skills. |
-| `pnpm skills <target>` | Sync the skill catalog. |
-| `pnpm sandbox <target>` | Build the Blaxel sandbox image. |
-| `pnpm db:seed dev`, `pnpm db:truncate dev` | Manage development data only. |
-
-- Deploy shared dev and production only from the primary checkout.
-  Use a task-specific Convex preview when worktree changes need live
-  backend verification.
-- Ship production only when the user asks. Do not inspect or expose
-  production secrets; let deployment tooling load them.
+- `pnpm task <name>` starts a branch and worktree, one per task or agent.
+  Work and commit there.
+- `pnpm test <paths>` runs the tests for what you changed.
+  `pnpm check:fix` formats and regenerates compiled content.
+- `pnpm land <name>` rebases on `main` and runs the full gate, unless the
+  tree already passed it. Run `task` and `land` from the primary checkout,
+  everything else in the worktree.
+- Only pure documentation lands with `--no-verify`. Anything the build reads,
+  including prompts, skills, and legal pages, is not documentation.
 
 ## Code
 
-- Prefer readable code, descriptive names, and simple control flow.
-  Keep cleanup local to the change.
-- Colocate UI, logic, data access, schemas, and tests by domain.
-  Use single-word source names, respecting framework conventions.
-- Formatting, dependency boundaries, and structure are defined in
+The goal is a codebase a developer can skim and guess right: folders by
+domain and responsibility, one purpose each, none overlapping, and one word
+per concept everywhere. A synonym is a rename, not a choice.
+
+- Keep the core simple and the edges busy. Primitives do one thing. Adapters
+  and integrations absorb provider variety and normalize it into internal
+  shapes. Core code never imports an edge.
+- Look for an existing component before writing one. Extract a shared one
+  the moment a second use appears.
+- Colocate UI, logic, data access, schemas, and tests by domain. Names are
+  single words except where a framework decides; nest when one word is not
+  enough. A file that outgrows itself becomes a folder with `index.ts` and
+  focused siblings, not `thing_helpers.ts`.
+- Keep cleanup local to the change.
+- Formatting, dependency direction, and folder limits are enforced by
   `biome.jsonc`, `scripts/dependencies/rules.ts`, and `scripts/structure/`.
-  Consult them when relevant.
-- Before adding a test, identify the behavior or failure mode it protects
-  and check whether existing tests already protect it. Prefer extending an
-  existing test when clear. Avoid tests that merely mirror the implementation.
-- Pre-launch: replace obsolete behavior directly, without compatibility
+- Before adding a test, name the behavior or failure it protects and check
+  whether an existing test already does; extend that one when clear. Avoid
+  tests that mirror the implementation.
+- Pre-launch: replace obsolete behavior outright, with no compatibility
   layers or staged migrations.
 
-## UI
+## Boundaries
 
-- Use shadcn/ui primitives, installed with `npx shadcn@latest add`, and
-  preserve their default styling.
-- Use Tailwind classes for static styling and inline styles for runtime
-  values. Reserve `src/styles.css` for shared theme tokens and global rules.
-- Desktop-first, responsive, no gradients.
-- Console views in `src/shared/console` take props and emit callbacks.
-  `src/console` binds them to Convex; `src/landing/demo` binds them to
-  fixtures. Landing demos reuse these views. Do not build console
-  lookalikes or import `src/console` into `src/landing`.
+- Skipping the gate is for pure documentation only. Ask before loosening a
+  check or deleting a test to get past a failure.
+- Dev is yours to deploy, seed, and truncate. Ship production, run functions
+  against it, or change its data only when asked.
+- Never read `.env.prod-*.local` or print a deployment's environment. The
+  tooling loads what it needs.
+- Keep EU and US data apart. When a provider cannot deliver per region, state
+  the limitation instead of widening geography or permissions.
+- Ask before changing legal pages.
 
-## Convex
+## Guides
 
-Read `convex/_generated/ai/guidelines.md` before changing Convex code.
+Read the matching guide first, and update it in the same change when your
+work makes it wrong.
+
+| Work | Guide |
+| --- | --- |
+| Console or landing UI | `guides/ui.md` |
+| Convex functions, schema, or workflows | `convex/_generated/ai/guidelines.md` |
+| Deploying, seeding, or sandbox images | `guides/deployment.md` |
+| Integrations: registrations, permissions, regional delivery | `guides/integrations.md` |
