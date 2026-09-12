@@ -3,6 +3,7 @@ import {
   Ban,
   CalendarClock,
   ClipboardCheck,
+  Code2,
   FileSearch,
   Fingerprint,
   FolderTree,
@@ -131,6 +132,19 @@ export function DataSection() {
         <Definition icon={ClipboardCheck} term="Audits">
           Independent security audits are planned. We'll publish the results
           when they're done.
+        </Definition>
+        <Definition icon={Code2} term="Source-available">
+          Review Jori's application code, prompts, and skills on{" "}
+          <a
+            className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+            href="https://github.com/vedin-labs-ab/jori"
+            rel="noreferrer"
+            target="_blank"
+          >
+            GitHub
+          </a>
+          , including how permissions and execution are implemented. Commercial
+          restrictions apply.
         </Definition>
       </FactList>
     </Section>

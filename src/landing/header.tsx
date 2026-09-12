@@ -13,6 +13,7 @@ import { regionConfig } from "@/shared/region/config"
 import { GetStarted } from "./cta"
 
 const signInUrl = new URL("/sign-in", regionConfig.publicOrigin).toString()
+const githubUrl = "https://github.com/vedin-labs-ab/jori"
 
 const navLinks = [
   { label: "Trust", to: "/trust" },
@@ -36,6 +37,14 @@ export function LandingHeader({ onWaitlistPage }: { onWaitlistPage: boolean }) {
               {link.label}
             </NavLink>
           ))}
+          <a
+            className="inline-flex items-center px-2.5 py-1 transition-colors hover:text-foreground"
+            href={githubUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            GitHub
+          </a>
         </nav>
         <MobileNav />
       </div>
@@ -58,7 +67,7 @@ function NavLink({ children, to }: { children: ReactNode; to: string }) {
 }
 
 /**
- * Two links do not earn a menu on their own, and hiding what already fits is
+ * These links do not earn a menu on their own, and hiding what already fits is
  * worse than showing it. What earns this one is that the row cannot hold them
  * beside a call to action at 375px, and the call to action is what a first
  * visit is for.
@@ -92,6 +101,11 @@ function MobileNav() {
             <Link to={link.to}>{link.label}</Link>
           </DropdownMenuItem>
         ))}
+        <DropdownMenuItem asChild>
+          <a href={githubUrl} rel="noreferrer" target="_blank">
+            GitHub
+          </a>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <a href={signInUrl}>Sign in</a>
         </DropdownMenuItem>
