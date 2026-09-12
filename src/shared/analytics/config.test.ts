@@ -26,6 +26,8 @@ test.each([
       autocapture: false,
       capture_pageview: false,
       capture_pageleave: false,
+      opt_out_capturing_by_default: true,
+      opt_out_persistence_by_default: true,
       disable_session_recording: true,
       disable_external_dependency_loading: true,
       person_profiles: "never",

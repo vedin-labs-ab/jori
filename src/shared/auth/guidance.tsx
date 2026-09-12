@@ -9,6 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { PrivacyChoices } from "../analytics/preferences"
 import { marketingUrl } from "../region/paths"
 
 type InfoDialogProps = {
@@ -60,6 +61,7 @@ export function SignInLegalNotice() {
       By continuing, you agree to Jori&apos;s{" "}
       <LegalLink to="/terms">Terms</LegalLink> and acknowledge the{" "}
       <LegalLink to="/privacy">Privacy Policy</LegalLink>.
+      <PrivacyChoices className="ml-1 h-auto px-0 py-0 text-xs" />
     </p>
   )
 }

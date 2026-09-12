@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router"
+import { PrivacyChoices } from "@/shared/analytics/preferences"
 import { brandHeadline } from "@/shared/brand/content"
 import { BrandLink } from "@/shared/brand/link"
 
@@ -32,6 +33,7 @@ export function LandingFooter() {
                 {link.label}
               </Link>
             ))}
+            <PrivacyChoices className={footerLinkClassName} />
           </nav>
         </div>
       </div>

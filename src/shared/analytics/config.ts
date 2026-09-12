@@ -57,6 +57,9 @@ function analyticsOptions(host: string, region: Region) {
     mask_all_text: true,
     mask_all_element_attributes: true,
     respect_dnt: true,
+    opt_out_capturing_by_default: true,
+    opt_out_persistence_by_default: true,
+    cookie_expiration: 180,
     before_send: minimizeEvent,
   } satisfies Partial<import("posthog-js").PostHogConfig>
 }
