@@ -128,7 +128,6 @@ export function DataSection() {
           Jori is built to comply with GDPR. Data processing agreements are
           available from launch.
         </Definition>
-        {/* TODO: add the retention commitment here once decided. */}
         <Definition icon={ClipboardCheck} term="Audits">
           Independent security audits are planned. We'll publish the results
           when they're done.

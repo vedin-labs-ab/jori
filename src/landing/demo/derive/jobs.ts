@@ -168,7 +168,6 @@ function projectAccess(access: SavedArgs["args"]["access"]): Job["access"] {
   }
 }
 
-/** A job as one of the move dialog's resources. */
 export function jobMoveTarget(job: Job): MoveResourceTarget {
   return {
     resourceType: "job",
@@ -178,7 +177,6 @@ export function jobMoveTarget(job: Job): MoveResourceTarget {
   }
 }
 
-/** A job on its own as the move dialog's subject. */
 export function jobMoveSubject(job: Job): MoveSubject {
   return resourceSubject([jobMoveTarget(job)])
 }

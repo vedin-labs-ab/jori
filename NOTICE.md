@@ -4,6 +4,7 @@ Third-party code and assets retain their applicable licenses and notices.
 Jori's [license](LICENSE.md) does not replace those terms. The notices below
 cover identified upstream material copied into this repository. Dependencies
 installed through the package manager carry their own license terms.
+This file covers redistributed code and assets, not hosted service providers.
 
 ## shadcn/ui
 
@@ -12,30 +13,6 @@ and `src/lib/utils.ts` originate from [shadcn/ui](https://github.com/shadcn-ui/u
 
 [Upstream license](https://raw.githubusercontent.com/shadcn-ui/ui/main/LICENSE.md)
 
-```text
-MIT License
-
-Copyright (c) 2023 shadcn
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
 ## Better Auth UI
 
 The Better Auth UI-derived portions of `src/components/auth/` originate from the
@@ -43,44 +20,26 @@ The Better Auth UI-derived portions of `src/components/auth/` originate from the
 
 [Upstream license](https://raw.githubusercontent.com/better-auth-ui/better-auth-ui/main/LICENSE)
 
-```text
-MIT License
-
-Copyright (c) 2025 daveycodez
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
 ## SVGL
 
 The vendor paths in `src/shared/logo/vendor.tsx` originate from
 [SVGL](https://github.com/pheralb/svgl/tree/main/static/library). The GitHub, Gmail,
 Google Calendar, Slack, Notion, and Linear SVG artwork in
 `public/logos/integrations/` also matches artwork distributed by SVGL.
-The SVGL project notice is reproduced below; trademark rights remain with
-the respective owners.
+Trademark rights remain with the respective owners.
 
 [Upstream license](https://raw.githubusercontent.com/pheralb/svgl/main/LICENSE)
+
+## MIT license
+
+The shadcn/ui, Better Auth UI and SVGL material identified above is covered
+by the following notices and license.
 
 ```text
 MIT License
 
+Copyright (c) 2023 shadcn
+Copyright (c) 2025 daveycodez
 Copyright (c) 2022 Pablo Hdez
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

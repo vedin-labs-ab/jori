@@ -19,7 +19,7 @@ import { seedSkills } from "./seed/skills"
 // its own transaction and clears what it previously wrote, so a stage can be
 // re-run alone and the whole seed can be run twice without doubling anything.
 // Nothing here is reachable from the product: these are internal functions,
-// and scripts/seed.ts refuses any deployment that is not a development one.
+// and scripts/db/seed.ts refuses any deployment that is not a development one.
 
 const organization = { organizationId: v.optional(v.string()) }
 

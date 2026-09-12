@@ -1,7 +1,6 @@
 import { MaterialLinksDialog } from "@/shared/console/materials/links"
 import { useDemoShares, useShareActions } from "../shares"
 
-/** The share links dialog over the workspace's links. */
 export function DemoLinksDialog({
   kind,
   materialId,

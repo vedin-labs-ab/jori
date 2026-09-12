@@ -1,8 +1,2 @@
-before/
-after/
-preflight*/
-contact/
-*.local
-contacts/
-controls-review/
-failures/
+*
+!.gitignore

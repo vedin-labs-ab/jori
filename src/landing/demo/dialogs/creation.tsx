@@ -53,7 +53,6 @@ export function DemoCreationDialogs({
   )
 }
 
-/** The create dialog for one material kind, over the workspace. */
 export function DemoCreateMaterialDialog({
   kind,
   onClose,

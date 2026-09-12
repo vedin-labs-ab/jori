@@ -26,6 +26,3 @@ does not reflow already painted text. A page may keep its fallback font on a
 slow first visit.
 
 Use the [layout recorder](../scripts/layout/README.md) for focused regressions.
-The [September 2026 report](../scripts/layout/reports/LAYOUT_SHIFT_REPORT.md)
-records the measured scope and remaining causes; it is not a product-wide
-zero-shift guarantee.

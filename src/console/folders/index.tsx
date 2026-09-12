@@ -4,7 +4,6 @@ import { FolderContents } from "@/shared/console/folders/list/contents"
 import { FolderFrame, type FramedFolder } from "./frame"
 import { useFolderContents } from "./list/contents"
 
-/** A folder's page: everything filed here. */
 export function FolderPage({ folderId }: { folderId: string }) {
   return (
     <FolderFrame folderId={folderId} view="contents">

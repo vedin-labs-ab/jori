@@ -33,9 +33,7 @@ function createOptions(runtime?: {
         disableOrganizationDeletion: true,
         allowUserToCreateOrganization: runtime?.allowUserToCreateOrganization,
         sendInvitationEmail: runtime?.sendInvitationEmail,
-        // Teams are deliberate groupings, soon access-control grantees, so
-        // none exist until someone creates one: no auto default team, and an
-        // organization may go back to zero.
+        // Teams are created explicitly; organizations may have none.
         teams: {
           allowRemovingAllTeams: true,
           defaultTeam: { enabled: false },

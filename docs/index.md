@@ -12,6 +12,8 @@ claims. Read only the guide relevant to the task.
 | [Sandboxes](sandboxes.md) | Regional sandbox setup, execution, cleanup and verification. |
 | [Previews](previews.md) | Isolated regional Convex deployments for branch verification. |
 | [Launch policies](legal.md) | Business scope, refunds, retention and checks before publication. |
+| [Refunds](refunds.md) | Credit reservation, refund calculation and support execution. |
+| [Exports](export.md) | Customer exports, controller exports and operator commands. |
 | [Residency](residency.md) | Data boundaries, known exceptions and evidence for customer claims. |
 | [Brand](brand.md) | Logo variants, clear space, browser and app icons, and social image regeneration. |
 | [Layout stability](layout.md) | Loading geometry, changing labels and dialog state during exit. |

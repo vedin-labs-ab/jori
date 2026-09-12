@@ -2,7 +2,6 @@ import { useQuery } from "convex/react"
 import { FolderPickerField } from "@/shared/console/folders/field"
 import { api } from "../../../convex/_generated/api"
 
-/** The Folder field over the organization's own tree. */
 export function FolderField({
   id,
   onChange,

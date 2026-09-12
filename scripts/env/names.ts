@@ -1,11 +1,5 @@
 import { isRegion, type Region } from "../../contracts/region.ts"
 
-/** The targets Jori deploys to: one development deployment, and one
- *  production deployment per region. A target is one word used everywhere
- *  a command is bound to a deployment: the argument it takes, the env file
- *  it reads, and the confirmation a production deploy asks for. Staging
- *  slots in here without touching anything else: add the name and its env
- *  file. */
 export const targets = ["dev", "prod-eu", "prod-us"] as const
 
 export type Target = (typeof targets)[number]
@@ -24,21 +18,14 @@ export function readTarget(argv: readonly string[]): Target {
   return target
 }
 
-/** Development is one deployment in one place; production is one per
- *  region, and the region rides in the target's name. */
 export function targetRegion(target: Target): Region | undefined {
   const region = target.split("-")[1]
 
   return isRegion(region) ? region : undefined
 }
 
-/** The env file a target reads.
- *
- *  Development keeps the conventional name. The Convex CLI writes the selected
- *  deployment into `.env.local` and Vite loads it without being asked, so
- *  renaming it would mean fighting two tools for a filename that already means
- *  "this machine". Everything else is named for its target, because nothing
- *  but development should ever be picked up by accident. */
+// Convex and Vite use .env.local for development. Production files are
+// target-specific so Vite does not load them during local development.
 export function environmentFile(target: Target) {
   return target === "dev" ? ".env.local" : `.env.${target}.local`
 }
