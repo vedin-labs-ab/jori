@@ -142,12 +142,12 @@ function ConsentPanel({
         )}
       </div>
       <p className="mt-2.5 text-muted-foreground text-sm/relaxed">
-        Can we use PostHog to see how Jori gets used? It gets a random browser
-        ID and which parts of Jori you use, never your chats or files. Jori
-        works the same either way.
+        Can we use PostHog to see which parts of Jori get used? It doesn't learn
+        who you are and never sees your chats or files. Jori works the same
+        either way.
       </p>
       <p className="mt-2 text-muted-foreground/80 text-xs/relaxed">
-        Details in the{" "}
+        You can change your mind later. More in the{" "}
         <a
           className="underline underline-offset-2"
           href={marketingUrl("/privacy")}
@@ -156,17 +156,19 @@ function ConsentPanel({
         >
           privacy policy
         </a>
-        . Change it later under Privacy choices.
+        .
       </p>
       <div className="mt-4 grid gap-2 min-[400px]:grid-cols-2">
         <ChoiceButton
           current={choice === "declined"}
+          icon={<XIcon aria-hidden="true" className="text-destructive" />}
           onClick={() => onChoose("declined")}
         >
           Decline
         </ChoiceButton>
         <ChoiceButton
           current={choice === "accepted"}
+          icon={<CheckIcon aria-hidden="true" className="text-primary" />}
           onClick={() => onChoose("accepted")}
         >
           Accept
@@ -179,10 +181,12 @@ function ConsentPanel({
 function ChoiceButton({
   children,
   current,
+  icon,
   onClick,
 }: {
   children: ReactNode
   current: boolean
+  icon: ReactNode
   onClick: () => void
 }) {
   return (
@@ -193,9 +197,7 @@ function ChoiceButton({
       type="button"
       variant="outline"
     >
-      {current ? (
-        <CheckIcon aria-hidden="true" className="text-primary" />
-      ) : null}
+      {current ? icon : null}
       {children}
     </Button>
   )
