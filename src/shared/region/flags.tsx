@@ -1,11 +1,34 @@
 import { cn } from "@/lib/utils"
 
 const stripeHeight = 16 / 13
-const starRing = Array.from({ length: 12 }, (_, index) => {
-  const angle = (index / 12) * 2 * Math.PI
 
-  return { cx: 12 + 4.6 * Math.sin(angle), cy: 8 - 4.6 * Math.cos(angle) }
-})
+/** The twelve stars of the European flag around a centre. Coordinates are
+ *  rounded because Node and the browser disagree on the last bit of a sine,
+ *  and the difference showed up as a hydration mismatch on every flag. */
+export function StarRing({
+  cx,
+  cy,
+  radius,
+  size,
+}: {
+  cx: number
+  cy: number
+  radius: number
+  size: number
+}) {
+  return Array.from({ length: 12 }, (_, index) => {
+    const angle = (index / 12) * 2 * Math.PI
+    const x = round(cx + radius * Math.sin(angle))
+    const y = round(cy - radius * Math.cos(angle))
+
+    return <circle cx={x} cy={y} fill="#FFCC00" key={`${x}-${y}`} r={size} />
+  })
+}
+
+function round(value: number) {
+  return Math.round(value * 1000) / 1000
+}
+
 const cantonDots = [0, 1, 2].flatMap((row) =>
   [0, 1, 2, 3].map((column) => ({
     cx: 1.4 + column * 2.3,
@@ -35,15 +58,7 @@ export function RegionFlag({
       {region === "eu" ? (
         <>
           <rect fill="#003399" height="16" width="24" />
-          {starRing.map((star) => (
-            <circle
-              cx={star.cx}
-              cy={star.cy}
-              fill="#FFCC00"
-              key={`${star.cx}-${star.cy}`}
-              r="0.85"
-            />
-          ))}
+          <StarRing cx={12} cy={8} radius={4.6} size={0.85} />
         </>
       ) : (
         <>

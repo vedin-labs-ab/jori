@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react"
 import { type ReactNode } from "react"
 import { afterEach, expect, test, vi } from "vitest"
 import { SignInLegalNotice } from "@/shared/auth/guidance"
+import { LandingFooter } from "./footer"
 import { LandingHeader } from "./header"
 
 const createAuthClient = vi.hoisted(() =>
@@ -31,13 +32,22 @@ afterEach(() => {
 test("marketing renders sign-in as full navigation without querying either regional session", () => {
   const fetcher = vi.fn()
   vi.stubGlobal("fetch", fetcher)
-  render(<LandingHeader onWaitlistPage />)
-  expect(
-    screen.getByRole("link", { name: "Sign in" }).getAttribute("href")
-  ).toBe("https://usejori.com/sign-in")
-  expect(
-    screen.getByRole("link", { name: "Jori home" }).getAttribute("href")
-  ).toBe("https://usejori.com/")
+  render(
+    <>
+      <LandingHeader onWaitlistPage />
+      <LandingFooter />
+    </>
+  )
+  for (const [name, href] of [
+    ["Sign in", "https://usejori.com/sign-in"],
+    ["Jori home", "https://usejori.com/"],
+  ]) {
+    const links = screen.getAllByRole("link", { name })
+    expect(links).toHaveLength(2)
+    for (const link of links) {
+      expect(link.getAttribute("href")).toBe(href)
+    }
+  }
   expect(createAuthClient).not.toHaveBeenCalled()
   expect(fetcher).not.toHaveBeenCalled()
 })
