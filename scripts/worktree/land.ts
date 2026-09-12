@@ -40,6 +40,11 @@ process.stdout.write(
 )
 
 function rebase() {
+  // Preserve merged branches when the task already includes main.
+  if (git(["merge-base", "main", branch]) === git(["rev-parse", "main"])) {
+    return
+  }
+
   try {
     git(["rebase", "main"], directory)
   } catch (error) {
