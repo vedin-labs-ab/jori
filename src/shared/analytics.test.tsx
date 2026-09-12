@@ -91,14 +91,12 @@ test("analytics starts only after acceptance and stops when consent is withdrawn
       <PrivacyChoices />
     </Analytics>
   )
-  expect(
-    await screen.findByRole("button", { name: "Accept analytics" })
-  ).toBeDefined()
+  expect(await screen.findByRole("button", { name: "Accept" })).toBeDefined()
   await act(async () => {})
   expect(state.init).not.toHaveBeenCalled()
   expect(state.capture).not.toHaveBeenCalled()
 
-  fireEvent.click(screen.getByRole("button", { name: "Decline analytics" }))
+  fireEvent.click(screen.getByRole("button", { name: "Decline" }))
   state.routeId = "/chat/$conversationId/"
   view.rerender(
     <Analytics>
@@ -106,8 +104,19 @@ test("analytics starts only after acceptance and stops when consent is withdrawn
     </Analytics>
   )
   expect(state.init).not.toHaveBeenCalled()
+  expect(screen.queryByRole("button", { name: "Close" })).toBeNull()
   fireEvent.click(screen.getByRole("button", { name: "Privacy choices" }))
-  fireEvent.click(screen.getByRole("button", { name: "Accept analytics" }))
+  expect(
+    screen.getByRole("button", { name: "Decline" }).getAttribute("aria-pressed")
+  ).toBe("true")
+  expect(
+    screen.getByRole("button", { name: "Accept" }).getAttribute("aria-pressed")
+  ).toBe("false")
+  fireEvent.click(screen.getByRole("button", { name: "Close" }))
+  expect(screen.queryByRole("button", { name: "Accept" })).toBeNull()
+  expect(state.init).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole("button", { name: "Privacy choices" }))
+  fireEvent.click(screen.getByRole("button", { name: "Accept" }))
   await waitFor(() => expect(state.capture).toHaveBeenCalledTimes(1))
   expect(state.init).toHaveBeenCalledTimes(1)
 
@@ -116,7 +125,7 @@ test("analytics starts only after acceptance and stops when consent is withdrawn
   // biome-ignore lint/suspicious/noDocumentCookie: Seed the SDK cookie whose deletion this test verifies.
   document.cookie = "ph_phc_public_posthog=private-id; Path=/"
   fireEvent.click(screen.getByRole("button", { name: "Privacy choices" }))
-  fireEvent.click(screen.getByRole("button", { name: "Decline analytics" }))
+  fireEvent.click(screen.getByRole("button", { name: "Decline" }))
   expect(state.optOut).toHaveBeenCalled()
   expect(localStorage.getItem("ph_phc_public_posthog")).toBeNull()
   expect(document.cookie).not.toContain("ph_phc_public_posthog=")
@@ -143,7 +152,7 @@ test("a saved decline survives remounting and another tab can withdraw consent",
   expect(
     await screen.findByRole("button", { name: "Privacy choices" })
   ).toBeDefined()
-  expect(screen.queryByRole("button", { name: "Accept analytics" })).toBeNull()
+  expect(screen.queryByRole("button", { name: "Accept" })).toBeNull()
   expect(state.init).not.toHaveBeenCalled()
   view.unmount()
   render(
@@ -151,10 +160,10 @@ test("a saved decline survives remounting and another tab can withdraw consent",
       <PrivacyChoices />
     </Analytics>
   )
-  expect(screen.queryByRole("button", { name: "Accept analytics" })).toBeNull()
+  expect(screen.queryByRole("button", { name: "Accept" })).toBeNull()
 
   fireEvent.click(screen.getByRole("button", { name: "Privacy choices" }))
-  fireEvent.click(screen.getByRole("button", { name: "Accept analytics" }))
+  fireEvent.click(screen.getByRole("button", { name: "Accept" }))
   await waitFor(() => expect(state.capture).toHaveBeenCalledTimes(1))
   act(() => {
     saveConsent("declined")
@@ -171,9 +180,7 @@ test("expired or malformed consent cannot enable analytics", async () => {
   )
   const { Analytics } = await import("./analytics")
   render(<Analytics>Content</Analytics>)
-  expect(
-    await screen.findByRole("button", { name: "Accept analytics" })
-  ).toBeDefined()
+  expect(await screen.findByRole("button", { name: "Accept" })).toBeDefined()
   expect(state.init).not.toHaveBeenCalled()
   act(() => {
     localStorage.setItem(consentKey, "broken")
@@ -194,11 +201,9 @@ test("withdrawing while the SDK loads prevents initialization and capture", asyn
       <PrivacyChoices />
     </Analytics>
   )
-  fireEvent.click(
-    await screen.findByRole("button", { name: "Accept analytics" })
-  )
+  fireEvent.click(await screen.findByRole("button", { name: "Accept" }))
   fireEvent.click(screen.getByRole("button", { name: "Privacy choices" }))
-  fireEvent.click(screen.getByRole("button", { name: "Decline analytics" }))
+  fireEvent.click(screen.getByRole("button", { name: "Decline" }))
   await act(async () => {
     finishLoading()
   })
