@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { send } from "./send"
 
 const message = {
-  to: "albin@usejori.com",
+  to: "verification-recipient@example.com",
   subject: "Hello",
   html: "<p>Hi</p>",
   text: "Hi",
