@@ -42,3 +42,29 @@ test("an unconfigured instance cannot use another region's configuration", () =>
   }
   expect(isStripeConfigured()).toBe(false)
 })
+
+test.each([
+  400, 401, 429, 503,
+])("Stripe HTTP %s errors omit reflected provider content without retrying", async (status) => {
+  const fetch = vi.fn(async () =>
+    Response.json(
+      { error: { message: "Reflected private customer value" } },
+      { status }
+    )
+  )
+  vi.stubGlobal("fetch", fetch)
+  await expect(stripeRequest("/v1/payment_intents")).rejects.toThrow(
+    `Stripe request failed (HTTP ${status})`
+  )
+  expect(fetch).toHaveBeenCalledTimes(1)
+})
+
+test("malformed successful Stripe responses cannot expose parser snippets", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => new Response("Private value"))
+  )
+  await expect(stripeRequest("/v1/payment_intents")).rejects.toThrow(
+    "Stripe returned invalid JSON"
+  )
+})

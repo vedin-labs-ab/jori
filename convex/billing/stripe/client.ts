@@ -36,27 +36,16 @@ export async function stripeRequest(
     },
     ...(method !== "GET" ? { body: form.toString() } : {}),
   })
-  const payload = (await response.json()) as Record<string, unknown>
-
   if (!response.ok) {
-    throw new Error(`Stripe request failed: ${readStripeError(payload)}`)
+    // Provider messages can reflect submitted credentials or customer values.
+    throw new Error(`Stripe request failed (HTTP ${response.status})`)
   }
-
-  return payload
-}
-
-function readStripeError(payload: Record<string, unknown>) {
-  const error = payload.error
-
-  if (typeof error === "object" && error !== null && "message" in error) {
-    const message = (error as { message?: unknown }).message
-
-    if (typeof message === "string") {
-      return message
-    }
+  try {
+    return (await response.json()) as Record<string, unknown>
+  } catch {
+    // JSON parser errors may include a snippet of the response body.
+    throw new Error("Stripe returned invalid JSON")
   }
-
-  return "Unknown error"
 }
 
 /** Stripe's bracket form encoding: nested objects become `parent[child]`. */

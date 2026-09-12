@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { purgeFile } from "../../files/records"
 import { belongsToWorkspace, contentTables } from "./tables"
 
 export async function purgeContent(
@@ -19,9 +20,10 @@ export async function purgeContent(
       continue
     }
     if (table === "files" && "storageId" in item && item.storageId) {
-      await ctx.storage.delete(item.storageId)
+      await purgeFile(ctx, item as Doc<"files">)
+    } else {
+      await ctx.db.delete(item._id)
     }
-    await ctx.db.delete(item._id)
   }
   await ctx.db.patch(row._id, {
     stage: page.isDone ? (row.stage ?? 6) + 1 : row.stage,

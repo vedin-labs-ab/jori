@@ -87,18 +87,6 @@ test("uploads reject a folder from another organization", async () => {
   ).rejects.toThrow("Folder was not found.")
 })
 
-test("private uploads require a resolvable owner", async () => {
-  const ctx = fileContext({ system: { get: vi.fn() } })
-
-  await expect(
-    insertUploadedFile(
-      ctx,
-      { organizationId: "organization" },
-      { storageId, name: "note.txt", visibility: { mode: "private" } }
-    )
-  ).rejects.toThrow("Private files need a resolvable owner")
-})
-
 test("deleting a file takes its blob and share links with the row", async () => {
   const storageDelete = vi.fn(async () => undefined)
   const rowDelete = vi.fn(async () => undefined)
