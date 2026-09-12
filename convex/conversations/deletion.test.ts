@@ -58,35 +58,35 @@ async function setup() {
   return { database, ctx, personId, parentId, folderId, sent, run, finishPurge }
 }
 
-test.each([
-  false,
-  true,
-])("folder deletion retains chat accounting, delete contents: %s", async (deleteResources) => {
-  const { database, ctx, parentId, folderId, sent, run, finishPurge } =
-    await setup()
-  await recordUsageDebit(ctx, {
-    run,
-    model: defaultSelection.model,
-    micros: 100,
-    tokens: { input: 10, output: 1 },
-  })
-  await removeFolder(ctx, { organizationId, folderId, deleteResources })
-  await finishPurge()
-  expect(await rows<Doc<"usage">>(database, "usage")).toMatchObject([
-    { conversationId: sent.conversationId, folderId: parentId, micros: 100 },
-  ])
-  expect(await database.get(run._id)).toMatchObject({ folderId: parentId })
-  if (deleteResources) {
-    expect(await database.get(sent.conversationId)).toBeNull()
-    expect(await rows(database, "messages")).toEqual([])
-    expect(await rows(database, "sessions")).toEqual([])
-    expect(await database.get(run._id)).toMatchObject({ status: "stopped" })
-  } else {
-    expect(await database.get(sent.conversationId)).toMatchObject({
-      folderId: parentId,
+test.each([false, true])(
+  "folder deletion retains chat accounting, delete contents: %s",
+  async (deleteResources) => {
+    const { database, ctx, parentId, folderId, sent, run, finishPurge } =
+      await setup()
+    await recordUsageDebit(ctx, {
+      run,
+      model: defaultSelection.model,
+      micros: 100,
+      tokens: { input: 10, output: 1 },
     })
+    await removeFolder(ctx, { organizationId, folderId, deleteResources })
+    await finishPurge()
+    expect(await rows<Doc<"usage">>(database, "usage")).toMatchObject([
+      { conversationId: sent.conversationId, folderId: parentId, micros: 100 },
+    ])
+    expect(await database.get(run._id)).toMatchObject({ folderId: parentId })
+    if (deleteResources) {
+      expect(await database.get(sent.conversationId)).toBeNull()
+      expect(await rows(database, "messages")).toEqual([])
+      expect(await rows(database, "sessions")).toEqual([])
+      expect(await database.get(run._id)).toMatchObject({ status: "stopped" })
+    } else {
+      expect(await database.get(sent.conversationId)).toMatchObject({
+        folderId: parentId,
+      })
+    }
   }
-})
+)
 
 test("deleting a filed chat counts each delegated run once", async () => {
   const { database, ctx, personId, folderId, run, finishPurge } = await setup()

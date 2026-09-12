@@ -14,67 +14,67 @@ import { executeRunApproval } from "../tools/broker"
 
 afterEach(() => vi.restoreAllMocks())
 
-test.each([
-  "allowed",
-  "blocked",
-] as const)("a persisted approved-action result is visible to the next model turn (%s)", async (mode) => {
-  const { t, args, ctx, personId } = await approvalFixture()
-  vi.spyOn(jori, "callJoriTool").mockResolvedValue({
-    status: "read",
-    text: "Synthetic result",
-  })
-  await t.run(
-    async (db) =>
-      await db.db.insert("permissions", {
-        organizationId: "verification",
-        tool: "read_file",
-        mode,
-        updatedBy: personId,
-        updatedAt: Date.now(),
-      })
-  )
-  const platform = convexPlatform({ t, args, ctx })
-  const runtime = createRuntime({
-    platform,
-    context: runtimeContext({
-      run: {
-        id: args.runId,
-        organizationId: "verification",
-        status: "running",
-        rootId: null,
-        sandboxId: null,
-      },
-      tools: [
-        {
-          name: "finish_run",
-          route: "run",
-          access: "write",
-          description: "Finish",
-          inputSchema: {},
+test.each(["allowed", "blocked"] as const)(
+  "a persisted approved-action result is visible to the next model turn (%s)",
+  async (mode) => {
+    const { t, args, ctx, personId } = await approvalFixture()
+    vi.spyOn(jori, "callJoriTool").mockResolvedValue({
+      status: "read",
+      text: "Synthetic result",
+    })
+    await t.run(
+      async (db) =>
+        await db.db.insert("permissions", {
+          organizationId: "verification",
+          tool: "read_file",
+          mode,
+          updatedBy: personId,
+          updatedAt: Date.now(),
+        })
+    )
+    const platform = convexPlatform({ t, args, ctx })
+    const runtime = createRuntime({
+      platform,
+      context: runtimeContext({
+        run: {
+          id: args.runId,
+          organizationId: "verification",
+          status: "running",
+          rootId: null,
+          sandboxId: null,
         },
-      ],
-    }),
-  })
-  const model = createQueuedModel([finish("first"), finish("second")])
+        tools: [
+          {
+            name: "finish_run",
+            route: "run",
+            access: "write",
+            description: "Finish",
+            inputSchema: {},
+          },
+        ],
+      }),
+    })
+    const model = createQueuedModel([finish("first"), finish("second")])
 
-  await expect(runLoop({ model, runtime })).resolves.toBe("completed")
-  expect(model.complete).toHaveBeenCalledTimes(2)
-  expect(model.complete.mock.calls[1]?.[0].messages).toContainEqual({
-    role: "user",
-    content: expect.stringContaining(
-      mode === "blocked" ? "Tool is blocked: read_file" : "Synthetic result"
-    ),
-  })
-  const notes = (await platform.listTranscript()).filter(
-    (message) =>
-      message.role === "user" && message.content?.includes("Approved action")
-  )
-  expect(notes).toHaveLength(1)
-  expect(notes[0]?.content).not.toContain(" ran.")
-  expect(
-    (await t.run(async (db) => await db.db.get(args.approvalId)))?.consumedAt
-  ).toBeDefined()
-})
+    await expect(runLoop({ model, runtime })).resolves.toBe("completed")
+    expect(model.complete).toHaveBeenCalledTimes(2)
+    expect(model.complete.mock.calls[1]?.[0].messages).toContainEqual({
+      role: "user",
+      content: expect.stringContaining(
+        mode === "blocked" ? "Tool is blocked: read_file" : "Synthetic result"
+      ),
+    })
+    const notes = (await platform.listTranscript()).filter(
+      (message) =>
+        message.role === "user" && message.content?.includes("Approved action")
+    )
+    expect(notes).toHaveLength(1)
+    expect(notes[0]?.content).not.toContain(" ran.")
+    expect(
+      (await t.run(async (db) => await db.db.get(args.approvalId)))?.consumedAt
+    ).toBeDefined()
+  }
+)
 
 function convexPlatform({
   t,

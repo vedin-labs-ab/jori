@@ -133,24 +133,23 @@ test("projects search run activity metadata without run ids", () => {
   )
 })
 
-test.each([
-  { value: undefined },
-  { value: [] },
-  { value: [null, 1] },
-])("keeps empty activity filters as all activity: %j", ({ value: filter }) => {
-  const items = projectActivity(
-    activityData({
-      traces: [toolStarted("search_run_activity", { filter })],
-    })
-  )
+test.each([{ value: undefined }, { value: [] }, { value: [null, 1] }])(
+  "keeps empty activity filters as all activity: %j",
+  ({ value: filter }) => {
+    const items = projectActivity(
+      activityData({
+        traces: [toolStarted("search_run_activity", { filter })],
+      })
+    )
 
-  expect(items).toContainEqual(
-    expect.objectContaining({
-      metadata: [{ kind: "target", text: "all activity" }],
-      title: "Search Run Activity",
-    })
-  )
-})
+    expect(items).toContainEqual(
+      expect.objectContaining({
+        metadata: [{ kind: "target", text: "all activity" }],
+        title: "Search Run Activity",
+      })
+    )
+  }
+)
 
 function result(
   itemKey: "items" | "runs",

@@ -163,22 +163,23 @@ test.each([
   {
     surfaces: [{ integration: "github" as const, tools: ["github_get_issue"] }],
   },
-])("removing a skill preserves explicit access $surfaces", async ({
-  surfaces,
-}) => {
-  const field = renderInstructionsField({
-    description: "Run /meeting-prep now.",
-    surfaces,
-  })
-
-  fireEvent.click(
-    await screen.findByRole("button", { name: "Remove meeting-prep" })
-  )
-
-  await waitFor(() => {
-    expect(field.onValueChange).toHaveBeenLastCalledWith({
-      description: "Run  now.",
+])(
+  "removing a skill preserves explicit access $surfaces",
+  async ({ surfaces }) => {
+    const field = renderInstructionsField({
+      description: "Run /meeting-prep now.",
       surfaces,
     })
-  })
-})
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Remove meeting-prep" })
+    )
+
+    await waitFor(() => {
+      expect(field.onValueChange).toHaveBeenLastCalledWith({
+        description: "Run  now.",
+        surfaces,
+      })
+    })
+  }
+)

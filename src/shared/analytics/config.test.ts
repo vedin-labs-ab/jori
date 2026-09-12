@@ -7,35 +7,35 @@ const settings = {
   VITE_POSTHOG_HOST: "https://eu.i.posthog.com",
 }
 
-test.each([
-  "eu",
-  "us",
-] as const)("%s analytics has a regional API and host-only identity", (region) => {
-  expect(
-    analyticsConfig(
-      { ...settings, VITE_POSTHOG_HOST: `https://${region}.i.posthog.com` },
-      region
-    )
-  ).toMatchObject({
-    key: "phc_test",
-    options: {
-      api_host: `https://${region}.i.posthog.com`,
-      ui_host: `https://${region}.posthog.com`,
-      cross_subdomain_cookie: false,
-      defaults: "2026-06-25",
-      autocapture: false,
-      capture_pageview: false,
-      capture_pageleave: false,
-      opt_out_capturing_by_default: true,
-      opt_out_persistence_by_default: true,
-      disable_session_recording: true,
-      disable_external_dependency_loading: true,
-      person_profiles: "never",
-      save_referrer: false,
-      save_campaign_params: false,
-    },
-  })
-})
+test.each(["eu", "us"] as const)(
+  "%s analytics has a regional API and host-only identity",
+  (region) => {
+    expect(
+      analyticsConfig(
+        { ...settings, VITE_POSTHOG_HOST: `https://${region}.i.posthog.com` },
+        region
+      )
+    ).toMatchObject({
+      key: "phc_test",
+      options: {
+        api_host: `https://${region}.i.posthog.com`,
+        ui_host: `https://${region}.posthog.com`,
+        cross_subdomain_cookie: false,
+        defaults: "2026-06-25",
+        autocapture: false,
+        capture_pageview: false,
+        capture_pageleave: false,
+        opt_out_capturing_by_default: true,
+        opt_out_persistence_by_default: true,
+        disable_session_recording: true,
+        disable_external_dependency_loading: true,
+        person_profiles: "never",
+        save_referrer: false,
+        save_campaign_params: false,
+      },
+    })
+  }
+)
 
 test("crossed regions, default hosts and private keys fail closed", () => {
   expect(() => analyticsConfig(settings, "us")).toThrow("regional PostHog host")

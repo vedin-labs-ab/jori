@@ -83,41 +83,41 @@ test("repairs non-empty stops and keeps tools available for the next turn", asyn
   )
 })
 
-test.each([
-  "tool_calls",
-  "stop",
-] as const)("fails when the model exhausts its steps with %s responses", async (type) => {
-  const runtime = createRuntime({
-    context: runtimeContext({ tools: [finishRunTool(), slackMessageTool()] }),
-  })
-  const model = createQueuedModel(
-    Array.from({ length: 30 }, (_value, index) =>
-      type === "stop"
-        ? { content: "Still thinking.", type }
-        : {
-            content: null,
-            toolCalls: [
-              {
-                args: { channel: "C123", text: `attempt ${index}` },
-                id: `call_${index}`,
-                name: "conversations_add_message",
-              },
-            ],
-            type,
-          }
-    )
-  )
-
-  await expect(runLoop({ model, runtime })).resolves.toBe("failed")
-
-  expect(model.complete).toHaveBeenCalledTimes(30)
-  expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
-    expect.objectContaining({
-      data: { error: "Model loop exceeded the maximum step count." },
-      type: "run.failed",
+test.each(["tool_calls", "stop"] as const)(
+  "fails when the model exhausts its steps with %s responses",
+  async (type) => {
+    const runtime = createRuntime({
+      context: runtimeContext({ tools: [finishRunTool(), slackMessageTool()] }),
     })
-  )
-})
+    const model = createQueuedModel(
+      Array.from({ length: 30 }, (_value, index) =>
+        type === "stop"
+          ? { content: "Still thinking.", type }
+          : {
+              content: null,
+              toolCalls: [
+                {
+                  args: { channel: "C123", text: `attempt ${index}` },
+                  id: `call_${index}`,
+                  name: "conversations_add_message",
+                },
+              ],
+              type,
+            }
+      )
+    )
+
+    await expect(runLoop({ model, runtime })).resolves.toBe("failed")
+
+    expect(model.complete).toHaveBeenCalledTimes(30)
+    expect(runtime.platform.recordEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: { error: "Model loop exceeded the maximum step count." },
+        type: "run.failed",
+      })
+    )
+  }
+)
 
 test("answers the calls a finishing call leaves behind", async () => {
   const runtime = createRuntime({

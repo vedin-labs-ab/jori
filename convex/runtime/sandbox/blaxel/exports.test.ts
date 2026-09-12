@@ -41,44 +41,44 @@ const handler = (
 
 beforeEach(() => vi.clearAllMocks())
 
-test.each([
-  17 * 1024 * 1024,
-  maxFileBytes,
-])("exports %i bytes directly to storage and returns metadata only", async (size) => {
-  const { ctx, storage, runQuery, runMutation, read } = fixture(size)
-  const result = await handler(ctx, args)
-  expect(result).toEqual({
-    sandboxId: "sandbox-1",
-    file: { fileId: "files:1", ...fileMetadata(size) },
-  })
-  expect(runQuery).toHaveBeenCalledWith(internal.runs.records.get, {
-    runId: args.runId,
-  })
-  expect(runMutation).toHaveBeenNthCalledWith(
-    1,
-    internal.runs.execution.sandboxes.records.claimForRun,
-    { runId: args.runId }
-  )
-  expect(openSandbox).toHaveBeenCalledWith(ctx, {
-    runId: args.runId,
-    sandboxId: "sandbox-1",
-  })
-  expect(read).toHaveBeenCalledWith(
-    expect.anything(),
-    "/home/user/workspace/output.bin"
-  )
-  expect(storage.store.mock.calls[0]?.[0].size).toBe(size)
-  expect(runMutation).toHaveBeenNthCalledWith(2, internal.files.data.record, {
-    organizationId: "organization-1",
-    runId: args.runId,
-    storageId: "storage-1",
-    visibility: { mode: "organization" },
-    name: args.name,
-    mimeType: args.mimeType,
-    size,
-  })
-  expect(storage.delete).not.toHaveBeenCalled()
-})
+test.each([17 * 1024 * 1024, maxFileBytes])(
+  "exports %i bytes directly to storage and returns metadata only",
+  async (size) => {
+    const { ctx, storage, runQuery, runMutation, read } = fixture(size)
+    const result = await handler(ctx, args)
+    expect(result).toEqual({
+      sandboxId: "sandbox-1",
+      file: { fileId: "files:1", ...fileMetadata(size) },
+    })
+    expect(runQuery).toHaveBeenCalledWith(internal.runs.records.get, {
+      runId: args.runId,
+    })
+    expect(runMutation).toHaveBeenNthCalledWith(
+      1,
+      internal.runs.execution.sandboxes.records.claimForRun,
+      { runId: args.runId }
+    )
+    expect(openSandbox).toHaveBeenCalledWith(ctx, {
+      runId: args.runId,
+      sandboxId: "sandbox-1",
+    })
+    expect(read).toHaveBeenCalledWith(
+      expect.anything(),
+      "/home/user/workspace/output.bin"
+    )
+    expect(storage.store.mock.calls[0]?.[0].size).toBe(size)
+    expect(runMutation).toHaveBeenNthCalledWith(2, internal.files.data.record, {
+      organizationId: "organization-1",
+      runId: args.runId,
+      storageId: "storage-1",
+      visibility: { mode: "organization" },
+      name: args.name,
+      mimeType: args.mimeType,
+      size,
+    })
+    expect(storage.delete).not.toHaveBeenCalled()
+  }
+)
 
 test.each([
   [0, "File is empty"],
@@ -90,15 +90,15 @@ test.each([
   expect(storage.store).not.toHaveBeenCalled()
 })
 
-test.each([
-  0,
-  maxFileBytes + 1,
-])("rechecks the actual bytes when the file changes to %i bytes", async (size) => {
-  const { ctx, read, storage } = fixture(1)
-  read.mockResolvedValue(new Uint8Array(size))
-  await expect(handler(ctx, args)).rejects.toThrow()
-  expect(storage.store).not.toHaveBeenCalled()
-})
+test.each([0, maxFileBytes + 1])(
+  "rechecks the actual bytes when the file changes to %i bytes",
+  async (size) => {
+    const { ctx, read, storage } = fixture(1)
+    read.mockResolvedValue(new Uint8Array(size))
+    await expect(handler(ctx, args)).rejects.toThrow()
+    expect(storage.store).not.toHaveBeenCalled()
+  }
+)
 
 test("rejects outside paths before querying or opening a sandbox", async () => {
   const { ctx, runQuery } = fixture(1)
@@ -133,20 +133,20 @@ test("does not upload when the sandbox file is missing", async () => {
   expect(storage.store).not.toHaveBeenCalled()
 })
 
-test.each([
-  "/home/user/workspace",
-  "/home/user/workspace/output.bin",
-])("rejects a symlink at %s before reading bytes", async (path) => {
-  const { ctx, getInfo, read, storage } = fixture(1)
-  getInfo.mockImplementation(async (_sandbox, current) => ({
-    size: 1,
-    type: current.endsWith(".bin") ? "file" : "dir",
-    ...(current === path ? { symlinkTarget: "/outside/fixture" } : {}),
-  }))
-  await expect(handler(ctx, args)).rejects.toThrow("symbolic links")
-  expect(read).not.toHaveBeenCalled()
-  expect(storage.store).not.toHaveBeenCalled()
-})
+test.each(["/home/user/workspace", "/home/user/workspace/output.bin"])(
+  "rejects a symlink at %s before reading bytes",
+  async (path) => {
+    const { ctx, getInfo, read, storage } = fixture(1)
+    getInfo.mockImplementation(async (_sandbox, current) => ({
+      size: 1,
+      type: current.endsWith(".bin") ? "file" : "dir",
+      ...(current === path ? { symlinkTarget: "/outside/fixture" } : {}),
+    }))
+    await expect(handler(ctx, args)).rejects.toThrow("symbolic links")
+    expect(read).not.toHaveBeenCalled()
+    expect(storage.store).not.toHaveBeenCalled()
+  }
+)
 
 test("rejects a directory at the file path", async () => {
   const { ctx, getInfo, read } = fixture(1)

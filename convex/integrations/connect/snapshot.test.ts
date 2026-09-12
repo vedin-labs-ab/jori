@@ -65,58 +65,64 @@ test.each([
   ["reconnect", false],
   ["rotation", true],
   ["rotation", false],
-] as const)("a delayed refresh cannot overwrite or expire a newer %s when success is %s", async (change, succeeded) => {
-  const { t, install, integration } = await setup()
-  const replacement = { bot: pair("new-bot"), user: pair("new-user") }
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockImplementation(async () => {
-      if (change === "reconnect") {
-        await t.mutation(
-          internal.integrations.slack.install.recordOAuthInstallation,
-          { ...install, ...replacement }
-        )
-      } else {
-        await t.mutation(
-          internal.integrations.slack.install.updateOAuthCredentials,
-          {
-            integrationId: integration._id,
-            expectedSnapshot: { connectionGeneration: 1, credentialVersion: 0 },
-            expectedTokens: {
-              bot: await sha256Hex(install.bot.refresh),
-              user: await sha256Hex(install.user.refresh),
-            },
-            ...replacement,
-          }
-        )
-      }
-      return Response.json(
-        succeeded
-          ? {
-              ok: true,
-              access_token: "late-access",
-              refresh_token: "late-refresh",
-              expires_in: 43_200,
+] as const)(
+  "a delayed refresh cannot overwrite or expire a newer %s when success is %s",
+  async (change, succeeded) => {
+    const { t, install, integration } = await setup()
+    const replacement = { bot: pair("new-bot"), user: pair("new-user") }
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => {
+        if (change === "reconnect") {
+          await t.mutation(
+            internal.integrations.slack.install.recordOAuthInstallation,
+            { ...install, ...replacement }
+          )
+        } else {
+          await t.mutation(
+            internal.integrations.slack.install.updateOAuthCredentials,
+            {
+              integrationId: integration._id,
+              expectedSnapshot: {
+                connectionGeneration: 1,
+                credentialVersion: 0,
+              },
+              expectedTokens: {
+                bot: await sha256Hex(install.bot.refresh),
+                user: await sha256Hex(install.user.refresh),
+              },
+              ...replacement,
             }
-          : { ok: false, error: "invalid_refresh_token" }
-      )
-    })
-  )
-  await expect(
-    prepareIntegrationForRuntime(
-      { runMutation: t.mutation } as unknown as ActionCtx,
-      { integration }
+          )
+        }
+        return Response.json(
+          succeeded
+            ? {
+                ok: true,
+                access_token: "late-access",
+                refresh_token: "late-refresh",
+                expires_in: 43_200,
+              }
+            : { ok: false, error: "invalid_refresh_token" }
+        )
+      })
     )
-  ).rejects.toThrow("Integration connection changed during token refresh")
-  expect(
-    await t.run(async (ctx) => await ctx.db.get(integration._id))
-  ).toMatchObject({
-    status: "active",
-    credentials: replacement,
-    connectionGeneration: change === "reconnect" ? 2 : 1,
-    credentialVersion: change === "reconnect" ? 0 : 1,
-  })
-})
+    await expect(
+      prepareIntegrationForRuntime(
+        { runMutation: t.mutation } as unknown as ActionCtx,
+        { integration }
+      )
+    ).rejects.toThrow("Integration connection changed during token refresh")
+    expect(
+      await t.run(async (ctx) => await ctx.db.get(integration._id))
+    ).toMatchObject({
+      status: "active",
+      credentials: replacement,
+      connectionGeneration: change === "reconnect" ? 2 : 1,
+      credentialVersion: change === "reconnect" ? 0 : 1,
+    })
+  }
+)
 
 test("a valid refresh advances its credential snapshot and a matching dead grant can expire", async () => {
   const { t, integration } = await setup()

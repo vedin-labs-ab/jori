@@ -67,35 +67,33 @@ test.each([
     title: "Agent running",
     isLive: true,
   },
-] as const)("projects $status delegated runs as agents", ({
-  status,
-  projected,
-  title,
-  isLive,
-}) => {
-  const items = projectActivity(
-    activityData({
-      agents: [
-        runDoc({
-          _id: id<"runs">("agent-run"),
-          parentId: id<"runs">("run"),
-          snapshot: runSnapshot("Draft a plan"),
-          status,
-        }),
-      ],
-    })
-  )
+] as const)(
+  "projects $status delegated runs as agents",
+  ({ status, projected, title, isLive }) => {
+    const items = projectActivity(
+      activityData({
+        agents: [
+          runDoc({
+            _id: id<"runs">("agent-run"),
+            parentId: id<"runs">("run"),
+            snapshot: runSnapshot("Draft a plan"),
+            status,
+          }),
+        ],
+      })
+    )
 
-  expect(items).toContainEqual(
-    expect.objectContaining({
-      id: "agent-run",
-      isLive,
-      kind: "agent",
-      status: projected,
-      title,
-    })
-  )
-})
+    expect(items).toContainEqual(
+      expect.objectContaining({
+        id: "agent-run",
+        isLive,
+        kind: "agent",
+        status: projected,
+        title,
+      })
+    )
+  }
+)
 
 test("labels approved approvals as approved actions", () => {
   const items = projectActivity(

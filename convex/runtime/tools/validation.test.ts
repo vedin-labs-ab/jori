@@ -25,25 +25,23 @@ const invalidCalls: { name: string; args: JsonObject }[] = [
   { name: "git", args: { args: ["status"], timeoutMs: 1_200_001 } },
 ]
 
-test.each(
-  invalidCalls
-)("rejects invalid $name input before execution: $args", async ({
-  name,
-  args,
-}) => {
-  const runtime = validationRuntime(name)
-  const result = await runTool({
-    call: { args, id: "invalid", name },
-    runtime,
-  })
+test.each(invalidCalls)(
+  "rejects invalid $name input before execution: $args",
+  async ({ name, args }) => {
+    const runtime = validationRuntime(name)
+    const result = await runTool({
+      call: { args, id: "invalid", name },
+      runtime,
+    })
 
-  expect(JSON.parse(result.content)).toMatchObject({ status: "error" })
-  expect(runtime.platform.createAgentRun).not.toHaveBeenCalled()
-  expect(runtime.platform.readAgentRuns).not.toHaveBeenCalled()
-  expect(runtime.platform.finishRun).not.toHaveBeenCalled()
-  expect(runtime.sandbox.runCommand).not.toHaveBeenCalled()
-  expect(runtime.sandbox.startCommand).not.toHaveBeenCalled()
-})
+    expect(JSON.parse(result.content)).toMatchObject({ status: "error" })
+    expect(runtime.platform.createAgentRun).not.toHaveBeenCalled()
+    expect(runtime.platform.readAgentRuns).not.toHaveBeenCalled()
+    expect(runtime.platform.finishRun).not.toHaveBeenCalled()
+    expect(runtime.sandbox.runCommand).not.toHaveBeenCalled()
+    expect(runtime.sandbox.startCommand).not.toHaveBeenCalled()
+  }
+)
 
 test("rejects a blocked native tool even if the model calls it", async () => {
   const runtime = validationRuntime("start_agent", "blocked")

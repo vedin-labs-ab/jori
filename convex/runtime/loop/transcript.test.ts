@@ -39,29 +39,29 @@ Reacted ✅ to Jori's message: "I can proceed with option B."
 \`\`\``)
 })
 
-test.each([
-  undefined,
-  ["# Recent activity — Albin"],
-])("appends drained messages after optional person context: %s", async (contexts) => {
-  const platform = createPlatform({
-    sessions: [{ contexts, hasMore: false, messages: [runtimeMessage()] }],
-  })
-  const runtime = createRuntime({
-    context: runtimeContext({
-      session: { id: runtimeId<"sessions">("session") },
-    }),
-    platform,
-  })
+test.each([undefined, ["# Recent activity — Albin"]])(
+  "appends drained messages after optional person context: %s",
+  async (contexts) => {
+    const platform = createPlatform({
+      sessions: [{ contexts, hasMore: false, messages: [runtimeMessage()] }],
+    })
+    const runtime = createRuntime({
+      context: runtimeContext({
+        session: { id: runtimeId<"sessions">("session") },
+      }),
+      platform,
+    })
 
-  await expect(appendSessionMessages(runtime)).resolves.toBe(true)
-  expect(platform.transcript).toEqual([
-    ...(contexts ?? []).map((content) => ({ content, role: "user" })),
-    {
-      content: expect.stringContaining("Here's what I've got."),
-      role: "user",
-    },
-  ])
-})
+    await expect(appendSessionMessages(runtime)).resolves.toBe(true)
+    expect(platform.transcript).toEqual([
+      ...(contexts ?? []).map((content) => ({ content, role: "user" })),
+      {
+        content: expect.stringContaining("Here's what I've got."),
+        role: "user",
+      },
+    ])
+  }
+)
 
 test("builds the prompt prefix from the present context messages in order", () => {
   expect(promptMessages(barePrompt)).toEqual([

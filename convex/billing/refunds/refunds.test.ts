@@ -93,25 +93,31 @@ test.each([
   { refund: { ...refund, charge: "ch_another" } },
   { refund: { ...refund, currency: "eur" } },
   { customer: "cus_another" },
-])("refuses unverified refund and leaves reserved credits held: %j", async (options) => {
-  const { t, id } = await setup()
-  await freezeSettled(t)
-  await t.action(internal.billing.refunds.actions.prepare, args)
-  mockStripe({ refunded: 2500, ...options })
-  await expect(
-    t.action(internal.billing.refunds.actions.reconcile, {
-      caseId: args.caseId,
-      refundId: refund.id,
-    })
-  ).rejects.toThrow()
-  expect(
-    (await t.run(async (ctx) => await ctx.db.get(id)))?.micros.allowance
-  ).toBe(0)
-  expect(
-    (await t.query(internal.billing.refunds.data.read, { caseId: args.caseId }))
-      ?.status
-  ).toBe("reserved")
-})
+])(
+  "refuses unverified refund and leaves reserved credits held: %j",
+  async (options) => {
+    const { t, id } = await setup()
+    await freezeSettled(t)
+    await t.action(internal.billing.refunds.actions.prepare, args)
+    mockStripe({ refunded: 2500, ...options })
+    await expect(
+      t.action(internal.billing.refunds.actions.reconcile, {
+        caseId: args.caseId,
+        refundId: refund.id,
+      })
+    ).rejects.toThrow()
+    expect(
+      (await t.run(async (ctx) => await ctx.db.get(id)))?.micros.allowance
+    ).toBe(0)
+    expect(
+      (
+        await t.query(internal.billing.refunds.data.read, {
+          caseId: args.caseId,
+        })
+      )?.status
+    ).toBe("reserved")
+  }
+)
 
 test("restores canceled reservation only when Stripe proves no new refund or pending attempt", async () => {
   const { t, id } = await setup()

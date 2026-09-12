@@ -40,10 +40,13 @@ test.each([
   event("checkout.session.completed", {
     metadata: { region: "eu", kind: "top-up" },
   }),
-])("does not fetch unpaid, failed, foreign-region or top-up subscriptions", async (payload) => {
-  await expect(readCheckoutSubscription(payload)).resolves.toBeUndefined()
-  expect(stripeRequest).not.toHaveBeenCalled()
-})
+])(
+  "does not fetch unpaid, failed, foreign-region or top-up subscriptions",
+  async (payload) => {
+    await expect(readCheckoutSubscription(payload)).resolves.toBeUndefined()
+    expect(stripeRequest).not.toHaveBeenCalled()
+  }
+)
 
 test("subscription lookup failure propagates so Stripe retries delivery", async () => {
   vi.mocked(stripeRequest).mockRejectedValueOnce(new Error("Unavailable"))

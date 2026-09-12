@@ -31,24 +31,23 @@ test("reconnect authorizes the current organization's existing installation with
   ).toEqual({ ...state, installationId: "123" })
 })
 
-test.each([
-  undefined,
-  "expired",
-  "disconnected",
-] as const)("uses installation flow when the current organization has no active connection (%s)", async (status) => {
-  const t = convexTest(schema, modules)
-  const state = await seedState(t, status)
-  const signed = await t.run(async (ctx) =>
-    createGitHubInstallState(ctx, state)
-  )
-  const response = await handleGitHubInstall(installRequest(signed))
-  const url = new URL(response.headers.get("location") ?? "")
-  expect(url.origin + url.pathname).toBe(
-    "https://github.com/apps/jori-eu/installations/new"
-  )
-  expect(url.searchParams.get("state")).toBe(signed)
-  expect(await parseSignedGitHubState(signed)).toEqual(state)
-})
+test.each([undefined, "expired", "disconnected"] as const)(
+  "uses installation flow when the current organization has no active connection (%s)",
+  async (status) => {
+    const t = convexTest(schema, modules)
+    const state = await seedState(t, status)
+    const signed = await t.run(async (ctx) =>
+      createGitHubInstallState(ctx, state)
+    )
+    const response = await handleGitHubInstall(installRequest(signed))
+    const url = new URL(response.headers.get("location") ?? "")
+    expect(url.origin + url.pathname).toBe(
+      "https://github.com/apps/jori-eu/installations/new"
+    )
+    expect(url.searchParams.get("state")).toBe(signed)
+    expect(await parseSignedGitHubState(signed)).toEqual(state)
+  }
+)
 
 test("does not forward forged reconnect state to GitHub", async () => {
   vi.stubEnv("GITHUB_WEBHOOK_SECRET", "test-secret")

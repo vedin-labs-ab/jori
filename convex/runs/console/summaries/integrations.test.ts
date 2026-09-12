@@ -47,19 +47,19 @@ test.each([
 ] satisfies Array<{
   surface: "github" | "linear"
   context: Doc<"runs">["snapshot"]["context"]
-}>)("preserves stored $surface details and links", async ({
-  surface,
-  context,
-}) => {
-  const run = testRun({
-    cause: { type: "event", eventId: "event" },
-    instructions: "Handle the comment.",
-    snapshot: {
-      title: "Comment event",
-      ...eventJobDisplay({ surface, context }),
-    },
-  })
-  const summary = await summarizeRun(fakeQueryCtx({ run }), run)
+}>)(
+  "preserves stored $surface details and links",
+  async ({ surface, context }) => {
+    const run = testRun({
+      cause: { type: "event", eventId: "event" },
+      instructions: "Handle the comment.",
+      snapshot: {
+        title: "Comment event",
+        ...eventJobDisplay({ surface, context }),
+      },
+    })
+    const summary = await summarizeRun(fakeQueryCtx({ run }), run)
 
-  expect(summary.details).toEqual(context)
-})
+    expect(summary.details).toEqual(context)
+  }
+)

@@ -51,27 +51,26 @@ test("completed search still omits owned jobs", async () => {
   expect(result.map((item) => item._id)).toEqual(["active", "completed"])
 })
 
-test.each([
-  "active",
-  "paused",
-  "completed",
-] as const)("%s search filters status before applying the result limit", async (status) => {
-  const ctx = await searchContext([
-    job({ id: "active", status: "active", at: 100 }),
-    job({ id: "paused", status: "paused", at: 200 }),
-    job({ id: "completed", status: "completed", at: 300 }),
-    job({ id: "child", status, at: 0, parentId: "parent" }),
-    job({ id: "foreign", status, at: 0, organizationId: "elsewhere" }),
-  ])
+test.each(["active", "paused", "completed"] as const)(
+  "%s search filters status before applying the result limit",
+  async (status) => {
+    const ctx = await searchContext([
+      job({ id: "active", status: "active", at: 100 }),
+      job({ id: "paused", status: "paused", at: 200 }),
+      job({ id: "completed", status: "completed", at: 300 }),
+      job({ id: "child", status, at: 0, parentId: "parent" }),
+      job({ id: "foreign", status, at: 0, organizationId: "elsewhere" }),
+    ])
 
-  const result = await searchJobs(ctx, {
-    organizationId: "organization",
-    status,
-    limit: 1,
-  })
+    const result = await searchJobs(ctx, {
+      organizationId: "organization",
+      status,
+      limit: 1,
+    })
 
-  expect(result.map((item) => item._id)).toEqual([status])
-})
+    expect(result.map((item) => item._id)).toEqual([status])
+  }
+)
 
 async function searchContext(rows: Doc<"jobs">[]) {
   const { database, ctx } = databaseContext()

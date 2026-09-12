@@ -32,16 +32,15 @@ test("accepts a current signed event and rejects forged or other-region signatur
   ).toBe(false)
 })
 
-test.each([
-  -60_001,
-  60_001,
-  undefined,
-])("rejects signed stale, future or missing delivery timestamps (%s)", async (offset) => {
-  const body = JSON.stringify({
-    webhookTimestamp: offset === undefined ? undefined : Date.now() + offset,
-  })
-  expect(await verifyLinearRequest(await request(body), body)).toBe(false)
-})
+test.each([-60_001, 60_001, undefined])(
+  "rejects signed stale, future or missing delivery timestamps (%s)",
+  async (offset) => {
+    const body = JSON.stringify({
+      webhookTimestamp: offset === undefined ? undefined : Date.now() + offset,
+    })
+    expect(await verifyLinearRequest(await request(body), body)).toBe(false)
+  }
+)
 
 test("does not trust an unsigned timestamp header or malformed payload", async () => {
   const body = JSON.stringify({ webhookTimestamp: Date.now() - 120_000 })

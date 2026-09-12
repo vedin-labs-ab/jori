@@ -75,15 +75,15 @@ test("Slack replies carry blocks and no parts", () => {
   expect(properties).not.toHaveProperty("parts")
 })
 
-test.each([
-  "github",
-  "linear",
-] as const)("%s replies carry neither blocks nor parts", (surface) => {
-  const properties = tool(surface, "send_reply")?.inputSchema.properties
+test.each(["github", "linear"] as const)(
+  "%s replies carry neither blocks nor parts",
+  (surface) => {
+    const properties = tool(surface, "send_reply")?.inputSchema.properties
 
-  expect(properties).not.toHaveProperty("blocks")
-  expect(properties).not.toHaveProperty("parts")
-})
+    expect(properties).not.toHaveProperty("blocks")
+    expect(properties).not.toHaveProperty("parts")
+  }
+)
 
 test("exposes Linear comment targeting only on the Linear active surface", () => {
   expect(activeSurfaceTools("linear")[0]?.inputSchema).toMatchObject({

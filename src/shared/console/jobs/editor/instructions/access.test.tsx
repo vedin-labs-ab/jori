@@ -86,25 +86,24 @@ test.each([
     title: "Read/write: 2 enabled",
     count: "2 enabled",
   },
-])("names the selected tool access as $title", async ({
-  tools,
-  title,
-  count,
-}) => {
-  renderInstructionsField({
-    description: "Post to @GitHub.",
-    surfaces: [{ integration: "github", tools }],
-  })
+])(
+  "names the selected tool access as $title",
+  async ({ tools, title, count }) => {
+    renderInstructionsField({
+      description: "Post to @GitHub.",
+      surfaces: [{ integration: "github", tools }],
+    })
 
-  const button = await screen.findByRole("button", {
-    name: `GitHub tools: ${count}. Configure tools.`,
-  })
+    const button = await screen.findByRole("button", {
+      name: `GitHub tools: ${count}. Configure tools.`,
+    })
 
-  expect(button.getAttribute("title")).toBe(title)
-  expect(button.textContent?.trim()).toBe(
-    tools.length === 0 ? "" : `${tools.length}`
-  )
-})
+    expect(button.getAttribute("title")).toBe(title)
+    expect(button.textContent?.trim()).toBe(
+      tools.length === 0 ? "" : `${tools.length}`
+    )
+  }
+)
 
 test("warns when policy denies access to a selected tool", async () => {
   const field = renderInstructionsField({

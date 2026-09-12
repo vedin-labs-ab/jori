@@ -35,24 +35,24 @@ describe("approval runtime decisions", () => {
   test.each([
     { status: "expired", message: expect.stringContaining("expired") },
     { status: "closed", message: "This run is no longer active." },
-  ])("reports $status approvals without resuming the run", async ({
-    status,
-    message,
-  }) => {
-    const approval = approvalDoc()
-    const ctx = {
-      runMutation: vi.fn().mockResolvedValue({ status, approval }),
-    } as unknown as ActionCtx
+  ])(
+    "reports $status approvals without resuming the run",
+    async ({ status, message }) => {
+      const approval = approvalDoc()
+      const ctx = {
+        runMutation: vi.fn().mockResolvedValue({ status, approval }),
+      } as unknown as ActionCtx
 
-    const result = await decideApproval(ctx, {
-      approval,
-      decidedBy: userActor(),
-      decision: "approved",
-    })
+      const result = await decideApproval(ctx, {
+        approval,
+        decidedBy: userActor(),
+        decision: "approved",
+      })
 
-    expect(result).toMatchObject({ status, message })
-    expect(ctx.runMutation).toHaveBeenCalledTimes(1)
-  })
+      expect(result).toMatchObject({ status, message })
+      expect(ctx.runMutation).toHaveBeenCalledTimes(1)
+    }
+  )
 })
 
 function approvalDoc(): Doc<"approvals"> {

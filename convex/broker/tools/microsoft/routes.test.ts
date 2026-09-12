@@ -172,20 +172,21 @@ describe.each(cases)("$tool mocked Graph contract", (fixture) => {
   })
 })
 
-test.each(
-  cases
-)("$tool reports status without provider content or retries", async (fixture) => {
-  const fetch = vi
-    .fn()
-    .mockResolvedValue(
-      Response.json({ error: { code: "SyntheticFailure" } }, { status: 500 })
-    )
-  vi.stubGlobal("fetch", fetch)
-  await expect(
-    callMicrosoftTool(integration(fixture.tool), fixture.tool, fixture.args)
-  ).rejects.toThrow("Provider API request failed (HTTP 500)")
-  expect(fetch).toHaveBeenCalledTimes(1)
-})
+test.each(cases)(
+  "$tool reports status without provider content or retries",
+  async (fixture) => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(
+        Response.json({ error: { code: "SyntheticFailure" } }, { status: 500 })
+      )
+    vi.stubGlobal("fetch", fetch)
+    await expect(
+      callMicrosoftTool(integration(fixture.tool), fixture.tool, fixture.args)
+    ).rejects.toThrow("Provider API request failed (HTTP 500)")
+    expect(fetch).toHaveBeenCalledTimes(1)
+  }
+)
 
 function integration(tool: string) {
   return integrationDoc({

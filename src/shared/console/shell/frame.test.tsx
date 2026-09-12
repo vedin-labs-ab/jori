@@ -90,15 +90,15 @@ test("lets the content pane shrink below its content's width", () => {
   expect(document.querySelector("main")?.className).toContain("min-w-0")
 })
 
-test.each([
-  "/tables/abc123",
-  "/folders/abc123",
-])("%s waits for the view to publish before naming the page", (pathname) => {
-  renderFrame(pathname)
+test.each(["/tables/abc123", "/folders/abc123"])(
+  "%s waits for the view to publish before naming the page",
+  (pathname) => {
+    renderFrame(pathname)
 
-  expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
-  expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
-})
+    expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
+    expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
+  }
+)
 
 test("appends the material's name once its view publishes it", () => {
   const { publish } = renderWithPublisher("/tables/abc123")

@@ -27,25 +27,25 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-test.each([
-  "eu",
-  "us",
-] as const)("posts %s waitlist data directly without cookies or a relay", async (region) => {
-  await expect(joinWaitlist(input, region)).resolves.toEqual({
-    status: "joined",
-  })
-  expect(fetcher).toHaveBeenCalledExactlyOnceWith(
-    `${waitlistSite(region)}/waitlist`,
-    {
-      method: "POST",
-      credentials: "omit",
-      redirect: "error",
-      referrerPolicy: "no-referrer",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(input),
-    }
-  )
-})
+test.each(["eu", "us"] as const)(
+  "posts %s waitlist data directly without cookies or a relay",
+  async (region) => {
+    await expect(joinWaitlist(input, region)).resolves.toEqual({
+      status: "joined",
+    })
+    expect(fetcher).toHaveBeenCalledExactlyOnceWith(
+      `${waitlistSite(region)}/waitlist`,
+      {
+        method: "POST",
+        credentials: "omit",
+        redirect: "error",
+        referrerPolicy: "no-referrer",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(input),
+      }
+    )
+  }
+)
 
 test("fails before sending form data if the selected production API is missing", async () => {
   vi.stubEnv("DEV", false)

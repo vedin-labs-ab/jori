@@ -36,26 +36,26 @@ test("cleanup has a durable watchdog and cannot be reserved twice", async () => 
   expect(runAt).toHaveBeenCalledTimes(1)
 })
 
-test.each([
-  "failed",
-  "cleaning",
-])("watchdog retries %s cleanup after its lease", async (status) => {
-  const clock = vi.spyOn(Date, "now").mockReturnValue(1000)
-  const { ctx, row, runAt } = fixture()
-  await reserveSandboxCleanup(ctx, target)
-  if (status === "failed") {
-    await markSandboxCleaned(ctx, {
-      externalId: target.externalId,
-      error: "Safe failure",
-    })
+test.each(["failed", "cleaning"])(
+  "watchdog retries %s cleanup after its lease",
+  async (status) => {
+    const clock = vi.spyOn(Date, "now").mockReturnValue(1000)
+    const { ctx, row, runAt } = fixture()
+    await reserveSandboxCleanup(ctx, target)
+    if (status === "failed") {
+      await markSandboxCleaned(ctx, {
+        externalId: target.externalId,
+        error: "Safe failure",
+      })
+    }
+    expect(row.status).toBe(status)
+    expect(await reserveSandboxCleanup(ctx, target)).toBe(false)
+    clock.mockReturnValue(121000)
+    expect(await reserveSandboxCleanup(ctx, target)).toBe(true)
+    expect(row.status).toBe("cleaning")
+    expect(runAt).toHaveBeenCalledTimes(2)
   }
-  expect(row.status).toBe(status)
-  expect(await reserveSandboxCleanup(ctx, target)).toBe(false)
-  clock.mockReturnValue(121000)
-  expect(await reserveSandboxCleanup(ctx, target)).toBe(true)
-  expect(row.status).toBe("cleaning")
-  expect(runAt).toHaveBeenCalledTimes(2)
-})
+)
 
 test("only confirmed deletion marks cleanup complete and stops retries", async () => {
   vi.spyOn(Date, "now").mockReturnValue(1000)

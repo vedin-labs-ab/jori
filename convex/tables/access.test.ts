@@ -56,12 +56,12 @@ describe("resolving the owner name", () => {
     expect(summary.ownerImage).toBe("https://lh3.example/avatar.png")
   })
 
-  test.each([
-    undefined,
-    testOwner,
-  ])("leaves the name unset for an owner without an identity: %s", async (ownerId) => {
-    const { ctx } = databaseContext()
-    const summary = await summarizeTableWithOwner(ctx, table({ ownerId }))
-    expect(summary.ownerName).toBeUndefined()
-  })
+  test.each([undefined, testOwner])(
+    "leaves the name unset for an owner without an identity: %s",
+    async (ownerId) => {
+      const { ctx } = databaseContext()
+      const summary = await summarizeTableWithOwner(ctx, table({ ownerId }))
+      expect(summary.ownerName).toBeUndefined()
+    }
+  )
 })

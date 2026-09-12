@@ -13,17 +13,14 @@ describe.each([
 ] as const)("%s batch validation", (tool, field) => {
   const schema = googleToolInputSchemas[tool]
 
-  test.each([
-    [],
-    [""],
-    [" "],
-    ["valid", 123],
-    Array(51).fill("id"),
-  ])("rejects invalid IDs at the schema boundary: %j", (...ids) => {
-    const args = { [field]: ids }
-    expect(schemaViolations(args, schema)).not.toEqual([])
-    expect(() => validateSchemaValue(args, schema, "input")).toThrow()
-  })
+  test.each([[], [""], [" "], ["valid", 123], Array(51).fill("id")])(
+    "rejects invalid IDs at the schema boundary: %j",
+    (...ids) => {
+      const args = { [field]: ids }
+      expect(schemaViolations(args, schema)).not.toEqual([])
+      expect(() => validateSchemaValue(args, schema, "input")).toThrow()
+    }
+  )
 
   test.each([1, 50])("accepts %i nonempty IDs", (count) => {
     const args = {

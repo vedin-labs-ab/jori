@@ -203,19 +203,20 @@ test("an overfull subtree continues through the scheduler", async () => {
 test.each([
   { operation: "moving", deleteResources: false },
   { operation: "deleting", deleteResources: true },
-])("$operation a folder's contents reparents its spend", async ({
-  deleteResources,
-}) => {
-  const { database, ctx } = deletionContext()
-  const parentId = await database.insert("folders", folderDoc())
-  const folderId = await database.insert("folders", folderDoc({ parentId }))
-  const runId = await seedSpend(database, ctx, folderId)
+])(
+  "$operation a folder's contents reparents its spend",
+  async ({ deleteResources }) => {
+    const { database, ctx } = deletionContext()
+    const parentId = await database.insert("folders", folderDoc())
+    const folderId = await database.insert("folders", folderDoc({ parentId }))
+    const runId = await seedSpend(database, ctx, folderId)
 
-  await remove(ctx, folderId, deleteResources)
+    await remove(ctx, folderId, deleteResources)
 
-  expect((await database.get(runId))?.folderId).toBe(parentId)
-  expect(await spendFolders(database)).toEqual([parentId])
-})
+    expect((await database.get(runId))?.folderId).toBe(parentId)
+    expect(await spendFolders(database)).toEqual([parentId])
+  }
+)
 
 test("spend left by a deleted root folder becomes unfiled", async () => {
   const { database, ctx } = deletionContext()

@@ -5,29 +5,29 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { createJob } from "./create"
 
-test.each([
-  undefined,
-  1,
-])("rejects owned work from stale parent configuration %s", async (version) => {
-  const parent = job({ version: 2 })
-  const ctx = {
-    db: { get: vi.fn(async () => parent) },
-  } as unknown as MutationCtx
+test.each([undefined, 1])(
+  "rejects owned work from stale parent configuration %s",
+  async (version) => {
+    const parent = job({ version: 2 })
+    const ctx = {
+      db: { get: vi.fn(async () => parent) },
+    } as unknown as MutationCtx
 
-  await expect(
-    createJob(ctx, {
-      organizationId: "organization",
-      parent: { id: parent._id, version },
-      name: "Meeting Briefing delivery",
-      instructions: "Deliver the briefing.",
-      visibility: { mode: "private" },
-      access: { integrations: [], web: false },
-      type: "once",
-      trigger: { at: "2030-01-01T08:00:00Z" },
-      createdBy: "person" as Id<"persons">,
-    })
-  ).rejects.toThrow("configuration has changed")
-})
+    await expect(
+      createJob(ctx, {
+        organizationId: "organization",
+        parent: { id: parent._id, version },
+        name: "Meeting Briefing delivery",
+        instructions: "Deliver the briefing.",
+        visibility: { mode: "private" },
+        access: { integrations: [], web: false },
+        type: "once",
+        trigger: { at: "2030-01-01T08:00:00Z" },
+        createdBy: "person" as Id<"persons">,
+      })
+    ).rejects.toThrow("configuration has changed")
+  }
+)
 
 function creationContext() {
   const { database, ctx } = databaseContext({

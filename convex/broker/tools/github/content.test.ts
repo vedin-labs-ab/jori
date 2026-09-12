@@ -78,31 +78,31 @@ test.each([
   },
   { kind: "symlink", payload: symlink, expected: symlink },
   { kind: "submodule", payload: submodule, expected: submodule },
-])("GitHub $kind output satisfies its response contract", async ({
-  payload,
-  expected,
-}) => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async () => Response.json(payload))
-  )
-  const result = await callGitHubTool(
-    integrationDoc({
-      integration: "github",
-      credentials: {
-        installationId: "123",
-        tokens: { access: "synthetic-token" },
-      },
-    }),
-    "github_get_file",
-    { owner: "acme", repo: "app", path: "docs/fixture.txt" }
-  )
+])(
+  "GitHub $kind output satisfies its response contract",
+  async ({ payload, expected }) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json(payload))
+    )
+    const result = await callGitHubTool(
+      integrationDoc({
+        integration: "github",
+        credentials: {
+          installationId: "123",
+          tokens: { access: "synthetic-token" },
+        },
+      }),
+      "github_get_file",
+      { owner: "acme", repo: "app", path: "docs/fixture.txt" }
+    )
 
-  expect(result).toEqual(expected)
-  expect(
-    schemaViolations(result, getToolResponseSchema("github_get_file"))
-  ).toEqual([])
-})
+    expect(result).toEqual(expected)
+    expect(
+      schemaViolations(result, getToolResponseSchema("github_get_file"))
+    ).toEqual([])
+  }
+)
 
 test.each([
   null,

@@ -9,40 +9,35 @@ const config: RegionConfig = {
   origins: { eu: "https://eu.usejori.com", us: "https://us.usejori.com" },
 }
 
-test.each([
-  "/",
-  "/pricing",
-  "/trust",
-  "/terms",
-  "/privacy",
-])("public marketing %s never selects a session", (path) => {
-  expect(
-    handleRegionRequest(
-      new Request(`https://usejori.com${path}`, {
-        headers: {
-          cookie: "jori_region=eu; session=private",
-          "x-vercel-ip-country": "US",
-        },
-      }),
+test.each(["/", "/pricing", "/trust", "/terms", "/privacy"])(
+  "public marketing %s never selects a session",
+  (path) => {
+    expect(
+      handleRegionRequest(
+        new Request(`https://usejori.com${path}`, {
+          headers: {
+            cookie: "jori_region=eu; session=private",
+            "x-vercel-ip-country": "US",
+          },
+        }),
+        config
+      )
+    ).toBeNull()
+  }
+)
+
+test.each(["/pricing", "/trust", "/terms", "/privacy"])(
+  "regional marketing %s returns to apex without private query data",
+  (path) => {
+    const response = handleRegionRequest(
+      new Request(`https://us.usejori.com${path}?token=private`),
       config
     )
-  ).toBeNull()
-})
-
-test.each([
-  "/pricing",
-  "/trust",
-  "/terms",
-  "/privacy",
-])("regional marketing %s returns to apex without private query data", (path) => {
-  const response = handleRegionRequest(
-    new Request(`https://us.usejori.com${path}?token=private`),
-    config
-  )
-  expect(response?.headers.get("location")).toBe(`https://usejori.com${path}`)
-  expect(response?.headers.get("referrer-policy")).toBe("no-referrer")
-  expect(response?.headers.get("set-cookie")).toBeNull()
-})
+    expect(response?.headers.get("location")).toBe(`https://usejori.com${path}`)
+    expect(response?.headers.get("referrer-policy")).toBe("no-referrer")
+    expect(response?.headers.get("set-cookie")).toBeNull()
+  }
+)
 
 test("the regional root enters the console, which owns the sign-in gate", () => {
   expect(
@@ -67,17 +62,17 @@ test("only the public region preference crosses the sign-in boundary", () => {
   expect(response?.headers.get("referrer-policy")).toBe("no-referrer")
 })
 
-test.each([
-  "GET",
-  "POST",
-])("public auth %s cannot reach a backend", (method) => {
-  const response = handleRegionRequest(
-    new Request("https://usejori.com/api/auth/get-session", { method }),
-    config
-  )
-  expect(response?.status).toBe(404)
-  expect(response?.headers.get("location")).toBeNull()
-})
+test.each(["GET", "POST"])(
+  "public auth %s cannot reach a backend",
+  (method) => {
+    const response = handleRegionRequest(
+      new Request("https://usejori.com/api/auth/get-session", { method }),
+      config
+    )
+    expect(response?.status).toBe(404)
+    expect(response?.headers.get("location")).toBeNull()
+  }
+)
 
 test("www never forwards a credential-bearing write", () => {
   const response = handleRegionRequest(

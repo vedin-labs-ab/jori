@@ -33,10 +33,18 @@ test("every catalogued tool has an input and output contract", () => {
   )
 })
 
-test.each(
-  toolPermissions.filter(({ route }) => route === "broker")
-)("$tool rejects non-object inputs and undeclared root fields", ({ tool }) => {
-  for (const input of [null, [], "text", 1, true, { unexpected_field: true }]) {
-    expect(() => normalizeBrokerToolInput(tool, input), tool).toThrow()
+test.each(toolPermissions.filter(({ route }) => route === "broker"))(
+  "$tool rejects non-object inputs and undeclared root fields",
+  ({ tool }) => {
+    for (const input of [
+      null,
+      [],
+      "text",
+      1,
+      true,
+      { unexpected_field: true },
+    ]) {
+      expect(() => normalizeBrokerToolInput(tool, input), tool).toThrow()
+    }
   }
-})
+)

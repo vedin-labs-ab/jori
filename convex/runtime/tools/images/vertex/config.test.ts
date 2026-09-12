@@ -12,15 +12,15 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllEnvs())
 
-test.each([
-  "eu",
-  "us",
-])("derives the entire inference route from JORI_REGION=%s", (region) => {
-  vi.stubEnv("JORI_REGION", region)
-  expect(vertexConfiguration().endpoint).toBe(
-    `https://aiplatform.${region}.rep.googleapis.com/v1/projects/jori-production-eu/locations/${region}/publishers/google/models/gemini-3.1-flash-image:generateContent`
-  )
-})
+test.each(["eu", "us"])(
+  "derives the entire inference route from JORI_REGION=%s",
+  (region) => {
+    vi.stubEnv("JORI_REGION", region)
+    expect(vertexConfiguration().endpoint).toBe(
+      `https://aiplatform.${region}.rep.googleapis.com/v1/projects/jori-production-eu/locations/${region}/publishers/google/models/gemini-3.1-flash-image:generateContent`
+    )
+  }
+)
 
 test.each([
   "JORI_REGION",
@@ -40,10 +40,10 @@ test("rejects a service account from a different project", () => {
   expect(() => vertexConfiguration()).toThrow("must belong")
 })
 
-test.each([
-  "../other-project",
-  "https://global.example",
-])("rejects invalid project IDs", (project) => {
-  vi.stubEnv("VERTEX_PROJECT_ID", project)
-  expect(() => vertexConfiguration()).toThrow("VERTEX_PROJECT_ID")
-})
+test.each(["../other-project", "https://global.example"])(
+  "rejects invalid project IDs",
+  (project) => {
+    vi.stubEnv("VERTEX_PROJECT_ID", project)
+    expect(() => vertexConfiguration()).toThrow("VERTEX_PROJECT_ID")
+  }
+)

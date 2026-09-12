@@ -39,16 +39,16 @@ test("rejects mismatched organizations even with a matching run reference", asyn
   )
 })
 
-test.each([
-  "fileId",
-  "runId",
-] as const)("rejects a missing %s", async (field) => {
-  const { ctx, database, args } = await fixture()
-  await database.delete(args[field])
-  await expect(handler(ctx, args)).rejects.toThrow(
-    "File does not belong to this run."
-  )
-})
+test.each(["fileId", "runId"] as const)(
+  "rejects a missing %s",
+  async (field) => {
+    const { ctx, database, args } = await fixture()
+    await database.delete(args[field])
+    await expect(handler(ctx, args)).rejects.toThrow(
+      "File does not belong to this run."
+    )
+  }
+)
 
 async function fixture() {
   const { ctx, database } = databaseContext()

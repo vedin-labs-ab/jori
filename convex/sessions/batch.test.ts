@@ -11,24 +11,27 @@ test.each([
       actor: { externalId: "UBOT", kind: "self" },
     }),
   ],
-])("advances across %s messages without returning them as user input", (_kind, skipped) => {
-  const batch = collectPendingBatch(
-    [
-      message("last", 1, "Already consumed."),
-      skipped,
-      message("next", 3, "Follow up.", {
-        actor: { externalId: "U123", kind: "person" },
-      }),
-    ],
-    session("last", 1),
-    10,
-    false
-  )
+])(
+  "advances across %s messages without returning them as user input",
+  (_kind, skipped) => {
+    const batch = collectPendingBatch(
+      [
+        message("last", 1, "Already consumed."),
+        skipped,
+        message("next", 3, "Follow up.", {
+          actor: { externalId: "U123", kind: "person" },
+        }),
+      ],
+      session("last", 1),
+      10,
+      false
+    )
 
-  expect(batch.messages.map((item) => item._id)).toEqual(["next"])
-  expect(batch.cursor?._id).toBe("next")
-  expect(batch.hasMore).toBe(false)
-})
+    expect(batch.messages.map((item) => item._id)).toEqual(["next"])
+    expect(batch.cursor?._id).toBe("next")
+    expect(batch.hasMore).toBe(false)
+  }
+)
 
 test("does not advance past the returned message limit", () => {
   const batch = collectPendingBatch(

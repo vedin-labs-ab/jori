@@ -47,10 +47,12 @@ test.each([
     [{ ...mode, limit: 0 }, "limit must be at least 1"],
     [{ ...mode, limit: 51 }, "limit must be at most 50"],
   ]),
-] as [
-  unknown,
-  string,
-][])("rejects run search input %j in both wire and broker contracts", (input, message) => {
-  expect(schemaViolations(input, schema)).not.toEqual([])
-  expect(() => normalizeBrokerToolInput("search_runs", input)).toThrow(message)
-})
+] as [unknown, string][])(
+  "rejects run search input %j in both wire and broker contracts",
+  (input, message) => {
+    expect(schemaViolations(input, schema)).not.toEqual([])
+    expect(() => normalizeBrokerToolInput("search_runs", input)).toThrow(
+      message
+    )
+  }
+)

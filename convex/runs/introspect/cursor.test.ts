@@ -7,33 +7,34 @@ import { type SearchRunsArgs } from "./schema"
 
 const ctx = {} as QueryCtx
 
-test.each([
-  48, 50,
-])("IDs mode returns all %s visible runs without pagination", async (count) => {
-  const visible = Array.from({ length: count }, (_, createdAt) =>
-    run({
-      _id: id<"runs">(`run-${createdAt}`),
-      createdAt,
-    })
-  )
-  const hidden = [
-    run({ _id: id<"runs">("foreign"), organizationId: "other" }),
-    run({ _id: id<"runs">("private"), audience: "person" }),
-  ]
-  const candidates = [...visible, ...hidden.slice(0, 50 - count)]
-  const page = await pageRunMatches(
-    ctx,
-    search(candidates, {
-      mode: "ids",
-      runIds: candidates.map((candidate) => candidate._id),
-    }),
-    { limit: 1 }
-  )
-  expect(page.runs.map((item) => item.runId)).toEqual(
-    [...visible].reverse().map((candidate) => candidate._id)
-  )
-  expect(page.cursor).toBeNull()
-})
+test.each([48, 50])(
+  "IDs mode returns all %s visible runs without pagination",
+  async (count) => {
+    const visible = Array.from({ length: count }, (_, createdAt) =>
+      run({
+        _id: id<"runs">(`run-${createdAt}`),
+        createdAt,
+      })
+    )
+    const hidden = [
+      run({ _id: id<"runs">("foreign"), organizationId: "other" }),
+      run({ _id: id<"runs">("private"), audience: "person" }),
+    ]
+    const candidates = [...visible, ...hidden.slice(0, 50 - count)]
+    const page = await pageRunMatches(
+      ctx,
+      search(candidates, {
+        mode: "ids",
+        runIds: candidates.map((candidate) => candidate._id),
+      }),
+      { limit: 1 }
+    )
+    expect(page.runs.map((item) => item.runId)).toEqual(
+      [...visible].reverse().map((candidate) => candidate._id)
+    )
+    expect(page.cursor).toBeNull()
+  }
+)
 
 test("continues when the cursor run stops matching or is deleted", async () => {
   const candidates = [30, 20, 10].map((createdAt) =>
@@ -89,42 +90,46 @@ test.each([
   { status: "completed" },
   { since: 1 },
   { until: 100 },
-] satisfies Partial<SearchRunsArgs>[])("rejects a cursor with changed selection or filters %j", async (changed) => {
-  const filters = search([
-    run({ _id: id<"runs">("a") }),
-    run({ _id: id<"runs">("b") }),
-  ])
-  const first = await pageRunMatches(ctx, filters, { limit: 1 })
-  await expect(
-    pageRunMatches(
-      ctx,
-      { ...filters, ...changed },
-      { cursor: requiredCursor(first) }
-    )
-  ).rejects.toThrow("Invalid search_runs cursor")
-})
+] satisfies Partial<SearchRunsArgs>[])(
+  "rejects a cursor with changed selection or filters %j",
+  async (changed) => {
+    const filters = search([
+      run({ _id: id<"runs">("a") }),
+      run({ _id: id<"runs">("b") }),
+    ])
+    const first = await pageRunMatches(ctx, filters, { limit: 1 })
+    await expect(
+      pageRunMatches(
+        ctx,
+        { ...filters, ...changed },
+        { cursor: requiredCursor(first) }
+      )
+    ).rejects.toThrow("Invalid search_runs cursor")
+  }
+)
 
 test.each([
   { organizationId: "other" },
   { audience: "person" },
   { createdBy: id<"persons">("person") },
   { conversationId: id<"conversations">("conversation") },
-] satisfies Partial<
-  Doc<"runs">
->[])("rejects a cursor from another visibility context %j", async (changed) => {
-  const filters = search([
-    run({ _id: id<"runs">("a") }),
-    run({ _id: id<"runs">("b") }),
-  ])
-  const first = await pageRunMatches(ctx, filters, { limit: 1 })
-  await expect(
-    pageRunMatches(
-      ctx,
-      { ...filters, current: run(changed) },
-      { cursor: requiredCursor(first) }
-    )
-  ).rejects.toThrow("Invalid search_runs cursor")
-})
+] satisfies Partial<Doc<"runs">>[])(
+  "rejects a cursor from another visibility context %j",
+  async (changed) => {
+    const filters = search([
+      run({ _id: id<"runs">("a") }),
+      run({ _id: id<"runs">("b") }),
+    ])
+    const first = await pageRunMatches(ctx, filters, { limit: 1 })
+    await expect(
+      pageRunMatches(
+        ctx,
+        { ...filters, current: run(changed) },
+        { cursor: requiredCursor(first) }
+      )
+    ).rejects.toThrow("Invalid search_runs cursor")
+  }
+)
 
 test.each([
   "",

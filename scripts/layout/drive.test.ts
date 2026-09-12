@@ -111,67 +111,70 @@ it("waits for the new document's paint after an action navigates", async () => {
   }
 }, 30_000)
 
-it.each([
-  "page load",
-  "setup action",
-])("observes %s through natural completion with no action steps", async (origin) => {
-  const server = createServer((_request, response) => {
-    response.setHeader("Content-Type", "text/html")
-    const expire =
-      "setTimeout(()=>document.querySelector('p').textContent='Idle',1800)"
-    response.end(
-      origin === "page load"
-        ? `<!doctype html><p>Saved</p><script>${expire}</script>`
-        : `<!doctype html><button onclick="document.querySelector('p').textContent='Saved';${expire}">Save</button><p>Initial</p>`
-    )
-  })
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
-  const address = server.address()
-  if (!address || typeof address === "string") {
-    throw new Error("Expected a test HTTP port")
-  }
-  const browser = await chromium.launch()
-  const output = await mkdtemp(path.join(tmpdir(), "layout-completion-"))
-  try {
-    const result = await drive(
-      browser,
-      {
-        id: "completion",
-        title: "Saved expires",
-        path: "/",
-        target: "app",
-        mutating: false,
-        setup:
-          origin === "page load"
-            ? []
-            : [{ action: "click", selector: "button" }],
-        setupReady: [{ selector: 'p:text-is("Saved")' }],
-        steps: [],
-        ready: [{ selector: 'p:text-is("Idle")' }],
-      },
-      {
-        condition: "warm",
-        width: 375,
-        output,
-        app: `http://127.0.0.1:${address.port}`,
-        fixture: "",
-      }
-    )
-    expect(result.before?.nodes.some((node) => node.text === "Saved")).toBe(
-      true
-    )
-    expect(
-      result.samples[0].snapshot.nodes.some((node) => node.text === "Saved")
-    ).toBe(true)
-    expect(
-      result.samples.at(-1)?.snapshot.nodes.some((node) => node.text === "Idle")
-    ).toBe(true)
-  } finally {
-    await browser.close()
-    await rm(output, { recursive: true, force: true })
-    await new Promise<void>((resolve) => server.close(() => resolve()))
-  }
-}, 30_000)
+it.each(["page load", "setup action"])(
+  "observes %s through natural completion with no action steps",
+  async (origin) => {
+    const server = createServer((_request, response) => {
+      response.setHeader("Content-Type", "text/html")
+      const expire =
+        "setTimeout(()=>document.querySelector('p').textContent='Idle',1800)"
+      response.end(
+        origin === "page load"
+          ? `<!doctype html><p>Saved</p><script>${expire}</script>`
+          : `<!doctype html><button onclick="document.querySelector('p').textContent='Saved';${expire}">Save</button><p>Initial</p>`
+      )
+    })
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
+    const address = server.address()
+    if (!address || typeof address === "string") {
+      throw new Error("Expected a test HTTP port")
+    }
+    const browser = await chromium.launch()
+    const output = await mkdtemp(path.join(tmpdir(), "layout-completion-"))
+    try {
+      const result = await drive(
+        browser,
+        {
+          id: "completion",
+          title: "Saved expires",
+          path: "/",
+          target: "app",
+          mutating: false,
+          setup:
+            origin === "page load"
+              ? []
+              : [{ action: "click", selector: "button" }],
+          setupReady: [{ selector: 'p:text-is("Saved")' }],
+          steps: [],
+          ready: [{ selector: 'p:text-is("Idle")' }],
+        },
+        {
+          condition: "warm",
+          width: 375,
+          output,
+          app: `http://127.0.0.1:${address.port}`,
+          fixture: "",
+        }
+      )
+      expect(result.before?.nodes.some((node) => node.text === "Saved")).toBe(
+        true
+      )
+      expect(
+        result.samples[0].snapshot.nodes.some((node) => node.text === "Saved")
+      ).toBe(true)
+      expect(
+        result.samples
+          .at(-1)
+          ?.snapshot.nodes.some((node) => node.text === "Idle")
+      ).toBe(true)
+    } finally {
+      await browser.close()
+      await rm(output, { recursive: true, force: true })
+      await new Promise<void>((resolve) => server.close(() => resolve()))
+    }
+  },
+  30_000
+)
 
 it("does not trigger layout transitions before blocking CSS has painted", async () => {
   const server = await delayedStylesheet()

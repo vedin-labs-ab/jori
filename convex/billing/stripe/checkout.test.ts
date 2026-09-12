@@ -31,43 +31,41 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllEnvs())
 
-test.each([
-  startPlanCheckout,
-  startTopUpCheckout,
-  openPortal,
-])("rejects incomplete billing before creating any resources", async (action) => {
-  vi.stubEnv("STRIPE_WEBHOOK_SECRET", "")
-  const { ctx, runMutation } = context()
-  await expect(
-    invoke(action, ctx, {
-      ...common,
-      plan: "starter",
-      interval: "month",
-      amountUsd: 25,
-    })
-  ).rejects.toThrow("Billing is not available in this instance yet.")
-  expect(runMutation).not.toHaveBeenCalled()
-  expect(stripeRequest).not.toHaveBeenCalled()
-})
+test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
+  "rejects incomplete billing before creating any resources",
+  async (action) => {
+    vi.stubEnv("STRIPE_WEBHOOK_SECRET", "")
+    const { ctx, runMutation } = context()
+    await expect(
+      invoke(action, ctx, {
+        ...common,
+        plan: "starter",
+        interval: "month",
+        amountUsd: 25,
+      })
+    ).rejects.toThrow("Billing is not available in this instance yet.")
+    expect(runMutation).not.toHaveBeenCalled()
+    expect(stripeRequest).not.toHaveBeenCalled()
+  }
+)
 
-test.each([
-  startPlanCheckout,
-  startTopUpCheckout,
-  openPortal,
-])("rejects cross-region returns before creating any billing resources", async (action) => {
-  const { ctx, runMutation } = context()
-  await expect(
-    invoke(action, ctx, {
-      ...common,
-      returnUrl: "https://us.usejori.com/settings",
-      plan: "starter",
-      interval: "month",
-      amountUsd: 25,
-    })
-  ).rejects.toThrow("Return URL must point to the Jori app.")
-  expect(runMutation).not.toHaveBeenCalled()
-  expect(stripeRequest).not.toHaveBeenCalled()
-})
+test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
+  "rejects cross-region returns before creating any billing resources",
+  async (action) => {
+    const { ctx, runMutation } = context()
+    await expect(
+      invoke(action, ctx, {
+        ...common,
+        returnUrl: "https://us.usejori.com/settings",
+        plan: "starter",
+        interval: "month",
+        amountUsd: 25,
+      })
+    ).rejects.toThrow("Return URL must point to the Jori app.")
+    expect(runMutation).not.toHaveBeenCalled()
+    expect(stripeRequest).not.toHaveBeenCalled()
+  }
+)
 
 test("subscription checkout uses regional metadata and dynamic methods", async () => {
   await invoke(startPlanCheckout, context().ctx, {
@@ -167,29 +165,29 @@ function context(hasCustomer = true) {
   return { ctx, runMutation }
 }
 
-test.each([
-  startPlanCheckout,
-  startTopUpCheckout,
-])("requires current business terms before a purchase", async (action) => {
-  const { ctx, runMutation } = context()
-  await expect(
-    invoke(action, ctx, {
-      ...common,
-      plan: "starter",
-      interval: "month",
-      amountUsd: 25,
-      businessPurchase: false,
-    })
-  ).rejects.toThrow("Confirm business use")
-  await expect(
-    invoke(action, ctx, {
-      ...common,
-      plan: "starter",
-      interval: "month",
-      amountUsd: 25,
-      termsVersion: "old",
-    })
-  ).rejects.toThrow("current terms")
-  expect(runMutation).not.toHaveBeenCalled()
-  expect(stripeRequest).not.toHaveBeenCalled()
-})
+test.each([startPlanCheckout, startTopUpCheckout])(
+  "requires current business terms before a purchase",
+  async (action) => {
+    const { ctx, runMutation } = context()
+    await expect(
+      invoke(action, ctx, {
+        ...common,
+        plan: "starter",
+        interval: "month",
+        amountUsd: 25,
+        businessPurchase: false,
+      })
+    ).rejects.toThrow("Confirm business use")
+    await expect(
+      invoke(action, ctx, {
+        ...common,
+        plan: "starter",
+        interval: "month",
+        amountUsd: 25,
+        termsVersion: "old",
+      })
+    ).rejects.toThrow("current terms")
+    expect(runMutation).not.toHaveBeenCalled()
+    expect(stripeRequest).not.toHaveBeenCalled()
+  }
+)

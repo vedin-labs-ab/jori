@@ -19,22 +19,22 @@ test("reads the unique bot display name and canonical profile URL", async () => 
   expect(body.query).toMatch(/viewer\s*\{\s*id\s*name\s*displayName\s*url\s*\}/)
 })
 
-test.each([
-  "displayName",
-  "url",
-])("rejects a missing bot %s instead of inventing identity", async (field) => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async () =>
-      Response.json({
-        data: { ...profile(), viewer: { ...profile().viewer, [field]: "" } },
-      })
+test.each(["displayName", "url"])(
+  "rejects a missing bot %s instead of inventing identity",
+  async (field) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          data: { ...profile(), viewer: { ...profile().viewer, [field]: "" } },
+        })
+      )
     )
-  )
-  await expect(
-    fetchLinearInstallationProfile("synthetic-token")
-  ).rejects.toThrow("Could not read Linear installation profile")
-})
+    await expect(
+      fetchLinearInstallationProfile("synthetic-token")
+    ).rejects.toThrow("Could not read Linear installation profile")
+  }
+)
 
 function profile() {
   return {

@@ -124,32 +124,28 @@ test("creates a pull request branch from local source changes", async () => {
   ).toEqual([])
 })
 
-test.each([
-  [],
-  ["PRODUCT.md"],
-  "2",
-  -1,
-  1.5,
-  null,
-])("rejects invalid committed-file counts %j", (files) => {
-  const create = getToolResponseSchema("github_create_pull_request")
-  const update = getToolResponseSchema("github_commit_to_pull_request")
-  expect(
-    schemaViolations({ commit: { files }, pullRequest: {} }, create)
-  ).not.toEqual([])
-  expect(
-    schemaViolations(
-      { changes: { files }, commit: { files: 2 }, pullRequest: {} },
-      update
-    )
-  ).not.toEqual([])
-  expect(
-    schemaViolations(
-      { changes: { files: 2 }, commit: { files }, pullRequest: {} },
-      update
-    )
-  ).not.toEqual([])
-})
+test.each([[], ["PRODUCT.md"], "2", -1, 1.5, null])(
+  "rejects invalid committed-file counts %j",
+  (files) => {
+    const create = getToolResponseSchema("github_create_pull_request")
+    const update = getToolResponseSchema("github_commit_to_pull_request")
+    expect(
+      schemaViolations({ commit: { files }, pullRequest: {} }, create)
+    ).not.toEqual([])
+    expect(
+      schemaViolations(
+        { changes: { files }, commit: { files: 2 }, pullRequest: {} },
+        update
+      )
+    ).not.toEqual([])
+    expect(
+      schemaViolations(
+        { changes: { files: 2 }, commit: { files }, pullRequest: {} },
+        update
+      )
+    ).not.toEqual([])
+  }
+)
 
 function sourceChanges(options: { headSha?: string } = {}) {
   return {
