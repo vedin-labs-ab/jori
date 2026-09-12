@@ -15,7 +15,7 @@ type StripeParams = {
 export async function stripeRequest(
   path: string,
   args?: {
-    method?: "GET" | "POST"
+    method?: "GET" | "POST" | "DELETE"
     params?: StripeParams
     idempotencyKey?: string
   }
@@ -27,14 +27,14 @@ export async function stripeRequest(
     method,
     headers: {
       authorization: `Bearer ${requireStripeSecretKey()}`,
-      ...(method === "POST"
+      ...(method !== "GET"
         ? { "content-type": "application/x-www-form-urlencoded" }
         : {}),
       ...(args?.idempotencyKey === undefined
         ? {}
         : { "idempotency-key": args.idempotencyKey }),
     },
-    ...(method === "POST" ? { body: form.toString() } : {}),
+    ...(method !== "GET" ? { body: form.toString() } : {}),
   })
   const payload = (await response.json()) as Record<string, unknown>
 

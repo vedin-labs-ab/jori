@@ -1,10 +1,13 @@
 import { plans } from "../../../contracts/billing"
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { isWorkspaceDeleting } from "../../retention/access"
+import { resumeWorkspace } from "../../retention/data"
 import { readArray, readRecord, readString } from "../../shared/input"
 import { trialRemainderMicros } from "../account"
 import { addMonths } from "../cycle"
 import { resetAllowance } from "../ledger"
+import { queueCancellation } from "./cancellation"
 import { stripeRequest } from "./client"
 import { belongsToRegion, planForPriceId } from "./config"
 
@@ -53,6 +56,19 @@ export async function applyPlanCheckout(
   ) {
     return
   }
+  if (
+    account.refundHold !== undefined ||
+    (await isWorkspaceDeleting(ctx, account.organizationId))
+  ) {
+    await queueCancellation(ctx, account, subscriptionId, String(session.id))
+    await ctx.db.patch(account._id, {
+      refundHold: account.refundHold ?? `late-payment:${String(session.id)}`,
+      topUp: { charged: account.topUp.charged },
+      updatedAt: Date.now(),
+    })
+    return
+  }
+  await resumeWorkspace(ctx, account.organizationId)
   const now = Date.now()
   await resetAllowance(ctx, {
     account,

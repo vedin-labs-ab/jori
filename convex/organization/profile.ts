@@ -11,6 +11,7 @@ import {
 import { requireOrganizationAccess } from "../access"
 import { readUserProfile } from "../access/users"
 import { ensureCurrentPerson } from "../persons/account"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 import { factsEqual, type OrganizationFacts, unique } from "./facts"
@@ -182,6 +183,7 @@ export const propose = internalMutation({
     website: v.string(),
   },
   handler: async (ctx, args) => {
+    await assertWorkspaceAvailable(ctx, args.organizationId)
     const profile = await readProfile(ctx, args.organizationId)
     const approvedSources = await readApprovedSources(ctx, args.organizationId)
 

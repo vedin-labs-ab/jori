@@ -24,6 +24,7 @@ export const files = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 })
+  .index("by_storageId", ["storageId"])
   .index("by_run", ["runId"])
   .index("by_organization_and_created_at", ["organizationId", "createdAt"])
   .index("by_folder", ["folderId"])

@@ -1,16 +1,24 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalMutation } from "../_generated/server"
+import { isWorkspaceDeleting } from "../retention/access"
 import { requireRegion } from "../shared/origin"
 import { canRetry, leaseMs, retentionMs, retryDelay } from "./policy"
 import { message } from "./schema"
 
 export const enqueue = internalMutation({
-  args: { message },
+  args: { message, organizationId: v.optional(v.string()) },
   handler: async (ctx, args) => {
+    if (
+      args.organizationId &&
+      (await isWorkspaceDeleting(ctx, args.organizationId))
+    ) {
+      throw new Error("This workspace has been deleted.")
+    }
     const recipient = args.message.to.trim().toLowerCase()
     const id = await ctx.db.insert("emailSubmissions", {
       region: requireRegion(),
+      organizationId: args.organizationId,
       message: { ...args.message, to: recipient },
       status: "queued",
       attempts: 0,
@@ -27,6 +35,18 @@ export const claim = internalMutation({
   handler: async (ctx, { id }) => {
     const row = await ctx.db.get(id)
     if (!row?.message || row.dueAt === undefined || row.dueAt > Date.now()) {
+      return null
+    }
+    if (
+      row.organizationId &&
+      (await isWorkspaceDeleting(ctx, row.organizationId))
+    ) {
+      await ctx.db.patch(id, {
+        status: "failed",
+        message: undefined,
+        dueAt: undefined,
+        failure: "workspace_deleted",
+      })
       return null
     }
     if (

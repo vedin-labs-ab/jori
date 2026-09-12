@@ -25,6 +25,7 @@ export const execute = internalAction({
     if (
       account === null ||
       account.state.kind !== "active" ||
+      account.refundHold !== undefined ||
       policy === undefined ||
       customer === undefined ||
       account.topUp.charged.micros + policy.amount > policy.cap

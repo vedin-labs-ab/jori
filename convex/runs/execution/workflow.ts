@@ -3,6 +3,7 @@ import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { isWorkspaceDeleting } from "../../retention/access"
 
 /**
  * Hand a queued run to its durable workflow. One run has one workflow for its
@@ -14,6 +15,7 @@ export async function startRun(ctx: MutationCtx, runId: Id<"runs">) {
 
   if (
     run === null ||
+    (await isWorkspaceDeleting(ctx, run.organizationId)) ||
     run.workflowId !== undefined ||
     isTerminalRunStatus(run.status)
   ) {

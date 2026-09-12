@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest"
+import { databaseContext } from "../../test/convex/database"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveRunAudience } from "./audience"
@@ -19,7 +20,9 @@ describe("instruction child runs", () => {
   test("inherit their job execution generation", async () => {
     const parent = jobRun()
     const insert = vi.fn(async () => "child" as Id<"runs">)
-    const ctx = { db: { insert } } as unknown as MutationCtx
+    const ctx = {
+      db: { ...databaseContext().database, insert },
+    } as unknown as MutationCtx
 
     await createInstructionRun(ctx, {
       organizationId: parent.organizationId,

@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { canExecuteJobRunTools } from "../../jobs/execution"
+import { isWorkspaceDeleting } from "../../retention/access"
 import { runExecutionIsCurrent } from "../../sessions/scope"
 import { type QueryLikeCtx } from "../../shared/context"
 import { runResourceGate } from "../sight"
@@ -7,6 +8,7 @@ import { runResourceGate } from "../sight"
 /** Recheck at publication, after any earlier broker check or awaited work. */
 export async function isRunExecutable(ctx: QueryLikeCtx, run: Doc<"runs">) {
   return (
+    !(await isWorkspaceDeleting(ctx, run.organizationId)) &&
     (await canExecuteJobRunTools(ctx, run)) &&
     (await runExecutionIsCurrent(ctx, run)) &&
     (await runResourceGate(ctx, run)) !== null

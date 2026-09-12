@@ -30,6 +30,7 @@ function createOptions(runtime?: {
     },
     plugins: [
       organization({
+        disableOrganizationDeletion: true,
         allowUserToCreateOrganization: runtime?.allowUserToCreateOrganization,
         sendInvitationEmail: runtime?.sendInvitationEmail,
         // Teams are deliberate groupings, soon access-control grantees, so
@@ -117,7 +118,7 @@ function socialCredentials(provider: "GOOGLE" | "MICROSOFT") {
 }
 
 /** Claims for the Convex JWT. The `org` claim carries the session's active
- *  organization so organization access checks stay a pure token comparison. */
+ *  organization. Access checks also reject workspace deletion tombstones. */
 function definePayload({
   user,
   session,

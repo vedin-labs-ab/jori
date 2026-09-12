@@ -5,6 +5,7 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../../_generated/server"
+import { isWorkspaceDeleting } from "../../retention/access"
 import { findActiveIntegrationByExternalId } from "../data"
 import {
   webhookLeaseMs,
@@ -77,6 +78,7 @@ export const claim = internalMutation({
     const integration = await ctx.db.get(row.integrationId)
     if (
       integration === null ||
+      (await isWorkspaceDeleting(ctx, row.organizationId)) ||
       integration.status !== "active" ||
       integration.integration !== row.provider ||
       integration.organizationId !== row.organizationId ||

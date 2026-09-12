@@ -53,7 +53,14 @@ export function availableMicros(account: Doc<"accounts">) {
   return account.micros.allowance + account.micros.wallet
 }
 
+export function requireNoRefundHold(account: Doc<"accounts">) {
+  if (account.refundHold !== undefined) {
+    throw new Error("Billing is paused while support settles a refund.")
+  }
+}
+
 export function requireActivePlan(account: Doc<"accounts">) {
+  requireNoRefundHold(account)
   if (account.state.kind !== "active") {
     throw new Error("An active plan is required to fund the wallet.")
   }

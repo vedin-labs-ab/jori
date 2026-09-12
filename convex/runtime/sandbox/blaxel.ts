@@ -244,19 +244,21 @@ export async function openSandbox(
 
   const sandbox = await createSandbox()
 
-  const accepted = await ctx.runMutation(
-    internal.runs.execution.sandboxes.records.upsert,
-    {
-      externalId: sandboxName(sandbox),
-      runId: args.runId,
+  try {
+    const accepted = await ctx.runMutation(
+      internal.runs.execution.sandboxes.records.upsert,
+      { externalId: sandboxName(sandbox), runId: args.runId }
+    )
+    if (!accepted) {
+      throw new Error("This run is no longer active.")
     }
-  )
-
-  if (!accepted) {
-    throw new Error("This run is no longer active.")
+    return sandbox
+  } catch (error) {
+    // Creation can finish after deletion removes the run. This sandbox has
+    // no durable owner, so the creating action must dispose of it.
+    await killSandbox(sandboxName(sandbox))
+    throw error
   }
-
-  return sandbox
 }
 
 function commandCallbackUrl() {

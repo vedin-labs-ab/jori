@@ -7,6 +7,7 @@ import {
   query,
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { type QueryLikeCtx } from "../shared/context"
 import { organizationSourceSnapshot } from "./schema"
 
@@ -26,6 +27,7 @@ export const baseline = internalMutation({
     sources: v.array(organizationSourceSnapshot),
   },
   handler: async (ctx, args) => {
+    await assertWorkspaceAvailable(ctx, args.organizationId)
     const existing = await readByOrganization(ctx, args.organizationId)
     const pages = uniqueSnapshots(args.sources).filter(hasHash)
     const primaryUrl = pages.find((page) => page.primary)?.url

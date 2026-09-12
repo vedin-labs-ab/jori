@@ -19,6 +19,9 @@ import { tables } from "./generated"
  */
 const schema = defineSchema({
   ...tables,
+  session: tables.session.index("activeOrganizationId", [
+    "activeOrganizationId",
+  ]),
   member: tables.member.index("organizationId_userId", [
     "organizationId",
     "userId",

@@ -3,13 +3,13 @@
 import {
   type OrganizationAuthClient,
   useAuth,
-  useAuthPlugin,
-  useDeleteOrganization
+  useAuthPlugin
 } from "@better-auth-ui/react"
 import type { Organization } from "better-auth/client"
 import { TriangleAlert } from "lucide-react"
-import type { SyntheticEvent } from "react"
-import { toast } from "sonner"
+import { useState, type SyntheticEvent } from "react"
+import { useMutation } from "convex/react"
+import { api } from "../../../../convex/_generated/api"
 
 import {
   AlertDialog,
@@ -38,30 +38,31 @@ export function DeleteOrganizationDialog({
   onOpenChange,
   organization
 }: DeleteOrganizationDialogProps) {
-  const { authClient, basePaths, localization, navigate } = useAuth()
-  const {
-    localization: organizationLocalization,
-    viewPaths: organizationPluginViewPaths
-  } = useAuthPlugin(organizationPlugin)
+  const { authClient, localization } = useAuth()
+  const { localization: organizationLocalization } = useAuthPlugin(organizationPlugin)
+  const remove = useMutation(api.retention.console.remove)
+  const [isPending, setPending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const { mutate: deleteOrganization, isPending } = useDeleteOrganization(
-    authClient as OrganizationAuthClient,
-    {
-      onSuccess: () => {
-        onOpenChange(false)
-        toast.success(organizationLocalization.organizationDeleted)
-
-        navigate({
-          to: `${basePaths.settings}/${organizationPluginViewPaths.settings.organizations}`,
-          replace: true
-        })
-      }
-    }
-  )
-
-  function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
+  async function handleSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault()
-    deleteOrganization({ organizationId: organization.id })
+    setPending(true)
+    setError(null)
+    try {
+      await remove({ organizationId: organization.id })
+      try {
+        await (authClient as OrganizationAuthClient).organization.setActive({
+          organizationId: null,
+          fetchOptions: { throw: true },
+        })
+      } finally {
+        window.location.assign("/deletion")
+      }
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Deletion could not start. Contact support@usejori.com.")
+    } finally {
+      setPending(false)
+    }
   }
 
   return (
@@ -78,7 +79,7 @@ export function DeleteOrganizationDialog({
             </AlertDialogTitle>
 
             <AlertDialogDescription>
-              {organizationLocalization.deleteOrganizationDescription}
+              Permanently delete this workspace, including chats, files and connected accounts. Export anything you need first. Cancel your subscription and contact support to refund unused purchased credits before deleting.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -87,6 +88,8 @@ export function DeleteOrganizationDialog({
               <OrganizationView organization={organization} hideRole />
             </CardContent>
           </Card>
+
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
 
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPending}>

@@ -1,5 +1,6 @@
 import { type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
+import { isWorkspaceDeleting } from "../../../retention/access"
 import { type QueryLikeCtx } from "../../../shared/context"
 import { compactTranscript, type TranscriptRow } from "./compact"
 import { type TranscriptMessage } from "./schema"
@@ -19,6 +20,9 @@ export async function appendTranscript(
     throw new Error("Run not found.")
   }
 
+  if (await isWorkspaceDeleting(ctx, run.organizationId)) {
+    return null
+  }
   let order = (await lastRow(ctx, runId))?.order ?? 0
 
   for (const message of messages) {

@@ -3,6 +3,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "../_generated/server"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { readOrganizationClaim } from "./users"
 
 /**
@@ -66,5 +67,6 @@ export async function checkOrganizationAccess(
     }
   }
 
+  await assertWorkspaceAvailable(ctx, organizationId)
   return { ok: true as const, identity }
 }

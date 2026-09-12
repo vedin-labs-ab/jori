@@ -6,7 +6,7 @@ import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, action } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
 import { requireReturnUrl } from "../../shared/origin"
-import { requireActivePlan } from "../account"
+import { requireActivePlan, requireNoRefundHold } from "../account"
 import { interval, plan } from "../schema"
 import { requireString, stripeRequest } from "./client"
 import {
@@ -174,6 +174,7 @@ async function ensuredAccount(ctx: ActionCtx, organizationId: string) {
     { organizationId }
   )
 
+  requireNoRefundHold(account)
   return account
 }
 

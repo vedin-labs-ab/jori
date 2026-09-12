@@ -2,6 +2,7 @@ import { type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { resolveCurrentPerson } from "../persons/account"
+import { isWorkspaceDeleting } from "../retention/access"
 import {
   type ExecutionPrincipal,
   executionPrincipalPersonId,
@@ -35,7 +36,9 @@ export async function findActiveIntegrationByExternalId(
 ) {
   const integration = await findIntegrationByExternalId(ctx, args)
 
-  return integration === null || integration.status !== "active"
+  return integration === null ||
+    integration.status !== "active" ||
+    (await isWorkspaceDeleting(ctx, integration.organizationId))
     ? null
     : integration
 }

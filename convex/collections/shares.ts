@@ -3,6 +3,10 @@ import { shareExpiresAt } from "../../contracts/shares/expiry"
 import { shareFragment } from "../../contracts/shares/fragment"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import {
+  assertWorkspaceAvailable,
+  isWorkspaceDeleting,
+} from "../retention/access"
 import { createRunSight } from "../runs/sight"
 import { type QueryLikeCtx } from "../shared/context"
 import { bytesToHex } from "../shared/encoding"
@@ -42,6 +46,7 @@ export async function mintShare(
   }
 ): Promise<MintedShare> {
   const organizationId = args.material.organizationId
+  await assertWorkspaceAvailable(ctx, organizationId)
 
   const sight = await createResourceSight(ctx, {
     organizationId,
@@ -161,7 +166,11 @@ export async function openShare(
 ): Promise<{ expiresAt: number } | null> {
   const secret = args.secret
 
-  if (secret === undefined || secret === "") {
+  if (
+    secret === undefined ||
+    secret === "" ||
+    (await isWorkspaceDeleting(ctx, args.material.organizationId))
+  ) {
     return null
   }
 

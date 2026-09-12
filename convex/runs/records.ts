@@ -12,6 +12,7 @@ import { readApprovedFacts } from "../organization/profile"
 import { readRequesterContext } from "../persons/profile/context"
 import { readPersonTimezone } from "../persons/profile/timezone"
 import { readPlaceContext } from "../places/context"
+import { isWorkspaceDeleting } from "../retention/access"
 import {
   hasIntegrationTools,
   isMessageIntegration,
@@ -26,7 +27,7 @@ export const getInputByRun = internalQuery({
   handler: async (ctx, args) => {
     const run = await ctx.db.get(args.runId)
 
-    if (run === null) {
+    if (run === null || (await isWorkspaceDeleting(ctx, run.organizationId))) {
       return null
     }
 

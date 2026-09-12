@@ -35,6 +35,16 @@ const OrganizationPeople = lazy(() =>
     (module) => ({ default: module.OrganizationPeople })
   )
 )
+const RetentionNotice = lazy(() =>
+  import("@/console/organization/export/retention").then((module) => ({
+    default: module.RetentionNotice,
+  }))
+)
+const WorkspaceExport = lazy(() =>
+  import("@/console/organization/export").then((module) => ({
+    default: module.WorkspaceExport,
+  }))
+)
 const OrganizationSettings = lazy(() =>
   import("@/components/auth/organization/organization-settings").then(
     (module) => ({ default: module.OrganizationSettings })
@@ -156,7 +166,13 @@ function OrganizationSettingsContent({
 }) {
   switch (view) {
     case "general":
-      return <OrganizationSettings />
+      return (
+        <div className="flex flex-col gap-6">
+          <RetentionNotice organizationId={organizationId} />
+          <WorkspaceExport organizationId={organizationId} />
+          <OrganizationSettings />
+        </div>
+      )
     case "people":
       return <OrganizationPeople />
     case "teams":

@@ -17,6 +17,7 @@ export const status = v.union(
 )
 // Tracks submission to Bird, not delivery to the recipient's mailbox.
 export const emailSubmissions = defineTable({
+  organizationId: v.optional(v.string()),
   region: v.union(v.literal("eu"), v.literal("us")),
   message: v.optional(message),
   status,

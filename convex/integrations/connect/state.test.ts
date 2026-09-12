@@ -1,4 +1,5 @@
 import { describe, expect, test, vi } from "vitest"
+import { databaseContext } from "../../../test/convex/database"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { consumeInstallAttempt } from "./state"
@@ -21,6 +22,7 @@ function context(
   const ctx = {
     auth: { getUserIdentity: async () => caller },
     db: {
+      ...databaseContext().database,
       get: async () =>
         exists
           ? {

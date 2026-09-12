@@ -8,6 +8,7 @@ import {
   internalQuery,
   type MutationCtx,
 } from "../_generated/server"
+import { isWorkspaceDeleting } from "../retention/access"
 import { fetchReadableText, hashText } from "./crawl"
 
 const dayMs = 24 * 60 * 60 * 1000
@@ -35,7 +36,13 @@ export const sweep = internalMutation({
 
 export const byId = internalQuery({
   args: { sourceId: v.id("organizationSources") },
-  handler: async (ctx, args) => await ctx.db.get(args.sourceId),
+  handler: async (ctx, args) => {
+    const source = await ctx.db.get(args.sourceId)
+    return source === null ||
+      (await isWorkspaceDeleting(ctx, source.organizationId))
+      ? null
+      : source
+  },
 })
 
 export const check = internalAction({
@@ -63,7 +70,10 @@ export const record = internalMutation({
   handler: async (ctx, args) => {
     const current = await ctx.db.get(args.sourceId)
 
-    if (current === null) {
+    if (
+      current === null ||
+      (await isWorkspaceDeleting(ctx, current.organizationId))
+    ) {
       return
     }
 

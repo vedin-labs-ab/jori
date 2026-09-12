@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { assertWorkspaceAvailable } from "../../retention/access"
 import { type QueryLikeCtx } from "../../shared/context"
 import { optionalString } from "../../shared/input"
 import { normalizeEmail } from "../email"
@@ -45,6 +46,7 @@ export async function insertIdentity(
     profile: IdentityProfile
   }
 ) {
+  await assertWorkspaceAvailable(ctx, args.organizationId)
   const now = Date.now()
 
   await ctx.db.insert("identities", {

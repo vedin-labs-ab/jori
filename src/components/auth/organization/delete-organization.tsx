@@ -53,7 +53,7 @@ export function DeleteOrganization() {
         </CardTitle>
 
         <CardDescription className="mt-0.5">
-          {organizationLocalization.deleteOrganizationDescription}
+          Permanently remove this workspace and its data. Export anything you need first.
         </CardDescription>
       </div>
 

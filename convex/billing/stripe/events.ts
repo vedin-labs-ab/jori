@@ -2,6 +2,8 @@ import { v } from "convex/values"
 import { autoTopUp, plans } from "../../../contracts/billing"
 import { type Doc } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
+import { isWorkspaceDeleting } from "../../retention/access"
+import { resumeWorkspace, retainWorkspace } from "../../retention/data"
 import { readArray, readRecord, readString } from "../../shared/input"
 import { getAccount, holdAutoTopUp } from "../account"
 import { addMonths } from "../cycle"
@@ -123,6 +125,8 @@ async function applySubscription(
     status === "incomplete_expired"
 
   if (ended) {
+    const endedAt = subscriptionEnd(subscription, now)
+    await retainWorkspace(ctx, account.organizationId, endedAt)
     await ctx.db.patch(account._id, {
       state: { kind: "paused", ...sold },
       renewsAt: undefined,
@@ -135,10 +139,11 @@ async function applySubscription(
     return
   }
 
-  if (status !== "active" && status !== "past_due") {
+  if (!(await canApplyActiveSubscription(ctx, account, status))) {
     return
   }
 
+  await resumeWorkspace(ctx, account.organizationId)
   const resumed = account.state.kind !== "active" && status === "active"
   const planChanged =
     account.state.kind === "active" && account.state.plan !== sold.plan
@@ -265,4 +270,22 @@ function readMicros(value: unknown) {
   const micros = typeof value === "string" ? Number(value) : Number.NaN
 
   return Number.isInteger(micros) && micros > 0 ? micros : undefined
+}
+
+async function canApplyActiveSubscription(
+  ctx: MutationCtx,
+  account: Doc<"accounts">,
+  status: string | undefined
+) {
+  return (
+    (status === "active" || status === "past_due") &&
+    account.refundHold === undefined &&
+    !(await isWorkspaceDeleting(ctx, account.organizationId))
+  )
+}
+
+function subscriptionEnd(subscription: Record<string, unknown>, now: number) {
+  return typeof subscription.ended_at === "number"
+    ? Math.min(now, subscription.ended_at * 1000)
+    : now
 }

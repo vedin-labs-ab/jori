@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { assertWorkspaceAvailable } from "../../retention/access"
 import { resolveRunAudience } from "../../runs/audience"
 import { startRun } from "../../runs/execution/workflow"
 import { createJobRunSnapshot } from "../../runs/snapshot"
@@ -14,6 +15,7 @@ export async function createJobRun(
     now: number
   }
 ) {
+  await assertWorkspaceAvailable(ctx, args.job.organizationId)
   const runId = await ctx.db.insert("runs", {
     organizationId: args.job.organizationId,
     job: {

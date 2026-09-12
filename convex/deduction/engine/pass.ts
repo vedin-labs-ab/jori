@@ -9,6 +9,7 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "../../_generated/server"
+import { isWorkspaceDeleting } from "../../retention/access"
 import {
   bootstrapMaxChunksPerSweep,
   deductionPaused,
@@ -137,10 +138,12 @@ export const open = internalMutation({
     force: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    if (deductionPaused) {
+    if (
+      deductionPaused ||
+      (await isWorkspaceDeleting(ctx, args.organizationId))
+    ) {
       return null
     }
-
     const now = Date.now()
     const timing = stageTiming(args.stage, args.scope)
     const latest = await latestPass(ctx, args)

@@ -16,6 +16,9 @@ export const interval = v.union(v.literal("month"), v.literal("year"))
  */
 export const accounts = defineTable({
   organizationId: v.string(),
+  /** Internal support case holding new usage and purchases during settlement. */
+  refundHold: v.optional(v.string()),
+  refundHeldAt: v.optional(v.number()),
   state: v.union(
     v.object({ kind: v.literal("trial"), endsAt: v.number() }),
     v.object({ kind: v.literal("active"), plan, interval }),

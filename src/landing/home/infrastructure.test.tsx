@@ -26,7 +26,7 @@ test("states the approved exception in the list, not behind a helper", () => {
   const { container } = render(<Infrastructure />)
 
   expect(container.textContent).toContain(
-    "Some features use services that process data outside your chosen region, including web search, code execution and billing."
+    "Page fetching and billing use global services that may process data outside your chosen region."
   )
   expect(screen.queryByRole("button")).toBeNull()
 })

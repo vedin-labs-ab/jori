@@ -8,6 +8,20 @@
  * @module
  */
 
+import type * as retention_schema from "../retention/schema.js";
+import type * as retention_data from "../retention/data.js";
+import type * as retention_deletion from "../retention/deletion.js";
+import type * as retention_sweep from "../retention/sweep.js";
+import type * as retention_authorization from "../retention/authorization.js";
+import type * as retention_access from "../retention/access.js";
+import type * as retention_records from "../retention/records.js";
+import type * as retention_notice from "../retention/notice.js";
+import type * as retention_console from "../retention/console.js";
+import type * as retention_erasure_quiesce from "../retention/erasure/quiesce.js";
+import type * as retention_erasure_tables from "../retention/erasure/tables.js";
+import type * as retention_erasure_purge from "../retention/erasure/purge.js";
+import type * as retention_erasure_sandboxes from "../retention/erasure/sandboxes.js";
+import type * as retention_erasure_auth from "../retention/erasure/auth.js";
 import type * as access_allowlist from "../access/allowlist.js";
 import type * as access_gate from "../access/gate.js";
 import type * as access_index from "../access/index.js";
@@ -32,6 +46,15 @@ import type * as backfill_linear from "../backfill/linear.js";
 import type * as backfill_page from "../backfill/page.js";
 import type * as backfill_record from "../backfill/record.js";
 import type * as backfill_step from "../backfill/step.js";
+import type * as billing_refunds_purchase from "../billing/refunds/purchase.js";
+import type * as billing_refunds_actions from "../billing/refunds/actions.js";
+import type * as billing_refunds_data from "../billing/refunds/data.js";
+import type * as billing_refunds_schema from "../billing/refunds/schema.js";
+import type * as billing_refunds_stripe from "../billing/refunds/stripe.js";
+import type * as billing_refunds_validation from "../billing/refunds/validation.js";
+import type * as billing_stripe_cancellation from "../billing/stripe/cancellation.js";
+import type * as billing_stripe_late from "../billing/stripe/late.js";
+import type * as billing_stripe_schema from "../billing/stripe/schema.js";
 import type * as billing_account from "../billing/account.js";
 import type * as billing_allowance from "../billing/allowance.js";
 import type * as billing_console from "../billing/console.js";
@@ -151,6 +174,13 @@ import type * as email_queue from "../email/queue.js";
 import type * as events_data from "../events/data.js";
 import type * as events_ingest from "../events/ingest.js";
 import type * as events_payload from "../events/payload.js";
+import type * as export_access from "../export/access.js";
+import type * as export_console from "../export/console.js";
+import type * as export_data from "../export/data.js";
+import type * as export_organization from "../export/organization.js";
+import type * as export_records from "../export/records.js";
+import type * as export_support from "../export/support.js";
+import type * as export_validators from "../export/validators.js";
 import type * as files_attachments from "../files/attachments.js";
 import type * as files_console from "../files/console.js";
 import type * as files_data from "../files/data.js";
@@ -158,6 +188,7 @@ import type * as files_mcp from "../files/mcp.js";
 import type * as files_names from "../files/names.js";
 import type * as files_records from "../files/records.js";
 import type * as files_share from "../files/share.js";
+import type * as files_cleanup_orphans from "../files/cleanup/orphans.js";
 import type * as files_upload from "../files/upload.js";
 import type * as folders_console from "../folders/console.js";
 import type * as folders_contents from "../folders/contents.js";
@@ -709,6 +740,21 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "retention/schema": typeof retention_schema;
+  "retention/data": typeof retention_data;
+  "retention/deletion": typeof retention_deletion;
+  "retention/sweep": typeof retention_sweep;
+  "retention/authorization": typeof retention_authorization;
+  "retention/access": typeof retention_access;
+  "retention/records": typeof retention_records;
+  "retention/notice": typeof retention_notice;
+  "retention/console": typeof retention_console;
+  "retention/erasure/quiesce": typeof retention_erasure_quiesce;
+  "retention/erasure/tables": typeof retention_erasure_tables;
+  "retention/erasure/purge": typeof retention_erasure_purge;
+  "retention/erasure/sandboxes": typeof retention_erasure_sandboxes;
+  "retention/erasure/auth": typeof retention_erasure_auth;
+
   "access/allowlist": typeof access_allowlist;
   "access/gate": typeof access_gate;
   "access/index": typeof access_index;
@@ -733,6 +779,15 @@ declare const fullApi: ApiFromModules<{
   "backfill/page": typeof backfill_page;
   "backfill/record": typeof backfill_record;
   "backfill/step": typeof backfill_step;
+  "billing/refunds/purchase": typeof billing_refunds_purchase;
+  "billing/refunds/actions": typeof billing_refunds_actions;
+  "billing/refunds/data": typeof billing_refunds_data;
+  "billing/refunds/schema": typeof billing_refunds_schema;
+  "billing/refunds/stripe": typeof billing_refunds_stripe;
+  "billing/refunds/validation": typeof billing_refunds_validation;
+  "billing/stripe/cancellation": typeof billing_stripe_cancellation;
+  "billing/stripe/late": typeof billing_stripe_late;
+  "billing/stripe/schema": typeof billing_stripe_schema;
   "billing/account": typeof billing_account;
   "billing/allowance": typeof billing_allowance;
   "billing/console": typeof billing_console;
@@ -852,6 +907,13 @@ declare const fullApi: ApiFromModules<{
   "events/data": typeof events_data;
   "events/ingest": typeof events_ingest;
   "events/payload": typeof events_payload;
+  "export/access": typeof export_access;
+  "export/console": typeof export_console;
+  "export/data": typeof export_data;
+  "export/organization": typeof export_organization;
+  "export/records": typeof export_records;
+  "export/support": typeof export_support;
+  "export/validators": typeof export_validators;
   "files/attachments": typeof files_attachments;
   "files/console": typeof files_console;
   "files/data": typeof files_data;
@@ -859,6 +921,7 @@ declare const fullApi: ApiFromModules<{
   "files/names": typeof files_names;
   "files/records": typeof files_records;
   "files/share": typeof files_share;
+  "files/cleanup/orphans": typeof files_cleanup_orphans;
   "files/upload": typeof files_upload;
   "folders/console": typeof folders_console;
   "folders/contents": typeof folders_contents;
