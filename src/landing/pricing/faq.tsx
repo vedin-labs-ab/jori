@@ -35,8 +35,9 @@ export function Faq() {
           goes silent halfway through answering you.
         </Definition>
         <Definition term="What does a run cost?">
-          Keeping a page current costs cents a day. A deep research run can cost
-          a few dollars. The receipt shows the exact figure.
+          A Jori run's cost depends on the model, the amount of text it
+          processes and generates, and any additional services it uses. Each run
+          has an itemized receipt showing what was billed.
         </Definition>
         <Definition term="Is there a free trial?">
           Yes. {trial.days} days and {formatUsd(trial.allowanceMicros)} of

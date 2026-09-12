@@ -45,9 +45,10 @@ export function Hero() {
           {brandHeadline}
         </h1>
         <p className="mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-          Put the jobs nobody wants next to the tables and files they keep
-          current, in folders shaped like your teams and projects. Who can see a
-          folder, and what it costs to run, come with it.
+          Jori is a shared workspace for AI jobs, tables, and files. Describe
+          recurring work in plain language and choose when it runs. Keep each
+          job beside the material it uses, with access and spend organized by
+          folder.
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <GetStarted prominent />

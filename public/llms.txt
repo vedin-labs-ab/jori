@@ -1,0 +1,17 @@
+# Jori
+
+> Jori is a shared workspace for AI jobs, tables, and files. Teams describe recurring work in plain language, choose when it runs, and organize access and spend by folder.
+
+This is the official site for Jori at usejori.com. The public pages below describe the product, availability, pricing, and access controls. Their text is readable without JavaScript; interactive demos use example data.
+
+## Product
+
+- [Jori overview](https://usejori.com/): How jobs, folders, tables, files, and integrations work together, with interactive examples and a waitlist.
+- [Pricing and availability](https://usejori.com/pricing): Current access, the organization-wide pricing model, usage billing, and trial details. Example balances are illustrative; consult this page for published pricing.
+- [Trust and data regions](https://usejori.com/trust): Job permissions, action approvals, run receipts, and EU or US workspace storage, including services that may process data outside the selected region.
+
+## Optional
+
+- [Privacy policy](https://usejori.com/privacy): How personal data is handled.
+- [Terms of service](https://usejori.com/terms): Terms for using Jori.
+- [Data processing agreement](https://usejori.com/dpa): Data processing terms and subprocessors.
