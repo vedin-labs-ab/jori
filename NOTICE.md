@@ -1,13 +1,9 @@
 # Third-party notices
 
-Third-party material retains its own license terms. The copied material below
-uses the MIT license reproduced here.
-
-| Source | Material in this repository |
-| --- | --- |
-| [shadcn/ui](https://github.com/shadcn-ui/ui) | Derived portions of `src/components/ui/`, `src/hooks/use-mobile.ts` and `src/lib/utils.ts`. |
-| [Better Auth UI](https://github.com/better-auth-ui/better-auth-ui) | Derived portions of `src/components/auth/`. |
-| [SVGL](https://github.com/pheralb/svgl) | Vendor paths in `src/shared/logo/vendor.tsx`; GitHub, Gmail, Google Calendar, Slack, Notion and Linear artwork in `public/logos/integrations/`. |
+Third-party material retains its own license terms. Jori includes MIT-licensed
+material from [shadcn/ui](https://github.com/shadcn-ui/ui),
+[Better Auth UI](https://github.com/better-auth-ui/better-auth-ui) and
+[SVGL](https://github.com/pheralb/svgl). Their copyright notices and license follow.
 
 ```text
 MIT License
