@@ -6,7 +6,7 @@ import { requireOrigin } from "../shared/origin"
 
 export type Invitation = {
   email: string
-  organization: { name: string }
+  organization: { id?: string; name: string }
   inviter: { user: { name: string; email: string } }
 }
 
@@ -23,12 +23,16 @@ export async function sendInvitation(
   const organization = invitation.organization.name
   const consoleUrl = `${requireOrigin()}/console`
 
-  await sendEmail(ctx, {
-    to: invitation.email,
-    subject: `${invitation.inviter.user.name} invited you to ${organization} on Jori`,
-    html: invitationHtml(invitation, consoleUrl),
-    text: invitationText(invitation, consoleUrl),
-  })
+  await sendEmail(
+    ctx,
+    {
+      to: invitation.email,
+      subject: `${invitation.inviter.user.name} invited you to ${organization} on Jori`,
+      html: invitationHtml(invitation, consoleUrl),
+      text: invitationText(invitation, consoleUrl),
+    },
+    invitation.organization.id
+  )
 }
 
 function invitationHtml(invitation: Invitation, consoleUrl: string) {

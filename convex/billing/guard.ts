@@ -21,7 +21,7 @@ export async function checkRunBudget(
   const account = await ensureAccount(ctx, args.organizationId)
   const now = Date.now()
 
-  if (account.state.kind === "paused") {
+  if (account.state.kind === "paused" || account.refundHold !== undefined) {
     return { ok: false, reason: "paused" }
   }
 

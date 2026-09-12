@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { isWorkspaceDeleting } from "../../retention/access"
 import { type AllowedSources, type SourceRecord } from "./rules"
 
 // The action-to-applier boundary: the run action serializes what the judge
@@ -91,7 +92,11 @@ export async function requireRunningPass(
 ): Promise<Doc<"passes"> | null> {
   const pass = await ctx.db.get(passId)
 
-  return pass !== null && pass.status === "running" ? pass : null
+  return pass !== null &&
+    pass.status === "running" &&
+    !(await isWorkspaceDeleting(ctx, pass.organizationId))
+    ? pass
+    : null
 }
 
 export async function completePass(

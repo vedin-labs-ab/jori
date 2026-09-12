@@ -7,7 +7,11 @@ export type { Message } from "./email/schema"
 /** Queue in the caller's transaction. Product templates know no provider. */
 export async function sendEmail(
   ctx: Pick<MutationCtx, "runMutation"> | Pick<ActionCtx, "runMutation">,
-  message: Message
+  message: Message,
+  organizationId?: string
 ) {
-  await ctx.runMutation(internal.email.queue.enqueue, { message })
+  await ctx.runMutation(internal.email.queue.enqueue, {
+    message,
+    organizationId,
+  })
 }

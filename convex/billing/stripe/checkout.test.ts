@@ -1,3 +1,4 @@
+import { getFunctionName } from "convex/server"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type ActionCtx } from "../../_generated/server"
 import { openPortal, startPlanCheckout, startTopUpCheckout } from "./checkout"
@@ -156,6 +157,12 @@ function context(hasCustomer = true) {
       }),
     },
     runMutation,
+    runQuery: vi.fn(async (reference) => {
+      if (getFunctionName(reference) !== "retention/records:deleting") {
+        throw new Error("Unexpected query in checkout fixture")
+      }
+      return false
+    }),
   } as unknown as ActionCtx
   return { ctx, runMutation }
 }

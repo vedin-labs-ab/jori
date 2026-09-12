@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as ConsoleRouteImport } from './routes/console'
+import { Route as DeletionRouteImport } from './routes/deletion'
 import { Route as DpaRouteImport } from './routes/dpa'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -63,6 +64,11 @@ const WorkspaceRoute = WorkspaceRouteImport.update({
 const ConsoleRoute = ConsoleRouteImport.update({
   id: '/console',
   path: '/console',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeletionRoute = DeletionRouteImport.update({
+  id: '/deletion',
+  path: '/deletion',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DpaRoute = DpaRouteImport.update({
@@ -268,6 +274,7 @@ const WorkspaceTablesTableIdIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/console': typeof ConsoleRoute
+  '/deletion': typeof DeletionRoute
   '/dpa': typeof DpaRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -310,6 +317,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/console': typeof ConsoleRoute
+  '/deletion': typeof DeletionRoute
   '/dpa': typeof DpaRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -347,6 +355,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_workspace': typeof WorkspaceRouteWithChildren
   '/console': typeof ConsoleRoute
+  '/deletion': typeof DeletionRoute
   '/dpa': typeof DpaRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -391,6 +400,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/console'
+    | '/deletion'
     | '/dpa'
     | '/pricing'
     | '/privacy'
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/console'
+    | '/deletion'
     | '/dpa'
     | '/pricing'
     | '/privacy'
@@ -469,6 +480,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_workspace'
     | '/console'
+    | '/deletion'
     | '/dpa'
     | '/pricing'
     | '/privacy'
@@ -513,6 +525,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   WorkspaceRoute: typeof WorkspaceRouteWithChildren
   ConsoleRoute: typeof ConsoleRoute
+  DeletionRoute: typeof DeletionRoute
   DpaRoute: typeof DpaRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -546,6 +559,13 @@ declare module '@tanstack/react-router' {
       path: '/console'
       fullPath: '/console'
       preLoaderRoute: typeof ConsoleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deletion': {
+      id: '/deletion'
+      path: '/deletion'
+      fullPath: '/deletion'
+      preLoaderRoute: typeof DeletionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dpa': {
@@ -956,6 +976,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   WorkspaceRoute: WorkspaceRouteWithChildren,
   ConsoleRoute: ConsoleRoute,
+  DeletionRoute: DeletionRoute,
   DpaRoute: DpaRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,

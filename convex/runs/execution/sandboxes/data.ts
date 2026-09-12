@@ -2,6 +2,7 @@ import { isTerminalRunStatus } from "../../../../contracts/runtime/runs"
 import { internal } from "../../../_generated/api"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
+import { isWorkspaceDeleting } from "../../../retention/access"
 import { type QueryLikeCtx } from "../../../shared/context"
 
 const idleSandboxLeaseMs = 5 * 60 * 1000
@@ -47,8 +48,8 @@ export async function findRetainedSandbox(
 export async function upsertSandbox(ctx: MutationCtx, args: SandboxRun) {
   const run = await ctx.db.get(args.runId)
 
-  if (run === null) {
-    throw new Error("Run not found.")
+  if (run === null || (await isWorkspaceDeleting(ctx, run.organizationId))) {
+    return false
   }
 
   const now = Date.now()
@@ -148,7 +149,11 @@ export async function claimReusableSandbox(
 ) {
   const run = await ctx.db.get(runId)
 
-  if (run === null || isTerminalRunStatus(run.status)) {
+  if (
+    run === null ||
+    isTerminalRunStatus(run.status) ||
+    (await isWorkspaceDeleting(ctx, run.organizationId))
+  ) {
     return null
   }
 

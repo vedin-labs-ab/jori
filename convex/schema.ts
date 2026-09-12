@@ -2,7 +2,9 @@ import { defineSchema } from "convex/server"
 import { allowlist } from "./access/schema"
 import { approvals } from "./approvals/schema"
 import { backfills } from "./backfill/schema"
+import { billingRefunds } from "./billing/refunds/schema"
 import { accounts, transactions } from "./billing/schema"
+import { billingCancellations } from "./billing/stripe/schema"
 import { usageReceipts } from "./billing/usage/schema"
 import { collections, documents, shares } from "./collections/schema"
 import { conversations } from "./conversations/schema"
@@ -30,6 +32,7 @@ import { identities } from "./persons/identity/schema"
 import { persons } from "./persons/schema"
 import { places } from "./places/schema"
 import { reactions } from "./reactions/schema"
+import { workspaceRetention } from "./retention/schema"
 import { drafts } from "./runs/execution/drafts/schema"
 import { sandboxes } from "./runs/execution/sandboxes/schema"
 import { traces } from "./runs/execution/traces/schema"
@@ -43,6 +46,7 @@ import { usage } from "./usage/schema"
 import { waitlist } from "./waitlist/schema"
 
 export default defineSchema({
+  workspaceRetention,
   githubRecoveries,
   notionWebhookSetups,
   emailSubmissions,
@@ -51,6 +55,8 @@ export default defineSchema({
   waitlist,
   files,
   accounts,
+  billingRefunds,
+  billingCancellations,
   transactions,
   usageReceipts,
   persons,

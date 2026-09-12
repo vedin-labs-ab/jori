@@ -1,5 +1,6 @@
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { type QueryLikeCtx } from "../shared/context"
 
 const canonicalDepthLimit = 16
@@ -8,6 +9,7 @@ export async function createPerson(
   ctx: MutationCtx,
   args: { organizationId: string; now?: number }
 ) {
+  await assertWorkspaceAvailable(ctx, args.organizationId)
   const now = args.now ?? Date.now()
 
   return await ctx.db.insert("persons", {

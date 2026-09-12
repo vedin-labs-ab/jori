@@ -190,6 +190,8 @@ export const runs = defineTable({
   stoppedBy: v.optional(actorValidator),
 })
   .index("by_organization", ["organizationId"])
+  .index("by_organizationId_and_status", ["organizationId", "status"])
+  .index("by_organizationId_and_workflowId", ["organizationId", "workflowId"])
   .index("by_parent", ["parentId"])
   .index("by_root", ["rootId"])
   .index("by_conversation_and_folder", ["conversationId", "folderId"])

@@ -42,7 +42,18 @@ function context() {
 
   return {
     insert,
-    ctx: { db: { insert, patch: vi.fn() } } as unknown as MutationCtx,
+    ctx: {
+      db: {
+        insert,
+        patch: vi.fn(),
+        query: (table: string) => {
+          if (table !== "workspaceRetention") {
+            throw new Error(`Unexpected table: ${table}`)
+          }
+          return { withIndex: () => ({ unique: async () => null }) }
+        },
+      },
+    } as unknown as MutationCtx,
   }
 }
 

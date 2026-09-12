@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalMutation } from "../_generated/server"
 import { deductionPaused } from "../deduction/limits"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { backfillWindowMs } from "./limits"
 
 const supported = ["github", "linear"] as const
@@ -16,10 +17,10 @@ const supported = ["github", "linear"] as const
 export const start = internalMutation({
   args: { organizationId: v.string() },
   handler: async (ctx, args) => {
+    await assertWorkspaceAvailable(ctx, args.organizationId)
     if (deductionPaused) {
       return { started: [] }
     }
-
     const now = Date.now()
     const window = { start: now - backfillWindowMs, end: now }
     const active = await ctx.db

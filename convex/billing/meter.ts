@@ -79,6 +79,7 @@ async function maybeScheduleAutoTopUp(
 
   if (
     account.state.kind !== "active" ||
+    account.refundHold !== undefined ||
     policy === undefined ||
     account.stripe === undefined
   ) {

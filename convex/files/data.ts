@@ -5,6 +5,7 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { boundedNumber, optionalString } from "../shared/input"
 import {
   createResourceSight,
@@ -23,6 +24,7 @@ export type FileViewer = ResourceViewer
 export const record = internalMutation({
   args: fileFields,
   handler: async (ctx, args) => {
+    await assertWorkspaceAvailable(ctx, args.organizationId)
     const now = Date.now()
 
     return await ctx.db.insert("files", {

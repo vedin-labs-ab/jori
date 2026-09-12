@@ -18,6 +18,7 @@ export const sandboxes = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 })
+  .index("by_organizationId", ["organizationId"])
   .index("by_run_and_status", ["runId", "status"])
   .index("by_external_id", ["externalId"])
   .index("by_session_and_status_and_expires_at", [

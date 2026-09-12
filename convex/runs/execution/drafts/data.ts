@@ -1,5 +1,6 @@
 import { type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
+import { isWorkspaceDeleting } from "../../../retention/access"
 import { type QueryLikeCtx } from "../../../shared/context"
 
 /** What a run has said of its reply so far: the reasoning it is thinking
@@ -34,6 +35,10 @@ export async function writeRunDraft(
   ctx: MutationCtx,
   args: RunDraft & { runId: Id<"runs">; turn: number }
 ) {
+  const run = await ctx.db.get(args.runId)
+  if (run === null || (await isWorkspaceDeleting(ctx, run.organizationId))) {
+    return
+  }
   const existing = await findRunDraft(ctx, args.runId)
   const updatedAt = Date.now()
 

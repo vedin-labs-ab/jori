@@ -3,6 +3,7 @@ import { compactRecord } from "../../contracts/json"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { type QueryLikeCtx } from "../shared/context"
 import { discoveryStepKind } from "./schema"
 
@@ -28,6 +29,7 @@ export const get = query({
 export const start = internalMutation({
   args: { organizationId: v.string() },
   handler: async (ctx, args) => {
+    await assertWorkspaceAvailable(ctx, args.organizationId)
     const existing = await readDiscovery(ctx, args.organizationId)
     const value = {
       organizationId: args.organizationId,

@@ -74,7 +74,7 @@ describe("buildInstallState", () => {
 
 test("a reconnect cannot reassign a provider account to another organization", async () => {
   const patch = vi.fn()
-  const ctx = { db: { patch } } as unknown as MutationCtx
+  const ctx = { db: { patch, query: retentionQuery } } as unknown as MutationCtx
   const existing = {
     _id: "integration_1",
     organizationId: "owner_org",
@@ -93,7 +93,7 @@ test.each([
   2,
 ])("a reconnect refreshes credentials and advances generation %s", async (generation) => {
   const patch = vi.fn()
-  const ctx = { db: { patch } } as unknown as MutationCtx
+  const ctx = { db: { patch, query: retentionQuery } } as unknown as MutationCtx
   const existing = {
     _id: "integration_1",
     organizationId: "owner_org",
@@ -124,17 +124,27 @@ function createCtx(identity: Record<string, unknown> | null) {
       get: async () => null,
       insert: async () => "person_1",
       patch: async () => undefined,
-      query: () => ({
-        withIndex: () => ({
-          first: async () =>
-            identity === null
-              ? null
-              : {
-                  personId: "person_1" as Id<"persons">,
-                  link: { method: "oauth" },
-                },
-        }),
-      }),
+      query: (table: string) =>
+        table === "workspaceRetention"
+          ? retentionQuery(table)
+          : {
+              withIndex: () => ({
+                first: async () =>
+                  identity === null
+                    ? null
+                    : {
+                        personId: "person_1" as Id<"persons">,
+                        link: { method: "oauth" },
+                      },
+              }),
+            },
     },
   } as unknown as MutationCtx
+}
+
+function retentionQuery(table: string) {
+  if (table !== "workspaceRetention") {
+    throw new Error(`Unexpected table in integration fixture: ${table}`)
+  }
+  return { withIndex: () => ({ unique: async () => null }) }
 }

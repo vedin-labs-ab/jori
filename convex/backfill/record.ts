@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internalMutation, internalQuery } from "../_generated/server"
 import { recordBackfillEvent } from "../events/data"
 import { eventData } from "../events/schema"
+import { isWorkspaceDeleting } from "../retention/access"
 import { actorValidator } from "../shared/actor"
 import { backfillCursor } from "./schema"
 
@@ -19,7 +20,10 @@ export const byId = internalQuery({
   handler: async (ctx, args) => {
     const backfill = await ctx.db.get(args.backfillId)
 
-    if (backfill === null) {
+    if (
+      backfill === null ||
+      (await isWorkspaceDeleting(ctx, backfill.organizationId))
+    ) {
       return null
     }
 
@@ -40,7 +44,11 @@ export const record = internalMutation({
   handler: async (ctx, args) => {
     const backfill = await ctx.db.get(args.backfillId)
 
-    if (backfill === null || backfill.status !== "running") {
+    if (
+      backfill === null ||
+      backfill.status !== "running" ||
+      (await isWorkspaceDeleting(ctx, backfill.organizationId))
+    ) {
       return
     }
 
@@ -82,7 +90,11 @@ export const advance = internalMutation({
   handler: async (ctx, args) => {
     const backfill = await ctx.db.get(args.backfillId)
 
-    if (backfill === null || backfill.status !== "running") {
+    if (
+      backfill === null ||
+      backfill.status !== "running" ||
+      (await isWorkspaceDeleting(ctx, backfill.organizationId))
+    ) {
       return
     }
 

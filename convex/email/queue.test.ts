@@ -110,3 +110,27 @@ test("maintenance removes expired submission records", async () => {
   await t.mutation(internal.email.maintenance.sweep, {})
   expect(await t.run(async (ctx) => await ctx.db.get(id))).toBeNull()
 })
+
+test("workspace deletion cancels an already queued invitation before provider submission", async () => {
+  const t = convexTest(schema, modules)
+  const id = await t.mutation(internal.email.queue.enqueue, {
+    message,
+    organizationId: "deleted-org",
+  })
+  await t.run(async (ctx) => {
+    await ctx.db.insert("workspaceRetention", {
+      organizationId: "deleted-org",
+      state: "deleting",
+      endedAt: Date.now(),
+      deletesAt: Date.now(),
+    })
+  })
+  expect(await t.mutation(internal.email.queue.claim, { id })).toBeNull()
+  expect(await t.run(async (ctx) => await ctx.db.get(id))).toMatchObject({
+    status: "failed",
+    failure: "workspace_deleted",
+  })
+  expect(
+    (await t.run(async (ctx) => await ctx.db.get(id)))?.message
+  ).toBeUndefined()
+})

@@ -6,7 +6,7 @@ import { clearRunDraft, readRunDraft, writeRunDraft } from "./data"
 const runId = "runs:1" as Id<"runs">
 
 test("a run's draft is one row, rewritten whole and gone when cleared", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = await setup()
 
   expect(await readRunDraft(ctx, runId)).toBeNull()
 
@@ -45,7 +45,7 @@ test("a run's draft is one row, rewritten whole and gone when cleared", async ()
 })
 
 test("a row with nothing said yet reads as no draft", async () => {
-  const { ctx } = databaseContext()
+  const { ctx } = await setup()
 
   await writeRunDraft(ctx, { runId, reasoning: " \n", text: "", turn: 1 })
 
@@ -60,7 +60,7 @@ test("a row with nothing said yet reads as no draft", async () => {
 })
 
 test("a later turn takes the row over", async () => {
-  const { database, ctx } = databaseContext()
+  const { database, ctx } = await setup()
 
   await writeRunDraft(ctx, { runId, reasoning: "", text: "First", turn: 1 })
   await writeRunDraft(ctx, { runId, reasoning: "", text: "Se", turn: 2 })
@@ -73,3 +73,25 @@ test("a later turn takes the row over", async () => {
 async function rows(database: ReturnType<typeof databaseContext>["database"]) {
   return await database.query("drafts").withIndex("by_run").collect()
 }
+
+async function setup() {
+  const fixture = databaseContext()
+  await fixture.database.insert("runs", {
+    _id: runId,
+    organizationId: "org",
+    status: "running",
+  })
+  return fixture
+}
+
+test("a late draft cannot recreate content after its run is deleted", async () => {
+  const { database, ctx } = await setup()
+  await database.delete(runId)
+  await writeRunDraft(ctx, {
+    runId,
+    reasoning: "private",
+    text: "late",
+    turn: 1,
+  })
+  expect(await rows(database)).toEqual([])
+})

@@ -1,6 +1,7 @@
 import { type ObjectType, v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { resolveCreationFolder } from "../folders/tree"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { requireExecutingRun } from "../runs/execution/guard"
 import { createRunSight, runResourceGate } from "../runs/sight"
 import { type QueryLikeCtx } from "../shared/context"
@@ -20,6 +21,7 @@ export async function createResourceSight(
   ctx: QueryLikeCtx,
   args: ResourceViewer
 ): Promise<Sight> {
+  await assertWorkspaceAvailable(ctx, args.organizationId)
   const run = await resourceRun(ctx, args)
   return run === undefined ? createSight(ctx, args) : createRunSight(ctx, run)
 }
@@ -32,6 +34,7 @@ export async function resourceCreation(
     folderId?: Id<"folders">
   }
 ) {
+  await assertWorkspaceAvailable(ctx, args.organizationId)
   const run = await resourceRun(ctx, args)
   const sight =
     run === undefined ? createSight(ctx, args) : await createRunSight(ctx, run)

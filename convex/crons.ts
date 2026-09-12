@@ -4,6 +4,13 @@ import { internal } from "./_generated/api"
 const crons = cronJobs()
 
 crons.interval(
+  "workspace retention",
+  { hours: 1 },
+  internal.retention.sweep.run,
+  {}
+)
+
+crons.interval(
   "integration webhook recovery",
   { minutes: 5 },
   internal.integrations.webhooks.delivery.sweep,
@@ -67,6 +74,20 @@ crons.interval(
   "model window refresh",
   { hours: 24 },
   internal.model.refresh.run,
+  {}
+)
+
+crons.interval(
+  "unregistered upload cleanup",
+  { hours: 1 },
+  internal.files.cleanup.orphans.sweep,
+  {}
+)
+
+crons.interval(
+  "retry late subscription cancellations",
+  { minutes: 5 },
+  internal.billing.stripe.cancellation.retry,
   {}
 )
 

@@ -20,8 +20,8 @@ export function Infrastructure() {
           <Region region="eu" /> and <Region region="us" />.
         </Definition>
         <Definition term="What leaves the region">
-          Some features use services that process data outside your chosen
-          region, including web search, code execution and billing.
+          Page fetching and billing use global services that may process data
+          outside your chosen region.
         </Definition>
       </dl>
     </Section>

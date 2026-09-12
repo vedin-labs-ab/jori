@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { requireRunBudget } from "../billing/guard"
+import { assertWorkspaceAvailable } from "../retention/access"
 import { type Access } from "../shared/integrations"
 import { resolveRunAudience } from "./audience"
 import { startRun } from "./execution/workflow"
@@ -27,6 +28,7 @@ export async function createInstructionRun(
     principal?: ExecutionPrincipal
   }
 ) {
+  await assertWorkspaceAvailable(ctx, args.organizationId)
   const parent = args.parent
   const conversation =
     parent?.conversationId === undefined

@@ -35,7 +35,8 @@ function publicAccount(account: Doc<"accounts">) {
     renewsAt: account.renewsAt,
     topUp: account.topUp,
     hasStripeCustomer: account.stripe !== undefined,
-    canFundWallet: account.state.kind === "active",
+    canFundWallet:
+      account.state.kind === "active" && account.refundHold === undefined,
   }
 }
 

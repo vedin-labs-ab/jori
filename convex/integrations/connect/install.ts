@@ -8,6 +8,7 @@ import {
   mutation,
 } from "../../_generated/server"
 import { ensureCurrentPerson } from "../../persons/account"
+import { assertWorkspaceAvailable } from "../../retention/access"
 import {
   type Integration,
   integrationValidator,
@@ -141,6 +142,7 @@ export async function upsertIntegration(
   existing: Doc<"integrations"> | null,
   values: IntegrationValues
 ): Promise<Id<"integrations">> {
+  await assertWorkspaceAvailable(ctx, values.organizationId)
   if (existing !== null) {
     if (existing.organizationId !== values.organizationId) {
       throw new Error(

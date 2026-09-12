@@ -1,6 +1,7 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
+import { isWorkspaceDeleting } from "../../../retention/access"
 import { type traceData } from "./schema"
 
 type TraceData = Infer<typeof traceData>
@@ -25,6 +26,9 @@ export async function recordTrace(
     type: Doc<"traces">["type"]
   }
 ) {
+  if (await isWorkspaceDeleting(ctx, args.run.organizationId)) {
+    return false
+  }
   const existing = await ctx.db
     .query("traces")
     .withIndex("by_key", (query) => query.eq("key", args.key))

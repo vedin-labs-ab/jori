@@ -35,8 +35,9 @@ settle in-flight usage, then calculate the remaining paid value from Stripe and
 the regional ledger. Account for discounts, tax and prior refunds. Do not refund
 more than was paid or deduct the same usage twice. Refund through the original
 payment method and remove refunded balances before restoring any access.
-Record the Stripe refund ID, calculation and resulting balances. An API key or
-a Stripe refund alone does not update Jori's credit ledger.
+Use the [support refund workflow](refunds.md) to reserve credits before the
+Stripe refund, verify it succeeded, and release the hold. It records the refund
+ID and calculation without exposing a customer-facing refund API.
 
 ## Retention and deletion
 
@@ -52,18 +53,26 @@ other workspaces and their users intact. Keep only the billing evidence required
 for accounting, separated from task content. Ask providers to delete retained
 copies where required, and record backup expiry limits.
 
-The current organisation-delete UI and chat-delete helpers do **not** constitute
-a complete workspace deletion procedure. Do not use the development database
-truncate command for customer deletion. Before publishing the 90-day promise,
-complete and verify a scoped deletion/export procedure and a reliable way to
-identify due workspaces and send notices. No automatic purge is enabled by these
-policy pages.
+Owners can export visible content from Settings or request a complete controller
+export through support. See [Exports](export.md) for scope and operator commands.
+
+The regional retention sweep detects expired trials and effective cancellations.
+It requires an accepted email notice and at least seven days before automatic
+deletion. Reactivation cancels the countdown. Missing notice delivery or an open
+refund case requires support attention; inspect the retention record's reason.
+
+Deletion blocks access and background writes immediately, disconnects integrations
+and stops jobs and runs. It waits for external work to drain, then deletes content,
+storage and workspace membership in retryable batches. Accounting records and a
+minimal deletion marker remain. Unused purchased credit remains refundable after
+automatic deletion. Unregistered uploads are reclaimed after a 24-hour grace
+period. Provider backups and independently retained copies follow their own
+verified deletion procedures; this workflow cannot erase data in customer apps.
 
 ## Publication checks
 
-- Verify support@usejori.com receives mail and assign ownership of requests.
-- Complete the retention/deletion procedure above and reconcile refunded credits
-  reliably before handling the first refund.
+- support@usejori.com receives mail, confirmed by Albin. Assign ownership of requests.
+- Use the verified export/deletion and [refund procedures](refunds.md) for support requests.
 - Parallel's [customer terms](https://parallel.ai/customer-terms), section 4,
   require a separately executed DPA and contain broad training permissions.
   Its [privacy policy](https://parallel.ai/privacy-policy) separately promises
@@ -84,6 +93,6 @@ policy pages.
   particularly liability, processor terms and actual cross-border processing.
   These drafts have not been reviewed by counsel.
 
-The current main-branch pages are for review until these checks are resolved.
+Keep the provider agreement checks open until there is supporting evidence.
 Changing to consumer sales later requires a fresh checkout and withdrawal review;
 do not just remove the business-use sentence.
