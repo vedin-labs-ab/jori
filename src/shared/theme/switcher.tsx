@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { MoonIcon } from "@/components/ui/moon"
 import { SunIcon } from "@/components/ui/sun"
 import { SunMoonIcon } from "@/components/ui/sun-moon"
-import { cn } from "@/lib/utils"
 import { useTheme } from "./context"
 import { type Theme, themeOption, themeOptions } from "./scheme"
 
@@ -32,7 +31,7 @@ export function ThemeSwitcher({ className }: { className?: string }) {
   return (
     <Button
       aria-label={`Theme: ${themeOption(theme).label}. Switch to ${themeOption(next).label.toLowerCase()}`}
-      className={cn("min-w-20", className)}
+      className={className}
       onClick={() => setTheme(next)}
       onMouseEnter={() => icon.current?.startAnimation()}
       onMouseLeave={() => icon.current?.stopAnimation()}
