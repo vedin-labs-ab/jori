@@ -97,6 +97,9 @@ function parseArguments(arguments_: readonly string[]) {
 
     if (argument === "--organization") {
       organizationId = arguments_[index + 1]
+      if (!organizationId?.trim() || organizationId.startsWith("-")) {
+        throw new Error("--organization requires an organization ID.")
+      }
       continue
     }
 

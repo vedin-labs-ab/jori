@@ -17,6 +17,12 @@ import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
  */
 requirePrimaryCheckout("Landing")
 
+if (git(["branch", "--show-current"]) !== "main") {
+  throw new Error(
+    "Landing requires main to be checked out in the primary checkout."
+  )
+}
+
 const args = process.argv.slice(2)
 const skipGate = args.at(-1) === "--no-verify"
 const task = readTaskName(skipGate ? args.slice(0, -1) : args)

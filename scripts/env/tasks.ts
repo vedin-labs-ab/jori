@@ -15,6 +15,7 @@ const usage = `Usage: scripts/env/task.ts <${Object.keys(commands).join("|")}> <
 
 export function taskCommand(argv: readonly string[]): {
   command: string[]
+  primary: boolean
   target: Target
 } {
   const [task, target, ...rest] = argv
@@ -23,7 +24,19 @@ export function taskCommand(argv: readonly string[]): {
     throw new Error(usage)
   }
 
-  return { command: [...commands[task], ...rest], target }
+  if ((task === "seed" || task === "truncate") && target !== "dev") {
+    throw new Error(`Database ${task} only runs against the dev target.`)
+  }
+
+  if (task === "sandbox" && rest.length > 0) {
+    throw new Error(`Usage: pnpm sandbox <${targets.join("|")}>`)
+  }
+
+  return {
+    command: [...commands[task], ...rest],
+    primary: task === "skills" || task === "sandbox",
+    target,
+  }
 }
 
 function isTask(value: string | undefined): value is Task {
