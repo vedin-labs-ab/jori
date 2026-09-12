@@ -1,3 +1,4 @@
+import { useId } from "react"
 import { cn } from "@/lib/utils"
 
 const stripeHeight = 16 / 13
@@ -53,6 +54,13 @@ const cantonDots = [0, 1, 2, 3, 4].flatMap((row) =>
   }))
 )
 
+/** Corners and rim are drawn in the flag's own units, so they scale with
+ *  it: a hair of rounding inline in a sentence, a little more at badge
+ *  size, never the box radius that suits neither. The rim is a touch of
+ *  ink inside the edge, which gives the white stripe a boundary on a light
+ *  ground and disappears on a dark one. */
+const flagCorner = 2.2
+
 /** The two regions' flags, drawn rather than typed: emoji flags depend on
  *  the reader's fonts and fall back to plain letters on some systems, and
  *  these need to look the same on every screen. */
@@ -63,44 +71,60 @@ export function RegionFlag({
   className?: string
   region: "eu" | "us"
 }) {
+  const clip = useId()
+
   return (
     <svg
       aria-hidden="true"
-      className={cn(
-        "h-3.5 w-5 shrink-0 rounded-[2px] ring-1 ring-foreground/10 ring-inset",
-        className
-      )}
+      className={cn("h-3.5 w-5 shrink-0", className)}
       viewBox="0 0 24 16"
     >
-      {region === "eu" ? (
-        <>
-          <rect fill="#003399" height="16" width="24" />
-          <StarRing cx={12} cy={8} radius={5.333} size={0.9} />
-        </>
-      ) : (
-        <>
-          <rect fill="#FFFFFF" height="16" width="24" />
-          {[0, 2, 4, 6, 8, 10, 12].map((stripe) => (
-            <rect
-              fill="#B22234"
-              height={stripeHeight}
-              key={stripe}
-              width="24"
-              y={stripe * stripeHeight}
-            />
-          ))}
-          <rect fill="#3C3B6E" height={7 * stripeHeight} width="9.6" />
-          {cantonDots.map((dot) => (
-            <circle
-              cx={dot.cx}
-              cy={dot.cy}
-              fill="#FFFFFF"
-              key={`${dot.cx}-${dot.cy}`}
-              r="0.42"
-            />
-          ))}
-        </>
-      )}
+      <clipPath id={clip}>
+        <rect height="16" rx={flagCorner} width="24" />
+      </clipPath>
+      <g clipPath={`url(#${clip})`}>
+        {region === "eu" ? (
+          <>
+            <rect fill="#003399" height="16" width="24" />
+            <StarRing cx={12} cy={8} radius={5.333} size={0.9} />
+          </>
+        ) : (
+          <>
+            <rect fill="#FFFFFF" height="16" width="24" />
+            {[0, 2, 4, 6, 8, 10, 12].map((stripe) => (
+              <rect
+                fill="#B22234"
+                height={stripeHeight}
+                key={stripe}
+                width="24"
+                y={stripe * stripeHeight}
+              />
+            ))}
+            <rect fill="#3C3B6E" height={7 * stripeHeight} width="9.6" />
+            {cantonDots.map((dot) => (
+              <circle
+                cx={dot.cx}
+                cy={dot.cy}
+                fill="#FFFFFF"
+                key={`${dot.cx}-${dot.cy}`}
+                r="0.42"
+              />
+            ))}
+          </>
+        )}
+        {/* Two pixels wide, centred on the edge: the clip keeps the inner
+            pixel and drops the rest. */}
+        <rect
+          fill="none"
+          height="16"
+          rx={flagCorner}
+          stroke="#000000"
+          strokeOpacity="0.12"
+          strokeWidth="2"
+          vectorEffect="non-scaling-stroke"
+          width="24"
+        />
+      </g>
     </svg>
   )
 }

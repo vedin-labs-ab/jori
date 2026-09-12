@@ -18,6 +18,7 @@ vi.mock("@tanstack/react-router", () => ({
       {children}
     </a>
   ),
+  useLocation: () => "/",
 }))
 vi.mock("@/shared/region/config", () => ({
   regionConfig: { publicOrigin: "https://usejori.com" },

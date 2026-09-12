@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowUpRight, Menu } from "lucide-react"
-import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,6 +10,7 @@ import {
 import { BrandLink } from "@/shared/brand/link"
 import { regionConfig } from "@/shared/region/config"
 import { GetStarted } from "./cta"
+import { PageLink } from "./link"
 
 const signInUrl = new URL("/sign-in", regionConfig.publicOrigin).toString()
 const githubUrl = "https://github.com/vedin-labs-ab/jori"
@@ -33,28 +33,13 @@ export function LandingHeader({ onWaitlistPage }: { onWaitlistPage: boolean }) {
           className="hidden items-center text-muted-foreground text-sm sm:flex"
         >
           {navLinks.map((link) => (
-            <NavLink key={link.to} to={link.to}>
-              {link.label}
-            </NavLink>
+            <PageLink className="px-2.5" key={link.to} link={link} />
           ))}
         </nav>
         <MobileNav />
       </div>
       <HeaderActions onWaitlistPage={onWaitlistPage} />
     </header>
-  )
-}
-
-/** Padded to a 24px target box: nav links are their own targets, not words in
- *  a sentence, so the inline exception to WCAG 2.5.8 does not cover them. */
-function NavLink({ children, to }: { children: ReactNode; to: string }) {
-  return (
-    <Link
-      className="inline-flex items-center px-2.5 py-1 transition-colors hover:text-foreground"
-      to={to}
-    >
-      {children}
-    </Link>
   )
 }
 

@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router"
 import { type ReactNode, useId } from "react"
 import { cn } from "@/lib/utils"
 import { PrivacyChoices } from "@/shared/analytics/preferences"
@@ -7,16 +6,17 @@ import { wordmarkPaths } from "@/shared/brand/lettering"
 import { BrandLink } from "@/shared/brand/link"
 import { regionConfig } from "@/shared/region/config"
 import { RegionFlag, StarRing } from "@/shared/region/flags"
+import { PageLink, type PageLinkTarget, pageLinkClassName } from "./link"
 
 const signInUrl = new URL("/sign-in", regionConfig.publicOrigin).toString()
-
-type FooterLink = { label: string } & ({ href: string } | { to: string })
 
 /** Only pages that exist. Every column would be longer with pages that do
  *  not, and a footer that promises more than the site has is the first thing
  *  a careful visitor checks. The legal documents sit on the closing line
- *  instead, beside the privacy choices they describe. */
-const footerColumns: { links: FooterLink[]; title: string }[] = [
+ *  instead, beside the privacy choices they describe. That line pads its
+ *  links sideways and pulls itself back by the same amount, so the last one
+ *  still ends on the container edge. */
+const footerColumns: { links: PageLinkTarget[]; title: string }[] = [
   {
     title: "Product",
     links: [
@@ -35,18 +35,11 @@ const footerColumns: { links: FooterLink[]; title: string }[] = [
   },
 ]
 
-const legalLinks: FooterLink[] = [
+const legalLinks: PageLinkTarget[] = [
   { label: "Privacy", to: "/privacy" },
   { label: "Terms", to: "/terms" },
   { label: "DPA", href: "/dpa" },
 ]
-
-/** Padded to a 24px target box: the links stand on their own, so the inline
- *  exception to WCAG 2.5.8 does not cover them. The closing row pads them
- *  sideways as well and pulls the row back by the same amount, so the last
- *  one still ends on the container edge. */
-const footerLinkClassName =
-  "inline-flex items-center py-1 transition-colors hover:text-foreground"
 
 /**
  * The page ends as a sheet resting on the footer: the strip at the top is the
@@ -80,7 +73,7 @@ export function LandingFooter() {
                   <ul className="mt-3 text-muted-foreground text-sm">
                     {column.links.map((link) => (
                       <li key={link.label}>
-                        <FooterLink link={link} />
+                        <PageLink link={link} />
                       </li>
                     ))}
                   </ul>
@@ -93,13 +86,13 @@ export function LandingFooter() {
             <ul className="-mx-2.5 flex flex-wrap items-center">
               {legalLinks.map((link) => (
                 <li key={link.label}>
-                  <FooterLink className="px-2.5" link={link} />
+                  <PageLink className="px-2.5" link={link} />
                 </li>
               ))}
               <li>
                 <PrivacyChoices
                   className={cn(
-                    footerLinkClassName,
+                    pageLinkClassName,
                     "h-auto px-2.5 font-normal text-muted-foreground text-sm hover:no-underline"
                   )}
                 />
@@ -113,35 +106,6 @@ export function LandingFooter() {
   )
 }
 
-function FooterLink({
-  className,
-  link,
-}: {
-  className?: string
-  link: FooterLink
-}) {
-  if ("to" in link) {
-    return (
-      <Link className={cn(footerLinkClassName, className)} to={link.to}>
-        {link.label}
-      </Link>
-    )
-  }
-
-  const external = link.href.startsWith("https://")
-
-  return (
-    <a
-      className={cn(footerLinkClassName, className)}
-      href={link.href}
-      rel={external ? "noreferrer" : undefined}
-      target={external ? "_blank" : undefined}
-    >
-      {link.label}
-    </a>
-  )
-}
-
 /** The two facts the trust page opens on, worn as badges: where the data
  *  lives, and the regulation it is built for. Both link nowhere because the
  *  page that expands on them is one column over. */
@@ -149,8 +113,8 @@ function Assurances() {
   return (
     <dl className="mt-8 flex gap-8">
       <Assurance detail="Stored in your region" term="EU or US">
-        <RegionFlag className="h-6 w-8 rounded-sm ring-0" region="eu" />
-        <RegionFlag className="h-6 w-8 rounded-sm ring-0" region="us" />
+        <RegionFlag className="h-6 w-8" region="eu" />
+        <RegionFlag className="h-6 w-8" region="us" />
       </Assurance>
       <Assurance detail="Built to comply" term="GDPR">
         <GdprBadge />
