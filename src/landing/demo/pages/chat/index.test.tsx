@@ -22,7 +22,7 @@ afterEach(cleanup)
 test("sends a message from the home, works a moment, then reads the reply", async () => {
   render(<DemoConsoleAt path="/chat" />)
 
-  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("New chat")
+  expect(screen.getByRole("heading", { level: 3 }).textContent).toBe("New chat")
   expect(
     await screen.findByRole("link", {
       name: /Which renewals are at risk this month\?/,

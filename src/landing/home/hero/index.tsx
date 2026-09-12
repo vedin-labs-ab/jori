@@ -20,10 +20,10 @@ import { RenewalsThread } from "./thread"
  *  where the reader has asked for less motion. */
 const consoleClassName = cn(
   "h-[36rem]",
-  "motion-safe:[&_tr:has(a[href$=renewals])]:animate-in motion-safe:[&_tr:has(a[href$=renewals])]:fade-in-40",
-  "motion-safe:[&_tr:has(a[href$=renewals])]:direction-alternate-reverse motion-safe:[&_tr:has(a[href$=renewals])]:repeat-2",
-  "motion-safe:[&_tr:has(a[href$=renewals])]:animation-duration-400 motion-safe:[&_tr:has(a[href$=renewals])]:delay-[1900ms]",
-  "motion-safe:[&_tr:has(a[href$=renewals])]:fill-mode-both"
+  "motion-safe:[&_tr:has(a[data-console-href$=renewals])]:animate-in motion-safe:[&_tr:has(a[data-console-href$=renewals])]:fade-in-40",
+  "motion-safe:[&_tr:has(a[data-console-href$=renewals])]:direction-alternate-reverse motion-safe:[&_tr:has(a[data-console-href$=renewals])]:repeat-2",
+  "motion-safe:[&_tr:has(a[data-console-href$=renewals])]:animation-duration-400 motion-safe:[&_tr:has(a[data-console-href$=renewals])]:delay-[1900ms]",
+  "motion-safe:[&_tr:has(a[data-console-href$=renewals])]:fill-mode-both"
 )
 
 export function Hero() {

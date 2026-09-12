@@ -51,6 +51,7 @@ export function ConsoleFrame({
   className,
   contentId,
   filterStorageKey,
+  heading = "h1",
   onSidebarOpenChange,
   pathname,
   sidebar,
@@ -62,6 +63,8 @@ export function ConsoleFrame({
   contentId?: string
   /** Where the filter panel's open state is kept; left out, it is not. */
   filterStorageKey?: string
+  /** Embedded consoles sit under their host section's heading. */
+  heading?: "h1" | "h3"
   onSidebarOpenChange?: (open: boolean) => void
   pathname: string
   /** Left out, the header opens on the title: there is nothing to toggle. */
@@ -127,7 +130,11 @@ export function ConsoleFrame({
               />
             </>
           )}
-          <ConsoleHeaderTitle material={material} pathname={pathname} />
+          <ConsoleHeaderTitle
+            heading={heading}
+            material={material}
+            pathname={pathname}
+          />
           <div
             className="ml-auto flex shrink-0 items-center gap-2"
             ref={setHeaderSlot}
@@ -154,9 +161,11 @@ export function ConsoleFrame({
  *  trail, it is the page's name, so it is marked up as a heading. A view
  *  may hang a small aside off the end, divided from the trail. */
 function ConsoleHeaderTitle({
+  heading: Heading,
   material,
   pathname,
 }: {
+  heading: "h1" | "h3"
   material: MaterialBreadcrumb | undefined
   pathname: string
 }) {
@@ -169,9 +178,9 @@ function ConsoleHeaderTitle({
     // A material page before anything published renders nothing — the
     // trail appears whole rather than assembling in front of the reader.
     return isMaterialPage(pathname) ? null : (
-      <h1 className="min-w-0 truncate text-xs/relaxed">
+      <Heading className="min-w-0 truncate text-xs/relaxed">
         {getPageTitle(pathname)}
-      </h1>
+      </Heading>
     )
   }
 

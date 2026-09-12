@@ -71,7 +71,11 @@ function renderSidebar(
   return render(
     <TooltipProvider>
       <ConsoleNavigationContext.Provider
-        value={{ navigate: options.navigate ?? (() => undefined), pathname }}
+        value={{
+          anchor: "demo",
+          navigate: options.navigate ?? (() => undefined),
+          pathname,
+        }}
       >
         <DragSurface onDragStart={options.onDragStart}>
           <SidebarProvider open={options.open ?? true}>
@@ -145,7 +149,7 @@ test.each(["/chat/conversations_flaky", "/chat/conversations_flaky/"])(
       screen
         .getByRole("link", { name: "Flaky payroll test" })
         .getAttribute("href")
-    ).toBe("/chat/conversations_flaky")
+    ).toBe("#demo")
     expect(
       screen
         .getByRole("link", { name: "Flaky payroll test" })

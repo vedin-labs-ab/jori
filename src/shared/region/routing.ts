@@ -4,6 +4,10 @@ import { estimateRegion } from "./geography"
 import { isMarketingPath } from "./paths"
 import { readRegionPreference, regionPreferenceHeader } from "./preference"
 
+// Public app links select a region; unknown URLs must reach the router's 404.
+const appPath =
+  /^\/(?:chat|console|context|deletion|files|folders|integrations|jobs|runs|sign-in|sign-out|skills|stores|tables)(?:\/|$)/
+
 export function handleRegionRequest(
   request: Request,
   config: RegionConfig
@@ -69,7 +73,10 @@ function publicRequest(
     return textResponse("Misdirected request.", 421)
   }
 
-  if (isMarketingPath(requestUrl.pathname)) {
+  if (
+    isMarketingPath(requestUrl.pathname) ||
+    !appPath.test(requestUrl.pathname)
+  ) {
     return null
   }
 
@@ -190,7 +197,7 @@ function canonicalHostRedirect(
       "Cache-Control": "private, no-store",
       "Referrer-Policy": "no-referrer",
       Location: new URL(
-        isMarketingPath(requestUrl.pathname) ? requestUrl.pathname : "/sign-in",
+        appPath.test(requestUrl.pathname) ? "/sign-in" : requestUrl.pathname,
         config.publicOrigin
       ).toString(),
     },

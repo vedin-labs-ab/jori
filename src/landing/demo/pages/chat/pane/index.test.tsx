@@ -27,9 +27,11 @@ afterEach(cleanup)
 
 /** The pane's name is the way to the target's page. */
 async function expectPaneLink(pane: HTMLElement, name: string, href: string) {
-  expect(
-    (await within(pane).findByRole("link", { name })).getAttribute("href")
-  ).toBe(href)
+  const link = await within(pane).findByRole("link", { name })
+  expect(link.getAttribute("data-console-href")).toBe(href)
+  const anchor = link.getAttribute("href")
+  expect(anchor?.startsWith("#")).toBe(true)
+  expect(document.getElementById(anchor?.slice(1) ?? "")).not.toBeNull()
 }
 
 test("a reference card opens its table beside the chat, with the way to its page", async () => {
@@ -52,11 +54,11 @@ test("a reference card opens its table beside the chat, with the way to its page
     })
   ).toBeDefined()
   expect(within(pane).getByText("4 rows")).toBeDefined()
-  expect(
-    within(pane)
-      .getByRole("link", { name: "Customer renewals" })
-      .getAttribute("href")
-  ).toBe("/tables/collections_renewals")
+  await expectPaneLink(
+    pane,
+    "Customer renewals",
+    "/tables/collections_renewals"
+  )
   // The thread's own rendering of the table stays where it was.
   expect(
     screen.getAllByRole("columnheader", { name: "Customer" })

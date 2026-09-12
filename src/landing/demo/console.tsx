@@ -43,10 +43,11 @@ export function DemoConsole({
 
   return (
     <ConsoleNavigationContext.Provider value={navigation}>
-      <div className={cn(frameClassName, className)}>
+      <div className={cn(frameClassName, className)} id={navigation.anchor}>
         <DemoDragProvider>
           <ConsoleFrame
             className="h-full min-h-0"
+            heading="h3"
             onSidebarOpenChange={setSidebarOpen}
             pathname={location.pathname}
             sidebar={

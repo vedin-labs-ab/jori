@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
+
+import { readFileSync } from "node:fs"
 import { HeadContent, RouterProvider } from "@tanstack/react-router"
 import { act, render, screen } from "@testing-library/react"
 import { type ReactNode } from "react"
 import { expect, test, vi } from "vitest"
 import { regionConfig } from "@/shared/region/config"
+import { isMarketingPath } from "@/shared/region/paths"
 import { setup } from "../../test/navigation"
 import { Document } from "../../test/navigation/pages"
 
@@ -68,6 +71,7 @@ test("marketing navigation updates canonical identity and leaves app pages witho
     expect(canonical).toHaveLength(1)
     expect(canonical[0]?.getAttribute("href")).toBe(expected)
     expect(content('meta[property="og:url"]')).toBe(expected)
+    expect(content('meta[name="robots"]')).toBeUndefined()
   }
 
   expect(content('meta[name="twitter:title"]')).toBeUndefined()
@@ -76,10 +80,12 @@ test("marketing navigation updates canonical identity and leaves app pages witho
   ).toBeNull()
 
   await act(() => router.navigate({ to: "/sign-in" }))
+  expect(content('meta[name="robots"]')).toBe("noindex, nofollow")
   expect(document.querySelector('link[rel="canonical"]')).toBeNull()
   expect(document.querySelector('meta[property="og:url"]')).toBeNull()
 
   await act(() => router.navigate({ href: "/missing" }))
+  expect(content('meta[name="robots"]')).toBe("noindex, nofollow")
   expect(document.querySelector('link[rel="canonical"]')).toBeNull()
   expect(document.querySelector('meta[property="og:url"]')).toBeNull()
 })
@@ -110,4 +116,29 @@ test("home structured data points to the public Jori identity and its dedicated 
   )
   expect(organization.logo.width).toBeGreaterThanOrEqual(112)
   expect(organization.logo.height).toBe(organization.logo.width)
+})
+
+test("the published sitemap discovers every marketing page and excludes workspace URLs", () => {
+  const sitemap = readFileSync("public/sitemap.xml", "utf8")
+  const xml = new DOMParser().parseFromString(sitemap, "application/xml")
+  expect(xml.querySelector("parsererror")).toBeNull()
+  const locations = [...xml.querySelectorAll("loc")].map(
+    (loc) => new URL(loc.textContent ?? "")
+  )
+  expect(locations.length).toBeGreaterThan(0)
+  expect(new Set(locations.map((url) => url.href)).size).toBe(locations.length)
+  for (const url of locations) {
+    expect(url.origin).toBe("https://usejori.com")
+    expect(isMarketingPath(url.pathname)).toBe(true)
+    expect(url.search + url.hash).toBe("")
+  }
+  const router = setupHead("/")
+  for (const route of Object.values(router.routesById)) {
+    if (isMarketingPath(route.fullPath)) {
+      expect(locations.map((url) => url.pathname)).toContain(route.fullPath)
+    }
+  }
+  expect(readFileSync("public/robots.txt", "utf8")).toContain(
+    "Sitemap: https://usejori.com/sitemap.xml"
+  )
 })

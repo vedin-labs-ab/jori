@@ -134,7 +134,7 @@ export const Route = createRootRoute({
     return {
       meta: url
         ? [...rootMeta, { property: "og:url", content: url }]
-        : rootMeta,
+        : [...rootMeta, { name: "robots", content: "noindex, nofollow" }],
       links: url ? [...rootLinks, { rel: "canonical", href: url }] : rootLinks,
     }
   },

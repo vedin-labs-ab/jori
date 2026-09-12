@@ -78,7 +78,9 @@ test("four chats show; the rest are a search away", () => {
   }))
 
   render(
-    <ConsoleNavigationContext.Provider value={{ navigate, pathname: "/chat" }}>
+    <ConsoleNavigationContext.Provider
+      value={{ anchor: "demo", navigate, pathname: "/chat" }}
+    >
       <ChatHome
         composer={null}
         now={now}

@@ -1,9 +1,7 @@
 # https://www.robotstxt.org/robotstxt.html
 #
-# The marketing pages are the public surface, so they are the only thing left
-# open. Everything else is either behind sign-in, where a crawler reaches a
-# redirect and nothing else, or a share link, whose whole point is that it
-# travels by hand rather than by search.
+# Public pages are crawlable. App routes also send noindex metadata; these
+# blocks reduce unnecessary crawling but do not provide access control.
 User-agent: *
 Disallow: /api/
 Disallow: /console
@@ -17,3 +15,5 @@ Disallow: /sign-out
 Disallow: /skills
 Disallow: /stores
 Disallow: /tables
+
+Sitemap: https://usejori.com/sitemap.xml
