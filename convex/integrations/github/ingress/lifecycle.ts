@@ -46,7 +46,7 @@ type PushCommit = {
 }
 
 // Issue, pull request, and default-branch push changes, recorded as events
-// for deduction. Comments stay on the message path.
+// for event-triggered jobs and activity history. Comments use the message path.
 export function getGitHubLifecycleEvent(args: {
   event: string | null
   payload: LifecyclePayload

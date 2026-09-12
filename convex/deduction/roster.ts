@@ -1,5 +1,5 @@
 import { type QueryCtx } from "../_generated/server"
-import { maxRosterEntries, rosterRecencyMs } from "./limits"
+import { deductionPaused, maxRosterEntries, rosterRecencyMs } from "./limits"
 
 // The slice of the roster that grounds runs: confirmed workstreams with a
 // sighting inside the rolling window, newest sighting first, capped. Proposed
@@ -20,6 +20,10 @@ export async function confirmedWorkstreams(
   organizationId: string,
   now: number
 ) {
+  if (deductionPaused) {
+    return []
+  }
+
   const rows = await ctx.db
     .query("beliefs")
     .withIndex("by_organization_and_kind_and_status", (index) =>

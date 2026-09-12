@@ -59,17 +59,6 @@ crons.interval(
   {}
 )
 
-// Hourly heartbeat for deduction: each organization's activity window is clustered
-// into efforts, then each belief kind reviews the changed efforts, with a
-// weekly consolidation pass restructuring the roster. Quiet windows complete
-// without a judge call, so frequency only costs when there is activity.
-crons.interval(
-  "deduction pass sweep",
-  { hours: 1 },
-  internal.deduction.engine.pass.sweep,
-  {}
-)
-
 // Daily refresh of every catalog model's context window and list rate from
 // OpenRouter's listing. The loop's compaction thresholds, the meter, and the
 // console's context indicator read the rows it writes; until the first
