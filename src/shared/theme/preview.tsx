@@ -52,7 +52,7 @@ function Surface({
 
   return ground(
     <span className="relative block size-full bg-muted">
-      <span className="absolute top-[24%] right-0 bottom-0 left-[14%] block rounded-tl-lg border-t border-l bg-background pt-[5cqw] pl-[6cqw] font-semibold text-[length:clamp(0.5625rem,13cqw,1rem)] text-foreground leading-none">
+      <span className="absolute top-[24%] right-0 bottom-0 left-[14%] block rounded-tl-lg border-t border-l bg-background pt-[7cqw] pl-[8cqw] font-semibold text-[length:clamp(0.5625rem,13cqw,1rem)] text-foreground leading-none">
         Aa
       </span>
     </span>
