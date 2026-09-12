@@ -70,7 +70,7 @@ SOFTWARE.
 ## SVGL
 
 The vendor paths in `src/shared/logo/vendor.tsx` originate from
-[SVGL](https://github.com/pheralb/svgl/tree/main/static/library). The Gmail,
+[SVGL](https://github.com/pheralb/svgl/tree/main/static/library). The GitHub, Gmail,
 Google Calendar, Slack, Notion, and Linear SVG artwork in
 `public/logos/integrations/` also matches artwork distributed by SVGL.
 The SVGL project notice is reproduced below; trademark rights remain with
