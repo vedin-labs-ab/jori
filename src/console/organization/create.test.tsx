@@ -15,7 +15,10 @@ vi.mock("@/shared/session/auth", () => ({
   },
 }))
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
-vi.mock("../shared/time", () => ({ localTimezone: () => "Europe/Stockholm" }))
+vi.mock("@/shared/console/time", async (original) => ({
+  ...(await original<typeof import("@/shared/console/time")>()),
+  localTimezone: () => "Europe/Stockholm",
+}))
 
 const create = vi.mocked(authClient.organization.create)
 

@@ -36,5 +36,7 @@ jobs:
           "$RUNNER_TEMP/gitleaks" git --log-opts="--all --full-history" --redact --no-banner --ignore-gitleaks-allow
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=moderate
+      - name: Install Chromium for browser tests
+        run: pnpm exec playwright install --with-deps chromium
       - run: pnpm check
       - run: pnpm test
