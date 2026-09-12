@@ -1,0 +1,120 @@
+# Third-party notices
+
+Third-party code and assets retain their applicable licenses and notices.
+Jori's [license](LICENSE.md) does not replace those terms. The notices below
+cover identified upstream material copied into this repository. Dependencies
+installed through the package manager carry their own license terms.
+
+## shadcn/ui
+
+The shadcn/ui-derived portions of `src/components/ui/`, `src/hooks/use-mobile.ts`,
+and `src/lib/utils.ts` originate from [shadcn/ui](https://github.com/shadcn-ui/ui).
+
+[Upstream license](https://raw.githubusercontent.com/shadcn-ui/ui/main/LICENSE.md)
+
+```text
+MIT License
+
+Copyright (c) 2023 shadcn
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## Better Auth UI
+
+The Better Auth UI-derived portions of `src/components/auth/` originate from the
+[Better Auth UI registry](https://github.com/better-auth-ui/better-auth-ui).
+
+[Upstream license](https://raw.githubusercontent.com/better-auth-ui/better-auth-ui/main/LICENSE)
+
+```text
+MIT License
+
+Copyright (c) 2025 daveycodez
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## SVGL
+
+The vendor paths in `src/shared/logo/vendor.tsx` originate from
+[SVGL](https://github.com/pheralb/svgl/tree/main/static/library). The Gmail,
+Google Calendar, Slack, Notion, and Linear SVG artwork in
+`public/logos/integrations/` also matches artwork distributed by SVGL.
+The SVGL project notice is reproduced below; trademark rights remain with
+the respective owners.
+
+[Upstream license](https://raw.githubusercontent.com/pheralb/svgl/main/LICENSE)
+
+```text
+MIT License
+
+Copyright (c) 2022 Pablo Hdez
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## Geist
+
+Jori uses [Geist](https://github.com/vercel/geist-font), supplied by
+`@fontsource-variable/geist` under the SIL Open Font License 1.1. The package
+includes its copyright notice and full license in `LICENSE`. Preserve that
+license when distributing the font files.
+
+The Jori wordmark uses outlined Geist lettering generated by
+`scripts/brand/lettering.py`. The OFL does not require artwork created with a
+font to use the font's license. See the [OFL FAQ, section 1.1](https://openfontlicense.org/ofl-faq/#11-can-i-use-the-fonts-for-a-book-or-other-print-publication-to-create-logos-or-other-graphics-or-even-to-manufacture-objects-based-on-their-outlines).
+
+## Third-party brands
+
+Provider names and logos in `public/logos/` identify the corresponding
+integrations and services. They belong to their respective owners. Jori's
+license does not grant rights to those trademarks or imply endorsement.
