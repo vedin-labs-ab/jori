@@ -1,3 +1,4 @@
+import { CircleDotDashed } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { ProviderLogo } from "@/shared/logo/provider"
 import { DemoConsole } from "../demo/console"
@@ -83,35 +84,35 @@ function ActivityRecord() {
   )
 }
 
-const lines = [
-  "On: COP-73 · Tip-pooling certification",
-  "Asking Jonas which two signatures are missing",
-  "Posted as you",
-]
-
-/** An ask-first request as the requester sees it: what would run, on whose
- *  behalf, with the decision still theirs. The code is the one the prose
- *  promises, set the way the console sets one. */
+/** An ask-first request as the requester sees it: what would run, on
+ *  what, with the decision still theirs. The issue wears the mark the
+ *  Activity page gives a Linear issue, and the channel its Slack mark. */
 function ReleaseApprovalCard() {
   return (
-    <Prop hint="#eng on Slack" label="Approval requested">
+    <Prop
+      hint={
+        <span className="inline-flex items-center gap-1.5">
+          <ProviderLogo className="size-3" surface="slack" />
+          #eng on Slack
+        </span>
+      }
+      label="Approval requested"
+    >
       <div className="px-5 py-4">
         <p className="flex items-center gap-2 font-medium text-sm">
           <ProviderLogo className="size-4" surface="linear" />
           Comment on the certification issue
         </p>
         <ul className="mt-3 space-y-1.5 text-muted-foreground text-xs">
-          {lines.map((line) => (
-            <li key={line}>{line}</li>
-          ))}
+          <li className="flex items-center gap-1.5">
+            <CircleDotDashed
+              aria-hidden="true"
+              className="size-3 shrink-0 text-muted-foreground/70"
+            />
+            COP-73 · Tip-pooling certification
+          </li>
+          <li>Asking Jonas which two signatures are missing</li>
         </ul>
-        <p className="mt-3 text-muted-foreground text-xs">
-          Reply{" "}
-          <span className="rounded-sm bg-muted px-1 py-px font-medium font-mono text-foreground">
-            YD4UEFNV
-          </span>{" "}
-          in this thread, or decide here.
-        </p>
         <div aria-hidden="true" className="mt-4 flex gap-2">
           <span className={buttonVariants({ size: "default" })}>Approve</span>
           <span className={buttonVariants({ variant: "outline" })}>Deny</span>
