@@ -22,6 +22,7 @@ import { regionConfig } from "@/shared/region/config"
 import { isMarketingPath, marketingUrl } from "@/shared/region/paths"
 import { handleRegionRequest } from "@/shared/region/routing"
 import { RootStateFrame } from "@/shared/state"
+import { ThemeProvider } from "@/shared/theme"
 import appCss from "../styles.css?url"
 
 const appTitle = "Jori"
@@ -50,10 +51,7 @@ const SessionProviders = lazy(() =>
 const rootMeta: React.ComponentProps<"meta">[] = [
   { charSet: "utf-8" },
   { name: "viewport", content: "width=device-width, initial-scale=1" },
-  // The surface is white and light-only, so the browser chrome matches it
-  // rather than falling back to the browser's own grey.
-  { name: "theme-color", content: "#ffffff" },
-  { name: "color-scheme", content: "light" },
+  { name: "color-scheme", content: "light dark" },
   { title: appTitle },
   { name: "description", content: appDescription },
   { property: "og:title", content: appTitle },
@@ -205,20 +203,37 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   )
 
   return (
-    <html lang="en">
+    // The theme script sets the root class before React hydrates, so the
+    // server's class-less `html` is expected to differ.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        {/* One per scheme, so the browser chrome matches the page ground
+            rather than falling back to its own grey. They sit outside the
+            route head because it keeps one meta per name. */}
+        <meta
+          content="#ffffff"
+          media="(prefers-color-scheme: light)"
+          name="theme-color"
+        />
+        <meta
+          content="#0a0a0a"
+          media="(prefers-color-scheme: dark)"
+          name="theme-color"
+        />
       </head>
       <body>
-        <Analytics>
-          {usesSessionProvider ? (
-            <Suspense fallback={<FullscreenSkeletonLoader />}>
-              <SessionProviders>{content}</SessionProviders>
-            </Suspense>
-          ) : (
-            content
-          )}
-        </Analytics>
+        <ThemeProvider>
+          <Analytics>
+            {usesSessionProvider ? (
+              <Suspense fallback={<FullscreenSkeletonLoader />}>
+                <SessionProviders>{content}</SessionProviders>
+              </Suspense>
+            ) : (
+              content
+            )}
+          </Analytics>
+        </ThemeProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",
