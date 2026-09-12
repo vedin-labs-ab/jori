@@ -66,36 +66,36 @@ export const evented: EventedSource[] = [
 export const manual: ManualSource[] = [
   {
     title: "Compare our pricing against three competitors",
-    person: "tobias@vedinlabs.com",
+    person: "tobias@vedinlabs.example",
     day: 30,
   },
   {
     title: "Draft the Holmberg security questionnaire answers",
-    person: "priya@vedinlabs.com",
+    person: "priya@vedinlabs.example",
     folder: "Support",
     day: 11,
   },
   {
     title: "Which accounts renew before December?",
-    person: "johan@vedinlabs.com",
+    person: "johan@vedinlabs.example",
     folder: "Customers",
     day: 13,
   },
   {
     title: "Summarize what the March release changed for customers",
-    person: "elin@vedinlabs.com",
+    person: "elin@vedinlabs.example",
     folder: "Releases",
     day: 9,
   },
   {
     title: "Reconcile the August card statement against the vendor table",
-    person: "johan@vedinlabs.com",
+    person: "johan@vedinlabs.example",
     folder: "Vendors",
     day: 7,
   },
   {
     title: "What did we promise Kessler during the security review?",
-    person: "tobias@vedinlabs.com",
+    person: "tobias@vedinlabs.example",
     day: 4,
   },
 ]

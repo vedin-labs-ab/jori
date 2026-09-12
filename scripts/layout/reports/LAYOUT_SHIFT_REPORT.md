@@ -77,6 +77,6 @@ corrected and its five tests passed. The final landing runs `pnpm check` and
 [Layout conventions](../../../docs/layout.md) and the
 [recorder instructions](../README.md) describe the shared rules and repeatable
 commands. Raw screenshots and traces remain under the ignored
-`/Users/albin/Code/jori/dist/layout-hunt` directory because signed-in captures can
+`dist/layout-hunt` directory because signed-in captures can
 contain development data. Auth session files remain ignored. No production
 shipment was requested or performed.

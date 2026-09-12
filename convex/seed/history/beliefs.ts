@@ -82,7 +82,7 @@ async function writeEffort(
     seenAt,
     anchors: effort.anchors,
     personIds: effort.people.flatMap((handle) => {
-      const personId = refs.people.get(`${handle}@vedinlabs.com`)
+      const personId = refs.people.get(`${handle}@vedinlabs.example`)
 
       return personId === undefined ? [] : [personId]
     }),

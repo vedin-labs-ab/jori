@@ -125,7 +125,7 @@ function messageItems(seed: SeedContext) {
         trigger: "message",
         mention: message.text,
         surface: "slack",
-        person: `${message.author}@vedinlabs.com`,
+        person: `${message.author}@vedinlabs.example`,
         channel: message.channel,
         status: "completed",
         durationMs: 0,

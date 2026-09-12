@@ -2,7 +2,7 @@
 
 ## Context
 
-This is discovery only. No product source or shared probe/driver changed. Worktree is `/Users/albin/.worktrees/jori/layout-shell`, branch `task/layout-shell`, created with `pnpm task layout-shell` in the primary checkout.
+This is discovery only. No product source or shared probe/driver changed. Worktree is `<worktree>/layout-shell`, branch `task/layout-shell`, created with `pnpm task layout-shell` in the primary checkout.
 
 The app uses React 19, TanStack Start SSR and file routes, Vite 8, Convex realtime data, Better Auth with React Query, shadcn components over Radix/Base UI, Tailwind 4 and tw-animate-css. Most motion is utility-based opacity/transform; sidebar controls include explicit width transitions and sign-in uses a WebGL canvas. The single Geist variable Latin font is preloaded by root head and uses `font-display: swap` without metric-adjusted fallback in `src/styles.css`.
 

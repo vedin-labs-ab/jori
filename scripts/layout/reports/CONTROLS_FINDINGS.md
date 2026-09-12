@@ -4,13 +4,13 @@ V3 review progress: 16 profile series and 96 frames examined, including the befo
 
 Final-run review progress: 552 profile series and 3276 frames examined, including the before frame where present.
 
-The final run uses frozen lead commit `9eddd142` and one Chromium browser. Earlier concurrent runs remain supplemental evidence and do not establish final coverage. Preliminary measurements from `2aa45283` are archived under `preflight-partial/controls`; preliminary observations below require remeasurement before a final pass/fail claim. Current raw evidence is written to `/Users/albin/Code/jori/dist/layout-hunt/before/controls`. This slice uses `scripts/layout/scenarios/shards/controls.json`: 196 original cases from C081 onward plus the supplemental cases listed in the coverage table, each scheduled for cold and warm runs at 1440×900 and 375×812. Explicitly unavailable states and intentional breakpoint restrictions remain coverage records. Fixture writes occur only in each scenario's in-memory DemoConsole context; live app recipes are read-only.
+The final run uses frozen lead commit `9eddd142` and one Chromium browser. Earlier concurrent runs remain supplemental evidence and do not establish final coverage. Preliminary measurements from `2aa45283` are archived under `preflight-partial/controls`; preliminary observations below require remeasurement before a final pass/fail claim. Current raw evidence is written to `dist/layout-hunt/before/controls`. This slice uses `scripts/layout/scenarios/shards/controls.json`: 196 original cases from C081 onward plus the supplemental cases listed in the coverage table, each scheduled for cold and warm runs at 1440×900 and 375×812. Explicitly unavailable states and intentional breakpoint restrictions remain coverage records. Fixture writes occur only in each scenario's in-memory DemoConsole context; live app recipes are read-only.
 
-Raw evidence is under `/Users/albin/Code/jori/dist/layout-hunt/before/controls/<scenario>/<condition>-<width>/`. Each completed execution records before/action geometry, 0/250/1000/3000 ms and settled frames, all LayoutShift entries including recent input, rect replacements/resizes and scroll deltas. The actual image capture times in `record.json` govern frame timing. `screenshotElapsed` is relative to sampling start after the action returns; `msAfterAction` is relative to the browser action marker before the click. They are reported separately and are not interchangeable. A contact sheet is a review aid; it does not replace the raw images.
+Raw evidence is under `dist/layout-hunt/before/controls/<scenario>/<condition>-<width>/`. Each completed execution records before/action geometry, 0/250/1000/3000 ms and settled frames, all LayoutShift entries including recent input, rect replacements/resizes and scroll deltas. The actual image capture times in `record.json` govern frame timing. `screenshotElapsed` is relative to sampling start after the action returns; `msAfterAction` is relative to the browser action marker before the click. They are reported separately and are not interchangeable. A contact sheet is a review aid; it does not replace the raw images.
 
 This file is preliminary. No UI fix has been made and this report does not establish the phase 3 completion gate.
 
-Occurrence index: `/Users/albin/Code/jori/dist/layout-hunt/CONTROLS_OCCURRENCES.json` groups every reviewed finding occurrence by cause, exact inventory ID/profile, source paths, status, recorded native/rect values and explicit PNG pairs. The coverage CSV uses the same cause IDs.
+Occurrence index: `dist/layout-hunt/CONTROLS_OCCURRENCES.json` groups every reviewed finding occurrence by cause, exact inventory ID/profile, source paths, status, recorded native/rect values and explicit PNG pairs. The coverage CSV uses the same cause IDs.
 
 ## Confirmed root causes
 
@@ -22,7 +22,7 @@ Source: `src/shared/console/stores/value/autosave.ts:13` schedules validation af
 
 Reproduction: C081-empty clears `[id="value.rolloutPercent"]`. C081-clear starts from that settled error and fills a valid value. All eight profiles reproduce. At mobile width, the `frozen` row changes `(x=0,y=159,w=375,h=37)` → `(0,186.5,375,37)`; desktop is `(256,159,1184,37)` → `(256,186.5,1184,37)`. Correction reverses the y delta. No scroll delta is recorded.
 
-Evidence pair: [1000 ms before error](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C081-empty/cold-375/1000.png) → [3000 ms error visible](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C081-empty/cold-375/3000.png). Reverse pair: [error before correction](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C081-clear/cold-375/before.png) → [immediate corrected field](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C081-clear/cold-375/0.png). Exact geometry and event attribution are in each `record.json`.
+Evidence pair: [1000 ms before error](dist/layout-hunt/before/controls/C081-empty/cold-375/1000.png) → [3000 ms error visible](dist/layout-hunt/before/controls/C081-empty/cold-375/3000.png). Reverse pair: [error before correction](dist/layout-hunt/before/controls/C081-clear/cold-375/before.png) → [immediate corrected field](dist/layout-hunt/before/controls/C081-clear/cold-375/0.png). Exact geometry and event attribution are in each `record.json`.
 
 | Case | Profile | Event after action | LayoutShift value | Recent input |
 | --- | --- | ---: | ---: | --- |
@@ -73,7 +73,7 @@ Desktop before rect is `(432,280.25,576,339.5)`, then warm first sample is empty
 | Cold 375 | 19 ms | 43 ms | 268 / 292 ms | Empty handle strip, then strip near bottom |
 | Warm 375 | 8 ms | 22 ms | 257 / 272 ms | Empty handle strip, then strip near bottom |
 
-Evidence: [desktop before](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C085-schema-close/warm-1440/before.png) → [desktop empty bar](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C085-schema-close/warm-1440/0.png); [mobile before](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C085-schema-close/cold-375/before.png) → [mobile empty strip](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C085-schema-close/cold-375/0.png) → [strip exiting](/Users/albin/Code/jori/dist/layout-hunt/before/controls/C085-schema-close/cold-375/250.png). Occurrence: 4/4 final profiles, all 24 frames reviewed under final digest `44d5b4a789…`.
+Evidence: [desktop before](dist/layout-hunt/before/controls/C085-schema-close/warm-1440/before.png) → [desktop empty bar](dist/layout-hunt/before/controls/C085-schema-close/warm-1440/0.png); [mobile before](dist/layout-hunt/before/controls/C085-schema-close/cold-375/before.png) → [mobile empty strip](dist/layout-hunt/before/controls/C085-schema-close/cold-375/0.png) → [strip exiting](dist/layout-hunt/before/controls/C085-schema-close/cold-375/250.png). Occurrence: 4/4 final profiles, all 24 frames reviewed under final digest `44d5b4a789…`.
 
 C089-remove (Remove schema commit) exercises the same premature close cleanup and visibly reproduces the empty desktop bar/mobile strip in all four profiles. Its underlying value switches to read-only JSON within the existing content region; the separate defect claimed here is the closing modal collapse. Evidence: `before/controls/C089-remove/{cold,warm}-{1440,375}/{before.png,0.png,record.json}`. All 24 frames reviewed. CF-02 now has eight final profile occurrences across C085-schema-close and C089-remove.
 
@@ -196,7 +196,7 @@ Desktop C134 Account open/close, Security/return, C135 Organization open/close, 
 
 ## Coverage
 
-The live per-profile [coverage table](/Users/albin/Code/jori/dist/layout-hunt/CONTROLS_COVERAGE.md) and [CSV](/Users/albin/Code/jori/dist/layout-hunt/CONTROLS_COVERAGE.csv) distinguish pending, reviewed, unavailable and retry-required records. Current recipe corrections are documented in `controls-review-final/recipe-failures.json`; they do not alter the frozen measurement code. An unavailable record is not a zero-shift measurement; a selector failure is not an unavailable product state.
+The live per-profile [coverage table](dist/layout-hunt/CONTROLS_COVERAGE.md) and [CSV](dist/layout-hunt/CONTROLS_COVERAGE.csv) distinguish pending, reviewed, unavailable and retry-required records. Current recipe corrections are documented in `controls-review-final/recipe-failures.json`; they do not alter the frozen measurement code. An unavailable record is not a zero-shift measurement; a selector failure is not an unavailable product state.
 
 ## Environment and capture limitations discovered during live settings
 
@@ -361,7 +361,7 @@ Strong pairs: `before-v3/controls/C134-mobile-billing-exit/warm-375/{before.png,
 
 The V3 series' remaining candidates are portal exit transforms/removal and the existing ChatHome placeholder typing inside its reserved input slot. No additional page-flow or late scroll change was found. C134-mobile-teams-exit/cold-375 has an interrupted browser-close error and no complete measured series; it is retained without a pass claim.
 
-Coverage links are in `/Users/albin/Code/jori/dist/layout-hunt/CONTROLS_COVERAGE_LINKS.json`. They distinguish preflight reachability, actual recorded profiles, and cases skipped after the user's scope change. C143/C146 no longer claim General or People is unavailable. Destructive organization/membership actions remain unexercised.
+Coverage links are in `dist/layout-hunt/CONTROLS_COVERAGE_LINKS.json`. They distinguish preflight reachability, actual recorded profiles, and cases skipped after the user's scope change. C143/C146 no longer claim General or People is unavailable. Destructive organization/membership actions remain unexercised.
 
 ## Best-effort implementation
 
@@ -394,11 +394,11 @@ The lead reviewed every frame from six representative profiles on the integrated
 
 | Cause | Inventory/profile | Result |
 | --- | --- | --- |
-| CF-01 | [C081-empty/warm-375](/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/record.json) | Required-error line remains reserved. Native0. |
-| CF-02 | [C085-schema-close/warm-375](/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/record.json) | Schema fields remain visible through exit at PNG70ms. Native0. |
-| CF-06 | [C109-one-time/cold-375](/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/record.json) | Fallback and loaded controls share bounds. Native0.042952 belongs to requested tab replacement. |
-| CF-11 | [C124-create/warm-375](/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/record.json) | Draft remains visible during exit at PNG32ms. Native0.012541 remains from insertion/table sizing. |
-| CF-25 | [C134-mobile-billing-exit/warm-375](/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/record.json) | Billing remains visible through exit at PNG75ms. Native0. |
-| CF-23 | [C171-timeline-open/warm-375](/Users/albin/Code/jori/dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/record.json) | Skeleton and loaded receipt keep later Kessler row fixed. Native0.062701 belongs to requested initial expansion. |
+| CF-01 | [C081-empty/warm-375](dist/layout-hunt/after/chat-controls-by-root/C081-empty/warm-375/record.json) | Required-error line remains reserved. Native0. |
+| CF-02 | [C085-schema-close/warm-375](dist/layout-hunt/after/chat-controls-by-root/C085-schema-close/warm-375/record.json) | Schema fields remain visible through exit at PNG70ms. Native0. |
+| CF-06 | [C109-one-time/cold-375](dist/layout-hunt/after/chat-controls-by-root/C109-one-time/cold-375/record.json) | Fallback and loaded controls share bounds. Native0.042952 belongs to requested tab replacement. |
+| CF-11 | [C124-create/warm-375](dist/layout-hunt/after/chat-controls-by-root/C124-create/warm-375/record.json) | Draft remains visible during exit at PNG32ms. Native0.012541 remains from insertion/table sizing. |
+| CF-25 | [C134-mobile-billing-exit/warm-375](dist/layout-hunt/after/chat-controls-by-root/C134-mobile-billing-exit/warm-375/record.json) | Billing remains visible through exit at PNG75ms. Native0. |
+| CF-23 | [C171-timeline-open/warm-375](dist/layout-hunt/after/chat-controls-by-root/C171-timeline-open/warm-375/record.json) | Skeleton and loaded receipt keep later Kessler row fixed. Native0.062701 belongs to requested initial expansion. |
 
 CF13, CF19, CF20 and CF21 have implementation and focused/static checks but were outside the six-profile after pass. The controls agent independently reviewed12 shell after profiles/70PNGs in `SHELL_INDEPENDENT_CONTROLS.json`; that pass confirms the personal-integration headline remains a partial fix.

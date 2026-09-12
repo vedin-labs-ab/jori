@@ -38,7 +38,7 @@ export async function seedFolders(ctx: MutationCtx, seed: SeedContext) {
   const ownerId = await resolveOwner(ctx, seed)
   const owners = await resolveOwners(ctx, seed)
   const people = await resolvePeople(ctx, seed)
-  const founders = [ownerId, people.get("mia@vedinlabs.com")].filter(
+  const founders = [ownerId, people.get("mia@vedinlabs.example")].filter(
     (personId) => personId !== undefined
   )
   const written = new Map<string, Id<"folders">>()

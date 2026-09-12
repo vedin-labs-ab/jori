@@ -6,18 +6,18 @@ All12 captures and70 PNGs were reviewed. Browser is closed. The targeted correct
 
 | Scenario | Profile | Result | Evidence |
 | --- | --- | --- | --- |
-| C156-personal | cold-375 | residual-confirmed | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/cold-375/record.json) |
-| C156-personal | warm-1440 | not-reproduced-at-this-profile | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/record.json) |
-| C156-return | cold-375 | targeted-cause-stable | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/cold-375/record.json) |
-| C156-return | warm-1440 | targeted-cause-stable | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/C156-return/warm-1440/record.json) |
-| shell-auth-google-pending | cold-375 | targeted-cause-stable | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/record.json) |
-| shell-auth-google-pending | warm-1440 | targeted-cause-stable | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/record.json) |
-| shell-live-usage-30-to-7 | cold-375 | targeted-cause-stable-with-existing-motion | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/record.json) |
-| shell-live-usage-30-to-7 | warm-1440 | targeted-cause-stable-with-existing-motion | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/record.json) |
-| shell-route-home-enter | cold-375 | targeted-cause-stable | [5 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/record.json) |
-| shell-route-home-enter | warm-1440 | targeted-cause-stable | [5 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/record.json) |
-| shell-waitlist-email-error | cold-375 | targeted-cause-stable | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/record.json) |
-| shell-waitlist-email-error | warm-1440 | targeted-cause-stable | [6 reviewed frames](/Users/albin/Code/jori/dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/record.json) |
+| C156-personal | cold-375 | residual-confirmed | [6 reviewed frames](dist/layout-hunt/after/shell-controls/C156-personal/cold-375/record.json) |
+| C156-personal | warm-1440 | not-reproduced-at-this-profile | [6 reviewed frames](dist/layout-hunt/after/shell-controls/C156-personal/warm-1440/record.json) |
+| C156-return | cold-375 | targeted-cause-stable | [6 reviewed frames](dist/layout-hunt/after/shell-controls/C156-return/cold-375/record.json) |
+| C156-return | warm-1440 | targeted-cause-stable | [6 reviewed frames](dist/layout-hunt/after/shell-controls/C156-return/warm-1440/record.json) |
+| shell-auth-google-pending | cold-375 | targeted-cause-stable | [6 reviewed frames](dist/layout-hunt/after/shell-controls/shell-auth-google-pending/cold-375/record.json) |
+| shell-auth-google-pending | warm-1440 | targeted-cause-stable | [6 reviewed frames](dist/layout-hunt/after/shell-controls/shell-auth-google-pending/warm-1440/record.json) |
+| shell-live-usage-30-to-7 | cold-375 | targeted-cause-stable-with-existing-motion | [6 reviewed frames](dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/cold-375/record.json) |
+| shell-live-usage-30-to-7 | warm-1440 | targeted-cause-stable-with-existing-motion | [6 reviewed frames](dist/layout-hunt/after/shell-controls/shell-live-usage-30-to-7/warm-1440/record.json) |
+| shell-route-home-enter | cold-375 | targeted-cause-stable | [5 reviewed frames](dist/layout-hunt/after/shell-controls/shell-route-home-enter/cold-375/record.json) |
+| shell-route-home-enter | warm-1440 | targeted-cause-stable | [5 reviewed frames](dist/layout-hunt/after/shell-controls/shell-route-home-enter/warm-1440/record.json) |
+| shell-waitlist-email-error | cold-375 | targeted-cause-stable | [6 reviewed frames](dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/cold-375/record.json) |
+| shell-waitlist-email-error | warm-1440 | targeted-cause-stable | [6 reviewed frames](dist/layout-hunt/after/shell-controls/shell-waitlist-email-error/warm-1440/record.json) |
 
 ## C156-personal
 

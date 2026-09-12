@@ -11,12 +11,12 @@
       "note": "Customer renewals remains in Name during modal exit. No native shifts. Mobile first PNG47ms clearly retains text.",
       "sources": ["src/shared/console/materials/dialogs/edit.tsx"],
       "sourcePaths": [
-        "/Users/albin/Code/jori/src/shared/console/materials/dialogs/edit.tsx"
+        "src/shared/console/materials/dialogs/edit.tsx"
       ],
       "profiles": [
         {
           "profile": "warm-1440",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -25,44 +25,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/0.png",
               "geometryMs": 46,
               "pngMs": 116
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/250.png",
               "geometryMs": 290,
               "pngMs": 292
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/1000.png",
               "geometryMs": 1037,
               "pngMs": 1039
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/3000.png",
               "geometryMs": 3066,
               "pngMs": 3084
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/settled.png",
               "geometryMs": 3588,
               "pngMs": 3588
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/0.png"
+            "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/before.png",
+            "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-1440/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -93,7 +93,7 @@
         },
         {
           "profile": "warm-375",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -102,44 +102,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/0.png",
               "geometryMs": 24,
               "pngMs": 47
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/250.png",
               "geometryMs": 266,
               "pngMs": 279
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/1000.png",
               "geometryMs": 1019,
               "pngMs": 1023
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/3000.png",
               "geometryMs": 3029,
               "pngMs": 3033
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/settled.png",
               "geometryMs": 3561,
               "pngMs": 3561
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/0.png"
+            "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/before.png",
+            "dist/layout-hunt/after/root-by-chat/C035-edit-close/warm-375/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -180,13 +180,13 @@
         "src/shared/console/list/frame.tsx"
       ],
       "sourcePaths": [
-        "/Users/albin/Code/jori/src/shared/console/materials/dialogs/create.tsx",
-        "/Users/albin/Code/jori/src/shared/console/list/frame.tsx"
+        "src/shared/console/materials/dialogs/create.tsx",
+        "src/shared/console/list/frame.tsx"
       ],
       "profiles": [
         {
           "profile": "warm-1440",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -195,44 +195,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/0.png",
               "geometryMs": 71,
               "pngMs": 130
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/250.png",
               "geometryMs": 318,
               "pngMs": 320
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/1000.png",
               "geometryMs": 1039,
               "pngMs": 1061
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/3000.png",
               "geometryMs": 3054,
               "pngMs": 3057
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/settled.png",
               "geometryMs": 3592,
               "pngMs": 3592
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/0.png"
+            "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/before.png",
+            "dist/layout-hunt/after/root-by-chat/C051-table/warm-1440/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -263,7 +263,7 @@
         },
         {
           "profile": "warm-375",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -272,44 +272,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/0.png",
               "geometryMs": 26,
               "pngMs": 49
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/250.png",
               "geometryMs": 270,
               "pngMs": 302
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/1000.png",
               "geometryMs": 1035,
               "pngMs": 1052
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/3000.png",
               "geometryMs": 3017,
               "pngMs": 3021
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/settled.png",
               "geometryMs": 3550,
               "pngMs": 3550
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C051-table/warm-375/0.png"
+            "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/before.png",
+            "dist/layout-hunt/after/root-by-chat/C051-table/warm-375/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -350,13 +350,13 @@
         "src/shared/console/tables/grid/index.tsx"
       ],
       "sourcePaths": [
-        "/Users/albin/Code/jori/src/shared/console/tables/add.tsx",
-        "/Users/albin/Code/jori/src/shared/console/tables/grid/index.tsx"
+        "src/shared/console/tables/add.tsx",
+        "src/shared/console/tables/grid/index.tsx"
       ],
       "profiles": [
         {
           "profile": "warm-1440",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -365,44 +365,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/0.png",
               "geometryMs": 51,
               "pngMs": 174
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/250.png",
               "geometryMs": 311,
               "pngMs": 316
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/1000.png",
               "geometryMs": 1049,
               "pngMs": 1053
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/3000.png",
               "geometryMs": 3053,
               "pngMs": 3059
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/settled.png",
               "geometryMs": 3598,
               "pngMs": 3598
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/0.png"
+            "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/before.png",
+            "dist/layout-hunt/after/root-by-chat/C069-add/warm-1440/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -433,7 +433,7 @@
         },
         {
           "profile": "warm-375",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -442,44 +442,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/0.png",
               "geometryMs": 24,
               "pngMs": 41
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/250.png",
               "geometryMs": 285,
               "pngMs": 321
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/1000.png",
               "geometryMs": 1016,
               "pngMs": 1022
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/3000.png",
               "geometryMs": 3031,
               "pngMs": 3042
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/settled.png",
               "geometryMs": 3547,
               "pngMs": 3547
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C069-add/warm-375/0.png"
+            "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/before.png",
+            "dist/layout-hunt/after/root-by-chat/C069-add/warm-375/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -517,12 +517,12 @@
       "note": "New column title, Type selector and Add column action stay in create mode throughout visible exit. Mobile PNG194ms shows retained form. Native0; remaining rects are exiting Sheet.",
       "sources": ["src/shared/console/tables/sheet.tsx"],
       "sourcePaths": [
-        "/Users/albin/Code/jori/src/shared/console/tables/sheet.tsx"
+        "src/shared/console/tables/sheet.tsx"
       ],
       "profiles": [
         {
           "profile": "warm-1440",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -531,44 +531,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/0.png",
               "geometryMs": 130,
               "pngMs": 226
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/250.png",
               "geometryMs": 335,
               "pngMs": 340
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/1000.png",
               "geometryMs": 1094,
               "pngMs": 1106
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/3000.png",
               "geometryMs": 3153,
               "pngMs": 3165
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/settled.png",
               "geometryMs": 3731,
               "pngMs": 3731
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/0.png"
+            "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/before.png",
+            "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-1440/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -599,7 +599,7 @@
         },
         {
           "profile": "warm-375",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -608,44 +608,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/0.png",
               "geometryMs": 39,
               "pngMs": 194
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/250.png",
               "geometryMs": 293,
               "pngMs": 305
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/1000.png",
               "geometryMs": 1021,
               "pngMs": 1037
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/3000.png",
               "geometryMs": 3072,
               "pngMs": 3079
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/settled.png",
               "geometryMs": 3618,
               "pngMs": 3618
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/0.png"
+            "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/before.png",
+            "dist/layout-hunt/after/root-by-chat/C073-new-close/warm-375/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -686,13 +686,13 @@
         "src/shared/console/list/frame.tsx"
       ],
       "sourcePaths": [
-        "/Users/albin/Code/jori/src/shared/console/list/head.tsx",
-        "/Users/albin/Code/jori/src/shared/console/list/frame.tsx"
+        "src/shared/console/list/head.tsx",
+        "src/shared/console/list/frame.tsx"
       ],
       "profiles": [
         {
           "profile": "warm-1440",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -701,44 +701,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/0.png",
               "geometryMs": 245,
               "pngMs": 377
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/250.png",
               "geometryMs": 374,
               "pngMs": 459
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/1000.png",
               "geometryMs": 1108,
               "pngMs": 1136
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/3000.png",
               "geometryMs": 3178,
               "pngMs": 3186
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/settled.png",
               "geometryMs": 3823,
               "pngMs": 3823
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/0.png"
+            "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/before.png",
+            "dist/layout-hunt/after/root-by-chat/C012-clear/warm-1440/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -779,13 +779,13 @@
         "src/shared/console/list/bar.tsx"
       ],
       "sourcePaths": [
-        "/Users/albin/Code/jori/src/shared/console/list/pager.tsx",
-        "/Users/albin/Code/jori/src/shared/console/list/bar.tsx"
+        "src/shared/console/list/pager.tsx",
+        "src/shared/console/list/bar.tsx"
       ],
       "profiles": [
         {
           "profile": "warm-1440",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -794,44 +794,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/0.png",
               "geometryMs": 36,
               "pngMs": 80
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/250.png",
               "geometryMs": 352,
               "pngMs": 417
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/1000.png",
               "geometryMs": 1049,
               "pngMs": 1063
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/3000.png",
               "geometryMs": 3048,
               "pngMs": 3057
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/settled.png",
               "geometryMs": 3666,
               "pngMs": 3666
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/0.png"
+            "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/before.png",
+            "dist/layout-hunt/after/root-by-chat/C030-files/warm-1440/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -862,7 +862,7 @@
         },
         {
           "profile": "warm-375",
-          "record": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/record.json",
+          "record": "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/record.json",
           "harness": "7bd0f4b7935def55b1b1686eb0ab475f9ae4ccc8f473d2069a9df9e40f7f6b21",
           "error": null,
           "pageErrors": [],
@@ -871,44 +871,44 @@
           "frames": [
             {
               "name": "before",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/before.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/before.png",
               "geometryMs": null,
               "pngMs": null
             },
             {
               "name": "0",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/0.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/0.png",
               "geometryMs": 9,
               "pngMs": 25
             },
             {
               "name": "250",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/250.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/250.png",
               "geometryMs": 264,
               "pngMs": 281
             },
             {
               "name": "1000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/1000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/1000.png",
               "geometryMs": 1007,
               "pngMs": 1024
             },
             {
               "name": "3000",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/3000.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/3000.png",
               "geometryMs": 3009,
               "pngMs": 3017
             },
             {
               "name": "settled",
-              "path": "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/settled.png",
+              "path": "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/settled.png",
               "geometryMs": 3525,
               "pngMs": 3525
             }
           ],
           "evidencePair": [
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/before.png",
-            "/Users/albin/Code/jori/dist/layout-hunt/after/root-by-chat/C030-files/warm-375/0.png"
+            "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/before.png",
+            "dist/layout-hunt/after/root-by-chat/C030-files/warm-375/0.png"
           ],
           "actionDeltaCounts": [
             {
@@ -940,5 +940,5 @@
       ]
     }
   ],
-  "fullEvidence": "/Users/albin/Code/jori/dist/layout-hunt/after/ROOT_BY_CHAT_REVIEW.json"
+  "fullEvidence": "dist/layout-hunt/after/ROOT_BY_CHAT_REVIEW.json"
 }
