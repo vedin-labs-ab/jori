@@ -1,10 +1,15 @@
 // @vitest-environment jsdom
 import { HeadContent, RouterProvider } from "@tanstack/react-router"
-import { act, render } from "@testing-library/react"
+import { act, render, screen } from "@testing-library/react"
 import { type ReactNode } from "react"
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import { regionConfig } from "@/shared/region/config"
 import { setup } from "../../test/navigation"
+import { Document } from "../../test/navigation/pages"
+
+// Vitest does not emit CSS assets. Represent the missing asset as undefined
+// so this metadata fixture neither emits an empty href nor waits for a load.
+vi.mock("../styles.css?url", () => ({ default: undefined }))
 
 function setupHead(path: string) {
   const router = setup(path)
@@ -12,7 +17,7 @@ function setupHead(path: string) {
     shellComponent: ({ children }: { children: ReactNode }) => (
       <>
         <HeadContent />
-        {children}
+        <Document>{children}</Document>
       </>
     ),
   })
@@ -28,6 +33,7 @@ test("home previews use the page headline and one accessible image across social
   render(<RouterProvider router={router} />)
 
   await act(() => router.load())
+  expect(await screen.findByTestId("page")).toBeDefined()
 
   expect(content('meta[property="og:title"]')).toBe(document.title)
   expect(content('meta[name="twitter:title"]')).toBe(document.title)
@@ -53,6 +59,7 @@ test("marketing navigation updates canonical identity and leaves app pages witho
   const router = setupHead("/?utm_source=launch")
   render(<RouterProvider router={router} />)
   await act(() => router.load())
+  expect(await screen.findByTestId("page")).toBeDefined()
 
   for (const path of ["/", "/pricing", "/trust", "/privacy", "/terms"]) {
     await act(() => router.navigate({ href: `${path}?utm_source=launch` }))
@@ -81,6 +88,7 @@ test("home structured data points to the public Jori identity and its dedicated 
   const router = setupHead("/")
   render(<RouterProvider router={router} />)
   await act(() => router.load())
+  expect(await screen.findByTestId("page")).toBeDefined()
 
   const script = document.querySelector('script[type="application/ld+json"]')
   const data = JSON.parse(script?.textContent ?? "null")

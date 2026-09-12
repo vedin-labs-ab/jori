@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, expect, test } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { ConsolePageBoundary } from "./boundary"
 
 let fails = true
@@ -15,19 +15,24 @@ afterEach(() => {
 /** The boundary around a page that throws on data it did not expect, until
  *  `fails` is cleared. */
 function renderPage(pathname: string) {
+  const error = new Error(message)
+  const onCaughtError = vi.fn()
   function Page() {
     if (fails) {
-      throw new Error(message)
+      throw error
     }
 
     return <>Table content</>
   }
 
-  return render(
+  const view = render(
     <ConsolePageBoundary resetKey={pathname}>
       <Page />
-    </ConsolePageBoundary>
+    </ConsolePageBoundary>,
+    { onCaughtError }
   )
+  expect(onCaughtError.mock.calls.map(([caught]) => caught)).toEqual([error])
+  return view
 }
 
 test("clears the failure on navigation, without a reload", () => {

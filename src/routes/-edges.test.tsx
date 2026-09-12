@@ -33,17 +33,20 @@ test.each(["search", "reload"])(
   "%s recovers a failed page without resetting the shell",
   async (navigation) => {
     const router = setup("/runs")
+    const error = new Error("Invalid run")
+    const onCaughtError = vi.fn()
     let fails = true
     router.routesById["/_workspace/runs"].update({
       component: () => {
         if (fails) {
-          throw new Error("Invalid run")
+          throw error
         }
         return <div>Recovered page</div>
       },
     })
-    render(<RouterProvider router={router} />)
+    render(<RouterProvider router={router} />, { onCaughtError })
     await screen.findByText("This page didn't load")
+    expect(onCaughtError.mock.calls.map(([caught]) => caught)).toEqual([error])
     const header = document.querySelector("header")
     fails = false
     await act(async () => {

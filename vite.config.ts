@@ -47,7 +47,7 @@ function hostingOptions() {
 }
 
 const reactOrAccessibilityWarning =
-  /Blocked aria-hidden|Each child in a list should have a unique|validateDOMNesting|A component is changing an? (?:un)?controlled|Cannot update a component while rendering|does not recognize the .* prop on a DOM element|Received `(?:true|false)` for a non-boolean attribute/
+  /An empty string .* was passed to the (?:href|src) attribute|must be used within .*Provider|Blocked aria-hidden|Each child in a list should have a unique|validateDOMNesting|A component is changing an? (?:un)?controlled|Cannot update a component while rendering|does not recognize the .* prop on a DOM element|Received `(?:true|false)` for a non-boolean attribute/
 
 const config = defineConfig({
   build: {
