@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { targetKey } from "../chat/types"
+import { targetKey } from "../references"
 import { findActiveMention } from "./active"
 import { mentionText } from "./node"
 import {

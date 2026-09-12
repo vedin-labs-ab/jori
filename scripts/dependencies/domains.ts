@@ -73,6 +73,41 @@ export const domainRules = [
     to: { path: "^convex/integrations/" },
   },
   {
+    name: "session-policy-does-not-import-console",
+    severity: "error",
+    comment:
+      "Session persistence and reconciliation use conversation execution policy, not console adapters.",
+    from: {
+      path: "^convex/(?:sessions/|conversations/execution/(?:principal|sharing)[.]ts$)",
+    },
+    to: { path: "^convex/[^/]+/console(?:/|[.]ts$)" },
+  },
+  {
+    name: "run-visibility-does-not-import-console",
+    severity: "error",
+    comment: "Run authorization owns its policy; console filters consume it.",
+    from: { path: "^convex/runs/visibility[.]ts$" },
+    to: { path: "^convex/[^/]+/console(?:/|[.]ts$)" },
+  },
+  {
+    name: "mentions-and-references-do-not-import-chat",
+    severity: "error",
+    comment:
+      "References and mentions serve chat and job editors without importing chat internals.",
+    from: { path: "^src/shared/console/(?:mentions|references)/" },
+    to: { path: "^src/shared/console/chat/" },
+  },
+  {
+    name: "blaxel-sdk-stays-in-adapter",
+    severity: "error",
+    comment: "Sandbox consumers use the adapter's normalized operations.",
+    from: {
+      path: "^convex/",
+      pathNot: "^convex/runtime/sandbox/blaxel/",
+    },
+    to: { path: "^node_modules/@blaxel/core(?:/|$)" },
+  },
+  {
     name: "runtime-platform-contract-does-not-import-implementation",
     severity: "error",
     comment:
@@ -89,7 +124,10 @@ export const domainRules = [
     comment:
       "Tools and traces use the platform interface; only assembly selects its concrete implementation.",
     from: { path: "^convex/runtime/(?:tools|trace)/" },
-    to: { path: "^convex/runtime/platform/(?:index|action)[.]ts$" },
+    to: {
+      path: "^convex/runtime/platform/",
+      pathNot: "^convex/runtime/platform/types[.]ts$",
+    },
   },
   {
     name: "shared-does-not-import-domains",

@@ -2,9 +2,9 @@ import { beforeEach, expect, test, vi } from "vitest"
 import { id } from "../../../test/convex/database"
 import { type ActionCtx } from "../../_generated/server"
 import { openSandbox } from "./blaxel"
-import { connectSandbox, createSandbox, killSandbox } from "./support"
+import { connectSandbox, createSandbox, killSandbox } from "./blaxel/client"
 
-vi.mock("./support", () => ({
+vi.mock("./blaxel/client", () => ({
   connectSandbox: vi.fn(),
   createSandbox: vi.fn(),
   killSandbox: vi.fn(),

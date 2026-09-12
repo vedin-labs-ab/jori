@@ -1,5 +1,7 @@
 import { v } from "convex/values"
-import { type Doc, type Id } from "../../_generated/dataModel"
+import { type Doc } from "../../_generated/dataModel"
+import { conversationVisibility } from "../../conversations/access"
+import { type QueryLikeCtx } from "../../shared/context"
 
 export type RunFilter = "all" | "ongoing" | "failed" | "stopped" | "completed"
 
@@ -46,21 +48,6 @@ export const approvalFilterValidator = v.union(
   v.literal("none")
 )
 
-/**
- * The console shows organization runs to everyone; person and conversation
- * runs only to their creator. Ownerless rows stay open.
- */
-export function runVisibleToPerson(
-  run: Doc<"runs">,
-  personId: Id<"persons"> | undefined
-) {
-  return (
-    run.audience === "organization" ||
-    run.createdBy === undefined ||
-    run.createdBy === personId
-  )
-}
-
 export function runMatchesFilter(run: Doc<"runs">, filter: RunFilter) {
   if (filter === "all") {
     return true
@@ -88,16 +75,6 @@ export function approvalMatchesFilter(
   return approvalState === filter
 }
 
-export function parseCursor(cursor: string | null) {
-  if (cursor === null) {
-    return 0
-  }
-
-  const parsed = Number.parseInt(cursor, 10)
-
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
-}
-
 export function normalizeQuery(query: string) {
   return query.trim().toLowerCase()
 }
@@ -111,64 +88,22 @@ export function summaryMatchesSearch(
   )
 }
 
-/** One page of the candidates that match, past the ones earlier pages
- *  served. Deciding whether a candidate matches may already build its
- *  row; the page keeps that row rather than building it again, and a
- *  candidate the offset skips is never built at all. */
-export type PageScan<Candidate, Row> = {
-  offset: number
-  numItems: number
-  match: (candidate: Candidate) => Promise<{ row?: Row } | null>
-  row: (candidate: Candidate) => Promise<Row>
-}
-
-export async function scanPage<Candidate, Row>(
-  candidates: AsyncIterable<Candidate>,
-  scan: PageScan<Candidate, Row>
+/** The console's facet follows the chat's live personal/workspace setting. */
+export async function runMatchesVisibilityFilter(
+  ctx: QueryLikeCtx,
+  run: Doc<"runs">,
+  filter: RunAudienceFilter
 ) {
-  const rows: Row[] = []
-  let matchingIndex = 0
-  let hasMore = false
-
-  for await (const candidate of candidates) {
-    const match = await scan.match(candidate)
-
-    if (match === null) {
-      continue
-    }
-
-    if (matchingIndex < scan.offset) {
-      matchingIndex += 1
-      continue
-    }
-
-    if (rows.length >= scan.numItems) {
-      hasMore = true
-      break
-    }
-
-    rows.push(match.row ?? (await scan.row(candidate)))
-    matchingIndex += 1
+  if (filter === "all") {
+    return true
   }
-
-  return {
-    continueCursor: String(scan.offset + rows.length),
-    isDone: !hasMore,
-    page: rows,
-  }
-}
-
-export async function countMatches<Candidate>(
-  candidates: AsyncIterable<Candidate>,
-  matches: (candidate: Candidate) => Promise<boolean>
-) {
-  let count = 0
-
-  for await (const candidate of candidates) {
-    if (await matches(candidate)) {
-      count += 1
-    }
-  }
-
-  return count
+  const conversation =
+    run.conversationId === undefined
+      ? null
+      : await ctx.db.get(run.conversationId)
+  const shared =
+    conversation?.surface === "console"
+      ? conversationVisibility(conversation).mode !== "private"
+      : run.audience === "organization"
+  return filter === "organization" ? shared : !shared
 }

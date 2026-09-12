@@ -10,8 +10,12 @@ import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
 } from "../../materials/breadcrumb"
-import { referencePresentation } from "../presentation"
-import { type ChatReference, type ReferenceTarget, targetKey } from "../types"
+import {
+  type ReferenceTarget,
+  type ReferenceView,
+  targetKey,
+} from "../../references"
+import { referencePresentation } from "../../references/presentation"
 import { PaneHeader } from "./header"
 import { PaneHint } from "./hint"
 import { PaneStrip, type PaneStripProps } from "./strip"
@@ -166,7 +170,7 @@ function PaneContent({
 }: {
   content: ReactNode
   isUnavailable: boolean
-  reference: ChatReference | undefined
+  reference: ReferenceView | undefined
   target: ReferenceTarget
 }) {
   const [crumb, setCrumb] = useState<MaterialBreadcrumb>()
@@ -197,7 +201,7 @@ function PaneEmpty({
   target,
 }: {
   isUnavailable: boolean
-  reference: ChatReference | undefined
+  reference: ReferenceView | undefined
   target: ReferenceTarget
 }) {
   const presentation = referencePresentation(target.kind, reference?.name ?? "")

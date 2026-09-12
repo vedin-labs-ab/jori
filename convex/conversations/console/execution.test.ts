@@ -1,9 +1,9 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { transactionalConsoleContext } from "../../../test/convex/conversations"
 import { listOrganizationViewerIds } from "../../visibility/audience"
+import { transitionConversationVisibility } from "../execution/sharing"
 import { recentConversation } from "../history/index"
 import { sendConsoleMessage } from "./send"
-import { transitionConversationVisibility } from "./sharing"
 
 vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 vi.mock("../../visibility/audience", () => ({

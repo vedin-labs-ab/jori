@@ -1,13 +1,11 @@
-import { beforeEach, expect, test, vi } from "vitest"
+import { expect, test, vi } from "vitest"
 import { toolResponseSchemas } from "../../../../contracts/tools/responses"
 import { schemaViolations } from "../../../../test/convex/schema"
 import { createRuntime } from "../../../../test/runtime"
 import { type AgentRuntime } from "../../platform/types"
 import { type SandboxRuntime } from "../../sandbox/types"
 import { generateImageFile } from "./index"
-import { generateVertexImage } from "./vertex"
 
-vi.mock("./vertex", () => ({ generateVertexImage: vi.fn() }))
 const imageBytes = new Uint8Array(6 * 1024 * 1024)
 const usage = {
   model: "google/gemini-3.1-flash-image",
@@ -17,20 +15,15 @@ const usage = {
   tokens: { input: 17, output: 1120 },
 }
 
-beforeEach(() => {
-  vi.mocked(generateVertexImage).mockResolvedValue({
-    image: { bytes: imageBytes, mimeType: "image/png" },
-    usage,
-  })
-})
-
 test("generates a regional image, accounts for it and saves it as a file", async () => {
   const runtime = imageRuntime()
   const result = await generateImageFile(runtime, {
     prompt: "A product hero image.",
     save: { name: "hero" },
   })
-  expect(generateVertexImage).toHaveBeenCalledWith("A product hero image.")
+  expect(runtime.platform.generateImage).toHaveBeenCalledWith(
+    "A product hero image."
+  )
   expect(runtime.platform.recordUsage).toHaveBeenCalledWith(usage)
   expect(runtime.sandbox.importFile).toHaveBeenCalledWith({
     fileId: "file_1",
@@ -61,12 +54,12 @@ test.each([
 ])(
   "accounts for a missing image before reporting its failure: %s",
   async (failure) => {
-    vi.mocked(generateVertexImage).mockResolvedValue({
+    const runtime = imageRuntime()
+    vi.mocked(runtime.platform.generateImage).mockResolvedValue({
       image: null,
       usage,
       failure,
     })
-    const runtime = imageRuntime()
     await expect(
       generateImageFile(runtime, { prompt: "Create an image." })
     ).rejects.toThrow(failure ?? "Vertex did not return a generated image.")
@@ -113,10 +106,15 @@ test("retains the saved file and charge when the sandbox copy fails", async () =
 })
 
 function imageRuntime(): AgentRuntime {
-  return createRuntime({
+  const runtime = createRuntime({
     sandbox: {
       writeFiles: vi.fn(async () => undefined),
       importFile: vi.fn(async () => undefined),
     } as unknown as SandboxRuntime,
   })
+  vi.mocked(runtime.platform.generateImage).mockResolvedValue({
+    image: { bytes: imageBytes, mimeType: "image/png" },
+    usage,
+  })
+  return runtime
 }

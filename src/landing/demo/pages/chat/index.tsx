@@ -17,8 +17,6 @@ import {
   type ChatMessage,
   type ChatRun,
   isLiveRun,
-  type ReferenceTarget,
-  type ResolveReference,
 } from "@/shared/console/chat/types"
 import { ChatWorking } from "@/shared/console/chat/working"
 import { type MentionSources } from "@/shared/console/mentions/sources"
@@ -26,6 +24,10 @@ import { ActivityTimeline } from "@/shared/console/runs/activity/item"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
+import {
+  type ReferenceTarget,
+  type ResolveReference,
+} from "../../../../shared/console/references"
 import { chatViews, liveActivity, resolveReference } from "../../derive/chat"
 import { mentionSources } from "../../derive/mentions"
 import {

@@ -1,8 +1,9 @@
 import { memo } from "react"
 import { Markdown } from "../../markdown"
 import { type MentionCatalog } from "../../mentions/scan"
+import { type ResolveReference } from "../../references"
 import { type OpenTarget } from "../pane/tabs"
-import { type ChatMessage, type ResolveReference } from "../types"
+import { type ChatMessage } from "../types"
 import { JoriMessage, MessageActions, PersonMessage } from "./message"
 import { type ChooseHandler, ReplyParts } from "./parts"
 

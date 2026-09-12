@@ -4,8 +4,12 @@ import { MentionChip } from "../mentions/chip"
 import { MentionKindIcon } from "../mentions/icon"
 import { type MentionKind, parseResourceMention } from "../mentions/scan"
 import { mentionTones } from "../mentions/tone"
-import { referencePresentation } from "./presentation"
-import { type ReferenceTarget, type ResolveReference, targetKey } from "./types"
+import {
+  type ReferenceTarget,
+  type ResolveReference,
+  targetKey,
+} from "../references"
+import { referencePresentation } from "../references/presentation"
 
 /** One of a chat's mentions as a chip, in the composer and in the thread
  *  alike: a resource by the name the host resolves it to, or as its kind

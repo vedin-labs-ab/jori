@@ -1,5 +1,5 @@
 import { type Doc } from "../_generated/dataModel"
-import { conversationExecutionScope } from "../conversations/console/principal"
+import { conversationExecutionScope } from "../conversations/execution/principal"
 import { type QueryLikeCtx } from "../shared/context"
 import { findSession } from "./data"
 

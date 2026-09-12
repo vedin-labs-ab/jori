@@ -1,7 +1,7 @@
 import { MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { type ReferenceTarget } from "../../references"
 import { ConsoleLink } from "../../shell/link"
-import { type ReferenceTarget } from "../types"
 import { chatDestination } from "./context"
 
 /** The way from a resource's page into a chat about it: a header action

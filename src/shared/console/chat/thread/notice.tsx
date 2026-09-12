@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react"
 import { type ReactNode } from "react"
+import { referenceDestination } from "../../references/presentation"
 import { ConsoleLink } from "../../shell/link"
-import { referenceDestination } from "../presentation"
 import { type ChatRun } from "../types"
 
 // Under the turns, what a run did besides reply: quiet, in the thread's

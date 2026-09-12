@@ -1,26 +1,26 @@
 "use node"
 
 import { SandboxInstance, settings } from "@blaxel/core"
-import {
-  assertSandboxRegion,
-  sandboxConnection,
-  sandboxImage,
-} from "./blaxel/connection"
-import { compactFailure } from "./output"
-import { sandboxClonePath, shellQuote } from "./path"
+import { compactFailure } from "../output"
+import { sandboxClonePath, shellQuote } from "../path"
 import {
   commandDirectory,
   gitCloneCommand,
   gitCredentialHelperScript,
   temporaryGitCredentialPath,
   workspaceBootstrapCommand,
-} from "./script"
+} from "../script"
 import {
   type SandboxCloneRepositoryInput,
   type SandboxCommandInput,
   type SandboxCommandResult,
   type SandboxWriteFile,
-} from "./types"
+} from "../types"
+import {
+  assertSandboxRegion,
+  sandboxConnection,
+  sandboxImage,
+} from "./connection"
 
 export type BlaxelSandbox = SandboxInstance
 export const defaultCommandTimeoutMs = 20 * 60 * 1000

@@ -10,7 +10,7 @@ import { useDemoWorkspace } from "@/landing/demo/workspace"
 import { ChatPane } from "@/shared/console/chat/pane"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { usePaneTabs } from "@/shared/console/chat/pane/tabs"
-import { type ReferenceTarget } from "@/shared/console/chat/types"
+import { type ReferenceTarget } from "../../../src/shared/console/references"
 import { delay } from "./service"
 
 export function PaneState({

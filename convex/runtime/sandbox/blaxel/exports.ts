@@ -11,7 +11,7 @@ import { internalAction } from "../../../_generated/server"
 import { uploadRunFile } from "../../../files/upload"
 import { openSandbox } from "../blaxel"
 import { sandboxFilePath } from "../path"
-import { type BlaxelSandbox, readSandboxFile, sandboxName } from "../support"
+import { type BlaxelSandbox, readSandboxFile, sandboxName } from "./client"
 import { sandboxFileInfo } from "./files"
 
 /** File bytes stay in Node and regional storage, never an action result. */

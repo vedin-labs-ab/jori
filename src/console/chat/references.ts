@@ -1,15 +1,15 @@
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { referencePresentation } from "@/shared/console/chat/presentation"
+import { type ChatMessage } from "@/shared/console/chat/types"
+import { referencePresentation } from "@/shared/console/references/presentation"
+import { api } from "../../../convex/_generated/api"
 import {
-  type ChatMessage,
-  type ChatReference,
   type ReferenceTarget,
+  type ReferenceView,
   type ResolveReference,
   targetKey,
-} from "@/shared/console/chat/types"
-import { api } from "../../../convex/_generated/api"
+} from "../../shared/console/references"
 
 type ResolvedReference = FunctionReturnType<
   typeof api.messages.references.resolve
@@ -73,7 +73,7 @@ export function useReferenceTargets(
   targets: ReferenceTarget[]
 ): ResolveReference {
   const [known, setKnown] = useState(
-    () => new Map<string, ChatReference | undefined>()
+    () => new Map<string, ReferenceView | undefined>()
   )
   const unnamed = targets.filter((target) => !known.has(targetKey(target)))
   const resolved = useQuery(
@@ -119,6 +119,6 @@ function toChatReference(reference: ResolvedReference) {
 }
 
 /** A target still being looked up reads as its kind, openable already. */
-function pending(target: ReferenceTarget): ChatReference {
+function pending(target: ReferenceTarget): ReferenceView {
   return { ...target, name: referencePresentation(target.kind, "").label }
 }

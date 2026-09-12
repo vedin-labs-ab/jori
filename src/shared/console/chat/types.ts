@@ -2,7 +2,7 @@ import {
   type ChoicesAnswer,
   type MessageContext,
 } from "@contracts/replies/answers"
-import { type ReferenceKind, type ReplyPart } from "@contracts/replies/parts"
+import { type ReplyPart } from "@contracts/replies/parts"
 import { type VisibilityMode } from "@contracts/visibility"
 
 // What the chat views read. The console maps its rows to these and the
@@ -58,37 +58,6 @@ export type ChatDraft = {
   reasoning: string
   text: string
 }
-
-/** What a reference part or a message's context points at. */
-export type ReferenceTarget = {
-  kind: ReferenceKind
-  id: string
-}
-
-/** One string per target — `kind:id`, as a resource token carries it —
- *  for keys, tab values, and mention ids. */
-export function targetKey(target: ReferenceTarget) {
-  return `${target.kind}:${target.id}`
-}
-
-export function isSameTarget(left: ReferenceTarget, right: ReferenceTarget) {
-  return left.kind === right.kind && left.id === right.id
-}
-
-/** A target as the host resolved it, for the card that shows it. */
-export type ChatReference = {
-  kind: ReferenceKind
-  id: string
-  name: string
-  /** One line under the name: where it is filed, what it holds. */
-  detail?: string
-  /** The host knows the target but can no longer open it. */
-  unavailable?: boolean
-}
-
-export type ResolveReference = (
-  target: ReferenceTarget
-) => ChatReference | undefined
 
 /** The latest message of a role: the person's, which the thread anchors
  *  on, or Jori's, whose references a reply may open. */

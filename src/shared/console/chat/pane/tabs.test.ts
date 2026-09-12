@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, renderHook } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { type ReferenceTarget } from "../types"
+import { type ReferenceTarget } from "../../references"
 import { usePaneTabs } from "./tabs"
 
 const table: ReferenceTarget = { kind: "table", id: "t1" }

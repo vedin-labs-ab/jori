@@ -7,7 +7,7 @@ import {
   type MentionSuggestion,
 } from "../../mentions/sources"
 import { type SuggestionState } from "../../mentions/suggest/state"
-import { type ResolveReference } from "../types"
+import { type ResolveReference } from "../../references"
 
 export type ComposerSuggestionState = SuggestionState<MentionSuggestion>
 

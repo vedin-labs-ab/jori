@@ -4,8 +4,8 @@ import { type ReactNode, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { InputGroupAddon } from "@/components/ui/input-group"
 import { MentionSuggestions } from "../../mentions/suggest/listbox"
-import { referencePresentation } from "../presentation"
-import { type ChatReference } from "../types"
+import { type ReferenceView } from "../../references"
+import { referencePresentation } from "../../references/presentation"
 import { type useComposerEditor } from "./editor"
 
 type Composer = ReturnType<typeof useComposerEditor>
@@ -70,7 +70,7 @@ export function ComposerContext({
   reference,
 }: {
   onClear: (() => void) | undefined
-  reference: ChatReference | undefined
+  reference: ReferenceView | undefined
 }) {
   const [hasContext, setHasContext] = useState(reference !== undefined)
   if (reference !== undefined && !hasContext) {
@@ -98,7 +98,7 @@ export function ContextChip({
   reference,
 }: {
   onClear: (() => void) | undefined
-  reference: ChatReference
+  reference: ReferenceView
 }) {
   const { icon: Icon, label } = referencePresentation(
     reference.kind,

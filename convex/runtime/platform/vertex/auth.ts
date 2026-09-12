@@ -1,9 +1,9 @@
-import { isRecord } from "../../../../../contracts/json"
+import { isRecord } from "../../../../contracts/json"
 import {
   base64DecodeBytes,
   base64UrlEncode,
   base64UrlEncodeBytes,
-} from "../../../../shared/encoding"
+} from "../../../shared/encoding"
 
 type Credentials = { clientEmail: string; privateKey: string }
 type Token = Credentials & { value: string; expiresAt: number }

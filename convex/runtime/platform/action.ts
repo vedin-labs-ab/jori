@@ -64,6 +64,11 @@ export class ActionPlatform implements RuntimePlatform {
     })
   }
 
+  generateImage = async (prompt: string) => {
+    const { generateVertexImage } = await import("./vertex")
+    return await generateVertexImage(prompt)
+  }
+
   listTranscript = () =>
     this.query(internal.runs.execution.transcript.records.list, {
       runId: this.runId,

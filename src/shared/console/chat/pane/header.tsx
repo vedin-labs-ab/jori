@@ -9,9 +9,12 @@ import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../dot"
 import { type MaterialBreadcrumb } from "../../materials/breadcrumb"
 import { SaveIcon, type SaveState } from "../../materials/save"
+import { type ReferenceTarget, type ReferenceView } from "../../references"
+import {
+  referenceDestination,
+  referencePresentation,
+} from "../../references/presentation"
 import { ConsoleLink } from "../../shell/link"
-import { referenceDestination, referencePresentation } from "../presentation"
-import { type ChatReference, type ReferenceTarget } from "../types"
 
 /** Under the strip, what the active tab holds: the target's icon, its
  *  name as the way to its own page, and its kind, so the pane is never
@@ -25,7 +28,7 @@ export function PaneHeader({
 }: {
   /** What the body published for the shell's breadcrumb, caught here. */
   crumb: MaterialBreadcrumb | undefined
-  reference: ChatReference | undefined
+  reference: ReferenceView | undefined
   target: ReferenceTarget
 }) {
   const presentation = referencePresentation(target.kind, reference?.name ?? "")

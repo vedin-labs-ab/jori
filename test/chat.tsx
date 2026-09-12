@@ -7,9 +7,9 @@ import { ChatDraftTurn } from "@/shared/console/chat/thread/draft"
 import {
   type ChatDraft,
   type ChatMessage,
-  type ChatReference,
   type ChatRun,
 } from "@/shared/console/chat/types"
+import { type ReferenceView } from "../src/shared/console/references"
 
 /**
  * A conversation to render the chat thread over in component tests: a
@@ -19,7 +19,7 @@ import {
  */
 
 export const now = 1_700_000_000_000
-export const table: ChatReference = {
+export const table: ReferenceView = {
   kind: "table",
   id: "collections_renewals",
   name: "Customer renewals",

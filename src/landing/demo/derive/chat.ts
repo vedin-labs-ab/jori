@@ -1,10 +1,10 @@
-import {
-  type ChatConversation,
-  type ChatReference,
-  type ReferenceTarget,
-} from "@/shared/console/chat/types"
+import { type ChatConversation } from "@/shared/console/chat/types"
 import { moveTarget, resourceSubject } from "@/shared/console/folders/types"
 import { type ActivityItem } from "@/shared/console/runs/activity/types"
+import {
+  type ReferenceTarget,
+  type ReferenceView,
+} from "../../../shared/console/references"
 import { type DemoConversation } from "../fixtures/chat"
 import { log } from "../fixtures/runs/steps"
 import { type DemoState } from "../state/types"
@@ -25,7 +25,7 @@ export function chatViews(state: DemoState): ChatConversation[] {
 export function resolveReference(
   state: DemoState,
   target: ReferenceTarget
-): ChatReference | undefined {
+): ReferenceView | undefined {
   const { id, kind } = target
 
   switch (kind) {

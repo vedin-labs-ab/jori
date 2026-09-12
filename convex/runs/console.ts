@@ -4,24 +4,24 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { resolveConsolePerson } from "../persons/account"
+import { countMatches, scanPage } from "../shared/pagination"
+import { parseCursor } from "../shared/pagination/cursor"
 import {
   type ApprovalFilter,
   approvalFilterValidator,
   approvalMatchesFilter,
   audienceFilterValidator,
-  countMatches,
   normalizeQuery,
-  parseCursor,
   type RunAudienceFilter,
   type RunFilter,
   runFilterValidator,
   runMatchesFilter,
-  scanPage,
+  runMatchesVisibilityFilter,
   summaryMatchesSearch,
 } from "./console/filters"
 import { countPendingApprovals, pagePendingApprovals } from "./console/pending"
 import { type RunSummary, summarizeRun } from "./console/summaries"
-import { canSeeRun, runMatchesVisibilityFilter } from "./visibility"
+import { canSeeRun } from "./visibility"
 
 /** What the listing keeps: the runs a person may see, under the facets
  *  and search the page shows. */

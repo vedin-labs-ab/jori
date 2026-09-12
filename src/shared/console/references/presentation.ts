@@ -2,7 +2,7 @@ import { type ReferenceKind } from "@contracts/replies/parts"
 import { Folder, type LucideIcon, Timeline } from "lucide-react"
 import { resourceDestination, resourcePresentation } from "../folders/types"
 import { type ConsoleDestination } from "../shell/location"
-import { type ReferenceTarget } from "./types"
+import { type ReferenceTarget } from "./index"
 
 /** References share the icons and nouns used by their resource lists. */
 export function referencePresentation(

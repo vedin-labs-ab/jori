@@ -5,7 +5,7 @@ import { Text } from "@tiptap/extension-text"
 import { UndoRedo } from "@tiptap/extensions"
 import { ReactNodeViewRenderer } from "@tiptap/react"
 import { MentionNode } from "../../mentions/node"
-import { type ResolveReference } from "../types"
+import { type ResolveReference } from "../../references"
 import { ComposerMentionView } from "./node"
 
 export type ComposerMentionOptions = {

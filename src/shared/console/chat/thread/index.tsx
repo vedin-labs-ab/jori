@@ -14,6 +14,7 @@ import {
   emptyMentionSources,
   type MentionSources,
 } from "../../mentions/sources"
+import { type ResolveReference } from "../../references"
 import { type OpenTarget } from "../pane/tabs"
 import {
   type ChatContextUsage,
@@ -21,7 +22,6 @@ import {
   type ChatRun,
   isLiveRun,
   lastMessage,
-  type ResolveReference,
 } from "../types"
 import { answerAuthors, answeredParts, answeringMessages } from "./answers"
 import { CondensedNotice } from "./notice"

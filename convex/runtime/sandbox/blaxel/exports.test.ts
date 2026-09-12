@@ -8,9 +8,9 @@ import { internal } from "../../../_generated/api"
 import { type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
 import { openSandbox } from "../blaxel"
-import { readSandboxFile } from "../support"
+import { readSandboxFile } from "./client"
 
-vi.mock("../support", () => ({
+vi.mock("./client", () => ({
   readSandboxFile: vi.fn(),
   sandboxName: (sandbox: { metadata: { name: string } }) =>
     sandbox.metadata.name,

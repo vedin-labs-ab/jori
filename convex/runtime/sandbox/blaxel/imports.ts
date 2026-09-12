@@ -9,7 +9,7 @@ import { internal } from "../../../_generated/api"
 import { internalAction } from "../../../_generated/server"
 import { openSandbox } from "../blaxel"
 import { sandboxFilePath } from "../path"
-import { sandboxName } from "../support"
+import { sandboxName } from "./client"
 
 /** Keep large bytes in storage, never in a Convex action argument or result. */
 export const file = internalAction({

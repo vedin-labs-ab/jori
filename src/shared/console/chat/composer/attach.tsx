@@ -23,8 +23,8 @@ import {
   type MentionSuggestion,
   resourceSuggestion,
 } from "../../mentions/sources"
-import { referencePresentation } from "../presentation"
-import { targetKey } from "../types"
+import { targetKey } from "../../references"
+import { referencePresentation } from "../../references/presentation"
 
 /** The kinds the menu lists, in the order they are reached for. */
 const attachKinds: readonly ReferenceKind[] = [

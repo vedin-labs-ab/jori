@@ -16,7 +16,7 @@ import {
   startSandboxCommand,
   waitForCommand,
   writeSandboxFiles,
-} from "../support"
+} from "./client"
 import { sandboxConnection } from "./connection"
 import { sandboxFileInfo } from "./files"
 

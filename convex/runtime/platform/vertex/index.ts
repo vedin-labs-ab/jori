@@ -1,16 +1,11 @@
-import { type ProviderUsage } from "../../../../../contracts/billing"
-import { isRecord } from "../../../../../contracts/json"
-import { base64DecodeBytes } from "../../../../shared/encoding"
+import { isRecord } from "../../../../contracts/json"
+import { base64DecodeBytes } from "../../../shared/encoding"
+import { type GeneratedImage } from "../types"
 import { vertexAccessToken } from "./auth"
 import { imageModel, vertexConfiguration } from "./config"
 import { vertexUsage } from "./usage"
 
-type Image = { bytes: Uint8Array; mimeType: string }
-export type GeneratedImage = {
-  image: Image | null
-  usage: ProviderUsage
-  failure?: string
-}
+type Image = NonNullable<GeneratedImage["image"]>
 
 export async function generateVertexImage(
   prompt: string

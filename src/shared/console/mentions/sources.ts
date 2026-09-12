@@ -7,8 +7,8 @@ import {
   type MentionResource,
   type MessageContext,
 } from "@contracts/replies/answers"
-import { referencePresentation } from "../chat/presentation"
-import { targetKey } from "../chat/types"
+import { targetKey } from "../references"
+import { referencePresentation } from "../references/presentation"
 import { type ActiveMention } from "./active"
 import { rankByName } from "./rank"
 import {

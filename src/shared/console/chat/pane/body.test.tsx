@@ -13,9 +13,9 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { ask, reply, table } from "../../../../../test/chat"
 import { type FolderContentsResult } from "../../folders/types"
 import { MaterialBreadcrumbContext } from "../../materials/breadcrumb"
+import { type ReferenceTarget, type ReferenceView } from "../../references"
 import { makeExecution } from "../../runs/fixtures"
 import { type StoreDetail } from "../../stores/types"
-import { type ChatReference, type ReferenceTarget } from "../types"
 import { ChatPane, type ChatPaneProps } from "."
 import { ChatPaneBody } from "./body"
 import { type OpenTarget } from "./tabs"
@@ -47,7 +47,7 @@ function renderPane({
   ...overrides
 }: Partial<ChatPaneProps> & {
   content: ReactNode
-  reference: ChatReference
+  reference: ReferenceView
 }) {
   const active: ReferenceTarget = { kind: reference.kind, id: reference.id }
 

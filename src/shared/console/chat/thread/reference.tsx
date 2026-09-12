@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../dot"
+import { type ReferenceTarget, type ReferenceView } from "../../references"
+import { referencePresentation } from "../../references/presentation"
 import { type OpenTarget } from "../pane/tabs"
-import { referencePresentation } from "../presentation"
-import { type ChatReference, type ReferenceTarget } from "../types"
 
 const cardClassName =
   "flex w-fit max-w-full min-w-0 items-center gap-2 rounded-md border bg-background px-2.5 py-1.5 text-left text-xs"
@@ -18,7 +18,7 @@ export function ReferenceCard({
   target,
 }: {
   onOpen: OpenTarget
-  reference: ChatReference | undefined
+  reference: ReferenceView | undefined
   target: ReferenceTarget
 }) {
   const presentation = referencePresentation(target.kind, reference?.name ?? "")

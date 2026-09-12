@@ -7,8 +7,8 @@ import {
   createMentionCatalog,
   emptyMentionSources,
 } from "../../mentions/sources"
+import { type ResolveReference } from "../../references"
 import { type OpenTarget } from "../pane/tabs"
-import { type ResolveReference } from "../types"
 import { PersonMessage } from "./message"
 
 afterEach(cleanup)

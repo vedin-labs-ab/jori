@@ -1,6 +1,6 @@
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { referencePresentation } from "../../chat/presentation"
+import { referencePresentation } from "../../references/presentation"
 import { MentionKindIcon } from "../icon"
 import { type MentionSuggestion } from "../sources"
 import { type SuggestionState } from "./state"

@@ -1,7 +1,7 @@
 "use node"
 
 import { shellQuote } from "../path"
-import { type BlaxelSandbox, runSandboxCommand } from "../support"
+import { type BlaxelSandbox, runSandboxCommand } from "./client"
 
 /** lstat exposes symlinks; the provider's directory listing does not. */
 export async function sandboxFileInfo(sandbox: BlaxelSandbox, path: string) {

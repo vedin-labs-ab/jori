@@ -1,15 +1,15 @@
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { canSeeRun, runMatchesVisibilityFilter } from "../visibility"
+import { countMatches, scanPage } from "../../shared/pagination"
+import { parseCursor } from "../../shared/pagination/cursor"
+import { canSeeRun } from "../visibility"
 import {
-  countMatches,
   normalizeQuery,
-  parseCursor,
   type RunAudienceFilter,
   type RunFilter,
   runMatchesFilter,
-  scanPage,
+  runMatchesVisibilityFilter,
   summaryMatchesSearch,
 } from "./filters"
 import { summarizeRun } from "./summaries"

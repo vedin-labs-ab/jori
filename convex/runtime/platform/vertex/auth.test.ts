@@ -4,7 +4,7 @@ import {
   base64DecodeBytes,
   base64EncodeBytes,
   base64UrlDecode,
-} from "../../../../shared/encoding"
+} from "../../../shared/encoding"
 
 const fetchMock = vi.fn()
 beforeEach(() => {

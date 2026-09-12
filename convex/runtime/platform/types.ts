@@ -23,6 +23,12 @@ import {
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
 import { type SandboxRuntime } from "../sandbox/types"
 
+export type GeneratedImage = {
+  image: { bytes: Uint8Array; mimeType: string } | null
+  usage: ProviderUsage
+  failure?: string
+}
+
 export type GitHubCloneCredentials = {
   remoteUrl: string
   token: string
@@ -99,6 +105,7 @@ export type RuntimePlatform = {
   executeApproval(args: ApprovalRef & RunRef): Promise<ApprovalExecution>
   fetchGitHubCloneCredentials(args: CloneArgs): Promise<GitHubCloneCredentials>
   finishRun(args: { result: string }): Promise<void>
+  generateImage(prompt: string): Promise<GeneratedImage>
   listTranscript(): Promise<TranscriptMessage[]>
   loadRunHandoffs(args: RunRef): Promise<RunHandoffs>
   markApprovalConsumed(args: ApprovalConsumption): Promise<void>

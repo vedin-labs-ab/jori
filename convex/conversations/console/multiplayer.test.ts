@@ -3,8 +3,8 @@ import { transactionalConsoleContext } from "../../../test/convex/conversations"
 import { findSession } from "../../sessions/data"
 import { drainSession } from "../../sessions/drain"
 import { listOrganizationViewerIds } from "../../visibility/audience"
+import { transitionConversationVisibility } from "../execution/sharing"
 import { recentConversation } from "../history/index"
-import { transitionConversationVisibility } from "./sharing"
 
 vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 vi.mock("../../visibility/audience", () => ({

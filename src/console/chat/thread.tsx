@@ -8,16 +8,16 @@ import { ChatPane } from "@/shared/console/chat/pane"
 import { useReplyReferences } from "@/shared/console/chat/pane/auto"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
 import { ChatThread, type ChooseHandler } from "@/shared/console/chat/thread"
-import {
-  isLiveRun,
-  type ReferenceTarget,
-  type ResolveReference,
-} from "@/shared/console/chat/types"
+import { isLiveRun } from "@/shared/console/chat/types"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { type MentionSources } from "@/shared/console/mentions/sources"
 import { useDocumentTitle } from "@/shared/console/shell/title"
 import { useNow } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
+import {
+  type ReferenceTarget,
+  type ResolveReference,
+} from "../../shared/console/references"
 import { ConsolePage } from "../page"
 import { type LiveConversation, useConversation } from "./conversation"
 import { ConversationDraft } from "./draft"

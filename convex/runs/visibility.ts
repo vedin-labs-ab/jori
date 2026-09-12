@@ -1,8 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { conversationVisibility } from "../conversations/access"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
-import { runVisibleToPerson } from "./console/filters"
 import { runResourceGate } from "./sight"
 
 /** Console history follows the chat's current audience, including revocation.
@@ -25,22 +23,17 @@ export async function canSeeRun(
     : run.job === undefined && runVisibleToPerson(run, personId)
 }
 
-/** The console's facet follows the chat's live personal/workspace setting. */
-export async function runMatchesVisibilityFilter(
-  ctx: QueryLikeCtx,
+/**
+ * The console shows organization runs to everyone; person and conversation
+ * runs only to their creator. Ownerless rows stay open.
+ */
+export function runVisibleToPerson(
   run: Doc<"runs">,
-  filter: import("./console/filters").RunAudienceFilter
+  personId: Id<"persons"> | undefined
 ) {
-  if (filter === "all") {
-    return true
-  }
-  const conversation =
-    run.conversationId === undefined
-      ? null
-      : await ctx.db.get(run.conversationId)
-  const shared =
-    conversation?.surface === "console"
-      ? conversationVisibility(conversation).mode !== "private"
-      : run.audience === "organization"
-  return filter === "organization" ? shared : !shared
+  return (
+    run.audience === "organization" ||
+    run.createdBy === undefined ||
+    run.createdBy === personId
+  )
 }

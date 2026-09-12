@@ -7,7 +7,7 @@ import {
 } from "react"
 import { useIsBelow } from "@/hooks/use-mobile"
 import { readStorage, writeStorage } from "@/shared/storage"
-import { type ReferenceTarget } from "../types"
+import { type ReferenceTarget } from "../../references"
 import {
   initialPaneState,
   type PaneAction,

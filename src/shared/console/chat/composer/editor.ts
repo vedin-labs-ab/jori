@@ -10,7 +10,7 @@ import {
 import { useAutocompleteA11y } from "../../mentions/suggest/a11y"
 import { updateSuggestionIndex } from "../../mentions/suggest/keys"
 import { getSuggestionState } from "../../mentions/suggest/state"
-import { type ResolveReference, targetKey } from "../types"
+import { type ResolveReference, targetKey } from "../../references"
 import { serializeComposerDocument } from "./codec"
 import { createComposerExtensions } from "./extensions"
 import {

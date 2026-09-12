@@ -1,4 +1,4 @@
-import { isRecord } from "../../../../../contracts/json"
+import { isRecord } from "../../../../contracts/json"
 
 /** Standard regional list prices, USD micros/token, verified 2026-09-07.
  * https://cloud.google.com/gemini-enterprise-agent-platform/generative-ai/pricing

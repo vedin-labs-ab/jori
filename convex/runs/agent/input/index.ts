@@ -1,10 +1,10 @@
-import { type Doc } from "../../_generated/dataModel"
-import { type RecentConversation } from "../../conversations/history/index"
-import { type WorkstreamContext } from "../../deduction/roster"
-import { type OrganizationFacts } from "../../organization/facts"
-import { type RequesterContext } from "../../persons/profile/context"
-import { type PlaceContext } from "../../places/context"
-import { type Access, type MessageSurface } from "../../shared/integrations"
+import { type Doc } from "../../../_generated/dataModel"
+import { type RecentConversation } from "../../../conversations/history/index"
+import { type WorkstreamContext } from "../../../deduction/roster"
+import { type OrganizationFacts } from "../../../organization/facts"
+import { type RequesterContext } from "../../../persons/profile/context"
+import { type PlaceContext } from "../../../places/context"
+import { type Access, type MessageSurface } from "../../../shared/integrations"
 
 export type RuntimeIntegration = Doc<"integrations">
 

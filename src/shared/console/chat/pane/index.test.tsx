@@ -8,7 +8,11 @@ import {
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { type ChatReference, type ReferenceTarget, targetKey } from "../types"
+import {
+  type ReferenceTarget,
+  type ReferenceView,
+  targetKey,
+} from "../../references"
 import { ChatPane, type ChatPaneProps } from "."
 
 vi.mock("@tanstack/react-router", async () => ({
@@ -23,7 +27,7 @@ vi.mock("@/hooks/use-mobile", () => ({ useIsBelow: () => mobile.current }))
 const table: ReferenceTarget = { kind: "table", id: "t1" }
 const job: ReferenceTarget = { kind: "job", id: "j1" }
 
-const references: Record<string, ChatReference> = {
+const references: Record<string, ReferenceView> = {
   [targetKey(table)]: { ...table, name: "Customer renewals" },
   [targetKey(job)]: { ...job, name: "Renewals watch" },
 }

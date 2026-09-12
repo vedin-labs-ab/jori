@@ -4,7 +4,7 @@ import {
   type ReferenceKind,
   resourceTokenPattern,
 } from "@contracts/replies/parts"
-import { targetKey } from "../chat/types"
+import { targetKey } from "../references"
 
 // Mentions are explicit, sigil-prefixed tokens — `@Gmail`, `/meeting-prep`,
 // `#send_message`, `+[table:k17…]`. Prose is never scanned for bare names,

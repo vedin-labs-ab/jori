@@ -15,12 +15,9 @@ import {
   emptyMentionSources,
   type MentionSources,
 } from "../../mentions/sources"
+import { type ReferenceView, type ResolveReference } from "../../references"
 import { chatColumnClassName } from "../thread"
-import {
-  type ChatContextUsage,
-  type ChatReference,
-  type ResolveReference,
-} from "../types"
+import { type ChatContextUsage } from "../types"
 import { useComposerEditor } from "./editor"
 import { ComposerContext, ComposerField } from "./field"
 import { ComposerFooter, HintsPeek } from "./footer"
@@ -57,7 +54,7 @@ export const ChatComposer = memo(function ChatComposer({
   autoFocus?: boolean
   availableModels?: readonly ModelSlug[]
   /** The resource the chat is about, shown as a chip the person can drop. */
-  context?: ChatReference
+  context?: ReferenceView
   disabled?: boolean
   /** A run is answering: follow-ups can still be sent, or work stopped. */
   isLive?: boolean

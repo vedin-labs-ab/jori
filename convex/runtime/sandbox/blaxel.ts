@@ -4,7 +4,6 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../../_generated/server"
-import { commandWrapperScript } from "./script"
 import {
   type BlaxelSandbox,
   cloneIntoSandbox,
@@ -21,7 +20,8 @@ import {
   startSandboxCommand,
   waitForCommand,
   writeSandboxFiles,
-} from "./support"
+} from "./blaxel/client"
+import { commandWrapperScript } from "./script"
 
 /** How long a command may hold its action open before the run parks on it.
  *  Most tool commands finish well inside this. */

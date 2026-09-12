@@ -98,6 +98,9 @@ function answers() {
       username: "x-access-token",
     })),
     finishRun: vi.fn(async () => undefined),
+    generateImage: vi.fn<RuntimePlatform["generateImage"]>(async () => {
+      throw new Error("This test does not generate images.")
+    }),
     markOfferConsumed: vi.fn(async () => undefined),
     readAgentRuns: vi.fn(async () => []),
     readWaiter: vi.fn(async () => null),

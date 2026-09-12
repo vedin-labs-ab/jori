@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react"
-import { type ChatMessage, lastMessage, type ReferenceTarget } from "../types"
+import { type ReferenceTarget } from "../../references"
+import { type ChatMessage, lastMessage } from "../types"
 
 /** Opens the first resource a new reply names, once per reply. Only a
  *  reply that lands while the conversation is on screen counts: what the

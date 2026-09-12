@@ -5,7 +5,7 @@ import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { moveUsageBucket } from "../../usage/record"
 import { audienceKey } from "../../visibility/execution"
 import { conversationGate, conversationVisibility } from "../access"
-import { resetConversationExecution } from "../console/sharing"
+import { resetConversationExecution } from "../execution/sharing"
 
 const batchSize = 100
 

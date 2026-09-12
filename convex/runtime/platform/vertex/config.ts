@@ -1,5 +1,5 @@
-import { requireEnvironmentVariable } from "../../../../shared/environment"
-import { requireRegion } from "../../../../shared/origin"
+import { requireEnvironmentVariable } from "../../../shared/environment"
+import { requireRegion } from "../../../shared/origin"
 
 export const imageModel = "gemini-3.1-flash-image"
 

@@ -1,6 +1,6 @@
 import { SandboxInstance } from "@blaxel/core"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { connectSandbox, killSandbox, sandboxCleanupFailure } from "./support"
+import { connectSandbox, killSandbox, sandboxCleanupFailure } from "./client"
 
 beforeEach(() => {
   vi.stubEnv("JORI_REGION", "eu")

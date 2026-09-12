@@ -4,7 +4,7 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
-import { killSandbox } from "../../runtime/sandbox/support"
+import { killSandbox } from "../../runtime/sandbox/blaxel/client"
 
 export const clean = internalAction({
   args: { id: v.id("workspaceRetention") },

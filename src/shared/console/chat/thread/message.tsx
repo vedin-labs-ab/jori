@@ -9,15 +9,12 @@ import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
 import { CopyButton } from "../../copy"
 import { type MentionCatalog, splitByMentions } from "../../mentions/scan"
+import { type ReferenceView, type ResolveReference } from "../../references"
+import { referencePresentation } from "../../references/presentation"
 import { absoluteTime, relativeTime } from "../../time"
 import { ChatMentionChip } from "../mentions"
 import { type OpenTarget } from "../pane/tabs"
-import { referencePresentation } from "../presentation"
-import {
-  type ChatMessage,
-  type ChatReference,
-  type ResolveReference,
-} from "../types"
+import { type ChatMessage } from "../types"
 
 /** Without a catalog, only resource tokens read as chips. */
 const resourceCatalog: MentionCatalog = { resource: true }
@@ -38,7 +35,7 @@ export const PersonMessage = memo(function PersonMessage({
   /** What the text's tokens may name, beyond resources. */
   catalog?: MentionCatalog
   /** The message's context, as the host resolved it. */
-  context: ChatReference | undefined
+  context: ReferenceView | undefined
   message: ChatMessage
   now: number
   onOpenReference?: OpenTarget
@@ -69,7 +66,7 @@ export const PersonMessage = memo(function PersonMessage({
   )
 })
 
-function ContextLine({ reference }: { reference: ChatReference }) {
+function ContextLine({ reference }: { reference: ReferenceView }) {
   const { icon: Icon, label } = referencePresentation(
     reference.kind,
     reference.name

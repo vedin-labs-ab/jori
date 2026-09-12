@@ -17,8 +17,7 @@ export async function generateImageFile(
   input: JsonObject
 ) {
   const request = normalizeGenerateImageInput(input)
-  const { generateVertexImage } = await import("./vertex")
-  const result = await generateVertexImage(request.prompt)
+  const result = await runtime.platform.generateImage(request.prompt)
   await runtime.platform.recordUsage(result.usage)
   const generated = result.image
   if (generated === null) {

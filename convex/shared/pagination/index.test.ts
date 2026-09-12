@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { countMatches, scanPage } from "./filters"
+import { countMatches, scanPage } from "./index"
 
 async function* numbers(count: number) {
   for (let number = 1; number <= count; number += 1) {

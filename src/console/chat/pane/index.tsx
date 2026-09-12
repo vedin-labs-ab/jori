@@ -1,6 +1,9 @@
 import { memo } from "react"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
-import { type ReferenceTarget, targetKey } from "@/shared/console/chat/types"
+import {
+  type ReferenceTarget,
+  targetKey,
+} from "../../../shared/console/references"
 import { paneBodies } from "./bodies"
 
 type PaneBodyProps = {

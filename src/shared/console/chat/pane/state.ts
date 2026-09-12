@@ -1,4 +1,4 @@
-import { isSameTarget, type ReferenceTarget } from "../types"
+import { isSameTarget, type ReferenceTarget } from "../../references"
 
 // The pane's tabs work like an editor's: opening a target previews it in
 // an unpinned tab that the next target takes over, and pinning keeps a tab

@@ -17,9 +17,9 @@ import {
 } from "../../sessions/data"
 import { currentConversationSession } from "../../sessions/execution"
 import { consoleRunDetails } from "../console/execution"
-import { conversationExecutionPrincipal } from "../console/principal"
 import { isFreshRunWithoutWaiter } from "../fresh"
 import { insertConversation } from "../records"
+import { conversationExecutionPrincipal } from "./principal"
 
 type StartMessageRunArgs = {
   conversation: Doc<"conversations"> | null
