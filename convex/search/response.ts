@@ -78,7 +78,7 @@ function normalizeResult(
 
 function links(markdown: string, base: string, limit: number) {
   const found = new Set<string>()
-  marked.walkTokens(marked.lexer(markdown), (token) => {
+  void marked.walkTokens(marked.lexer(markdown), (token) => {
     if (token.type !== "link" || found.size >= limit) {
       return
     }

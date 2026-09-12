@@ -6,6 +6,10 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
+      authentication:
+        patterns: ["better-auth", "@better-auth/*", "@better-auth-ui/*", "@convex-dev/better-auth"]
+      router:
+        patterns: ["@tanstack/react-router", "@tanstack/react-router-devtools", "@tanstack/react-start"]
       tiptap:
         patterns: ["@tiptap/*"]
   - package-ecosystem: github-actions

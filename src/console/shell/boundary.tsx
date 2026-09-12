@@ -23,7 +23,7 @@ export function ConsolePageBoundary({
   resetKey,
 }: {
   children: ReactNode
-  resetKey: string
+  resetKey: unknown
 }) {
   return (
     <CatchBoundary errorComponent={PageError} getResetKey={() => resetKey}>

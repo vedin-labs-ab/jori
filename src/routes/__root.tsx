@@ -126,7 +126,7 @@ export const Route = createRootRoute({
   head: ({ matches }) => {
     const path = matches.at(-1)?.pathname
     const notFound = matches.some(
-      (match) => match.globalNotFound || match.status === "notFound"
+      (match) => match._notFound || match.status === "notFound"
     )
     const url =
       !notFound && path && isMarketingPath(path)

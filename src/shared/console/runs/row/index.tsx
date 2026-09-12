@@ -50,7 +50,7 @@ export const ExecutionRow = memo(function ExecutionRow({
   showAudience: boolean
 }) {
   const [isToggledOpen, setIsToggledOpen] = useState(defaultOpen)
-  const isOpen = open || isToggledOpen
+  const isOpen = isToggledOpen || open === true
   const durationMs = durationFor(execution, now)
   const isOngoing =
     execution.status === "queued" || execution.status === "running"

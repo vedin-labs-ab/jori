@@ -4,7 +4,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import viteReact from "@vitejs/plugin-react"
 import { nitro } from "nitro/vite"
 import { configDefaults, defineConfig } from "vitest/config"
-import { isRegion } from "./contracts/region"
+import { isRegion } from "./contracts/region.ts"
 
 const ignoredWorkspacePaths = [
   "**/.agents/**",

@@ -61,9 +61,7 @@ function LocalLink({
         }
       }}
     >
-      {typeof children === "function"
-        ? children({ isActive, isTransitioning: false })
-        : children}
+      {typeof children === "function" ? children({ isActive }) : children}
     </a>
   )
 }

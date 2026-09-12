@@ -4,12 +4,16 @@ import {
   type Column,
   type ColumnDef,
   type ColumnFiltersState,
+  columnFilteringFeature,
+  createFilteredRowModel,
+  createSortedRowModel,
+  filterFn_equalsString,
   flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
+  rowSortingFeature,
   type SortingState,
-  useReactTable,
+  sortFn_basic,
+  tableFeatures,
+  useTable,
 } from "@tanstack/react-table"
 import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
 import { type ReactNode, useMemo, useState } from "react"
@@ -37,27 +41,18 @@ import { absoluteTime } from "@/shared/console/time"
 import { StableLabel } from "@/shared/label"
 import { type BillingOverview } from "./actions"
 import { BillingActivityEmpty } from "./empty"
+import { type ActivityKind, type ActivityRow, kindLabels, toRow } from "./model"
 
 type BillingEntry = BillingOverview["entries"][number]
 
-type ActivityKind = "run" | "allowance" | "top-up"
-
-type ActivityRow = {
-  id: string
-  timestamp: number
-  kind: ActivityKind
-  label: string
-  runId: string | undefined
-  dot: string | undefined
-  signedMicros: number
-  balanceMicros: number
-}
-
-const kindLabels: Record<ActivityKind, string> = {
-  run: "Runs",
-  allowance: "Allowances",
-  "top-up": "Top-ups",
-}
+const features = tableFeatures({
+  columnFilteringFeature,
+  filteredRowModel: createFilteredRowModel(),
+  filterFns: { equalsString: filterFn_equalsString },
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  sortFns: { basic: sortFn_basic },
+})
 
 /** Billing statement with sortable time and amount, plus an inline kind filter. */
 export function Activity({ entries }: { entries: BillingEntry[] }) {
@@ -66,15 +61,13 @@ export function Activity({ entries }: { entries: BillingEntry[] }) {
     { id: "timestamp", desc: true },
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const table = useReactTable({
+  const table = useTable({
+    features,
     data: rows,
     columns,
     state: { sorting, columnFilters },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
   })
 
   return (
@@ -88,7 +81,9 @@ export function Activity({ entries }: { entries: BillingEntry[] }) {
   )
 }
 
-type ActivityTableInstance = ReturnType<typeof useReactTable<ActivityRow>>
+type ActivityTableInstance = ReturnType<
+  typeof useTable<typeof features, ActivityRow>
+>
 
 function ActivityTable({ table }: { table: ActivityTableInstance }) {
   return (
@@ -133,7 +128,7 @@ function ActivityTable({ table }: { table: ActivityTableInstance }) {
           ) : (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
+                {row.getAllCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
@@ -157,7 +152,7 @@ function SortHeader({
   children,
   align = "left",
 }: {
-  column: Column<ActivityRow>
+  column: Column<typeof features, ActivityRow>
   children: ReactNode
   align?: "left" | "right"
 }) {
@@ -189,7 +184,11 @@ function SortHeader({
  * The kind filter lives in the What header: a Filter-prefixed label that
  * opens a radio menu and shows the active choice in place.
  */
-function KindHeader({ column }: { column: Column<ActivityRow> }) {
+function KindHeader({
+  column,
+}: {
+  column: Column<typeof features, ActivityRow>
+}) {
   const value = (column.getFilterValue() as ActivityKind | undefined) ?? ""
 
   return (
@@ -254,9 +253,10 @@ function WhatCell({ row }: { row: ActivityRow }) {
   )
 }
 
-const columns: ColumnDef<ActivityRow>[] = [
+const columns: ColumnDef<typeof features, ActivityRow>[] = [
   {
     accessorKey: "timestamp",
+    sortFn: "basic",
     header: ({ column }) => <SortHeader column={column}>When</SortHeader>,
     cell: ({ row }) => (
       <span className="whitespace-nowrap text-muted-foreground">
@@ -272,6 +272,7 @@ const columns: ColumnDef<ActivityRow>[] = [
   },
   {
     accessorKey: "signedMicros",
+    sortFn: "basic",
     header: ({ column }) => (
       <SortHeader align="right" column={column}>
         Amount
@@ -300,47 +301,3 @@ const columns: ColumnDef<ActivityRow>[] = [
     ),
   },
 ]
-
-const entryKinds: Record<BillingEntry["type"], ActivityKind> = {
-  debit: "run",
-  allowance: "allowance",
-  topup: "top-up",
-}
-
-function toRow(entry: BillingEntry): ActivityRow {
-  return {
-    id: entry._id,
-    timestamp: entry.timestamp,
-    kind: entryKinds[entry.type],
-    label: entryLabel(entry),
-    runId: entry.type === "debit" ? entry.runId : undefined,
-    dot: entryDot(entry),
-    signedMicros:
-      entry.type === "debit" ? -entry.micros.amount : entry.micros.amount,
-    balanceMicros: entry.micros.balance,
-  }
-}
-
-function entryLabel(entry: BillingEntry) {
-  if (entry.type === "debit") {
-    return entry.runTitle ?? "Run"
-  }
-
-  if (entry.type === "topup") {
-    return entry.auto ? "Auto top-up" : "Top-up"
-  }
-
-  if (entry.source === "manual") {
-    return "Manual allowance"
-  }
-
-  return entry.source === "trial" ? "Trial allowance" : "Monthly allowance"
-}
-
-function entryDot(entry: BillingEntry) {
-  if (entry.type === "allowance") {
-    return entry.source === "trial" ? "bg-warning" : "bg-primary"
-  }
-
-  return entry.type === "topup" ? "bg-informational" : undefined
-}

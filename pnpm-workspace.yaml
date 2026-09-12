@@ -3,11 +3,16 @@ packages: []
 minimumReleaseAge: 0
 
 overrides:
-  '@opentelemetry/core': 2.9.0
+  # The Convex adapter requires Better Auth <1.7; keep its UI peers aligned.
+  # UI stays at 1.6.31: later releases add an OAuth provider needing Auth 1.7
+  # for GHSA-p2fr-6hmx-4528. Vitest also stays on Auth 1.6's supported v4.
+  '@better-auth/api-key': 1.6.31
+  '@better-auth/passkey': 1.6.31
+  '@opentelemetry/core': 2.11.0
   '@hey-api/json-schema-ref-parser>js-yaml': 4.3.2
-  'giget>tar': 7.5.20
+  'giget>tar': 7.5.22
   tsconfck: 3.1.6
-  ws: 8.21.1
+  ws: 8.21.3
 
 peerDependencyRules:
   allowedVersions:

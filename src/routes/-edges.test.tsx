@@ -5,13 +5,21 @@ import { expect, test, vi } from "vitest"
 import { useMaterialMode } from "@/console/frame/mode"
 import { setup, sync, viewer } from "../../test/navigation"
 
-test("an unknown path within a workspace section keeps navigation mounted", async () => {
+test.each([
+  "chat",
+  "context",
+  "files",
+  "folders",
+  "integrations",
+  "stores",
+  "tables",
+])("an unknown path within %s keeps navigation mounted", async (section) => {
   const router = setup()
   render(<RouterProvider router={router} />)
   await screen.findByTestId("page")
   const header = document.querySelector("header")
   await act(async () => {
-    await router.navigate({ href: "/folders/missing/unknown" })
+    await router.navigate({ href: `/${section}/missing/unknown` })
   })
   expect(await screen.findByText("Page not found")).toBeDefined()
   expect(document.querySelector("header")).toBe(header)
@@ -21,27 +29,34 @@ test("an unknown path within a workspace section keeps navigation mounted", asyn
   expect(sync).toHaveBeenCalledTimes(1)
 })
 
-test("a corrected query string recovers a failed page without resetting the shell", async () => {
-  const router = setup("/runs")
-  let fails = true
-  router.routesById["/_workspace/runs"].update({
-    component: () => {
-      if (fails) {
-        throw new Error("Invalid run")
+test.each(["search", "reload"])(
+  "%s recovers a failed page without resetting the shell",
+  async (navigation) => {
+    const router = setup("/runs")
+    let fails = true
+    router.routesById["/_workspace/runs"].update({
+      component: () => {
+        if (fails) {
+          throw new Error("Invalid run")
+        }
+        return <div>Recovered page</div>
+      },
+    })
+    render(<RouterProvider router={router} />)
+    await screen.findByText("This page didn't load")
+    const header = document.querySelector("header")
+    fails = false
+    await act(async () => {
+      if (navigation === "search") {
+        await router.navigate({ to: "/runs", search: { page: 2 } })
+      } else {
+        await router.invalidate()
       }
-      return <div>Recovered page</div>
-    },
-  })
-  render(<RouterProvider router={router} />)
-  await screen.findByText("This page didn't load")
-  const header = document.querySelector("header")
-  fails = false
-  await act(async () => {
-    await router.navigate({ to: "/runs", search: { page: 2 } })
-  })
-  expect(await screen.findByText("Recovered page")).toBeDefined()
-  expect(document.querySelector("header")).toBe(header)
-})
+    })
+    expect(await screen.findByText("Recovered page")).toBeDefined()
+    expect(document.querySelector("header")).toBe(header)
+  }
+)
 
 test("the mobile sidebar closes after navigation while the header stays mounted", async () => {
   vi.mocked(window.matchMedia).mockReturnValue({
