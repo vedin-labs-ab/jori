@@ -19,16 +19,21 @@ export async function fetchJson(
     headers: options.headers,
     body: options.body === undefined ? undefined : JSON.stringify(options.body),
   })
-  const text = await response.text()
-  const parsed: unknown =
-    text === "" ? (options.emptyResponse ?? null) : JSON.parse(text)
-  const result = toJsonValue(parsed)
-
+  // Provider errors can echo credentials or customer input. These exceptions
+  // reach run traces, so retain the status without copying the response body.
   if (!response.ok) {
-    throw new Error(`Provider API request failed: ${JSON.stringify(result)}`)
+    throw new Error(`Provider API request failed (HTTP ${response.status})`)
   }
 
-  return result
+  const text = await response.text()
+  try {
+    const parsed: unknown =
+      text === "" ? (options.emptyResponse ?? null) : JSON.parse(text)
+    return toJsonValue(parsed)
+  } catch {
+    // JSON parser errors can contain a snippet of the original response too.
+    throw new Error("Provider API returned an invalid JSON response")
+  }
 }
 
 export async function fetchJsonObject(
