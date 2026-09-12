@@ -87,5 +87,5 @@ a guide out of date, fix the guide in the same change.
 | --- | --- |
 | Console or landing UI | `guides/ui.md` |
 | Convex functions, schema, or workflows | `convex/_generated/ai/guidelines.md` |
-| Deploying, seeding, or sandbox images | `guides/deployment.md` |
+| Deploying, seeding, or building sandbox images | `guides/deployment.md` |
 | Integrations: registrations, permissions, regional delivery | `guides/integrations.md` |
