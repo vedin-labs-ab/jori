@@ -5,7 +5,7 @@ afterEach(() => vi.unstubAllGlobals())
 
 test.each([
   401, 403, 429, 500,
-])("Graph HTTP %s fails without retrying a write", async (status) => {
+])("Graph HTTP %s reports status without response content or retries", async (status) => {
   const fetch = vi.fn(async () =>
     Response.json({ error: { code: "SyntheticFailure" } }, { status })
   )
@@ -16,6 +16,6 @@ test.each([
       method: "POST",
       body: { message: {} },
     })
-  ).rejects.toThrow("SyntheticFailure")
+  ).rejects.toThrow(`Provider API request failed (HTTP ${status})`)
   expect(fetch).toHaveBeenCalledTimes(1)
 })
