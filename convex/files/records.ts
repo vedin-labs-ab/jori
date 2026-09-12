@@ -34,11 +34,7 @@ export async function insertUploadedFile(
     throw new Error("Private files need a resolvable owner")
   }
 
-  const metadata = await ctx.db.system.get(args.storageId)
-
-  if (metadata === null) {
-    throw new Error("Uploaded file was not found in storage")
-  }
+  const metadata = await requireUnusedUpload(ctx, args.storageId)
 
   const now = Date.now()
 
@@ -84,11 +80,7 @@ export async function swapFileBlob(
   args: { fileId: Id<"files">; storageId: Id<"_storage"> }
 ) {
   const file = await requireViewableFile(ctx, viewer, args.fileId)
-  const metadata = await ctx.db.system.get(args.storageId)
-
-  if (metadata === null) {
-    throw new Error("Uploaded file was not found in storage")
-  }
+  const metadata = await requireUnusedUpload(ctx, args.storageId)
 
   await ctx.storage.delete(file.storageId)
   await ctx.db.patch(file._id, {
@@ -127,4 +119,24 @@ export async function requireViewableFile(
   }
 
   return file
+}
+
+/** An upload can belong to only one file. Accepting an already linked blob
+ * lets another caller claim it and later delete its original owner's content. */
+async function requireUnusedUpload(
+  ctx: MutationCtx,
+  storageId: Id<"_storage">
+) {
+  const metadata = await ctx.db.system.get(storageId)
+  if (metadata === null) {
+    throw new Error("Uploaded file was not found in storage")
+  }
+  const existing = await ctx.db
+    .query("files")
+    .withIndex("by_storageId", (index) => index.eq("storageId", storageId))
+    .first()
+  if (existing !== null) {
+    throw new Error("Uploaded file is already in use")
+  }
+  return metadata
 }

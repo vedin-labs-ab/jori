@@ -15,7 +15,7 @@ export function createFenceInputRules({
 }) {
   return fenceMarkers.flatMap((marker) => [
     softBreakFenceInputRule({
-      find: fenceInputExpression(marker, language, "\\n"),
+      find: fenceInputExpression(marker, language, "(?<=\\n)"),
       getAttributes,
       type,
     }),
@@ -48,9 +48,15 @@ function softBreakFenceInputRule({
     find,
     handler: ({ match, range, state }) => {
       const { $from } = state.selection
-      const offset = range.from - $from.start()
+      // Match only text, then remove the preceding hard break explicitly.
+      // Tiptap rejects input-rule matches that span leaf nodes.
+      const offset = range.from - $from.start() - 1
 
-      if (!$from.parent.isTextblock || offset < 0) {
+      if (
+        !$from.parent.isTextblock ||
+        offset < 0 ||
+        $from.parent.nodeAt(offset)?.type.name !== "hardBreak"
+      ) {
         return null
       }
 
@@ -87,7 +93,7 @@ function softBreakFenceInputRule({
 function fenceInputExpression(
   marker: "`" | "~",
   language: string,
-  lineStart: "^" | "\\n"
+  lineStart: "^" | "(?<=\\n)"
 ) {
   return new RegExp(`${lineStart} {0,3}${marker}{3,}${language}[ \\t\\n]$`, "i")
 }
