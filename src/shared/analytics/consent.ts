@@ -1,41 +1,26 @@
-export type AnalyticsChoice = "accepted" | "declined"
-export const consentKey = "jori.analytics.v1"
-const consentLifetime = 180 * 24 * 60 * 60 * 1000
+import { type Region } from "@contracts/region"
+import { readCookie, siteCookieAttributes } from "../cookie"
+import { regionConfig } from "../region/config"
 
-export function readConsent(): AnalyticsChoice | undefined {
-  try {
-    const stored: unknown = JSON.parse(
-      localStorage.getItem(consentKey) ?? "null"
-    )
-    if (stored === null || typeof stored !== "object") {
-      return undefined
-    }
-    if (!("choice" in stored) || !("expires" in stored)) {
-      return undefined
-    }
-    if (typeof stored.expires !== "number" || stored.expires <= Date.now()) {
-      return undefined
-    }
-    return stored.choice === "accepted" || stored.choice === "declined"
-      ? stored.choice
-      : undefined
-  } catch {
-    return undefined
-  }
+export type AnalyticsChoice = "accepted" | "declined"
+
+const consentLifetimeSeconds = 180 * 24 * 60 * 60
+
+/** One choice per data region, kept in a cookie the public origin and the
+ *  regional hosts all read, so a decision made on either holds on both. */
+function consentCookie(region: Region) {
+  return `jori_analytics_${region}`
 }
 
-export function saveConsent(choice: AnalyticsChoice) {
-  try {
-    localStorage.setItem(
-      consentKey,
-      JSON.stringify({
-        choice,
-        expires: Date.now() + consentLifetime,
-      })
-    )
-  } catch {
-    // The choice still applies in this tab when storage is unavailable.
-  }
+export function readConsent(region: Region): AnalyticsChoice | undefined {
+  const value = readCookie(document.cookie, consentCookie(region))
+
+  return value === "accepted" || value === "declined" ? value : undefined
+}
+
+export function saveConsent(region: Region, choice: AnalyticsChoice) {
+  // biome-ignore lint/suspicious/noDocumentCookie: A first-party preference, written synchronously so the choice applies in this frame.
+  document.cookie = `${consentCookie(region)}=${choice}; ${siteCookieAttributes(regionConfig.publicOrigin, consentLifetimeSeconds)}`
 }
 
 /** Remove only this project's analytics identifiers, never sign-in storage. */

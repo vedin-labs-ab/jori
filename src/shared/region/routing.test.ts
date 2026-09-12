@@ -3,6 +3,7 @@ import { type RegionConfig } from "./config"
 import {
   handleRegionRequest,
   normalizeReturnPath,
+  regionPinHeader,
   regionSelectionUrl,
 } from "./routing"
 
@@ -34,6 +35,21 @@ test("keeps marketing on the apex regardless of the remembered region", () => {
   )
 
   expect(response).toBeNull()
+})
+
+test("a first marketing visit pins the estimated region, readably, once", () => {
+  const request = (cookie?: string) =>
+    new Request("https://jori.example/pricing", {
+      headers: { "x-vercel-ip-country": "SE", ...(cookie ? { cookie } : {}) },
+    })
+
+  const pin = regionPinHeader(request(), config)
+  expect(pin).toContain("jori_region=eu")
+  expect(pin).not.toContain("HttpOnly")
+  expect(regionPinHeader(request("jori_region=us"), config)).toBeUndefined()
+  expect(
+    regionPinHeader(new Request("https://us.jori.example/console"), config)
+  ).toBeUndefined()
 })
 
 test("estimates Europe and persists the routing preference", () => {

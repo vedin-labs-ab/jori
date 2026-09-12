@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react"
 import { StrictMode } from "react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { consentKey, saveConsent } from "./analytics/consent"
+import { saveConsent } from "./analytics/consent"
 
 const state = vi.hoisted(() => ({
   routeId: "/folders/$folderId/",
@@ -24,10 +24,14 @@ vi.mock("@tanstack/react-router", () => ({
   useRouterState: () => state.routeId,
 }))
 vi.mock("./analytics/config", () => ({
-  analyticsConfig: () => ({ key: "phc_public", options: {} }),
+  analyticsConfig: () => ({ eu: { key: "phc_public", options: {} } }),
 }))
 vi.mock("./region/config", () => ({
-  regionConfig: { current: "eu", publicOrigin: "https://www.usejori.com" },
+  regionConfig: {
+    current: "eu",
+    enabled: new Set(["eu"]),
+    publicOrigin: "http://localhost:3000",
+  },
   requireRegionOrigin: () => window.location.origin,
 }))
 vi.mock("posthog-js", async () => {
@@ -47,12 +51,16 @@ beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
   sessionStorage.clear()
+  for (const name of ["jori_analytics_eu", "ph_phc_public_posthog"]) {
+    // biome-ignore lint/suspicious/noDocumentCookie: Reset the cookies a test may leave.
+    document.cookie = `${name}=; Max-Age=0; Path=/`
+  }
   state.routeId = "/folders/$folderId/"
   state.loading = undefined
 })
 
 test("explicit pageviews survive navigation without DOM content or duplicate strict-mode events", async () => {
-  saveConsent("accepted")
+  saveConsent("eu", "accepted")
   const { Analytics } = await import("./analytics")
   window.history.replaceState(
     {},
@@ -141,7 +149,7 @@ test("analytics starts only after acceptance and stops when consent is withdrawn
 })
 
 test("a saved decline survives remounting and another tab can withdraw consent", async () => {
-  saveConsent("declined")
+  saveConsent("eu", "declined")
   const { Analytics } = await import("./analytics")
   const { PrivacyChoices } = await import("./analytics/preferences")
   const view = render(
@@ -166,26 +174,20 @@ test("a saved decline survives remounting and another tab can withdraw consent",
   fireEvent.click(screen.getByRole("button", { name: "Accept" }))
   await waitFor(() => expect(state.capture).toHaveBeenCalledTimes(1))
   act(() => {
-    saveConsent("declined")
-    window.dispatchEvent(new StorageEvent("storage", { key: consentKey }))
+    saveConsent("eu", "declined")
+    window.dispatchEvent(new Event("focus"))
   })
   expect(state.optOut).toHaveBeenCalled()
   expect(state.capture).toHaveBeenCalledTimes(1)
 })
 
-test("expired or malformed consent cannot enable analytics", async () => {
-  localStorage.setItem(
-    consentKey,
-    JSON.stringify({ choice: "accepted", expires: Date.now() - 1 })
-  )
+test("a malformed choice cannot enable analytics", async () => {
+  // biome-ignore lint/suspicious/noDocumentCookie: Seed the value under test.
+  document.cookie = "jori_analytics_eu=broken; Path=/"
   const { Analytics } = await import("./analytics")
   render(<Analytics>Content</Analytics>)
   expect(await screen.findByRole("button", { name: "Accept" })).toBeDefined()
   expect(state.init).not.toHaveBeenCalled()
-  act(() => {
-    localStorage.setItem(consentKey, "broken")
-    window.dispatchEvent(new StorageEvent("storage", { key: consentKey }))
-  })
   expect(state.capture).not.toHaveBeenCalled()
 })
 

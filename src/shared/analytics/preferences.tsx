@@ -1,3 +1,4 @@
+import { type Region } from "@contracts/region"
 import { CheckIcon, XIcon } from "lucide-react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -28,19 +29,21 @@ export function PrivacyChoices({ className }: { className?: string }) {
   )
 }
 
+/** The ask and the saved answer for one region; without one, nothing is
+ *  asked and Privacy choices stays out of the page. */
 export function PrivacyProvider({
   children,
-  enabled,
+  region,
 }: {
   children: ReactNode
-  enabled: boolean
+  region: Region | undefined
 }) {
   const {
     choice,
     ready,
     choose: saveChoice,
     allowsAnalytics,
-  } = useAnalyticsConsent()
+  } = useAnalyticsConsent(region)
   const [editing, setEditing] = useState(false)
   const heading = useRef<HTMLHeadingElement>(null)
   const trigger = useRef<HTMLElement>(null)
@@ -62,7 +65,7 @@ export function PrivacyProvider({
   }
 
   const value =
-    enabled && ready
+    region !== undefined && ready
       ? {
           choice,
           allowsAnalytics,

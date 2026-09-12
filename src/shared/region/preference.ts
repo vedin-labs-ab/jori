@@ -1,33 +1,27 @@
 import { isRegion, type Region } from "@contracts/region"
+import { readCookie } from "../cookie"
 import { type RegionConfig } from "./config"
 
 const preferenceCookie = "jori_region"
 const preferenceMaxAgeSeconds = 60 * 60 * 24 * 365
 
-export function readRegionPreference(request: Request, config: RegionConfig) {
-  const header = request.headers.get("cookie")
+/** The region the visitor is treated as on the public origin, from a
+ *  `Cookie` header on the server or `document.cookie` in the page. */
+export function readRegionPreference(
+  cookies: string | null,
+  config: RegionConfig
+) {
+  const value = readCookie(cookies, preferenceCookie)
 
-  if (header === null) {
-    return undefined
-  }
-
-  for (const part of header.split(";")) {
-    const [name, ...valueParts] = part.trim().split("=")
-
-    if (name !== preferenceCookie) {
-      continue
-    }
-
-    const value = valueParts.join("=")
-
-    return isRegion(value) && config.enabled.has(value) ? value : undefined
-  }
-
-  return undefined
+  return value !== undefined && isRegion(value) && config.enabled.has(value)
+    ? value
+    : undefined
 }
 
+/** Host-only on the public origin, and readable there: the page files
+ *  the analytics choice under it. */
 export function regionPreferenceHeader(region: Region, publicOrigin: string) {
   const secure = new URL(publicOrigin).protocol === "https:" ? "; Secure" : ""
 
-  return `${preferenceCookie}=${region}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${preferenceMaxAgeSeconds}${secure}`
+  return `${preferenceCookie}=${region}; Path=/; SameSite=Lax; Max-Age=${preferenceMaxAgeSeconds}${secure}`
 }

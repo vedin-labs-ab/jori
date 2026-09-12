@@ -23,8 +23,8 @@ export const frontendNames = [
   "VITE_JORI_EU_SITE_URL",
   "VITE_JORI_US_SITE_URL",
   "VITE_POSTHOG_ENABLED",
-  "VITE_POSTHOG_HOST",
-  "VITE_POSTHOG_KEY",
+  "VITE_POSTHOG_EU_KEY",
+  "VITE_POSTHOG_US_KEY",
 ] as const
 
 /** Remote builds read Vercel's environment, not the local deploy process. */

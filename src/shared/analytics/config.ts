@@ -3,8 +3,17 @@ import { minimizeEvent } from "./privacy"
 
 type Environment = Record<string, string | boolean | undefined>
 
-/** Each deployment chooses one destination, with no default US endpoint. */
-export function analyticsConfig(environment: Environment, region: Region) {
+export type AnalyticsInstance = {
+  key: string
+  options: ReturnType<typeof analyticsOptions>
+}
+
+/** One PostHog instance per enabled region, each at that region's own
+ *  host, so a page can send to the region the visitor chose. */
+export function analyticsConfig(
+  environment: Environment,
+  regions: Iterable<Region>
+): Partial<Record<Region, AnalyticsInstance>> | undefined {
   const enabled = setting(environment, "VITE_POSTHOG_ENABLED")
   if (enabled !== undefined && enabled !== "true" && enabled !== "false") {
     throw new Error("VITE_POSTHOG_ENABLED must be true or false.")
@@ -12,30 +21,26 @@ export function analyticsConfig(environment: Environment, region: Region) {
   if (enabled !== "true") {
     return undefined
   }
-  const key = setting(environment, "VITE_POSTHOG_KEY")
-  const host = setting(environment, "VITE_POSTHOG_HOST")
-  if (key === undefined || host === undefined) {
-    throw new Error(
-      "Enabled analytics requires VITE_POSTHOG_KEY and VITE_POSTHOG_HOST."
-    )
+  const instances: Partial<Record<Region, AnalyticsInstance>> = {}
+  for (const region of regions) {
+    const name = `VITE_POSTHOG_${region.toUpperCase()}_KEY`
+    const key = setting(environment, name)
+    if (key === undefined) {
+      throw new Error(`Enabled analytics requires ${name}.`)
+    }
+    if (!key.startsWith("phc_")) {
+      throw new Error(
+        "Browser analytics requires a public PostHog project token."
+      )
+    }
+    instances[region] = { key, options: analyticsOptions(region) }
   }
-  if (!key.startsWith("phc_")) {
-    throw new Error(
-      "Browser analytics requires a public PostHog project token."
-    )
-  }
-  if (host !== `https://${region}.i.posthog.com`) {
-    throw new Error("Analytics must use this instance's regional PostHog host.")
-  }
-  return {
-    key,
-    options: analyticsOptions(host, region),
-  }
+  return instances
 }
 
-function analyticsOptions(host: string, region: Region) {
+function analyticsOptions(region: Region) {
   return {
-    api_host: host,
+    api_host: `https://${region}.i.posthog.com`,
     ui_host: `https://${region}.posthog.com`,
     cross_subdomain_cookie: false,
     defaults: "2026-06-25",

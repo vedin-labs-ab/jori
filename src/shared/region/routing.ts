@@ -73,7 +73,7 @@ function publicRequest(
     return null
   }
 
-  const preferred = readRegionPreference(request, config)
+  const preferred = readRegionPreference(request.headers.get("cookie"), config)
   const region = preferred ?? estimateRegion(request, config)
   // A public link never carries tenant IDs, auth codes or return queries into
   // an inferred region. Existing deep links must name their regional host.
@@ -87,6 +87,27 @@ function publicRequest(
     target,
     config.publicOrigin,
     preferred === undefined ? region : undefined
+  )
+}
+
+/** A first visit to the public origin pins the estimated region, so the
+ *  page can file its analytics choice under one before any sign-in has
+ *  chosen it; the sign-in redirect would pin the same estimate later. */
+export function regionPinHeader(request: Request, config: RegionConfig) {
+  const url = new URL(request.url)
+
+  if (
+    (request.method !== "GET" && request.method !== "HEAD") ||
+    resolveRequestOrigin(request, config) !== config.publicOrigin ||
+    !isMarketingPath(url.pathname) ||
+    readRegionPreference(request.headers.get("cookie"), config) !== undefined
+  ) {
+    return undefined
+  }
+
+  return regionPreferenceHeader(
+    estimateRegion(request, config),
+    config.publicOrigin
   )
 }
 

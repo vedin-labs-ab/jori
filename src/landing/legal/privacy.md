@@ -108,7 +108,8 @@ particular provider or data category.
 Essential browser storage keeps sign-in and basic settings working. Optional
 PostHog analytics starts only if you accept it. It measures page categories with
 browser identifiers, without collecting chat or file content. Your choice is
-remembered on each site for 180 days. Use Privacy choices in the website footer,
+remembered for each data region for 180 days, on usejori.com and that
+region's site alike. Use Privacy choices in the website footer,
 sign-in page or account menu to change it. Declining does not limit Jori.
 
 Contact support@usejori.com to request access, correction, deletion, restriction
