@@ -1,6 +1,6 @@
 # Integration decisions
 
-[Docs index](index.md) · [Architecture](architecture.md) · [Residency](residency.md)
+[Docs index](index.md)
 
 ## Choose the registration
 
@@ -9,8 +9,8 @@
 2. Use separate EU/US registrations when app-wide delivery prevents direct
    regional routing. Keep the same implementation with regional configuration.
 3. If neither meets the feature's needs, compare provider-supported alternatives
-   such as polling. Shared ingress requires a concrete reason and the
-   [exception review](architecture.md#when-to-revisit).
+   such as polling. Shared ingress requires a concrete reason and a maintainer
+   review of data, credentials, processing locations, retention and failure handling.
 4. If no option meets the requirements, state the limitation. Do not silently
    broaden geography or permissions.
 
@@ -39,9 +39,8 @@ Verify the installed username and visible identity after installation or
 configuration changes.
 
 Jori's console selects the regional app. All four provider registrations use
-`public/brand/avatar/avatar-light-512.png` for Jori's avatar. Follow the
-[brand guide](brand.md) for other placements. Use this description wherever the
-provider exposes an app description field:
+`public/brand/avatar/avatar-light-512.png` for Jori's avatar. Use this description
+wherever the provider exposes an app description field:
 
 > Jori helps your team find information and get work done across your connected tools.
 

@@ -2,9 +2,9 @@
 
 ## Architecture
 
-Start with [the docs index](docs/index.md) before changing integrations, provider
-selection, identity, data flows, or residency claims. Read the relevant guide for
-the agreed priorities, regional boundary and integration decision tree.
+Start with [the docs index](docs/index.md) before adding a provider or changing
+integration registrations, permissions or regional delivery. Follow the
+integration decision tree and verify current provider capabilities.
 
 ## Workflow
 

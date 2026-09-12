@@ -12,10 +12,11 @@ if (!manifest) {
   )
 }
 const scenarios = JSON.parse(await readFile(manifest, "utf8")) as Scenario[]
-const concurrency = Math.min(
-  4,
-  Math.max(1, Number(process.env.LAYOUT_CONCURRENCY ?? 1))
-)
+const requestedConcurrency = Number(process.env.LAYOUT_CONCURRENCY ?? 1)
+if (!Number.isInteger(requestedConcurrency) || requestedConcurrency < 1) {
+  throw new Error("LAYOUT_CONCURRENCY must be a positive integer")
+}
+const concurrency = Math.min(4, requestedConcurrency)
 const sources = await Promise.all(
   [
     "probe.js",
@@ -121,6 +122,9 @@ async function record(browser: Browser, job: Job) {
       2
     )
   )
+  if ("error" in result && !interrupted) {
+    process.exitCode = 1
+  }
   process.stdout.write(
     `${scenario.id} ${condition} ${width} ${"error" in result ? "ERROR" : "recorded"}\n`
   )

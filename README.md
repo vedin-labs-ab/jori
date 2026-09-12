@@ -40,8 +40,8 @@ Production uses separate target files described in
 
 ## Working on the code
 
-Start with [the docs index](docs/index.md) for architecture, permissions,
-integrations and regional boundaries. Follow [AGENTS.md](AGENTS.md) for the
+Start with [the docs index](docs/index.md) for integration strategy and
+regional provider decisions. Follow [AGENTS.md](AGENTS.md) for the
 task-worktree and landing workflow.
 
 ```sh
