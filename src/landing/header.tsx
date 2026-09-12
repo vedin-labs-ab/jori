@@ -37,14 +37,6 @@ export function LandingHeader({ onWaitlistPage }: { onWaitlistPage: boolean }) {
               {link.label}
             </NavLink>
           ))}
-          <a
-            className="inline-flex items-center px-2.5 py-1 transition-colors hover:text-foreground"
-            href={githubUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            GitHub
-          </a>
         </nav>
         <MobileNav />
       </div>
@@ -103,6 +95,11 @@ function MobileNav() {
         ))}
         <DropdownMenuItem asChild>
           <a href={githubUrl} rel="noreferrer" target="_blank">
+            <img
+              alt=""
+              className="size-4 dark:invert"
+              src="/logos/integrations/github.svg"
+            />
             GitHub
           </a>
         </DropdownMenuItem>
@@ -117,6 +114,22 @@ function MobileNav() {
 function HeaderActions({ onWaitlistPage }: { onWaitlistPage: boolean }) {
   return (
     <div className="flex items-center gap-2">
+      <Button
+        asChild
+        className="hidden sm:inline-flex"
+        size="lg"
+        variant="outline"
+      >
+        <a href={githubUrl} rel="noreferrer" target="_blank">
+          <img
+            alt=""
+            className="size-4 dark:invert"
+            data-icon="inline-start"
+            src="/logos/integrations/github.svg"
+          />
+          GitHub
+        </a>
+      </Button>
       <Button
         asChild
         className="hidden sm:inline-flex"
