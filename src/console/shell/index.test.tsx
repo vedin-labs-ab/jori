@@ -74,15 +74,20 @@ test("opens on a skip link pointing at the main element", () => {
 })
 
 test("keeps the sidebar and header up when the page throws", () => {
+  const error = new Error("Run `status` is missing")
+  const onCaughtError = vi.fn()
   function Broken(): never {
-    throw new Error("Run `status` is missing")
+    throw error
   }
 
   render(
     <ConsoleShell>
       <Broken />
-    </ConsoleShell>
+    </ConsoleShell>,
+    { onCaughtError }
   )
+
+  expect(onCaughtError.mock.calls.map(([caught]) => caught)).toEqual([error])
 
   // The failure is contained: the way to another page is still on screen,
   // so recovering costs a click rather than a full reload.

@@ -119,7 +119,9 @@ test("dragging a sidebar chat carries its current folder without navigating", ()
     ],
   })
   fireEvent.pointerUp(document, { pointerId: 1 })
-  fireEvent.click(link, { detail: 1 })
+  // Exercise the row's guard after dnd-kit removes its document listener.
+  vi.advanceTimersByTime(100)
+  expect(fireEvent.click(link, { detail: 1 })).toBe(false)
   expect(navigate).not.toHaveBeenCalled()
 })
 

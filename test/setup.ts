@@ -19,6 +19,12 @@ if (typeof document !== "undefined") {
   afterAll(() => vi.dynamicImportSettled())
 }
 
+// jsdom has no viewport scrolling. Tests that inspect scrolling can
+// replace this stub with a spy; real browser tests exercise the movement.
+if (typeof window !== "undefined") {
+  window.scrollTo = () => undefined
+}
+
 // jsdom leaves out ResizeObserver, which Radix form controls reach for once
 // they sit inside a <form> and render their hidden form-bubbling inputs.
 // Browsers always have it; the tests only need it to exist.

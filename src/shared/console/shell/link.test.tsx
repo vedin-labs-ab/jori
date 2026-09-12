@@ -79,7 +79,16 @@ test("a modified click is the browser's to open a new tab with", () => {
   const navigate = vi.fn()
   const link = renderLocal(navigate)
 
-  expect(fireEvent.click(link, { metaKey: true })).toBe(true)
+  // Observe the event after React handles it, then stop jsdom from trying
+  // to open a document. The application must leave this browser action alone.
+  const browserClick = vi.fn((event: MouseEvent) => {
+    const prevented = event.defaultPrevented
+    event.preventDefault()
+    return prevented
+  })
+  document.addEventListener("click", browserClick, { once: true })
+  fireEvent.click(link, { metaKey: true })
+  expect(browserClick).toHaveReturnedWith(false)
   expect(navigate).not.toHaveBeenCalled()
 })
 

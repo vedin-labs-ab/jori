@@ -108,18 +108,21 @@ test("a cold page chunk loads inside the shell and can be abandoned", async () =
 
 test("page errors leave navigation usable and clear on the next route", async () => {
   const router = setup()
+  const error = new Error("Page query failed")
+  const onCaughtError = vi.fn()
   router.routesById["/_workspace/skills"].update({
     component: () => {
-      throw new Error("Page query failed")
+      throw error
     },
   })
-  render(<RouterProvider router={router} />)
+  render(<RouterProvider router={router} />, { onCaughtError })
   await screen.findByTestId("page")
   const header = document.querySelector("header")
   await act(async () => {
     await router.navigate({ to: "/skills" })
   })
   expect(await screen.findByText("This page didn't load")).toBeDefined()
+  expect(onCaughtError.mock.calls.map(([caught]) => caught)).toEqual([error])
   expect(document.querySelector("header")).toBe(header)
   fireEvent.click(screen.getByRole("link", { name: "Activity" }))
   expect(await screen.findByTestId("page")).toBeDefined()
