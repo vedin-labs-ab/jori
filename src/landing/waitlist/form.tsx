@@ -82,13 +82,13 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
 
   return (
     <form
-      className="grid max-w-xl gap-5"
+      className="grid max-w-xl gap-4"
       noValidate
       onInput={() => setRejection(undefined)}
       onSubmit={submit}
       ref={form}
     >
-      <div className="grid gap-5 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <EmailField
           fieldId={fieldId}
           invalid={invalid}
@@ -107,16 +107,17 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
         />
       ) : null}
       <Honeypot />
-      <div>
+      {/* A rejection appears where it belongs and pushes what follows;
+          reserving its line under every field spread the form out more
+          than the message ever would. */}
+      <div className="grid justify-items-start gap-3 pt-1">
         <Button disabled={status === "submitting"} type="submit">
           {status === "submitting" ? <Spinner /> : null}
           Join the waitlist
         </Button>
-        <div className="mt-3 min-h-[2lh] text-xs/relaxed sm:min-h-lh">
-          {rejection?.kind === "form" ? (
-            <FieldError>{rejection.message}</FieldError>
-          ) : null}
-        </div>
+        {rejection?.kind === "form" ? (
+          <FieldError>{rejection.message}</FieldError>
+        ) : null}
       </div>
     </form>
   )
@@ -169,11 +170,9 @@ function EmailField({
         required
         type="email"
       />
-      <div className="min-h-lh text-xs/relaxed">
-        <FieldError id={errorId(fieldId, "email")}>
-          {fieldMessage(rejection, "email")}
-        </FieldError>
-      </div>
+      <FieldError id={errorId(fieldId, "email")}>
+        {fieldMessage(rejection, "email")}
+      </FieldError>
     </Field>
   )
 }
@@ -195,11 +194,9 @@ function SizeField({ fieldId, invalid, rejection }: FieldProps) {
           </NativeSelectOption>
         ))}
       </NativeSelect>
-      <div className="min-h-lh text-xs/relaxed">
-        <FieldError id={errorId(fieldId, "size")}>
-          {fieldMessage(rejection, "size")}
-        </FieldError>
-      </div>
+      <FieldError id={errorId(fieldId, "size")}>
+        {fieldMessage(rejection, "size")}
+      </FieldError>
     </Field>
   )
 }
@@ -221,11 +218,9 @@ function WorkField({ fieldId, invalid, rejection }: FieldProps) {
         required
         rows={5}
       />
-      <div className="min-h-lh text-xs/relaxed">
-        <FieldError id={errorId(fieldId, "work")}>
-          {fieldMessage(rejection, "work")}
-        </FieldError>
-      </div>
+      <FieldError id={errorId(fieldId, "work")}>
+        {fieldMessage(rejection, "work")}
+      </FieldError>
     </Field>
   )
 }
