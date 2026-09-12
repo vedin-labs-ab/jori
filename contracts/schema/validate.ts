@@ -1,4 +1,5 @@
 import { isRecord, readStringArray } from "../json"
+import { compileSchemaPattern } from "./pattern"
 
 // Validates JSON values against the supported JSON Schema subset described
 // in ./normalize.ts. Runtime-neutral: usable from Convex, workers, and app
@@ -200,16 +201,23 @@ function validateString(
 ): SchemaValidationIssue[] {
   const issues = validateSize(schema, value.length, path, "Length")
 
-  if (typeof schema.pattern !== "string") {
+  if (schema.pattern === undefined) {
     return issues
+  }
+  if (typeof schema.pattern !== "string") {
+    return [...issues, { path, message: "pattern must be a string" }]
   }
 
   try {
-    if (!new RegExp(schema.pattern, "u").test(value)) {
+    if (!compileSchemaPattern(schema.pattern).test(value)) {
       issues.push({ path, message: "does not match required pattern" })
     }
-  } catch {
-    issues.push({ path, message: "uses an invalid pattern" })
+  } catch (error) {
+    issues.push({
+      path,
+      message:
+        error instanceof Error ? error.message : "uses an invalid pattern",
+    })
   }
 
   return issues

@@ -56,3 +56,16 @@ describe("assertSupportedJsonSchema", () => {
     ).toThrow("unsupported type date")
   })
 })
+
+test("schema writes reject unsupported patterns in nested properties and variants", () => {
+  for (const pattern of ["(?=a)a", "(a)\\1", "[", "a".repeat(513), 123]) {
+    expect(() =>
+      assertSupportedJsonSchema({
+        type: "object",
+        properties: {
+          value: { anyOf: [{ type: "string", pattern }, { type: "null" }] },
+        },
+      })
+    ).toThrow(/pattern/)
+  }
+})

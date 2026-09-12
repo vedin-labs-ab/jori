@@ -77,3 +77,50 @@ describe("validateJsonSchemaValue", () => {
     ).toEqual([{ path: "value", message: "does not match required pattern" }])
   })
 })
+
+test("authored patterns preserve search, anchors and Unicode escapes", () => {
+  for (const [pattern, value] of [
+    ["abc", "prefix abc suffix"],
+    ["^[a-z]+$", "valid"],
+    ["^\\u0041+$", "AAA"],
+    ["^\\u{1F600}$", "😀"],
+  ]) {
+    expect(
+      validateJsonSchemaValue({ type: "string", pattern }, value, "value")
+    ).toEqual([])
+  }
+  expect(
+    validateJsonSchemaValue(
+      { type: "string", pattern: "^abc$" },
+      "prefix abc suffix",
+      "value"
+    )
+  ).toHaveLength(1)
+})
+
+test("nested quantifiers cannot block validation of an untrusted value", () => {
+  const pattern = "^(a+)+$"
+  const value = `${"a".repeat(32_768)}!`
+  expect(
+    validateJsonSchemaValue({ type: "string", pattern }, value, "value")
+  ).toEqual([{ path: "value", message: "does not match required pattern" }])
+})
+
+test("unvalidated stored schemas reject unsupported patterns without executing them", () => {
+  for (const pattern of ["(?=a)a", "(a)\\1", "[", "a".repeat(513), 123]) {
+    expect(
+      validateJsonSchemaValue({ type: "string", pattern }, "aa", "value")
+    ).toHaveLength(1)
+  }
+})
+
+test("the supported pattern dialect has explicit RE2 whitespace and anchor semantics", () => {
+  const matches = (pattern: string, value: string) =>
+    validateJsonSchemaValue({ type: "string", pattern }, value, "value")
+      .length === 0
+  expect(matches("^a$", "a\n")).toBe(false)
+  expect(matches("^\\s$", "\u00a0")).toBe(false)
+  expect(matches("^\\s$", " ")).toBe(true)
+  expect(matches("^.$", "\r")).toBe(true)
+  expect(matches("^.$", "\n")).toBe(false)
+})

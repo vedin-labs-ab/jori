@@ -1,4 +1,5 @@
 import { isRecord } from "../json"
+import { schemaPatternIssue } from "./pattern"
 import { type JsonSchemaObject, type SchemaValidationIssue } from "./validate"
 
 // The supported JSON Schema subset: fully inlined object schemas using the
@@ -94,6 +95,7 @@ function validateSchemaNode(
   }
 
   const typeIssues = validateSchemaType(schema, path)
+  const patternIssue = schemaPatternIssue(schema.pattern)
   const properties = schema.properties
   const items = schema.items
   const additionalProperties = schema.additionalProperties
@@ -101,6 +103,9 @@ function validateSchemaNode(
 
   return [
     ...typeIssues,
+    ...(patternIssue === undefined
+      ? []
+      : [{ path: `${path}.pattern`, message: patternIssue }]),
     ...(isRecord(properties)
       ? Object.entries(properties).flatMap(([key, property]) =>
           validateSchemaNode(property, `${path}.properties.${key}`)
