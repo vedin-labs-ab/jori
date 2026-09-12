@@ -54,7 +54,10 @@ vi.mock("@/shared/loading", () => ({
 vi.mock("convex/react", () => ({
   useMutation: () => mutate,
 }))
-vi.mock("./shared/time", () => ({ localTimezone: () => "Europe/Stockholm" }))
+vi.mock("@/shared/console/time", async (original) => ({
+  ...(await original<typeof import("@/shared/console/time")>()),
+  localTimezone: () => "Europe/Stockholm",
+}))
 vi.mock("./context/organization/onboarding/gate", () => ({
   OnboardingGate: () => null,
 }))
