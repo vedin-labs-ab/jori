@@ -14,7 +14,8 @@ type FooterLink = { label: string } & ({ href: string } | { to: string })
 
 /** Only pages that exist. Every column would be longer with pages that do
  *  not, and a footer that promises more than the site has is the first thing
- *  a careful visitor checks. */
+ *  a careful visitor checks. The legal documents sit on the closing line
+ *  instead, beside the privacy choices they describe. */
 const footerColumns: { links: FooterLink[]; title: string }[] = [
   {
     title: "Product",
@@ -28,22 +29,22 @@ const footerColumns: { links: FooterLink[]; title: string }[] = [
     title: "Company",
     links: [
       { label: "GitHub", href: "https://github.com/vedin-labs-ab/jori" },
-      { label: "Contact", href: "mailto:support@usejori.com" },
+      { label: "Contact", href: "mailto:hello@usejori.com" },
       { label: "Sign in", href: signInUrl },
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      { label: "Privacy", to: "/privacy" },
-      { label: "Terms", to: "/terms" },
-      { label: "DPA", href: "/dpa" },
     ],
   },
 ]
 
-/** Padded to a 24px target box: the links stand in a column, so the inline
- *  exception to WCAG 2.5.8 does not cover them. */
+const legalLinks: FooterLink[] = [
+  { label: "Privacy", to: "/privacy" },
+  { label: "Terms", to: "/terms" },
+  { label: "DPA", href: "/dpa" },
+]
+
+/** Padded to a 24px target box: the links stand on their own, so the inline
+ *  exception to WCAG 2.5.8 does not cover them. The closing row pads them
+ *  sideways as well and pulls the row back by the same amount, so the last
+ *  one still ends on the container edge. */
 const footerLinkClassName =
   "inline-flex items-center py-1 transition-colors hover:text-foreground"
 
@@ -70,7 +71,7 @@ export function LandingFooter() {
             </div>
             <nav
               aria-label="Footer"
-              className="grid grid-cols-3 gap-x-8 gap-y-8 sm:gap-x-16"
+              className="grid grid-cols-2 gap-x-12 gap-y-8 sm:gap-x-20"
             >
               {footerColumns.map((column) => (
                 <div key={column.title}>
@@ -87,13 +88,22 @@ export function LandingFooter() {
             </nav>
           </div>
           <div className="mt-16 flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t pt-6 text-muted-foreground text-sm">
-            <p>© {new Date().getFullYear()} Vedin Labs AB</p>
-            <PrivacyChoices
-              className={cn(
-                footerLinkClassName,
-                "h-auto px-0 font-normal text-muted-foreground text-sm hover:no-underline"
-              )}
-            />
+            <p className="py-1">© {new Date().getFullYear()} Vedin Labs AB</p>
+            <ul className="-mx-2.5 flex flex-wrap items-center">
+              {legalLinks.map((link) => (
+                <li key={link.label}>
+                  <FooterLink className="px-2.5" link={link} />
+                </li>
+              ))}
+              <li>
+                <PrivacyChoices
+                  className={cn(
+                    footerLinkClassName,
+                    "h-auto px-2.5 font-normal text-muted-foreground text-sm hover:no-underline"
+                  )}
+                />
+              </li>
+            </ul>
           </div>
         </div>
         <Wordmark />
@@ -102,10 +112,16 @@ export function LandingFooter() {
   )
 }
 
-function FooterLink({ link }: { link: FooterLink }) {
+function FooterLink({
+  className,
+  link,
+}: {
+  className?: string
+  link: FooterLink
+}) {
   if ("to" in link) {
     return (
-      <Link className={footerLinkClassName} to={link.to}>
+      <Link className={cn(footerLinkClassName, className)} to={link.to}>
         {link.label}
       </Link>
     )
@@ -115,7 +131,7 @@ function FooterLink({ link }: { link: FooterLink }) {
 
   return (
     <a
-      className={footerLinkClassName}
+      className={cn(footerLinkClassName, className)}
       href={link.href}
       rel={external ? "noreferrer" : undefined}
       target={external ? "_blank" : undefined}
@@ -132,8 +148,8 @@ function Assurances() {
   return (
     <dl className="mt-8 flex gap-8">
       <Assurance detail="Stored in your region" term="EU or US">
-        <RegionFlag className="h-6 w-8" region="eu" />
-        <RegionFlag className="-ml-2 h-6 w-8" region="us" />
+        <RegionFlag className="h-6 w-8 rounded-sm ring-0" region="eu" />
+        <RegionFlag className="h-6 w-8 rounded-sm ring-0" region="us" />
       </Assurance>
       <Assurance detail="Built to comply" term="GDPR">
         <GdprBadge />
@@ -153,7 +169,7 @@ function Assurance({
 }) {
   return (
     <div className="text-sm">
-      <dt className="flex h-9 items-center">{children}</dt>
+      <dt className="flex h-9 items-center gap-1.5">{children}</dt>
       <dd className="mt-2.5 font-medium leading-tight">
         {term}
         <span className="mt-0.5 block font-normal text-muted-foreground">
@@ -174,7 +190,7 @@ function GdprBadge() {
       viewBox="0 0 36 36"
     >
       <circle cx="18" cy="18" fill="#003399" r="18" />
-      <StarRing cx={18} cy={18} radius={14.5} size={1} />
+      <StarRing cx={18} cy={18} radius={14.5} size={1.5} />
       <text
         className="fill-white font-semibold"
         dominantBaseline="central"
@@ -189,17 +205,20 @@ function GdprBadge() {
   )
 }
 
-/** The letters of the wordmark, outlined and cut off below their x-height,
- *  so the page ends on the name without a second logo. Set in glyph
- *  coordinates rather than the mark's, which is why no transform applies. */
-const wordmarkCrop = "2.9 -34.4 79.5 21.5"
+/** The letters of the wordmark, cropped a little above the baseline so the
+ *  page ends on the name without a second logo. Set in glyph coordinates
+ *  rather than the mark's, which is why no transform applies. The stroke
+ *  paints under the fill: the outline stays a hairline outside each letter,
+ *  and the seams where the font's contours overlap never show. */
+const wordmarkCrop = "2.9 -34.4 79.5 29"
 
 function Wordmark() {
   return (
     <div className="mx-auto mt-14 w-full max-w-6xl px-6 md:mt-20">
       <svg
         aria-hidden="true"
-        className="block w-full fill-none stroke-foreground/30"
+        className="block w-full fill-card stroke-foreground/30 [paint-order:stroke]"
+        strokeWidth="2"
         viewBox={wordmarkCrop}
       >
         {wordmarkPaths.map((path) => (
