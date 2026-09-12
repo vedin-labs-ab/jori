@@ -197,12 +197,13 @@ function Wordmark() {
         viewBox={Object.values(wordmarkCrop).join(" ")}
       >
         <defs>
-          {/* Frequencies are in glyph units, so the grain is a few pixels
-              wide on a desktop and finer on a phone. */}
+          {/* The frequency is in glyph units: about a pixel at desktop
+              width, finer on a phone. One octave, so it is grain and not
+              cloud. */}
           <filter id={grain}>
             <feTurbulence
-              baseFrequency="3"
-              numOctaves="3"
+              baseFrequency="14"
+              numOctaves="1"
               stitchTiles="stitch"
               type="fractalNoise"
             />
@@ -215,7 +216,7 @@ function Wordmark() {
           {...wordmarkCrop}
           clipPath={`url(#${letters})`}
           filter={`url(#${grain})`}
-          opacity="0.12"
+          opacity="0.08"
           stroke="none"
         />
       </svg>

@@ -57,9 +57,10 @@ export function SignInLegalNotice() {
   return (
     // Consent copy, so it is set at the smallest size the system actually
     // uses for reading rather than a step below it.
+    // The age, business-use, and authority representations live in the
+    // Terms' opening section; restating them here made the line a paragraph.
     <p className="text-pretty text-center text-muted-foreground text-xs/relaxed">
-      By continuing, you confirm you are at least 18, are acting for business
-      purposes with the necessary authority, and agree to Jori&apos;s{" "}
+      By continuing, you agree to Jori&apos;s{" "}
       <LegalLink to="/terms">Terms</LegalLink> and acknowledge the{" "}
       <LegalLink to="/privacy">Privacy Policy</LegalLink>.
       <PrivacyChoices className="ml-1 h-auto px-0 py-0 text-xs" />
