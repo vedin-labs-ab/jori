@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { internalAction } from "../_generated/server"
+import { deductionPaused } from "../deduction/limits"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
 import { fetchGitHubBackfillPage, type GitHubCursor } from "./github"
 import { recordBatch, stepDelayMs, stepEvents } from "./limits"
@@ -14,6 +15,11 @@ import { type BackfillEvent } from "./page"
 export const step = internalAction({
   args: { backfillId: v.id("backfills") },
   handler: async (ctx, args) => {
+    if (deductionPaused) {
+      // Keep running imports and their cursors; reschedule these steps on resume.
+      return
+    }
+
     const loaded = await ctx.runQuery(internal.backfill.record.byId, {
       backfillId: args.backfillId,
     })

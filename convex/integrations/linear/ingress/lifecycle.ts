@@ -38,7 +38,7 @@ type LinearProjectData = {
   status?: { name?: string }
 }
 
-// Issue and project lifecycle changes recorded as events for deduction.
+// Issue and project lifecycle changes feed event-triggered jobs and history.
 // Updates count only when the workflow state changed: field edits are noise,
 // transitions are signal. Comments stay on the message path.
 export function getLinearLifecycleEvent(args: {

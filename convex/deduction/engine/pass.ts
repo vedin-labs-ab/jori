@@ -11,6 +11,7 @@ import {
 } from "../../_generated/server"
 import {
   bootstrapMaxChunksPerSweep,
+  deductionPaused,
   promptVersions,
   sweepBatch,
 } from "../limits"
@@ -45,6 +46,10 @@ const stageRuns: { stage: PassStage; scope: PassScope }[] = [
 export const sweep = internalMutation({
   args: {},
   handler: async (ctx) => {
+    if (deductionPaused) {
+      return
+    }
+
     for (const organizationId of await activeOrganizations(ctx)) {
       await ctx.scheduler.runAfter(0, internal.deduction.engine.pass.run, {
         organizationId,
@@ -74,6 +79,10 @@ async function activeOrganizations(ctx: MutationCtx) {
 export const run = internalAction({
   args: { organizationId: v.string(), force: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
+    if (deductionPaused) {
+      return
+    }
+
     const force = args.force === true
     const stages = force
       ? stageRuns.filter((stageRun) => stageRun.scope === "window")
@@ -128,6 +137,10 @@ export const open = internalMutation({
     force: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    if (deductionPaused) {
+      return null
+    }
+
     const now = Date.now()
     const timing = stageTiming(args.stage, args.scope)
     const latest = await latestPass(ctx, args)

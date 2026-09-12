@@ -1,3 +1,8 @@
+// Pause effort deduction, workstream reviews, consolidation, and historical
+// backfill until further notice. Preserve history without using stale workstream
+// context in new runs. Live ingestion, jobs, and conversation summaries continue.
+export const deductionPaused = true
+
 const hourMs = 60 * 60 * 1000
 const dayMs = 24 * hourMs
 
