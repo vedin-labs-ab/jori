@@ -1,9 +1,34 @@
 # Jori
 
 Jori is the shared drive an organization's AI works out of. Folders hold
-tables, stores, files, and jobs; sharing and spend attach to the folder tree.
-The console and the Slack app are the surfaces, Convex is the backend, and
-runs execute in regional sandboxes so EU and US data stay apart.
+jobs beside the tables, stores, and files they use. A person describes a
+job in plain language, says when it runs, and it runs. We are laying the
+foundation: primitives a person drives, before Jori starts suggesting jobs
+of its own.
+
+## Words
+
+Same word, same meaning, wherever you write:
+
+- **you** means the coding agent reading this and making changes to Jori.
+- **the developer**, **the owner**, **me**, **we**, and **us** mean Albin,
+  who's building Jori as Vedin Labs and is talking to you now.
+- **Jori** means the product, and the agent inside it that users talk to.
+  Jori's they, never it.
+- **user** means a person using Jori.
+- **agent** means Jori's agent, the one the prompts and runs describe. In
+  this codebase's tooling it means a coding agent, which may be you.
+
+## How we decide
+
+- The admin work that keeps a business alive is work nobody wants. If a
+  user needs an engineer to do it in Jori, the design is wrong.
+- Folders are the unit. Jobs, materials, and chats live in the tree, a
+  folder is the ceiling on who sees what it holds, and spend rolls up by
+  folder. A new primitive joins the tree instead of bringing its own
+  sharing or billing.
+- Reliable before magical. A primitive a person can drive beats an
+  automation that guesses, until the primitives are boring.
 
 ## Workflow
 
@@ -19,7 +44,7 @@ runs execute in regional sandboxes so EU and US data stay apart.
 
 ## Code
 
-The goal is a codebase a developer can skim and guess right: folders by
+The goal is a codebase a newcomer can skim and guess right: folders by
 domain and responsibility, one purpose each, none overlapping, and one word
 per concept everywhere. A synonym is a rename, not a choice.
 

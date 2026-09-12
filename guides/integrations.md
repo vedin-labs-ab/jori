@@ -21,8 +21,8 @@ development apps and data apart from production.
 ## Current choices
 
 All four providers use separate registrations named "Jori", or "Jori EU" and
-"Jori US" where names must be unique. If those are taken, ask Albin rather
-than inventing one. These are decisions, not a record of provider settings;
+"Jori US" where names must be unique. If those are taken, ask the developer
+rather than inventing one. These are decisions, not a record of provider settings;
 check the provider before assuming they are applied. Jori's console selects
 the regional app at connection time.
 

@@ -17,4 +17,4 @@ Targets: `dev`, `prod-us`, `prod-eu`. Dev reads `.env.local`, production
 - Production ships from pushed `main`, reusing the gate pass landing
   recorded; `--yes` replaces the typed confirmation without a terminal.
 - Vercel refuses a head commit authored by `noreply@anthropic.com`: author
-  `main` commits as Albin and credit agents in the trailer.
+  `main` commits as the developer and credit yourself in the trailer.
