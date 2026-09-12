@@ -5,8 +5,9 @@ import { linkIdentityToPerson } from "../persons/identity/links"
 import { type Actor } from "../shared/actor"
 import { daysAgo, type SeedContext } from "./context"
 
-// The Vedin Labs roster. Everyone here is reached by email everywhere else in
-// the seed, so the fixtures read as names rather than ids. Whoever actually
+// This roster is synthetic, not a company directory. Reserved email domains
+// and seed-prefixed provider IDs keep fixtures separate from real identities.
+// Everyone is reached by email elsewhere in the seed. Whoever actually
 // signed in to this deployment keeps their own person row and stays the
 // organization's owner; the seed only adds colleagues around them.
 
@@ -26,61 +27,61 @@ type SeedPerson = {
 export const roster: SeedPerson[] = [
   {
     name: "Mia Lindqvist",
-    email: "mia@vedinlabs.com",
+    email: "mia@vedinlabs.example",
     joined: 402,
-    identities: [{ provider: "slack", externalId: "U08KQ4MT2LD" }],
+    identities: [{ provider: "slack", externalId: "seed-slack-mia" }],
   },
   {
     name: "Oskar Hedlund",
-    email: "oskar@vedinlabs.com",
+    email: "oskar@vedinlabs.example",
     joined: 388,
     identities: [
-      { provider: "slack", externalId: "U08J7RB1XCP" },
-      { provider: "github", externalId: "10428837" },
+      { provider: "slack", externalId: "seed-slack-oskar" },
+      { provider: "github", externalId: "seed-github-oskar" },
       {
         provider: "linear",
-        externalId: "6b1f0a24-5c8e-4f31-9a77-2d0be4c1a913",
+        externalId: "seed-linear-oskar",
       },
     ],
   },
   {
     name: "Nadia Rahman",
-    email: "nadia@vedinlabs.com",
+    email: "nadia@vedinlabs.example",
     joined: 271,
     identities: [
-      { provider: "slack", externalId: "U08N2WE6QKV" },
-      { provider: "github", externalId: "17739204" },
+      { provider: "slack", externalId: "seed-slack-nadia" },
+      { provider: "github", externalId: "seed-github-nadia" },
       {
         provider: "linear",
-        externalId: "c94d7e60-13ab-4a52-8f19-77e2c0d5b846",
+        externalId: "seed-linear-nadia",
       },
     ],
   },
   {
     name: "Tobias Ek",
-    email: "tobias@vedinlabs.com",
+    email: "tobias@vedinlabs.example",
     joined: 214,
-    identities: [{ provider: "slack", externalId: "U08PD3YH5MZ" }],
+    identities: [{ provider: "slack", externalId: "seed-slack-tobias" }],
   },
   {
     name: "Priya Iyer",
-    email: "priya@vedinlabs.com",
+    email: "priya@vedinlabs.example",
     joined: 163,
-    identities: [{ provider: "slack", externalId: "U08R6XA9TFN" }],
+    identities: [{ provider: "slack", externalId: "seed-slack-priya" }],
   },
   {
     name: "Johan Sandström",
-    email: "johan@vedinlabs.com",
+    email: "johan@vedinlabs.example",
     joined: 128,
-    identities: [{ provider: "slack", externalId: "U08S4KV0GJW" }],
+    identities: [{ provider: "slack", externalId: "seed-slack-johan" }],
   },
   {
     name: "Elin Byström",
-    email: "elin@vedinlabs.com",
+    email: "elin@vedinlabs.example",
     joined: 74,
     identities: [
-      { provider: "slack", externalId: "U08T9NC3PRB" },
-      { provider: "github", externalId: "21550913" },
+      { provider: "slack", externalId: "seed-slack-elin" },
+      { provider: "github", externalId: "seed-github-elin" },
     ],
   },
 ]
@@ -169,7 +170,7 @@ export async function resolvePeople(ctx: QueryCtx, seed: SeedContext) {
 }
 
 /** The roster keyed by the local part of each address, which is how the
- *  fixtures name people: `oskar`, not `oskar@vedinlabs.com`. */
+ *  fixtures name people: `oskar`, not `oskar@vedinlabs.example`. */
 const rosterByHandle = new Map(
   roster.map((person) => [person.email.split("@")[0], person])
 )
@@ -213,5 +214,5 @@ export async function resolveOwners(ctx: QueryCtx, seed: SeedContext) {
   const account = await resolveOwner(ctx, seed)
 
   return (handle: string | undefined) =>
-    people.get(`${handle}@vedinlabs.com`) ?? account
+    people.get(`${handle}@vedinlabs.example`) ?? account
 }
