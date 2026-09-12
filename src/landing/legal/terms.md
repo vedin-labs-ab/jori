@@ -1,4 +1,4 @@
-export const terms = `## Your agreement with Jori
+## Your agreement with Jori
 
 Jori is provided by Vedin Labs AB, organisation number 556512-5449,
 Braxenvägen 12, 181 30 Lidingö, Sweden. Contact support@usejori.com.
@@ -131,4 +131,3 @@ refund for any prepaid service we will no longer provide.
 Swedish law applies. Disputes are heard by Stockholm District Court, subject
 to any mandatory rules on jurisdiction. Contact support@usejori.com first so
 we can try to resolve the issue.
-`

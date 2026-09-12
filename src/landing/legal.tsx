@@ -1,9 +1,9 @@
-import { terms } from "@contracts/legal/terms"
-import { termsVersion } from "@contracts/legal/version"
+import { termsVersion } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
 import { Markdown } from "@/shared/console/markdown"
 import dpa from "./legal/dpa.md?raw"
 import privacy from "./legal/privacy.md?raw"
+import terms from "./legal/terms.md?raw"
 import { MarketingShell } from "./shell"
 
 export function PrivacyPage() {

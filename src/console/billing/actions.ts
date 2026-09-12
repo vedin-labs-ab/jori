@@ -1,5 +1,8 @@
-import { type BillingInterval, type PlanKey } from "@contracts/billing"
-import { termsVersion } from "@contracts/legal/version"
+import {
+  type BillingInterval,
+  type PlanKey,
+  termsVersion,
+} from "@contracts/billing"
 import { useAction } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { useState } from "react"

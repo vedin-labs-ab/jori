@@ -161,3 +161,6 @@ export type ProviderUsage = {
   micros: number
   tokens: { input: number; output: number }
 }
+
+/** Bump when changing the terms customers accept at purchase. */
+export const termsVersion = "2026-09-12"

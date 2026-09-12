@@ -1,6 +1,9 @@
 import { v } from "convex/values"
-import { dollarsToMicros, topUp } from "../../../contracts/billing"
-import { termsVersion } from "../../../contracts/legal/version"
+import {
+  dollarsToMicros,
+  termsVersion,
+  topUp,
+} from "../../../contracts/billing"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, action } from "../../_generated/server"
