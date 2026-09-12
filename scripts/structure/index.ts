@@ -1,6 +1,7 @@
 import { type Dirent } from "node:fs"
 import { readdir } from "node:fs/promises"
 import path from "node:path"
+import { findDocumentViolations, formatDocumentViolation } from "./documents.ts"
 import {
   findNamingViolations,
   formatNamingViolation,
@@ -18,6 +19,7 @@ type FolderScan = FolderCount & {
 }
 
 type StructureScan = {
+  documentViolations: string[]
   folders: FolderScan[]
   namingViolations: NamingViolation[]
 }
@@ -53,11 +55,16 @@ const skippedDirectories = [
 // serves, not here.
 const allowedSingleFileFolders = ["src/hooks", "src/lib"]
 
-const { folders: counts, namingViolations } = await scanFolders(root)
+const {
+  documentViolations,
+  folders: counts,
+  namingViolations,
+} = await scanFolders(root)
 
 namingViolations.sort((left, right) =>
   left.relativePath.localeCompare(right.relativePath)
 )
+documentViolations.sort()
 
 const limitViolations = counts
   .filter((folder) => folder.count > defaultLimit)
@@ -73,10 +80,16 @@ const singleFileViolations = counts
 if (
   limitViolations.length > 0 ||
   singleFileViolations.length > 0 ||
-  namingViolations.length > 0
+  namingViolations.length > 0 ||
+  documentViolations.length > 0
 ) {
   process.stderr.write(
-    formatViolations(limitViolations, singleFileViolations, namingViolations)
+    formatViolations(
+      limitViolations,
+      singleFileViolations,
+      namingViolations,
+      documentViolations
+    )
   )
   process.exitCode = 1
 } else {
@@ -102,6 +115,12 @@ async function scanFolders(directory: string): Promise<StructureScan> {
     }),
     ...childScanGroups.flatMap((scan) => scan.namingViolations),
   ]
+  const documentViolations = [
+    ...(isSkipped(relativePath)
+      ? []
+      : findDocumentViolations(relativePath, entries)),
+    ...childScanGroups.flatMap((scan) => scan.documentViolations),
+  ]
 
   if (directSourceFileCount > 0 && !isSkipped(relativePath)) {
     folders.push({
@@ -112,7 +131,7 @@ async function scanFolders(directory: string): Promise<StructureScan> {
     })
   }
 
-  return { folders, namingViolations }
+  return { documentViolations, folders, namingViolations }
 }
 
 async function scanChildren(directory: string, entries: Dirent[]) {
@@ -177,7 +196,8 @@ function toRelativePath(directory: string) {
 function formatViolations(
   limitViolations: FolderCount[],
   singleFileViolations: FolderCount[],
-  namingViolations: NamingViolation[]
+  namingViolations: NamingViolation[],
+  documentViolations: string[]
 ) {
   const lines = [
     "Folder structure check failed.",
@@ -197,8 +217,13 @@ function formatViolations(
       namingViolations,
       formatNamingViolation
     ),
+    ...formatSection(
+      "Markdown outside its homes",
+      documentViolations,
+      formatDocumentViolation
+    ),
     "",
-    "Split crowded folders by domain, workflow, or responsibility. Flatten one-file leaf folders until supporting source files exist.",
+    "Split crowded folders by domain, workflow, or responsibility. Flatten one-file leaf folders until supporting source files exist. Markdown lives in guides, prompts, skills, the legal pages, and the repository root; ask the developer before adding a document.",
     "",
   ]
 

@@ -92,7 +92,7 @@ test("reports invalid empty directories and source names in path order", () => {
       "- src/z-bad: `z-bad` is not a single word",
       "",
       "",
-      "Split crowded folders by domain, workflow, or responsibility. Flatten one-file leaf folders until supporting source files exist.",
+      "Split crowded folders by domain, workflow, or responsibility. Flatten one-file leaf folders until supporting source files exist. Markdown lives in guides, prompts, skills, the legal pages, and the repository root; ask the developer before adding a document.",
       "",
     ].join("\n")
   )
@@ -123,4 +123,43 @@ test("a child containing only tests does not exempt a single-file parent", () =>
 
   expect(result.status).toBe(1)
   expect(result.stderr).toContain("- src/parent: 1 direct source file")
+})
+
+test("markdown passes in its homes and fails anywhere else", () => {
+  const allowed = check([
+    "AGENTS.md",
+    "README.md",
+    "guides/ui.md",
+    "prompts/agent/instructions.md",
+    "skills/slack/SKILL.md",
+    "src/landing/legal/privacy.md",
+    "scripts/layout/README.md",
+    "node_modules/pkg/README.md",
+    "convex/_generated/ai/guidelines.md",
+    "src/index.ts",
+    "src/index.test.ts",
+  ])
+
+  expect(allowed.status).toBe(0)
+
+  const stray = check([
+    "src/index.ts",
+    "src/index.test.ts",
+    "src/NOTES.md",
+    "docs/plan.md",
+    "guides/deep/page.md",
+    "STATUS.md",
+  ])
+
+  expect(stray.status).toBe(1)
+  expect(stray.stderr).toContain(
+    [
+      "Markdown outside its homes",
+      "",
+      "- STATUS.md",
+      "- docs/plan.md",
+      "- guides/deep/page.md",
+      "- src/NOTES.md",
+    ].join("\n")
+  )
 })

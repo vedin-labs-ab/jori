@@ -77,6 +77,8 @@ per concept everywhere. A synonym is a rename, not a choice.
 - Keep EU and US data apart. When a provider cannot deliver per region, state
   the limitation instead of widening geography or permissions.
 - Ask before changing legal pages.
+- Ask before adding documentation. Guides are the only docs, and the
+  structure check refuses markdown anywhere else.
 
 ## Guides
 
