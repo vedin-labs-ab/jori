@@ -19,23 +19,23 @@ beforeEach(() => {
 // Attribution is stamped at creation and never joined at read time, so a run
 // keeps costing the folder its job was filed in when it fired.
 
-test.each([
-  "folder",
-  undefined,
-])("a run keeps its job's folder attribution: %s", async (folderId) => {
-  const { ctx, insert } = context()
+test.each(["folder", undefined])(
+  "a run keeps its job's folder attribution: %s",
+  async (folderId) => {
+    const { ctx, insert } = context()
 
-  await createJobRun(ctx, {
-    job: job(folderId as Id<"folders"> | undefined),
-    cause: { type: "time", scheduledAt: 1 },
-    now: 1,
-  })
+    await createJobRun(ctx, {
+      job: job(folderId as Id<"folders"> | undefined),
+      cause: { type: "time", scheduledAt: 1 },
+      now: 1,
+    })
 
-  expect(insert).toHaveBeenCalledWith(
-    "runs",
-    expect.objectContaining({ folderId })
-  )
-})
+    expect(insert).toHaveBeenCalledWith(
+      "runs",
+      expect.objectContaining({ folderId })
+    )
+  }
+)
 
 function context() {
   const insert = vi.fn(async () => "run" as Id<"runs">)

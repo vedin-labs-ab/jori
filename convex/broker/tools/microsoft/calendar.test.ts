@@ -21,14 +21,14 @@ const writes = [
 ] as const
 
 describe.each(writes)("$tool notification semantics", (write) => {
-  test.each([
-    "all",
-    "none",
-  ])("rejects unsupported sendUpdates=%s at the broker boundary", (sendUpdates) => {
-    expect(() =>
-      normalizeBrokerToolInput(write.tool, { ...write.args, sendUpdates })
-    ).toThrow(`${write.tool}.sendUpdates is not supported`)
-  })
+  test.each(["all", "none"])(
+    "rejects unsupported sendUpdates=%s at the broker boundary",
+    (sendUpdates) => {
+      expect(() =>
+        normalizeBrokerToolInput(write.tool, { ...write.args, sendUpdates })
+      ).toThrow(`${write.tool}.sendUpdates is not supported`)
+    }
+  )
 
   test("explains that attendee email cannot be suppressed", () => {
     const schema = microsoftToolInputSchemas[write.tool]

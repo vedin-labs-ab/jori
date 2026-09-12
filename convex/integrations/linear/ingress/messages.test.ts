@@ -14,42 +14,42 @@ vi.mock("../../../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
 
-test.each([
-  "eu",
-  "us",
-])("matches only the installed %s handle or profile", (region) => {
-  const data = identity(region)
-  for (const text of [
-    `@${data.botDisplayName}`,
-    `Please @${data.botDisplayName}, help.`,
-    `(@${data.botDisplayName.toUpperCase()})`,
-    `Ask @${data.botDisplayName}.`,
-    `${data.botUrl} help`,
-    `[Jori](${data.botUrl})`,
-    `<${data.botUrl}>`,
-    `Ask ${data.botUrl}.`,
-  ]) {
-    expect(mentionsLinearApp(text, data), text).toBe(true)
+test.each(["eu", "us"])(
+  "matches only the installed %s handle or profile",
+  (region) => {
+    const data = identity(region)
+    for (const text of [
+      `@${data.botDisplayName}`,
+      `Please @${data.botDisplayName}, help.`,
+      `(@${data.botDisplayName.toUpperCase()})`,
+      `Ask @${data.botDisplayName}.`,
+      `${data.botUrl} help`,
+      `[Jori](${data.botUrl})`,
+      `<${data.botUrl}>`,
+      `Ask ${data.botUrl}.`,
+    ]) {
+      expect(mentionsLinearApp(text, data), text).toBe(true)
+    }
+    const other = identity(region === "eu" ? "us" : "eu")
+    for (const text of [
+      "@jori",
+      `@${other.botDisplayName}`,
+      `@${data.botDisplayName}-extra`,
+      `@${data.botDisplayName}_extra`,
+      `@${data.botDisplayName}.extra`,
+      `@prefix-${data.botDisplayName}`,
+      `email@${data.botDisplayName}`,
+      `@@${data.botDisplayName}`,
+      other.botUrl,
+      `${data.botUrl}-extra`,
+      `${data.botUrl}/extra`,
+      data.botUrl.replace("vedin-labs", "another-workspace"),
+      `https://example.com/?redirect=${data.botUrl}`,
+    ]) {
+      expect(mentionsLinearApp(text, data), text).toBe(false)
+    }
   }
-  const other = identity(region === "eu" ? "us" : "eu")
-  for (const text of [
-    "@jori",
-    `@${other.botDisplayName}`,
-    `@${data.botDisplayName}-extra`,
-    `@${data.botDisplayName}_extra`,
-    `@${data.botDisplayName}.extra`,
-    `@prefix-${data.botDisplayName}`,
-    `email@${data.botDisplayName}`,
-    `@@${data.botDisplayName}`,
-    other.botUrl,
-    `${data.botUrl}-extra`,
-    `${data.botUrl}/extra`,
-    data.botUrl.replace("vedin-labs", "another-workspace"),
-    `https://example.com/?redirect=${data.botUrl}`,
-  ]) {
-    expect(mentionsLinearApp(text, data), text).toBe(false)
-  }
-})
+)
 
 test("missing identities and full names never become a generic alias", () => {
   for (const data of [
@@ -69,63 +69,64 @@ test("missing identities and full names never become a generic alias", () => {
   ).toBe(true)
 })
 
-test.each([
-  "eu",
-  "us",
-])("the %s intake ignores the opposite regional bot", async (region) => {
-  const { t, personId } = await setup(region)
-  const other = region === "eu" ? "us" : "eu"
-  await t.mutation(record, {
-    ...message(`@jori-production-${other} help`),
-    actor: { kind: "person", personId },
-    mentioned: true,
-  })
-  const stored = await rows(t)
-  expect(stored.messages[0]).toMatchObject({
-    mentioned: false,
-    surface: "linear",
-  })
-  expect(stored.conversations).toEqual([])
-  expect(stored.runs).toEqual([])
-})
+test.each(["eu", "us"])(
+  "the %s intake ignores the opposite regional bot",
+  async (region) => {
+    const { t, personId } = await setup(region)
+    const other = region === "eu" ? "us" : "eu"
+    await t.mutation(record, {
+      ...message(`@jori-production-${other} help`),
+      actor: { kind: "person", personId },
+      mentioned: true,
+    })
+    const stored = await rows(t)
+    expect(stored.messages[0]).toMatchObject({
+      mentioned: false,
+      surface: "linear",
+    })
+    expect(stored.conversations).toEqual([])
+    expect(stored.runs).toEqual([])
+  }
+)
 
-test.each([
-  "eu",
-  "us",
-])("the %s intake starts once and preserves unmentioned follow-ups", async (region) => {
-  const { t, personId } = await setup(region)
-  const input = {
-    ...message(`@jori-production-${region} help`),
-    actor: { kind: "person" as const, personId },
-    mentioned: false,
+test.each(["eu", "us"])(
+  "the %s intake starts once and preserves unmentioned follow-ups",
+  async (region) => {
+    const { t, personId } = await setup(region)
+    const input = {
+      ...message(`@jori-production-${region} help`),
+      actor: { kind: "person" as const, personId },
+      mentioned: false,
+    }
+    await t.mutation(record, input)
+    await t.mutation(record, input)
+    let stored = await rows(t)
+    expect(stored.messages).toHaveLength(1)
+    expect(stored.messages[0]?.mentioned).toBe(true)
+    expect(stored.runs).toHaveLength(1)
+    const previousRun = stored.runs[0]
+    if (previousRun === undefined) {
+      throw new Error("Expected the initial mention run")
+    }
+    await t.run(
+      async (ctx) =>
+        await ctx.db.patch(previousRun._id, { status: "completed" })
+    )
+    await t.mutation(record, {
+      ...input,
+      externalId: "follow-up",
+      text: "Continue please",
+    })
+    stored = await rows(t)
+    expect(stored.messages[1]?.mentioned).toBe(false)
+    expect(stored.conversations).toHaveLength(1)
+    expect(stored.runs).toHaveLength(2)
+    expect(stored.runs[1]?.cause).toMatchObject({
+      type: "message",
+      kind: "reply",
+    })
   }
-  await t.mutation(record, input)
-  await t.mutation(record, input)
-  let stored = await rows(t)
-  expect(stored.messages).toHaveLength(1)
-  expect(stored.messages[0]?.mentioned).toBe(true)
-  expect(stored.runs).toHaveLength(1)
-  const previousRun = stored.runs[0]
-  if (previousRun === undefined) {
-    throw new Error("Expected the initial mention run")
-  }
-  await t.run(
-    async (ctx) => await ctx.db.patch(previousRun._id, { status: "completed" })
-  )
-  await t.mutation(record, {
-    ...input,
-    externalId: "follow-up",
-    text: "Continue please",
-  })
-  stored = await rows(t)
-  expect(stored.messages[1]?.mentioned).toBe(false)
-  expect(stored.conversations).toHaveLength(1)
-  expect(stored.runs).toHaveLength(2)
-  expect(stored.runs[1]?.cause).toMatchObject({
-    type: "message",
-    kind: "reply",
-  })
-})
+)
 
 test("own-bot messages cannot start runs even when mentioning the app", async () => {
   const { t } = await setup("eu")

@@ -143,82 +143,82 @@ test("an execution exception is stored once and replay never calls the adapter",
   expect(execute).toHaveBeenCalledTimes(1)
 })
 
-test.each([
-  false,
-  true,
-])("concurrent execution preserves the canonical result (timeout: %s)", async (timeout) => {
-  const { ctx, args } = await fixture()
-  let release: (result: unknown) => void = () => undefined
-  let started: () => void = () => undefined
-  const entered = new Promise<void>((resolve) => {
-    started = resolve
-  })
-  const execute = vi
-    .spyOn(jori, "callJoriTool")
-    .mockImplementation(async () => {
-      started()
-      return await new Promise((resolve) => {
-        release = resolve
+test.each([false, true])(
+  "concurrent execution preserves the canonical result (timeout: %s)",
+  async (timeout) => {
+    const { ctx, args } = await fixture()
+    let release: (result: unknown) => void = () => undefined
+    let started: () => void = () => undefined
+    const entered = new Promise<void>((resolve) => {
+      started = resolve
+    })
+    const execute = vi
+      .spyOn(jori, "callJoriTool")
+      .mockImplementation(async () => {
+        started()
+        return await new Promise((resolve) => {
+          release = resolve
+        })
       })
+    const first = executeRunApproval(ctx, args)
+    await entered
+    expect(await executeRunApproval(ctx, args)).toEqual({
+      state: "executing",
+      expiresAt: Date.now() + approvalExecutionTimeoutMs,
     })
-  const first = executeRunApproval(ctx, args)
-  await entered
-  expect(await executeRunApproval(ctx, args)).toEqual({
-    state: "executing",
-    expiresAt: Date.now() + approvalExecutionTimeoutMs,
-  })
-  if (timeout) {
-    vi.setSystemTime(Date.now() + approvalExecutionTimeoutMs)
-    const uncertain = await executeRunApproval(ctx, args)
-    expect(uncertain).toMatchObject({
-      state: "done",
-      result: expect.stringContaining("could not be confirmed"),
-    })
-    release(JSON.parse(success))
-    expect(await first).toEqual(uncertain)
-    expect(execute).toHaveBeenCalledTimes(1)
-    return
-  }
-  release(JSON.parse(success))
-  expect(await first).toEqual({ state: "done", result: success })
-  expect(execute).toHaveBeenCalledTimes(1)
-})
-
-test.each([
-  false,
-  true,
-])("a result persistence failure cannot repeat the write (committed: %s)", async (committed) => {
-  const { t, ctx, args } = await fixture()
-  const execute = vi
-    .spyOn(jori, "callJoriTool")
-    .mockResolvedValue(JSON.parse(success))
-  const write = ctx.runMutation
-  ctx.runMutation = async (reference, input) => {
-    if (getFunctionName(reference) === "approvals/execution:record") {
-      if (committed) {
-        await write(reference, input)
-      }
-      throw new Error("Lost persistence acknowledgement")
+    if (timeout) {
+      vi.setSystemTime(Date.now() + approvalExecutionTimeoutMs)
+      const uncertain = await executeRunApproval(ctx, args)
+      expect(uncertain).toMatchObject({
+        state: "done",
+        result: expect.stringContaining("could not be confirmed"),
+      })
+      release(JSON.parse(success))
+      expect(await first).toEqual(uncertain)
+      expect(execute).toHaveBeenCalledTimes(1)
+      return
     }
-    return await write(reference, input)
+    release(JSON.parse(success))
+    expect(await first).toEqual({ state: "done", result: success })
+    expect(execute).toHaveBeenCalledTimes(1)
   }
-  await expect(executeRunApproval(ctx, args)).rejects.toThrow(
-    "Lost persistence acknowledgement"
-  )
-  ctx.runMutation = write
-  const retry = await executeRunApproval(ctx, args)
-  if (committed) {
-    expect(retry).toEqual({ state: "done", result: success })
-  } else {
-    expect(retry.state).toBe("executing")
-    vi.setSystemTime(Date.now() + approvalExecutionTimeoutMs)
-    expect(await executeRunApproval(ctx, args)).toMatchObject({
-      state: "done",
-      result: expect.stringContaining("could not be confirmed"),
-    })
+)
+
+test.each([false, true])(
+  "a result persistence failure cannot repeat the write (committed: %s)",
+  async (committed) => {
+    const { t, ctx, args } = await fixture()
+    const execute = vi
+      .spyOn(jori, "callJoriTool")
+      .mockResolvedValue(JSON.parse(success))
+    const write = ctx.runMutation
+    ctx.runMutation = async (reference, input) => {
+      if (getFunctionName(reference) === "approvals/execution:record") {
+        if (committed) {
+          await write(reference, input)
+        }
+        throw new Error("Lost persistence acknowledgement")
+      }
+      return await write(reference, input)
+    }
+    await expect(executeRunApproval(ctx, args)).rejects.toThrow(
+      "Lost persistence acknowledgement"
+    )
+    ctx.runMutation = write
+    const retry = await executeRunApproval(ctx, args)
+    if (committed) {
+      expect(retry).toEqual({ state: "done", result: success })
+    } else {
+      expect(retry.state).toBe("executing")
+      vi.setSystemTime(Date.now() + approvalExecutionTimeoutMs)
+      expect(await executeRunApproval(ctx, args)).toMatchObject({
+        state: "done",
+        result: expect.stringContaining("could not be confirmed"),
+      })
+    }
+    expect(execute).toHaveBeenCalledTimes(1)
+    expect(
+      (await t.run(async (db) => await db.db.get(args.approvalId)))?.result
+    ).toBeDefined()
   }
-  expect(execute).toHaveBeenCalledTimes(1)
-  expect(
-    (await t.run(async (db) => await db.db.get(args.approvalId)))?.result
-  ).toBeDefined()
-})
+)

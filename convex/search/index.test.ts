@@ -43,37 +43,36 @@ function requestBody() {
   return JSON.parse(providerFetch.mock.calls[0][1].body)
 }
 
-test.each([
-  "eu",
-  "us",
-])("%s uses only its deployment credential and explicitly reports global processing", async (region) => {
-  vi.stubEnv("JORI_REGION", region)
-  vi.stubEnv("PARALLEL_API_KEY", `test-${region}-key`)
-  const client = createSearchClient()
-  const result = await client.search({
-    query: "public documentation",
-    limit: 2,
-    maxCharacters: 500,
-  })
-  expect(client.region).toBe(region)
-  expect(client.processing).toBe("global")
-  expect(providerFetch.mock.calls[0][0].toString()).toBe(
-    "https://api.parallel.ai/v1/search"
-  )
-  expect(
-    new Headers(providerFetch.mock.calls[0][1].headers).get("x-api-key")
-  ).toBe(`test-${region}-key`)
-  expect(result.provider.name).toBe("parallel")
-})
-test.each([
-  undefined,
-  "",
-  "invalid",
-])("rejects invalid deployment region %s before any network request", (region) => {
-  vi.stubEnv("JORI_REGION", region)
-  expect(() => createSearchClient()).toThrow("JORI_REGION")
-  expect(providerFetch).not.toHaveBeenCalled()
-})
+test.each(["eu", "us"])(
+  "%s uses only its deployment credential and explicitly reports global processing",
+  async (region) => {
+    vi.stubEnv("JORI_REGION", region)
+    vi.stubEnv("PARALLEL_API_KEY", `test-${region}-key`)
+    const client = createSearchClient()
+    const result = await client.search({
+      query: "public documentation",
+      limit: 2,
+      maxCharacters: 500,
+    })
+    expect(client.region).toBe(region)
+    expect(client.processing).toBe("global")
+    expect(providerFetch.mock.calls[0][0].toString()).toBe(
+      "https://api.parallel.ai/v1/search"
+    )
+    expect(
+      new Headers(providerFetch.mock.calls[0][1].headers).get("x-api-key")
+    ).toBe(`test-${region}-key`)
+    expect(result.provider.name).toBe("parallel")
+  }
+)
+test.each([undefined, "", "invalid"])(
+  "rejects invalid deployment region %s before any network request",
+  (region) => {
+    vi.stubEnv("JORI_REGION", region)
+    expect(() => createSearchClient()).toThrow("JORI_REGION")
+    expect(providerFetch).not.toHaveBeenCalled()
+  }
+)
 test("does not borrow another deployment's credential", () => {
   vi.stubEnv("PARALLEL_API_KEY", undefined)
   expect(() => createSearchClient()).toThrow("Missing PARALLEL_API_KEY")

@@ -58,20 +58,23 @@ test("generates a regional image, accounts for it and saves it as a file", async
 test.each([
   undefined,
   "Vertex returned no supported image (IMAGE_SAFETY; missing content parts).",
-])("accounts for a missing image before reporting its failure: %s", async (failure) => {
-  vi.mocked(generateVertexImage).mockResolvedValue({
-    image: null,
-    usage,
-    failure,
-  })
-  const runtime = imageRuntime()
-  await expect(
-    generateImageFile(runtime, { prompt: "Create an image." })
-  ).rejects.toThrow(failure ?? "Vertex did not return a generated image.")
-  expect(runtime.platform.recordUsage).toHaveBeenCalledExactlyOnceWith(usage)
-  expect(runtime.platform.uploadFile).not.toHaveBeenCalled()
-  expect(runtime.sandbox.importFile).not.toHaveBeenCalled()
-})
+])(
+  "accounts for a missing image before reporting its failure: %s",
+  async (failure) => {
+    vi.mocked(generateVertexImage).mockResolvedValue({
+      image: null,
+      usage,
+      failure,
+    })
+    const runtime = imageRuntime()
+    await expect(
+      generateImageFile(runtime, { prompt: "Create an image." })
+    ).rejects.toThrow(failure ?? "Vertex did not return a generated image.")
+    expect(runtime.platform.recordUsage).toHaveBeenCalledExactlyOnceWith(usage)
+    expect(runtime.platform.uploadFile).not.toHaveBeenCalled()
+    expect(runtime.sandbox.importFile).not.toHaveBeenCalled()
+  }
+)
 
 test("records the provider charge before a file write can fail", async () => {
   const runtime = imageRuntime()

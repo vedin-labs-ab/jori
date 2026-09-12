@@ -31,19 +31,20 @@ test("list_capabilities validates input on its fast path", async () => {
 test.each([
   { name: "ordinary call", execute: callBrokerTool },
   { name: "approved call", execute: executeApprovedTool },
-])("$name validates before refreshing provider credentials", async ({
-  execute,
-}) => {
-  await expect(
-    execute(ctx, context(), {
-      surface: "notion",
-      tool: "notion_get_page",
-      args: { pageId: 42 },
-    })
-  ).rejects.toThrow("pageId must be a string")
-  expect(prepareIntegrationForRuntime).not.toHaveBeenCalled()
-  expect(callProviderTool).not.toHaveBeenCalled()
-})
+])(
+  "$name validates before refreshing provider credentials",
+  async ({ execute }) => {
+    await expect(
+      execute(ctx, context(), {
+        surface: "notion",
+        tool: "notion_get_page",
+        args: { pageId: 42 },
+      })
+    ).rejects.toThrow("pageId must be a string")
+    expect(prepareIntegrationForRuntime).not.toHaveBeenCalled()
+    expect(callProviderTool).not.toHaveBeenCalled()
+  }
+)
 
 test("valid provider input still refreshes credentials and executes", async () => {
   await callBrokerTool(ctx, context(), {

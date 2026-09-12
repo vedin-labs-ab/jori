@@ -29,24 +29,27 @@ test.each([
     { channel: "C123", name: "thumbsup", timestamp: "123.456" },
     "slack_add_reaction",
   ],
-] as const)("%s reaction tools do not mark the active surface communicated", async (surface, tool, args, name) => {
-  const runtime = communicationRuntime({
-    result: { ok: true },
-    surface,
-    tool,
-  })
+] as const)(
+  "%s reaction tools do not mark the active surface communicated",
+  async (surface, tool, args, name) => {
+    const runtime = communicationRuntime({
+      result: { ok: true },
+      surface,
+      tool,
+    })
 
-  await runTool({
-    call: {
-      args,
-      id: "call_1",
-      name,
-    },
-    runtime,
-  })
+    await runTool({
+      call: {
+        args,
+        id: "call_1",
+        name,
+      },
+      runtime,
+    })
 
-  expect(runtime.context.activeSurface?.communicated).toBe(false)
-})
+    expect(runtime.context.activeSurface?.communicated).toBe(false)
+  }
+)
 
 test("final integration offers finish the tool step", async () => {
   const runtime = communicationRuntime({
@@ -83,28 +86,31 @@ test.each([
   ["delivered without a surface", { delivery: { status: "delivered" } }, false],
   ["not delivered", { delivery: { status: "created" } }, false],
   ["already connected", { status: "connected" }, false],
-] as const)("integration offers continue without final when %s", async (_label, result, communicated) => {
-  const runtime = communicationRuntime({
-    result,
-    surface: "slack",
-    tool: integrationOfferTool(),
-  })
+] as const)(
+  "integration offers continue without final when %s",
+  async (_label, result, communicated) => {
+    const runtime = communicationRuntime({
+      result,
+      surface: "slack",
+      tool: integrationOfferTool(),
+    })
 
-  const output = await runTool({
-    call: {
-      args: {
-        integration: "gmail",
-        summary: "Gmail is needed here.",
+    const output = await runTool({
+      call: {
+        args: {
+          integration: "gmail",
+          summary: "Gmail is needed here.",
+        },
+        id: "call_1",
+        name: "offer_integration",
       },
-      id: "call_1",
-      name: "offer_integration",
-    },
-    runtime,
-  })
+      runtime,
+    })
 
-  expect(output.finished).toBe(false)
-  expect(runtime.context.activeSurface?.communicated).toBe(communicated)
-})
+    expect(output.finished).toBe(false)
+    expect(runtime.context.activeSurface?.communicated).toBe(communicated)
+  }
+)
 
 function communicationRuntime(options: {
   result: unknown

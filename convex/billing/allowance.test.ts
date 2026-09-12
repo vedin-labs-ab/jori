@@ -117,29 +117,28 @@ test.each([
   ).toHaveLength(1)
 })
 
-test.each([
-  0,
-  -1,
-  1.5,
-  NaN,
-  Infinity,
-  1_000_000_001,
-])("rejects invalid amount %s without writes", async (micros) => {
-  const { t, id } = await setup()
-  const before = await t.run(async (ctx) => await ctx.db.get(id))
-  await expect(t.mutation(reference, { ...args, micros })).rejects.toThrow()
-  expect(await t.run(async (ctx) => await ctx.db.get(id))).toEqual(before)
-  expect(
-    await t.run(async (ctx) => await ctx.db.query("transactions").take(10))
-  ).toEqual([])
-})
+test.each([0, -1, 1.5, NaN, Infinity, 1_000_000_001])(
+  "rejects invalid amount %s without writes",
+  async (micros) => {
+    const { t, id } = await setup()
+    const before = await t.run(async (ctx) => await ctx.db.get(id))
+    await expect(t.mutation(reference, { ...args, micros })).rejects.toThrow()
+    expect(await t.run(async (ctx) => await ctx.db.get(id))).toEqual(before)
+    expect(
+      await t.run(async (ctx) => await ctx.db.query("transactions").take(10))
+    ).toEqual([])
+  }
+)
 
-test.each([
-  1, 1_000_000_000,
-])("accepts bounded integer amount %s", async (micros) => {
-  const { t } = await setup()
-  expect((await t.mutation(reference, { ...args, micros })).applied).toBe(true)
-})
+test.each([1, 1_000_000_000])(
+  "accepts bounded integer amount %s",
+  async (micros) => {
+    const { t } = await setup()
+    expect((await t.mutation(reference, { ...args, micros })).applied).toBe(
+      true
+    )
+  }
+)
 
 test.each([
   { reason: "" },

@@ -11,47 +11,49 @@ import { recordTrace } from "../runs/execution/traces/write"
 import { appendTranscript } from "../runs/execution/transcript/data"
 import { insertRow } from "../shared/context"
 
-test.each([
-  "deleting",
-  "deleted",
-])("%s workspaces reject late producers without affecting another workspace", async (state) => {
-  const { ctx, database, run, runId, values } = await setup(state)
-  expect(
-    await findActiveIntegrationByExternalId(ctx, {
-      integration: "slack",
-      externalId: "T-CLOSED",
+test.each(["deleting", "deleted"])(
+  "%s workspaces reject late producers without affecting another workspace",
+  async (state) => {
+    const { ctx, database, run, runId, values } = await setup(state)
+    expect(
+      await findActiveIntegrationByExternalId(ctx, {
+        integration: "slack",
+        externalId: "T-CLOSED",
+      })
+    ).toBeNull()
+    await expect(upsertIntegration(ctx, null, values)).rejects.toThrow(
+      "deleted"
+    )
+    await expect(
+      createPerson(ctx, { organizationId: "closed" })
+    ).rejects.toThrow("deleted")
+    await expect(
+      insertRow(ctx, "persons", {
+        organizationId: "closed",
+        createdAt: 1,
+        updatedAt: 1,
+      })
+    ).rejects.toThrow("deleted")
+    expect(await isRunExecutable(ctx, run)).toBe(false)
+    await writeRunDraft(ctx, {
+      runId,
+      reasoning: "private",
+      text: "late",
+      turn: 1,
     })
-  ).toBeNull()
-  await expect(upsertIntegration(ctx, null, values)).rejects.toThrow("deleted")
-  await expect(createPerson(ctx, { organizationId: "closed" })).rejects.toThrow(
-    "deleted"
-  )
-  await expect(
-    insertRow(ctx, "persons", {
-      organizationId: "closed",
-      createdAt: 1,
-      updatedAt: 1,
-    })
-  ).rejects.toThrow("deleted")
-  expect(await isRunExecutable(ctx, run)).toBe(false)
-  await writeRunDraft(ctx, {
-    runId,
-    reasoning: "private",
-    text: "late",
-    turn: 1,
-  })
-  await appendTranscript(ctx, runId, [{ role: "user", content: "late" }])
-  expect(
-    await recordTrace(ctx, { run, key: "late", type: "run.stopped" })
-  ).toBe(false)
-  expect(await upsertSandbox(ctx, { runId, externalId: "late-sandbox" })).toBe(
-    false
-  )
-  for (const table of ["drafts", "transcript", "traces", "sandboxes"]) {
-    expect(await database.query(table).collect()).toEqual([])
+    await appendTranscript(ctx, runId, [{ role: "user", content: "late" }])
+    expect(
+      await recordTrace(ctx, { run, key: "late", type: "run.stopped" })
+    ).toBe(false)
+    expect(
+      await upsertSandbox(ctx, { runId, externalId: "late-sandbox" })
+    ).toBe(false)
+    for (const table of ["drafts", "transcript", "traces", "sandboxes"]) {
+      expect(await database.query(table).collect()).toEqual([])
+    }
+    expect(await createPerson(ctx, { organizationId: "other" })).toBeTruthy()
   }
-  expect(await createPerson(ctx, { organizationId: "other" })).toBeTruthy()
-})
+)
 
 async function setup(state: string) {
   const { ctx, database } = databaseContext()

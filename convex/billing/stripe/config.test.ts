@@ -22,18 +22,19 @@ test("billing readiness requires credentials, webhook verification and all price
   expect(() => requireStripeConfiguration()).not.toThrow()
 })
 
-test.each(
-  stripeEnvironmentNames
-)("missing %s disables every Stripe request", async (name) => {
-  const fetch = vi.fn()
-  vi.stubGlobal("fetch", fetch)
-  vi.stubEnv(name, "  ")
-  expect(isStripeConfigured()).toBe(false)
-  await expect(stripeRequest("/v1/payment_intents")).rejects.toThrow(
-    "Billing is not available in this instance yet."
-  )
-  expect(fetch).not.toHaveBeenCalled()
-})
+test.each(stripeEnvironmentNames)(
+  "missing %s disables every Stripe request",
+  async (name) => {
+    const fetch = vi.fn()
+    vi.stubGlobal("fetch", fetch)
+    vi.stubEnv(name, "  ")
+    expect(isStripeConfigured()).toBe(false)
+    await expect(stripeRequest("/v1/payment_intents")).rejects.toThrow(
+      "Billing is not available in this instance yet."
+    )
+    expect(fetch).not.toHaveBeenCalled()
+  }
+)
 
 test("an unconfigured instance cannot use another region's configuration", () => {
   for (const name of stripeEnvironmentNames) {
@@ -43,21 +44,22 @@ test("an unconfigured instance cannot use another region's configuration", () =>
   expect(isStripeConfigured()).toBe(false)
 })
 
-test.each([
-  400, 401, 429, 503,
-])("Stripe HTTP %s errors omit reflected provider content without retrying", async (status) => {
-  const fetch = vi.fn(async () =>
-    Response.json(
-      { error: { message: "Reflected private customer value" } },
-      { status }
+test.each([400, 401, 429, 503])(
+  "Stripe HTTP %s errors omit reflected provider content without retrying",
+  async (status) => {
+    const fetch = vi.fn(async () =>
+      Response.json(
+        { error: { message: "Reflected private customer value" } },
+        { status }
+      )
     )
-  )
-  vi.stubGlobal("fetch", fetch)
-  await expect(stripeRequest("/v1/payment_intents")).rejects.toThrow(
-    `Stripe request failed (HTTP ${status})`
-  )
-  expect(fetch).toHaveBeenCalledTimes(1)
-})
+    vi.stubGlobal("fetch", fetch)
+    await expect(stripeRequest("/v1/payment_intents")).rejects.toThrow(
+      `Stripe request failed (HTTP ${status})`
+    )
+    expect(fetch).toHaveBeenCalledTimes(1)
+  }
+)
 
 test("malformed successful Stripe responses cannot expose parser snippets", async () => {
   vi.stubGlobal(

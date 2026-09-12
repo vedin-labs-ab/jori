@@ -19,39 +19,37 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllEnvs())
 
-test.each([
-  "us",
-  undefined,
-  "unknown",
-])("ignores %s region before touching local billing data", async (region) => {
-  const { ctx, query, insert, patch } = context()
-  for (const type of [
-    "checkout.session.completed",
-    "checkout.session.async_payment_succeeded",
-    "checkout.session.async_payment_failed",
-    "customer.subscription.updated",
-    "customer.subscription.deleted",
-    "payment_intent.succeeded",
-    "payment_intent.payment_failed",
-  ]) {
-    await handle(ctx, { event: event({ metadata: { region } }, type) })
+test.each(["us", undefined, "unknown"])(
+  "ignores %s region before touching local billing data",
+  async (region) => {
+    const { ctx, query, insert, patch } = context()
+    for (const type of [
+      "checkout.session.completed",
+      "checkout.session.async_payment_succeeded",
+      "checkout.session.async_payment_failed",
+      "customer.subscription.updated",
+      "customer.subscription.deleted",
+      "payment_intent.succeeded",
+      "payment_intent.payment_failed",
+    ]) {
+      await handle(ctx, { event: event({ metadata: { region } }, type) })
+    }
+    expect(query).not.toHaveBeenCalled()
+    expect(insert).not.toHaveBeenCalled()
+    expect(patch).not.toHaveBeenCalled()
   }
-  expect(query).not.toHaveBeenCalled()
-  expect(insert).not.toHaveBeenCalled()
-  expect(patch).not.toHaveBeenCalled()
-})
+)
 
-test.each([
-  "unpaid",
-  "no_payment_required",
-  undefined,
-])("does not fund the wallet when payment status is %s", async (payment_status) => {
-  const { ctx, query, insert, patch } = context()
-  await handle(ctx, { event: event({ payment_status }) })
-  expect(query).not.toHaveBeenCalled()
-  expect(insert).not.toHaveBeenCalled()
-  expect(patch).not.toHaveBeenCalled()
-})
+test.each(["unpaid", "no_payment_required", undefined])(
+  "does not fund the wallet when payment status is %s",
+  async (payment_status) => {
+    const { ctx, query, insert, patch } = context()
+    await handle(ctx, { event: event({ payment_status }) })
+    expect(query).not.toHaveBeenCalled()
+    expect(insert).not.toHaveBeenCalled()
+    expect(patch).not.toHaveBeenCalled()
+  }
+)
 
 test("credits a paid checkout only to its existing regional customer", async () => {
   const { ctx, insert, patch } = context()
@@ -154,26 +152,24 @@ test("a paid delayed subscription is activated once", async () => {
   )
 })
 
-test.each([
-  "canceled",
-  "incomplete",
-  "incomplete_expired",
-  "unpaid",
-])("late checkout cannot activate a currently %s subscription", async (status) => {
-  const { ctx, patch } = context()
-  await handle(ctx, {
-    event: event({
-      subscription: "sub_1",
-      metadata: {
-        organizationId: "organization-1",
-        region: "eu",
-        kind: "plan",
-      },
-    }),
-    subscription: { ...currentSubscription(), status },
-  })
-  expect(patch).not.toHaveBeenCalled()
-})
+test.each(["canceled", "incomplete", "incomplete_expired", "unpaid"])(
+  "late checkout cannot activate a currently %s subscription",
+  async (status) => {
+    const { ctx, patch } = context()
+    await handle(ctx, {
+      event: event({
+        subscription: "sub_1",
+        metadata: {
+          organizationId: "organization-1",
+          region: "eu",
+          kind: "plan",
+        },
+      }),
+      subscription: { ...currentSubscription(), status },
+    })
+    expect(patch).not.toHaveBeenCalled()
+  }
+)
 
 test("paid checkout uses the current price instead of stale checkout metadata", async () => {
   const { ctx, patch } = context()

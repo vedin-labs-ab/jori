@@ -5,18 +5,21 @@ describe("renderPromptTemplate", () => {
   test.each([
     [true, "slack", "Hello Albin. Reply in Slack."],
     [false, "console", "Hello Albin."],
-  ])("renders values and conditional sections for %s / %s", (sendReply, surface, expected) => {
-    expect(
-      renderPromptTemplate(
-        'Hello {{ user.name }}.{% if tools.send_reply %} Reply{% endif %}{% if surface.integration == "slack" %} in Slack.{% endif %}',
-        {
-          user: { name: "Albin" },
-          tools: { send_reply: sendReply },
-          surface: { integration: surface },
-        }
-      )
-    ).toBe(expected)
-  })
+  ])(
+    "renders values and conditional sections for %s / %s",
+    (sendReply, surface, expected) => {
+      expect(
+        renderPromptTemplate(
+          'Hello {{ user.name }}.{% if tools.send_reply %} Reply{% endif %}{% if surface.integration == "slack" %} in Slack.{% endif %}',
+          {
+            user: { name: "Albin" },
+            tools: { send_reply: sendReply },
+            surface: { integration: surface },
+          }
+        )
+      ).toBe(expected)
+    }
+  )
 
   test("throws when required output values are missing", () => {
     expect(() => renderPromptTemplate("Hello {{ user.name }}.", {})).toThrow(

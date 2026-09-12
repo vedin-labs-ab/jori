@@ -59,23 +59,22 @@ test("rejects conflicting receipt replays without modifying the first charge", a
   ).rejects.toThrow("conflicts")
 })
 
-test.each([
-  -1,
-  Number.NaN,
-  0.5,
-])("rejects invalid amounts: %s", async (micros) => {
-  const { t, runId } = await setup()
-  await expect(
-    t.mutation(internal.billing.usage.records.record, {
-      ...usage,
-      runId,
-      micros,
-    })
-  ).rejects.toThrow("non-negative integers")
-  expect(
-    await t.run(async (ctx) => await ctx.db.query("usageReceipts").collect())
-  ).toHaveLength(0)
-})
+test.each([-1, Number.NaN, 0.5])(
+  "rejects invalid amounts: %s",
+  async (micros) => {
+    const { t, runId } = await setup()
+    await expect(
+      t.mutation(internal.billing.usage.records.record, {
+        ...usage,
+        runId,
+        micros,
+      })
+    ).rejects.toThrow("non-negative integers")
+    expect(
+      await t.run(async (ctx) => await ctx.db.query("usageReceipts").collect())
+    ).toHaveLength(0)
+  }
+)
 
 async function setup() {
   const t = convexTest(schema, modules)

@@ -40,66 +40,66 @@ test("creates Notion pages with icon and cover payloads", async () => {
   })
 })
 
-test.each([
-  "standard",
-  "Convex",
-])("uploads saved files with their MIME type using %s FormData", async (runtime) => {
-  if (runtime === "Convex") {
-    // Convex's FormData.set recreates File without preserving its MIME type.
-    // append preserves it. Model that runtime behavior at the upload boundary.
-    vi.stubGlobal(
-      "FormData",
-      class extends FormData {
-        override set(name: string, value: string | Blob, filename?: string) {
-          if (value instanceof Blob) {
-            super.set(name, new Blob([value]), filename)
-          } else {
-            super.set(name, value)
+test.each(["standard", "Convex"])(
+  "uploads saved files with their MIME type using %s FormData",
+  async (runtime) => {
+    if (runtime === "Convex") {
+      // Convex's FormData.set recreates File without preserving its MIME type.
+      // append preserves it. Model that runtime behavior at the upload boundary.
+      vi.stubGlobal(
+        "FormData",
+        class extends FormData {
+          override set(name: string, value: string | Blob, filename?: string) {
+            if (value instanceof Blob) {
+              super.set(name, new Blob([value]), filename)
+            } else {
+              super.set(name, value)
+            }
           }
         }
-      }
-    )
-  }
-  const fetch = vi.fn<typeof globalThis.fetch>(async (url) => {
-    const pathname = new URL(String(url)).pathname
+      )
+    }
+    const fetch = vi.fn<typeof globalThis.fetch>(async (url) => {
+      const pathname = new URL(String(url)).pathname
 
-    return Response.json({
-      id: "upload_1",
-      status: pathname.endsWith("/send") ? "uploaded" : "pending",
+      return Response.json({
+        id: "upload_1",
+        status: pathname.endsWith("/send") ? "uploaded" : "pending",
+      })
     })
-  })
 
-  vi.stubGlobal("fetch", fetch)
-  const result = await callNotionTool(
-    integration("notion"),
-    "notion_upload_file",
-    { fileId: "file_1" },
-    fileContext()
-  )
+    vi.stubGlobal("fetch", fetch)
+    const result = await callNotionTool(
+      integration("notion"),
+      "notion_upload_file",
+      { fileId: "file_1" },
+      fileContext()
+    )
 
-  expect(result).toMatchObject({
-    file: { type: "file_upload", file_upload: { id: "upload_1" } },
-    fileUpload: { id: "upload_1", status: "uploaded" },
-  })
-  expect(fetch).toHaveBeenCalledTimes(2)
-  expect(fetch.mock.calls[0]?.[0]).toBe(
-    "https://api.notion.com/v1/file_uploads"
-  )
-  expect(JSON.parse(String(fetch.mock.calls[0]?.[1]?.body))).toEqual({
-    content_type: "image/png",
-    filename: "ÅÄÖ-🚀.png",
-    mode: "single_part",
-  })
-  expect(fetch.mock.calls[1]).toEqual([
-    "https://api.notion.com/v1/file_uploads/upload_1/send",
-    expect.objectContaining({ method: "POST", body: expect.any(FormData) }),
-  ])
-  const body = fetch.mock.calls[1]?.[1]?.body as FormData
-  expect(body.get("file")).toMatchObject({
-    name: "ÅÄÖ-🚀.png",
-    type: "image/png",
-  })
-})
+    expect(result).toMatchObject({
+      file: { type: "file_upload", file_upload: { id: "upload_1" } },
+      fileUpload: { id: "upload_1", status: "uploaded" },
+    })
+    expect(fetch).toHaveBeenCalledTimes(2)
+    expect(fetch.mock.calls[0]?.[0]).toBe(
+      "https://api.notion.com/v1/file_uploads"
+    )
+    expect(JSON.parse(String(fetch.mock.calls[0]?.[1]?.body))).toEqual({
+      content_type: "image/png",
+      filename: "ÅÄÖ-🚀.png",
+      mode: "single_part",
+    })
+    expect(fetch.mock.calls[1]).toEqual([
+      "https://api.notion.com/v1/file_uploads/upload_1/send",
+      expect.objectContaining({ method: "POST", body: expect.any(FormData) }),
+    ])
+    const body = fetch.mock.calls[1]?.[1]?.body as FormData
+    expect(body.get("file")).toMatchObject({
+      name: "ÅÄÖ-🚀.png",
+      type: "image/png",
+    })
+  }
+)
 
 function fileContext() {
   return {

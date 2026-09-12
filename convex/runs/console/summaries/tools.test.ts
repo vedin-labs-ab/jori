@@ -12,23 +12,23 @@ import {
 } from "../../../../test/convex/tools"
 import { summarizeRun } from "../summaries"
 
-test.each([
-  true,
-  false,
-])("shows stored event job tools with web search allowed: %s", async (webSearch) => {
-  const run = testRun(eventRun(), {
-    preparedTools: slackToolSnapshot(webSearch),
-  })
-  const summary = await summarizeRun(
-    fakeQueryCtx({ run }, { traces: preparedTraceRows(run) }),
-    run
-  )
+test.each([true, false])(
+  "shows stored event job tools with web search allowed: %s",
+  async (webSearch) => {
+    const run = testRun(eventRun(), {
+      preparedTools: slackToolSnapshot(webSearch),
+    })
+    const summary = await summarizeRun(
+      fakeQueryCtx({ run }, { traces: preparedTraceRows(run) }),
+      run
+    )
 
-  expect(summary.details).toContainEqual(slackToolsDetail())
-  expect(summary.details).toContainEqual(
-    webSearchDetail(webSearch ? "Allowed" : "Blocked")
-  )
-})
+    expect(summary.details).toContainEqual(slackToolsDetail())
+    expect(summary.details).toContainEqual(
+      webSearchDetail(webSearch ? "Allowed" : "Blocked")
+    )
+  }
+)
 
 test("shows stored tools for mention and reply runs", async () => {
   for (const kind of ["mention", "reply"] as const) {

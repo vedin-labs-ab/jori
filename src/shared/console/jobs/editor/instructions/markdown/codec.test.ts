@@ -30,39 +30,34 @@ test("round-trips the supported Markdown profile", () => {
   expect(roundTrip(source)).toBe(source)
 })
 
-test.each([
-  "",
-  "txt",
-  "text",
-  "plaintext",
-  "TeXt",
-  "PLAINTEXT",
-])("treats the %s fence as canonical plain text", (language) => {
-  const document = parse(
-    [`\`\`\`${language}`, "Use #save_file.", "```"].join("\n")
-  )
+test.each(["", "txt", "text", "plaintext", "TeXt", "PLAINTEXT"])(
+  "treats the %s fence as canonical plain text",
+  (language) => {
+    const document = parse(
+      [`\`\`\`${language}`, "Use #save_file.", "```"].join("\n")
+    )
 
-  expect(document.content?.[0]?.type).toBe("fencedText")
-  expect(readInstructionReferences(document)).toEqual([
-    { id: "save_file", kind: "tool" },
-  ])
-  expect(serialize(document).description).toBe(
-    ["```txt", "Use #save_file.", "```"].join("\n")
-  )
-})
+    expect(document.content?.[0]?.type).toBe("fencedText")
+    expect(readInstructionReferences(document)).toEqual([
+      { id: "save_file", kind: "tool" },
+    ])
+    expect(serialize(document).description).toBe(
+      ["```txt", "Use #save_file.", "```"].join("\n")
+    )
+  }
+)
 
-test.each([
-  "json",
-  "instructions",
-  "javascript",
-])("keeps the %s fence literal and inert", (language) => {
-  const source = [`\`\`\`${language}`, 'Use "#save_file".', "```"].join("\n")
-  const document = parse(source)
+test.each(["json", "instructions", "javascript"])(
+  "keeps the %s fence literal and inert",
+  (language) => {
+    const source = [`\`\`\`${language}`, 'Use "#save_file".', "```"].join("\n")
+    const document = parse(source)
 
-  expect(document.content?.[0]?.type).toBe("codeBlock")
-  expect(readInstructionReferences(document)).toEqual([])
-  expect(serialize(document).description).toBe(source)
-})
+    expect(document.content?.[0]?.type).toBe("codeBlock")
+    expect(readInstructionReferences(document)).toEqual([])
+    expect(serialize(document).description).toBe(source)
+  }
+)
 
 test("distinguishes headings from tool references", () => {
   const document = parse("# Heading\n\n#save_file")
@@ -110,17 +105,15 @@ test("keeps a same-line backtick run as inline code", () => {
   expect(inlineCode?.marks?.[0]?.type).toBe("code")
 })
 
-test.each([
-  "\\# literal",
-  "\\- item",
-  "\\+ item",
-  "1\\. item",
-])("keeps the paragraph opener in %s escaped", (source) => {
-  const serialized = roundTrip(source)
+test.each(["\\# literal", "\\- item", "\\+ item", "1\\. item"])(
+  "keeps the paragraph opener in %s escaped",
+  (source) => {
+    const serialized = roundTrip(source)
 
-  expect(parse(serialized).content?.[0]?.type).toBe("paragraph")
-  expect(roundTrip(serialized)).toBe(serialized)
-})
+    expect(parse(serialized).content?.[0]?.type).toBe("paragraph")
+    expect(roundTrip(serialized)).toBe(serialized)
+  }
+)
 
 test("keeps raw HTML and images literal without hydrating references", () => {
   const source = [

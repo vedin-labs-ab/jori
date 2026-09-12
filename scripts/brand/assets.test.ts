@@ -22,26 +22,27 @@ function pixel(
 }
 
 describe("published brand artwork", () => {
-  it.each([
-    512, 1024,
-  ])("keeps %ipx marks tight, transparent outside, and opaque inside", async (size) => {
-    for (const theme of ["light", "dark"] as const) {
-      const image = await pixels(`mark/mark-${theme}-${size}.png`)
-      const body = theme === "light" ? 0 : 255
-      const slit = 255 - body
-      const center = size / 2
-      expect(pixel(image, 0, 0)[3]).toBe(0)
-      expect(pixel(image, center, 0)).toEqual([body, body, body, 255])
-      expect(pixel(image, 0, center)).toEqual([body, body, body, 255])
-      expect(pixel(image, center, center)).toEqual([body, body, body, 255])
-      expect(pixel(image, center, Math.round((size * 36) / 52))).toEqual([
-        slit,
-        slit,
-        slit,
-        255,
-      ])
+  it.each([512, 1024])(
+    "keeps %ipx marks tight, transparent outside, and opaque inside",
+    async (size) => {
+      for (const theme of ["light", "dark"] as const) {
+        const image = await pixels(`mark/mark-${theme}-${size}.png`)
+        const body = theme === "light" ? 0 : 255
+        const slit = 255 - body
+        const center = size / 2
+        expect(pixel(image, 0, 0)[3]).toBe(0)
+        expect(pixel(image, center, 0)).toEqual([body, body, body, 255])
+        expect(pixel(image, 0, center)).toEqual([body, body, body, 255])
+        expect(pixel(image, center, center)).toEqual([body, body, body, 255])
+        expect(pixel(image, center, Math.round((size * 36) / 52))).toEqual([
+          slit,
+          slit,
+          slit,
+          255,
+        ])
+      }
     }
-  })
+  )
 
   it("keeps the slit opaque even at the 16px browser size", async () => {
     const image = await pixels("favicon/favicon-16.png")

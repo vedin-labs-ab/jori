@@ -52,23 +52,26 @@ test.each([
   ["@jori-production-eu[bot]", true],
   ["@jori-production-us", false],
   ["@jori-production-eu-extra", false],
-])("records installed-app targeting through shared intake: %s", async (text, mentioned) => {
-  const t = convexTest(schema, modules)
-  await seedIntegration(t)
-  await t.mutation(record, {
-    ...message(text),
-    mode: "record",
-    // The provider edge computes the decision rather than accepting callers'.
-    mentioned: !mentioned,
-  })
-  const stored = await t.run(
-    async (ctx) => await ctx.db.query("messages").unique()
-  )
-  expect(stored).toMatchObject({ mentioned, surface: "github", text })
-  expect(
-    await t.run(async (ctx) => await ctx.db.query("runs").take(1))
-  ).toEqual([])
-})
+])(
+  "records installed-app targeting through shared intake: %s",
+  async (text, mentioned) => {
+    const t = convexTest(schema, modules)
+    await seedIntegration(t)
+    await t.mutation(record, {
+      ...message(text),
+      mode: "record",
+      // The provider edge computes the decision rather than accepting callers'.
+      mentioned: !mentioned,
+    })
+    const stored = await t.run(
+      async (ctx) => await ctx.db.query("messages").unique()
+    )
+    expect(stored).toMatchObject({ mentioned, surface: "github", text })
+    expect(
+      await t.run(async (ctx) => await ctx.db.query("runs").take(1))
+    ).toEqual([])
+  }
+)
 
 test("does not record a comment for an unknown installation", async () => {
   const t = convexTest(schema, modules)

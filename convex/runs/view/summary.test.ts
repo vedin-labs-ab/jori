@@ -30,25 +30,26 @@ test("projected lifecycle activity satisfies the search_run_activity contract", 
   ).toEqual([])
 })
 
-test.each(
-  runActivityKinds
-)("activity contract accepts the canonical %s kind", (kind) => {
-  const items = [
-    {
-      id: "synthetic",
-      kind,
-      status: "completed",
-      title: "Synthetic activity",
-      startedAt: 1,
-    },
-  ]
-  expect(
-    schemaViolations(
-      { cursor: null, items },
-      getToolResponseSchema("search_run_activity")
-    )
-  ).toEqual([])
-})
+test.each(runActivityKinds)(
+  "activity contract accepts the canonical %s kind",
+  (kind) => {
+    const items = [
+      {
+        id: "synthetic",
+        kind,
+        status: "completed",
+        title: "Synthetic activity",
+        startedAt: 1,
+      },
+    ]
+    expect(
+      schemaViolations(
+        { cursor: null, items },
+        getToolResponseSchema("search_run_activity")
+      )
+    ).toEqual([])
+  }
+)
 
 test("activity contract rejects an unknown kind", () => {
   expect(
@@ -81,19 +82,19 @@ test.each([
 ] satisfies {
   source: Doc<"runs">["snapshot"]["source"]
   cause: Doc<"runs">["cause"]
-}[])("projected $source.type summary satisfies the search_runs response contract", async ({
-  source,
-  cause,
-}) => {
-  const run = fixture()
-  run.snapshot.source = source
-  run.cause = cause
-  const summary = await projectRunSummary(ctx, run)
-  expect(summary.source).toEqual(source)
-  expect(schemaViolations({ cursor: null, runs: [summary] }, schema)).toEqual(
-    []
-  )
-})
+}[])(
+  "projected $source.type summary satisfies the search_runs response contract",
+  async ({ source, cause }) => {
+    const run = fixture()
+    run.snapshot.source = source
+    run.cause = cause
+    const summary = await projectRunSummary(ctx, run)
+    expect(summary.source).toEqual(source)
+    expect(schemaViolations({ cursor: null, runs: [summary] }, schema)).toEqual(
+      []
+    )
+  }
+)
 
 test.each([
   "manual",

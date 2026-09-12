@@ -14,20 +14,24 @@ test.each([
   [400, '{"message":"Synthetic private message"}'],
   [401, '{"token":"synthetic-test-token"}'],
   [502, "Synthetic private message: invalid upstream response"],
-])("provider HTTP %s errors keep response content out of traces", async (status, body) => {
-  const response = new Response(body, { status })
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response))
+])(
+  "provider HTTP %s errors keep response content out of traces",
+  async (status, body) => {
+    const response = new Response(body, { status })
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response))
 
-  const error = await fetchJson("https://provider.example/api", request).catch(
-    (caught: unknown) => caught
-  )
+    const error = await fetchJson(
+      "https://provider.example/api",
+      request
+    ).catch((caught: unknown) => caught)
 
-  expect(error).toBeInstanceOf(Error)
-  expect(errorDetails(error)).toEqual({
-    error: `Provider API request failed (HTTP ${status})`,
-  })
-  expect(response.bodyUsed).toBe(false)
-})
+    expect(error).toBeInstanceOf(Error)
+    expect(errorDetails(error)).toEqual({
+      error: `Provider API request failed (HTTP ${status})`,
+    })
+    expect(response.bodyUsed).toBe(false)
+  }
+)
 
 test("malformed successful responses keep parser snippets out of traces", async () => {
   vi.stubGlobal(

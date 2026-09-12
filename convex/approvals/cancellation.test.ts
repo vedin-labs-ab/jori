@@ -21,29 +21,29 @@ test.each<{
     message: { actor: { externalId: "UBOT", kind: "self" } },
     expected: null,
   },
-])("resolves the cancellation actor for $scenario", async ({
-  message,
-  expected,
-}) => {
-  const { database, ctx } = databaseContext()
-  const organizationId = "organization"
-  const integrationId = id<"integrations">("integration")
-  const runId = id<"runs">("run")
-  const conversationId = await database.insert("conversations", {
-    organizationId,
-    integrationId,
-    externalId: "conversation",
-  })
-  await database.insert("sessions", { conversationId, runId })
-  const messageId = await database.insert("messages", {
-    organizationId,
-    integrationId,
-    conversationId: "conversation",
-    actor,
-    ...message,
-  })
+])(
+  "resolves the cancellation actor for $scenario",
+  async ({ message, expected }) => {
+    const { database, ctx } = databaseContext()
+    const organizationId = "organization"
+    const integrationId = id<"integrations">("integration")
+    const runId = id<"runs">("run")
+    const conversationId = await database.insert("conversations", {
+      organizationId,
+      integrationId,
+      externalId: "conversation",
+    })
+    await database.insert("sessions", { conversationId, runId })
+    const messageId = await database.insert("messages", {
+      organizationId,
+      integrationId,
+      conversationId: "conversation",
+      actor,
+      ...message,
+    })
 
-  await expect(
-    resolveCancellationActor(ctx, { messageId, runId, organizationId })
-  ).resolves.toEqual(expected)
-})
+    await expect(
+      resolveCancellationActor(ctx, { messageId, runId, organizationId })
+    ).resolves.toEqual(expected)
+  }
+)

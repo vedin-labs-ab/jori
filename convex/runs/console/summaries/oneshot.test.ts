@@ -13,48 +13,48 @@ import {
 import { type Id } from "../../../_generated/dataModel"
 import { summarizeRun } from "../summaries"
 
-test.each([
-  true,
-  false,
-])("includes one-shot job access details with web search allowed: %s", async (webSearch) => {
-  const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
-  const run = testRun(oneShotRun(scheduledAt), {
-    createdAt: scheduledAt + 1000,
-    endedAt: scheduledAt + 2000,
-    preparedTools: slackToolSnapshot(webSearch),
-  })
-  const summary = await summarizeRun(
-    fakeQueryCtx(
-      {
-        job: oneShotJob(scheduledAt, webSearch),
-        integration: slackIntegration(),
-        run,
-      },
-      { traces: preparedTraceRows(run) }
-    ),
-    run
-  )
-
-  expect(summary.source).toEqual({
-    kind: { label: "one-shot", type: "one-shot" },
-    type: "job",
-    surface: "jori",
-  })
-  expect(summary.details).toEqual([
-    {
-      type: "tools",
-      label: "Slack · Read 1 · Write 1",
-      groups: [
+test.each([true, false])(
+  "includes one-shot job access details with web search allowed: %s",
+  async (webSearch) => {
+    const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)
+    const run = testRun(oneShotRun(scheduledAt), {
+      createdAt: scheduledAt + 1000,
+      endedAt: scheduledAt + 2000,
+      preparedTools: slackToolSnapshot(webSearch),
+    })
+    const summary = await summarizeRun(
+      fakeQueryCtx(
         {
-          type: "slack",
-          label: "Slack",
-          tools: slackDisplayTools(),
+          job: oneShotJob(scheduledAt, webSearch),
+          integration: slackIntegration(),
+          run,
         },
-      ],
-    },
-    { type: "web_search", label: webSearch ? "Allowed" : "Blocked" },
-  ])
-})
+        { traces: preparedTraceRows(run) }
+      ),
+      run
+    )
+
+    expect(summary.source).toEqual({
+      kind: { label: "one-shot", type: "one-shot" },
+      type: "job",
+      surface: "jori",
+    })
+    expect(summary.details).toEqual([
+      {
+        type: "tools",
+        label: "Slack · Read 1 · Write 1",
+        groups: [
+          {
+            type: "slack",
+            label: "Slack",
+            tools: slackDisplayTools(),
+          },
+        ],
+      },
+      { type: "web_search", label: webSearch ? "Allowed" : "Blocked" },
+    ])
+  }
+)
 
 test("keeps the one-shot label after an owned job is cleaned up", async () => {
   const scheduledAt = Date.UTC(2026, 5, 14, 21, 34)

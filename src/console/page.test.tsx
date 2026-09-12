@@ -182,24 +182,24 @@ test("a load with no pending choice declares nothing", async () => {
   })
 })
 
-test.each([
-  "shell",
-  "none",
-] as const)("holds the %s console and its render prop until identity sync commits", async (chrome) => {
-  organization.isResolved = true
-  const sync = pendingSync()
-  mutate.mockReturnValueOnce(sync.promise)
-  const children = vi.fn(() => <div>Console</div>)
+test.each(["shell", "none"] as const)(
+  "holds the %s console and its render prop until identity sync commits",
+  async (chrome) => {
+    organization.isResolved = true
+    const sync = pendingSync()
+    mutate.mockReturnValueOnce(sync.promise)
+    const children = vi.fn(() => <div>Console</div>)
 
-  render(<ConsolePage chrome={chrome}>{children}</ConsolePage>)
+    render(<ConsolePage chrome={chrome}>{children}</ConsolePage>)
 
-  expect(screen.getByText("Loading console")).toBeDefined()
-  expect(screen.queryByTestId("shell")).toBeNull()
-  expect(children).not.toHaveBeenCalled()
-  await act(async () => sync.resolve(undefined))
-  expect(screen.getByText("Console")).toBeDefined()
-  expect(children).toHaveBeenCalledWith("organization")
-})
+    expect(screen.getByText("Loading console")).toBeDefined()
+    expect(screen.queryByTestId("shell")).toBeNull()
+    expect(children).not.toHaveBeenCalled()
+    await act(async () => sync.resolve(undefined))
+    expect(screen.getByText("Console")).toBeDefined()
+    expect(children).toHaveBeenCalledWith("organization")
+  }
+)
 
 test("failed initialization stays closed and can be retried", async () => {
   organization.isResolved = true

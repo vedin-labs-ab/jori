@@ -50,30 +50,31 @@ const messageTriggerCases = [
 ] as const
 
 describe("runtime prompts", () => {
-  test.each(
-    messageTriggerCases
-  )("renders %s message trigger target", (provider, data, toolSurfaceLabel, targetLines) => {
-    const prompt = assemblePrompt(runtimeInput(provider, data)).context
+  test.each(messageTriggerCases)(
+    "renders %s message trigger target",
+    (provider, data, toolSurfaceLabel, targetLines) => {
+      const prompt = assemblePrompt(runtimeInput(provider, data)).context
 
-    expect(prompt).toContain(
-      `A ${toolSurfaceLabel} message triggered this run.`
-    )
-    expect(prompt).toContain(`Active surface: \`${toolSurfaceLabel}\``)
-    expectRunBefore(prompt, "# Trigger")
+      expect(prompt).toContain(
+        `A ${toolSurfaceLabel} message triggered this run.`
+      )
+      expect(prompt).toContain(`Active surface: \`${toolSurfaceLabel}\``)
+      expectRunBefore(prompt, "# Trigger")
 
-    if (targetLines.length === 0) {
-      expect(prompt).not.toContain("Target:")
-    } else {
-      expect(prompt).toContain("Target:")
-      expect(prompt).toContain(targetLines.join("\n"))
+      if (targetLines.length === 0) {
+        expect(prompt).not.toContain("Target:")
+      } else {
+        expect(prompt).toContain("Target:")
+        expect(prompt).toContain(targetLines.join("\n"))
+      }
+
+      expect(prompt).toContain("Current message:")
+      expect(prompt).not.toContain("{{message.target}}")
+      expect(prompt).toContain(
+        "- 1970-01-01T00:00:01.000Z | person | Albin Vedin"
+      )
     }
-
-    expect(prompt).toContain("Current message:")
-    expect(prompt).not.toContain("{{message.target}}")
-    expect(prompt).toContain(
-      "- 1970-01-01T00:00:01.000Z | person | Albin Vedin"
-    )
-  })
+  )
 
   test("renders Slack trigger text with actor metadata", () => {
     const input = runtimeInput("slack", {
@@ -141,25 +142,26 @@ describe("runtime delivery prompts", () => {
     )
   })
 
-  test.each(
-    messageTriggerCases
-  )("renders communication and completion sections for %s message runs", (provider, data) => {
-    const instructions = assemblePrompt(
-      runtimeInput(provider, data)
-    ).instructions
+  test.each(messageTriggerCases)(
+    "renders communication and completion sections for %s message runs",
+    (provider, data) => {
+      const instructions = assemblePrompt(
+        runtimeInput(provider, data)
+      ).instructions
 
-    expect(instructions).toContain("# Communication")
-    expect(instructions).toContain("use the lightest action that delivers it")
-    expect(instructions).toContain("plain closure usually get no response")
-    expect(instructions).toContain("Use `send_reply`")
-    expect(instructions).not.toContain("Current surface:")
-    expect(instructions).toContain("# Finish")
-    expect(instructions).toContain(
-      "Finish the run when no useful work remains: prefer setting `final: true` on the last useful tool call that supports it, and call `finish_run` otherwise."
-    )
-    expectInstructionsOrder(instructions)
-    expect(instructions).not.toMatch(/\n{3,}/)
-  })
+      expect(instructions).toContain("# Communication")
+      expect(instructions).toContain("use the lightest action that delivers it")
+      expect(instructions).toContain("plain closure usually get no response")
+      expect(instructions).toContain("Use `send_reply`")
+      expect(instructions).not.toContain("Current surface:")
+      expect(instructions).toContain("# Finish")
+      expect(instructions).toContain(
+        "Finish the run when no useful work remains: prefer setting `final: true` on the last useful tool call that supports it, and call `finish_run` otherwise."
+      )
+      expectInstructionsOrder(instructions)
+      expect(instructions).not.toMatch(/\n{3,}/)
+    }
+  )
 })
 
 describe("output contract prompts", () => {

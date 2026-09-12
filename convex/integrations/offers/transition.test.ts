@@ -100,25 +100,23 @@ test.each(settlements)("settles $status offers once", async (settlement) => {
   })
 })
 
-test.each([
-  "cancelled",
-  "connected",
-  "expired",
-  "failed",
-] as const)("leaves %s offers settled", async (status) => {
-  const fixture = offerFixture(status)
+test.each(["cancelled", "connected", "expired", "failed"] as const)(
+  "leaves %s offers settled",
+  async (status) => {
+    const fixture = offerFixture(status)
 
-  await markIntegrationOfferFailed(fixture.ctx, fixture.offer, {
-    error: "ignored",
-    now,
-  })
+    await markIntegrationOfferFailed(fixture.ctx, fixture.offer, {
+      error: "ignored",
+      now,
+    })
 
-  expect(fixture.patch).not.toHaveBeenCalled()
-  expect(fixture.cancel).not.toHaveBeenCalled()
-  expect(recordTransition).not.toHaveBeenCalled()
-  expect(scheduleTransitionSurfaceSync).not.toHaveBeenCalled()
-  expect(wakeRun).not.toHaveBeenCalled()
-})
+    expect(fixture.patch).not.toHaveBeenCalled()
+    expect(fixture.cancel).not.toHaveBeenCalled()
+    expect(recordTransition).not.toHaveBeenCalled()
+    expect(scheduleTransitionSurfaceSync).not.toHaveBeenCalled()
+    expect(wakeRun).not.toHaveBeenCalled()
+  }
+)
 
 test("a claimed offer can still connect", async () => {
   const fixture = offerFixture("claimed")

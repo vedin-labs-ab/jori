@@ -68,19 +68,16 @@ test("excludes parked time from completed tool duration", () => {
   })
 })
 
-test.each([
-  { value: undefined },
-  { value: [] },
-  { value: [null, 1] },
-])("omits agent metadata for an empty wait selection: %j", ({
-  value: runIds,
-}) => {
-  expect(
-    agentWaitMetadata("wait_for_agents", { runIds }, [
-      agent("running", "running"),
-    ])
-  ).toEqual([])
-})
+test.each([{ value: undefined }, { value: [] }, { value: [null, 1] }])(
+  "omits agent metadata for an empty wait selection: %j",
+  ({ value: runIds }) => {
+    expect(
+      agentWaitMetadata("wait_for_agents", { runIds }, [
+        agent("running", "running"),
+      ])
+    ).toEqual([])
+  }
+)
 
 function agentWaitTraces() {
   return [

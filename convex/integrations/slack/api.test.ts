@@ -21,12 +21,15 @@ test.each([
     "invalid_auth",
   ],
   [200, "customer-secret", "invalid JSON response"],
-])("Slack API failures keep response content out of exceptions", async (status, body, message) => {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(new Response(body, { status }))
-  )
-  await expect(slackQueryApi("test-token", "auth.test", {})).rejects.toThrow(
-    `Slack API request failed: ${message}`
-  )
-})
+])(
+  "Slack API failures keep response content out of exceptions",
+  async (status, body, message) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(body, { status }))
+    )
+    await expect(slackQueryApi("test-token", "auth.test", {})).rejects.toThrow(
+      `Slack API request failed: ${message}`
+    )
+  }
+)

@@ -1,31 +1,31 @@
 import { expect, test } from "vitest"
 import { createSurfaceRuntime, runTool } from "../../../test/runtime"
 
-test.each([
-  false,
-  true,
-])("send_reply delivers the message and communicates with final=%s", async (final) => {
-  const runtime = createSurfaceRuntime()
-  const blocks = [{ text: { text: "Done", type: "mrkdwn" }, type: "section" }]
+test.each([false, true])(
+  "send_reply delivers the message and communicates with final=%s",
+  async (final) => {
+    const runtime = createSurfaceRuntime()
+    const blocks = [{ text: { text: "Done", type: "mrkdwn" }, type: "section" }]
 
-  const result = await runTool({
-    call: {
-      args: final ? { final, text: "Done" } : { blocks, text: "Done" },
-      id: "call_1",
-      name: "send_reply",
-    },
-    runtime,
-  })
+    const result = await runTool({
+      call: {
+        args: final ? { final, text: "Done" } : { blocks, text: "Done" },
+        id: "call_1",
+        name: "send_reply",
+      },
+      runtime,
+    })
 
-  expect(result.finished).toBe(final)
-  expect(JSON.parse(result.content)).toEqual({ status: "sent" })
-  expect(runtime.context.activeSurface?.communicated).toBe(true)
-  expect(runtime.platform.sendReply).toHaveBeenCalledWith({
-    blocks: final ? undefined : blocks,
-    runId: "run_1",
-    text: "Done",
-  })
-})
+    expect(result.finished).toBe(final)
+    expect(JSON.parse(result.content)).toEqual({ status: "sent" })
+    expect(runtime.context.activeSurface?.communicated).toBe(true)
+    expect(runtime.platform.sendReply).toHaveBeenCalledWith({
+      blocks: final ? undefined : blocks,
+      runId: "run_1",
+      text: "Done",
+    })
+  }
+)
 
 test("send_reply forwards the active Linear target by default", async () => {
   const runtime = createSurfaceRuntime({
@@ -76,34 +76,34 @@ test("send_reply can target a specific Linear comment", async () => {
   )
 })
 
-test.each([
-  false,
-  true,
-])("add_reaction delivers the reaction and communicates with final=%s", async (final) => {
-  const runtime = createSurfaceRuntime({ tool: "add_reaction" })
+test.each([false, true])(
+  "add_reaction delivers the reaction and communicates with final=%s",
+  async (final) => {
+    const runtime = createSurfaceRuntime({ tool: "add_reaction" })
 
-  const result = await runTool({
-    call: {
-      args: {
-        ...(final ? { final } : {}),
-        reaction: "white_check_mark",
-        target: { messageTs: "123.456" },
+    const result = await runTool({
+      call: {
+        args: {
+          ...(final ? { final } : {}),
+          reaction: "white_check_mark",
+          target: { messageTs: "123.456" },
+        },
+        id: "call_1",
+        name: "add_reaction",
       },
-      id: "call_1",
-      name: "add_reaction",
-    },
-    runtime,
-  })
+      runtime,
+    })
 
-  expect(result.finished).toBe(final)
-  expect(JSON.parse(result.content)).toEqual({ status: "added" })
-  expect(runtime.context.activeSurface?.communicated).toBe(true)
-  expect(runtime.platform.addReaction).toHaveBeenCalledWith({
-    reaction: "white_check_mark",
-    runId: "run_1",
-    target: { messageTs: "123.456" },
-  })
-})
+    expect(result.finished).toBe(final)
+    expect(JSON.parse(result.content)).toEqual({ status: "added" })
+    expect(runtime.context.activeSurface?.communicated).toBe(true)
+    expect(runtime.platform.addReaction).toHaveBeenCalledWith({
+      reaction: "white_check_mark",
+      runId: "run_1",
+      target: { messageTs: "123.456" },
+    })
+  }
+)
 
 test("add_reaction is refused on the console surface", async () => {
   const runtime = createSurfaceRuntime({
@@ -142,27 +142,26 @@ test.each([
     message:
       "reaction must be one of +1, -1, laugh, confused, heart, hooray, rocket, eyes",
   },
-])("add_reaction rejects $reason before calling Convex", async ({
-  reaction,
-  target,
-  message,
-}) => {
-  const runtime = createSurfaceRuntime({
-    surface: "github",
-    tool: "add_reaction",
-  })
-  const result = await runTool({
-    call: {
-      args: { reaction, target },
-      id: "call_1",
-      name: "add_reaction",
-    },
-    runtime,
-  })
+])(
+  "add_reaction rejects $reason before calling Convex",
+  async ({ reaction, target, message }) => {
+    const runtime = createSurfaceRuntime({
+      surface: "github",
+      tool: "add_reaction",
+    })
+    const result = await runTool({
+      call: {
+        args: { reaction, target },
+        id: "call_1",
+        name: "add_reaction",
+      },
+      runtime,
+    })
 
-  expect(JSON.parse(result.content)).toEqual({
-    error: { message },
-    status: "error",
-  })
-  expect(runtime.platform.addReaction).not.toHaveBeenCalled()
-})
+    expect(JSON.parse(result.content)).toEqual({
+      error: { message },
+      status: "error",
+    })
+    expect(runtime.platform.addReaction).not.toHaveBeenCalled()
+  }
+)

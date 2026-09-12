@@ -61,56 +61,56 @@ test("snapshots message source details and source link", () => {
   })
 })
 
-test.each([
-  true,
-  false,
-])("snapshots event jobs with event present: %s", (hasEvent) => {
-  const sourceMessage = message("Summarize this thread.", {
-    channel: { id: "C123", name: "product" },
-    ts: "1700000000.000000",
-  })
-  const event = {
-    ...sourceMessage,
-    _id: id<"events">("event"),
-    integrationId: id<"integrations">("integration"),
-    key: "event",
-  }
-  const eventJob = job({
-    name: "Digest",
-    instructions: "Summarize.",
-    type: "event",
-    trigger: {
+test.each([true, false])(
+  "snapshots event jobs with event present: %s",
+  (hasEvent) => {
+    const sourceMessage = message("Summarize this thread.", {
+      channel: { id: "C123", name: "product" },
+      ts: "1700000000.000000",
+    })
+    const event = {
+      ...sourceMessage,
+      _id: id<"events">("event"),
       integrationId: id<"integrations">("integration"),
-      event: "message.created",
-    },
-  })
-  const snapshot = createJobRunSnapshot({
-    job: eventJob,
-    event: hasEvent ? event : null,
-    integration: integration(),
-  }).snapshot
-  const messageSnapshot = createMessageRunSnapshot({
-    message: sourceMessage,
-    integration: integration(),
-    kind: "mention",
-  }).snapshot
+      key: "event",
+    }
+    const eventJob = job({
+      name: "Digest",
+      instructions: "Summarize.",
+      type: "event",
+      trigger: {
+        integrationId: id<"integrations">("integration"),
+        event: "message.created",
+      },
+    })
+    const snapshot = createJobRunSnapshot({
+      job: eventJob,
+      event: hasEvent ? event : null,
+      integration: integration(),
+    }).snapshot
+    const messageSnapshot = createMessageRunSnapshot({
+      message: sourceMessage,
+      integration: integration(),
+      kind: "mention",
+    }).snapshot
 
-  expect(snapshot).toEqual({
-    title: "Digest",
-    source: hasEvent
-      ? { ...messageSnapshot.source, type: "job" }
-      : { type: "job", surface: "slack" },
-    context: hasEvent ? messageSnapshot.context : [],
-  })
-  expect(
-    createJobRunSnapshot({ job: eventJob, event: hasEvent ? event : null })
-      .snapshot
-  ).toEqual({
-    title: "Digest",
-    source: { type: "job" },
-    context: [],
-  })
-})
+    expect(snapshot).toEqual({
+      title: "Digest",
+      source: hasEvent
+        ? { ...messageSnapshot.source, type: "job" }
+        : { type: "job", surface: "slack" },
+      context: hasEvent ? messageSnapshot.context : [],
+    })
+    expect(
+      createJobRunSnapshot({ job: eventJob, event: hasEvent ? event : null })
+        .snapshot
+    ).toEqual({
+      title: "Digest",
+      source: { type: "job" },
+      context: [],
+    })
+  }
+)
 
 test("provider messages retain context without an integration record", () => {
   expect(

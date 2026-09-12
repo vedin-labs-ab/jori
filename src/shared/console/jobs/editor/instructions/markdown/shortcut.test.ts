@@ -36,21 +36,20 @@ test("accepts Enter after a plain tilde fence opener", () => {
   expect(editor.getJSON().content?.[0]?.type).toBe("fencedText")
 })
 
-test.each([
-  "```json ",
-  "````json ",
-  "   ```json ",
-])("turns the typed %j opener into a programming block", (opener) => {
-  const editor = createEditor()
+test.each(["```json ", "````json ", "   ```json "])(
+  "turns the typed %j opener into a programming block",
+  (opener) => {
+    const editor = createEditor()
 
-  typeText(editor, opener)
+    typeText(editor, opener)
 
-  expect(editor.getJSON().content?.[0]).toMatchObject({
-    attrs: { language: "json" },
-    type: "codeBlock",
-  })
-  expect(documentNodeTypes(editor)).toEqual(["codeBlock"])
-})
+    expect(editor.getJSON().content?.[0]).toMatchObject({
+      attrs: { language: "json" },
+      type: "codeBlock",
+    })
+    expect(documentNodeTypes(editor)).toEqual(["codeBlock"])
+  }
+)
 
 test("does not treat four-space indentation as a fenced block", () => {
   const editor = createEditor()

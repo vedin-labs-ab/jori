@@ -56,12 +56,12 @@ test.each([
       "using only ids present in the input",
     ],
   },
-])("$template preserves its safety and decision rules", ({
-  template,
-  rules,
-}) => {
-  const charter = renderPromptTemplate(promptTemplates[template], {})
-  for (const rule of rules) {
-    expect(charter).toContain(rule)
+])(
+  "$template preserves its safety and decision rules",
+  ({ template, rules }) => {
+    const charter = renderPromptTemplate(promptTemplates[template], {})
+    for (const rule of rules) {
+      expect(charter).toContain(rule)
+    }
   }
-})
+)

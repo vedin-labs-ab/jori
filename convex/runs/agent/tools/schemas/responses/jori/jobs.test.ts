@@ -17,19 +17,18 @@ const job = {
   access: { integrations: [], web: false },
 }
 
-test.each([
-  "once",
-  "cron",
-  "event",
-])("job responses describe the current %s trigger kind", (type) => {
-  const value = { ...job, type }
-  for (const tool of ["add_job", "read_job", "update_job"] as const) {
-    expect(compileSchema(jobJoriToolResponseSchemas[tool])(value)).toBe(true)
+test.each(["once", "cron", "event"])(
+  "job responses describe the current %s trigger kind",
+  (type) => {
+    const value = { ...job, type }
+    for (const tool of ["add_job", "read_job", "update_job"] as const) {
+      expect(compileSchema(jobJoriToolResponseSchemas[tool])(value)).toBe(true)
+    }
+    expect(compileSchema(jobJoriToolResponseSchemas.search_jobs)([value])).toBe(
+      true
+    )
   }
-  expect(compileSchema(jobJoriToolResponseSchemas.search_jobs)([value])).toBe(
-    true
-  )
-})
+)
 
 test("job responses require current visibility and execution identity", () => {
   const validate = compileSchema(jobJoriToolResponseSchemas.read_job)
@@ -47,11 +46,11 @@ test("job responses require current visibility and execution identity", () => {
   expect(validate(null)).toBe(true)
 })
 
-test.each([
-  "recurring",
-  "mention",
-])("job responses reject obsolete %s trigger kinds", (type) => {
-  expect(
-    compileSchema(jobJoriToolResponseSchemas.read_job)({ ...job, type })
-  ).toBe(false)
-})
+test.each(["recurring", "mention"])(
+  "job responses reject obsolete %s trigger kinds",
+  (type) => {
+    expect(
+      compileSchema(jobJoriToolResponseSchemas.read_job)({ ...job, type })
+    ).toBe(false)
+  }
+)

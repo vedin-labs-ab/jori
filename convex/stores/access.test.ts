@@ -71,12 +71,12 @@ describe("counting leaf properties", () => {
     expect(summarizeStore(document).propertyCount).toBe(2)
   })
 
-  test.each([
-    { type: "object" },
-    { type: "object", properties: {} },
-  ])("counts an object without properties as zero: %j", (schema) => {
-    expect(summarizeStore(store({ schema })).propertyCount).toBe(0)
-  })
+  test.each([{ type: "object" }, { type: "object", properties: {} }])(
+    "counts an object without properties as zero: %j",
+    (schema) => {
+      expect(summarizeStore(store({ schema })).propertyCount).toBe(0)
+    }
+  )
 
   test("counts nothing at all for a store without a schema", () => {
     const document = store({ schema: undefined })
@@ -105,12 +105,12 @@ describe("resolving the owner name", () => {
     expect(summary.ownerName).toBe("Ada Lovelace")
   })
 
-  test.each([
-    undefined,
-    testOwner,
-  ])("leaves the name unset for an owner without an identity: %s", async (ownerId) => {
-    const { ctx } = databaseContext()
-    const summary = await summarizeStoreWithOwner(ctx, store({ ownerId }))
-    expect(summary.ownerName).toBeUndefined()
-  })
+  test.each([undefined, testOwner])(
+    "leaves the name unset for an owner without an identity: %s",
+    async (ownerId) => {
+      const { ctx } = databaseContext()
+      const summary = await summarizeStoreWithOwner(ctx, store({ ownerId }))
+      expect(summary.ownerName).toBeUndefined()
+    }
+  )
 })

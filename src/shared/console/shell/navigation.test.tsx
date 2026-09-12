@@ -123,41 +123,41 @@ test("dragging a sidebar chat carries its current folder without navigating", ()
   expect(navigate).not.toHaveBeenCalled()
 })
 
-test.each([
-  "/chat/conversations_flaky",
-  "/chat/conversations_flaky/",
-])("the current chat is active at %s, between Activity and resources", (pathname) => {
-  renderSidebar(pathname)
+test.each(["/chat/conversations_flaky", "/chat/conversations_flaky/"])(
+  "the current chat is active at %s, between Activity and resources",
+  (pathname) => {
+    renderSidebar(pathname)
 
-  const links = screen.getAllByRole("link").map((link) => link.textContent)
+    const links = screen.getAllByRole("link").map((link) => link.textContent)
 
-  expect(links.slice(0, 5)).toEqual([
-    "New chat",
-    "Activity",
-    "Renewals at risk",
-    "Flaky payroll test",
-    "Jobs",
-  ])
-  expect(screen.getByText("Chats")).toBeDefined()
-  expect(
-    screen
-      .getByRole("link", { name: "Flaky payroll test" })
-      .getAttribute("href")
-  ).toBe("/chat/conversations_flaky")
-  expect(
-    screen
-      .getByRole("link", { name: "Flaky payroll test" })
-      .getAttribute("data-active")
-  ).toBe("true")
-  expect(
-    screen
-      .getByRole("link", { name: "Renewals at risk" })
-      .getAttribute("data-active")
-  ).toBe("false")
-  expect(
-    screen.getByRole("link", { name: "New chat" }).getAttribute("data-active")
-  ).toBe("false")
-})
+    expect(links.slice(0, 5)).toEqual([
+      "New chat",
+      "Activity",
+      "Renewals at risk",
+      "Flaky payroll test",
+      "Jobs",
+    ])
+    expect(screen.getByText("Chats")).toBeDefined()
+    expect(
+      screen
+        .getByRole("link", { name: "Flaky payroll test" })
+        .getAttribute("href")
+    ).toBe("/chat/conversations_flaky")
+    expect(
+      screen
+        .getByRole("link", { name: "Flaky payroll test" })
+        .getAttribute("data-active")
+    ).toBe("true")
+    expect(
+      screen
+        .getByRole("link", { name: "Renewals at risk" })
+        .getAttribute("data-active")
+    ).toBe("false")
+    expect(
+      screen.getByRole("link", { name: "New chat" }).getAttribute("data-active")
+    ).toBe("false")
+  }
+)
 
 test("New chat is active on /chat itself", () => {
   renderSidebar("/chat")
@@ -204,27 +204,29 @@ test("Chats and Resources close from their labels, and stay closed on the next v
   expect(screen.getByRole("link", { name: "Jobs" })).toBeDefined()
 })
 
-test.each([
-  "/chat/conversations_flaky",
-  "/chat/conversations_flaky/",
-])("the icon rail marks Chats active at %s and opens a searchable list", (pathname) => {
-  const navigate = vi.fn()
+test.each(["/chat/conversations_flaky", "/chat/conversations_flaky/"])(
+  "the icon rail marks Chats active at %s and opens a searchable list",
+  (pathname) => {
+    const navigate = vi.fn()
 
-  renderSidebar(pathname, chats, { open: false, navigate })
+    renderSidebar(pathname, chats, { open: false, navigate })
 
-  const entry = screen.getByRole("button", { name: "Chats" })
+    const entry = screen.getByRole("button", { name: "Chats" })
 
-  expect(entry.getAttribute("data-active")).toBe("true")
+    expect(entry.getAttribute("data-active")).toBe("true")
 
-  fireEvent.click(entry)
-  fireEvent.change(screen.getByPlaceholderText("Search chats…"), {
-    target: { value: "payroll" },
-  })
+    fireEvent.click(entry)
+    fireEvent.change(screen.getByPlaceholderText("Search chats…"), {
+      target: { value: "payroll" },
+    })
 
-  expect(screen.queryByRole("option", { name: "Renewals at risk" })).toBeNull()
+    expect(
+      screen.queryByRole("option", { name: "Renewals at risk" })
+    ).toBeNull()
 
-  fireEvent.click(screen.getByRole("option", { name: "Flaky payroll test" }))
+    fireEvent.click(screen.getByRole("option", { name: "Flaky payroll test" }))
 
-  expect(navigate).toHaveBeenCalledWith("/chat/conversations_flaky")
-  expect(screen.queryByPlaceholderText("Search chats…")).toBeNull()
-})
+    expect(navigate).toHaveBeenCalledWith("/chat/conversations_flaky")
+    expect(screen.queryByPlaceholderText("Search chats…")).toBeNull()
+  }
+)
