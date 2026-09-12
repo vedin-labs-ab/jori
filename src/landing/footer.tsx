@@ -84,10 +84,14 @@ export function LandingFooter() {
           </div>
           <div className="mt-16 flex flex-wrap items-center justify-between gap-x-8 gap-y-2 border-t pt-6 text-muted-foreground text-sm">
             <p className="py-1">© {new Date().getFullYear()} Vedin Labs AB</p>
+            {/* On a phone the links take their own line under the switcher,
+                and the dot that joins the two on one line goes with it. */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
               <ThemeSwitcher />
-              <span aria-hidden="true">·</span>
-              <ul className="-mx-2.5 flex flex-wrap items-center">
+              <span aria-hidden="true" className="hidden sm:inline">
+                ·
+              </span>
+              <ul className="-mx-2.5 flex basis-full flex-wrap items-center sm:basis-auto">
                 {legalLinks.map((link) => (
                   <li key={link.label}>
                     <PageLink className="px-2.5" link={link} />
