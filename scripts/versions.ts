@@ -34,17 +34,20 @@ if (violations.length > 0) {
 
 function collectPackageVersions(content: string) {
   const versionsByName = new Map<string, Set<string>>()
-  const packagesSection = /^packages:$([\s\S]*?)(?=^\S|(?![\s\S]))/m.exec(
-    content
+  // pnpm 12 writes separate YAML documents for the package manager and app.
+  const packageSections = content.matchAll(
+    /^packages:$([\s\S]*?)(?=^\S|(?![\s\S]))/gm
   )
   const entryPattern = /^ {2}'?((?:@[^/']+\/)?[^@' ]+)@([^'(:\n]+)/gm
 
-  for (const match of (packagesSection?.[1] ?? "").matchAll(entryPattern)) {
-    const [, name, version] = match
-    const found = versionsByName.get(name) ?? new Set<string>()
+  for (const section of packageSections) {
+    for (const match of section[1].matchAll(entryPattern)) {
+      const [, name, version] = match
+      const found = versionsByName.get(name) ?? new Set<string>()
 
-    found.add(version)
-    versionsByName.set(name, found)
+      found.add(version)
+      versionsByName.set(name, found)
+    }
   }
 
   return versionsByName
