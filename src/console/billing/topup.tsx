@@ -23,6 +23,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { ConsoleFilterToggle } from "@/shared/console/filters/field"
 import { DialogForm } from "@/shared/console/materials/form"
 import { useBillingCheckout } from "./actions"
+import { PurchaseAgreement } from "./agreement"
 
 const presetOptions = topUp.presetsUsd.map((preset) => ({
   label: `$${preset}`,
@@ -40,6 +41,7 @@ export function TopUpDialog({
   available: boolean
   organizationId: string
 }) {
+  const [accepted, setAccepted] = useState(false)
   const checkout = useBillingCheckout(organizationId)
   const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState(String(topUp.defaultUsd))
@@ -59,6 +61,7 @@ export function TopUpDialog({
           return
         }
 
+        setAccepted(false)
         setOpen(nextOpen)
       }}
       open={open}
@@ -78,8 +81,12 @@ export function TopUpDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogForm
-          disabled={!valid || checkout.pending !== null}
-          onSubmit={() => checkout.topUp(parsed)}
+          disabled={!valid || !accepted || checkout.pending !== null}
+          onSubmit={() => {
+            if (accepted) {
+              return checkout.topUp(parsed)
+            }
+          }}
         >
           <div className="flex flex-col gap-3">
             <ConsoleFilterToggle
@@ -117,9 +124,10 @@ export function TopUpDialog({
               )}
             </div>
           </div>
+          <PurchaseAgreement accepted={accepted} onChange={setAccepted} />
           <DialogFooter>
             <Button
-              disabled={!valid || checkout.pending !== null}
+              disabled={!valid || !accepted || checkout.pending !== null}
               type="submit"
             >
               Continue to checkout
