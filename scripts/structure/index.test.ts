@@ -133,7 +133,6 @@ test("markdown passes in its homes and fails anywhere else", () => {
     "prompts/agent/instructions.md",
     "skills/slack/SKILL.md",
     "src/landing/legal/privacy.md",
-    "scripts/layout/README.md",
     "node_modules/pkg/README.md",
     "convex/_generated/ai/guidelines.md",
     "src/index.ts",
@@ -148,6 +147,7 @@ test("markdown passes in its homes and fails anywhere else", () => {
     "src/NOTES.md",
     "docs/plan.md",
     "guides/deep/page.md",
+    "scripts/layout/README.md",
     "STATUS.md",
   ])
 
@@ -159,6 +159,7 @@ test("markdown passes in its homes and fails anywhere else", () => {
       "- STATUS.md",
       "- docs/plan.md",
       "- guides/deep/page.md",
+      "- scripts/layout/README.md",
       "- src/NOTES.md",
     ].join("\n")
   )

@@ -18,12 +18,6 @@ const rootDocuments = new Set([
   "SECURITY.md",
 ])
 const documentRoots = ["prompts", "skills", "src/landing/legal"]
-// Tool notes that predate the rule. Delete the file and the entry together.
-const keptDocuments = new Set([
-  "scripts/layout/README.md",
-  "scripts/layout/chatstate/README.md",
-  "scripts/layout/states/README.md",
-])
 
 export function isAllowedDocument(relativePath: string) {
   const segments = relativePath.split("/")
@@ -35,10 +29,7 @@ export function isAllowedDocument(relativePath: string) {
     return true
   }
 
-  return (
-    keptDocuments.has(relativePath) ||
-    documentRoots.some((root) => relativePath.startsWith(`${root}/`))
-  )
+  return documentRoots.some((root) => relativePath.startsWith(`${root}/`))
 }
 
 export function findDocumentViolations(directory: string, entries: Dirent[]) {
