@@ -107,3 +107,44 @@ test("matching US build accepts proxy-origin requests but an EU build fails clos
     handleRegionRequest(request, { ...config, current: "eu" })?.status
   ).toBe(421)
 })
+
+// Unknown public URLs must not masquerade as successful regional app pages.
+test.each([
+  "/missing",
+  "/sitemap.xml",
+  "/pricing/missing",
+  "/jobs-not-a-route",
+])(
+  "public %s stays on the public host for static serving or a router 404",
+  (path) => {
+    expect(
+      handleRegionRequest(new Request(`https://usejori.com${path}`), config)
+    ).toBeNull()
+    const response = handleRegionRequest(
+      new Request(`https://www.usejori.com${path}?token=private`),
+      config
+    )
+    expect(response?.status).toBe(308)
+    expect(response?.headers.get("location")).toBe(`https://usejori.com${path}`)
+  }
+)
+
+test.each([
+  "/chat",
+  "/folders/private",
+  "/jobs/private",
+  "/tables/private?share=secret",
+])(
+  "public app link %s still selects a region without forwarding workspace data",
+  (path) => {
+    const response = handleRegionRequest(
+      new Request(`https://usejori.com${path}`, {
+        headers: { cookie: "jori_region=eu" },
+      }),
+      config
+    )
+    expect(response?.headers.get("location")).toBe(
+      "https://eu.usejori.com/console"
+    )
+  }
+)

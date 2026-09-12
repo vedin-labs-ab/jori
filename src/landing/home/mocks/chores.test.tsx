@@ -19,12 +19,17 @@ test("lists the jobs and pauses one from its row", () => {
     </DemoWorkspaceProvider>
   )
 
+  expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
+  expect(screen.getByRole("heading", { name: "Jobs", level: 3 })).toBeDefined()
+
   for (const name of [
     "Weekly release summary",
     "Ticket triage",
     "Chase overdue invoices",
   ]) {
-    expect(screen.getByRole("link", { name })).toBeDefined()
+    const href = screen.getByRole("link", { name }).getAttribute("href")
+    expect(href?.startsWith("#")).toBe(true)
+    expect(document.getElementById(href?.slice(1) ?? "")).not.toBeNull()
   }
 
   // The paused job is listed too, wearing its badge beside the filter

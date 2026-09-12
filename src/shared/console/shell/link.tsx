@@ -11,9 +11,8 @@ import { type ConsoleNavigation, ConsoleNavigationContext } from "./location"
 /** The link every console view renders, typed exactly as the router's own
  *  Link. Under the router it is that Link, so preloading, active state,
  *  and modified clicks all keep working. Under a local navigation it is a
- *  plain anchor whose href the router still builds, so it reads as the
- *  real link, and whose plain left click the navigation takes instead of
- *  the browser. */
+ *  fragment link back to its host. A plain click moves local state; opening
+ *  a new tab stays on the public page instead of visiting a fixture URL. */
 export const ConsoleLink: LinkComponent<"a"> = (props) => {
   const navigation = useContext(ConsoleNavigationContext)
 
@@ -51,7 +50,8 @@ function LocalLink({
   return (
     <a
       {...anchor}
-      href={location.href}
+      data-console-href={location.href}
+      href={`#${navigation.anchor}`}
       onClick={(event) => {
         onClick?.(event)
 

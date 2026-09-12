@@ -62,7 +62,7 @@ function renderPage(storageKey?: string, pathname = "/things") {
         <header ref={setSlot} />
         <ConsoleHeaderActionsProvider slot={slot}>
           <ConsoleNavigationContext.Provider
-            value={{ navigate: () => undefined, pathname }}
+            value={{ anchor: "demo", navigate: () => undefined, pathname }}
           >
             <ConsoleFiltersProvider storageKey={storageKey}>
               <ConsoleFiltered

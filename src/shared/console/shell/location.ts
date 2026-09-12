@@ -14,6 +14,8 @@ import { createContext, useCallback, useContext } from "react"
 /** A navigation standing in for the router: where the console is, and how
  *  a link moves it. */
 export type ConsoleNavigation = {
+  /** The host element local links return to when copied or opened in a tab. */
+  anchor: string
   navigate: (href: string) => void
   pathname: string
 }

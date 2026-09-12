@@ -42,7 +42,9 @@ afterEach(cleanup)
 
 function renderLocal(navigate: (href: string) => void) {
   render(
-    <ConsoleNavigationContext.Provider value={{ navigate, pathname: "/runs" }}>
+    <ConsoleNavigationContext.Provider
+      value={{ anchor: "demo", navigate, pathname: "/runs" }}
+    >
       <ConsoleLink params={{ folderId: "finance" }} to="/folders/$folderId">
         Finance
       </ConsoleLink>
@@ -68,9 +70,8 @@ test("under a local navigation a plain click goes to the navigation", () => {
   const navigate = vi.fn()
   const link = renderLocal(navigate)
 
-  // A real href, so the link reads and copies like one; the click itself
-  // stays out of the browser's hands.
-  expect(link.getAttribute("href")).toBe("/folders/finance")
+  // Copied links stay at the public demo instead of exposing fixture URLs.
+  expect(link.getAttribute("href")).toBe("#demo")
   expect(fireEvent.click(link)).toBe(false)
   expect(navigate).toHaveBeenCalledWith("/folders/finance")
 })
@@ -99,7 +100,11 @@ test("the pathname is the navigation's when one is in force", () => {
 
   render(
     <ConsoleNavigationContext.Provider
-      value={{ navigate: () => undefined, pathname: "/folders" }}
+      value={{
+        anchor: "demo",
+        navigate: () => undefined,
+        pathname: "/folders",
+      }}
     >
       <Pathname />
     </ConsoleNavigationContext.Provider>

@@ -5,9 +5,9 @@ import { TrustPage } from "@/landing/trust"
  *  inherits a description written about somewhere else. Both the search result
  *  and the share card read these, and this is the page a technical evaluator
  *  is sent to. */
-const title = "Trust · Jori"
+const title = "AI access controls, approvals, and data regions · Jori"
 const description =
-  "Every tool has a mode: allowed, ask first, or blocked. Approvals carry a code, every run keeps receipts, and unattended runs can never touch a gated tool."
+  "Control what Jori can access, approve actions, and inspect every run. Choose EU or US workspace storage and see which services process data outside your region."
 
 export const Route = createFileRoute("/trust")({
   component: TrustPage,
