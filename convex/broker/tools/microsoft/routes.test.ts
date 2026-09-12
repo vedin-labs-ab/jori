@@ -174,7 +174,7 @@ describe.each(cases)("$tool mocked Graph contract", (fixture) => {
 
 test.each(
   cases
-)("$tool surfaces provider errors without retrying", async (fixture) => {
+)("$tool reports status without provider content or retries", async (fixture) => {
   const fetch = vi
     .fn()
     .mockResolvedValue(
@@ -183,7 +183,7 @@ test.each(
   vi.stubGlobal("fetch", fetch)
   await expect(
     callMicrosoftTool(integration(fixture.tool), fixture.tool, fixture.args)
-  ).rejects.toThrow("SyntheticFailure")
+  ).rejects.toThrow("Provider API request failed (HTTP 500)")
   expect(fetch).toHaveBeenCalledTimes(1)
 })
 
