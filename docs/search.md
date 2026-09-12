@@ -16,6 +16,9 @@ rejects redirects. It does not retry or fall back to another endpoint.
 Use separate API keys for development and each production region. Confirm
 that each key can access its configured endpoints before replacing it.
 
+Organization names and separate keys do not establish residency. Never let a
+user, tool argument or result choose the API origin.
+
 | Deployment | Search origin | Extract origin |
 | --- | --- | --- |
 | Development and US production | `https://api.parallel.ai` | `https://api.parallel.ai` |
