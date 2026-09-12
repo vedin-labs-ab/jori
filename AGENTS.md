@@ -80,8 +80,8 @@ per concept everywhere. A synonym is a rename, not a choice.
 
 ## Guides
 
-Read the matching guide first, and update it in the same change when your
-work makes it wrong.
+Before work of a kind listed below, read its guide. When your change makes
+a guide out of date, fix the guide in the same change.
 
 | Work | Guide |
 | --- | --- |
