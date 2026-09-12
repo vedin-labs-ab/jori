@@ -33,6 +33,9 @@ export function LandingFooter() {
                 {link.label}
               </Link>
             ))}
+            <a className={footerLinkClassName} href="/dpa">
+              DPA
+            </a>
             <PrivacyChoices className={footerLinkClassName} />
           </nav>
         </div>
