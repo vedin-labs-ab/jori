@@ -10,9 +10,7 @@
       "remaining": [],
       "note": "Customer renewals remains in Name during modal exit. No native shifts. Mobile first PNG47ms clearly retains text.",
       "sources": ["src/shared/console/materials/dialogs/edit.tsx"],
-      "sourcePaths": [
-        "src/shared/console/materials/dialogs/edit.tsx"
-      ],
+      "sourcePaths": ["src/shared/console/materials/dialogs/edit.tsx"],
       "profiles": [
         {
           "profile": "warm-1440",
@@ -516,9 +514,7 @@
       "remaining": [],
       "note": "New column title, Type selector and Add column action stay in create mode throughout visible exit. Mobile PNG194ms shows retained form. Native0; remaining rects are exiting Sheet.",
       "sources": ["src/shared/console/tables/sheet.tsx"],
-      "sourcePaths": [
-        "src/shared/console/tables/sheet.tsx"
-      ],
+      "sourcePaths": ["src/shared/console/tables/sheet.tsx"],
       "profiles": [
         {
           "profile": "warm-1440",
