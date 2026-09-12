@@ -1,9 +1,8 @@
 import { type Region } from "@contracts/region"
-import { CheckIcon, XIcon } from "lucide-react"
+import { ChartNoAxesColumn, CheckIcon, XIcon } from "lucide-react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { BrandIcon } from "@/shared/brand"
 import { marketingUrl } from "@/shared/region/paths"
 import { type AnalyticsChoice } from "./consent"
 import {
@@ -122,7 +121,7 @@ function ConsentPanel({
       }}
     >
       <div className="flex items-center gap-2.5">
-        <BrandIcon className="size-5" />
+        <ChartNoAxesColumn aria-hidden="true" className="size-5 shrink-0" />
         <h2
           className="flex-1 font-semibold text-base outline-none"
           id="analytics-choice-title"
@@ -145,12 +144,12 @@ function ConsentPanel({
         )}
       </div>
       <p className="mt-2.5 text-muted-foreground text-sm/relaxed">
-        Can we use PostHog to see which parts of Jori get used? It doesn't learn
-        who you are and never sees your chats or files. Jori works the same
-        either way.
+        May we count which pages get opened? It shows us what to improve. The
+        count runs through PostHog and never sees your chats, files, or name.
+        Either way, Jori works the same.
       </p>
       <p className="mt-2 text-muted-foreground/80 text-xs/relaxed">
-        You can change your mind later. More in the{" "}
+        Change your answer any time under Privacy choices. Details in the{" "}
         <a
           className="underline underline-offset-2"
           href={marketingUrl("/privacy")}
