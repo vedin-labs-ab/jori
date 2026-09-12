@@ -91,3 +91,7 @@ a guide out of date, fix the guide in the same change.
 | Convex functions, schema, or workflows | `convex/_generated/ai/guidelines.md` |
 | Deploying, seeding, or building sandbox images | `guides/deployment.md` |
 | Integrations: registrations, permissions, regional delivery | `guides/integrations.md` |
+
+For work that wants domain expertise instead, such as copy, marketing,
+product, or design, `npx skills find <topic>` searches skills.sh. Install
+a skill globally, and only when its audits there are clean.
