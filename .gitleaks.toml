@@ -1,0 +1,14 @@
+# Keep the maintained provider rules and generic secret detection enabled.
+[extend]
+useDefault = true
+
+# This exact value is a synthetic idempotency key in a billing unit test.
+# It identifies a request and does not grant access to a service.
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Synthetic billing allowance idempotency key"
+condition = "AND"
+paths = ['''^convex/billing/allowance\.test\.ts$''']
+regexTarget = "secret"
+regexes = ['''^verification-20260908-eu$''']
