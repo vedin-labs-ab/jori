@@ -39,6 +39,7 @@ test("separates run tools from connected and available capabilities", () => {
       .find((group) => group.surface === "jori")
       ?.tools.some((tool) => tool.tool === "list_capabilities")
   ).toBe(true)
+  expect(joriTools(capabilities)).not.toContain("read_workstreams")
   expect(
     capabilities.connected
       .find((group) => group.surface === "github")
