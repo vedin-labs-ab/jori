@@ -25,3 +25,30 @@ export function regionPreferenceHeader(region: Region, publicOrigin: string) {
 
   return `${preferenceCookie}=${region}; Path=/; SameSite=Lax; Max-Age=${preferenceMaxAgeSeconds}${secure}`
 }
+
+/** The choice as the page holds it, for the public origin: what the
+ *  visitor picked here or the server pinned, and picking again keeps the
+ *  same cookie and tells every reader in the page. */
+const listeners = new Set<() => void>()
+
+export function subscribeRegionChoice(listener: () => void) {
+  listeners.add(listener)
+
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+export function readRegionChoice(config: RegionConfig) {
+  return typeof document === "undefined"
+    ? undefined
+    : readRegionPreference(document.cookie, config)
+}
+
+export function saveRegionChoice(region: Region, config: RegionConfig) {
+  // biome-ignore lint/suspicious/noDocumentCookie: The same first-party cookie the server pins, written where the choice is made.
+  document.cookie = regionPreferenceHeader(region, config.publicOrigin)
+  for (const listener of listeners) {
+    listener()
+  }
+}

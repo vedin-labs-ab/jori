@@ -15,8 +15,10 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { FieldHelp } from "@/shared/field"
+import { useRegionChoice } from "@/shared/region/choice"
 import { regionConfig } from "@/shared/region/config"
 import { RegionPicker } from "@/shared/region/picker"
+import { saveRegionChoice } from "@/shared/region/preference"
 import { joinWaitlist } from "./client"
 
 type Status = "idle" | "submitting" | "joined"
@@ -42,7 +44,10 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
   const form = useRef<HTMLFormElement>(null)
   const [status, setStatus] = useState<Status>("idle")
   const [rejection, setRejection] = useState<Rejection>()
-  const [region, setRegion] = useState(regionConfig.current)
+  // The picker is the site's region choice, not only this form's: what
+  // it shows is what the visitor chose or the server pinned, and picking
+  // stores the choice for the next visit and the analytics ask alike.
+  const region = useRegionChoice() ?? regionConfig.current
 
   useRejectionFocus(form, fieldId, rejection)
 
@@ -102,7 +107,7 @@ export function WaitlistForm({ lockedEmail }: { lockedEmail?: string }) {
         <RegionPicker
           layout="field"
           value={region}
-          onChange={setRegion}
+          onChange={(choice) => saveRegionChoice(choice, regionConfig)}
           disabled={status === "submitting"}
         />
       ) : null}
