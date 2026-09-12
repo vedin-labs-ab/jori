@@ -178,7 +178,10 @@ function GdprBadge() {
  *  outside each letter, and the seams where the font's contours overlap
  *  never show. A faint grain, clipped to the letters, keeps the fill from
  *  reading as flat print. */
-const wordmarkCrop = { x: 2.9, y: -34.4, width: 79.5, height: 29 }
+/** The letters run from x 2.93 to 82.38 and start at y -34.31. The crop
+ *  leaves room outside them on the left, right, and top for the outer
+ *  pixel of the stroke, which the viewport would otherwise clip. */
+const wordmarkCrop = { x: 2.6, y: -34.7, width: 80.1, height: 29.3 }
 
 function Wordmark() {
   const id = useId()
