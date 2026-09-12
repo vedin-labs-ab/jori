@@ -3,17 +3,7 @@ import { BrandIcon } from "@/shared/brand"
 import { Organization } from "../demo/organization"
 import { Prop } from "../section"
 
-/**
- * The console's billing band, in miniature.
- *
- * The page claims usage is billed at cost, drawn from prepaid credit, and
- * visible as a live tally. That is three sentences a reader has to take on
- * faith, or one picture of the thing itself: what is left, what it came from,
- * and what a month of real work actually spent.
- *
- * The numbers are a plausible month for a team of this size, not a promise.
- * The shape is what is being shown.
- */
+/** Illustrative balances show how monthly usage and prepaid credit combine. */
 export function UsageMeter() {
   return (
     <Prop
@@ -21,7 +11,7 @@ export function UsageMeter() {
       label={
         <>
           <BrandIcon className="size-4" />
-          Usage
+          Example usage
         </>
       }
     >
