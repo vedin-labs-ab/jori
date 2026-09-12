@@ -65,6 +65,8 @@ test("a signed-in waitlisted caller without an organization cannot use billing A
   await expect(
     caller.action(api.billing.stripe.checkout.startPlanCheckout, {
       organizationId,
+      businessPurchase: true,
+      termsVersion: "2026-09-12",
       plan: "starter",
       interval: "month",
       returnUrl: "https://eu.usejori.com/console",

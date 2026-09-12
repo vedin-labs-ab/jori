@@ -45,8 +45,9 @@ from 9 September; this is not proof of provider contracts.
   Vercel/PostHog edge and provider operations remain separately scoped exceptions.
 - **Email and images:** recipient mail systems are outside Jori's control.
   Google image abuse monitoring has separate retention terms; images also reach the regional Blaxel sandbox.
-- **Legal:** public privacy/terms pages were placeholders at review. Executed
-  agreements and complete retention rules are not established by this repository.
+- **Legal:** launch policy drafts and business purchase confirmation are prepared.
+  See [Launch policies](legal.md) for publication checks. Executed provider
+  agreements and complete deletion procedures are not established by the pages.
 
 ## Evidence before claims
 

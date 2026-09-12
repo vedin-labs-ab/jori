@@ -58,7 +58,8 @@ export function SignInLegalNotice() {
     // Consent copy, so it is set at the smallest size the system actually
     // uses for reading rather than a step below it.
     <p className="text-pretty text-center text-muted-foreground text-xs/relaxed">
-      By continuing, you agree to Jori&apos;s{" "}
+      By continuing, you confirm you are at least 18, are acting for business
+      purposes with the necessary authority, and agree to Jori&apos;s{" "}
       <LegalLink to="/terms">Terms</LegalLink> and acknowledge the{" "}
       <LegalLink to="/privacy">Privacy Policy</LegalLink>.
       <PrivacyChoices className="ml-1 h-auto px-0 py-0 text-xs" />

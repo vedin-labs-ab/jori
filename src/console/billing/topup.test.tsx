@@ -34,3 +34,18 @@ test("opens top-up controls for organizations on a plan", () => {
   expect(screen.getByText("Top up the wallet")).toBeDefined()
   expect(toast.info).not.toHaveBeenCalled()
 })
+
+test("requires an explicit business purchase confirmation", () => {
+  render(<TopUpDialog available organizationId="organization" />)
+  fireEvent.click(screen.getByRole("button", { name: "Top up" }))
+  const button = screen.getByRole("button", {
+    name: "Continue to checkout",
+  }) as HTMLButtonElement
+  const agreement = screen.getByRole("checkbox")
+  expect(button.disabled).toBe(true)
+  expect(agreement.getAttribute("aria-checked")).toBe("false")
+  fireEvent.click(agreement)
+  expect(button.disabled).toBe(false)
+  fireEvent.click(agreement)
+  expect(button.disabled).toBe(true)
+})

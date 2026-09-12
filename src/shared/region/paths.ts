@@ -4,6 +4,7 @@ const marketingPaths = new Set([
   "/",
   "/pricing",
   "/privacy",
+  "/dpa",
   "/terms",
   "/trust",
 ])

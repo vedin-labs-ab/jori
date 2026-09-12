@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { dollarsToMicros, topUp } from "../../../contracts/billing"
+import { termsVersion } from "../../../contracts/legal/version"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, action } from "../../_generated/server"
@@ -26,11 +27,14 @@ export const startPlanCheckout = action({
     plan,
     interval,
     returnUrl: v.string(),
+    businessPurchase: v.literal(true),
+    termsVersion: v.literal(termsVersion),
   },
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
     const returnUrl = requireReturnUrl(args.returnUrl)
     requireStripeConfiguration()
+    requirePurchaseAgreement(args)
 
     const account = await ensuredAccount(ctx, args.organizationId)
 
@@ -53,6 +57,8 @@ export const startPlanCheckout = action({
         metadata: stripeMetadata({
           organizationId: args.organizationId,
           kind: "plan",
+          termsVersion,
+          businessPurchase: "true",
           plan: args.plan,
           interval: args.interval,
         }),
@@ -81,11 +87,14 @@ export const startTopUpCheckout = action({
     organizationId: v.string(),
     amountUsd: v.number(),
     returnUrl: v.string(),
+    businessPurchase: v.literal(true),
+    termsVersion: v.literal(termsVersion),
   },
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
     const returnUrl = requireReturnUrl(args.returnUrl)
     requireStripeConfiguration()
+    requirePurchaseAgreement(args)
 
     if (
       !Number.isInteger(args.amountUsd) ||
@@ -124,6 +133,8 @@ export const startTopUpCheckout = action({
         metadata: stripeMetadata({
           organizationId: args.organizationId,
           kind: "top-up",
+          termsVersion,
+          businessPurchase: "true",
           micros: String(micros),
         }),
       },
@@ -196,4 +207,15 @@ function billingReturnUrl(returnUrl: string, status: string) {
   const url = new URL(returnUrl)
   url.searchParams.set("billing", status)
   return url.toString()
+}
+
+function requirePurchaseAgreement(args: {
+  businessPurchase: boolean
+  termsVersion: string
+}) {
+  if (args.businessPurchase !== true || args.termsVersion !== termsVersion) {
+    throw new Error(
+      "Confirm business use and accept the current terms before purchasing."
+    )
+  }
 }

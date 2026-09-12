@@ -1,4 +1,5 @@
 import { type BillingInterval, type PlanKey } from "@contracts/billing"
+import { termsVersion } from "@contracts/legal/version"
 import { useAction } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { useState } from "react"
@@ -67,7 +68,7 @@ export function useBillingCheckout(organizationId: string) {
             organizationId,
             plan,
             interval,
-            returnUrl: billingReturnUrl(),
+            ...purchaseAgreement(),
           }),
         "Could not open checkout."
       ),
@@ -78,7 +79,7 @@ export function useBillingCheckout(organizationId: string) {
           startTopUpCheckout({
             organizationId,
             amountUsd,
-            returnUrl: billingReturnUrl(),
+            ...purchaseAgreement(),
           }),
         "Could not open checkout."
       ),
@@ -89,4 +90,12 @@ export function useBillingCheckout(organizationId: string) {
         "Could not open the billing portal."
       ),
   }
+}
+
+function purchaseAgreement() {
+  return {
+    returnUrl: billingReturnUrl(),
+    businessPurchase: true,
+    termsVersion,
+  } as const
 }

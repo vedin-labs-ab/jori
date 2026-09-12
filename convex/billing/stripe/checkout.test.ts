@@ -13,6 +13,8 @@ vi.mock("./client", async (original) => ({
 }))
 
 const common = {
+  businessPurchase: true,
+  termsVersion: "2026-09-12",
   organizationId: "organization-1",
   returnUrl: "https://eu.usejori.com/settings?tab=billing",
 }
@@ -157,3 +159,30 @@ function context(hasCustomer = true) {
   } as unknown as ActionCtx
   return { ctx, runMutation }
 }
+
+test.each([
+  startPlanCheckout,
+  startTopUpCheckout,
+])("requires current business terms before a purchase", async (action) => {
+  const { ctx, runMutation } = context()
+  await expect(
+    invoke(action, ctx, {
+      ...common,
+      plan: "starter",
+      interval: "month",
+      amountUsd: 25,
+      businessPurchase: false,
+    })
+  ).rejects.toThrow("Confirm business use")
+  await expect(
+    invoke(action, ctx, {
+      ...common,
+      plan: "starter",
+      interval: "month",
+      amountUsd: 25,
+      termsVersion: "old",
+    })
+  ).rejects.toThrow("current terms")
+  expect(runMutation).not.toHaveBeenCalled()
+  expect(stripeRequest).not.toHaveBeenCalled()
+})

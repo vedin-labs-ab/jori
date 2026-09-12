@@ -18,19 +18,24 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useBillingCheckout } from "./actions"
+import { PurchaseAgreement } from "./agreement"
 
 export function PlanPicker({ organizationId }: { organizationId: string }) {
+  const [accepted, setAccepted] = useState(false)
   const checkout = useBillingCheckout(organizationId)
   const [interval, setInterval] = useState<BillingInterval>("month")
   const [chosen, setChosen] = useState<PlanKey | null>(null)
 
   const choose = (plan: PlanKey) => {
+    if (!accepted) {
+      return
+    }
     setChosen(plan)
     void checkout.choosePlan(plan, interval)
   }
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={() => setAccepted(false)}>
       <DialogTrigger asChild>
         <Button>Choose a plan</Button>
       </DialogTrigger>
@@ -51,13 +56,14 @@ export function PlanPicker({ organizationId }: { organizationId: string }) {
             <TabsTrigger value="year">Annual, 20% off</TabsTrigger>
           </TabsList>
         </Tabs>
+        <PurchaseAgreement accepted={accepted} onChange={setAccepted} />
         <div className="flex flex-col gap-3">
           {Object.values(plans).map((plan) => (
             <PlanOption
               interval={interval}
               key={plan.key}
               onChoose={choose}
-              pending={checkout.pending !== null}
+              pending={!accepted || checkout.pending !== null}
               plan={plan.key}
               spinning={checkout.pending === "plan" && chosen === plan.key}
             />
