@@ -4,6 +4,7 @@ minimumReleaseAge: 0
 
 overrides:
   '@opentelemetry/core': 2.9.0
+  '@hey-api/json-schema-ref-parser>js-yaml': 4.3.2
   'giget>tar': 7.5.20
   tsconfck: 3.1.6
   ws: 8.21.1

@@ -271,6 +271,9 @@ function personalFile(): Doc<"files"> {
 }
 
 function workspaceQuery(table: string) {
+  if (table === "files") {
+    return { withIndex: () => ({ first: async () => null }) }
+  }
   if (table !== "workspaceRetention") {
     throw new Error(`Unexpected table in file fixture: ${table}`)
   }
