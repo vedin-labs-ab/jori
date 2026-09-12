@@ -166,6 +166,7 @@ import type * as export_records from "../export/records.js";
 import type * as export_support from "../export/support.js";
 import type * as export_validators from "../export/validators.js";
 import type * as files_attachments from "../files/attachments.js";
+import type * as files_blobs from "../files/blobs.js";
 import type * as files_cleanup_orphans from "../files/cleanup/orphans.js";
 import type * as files_console from "../files/console.js";
 import type * as files_data from "../files/data.js";
@@ -896,6 +897,7 @@ declare const fullApi: ApiFromModules<{
   "export/support": typeof export_support;
   "export/validators": typeof export_validators;
   "files/attachments": typeof files_attachments;
+  "files/blobs": typeof files_blobs;
   "files/cleanup/orphans": typeof files_cleanup_orphans;
   "files/console": typeof files_console;
   "files/data": typeof files_data;
