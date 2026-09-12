@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { Menu } from "lucide-react"
+import { ArrowUpRight, Menu } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -128,6 +128,7 @@ function HeaderActions({ onWaitlistPage }: { onWaitlistPage: boolean }) {
             src="/logos/integrations/github.svg"
           />
           GitHub
+          <ArrowUpRight aria-hidden="true" data-icon="inline-end" />
         </a>
       </Button>
       <Button
