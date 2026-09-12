@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
+import { mailThreadSchema } from "../../../../contracts/tools/responses/mail"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { mailThreadSchema } from "../../../runs/agent/tools/schemas/responses/mail"
 import {
   gmailMailMessage,
   gmailMailThread,

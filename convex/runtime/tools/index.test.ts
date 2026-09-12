@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 
 test("prompted tools request approval without executing", async () => {
   const runtime = toolRuntime()

@@ -2,7 +2,6 @@ import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
 import {
-  enrichReactionTarget,
   type ReactionAction,
   type ReactionSnapshotItem,
   type ReactionTarget,
@@ -13,7 +12,7 @@ const maxReactionsPerTarget = 500
 
 type ReactionTargetState = {
   byKey: Map<string, Doc<"reactions">>
-  enriched: ReactionTarget
+  target: ReactionTarget
   integration: Doc<"integrations">
   rows: Doc<"reactions">[]
 }
@@ -96,16 +95,15 @@ async function loadReactionTargetState(
   integration: Doc<"integrations">,
   target: ReactionTarget
 ): Promise<ReactionTargetState> {
-  const enriched = await enrichReactionTarget(ctx, { integration, target })
   const rows = await ctx.db
     .query("reactions")
     .withIndex("by_integration_and_target_key", (query) =>
-      query.eq("integrationId", integration._id).eq("target.key", enriched.key)
+      query.eq("integrationId", integration._id).eq("target.key", target.key)
     )
     .take(maxReactionsPerTarget)
   const byKey = new Map(rows.map((row) => [rowKey(row), row]))
 
-  return { byKey, enriched, integration, rows }
+  return { byKey, target, integration, rows }
 }
 
 async function applyPresence(
@@ -166,11 +164,11 @@ function newReactionRow(state: ReactionTargetState, input: PresenceInput) {
     observedAt: input.observedAt ?? now,
     reaction: input.reaction,
     target: {
-      actor: state.enriched.actor,
-      conversationId: state.enriched.conversationId,
-      identifiers: state.enriched.identifiers,
-      key: state.enriched.key,
-      text: state.enriched.text,
+      actor: state.target.actor,
+      conversationId: state.target.conversationId,
+      identifiers: state.target.identifiers,
+      key: state.target.key,
+      text: state.target.text,
     },
     organizationId: state.integration.organizationId,
     updatedAt: now,

@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
+import { getToolResponseSchema } from "../../../../contracts/tools/responses"
 import { integrationDoc } from "../../../../test/convex/integrations"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { getToolResponseSchema } from "../../../runs/agent/tools/schemas/responses"
 import { callGitHubTool } from "./index"
 
 afterEach(() => {

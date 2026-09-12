@@ -1,4 +1,5 @@
 import { type IFlattenedRuleSet } from "dependency-cruiser"
+import { domainRules } from "./domains.ts"
 
 export const ruleSet = {
   forbidden: [
@@ -49,59 +50,7 @@ export const ruleSet = {
         path: "^(?:src|scripts)(?:/|$)",
       },
     },
-    {
-      name: "parallel-stays-in-search-adapter",
-      severity: "error",
-      comment:
-        "Search consumers use the regional provider-neutral client, not Parallel SDK types or transport.",
-      from: {
-        path: "^convex/",
-        pathNot: "^convex/search/(?:parallel|response)[.]ts$",
-      },
-      to: { path: "^node_modules/parallel-web(?:/|$)" },
-    },
-    {
-      name: "integrations-do-not-import-broker",
-      severity: "error",
-      comment: "Integration adapters should be below broker tool adapters.",
-      from: {
-        path: "^convex/integrations/",
-      },
-      to: {
-        path: "^convex/broker/",
-      },
-    },
-    {
-      name: "offer-core-does-not-import-provider-adapters",
-      severity: "error",
-      comment:
-        "Generic integration-offer state should not depend on provider presentation or transport.",
-      from: {
-        path: "^convex/integrations/offers/",
-      },
-      to: {
-        path: "^convex/integrations/(?:github|google|linear|microsoft|notion|slack)/",
-      },
-    },
-    {
-      name: "transitions-do-not-import-integration-adapters",
-      severity: "error",
-      comment: "Transition persistence stays provider-free.",
-      from: { path: "^convex/transitions/" },
-      to: { path: "^convex/integrations/" },
-    },
-    {
-      name: "deduction-does-not-import-workstream-projection",
-      severity: "error",
-      comment:
-        "The product-facing workstream projection may read deduction internals, not the reverse.",
-      from: {
-        path: "^convex/deduction/",
-      },
-      to: {
-        path: "^convex/workstreams/",
-      },
-    },
+    ...domainRules,
     {
       name: "features-do-not-import-routes",
       severity: "error",

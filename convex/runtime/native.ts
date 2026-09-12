@@ -12,7 +12,7 @@ import {
 import {
   stringArrayProperty,
   withOptionalFieldGuidance,
-} from "../runs/agent/tools/schemas"
+} from "../../contracts/tools"
 import { nativeToolUsage } from "./permissions/native"
 
 type RunLifecycleTool = {

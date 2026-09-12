@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import { googleToolInputSchemas } from "../../../../contracts/tools/google"
+import { googleToolResponseSchemas } from "../../../../contracts/tools/responses/google"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { googleToolInputSchemas } from "../../../runs/agent/tools/schemas/google"
-import { googleToolResponseSchemas } from "../../../runs/agent/tools/schemas/responses/google"
 import { validateSchemaValue } from "../../input/validation"
 import { searchGmailThreads } from "./read"
 

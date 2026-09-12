@@ -4,7 +4,7 @@ import {
   type ModelResponse,
   type ModelToolCallDelta,
 } from "../model/types"
-import { type AgentRuntime, type RuntimePlatform } from "../platform"
+import { type AgentRuntime, type RuntimePlatform } from "../platform/types"
 import { formatError } from "../trace/events"
 
 /** The console's view of the reply a turn is composing. */

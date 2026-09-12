@@ -9,7 +9,7 @@ import { isRunExecutable } from "../runs/execution/guard"
 import { upsertSandbox } from "../runs/execution/sandboxes/data"
 import { recordTrace } from "../runs/execution/traces/write"
 import { appendTranscript } from "../runs/execution/transcript/data"
-import { insertRow } from "../shared/context"
+import { insertRow } from "./write"
 
 test.each(["deleting", "deleted"])(
   "%s workspaces reject late producers without affecting another workspace",

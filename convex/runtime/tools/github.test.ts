@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest"
 import { sandboxWorkspace } from "../../../contracts/coding"
 import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 import { type SandboxRuntime } from "../sandbox/types"
 
 test("prompted GitHub commit tools include collected workspace changes", async () => {

@@ -1,8 +1,8 @@
 import { afterEach, expect, test, vi } from "vitest"
+import { linearToolResponseSchemas } from "../../../../contracts/tools/responses/linear"
 import { schemaViolations } from "../../../../test/convex/schema"
 import { integration } from "../../../../test/convex/tools"
 import { postLinearComment } from "../../../integrations/linear/delivery/comments"
-import { linearToolResponseSchemas } from "../../../runs/agent/tools/schemas/responses/linear"
 import { callLinearTool } from "."
 
 type LinearGraphqlCall = {

@@ -7,7 +7,7 @@ import {
 } from "../../../contracts/runtime/handoffs"
 import { type RuntimeId } from "../../../contracts/runtime/ids"
 import { optionalString } from "../../shared/input"
-import { type RuntimePlatform, type TraceRuntime } from "../platform"
+import { type RuntimePlatform, type TraceRuntime } from "../platform/types"
 import { recordRuntimeEvent } from "./record"
 
 export async function recordToolResultActivity(args: {

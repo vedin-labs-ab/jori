@@ -1,7 +1,7 @@
 import { sandboxWorkspace } from "../../../../contracts/coding"
 import { isRecord, type JsonObject } from "../../../../contracts/json"
 import { optionalString, requiredString } from "../../../shared/input"
-import { type AgentRuntime } from "../../platform"
+import { type AgentRuntime } from "../../platform/types"
 
 type GenerateImageInput = {
   prompt: string

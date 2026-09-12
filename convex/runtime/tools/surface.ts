@@ -8,7 +8,7 @@ import {
   type MessageSurface,
   messageSurfaceLabel,
 } from "../../shared/integrations"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 
 export async function executeActiveSurfaceTool(
   runtime: AgentRuntime,

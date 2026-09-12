@@ -1,5 +1,5 @@
 import { type Doc, type Id } from "../_generated/dataModel"
-import { messageReactionTargetKey } from "../messages/identifiers"
+import { messageReactionTargetKey } from "../integrations/messages/identifiers"
 import { type Actor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
 

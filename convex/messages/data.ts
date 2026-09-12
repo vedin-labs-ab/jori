@@ -2,13 +2,12 @@ import { v } from "convex/values"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { resolveActor } from "../persons/resolve"
+import { insertRow } from "../retention/write"
 import { type Actor, actorValidator } from "../shared/actor"
-import { insertRow } from "../shared/context"
 import {
   type MessageIntegration,
   type MessageSurface,
 } from "../shared/integrations"
-import { messageDataReactionTargetKey } from "./identifiers"
 
 export const observedMessageArgs = {
   accountId: v.string(),
@@ -57,6 +56,7 @@ export async function insertMessage(
     personId: Id<"persons"> | undefined
     placeId: Id<"places"> | undefined
     surface: MessageIntegration
+    targetKey: string | undefined
   }
 ): Promise<Doc<"messages">> {
   const now = Date.now()
@@ -71,7 +71,7 @@ export async function insertMessage(
     personId: input.personId,
     conversationId: input.message.conversationId,
     placeId: input.placeId,
-    targetKey: messageDataReactionTargetKey(input.surface, input.message.data),
+    targetKey: input.targetKey,
     text: input.message.text,
     data: input.message.data,
     observedAt: input.message.observedAt,

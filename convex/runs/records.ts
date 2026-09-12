@@ -5,9 +5,9 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
+import { recentConversation } from "../conversations/history/index"
 import { readWorkstreamRoster } from "../deduction/roster"
 import { listActiveIntegrationsForPrincipal } from "../integrations/data"
-import { recentConversation } from "../messages/history"
 import { readApprovedFacts } from "../organization/profile"
 import { readRequesterContext } from "../persons/profile/context"
 import { readPersonTimezone } from "../persons/profile/timezone"

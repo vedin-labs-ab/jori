@@ -7,7 +7,6 @@ import {
   type MutationCtx,
 } from "../_generated/server"
 import { conversationExecutionScope } from "../conversations/console/principal"
-import { messageReplyTargetIdentifier } from "../messages/identifiers"
 import { type QueryLikeCtx } from "../shared/context"
 import {
   collectPendingBatch,
@@ -36,6 +35,7 @@ export async function startSession(
   args: {
     conversationId: Id<"conversations">
     message: Doc<"messages">
+    target: string | undefined
     now: number
     runId: Id<"runs">
   }
@@ -50,7 +50,7 @@ export async function startSession(
     cursor: initialCursor(args.message, args.now),
     recency: initialRecency(args.message),
     runId: args.runId,
-    target: messageReplyTargetIdentifier(args.message) ?? undefined,
+    target: args.target,
     updatedAt: args.now,
   }
 

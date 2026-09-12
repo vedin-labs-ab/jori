@@ -1,7 +1,7 @@
 import { trial } from "../../contracts/billing"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
-import { insertRow } from "../shared/context"
+import { insertRow } from "../retention/write"
 
 const dayMs = 24 * 60 * 60 * 1000
 

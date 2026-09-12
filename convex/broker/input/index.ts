@@ -1,5 +1,5 @@
 import { type JsonObject } from "../../../contracts/json"
-import { getToolInputSchema } from "../../runs/agent/tools/schemas"
+import { getToolInputSchema } from "../../../contracts/tools"
 import { isJsonObject, validateSchemaValue } from "./validation"
 
 export function normalizeBrokerToolInput(

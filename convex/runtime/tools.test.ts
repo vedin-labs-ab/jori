@@ -3,7 +3,7 @@ import { getToolPermission } from "../../contracts/permissions"
 import {
   optionalFieldGuidance,
   schemaHasOptionalFields,
-} from "../runs/agent/tools/schemas"
+} from "../../contracts/tools"
 import { runLifecycleTools, sandboxTools } from "./native"
 import { visibleNativeToolSnapshots } from "./permissions/native"
 import { activeSurfaceTools } from "./surface/tools"

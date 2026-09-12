@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import { microsoftToolResponseSchemas } from "../../../../contracts/tools/responses/microsoft"
 import { integrationDoc } from "../../../../test/convex/integrations"
 import { schemaViolations } from "../../../../test/convex/schema"
-import { microsoftToolResponseSchemas } from "../../../runs/agent/tools/schemas/responses/microsoft"
 import { normalizeBrokerToolInput } from "../../input"
 import { callMicrosoftTool } from "."
 

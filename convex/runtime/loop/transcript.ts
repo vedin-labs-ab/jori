@@ -8,7 +8,7 @@ import { collapseWhitespace } from "../../../contracts/text"
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 
 // The prompt prefix every turn starts with: instructions as the system
 // message, then the organization, requester, place, and person contexts

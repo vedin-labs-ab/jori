@@ -4,7 +4,7 @@ import { messageHasText, resolveMessageOwner } from "../messages/data"
 import { maxPendingReadLimit } from "../sessions/batch"
 import { readPendingMessages, stopSession } from "../sessions/data"
 import { isPersonActor } from "../shared/actor"
-import { startMessageRun } from "./data"
+import { startMessageRun } from "./execution/index"
 
 export async function continuePendingConversationRun(
   ctx: MutationCtx,

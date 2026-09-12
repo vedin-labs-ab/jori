@@ -2,9 +2,9 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
 import { afterEach, expect, test, vi } from "vitest"
+import { storeToolResponseSchemas } from "../../contracts/tools/responses/jori/stores"
 import { schemaViolations } from "../../test/convex/schema"
 import { internal } from "../_generated/api"
-import { storeToolResponseSchemas } from "../runs/agent/tools/schemas/responses/jori/stores"
 import schema from "../schema"
 
 const modules = import.meta.glob("/convex/{_generated,stores}/**/*.{ts,js}")

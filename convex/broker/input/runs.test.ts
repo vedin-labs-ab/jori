@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
+import { getToolInputSchema } from "../../../contracts/tools"
 import { schemaViolations } from "../../../test/convex/schema"
-import { getToolInputSchema } from "../../runs/agent/tools/schemas"
 import { normalizeBrokerToolInput } from "."
 
 const schema = getToolInputSchema("search_runs")

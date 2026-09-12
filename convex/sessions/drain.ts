@@ -6,6 +6,7 @@ import {
 import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { formatRuntimeMessage } from "../integrations/messages/runtime"
 import {
   defaultReactionDrainLimit,
   formatRuntimeReaction,
@@ -14,7 +15,7 @@ import {
 import { reactionSummariesForMessages } from "../reactions/summary"
 import { type QueryLikeCtx } from "../shared/context"
 import { boundedNumber } from "../shared/input"
-import { defaultDrainLimit, formatRuntimeMessage, maxDrainLimit } from "./batch"
+import { defaultDrainLimit, maxDrainLimit } from "./batch"
 import { cursorWithMessage, cursorWithReaction } from "./cursor"
 import { readPendingBatch } from "./data"
 import { reconcileRunExecution } from "./execution"

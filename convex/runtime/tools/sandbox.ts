@@ -1,6 +1,6 @@
 import { type WaiterWake } from "../../../contracts/runtime/waiters"
 import { isParked, park, recordResumed } from "../loop/park"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 import {
   bashTimeoutMs,
   executeCodingTool,

@@ -1,6 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
-import { messageIdentifiers } from "../../messages/identifiers"
+import { messageIdentifiers } from "../../integrations/messages/identifiers"
 import { type Audience } from "../../shared/audience"
 import { createSight, type Sight } from "../../visibility/sight"
 import { conversationGate, createConversationSight } from "../access"

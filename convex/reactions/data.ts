@@ -1,7 +1,5 @@
-import { type Doc, type Id } from "../_generated/dataModel"
+import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { normalizeSelfActor } from "../messages/actor"
-import { messageReactionTargetIdentifiers } from "../messages/identifiers"
 import {
   type Actor,
   getActorDisplayName,
@@ -37,37 +35,6 @@ export type ReactionSnapshotPlan = {
   targets: ReactionSnapshotTarget[]
 }
 
-export async function enrichReactionTarget(
-  ctx: MutationCtx,
-  args: {
-    integration: Doc<"integrations">
-    target: ReactionTarget
-  }
-): Promise<ReactionTarget> {
-  const message = await findReactionTargetMessage(ctx, {
-    integrationId: args.integration._id,
-    targetKey: args.target.key,
-  })
-
-  if (message === null) {
-    return args.target
-  }
-
-  return {
-    ...args.target,
-    actor: normalizeSelfActor(
-      args.target.actor ?? message.actor,
-      args.integration
-    ),
-    conversationId: message.conversationId ?? args.target.conversationId,
-    identifiers: mergeIdentifiers(
-      args.target.identifiers,
-      messageReactionTargetIdentifiers(message)
-    ),
-    text: args.target.text ?? message.text,
-  }
-}
-
 export function reactionActorKey(actor: Actor | undefined) {
   return (
     getActorExternalId(actor) ??
@@ -77,7 +44,7 @@ export function reactionActorKey(actor: Actor | undefined) {
   )
 }
 
-async function findReactionTargetMessage(
+export async function findReactionTargetMessage(
   ctx: MutationCtx,
   args: {
     integrationId: Id<"integrations">
@@ -92,10 +59,4 @@ async function findReactionTargetMessage(
         .eq("targetKey", args.targetKey)
     )
     .first()
-}
-
-function mergeIdentifiers(left: string[], right: string[]) {
-  return [...left, ...right].filter(
-    (identifier, index, values) => values.indexOf(identifier) === index
-  )
 }

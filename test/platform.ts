@@ -6,7 +6,7 @@ import {
   type RunHandoffs,
 } from "../contracts/runtime/handoffs"
 import { type TranscriptMessage } from "../convex/runs/execution/transcript/schema"
-import { type RuntimePlatform } from "../convex/runtime/platform"
+import { type RuntimePlatform } from "../convex/runtime/platform/types"
 import { type SandboxRuntime } from "../convex/runtime/sandbox/types"
 import { runtimeId } from "./runtime"
 

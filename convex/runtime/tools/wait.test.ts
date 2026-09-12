@@ -6,7 +6,7 @@ import {
   runtimeId,
 } from "../../../test/runtime"
 import { isParked } from "../loop/park"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 import { executeToolCall } from "./index"
 
 afterEach(() => vi.restoreAllMocks())

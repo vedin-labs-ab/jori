@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 
 test("start_agent forwards its explicit title", async () => {
   const runtime = agentRuntime()

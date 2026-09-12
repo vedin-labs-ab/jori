@@ -3,7 +3,7 @@ import {
   type WaiterCondition,
   type WaiterWake,
 } from "../../../contracts/runtime/waiters"
-import { type TraceRuntime } from "../platform"
+import { type TraceRuntime } from "../platform/types"
 import { recordRuntimeEvent } from "../trace/record"
 import { hasResolvedHandoffs, type PendingHandoff } from "./pending"
 

@@ -13,7 +13,8 @@ import {
   type ModelRuntime,
   type ModelTool,
 } from "../model/types"
-import { type AgentRuntime, createAgentRuntime } from "../platform"
+import { createAgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 import { syncSessionReactions } from "../sessions"
 import { modelTools } from "../tools/index"
 import { formatError } from "../trace/events"

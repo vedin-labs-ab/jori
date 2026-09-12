@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
+import { getToolResponseSchema } from "../../../../contracts/tools/responses"
 import { schemaViolations } from "../../../../test/convex/schema"
 import { integration } from "../../../../test/convex/tools"
-import { getToolResponseSchema } from "../../../runs/agent/tools/schemas/responses"
 import { callLinearTool } from "."
 
 afterEach(() => vi.unstubAllGlobals())

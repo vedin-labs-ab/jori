@@ -1,7 +1,7 @@
 import { expect, test, vi } from "vitest"
 import { sandboxWorkspace } from "../../../contracts/coding"
 import { createRuntime } from "../../../test/runtime"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 import { type SandboxRuntime } from "../sandbox/types"
 import { materializeSandboxResult } from "./results"
 

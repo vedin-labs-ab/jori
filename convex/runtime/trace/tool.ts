@@ -9,7 +9,7 @@ import {
 } from "../../../contracts/runtime/events"
 import { type RuntimeValueSummary } from "../../../contracts/runtime/trace"
 import { type ModelToolCall } from "../model/types"
-import { type RuntimePlatform } from "../platform"
+import { type RuntimePlatform } from "../platform/types"
 import { recordRuntimeEvent } from "./record"
 
 const maxToolInputBytes = 32 * 1024

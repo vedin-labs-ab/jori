@@ -4,7 +4,7 @@ import {
   createLocalPromptTime,
   createPromptTime,
 } from "../../../../prompts/time"
-import { replyAddress } from "../../../messages/targets"
+import { replyAddress } from "../../../integrations/messages/targets"
 import {
   integrationLabels,
   type MessageSurface,

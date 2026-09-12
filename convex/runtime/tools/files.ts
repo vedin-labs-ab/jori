@@ -1,6 +1,6 @@
 import { type JsonObject } from "../../../contracts/json"
 import { optionalString, requiredString } from "../../shared/input"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 import { sandboxFilePath } from "../sandbox/path"
 
 const mimeTypesByExtension: Record<string, string> = {

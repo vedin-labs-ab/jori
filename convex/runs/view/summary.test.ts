@@ -1,12 +1,12 @@
 import { expect, test } from "vitest"
 import { runActivityKinds } from "../../../contracts/runtime/runs"
+import { getToolResponseSchema } from "../../../contracts/tools/responses"
 import { activityData, traceDoc } from "../../../test/convex/console"
 import { id } from "../../../test/convex/database"
 import { schemaViolations } from "../../../test/convex/schema"
 import { type Doc } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { projectActivity } from "../activity/project"
-import { getToolResponseSchema } from "../agent/tools/schemas/responses"
 import { projectRunSummary } from "./summary"
 
 const ctx = { db: { get: async () => null } } as unknown as QueryCtx

@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { createFileContext, mockJsonFetch } from "../../../test/convex/broker"
-import { schemaViolations } from "../../../test/convex/schema"
-import { integration } from "../../../test/convex/tools"
 import {
   calendarListSchema,
   eventListingSchema,
-} from "../../runs/agent/tools/schemas/responses/calendar"
+} from "../../../contracts/tools/responses/calendar"
+import { createFileContext, mockJsonFetch } from "../../../test/convex/broker"
+import { schemaViolations } from "../../../test/convex/schema"
+import { integration } from "../../../test/convex/tools"
 import { callMicrosoftTool } from "./microsoft"
 
 afterEach(() => vi.unstubAllGlobals())

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest"
-import { microsoftToolInputSchemas } from "../../../runs/agent/tools/schemas/microsoft"
+import { microsoftToolInputSchemas } from "../../../../contracts/tools/microsoft"
 import { normalizeBrokerToolInput } from "../../input"
 
 const event = {

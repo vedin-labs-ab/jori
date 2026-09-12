@@ -2,13 +2,13 @@ import { type ToolSurface } from "../../../contracts/permissions"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
+import { sendSurfaceReply } from "../../integrations/messages/reply"
+import { replyAddress } from "../../integrations/messages/targets"
 import { createSlackApprovalRequest } from "../../integrations/slack/approvals/blocks"
 import {
   postSlackCard,
   slackCardTarget,
 } from "../../integrations/slack/delivery/cards"
-import { sendSurfaceReply } from "../../messages/reply"
-import { replyAddress } from "../../messages/targets"
 import {
   type AgentRuntimeInput,
   findRunIntegration,

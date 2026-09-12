@@ -1,7 +1,8 @@
 import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
-import { insertRow, type QueryLikeCtx } from "../shared/context"
+import { insertRow } from "../retention/write"
+import { type QueryLikeCtx } from "../shared/context"
 import { type PlaceVisibility, placeVisibility } from "./schema"
 
 // The normalized descriptor provider edges attach to observed messages when

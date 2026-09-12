@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import {
+  draftedMailSchema,
+  sentMailSchema,
+} from "../../../../contracts/tools/responses/mail"
+import {
   createFileContext,
   mockJsonFetch,
 } from "../../../../test/convex/broker"
 import { schemaViolations } from "../../../../test/convex/schema"
 import { integration } from "../../../../test/convex/tools"
-import {
-  draftedMailSchema,
-  sentMailSchema,
-} from "../../../runs/agent/tools/schemas/responses/mail"
 import { callGoogleTool } from "."
 
 afterEach(() => vi.unstubAllGlobals())

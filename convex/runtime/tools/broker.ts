@@ -12,7 +12,7 @@ import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { type ApprovalBrokerContext } from "../../broker/approval"
 import { loadRunBrokerContext } from "../../broker/auth"
-import { type GitHubCloneCredentials } from "../platform"
+import { type GitHubCloneCredentials } from "../platform/types"
 import { toolErrorResult } from "./results"
 
 // The broker carries every provider's tool implementation, more than the act

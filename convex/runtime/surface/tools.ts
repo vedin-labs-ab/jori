@@ -1,11 +1,11 @@
 import { type JsonObject, toJsonObject } from "../../../contracts/json"
 import { replyPartsSchema } from "../../../contracts/replies/parts"
 import { finalProperty } from "../../../contracts/runtime/tools"
+import { withOptionalFieldGuidance } from "../../../contracts/tools"
 import {
   communicationCapabilities,
   replyPartKinds,
 } from "../../messages/capabilities"
-import { withOptionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import {
   type MessageIntegration,
   type MessageSurface,

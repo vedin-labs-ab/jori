@@ -8,9 +8,12 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
-import { messageMatchesReplyTargetIdentifier } from "../messages/identifiers"
-import { optionalSlackBlocks, sendSurfaceReply } from "../messages/reply"
-import { replyAddress } from "../messages/targets"
+import { messageMatchesReplyTargetIdentifier } from "../integrations/messages/identifiers"
+import {
+  optionalSlackBlocks,
+  sendSurfaceReply,
+} from "../integrations/messages/reply"
+import { replyAddress } from "../integrations/messages/targets"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { optionalString, requiredString } from "../shared/input"
 import { type MessageSurface } from "../shared/integrations"

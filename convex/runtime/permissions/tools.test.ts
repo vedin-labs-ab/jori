@@ -3,10 +3,10 @@ import {
   getToolPermission,
   resolveToolModes,
 } from "../../../contracts/permissions"
+import { optionalFieldGuidance } from "../../../contracts/tools"
 import { integration } from "../../../test/convex/tools"
 import { type Doc } from "../../_generated/dataModel"
 import { type InstructionRuntimeInput } from "../../runs/agent/input"
-import { optionalFieldGuidance } from "../../runs/agent/tools/schemas"
 import { permissionGroups, toolDescriptor } from "./tools"
 
 test("uses runtime skill names in the load_skill schema", () => {

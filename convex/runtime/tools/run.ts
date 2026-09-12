@@ -1,7 +1,7 @@
 import { type JsonObject } from "../../../contracts/json"
 import { maxRunResultLength } from "../../../contracts/runtime/tools"
 import { optionalString } from "../../shared/input"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 
 /** The one run-routed tool: the agent's own signal that the run is done.
  *  The outcome is stored on the run itself, so the parent reads it back

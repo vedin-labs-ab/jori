@@ -5,7 +5,7 @@ import {
   type RuntimeEventTraceData,
   type RuntimeEventType,
 } from "../../../contracts/runtime/events"
-import { type RuntimePlatform } from "../platform"
+import { type RuntimePlatform } from "../platform/types"
 import { runtimeEvent } from "./events"
 
 type RuntimeEventBase = Omit<RuntimeEventInput, "data" | "runId" | "type">

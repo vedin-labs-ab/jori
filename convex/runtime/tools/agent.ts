@@ -13,7 +13,7 @@ import { maxAgentWaitRuns } from "../../../contracts/runtime/tools"
 import { type WaiterWake } from "../../../contracts/runtime/waiters"
 import { optionalStringArray, requiredString } from "../../shared/input"
 import { isParked, park, recordResumed } from "../loop/park"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 
 const minTimeoutMs = durationMilliseconds({ unit: "seconds", value: 5 })
 const maxTimeoutMs = durationMilliseconds({ unit: "days", value: 30 })

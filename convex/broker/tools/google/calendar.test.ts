@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
+import {
+  calendarListSchema,
+  eventListingSchema,
+} from "../../../../contracts/tools/responses/calendar"
 import { mockJsonFetch } from "../../../../test/convex/broker"
 import { schemaViolations } from "../../../../test/convex/schema"
 import { integration } from "../../../../test/convex/tools"
 import { googleIntegrationConfigs } from "../../../integrations/google/config"
-import {
-  calendarListSchema,
-  eventListingSchema,
-} from "../../../runs/agent/tools/schemas/responses/calendar"
 import { callGoogleTool } from "."
 
 afterEach(() => vi.unstubAllGlobals())

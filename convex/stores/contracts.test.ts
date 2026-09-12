@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
+import { storeToolResponseSchemas } from "../../contracts/tools/responses/jori/stores"
 import { storeDoc } from "../../test/convex/collections"
 import { id } from "../../test/convex/database"
 import { schemaViolations } from "../../test/convex/schema"
-import { storeToolResponseSchemas } from "../runs/agent/tools/schemas/responses/jori/stores"
 import { summarizeStore } from "./access"
 
 test("store response contracts include schema counts and containing folders", () => {

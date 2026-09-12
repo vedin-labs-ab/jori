@@ -18,7 +18,7 @@ import {
 import {
   type AgentRuntime,
   type RuntimePlatform,
-} from "../convex/runtime/platform"
+} from "../convex/runtime/platform/types"
 import { type SandboxRuntime } from "../convex/runtime/sandbox/types"
 import { executeToolCall } from "../convex/runtime/tools/index"
 import { createPlatform, createSandbox } from "./platform"

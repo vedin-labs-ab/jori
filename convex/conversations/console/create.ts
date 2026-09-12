@@ -5,7 +5,8 @@ import { type MutationCtx } from "../../_generated/server"
 import { resolveConsoleContext } from "../../messages/references"
 import { type modelSelectionValidator } from "../../model/selection"
 import { loadReference, referenceTable } from "../../references/lookup"
-import { insertRow, type QueryLikeCtx } from "../../shared/context"
+import { insertRow } from "../../retention/write"
+import { type QueryLikeCtx } from "../../shared/context"
 import { createSight, type Sight } from "../../visibility/sight"
 
 const titleMaxLength = 80

@@ -1,7 +1,8 @@
 import { expect, test } from "vitest"
 import { id } from "../../test/convex/database"
 import { type Doc } from "../_generated/dataModel"
-import { collectPendingBatch, formatRuntimeMessage } from "./batch"
+import { formatRuntimeMessage } from "../integrations/messages/runtime"
+import { collectPendingBatch } from "./batch"
 
 test.each([
   ["non-text", message("skipped", 2)],

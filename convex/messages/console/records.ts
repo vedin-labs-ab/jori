@@ -2,11 +2,11 @@ import { type ReplyPart } from "../../../contracts/replies/parts"
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { insertRow } from "../../retention/write"
 import { clearRunDraft } from "../../runs/execution/drafts/data"
 import { findSession } from "../../sessions/data"
 import { runExecutionIsCurrent } from "../../sessions/scope"
 import { type Actor } from "../../shared/actor"
-import { insertRow } from "../../shared/context"
 
 const consoleMessageType = "console.message"
 

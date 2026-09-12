@@ -3,7 +3,7 @@ import { type MutationCtx } from "../_generated/server"
 import { startEventJobs } from "../jobs/lifecycle"
 import { actorIdentityProvider } from "../persons/identity/schema"
 import { resolveActor } from "../persons/resolve"
-import { insertRow } from "../shared/context"
+import { insertRow } from "../retention/write"
 import { normalizeEventData } from "./payload"
 import { type EventMatch } from "./schema"
 

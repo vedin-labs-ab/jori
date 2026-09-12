@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest"
+import { brokerJoriToolResponseSchemas } from "../../contracts/tools/responses/jori/broker"
 import { schemaViolations } from "../../test/convex/schema"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
-import { brokerJoriToolResponseSchemas } from "../runs/agent/tools/schemas/responses/jori/broker"
 import { cancelApprovalRequest } from "./cancel"
 
 test.each([

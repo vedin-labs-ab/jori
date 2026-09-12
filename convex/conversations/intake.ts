@@ -2,7 +2,13 @@ import { v } from "convex/values"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { findActiveIntegrationByExternalId } from "../integrations/data"
-import { normalizeSelfActor } from "../messages/actor"
+import { normalizeSelfActor } from "../integrations/messages/actor"
+import {
+  conversationScope,
+  messageAudience,
+} from "../integrations/messages/audience"
+import { recordJobEvent } from "../integrations/messages/events"
+import { messageDataReactionTargetKey } from "../integrations/messages/identifiers"
 import {
   findMessageByExternalId,
   insertMessage,
@@ -10,8 +16,6 @@ import {
   type ObservedMessage,
   observedMessageArgs,
 } from "../messages/data"
-import { recordJobEvent } from "../messages/events"
-import { messageAudience } from "../messages/surface"
 import { resolveActor } from "../persons/resolve"
 import {
   ensurePlace,
@@ -24,7 +28,8 @@ import {
   type MessageIntegration,
   messageIntegrationValidator,
 } from "../shared/integrations"
-import { ensureConversation, startMessageRun } from "./data"
+import { startMessageRun } from "./execution"
+import { ensureConversation } from "./records"
 import { findConversation } from "./resolve"
 import { scheduleConversationSummary } from "./summary/schedule"
 
@@ -138,6 +143,7 @@ async function insertObservedMessage(
     personId: createdBy,
     placeId: place?._id,
     surface: args.integration,
+    targetKey: messageDataReactionTargetKey(args.integration, observed.data),
   })
 
   return { createdBy, message, observed, place }
@@ -176,6 +182,7 @@ async function messageRunConversation(
         externalId: args.message.conversationId,
         integration: args.integration,
         message: args.message,
+        scope: conversationScope(args.message),
       })
     : await findConversation(ctx, {
         organizationId: args.integration.organizationId,

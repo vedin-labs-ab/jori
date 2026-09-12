@@ -1,11 +1,11 @@
 import { expect, test } from "vitest"
 import { getToolPermission } from "../../contracts/permissions"
+import { brokerJoriToolResponseSchemas } from "../../contracts/tools/responses/jori/broker"
 import { runDoc } from "../../test/convex/console"
 import { schemaViolations } from "../../test/convex/schema"
 import { integration } from "../../test/convex/tools"
 import { type Doc } from "../_generated/dataModel"
 import { type AgentRuntimeInput } from "../runs/agent/input"
-import { brokerJoriToolResponseSchemas } from "../runs/agent/tools/schemas/responses/jori/broker"
 import { type ApprovalBrokerContext } from "./approval"
 import { listCapabilities } from "./capabilities"
 

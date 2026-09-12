@@ -1,7 +1,7 @@
 import { chatFunctionToolToJSON } from "@openrouter/sdk/models/chatfunctiontool"
 import { expect, test, vi } from "vitest"
 import { decodeJsonObject } from "../../../contracts/json"
-import { notionToolInputSchemas } from "../../runs/agent/tools/schemas/notion"
+import { notionToolInputSchemas } from "../../../contracts/tools/notion"
 import { OpenRouterModel } from "./chat"
 
 const openRouter = vi.hoisted(() => ({ send: vi.fn() }))

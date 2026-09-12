@@ -1,6 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
+import { type RecentConversation } from "../../conversations/history/index"
 import { type WorkstreamContext } from "../../deduction/roster"
-import { type RecentConversation } from "../../messages/history"
 import { type OrganizationFacts } from "../../organization/facts"
 import { type RequesterContext } from "../../persons/profile/context"
 import { type PlaceContext } from "../../places/context"

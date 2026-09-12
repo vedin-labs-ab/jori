@@ -1,9 +1,9 @@
 import { expect, test } from "vitest"
+import { tableToolResponseSchemas } from "../../contracts/tools/responses/jori/tables"
 import { type Visibility } from "../../contracts/visibility"
 import { tableDoc } from "../../test/convex/collections"
 import { id } from "../../test/convex/database"
 import { schemaViolations } from "../../test/convex/schema"
-import { tableToolResponseSchemas } from "../runs/agent/tools/schemas/responses/jori/tables"
 import { agentTableSummary, summarizeTable } from "./access"
 
 test.each<Visibility>([

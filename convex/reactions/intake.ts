@@ -1,6 +1,7 @@
 import { v } from "convex/values"
 import { internalMutation } from "../_generated/server"
 import { findActiveIntegrationByExternalId } from "../integrations/data"
+import { enrichReactionTarget } from "../integrations/messages/reactions"
 import { resolveActor } from "../persons/resolve"
 import { actorValidator } from "../shared/actor"
 import {
@@ -49,7 +50,10 @@ export const record = internalMutation({
       integration,
       observedAt: args.observedAt,
       reaction: args.reaction,
-      target: args.target,
+      target: await enrichReactionTarget(ctx, {
+        integration,
+        target: args.target,
+      }),
     })
 
     return { status: "recorded" as const, recorded: result.recorded }
@@ -91,7 +95,10 @@ export const sync = internalMutation({
       ...(await reconcileTargetReactions(ctx, {
         integration,
         reactions: args.reactions,
-        target: args.target,
+        target: await enrichReactionTarget(ctx, {
+          integration,
+          target: args.target,
+        }),
       })),
     }
   },

@@ -5,7 +5,7 @@ import {
   type RunHandoffs,
 } from "../../../contracts/runtime/handoffs"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 import { markVisibleCommunication } from "../tools/index"
 import { materializeSandboxResult } from "../tools/results"
 import { recordApprovalResolved, recordOfferResolved } from "../trace/activity"

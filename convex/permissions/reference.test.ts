@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { toolPermissions } from "../../contracts/permissions"
-import { toolResponseSchemas } from "../runs/agent/tools/schemas/responses"
+import { toolResponseSchemas } from "../../contracts/tools/responses"
 import { resolveToolReference } from "./reference"
 
 test("every permissioned tool resolves a request and a response schema", () => {

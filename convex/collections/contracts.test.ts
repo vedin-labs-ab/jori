@@ -3,10 +3,10 @@
 import { convexTest } from "convex-test"
 import { expect, test } from "vitest"
 import { type JsonObject } from "../../contracts/json"
+import { getToolResponseSchema } from "../../contracts/tools/responses"
 import { schemaViolations } from "../../test/convex/schema"
 import { type ActionCtx } from "../_generated/server"
 import { callJoriTool } from "../broker/jori"
-import { getToolResponseSchema } from "../runs/agent/tools/schemas/responses"
 import schema from "../schema"
 
 const modules = import.meta.glob("/convex/**/*.{ts,js}")

@@ -59,6 +59,7 @@ test.each([
     await seedIntegration(t)
     await t.mutation(record, {
       ...message(text),
+      data: { repository: { fullName: "test/repo" }, comment: { id: "17" } },
       mode: "record",
       // The provider edge computes the decision rather than accepting callers'.
       mentioned: !mentioned,
@@ -66,7 +67,13 @@ test.each([
     const stored = await t.run(
       async (ctx) => await ctx.db.query("messages").unique()
     )
-    expect(stored).toMatchObject({ mentioned, surface: "github", text })
+    expect(stored).toMatchObject({
+      mentioned,
+      surface: "github",
+      text,
+      targetKey: "github:comment:test/repo:17",
+      data: { repository: { fullName: "test/repo" }, comment: { id: "17" } },
+    })
     expect(
       await t.run(async (ctx) => await ctx.db.query("runs").take(1))
     ).toEqual([])

@@ -1,9 +1,9 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { transactionalConsoleContext } from "../../../test/convex/conversations"
-import { recentConversation } from "../../messages/history"
 import { findSession } from "../../sessions/data"
 import { drainSession } from "../../sessions/drain"
 import { listOrganizationViewerIds } from "../../visibility/audience"
+import { recentConversation } from "../history/index"
 import { transitionConversationVisibility } from "./sharing"
 
 vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))

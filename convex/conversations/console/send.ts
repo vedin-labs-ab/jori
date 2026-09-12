@@ -12,7 +12,7 @@ import { nameMentions } from "../../references/tokens"
 import { createPersonActor } from "../../shared/actor"
 import { createSight } from "../../visibility/sight"
 import { createConversationSight } from "../access"
-import { startMessageRun } from "../data"
+import { startMessageRun } from "../execution/index"
 import { requireVisibleConsoleConversation } from "../resolve"
 import { scheduleConversationSummary } from "../summary/schedule"
 import {

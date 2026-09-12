@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest"
-import { schemaViolations } from "../../../../test/convex/schema"
 import {
   draftedMailSchema,
   mailMessageSchema,
-} from "../../../runs/agent/tools/schemas/responses/mail"
+} from "../../../../contracts/tools/responses/mail"
+import { schemaViolations } from "../../../../test/convex/schema"
 import { microsoftDraftResult, microsoftMailMessage } from "./mail"
 
 function graphMessage() {

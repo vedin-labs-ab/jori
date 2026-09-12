@@ -1,4 +1,4 @@
-import { replyAddress } from "../../../messages/targets"
+import { replyAddress } from "../../../integrations/messages/targets"
 import {
   type CommunicationInstructions,
   createCommunicationGuidance,

@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { transactionalConsoleContext } from "../../../test/convex/conversations"
-import { recentConversation } from "../../messages/history"
 import { listOrganizationViewerIds } from "../../visibility/audience"
+import { recentConversation } from "../history/index"
 import { sendConsoleMessage } from "./send"
 import { transitionConversationVisibility } from "./sharing"
 

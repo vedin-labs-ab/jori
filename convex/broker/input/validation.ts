@@ -4,7 +4,7 @@ import {
   type JsonSchema,
   readSchemaMap,
   readString,
-} from "../../runs/agent/tools/schemas"
+} from "../../../contracts/tools"
 import { optionalNumber } from "../../shared/input"
 
 export function validateSchemaValue(

@@ -10,7 +10,7 @@ import {
   normalizeSourceChanges,
 } from "../../../contracts/source"
 import { optionalString, requiredString } from "../../shared/input"
-import { type AgentRuntime } from "../platform"
+import { type AgentRuntime } from "../platform/types"
 import { sandboxClonePath } from "../sandbox/path"
 
 const sourceChangeTools = new Set([

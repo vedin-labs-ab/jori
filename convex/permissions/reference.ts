@@ -1,12 +1,9 @@
 import { v } from "convex/values"
 import { getToolPermission } from "../../contracts/permissions"
+import { getToolInputSchema, type JsonSchema } from "../../contracts/tools"
+import { getToolResponseSchema } from "../../contracts/tools/responses"
 import { query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
-import {
-  getToolInputSchema,
-  type JsonSchema,
-} from "../runs/agent/tools/schemas"
-import { getToolResponseSchema } from "../runs/agent/tools/schemas/responses"
 import { runLifecycleTools, sandboxTools } from "../runtime/native"
 import { activeSurfaceToolReferenceSchemas } from "../runtime/surface/tools"
 
