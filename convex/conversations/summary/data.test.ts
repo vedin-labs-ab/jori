@@ -13,14 +13,20 @@ test("loads all source messages for small conversations", async () => {
   expect(texts(messages)).toEqual(messageNumbers(1, summarySourceMessageLimit))
 })
 
-test("loads overlap and new messages for large conversations", async () => {
-  const messages = await loadSummaryMessages(
-    await seeded(120),
-    conversation({ summarizedAt: 100.5 })
-  )
+test.each([
+  [100.5, messageNumbers(76, 120)],
+  [100, [...messageNumbers(75, 99), ...messageNumbers(101, 120)]],
+] as const)(
+  "loads overlap and new messages strictly around watermark %s",
+  async (summarizedAt, expected) => {
+    const messages = await loadSummaryMessages(
+      await seeded(120),
+      conversation({ summarizedAt })
+    )
 
-  expect(texts(messages)).toEqual(messageNumbers(76, 120))
-})
+    expect(texts(messages)).toEqual(expected)
+  }
+)
 
 test("prioritizes new messages over overlap within the source limit", async () => {
   const messages = await loadSummaryMessages(

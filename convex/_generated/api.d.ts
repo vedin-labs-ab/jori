@@ -365,6 +365,7 @@ import type * as messages_console from "../messages/console.js";
 import type * as messages_console_records from "../messages/console/records.js";
 import type * as messages_console_view from "../messages/console/view.js";
 import type * as messages_data from "../messages/data.js";
+import type * as messages_read from "../messages/read.js";
 import type * as messages_references from "../messages/references.js";
 import type * as model_available from "../model/available.js";
 import type * as model_connection from "../model/connection.js";
@@ -1065,6 +1066,7 @@ declare const fullApi: ApiFromModules<{
   "messages/console/records": typeof messages_console_records;
   "messages/console/view": typeof messages_console_view;
   "messages/data": typeof messages_data;
+  "messages/read": typeof messages_read;
   "messages/references": typeof messages_references;
   "model/available": typeof model_available;
   "model/connection": typeof model_connection;

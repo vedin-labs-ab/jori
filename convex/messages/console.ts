@@ -8,6 +8,7 @@ import { resolveCurrentPerson } from "../persons/account"
 import { type QueryLikeCtx } from "../shared/context"
 import { insertConsoleReply } from "./console/records"
 import { consoleMessageViews } from "./console/view"
+import { conversationMessages } from "./read"
 import { type referenceTargetValidator } from "./references"
 
 // Console messages: what a person types to Jori in the web console and what
@@ -92,16 +93,10 @@ export async function pageConsoleMessages(
   paginationOpts: PaginationOptions,
   viewerId?: Id<"persons">
 ) {
-  const result = await ctx.db
-    .query("messages")
-    .withIndex(
-      "by_organization_and_integration_and_conversation_and_created_at",
-      (query) =>
-        query
-          .eq("organizationId", conversation.organizationId)
-          .eq("integrationId", undefined)
-          .eq("conversationId", conversation.externalId)
-    )
+  const result = await conversationMessages(ctx, {
+    ...conversation,
+    integrationId: undefined,
+  })
     .order("desc")
     .paginate(paginationOpts)
 

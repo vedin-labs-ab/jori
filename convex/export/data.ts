@@ -3,6 +3,7 @@ import { type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { conversationGate } from "../conversations/access"
 import { jobGate } from "../jobs/access"
+import { conversationMessages } from "../messages/read"
 import { type Sight } from "../visibility/sight"
 
 export type ExportSection =
@@ -104,17 +105,9 @@ export async function childPage(
   ) {
     throw new Error("Chat is unavailable for export.")
   }
-  const result = await ctx.db
-    .query("messages")
-    .withIndex(
-      "by_organization_and_integration_and_conversation_and_created_at",
-      (q) =>
-        q
-          .eq("organizationId", args.organizationId)
-          .eq("integrationId", parent.integrationId)
-          .eq("conversationId", parent.externalId)
-    )
-    .paginate(pageOptions(args.cursor))
+  const result = await conversationMessages(ctx, parent).paginate(
+    pageOptions(args.cursor)
+  )
   return {
     ...result,
     page: result.page.map((row) => ({

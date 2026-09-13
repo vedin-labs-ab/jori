@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { conversationMessages } from "../../messages/read"
 import {
   type ResolvedContext,
   resolveConsoleContext,
@@ -21,16 +22,10 @@ export async function consoleRunDetails(
     return { context: undefined }
   }
 
-  const first = await ctx.db
-    .query("messages")
-    .withIndex(
-      "by_organization_and_integration_and_conversation_and_created_at",
-      (query) =>
-        query
-          .eq("organizationId", conversation.organizationId)
-          .eq("integrationId", undefined)
-          .eq("conversationId", conversation.externalId)
-    )
+  const first = await conversationMessages(ctx, {
+    ...conversation,
+    integrationId: undefined,
+  })
     .order("asc")
     .first()
   const sight = createConversationSight(ctx, conversation)
