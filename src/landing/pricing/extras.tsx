@@ -1,5 +1,5 @@
+import { type ReactNode } from "react"
 import { Section } from "../section"
-import { Row } from "./row"
 
 /** What the cloud plan grows into, at the rates it grows at. Both draw on
  *  prepaid credit under a limit the organization sets, so the page never
@@ -25,5 +25,27 @@ export function Extras() {
         />
       </dl>
     </Section>
+  )
+}
+
+function Row({
+  note,
+  term,
+  value,
+}: {
+  note: ReactNode
+  term: string
+  value: string
+}) {
+  return (
+    <div className="grid gap-x-8 gap-y-1 py-5 sm:grid-cols-2 sm:items-baseline">
+      <dt className="font-medium">{term}</dt>
+      <dd>
+        <span className="font-medium">{value}</span>
+        <span className="mt-0.5 block text-muted-foreground text-sm leading-relaxed">
+          {note}
+        </span>
+      </dd>
+    </div>
   )
 }

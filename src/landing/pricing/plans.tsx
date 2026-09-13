@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils"
 import { repositoryUrl } from "@/shared/brand/content"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { GetStarted } from "../cta"
-import { Row } from "./row"
 
 /** Marketing's numbers for the cloud plan. `contracts/billing.ts` still
  *  carries the plans the console sells, and it changes when billing does. */
@@ -185,7 +184,7 @@ export function Plans() {
 function PlanBody({ plan }: { plan: Plan }) {
   return (
     <>
-      <div className="px-6 pt-8 pb-2 sm:px-8 sm:pt-10 md:px-10">
+      <div className="px-6 pt-8 pb-8 sm:px-8 sm:pt-10 sm:pb-10 md:px-10">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
           <h2 className="font-medium text-2xl tracking-tight sm:text-3xl">
             {plan.title}
@@ -199,15 +198,24 @@ function PlanBody({ plan }: { plan: Plan }) {
             </span>
           </p>
         </div>
-        <dl className="mt-8 divide-y border-t">
+        {/* Four facts across rather than four rows down: the folder spans
+            the page, and a two-column row across it is mostly air. */}
+        <dl className="mt-8 grid gap-x-8 gap-y-8 border-t pt-8 sm:grid-cols-2 lg:grid-cols-4">
           {plan.rows.map((row) => (
-            <Row
-              icon={row.icon}
-              key={row.term}
-              note={row.note}
-              term={row.term}
-              value={row.value}
-            />
+            <div key={row.term}>
+              <dt className="flex items-center gap-2 text-muted-foreground text-sm">
+                <row.icon className="size-4 shrink-0" />
+                {row.term}
+              </dt>
+              <dd className="mt-2">
+                <span className="block font-medium text-lg tracking-tight">
+                  {row.value}
+                </span>
+                <span className="mt-0.5 block text-muted-foreground text-sm leading-relaxed">
+                  {row.note}
+                </span>
+              </dd>
+            </div>
           ))}
         </dl>
       </div>
