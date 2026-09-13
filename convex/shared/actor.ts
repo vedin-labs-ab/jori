@@ -1,25 +1,13 @@
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
-
-export type ActorKind = "bot" | "person" | "self"
-export type ActorAlias = { type: string; id: string }
-
-export type Actor =
-  | { kind: "person"; personId: Id<"persons">; name?: string; email?: string }
-  | { kind: "person"; email: string }
-  | {
-      kind: ActorKind
-      externalId: string
-      aliases?: ActorAlias[]
-      name?: string
-      email?: string
-    }
 
 const actorKindValidator = v.union(
   v.literal("bot"),
   v.literal("person"),
   v.literal("self")
 )
+
+const actorAliasValidator = v.object({ type: v.string(), id: v.string() })
 
 export const actorValidator = v.union(
   v.object({
@@ -35,13 +23,15 @@ export const actorValidator = v.union(
   v.object({
     kind: actorKindValidator,
     externalId: v.string(),
-    aliases: v.optional(
-      v.array(v.object({ type: v.string(), id: v.string() }))
-    ),
+    aliases: v.optional(v.array(actorAliasValidator)),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
   })
 )
+
+export type ActorKind = Infer<typeof actorKindValidator>
+export type ActorAlias = Infer<typeof actorAliasValidator>
+export type Actor = Infer<typeof actorValidator>
 
 export function createPersonActor(
   personId: Id<"persons">,
