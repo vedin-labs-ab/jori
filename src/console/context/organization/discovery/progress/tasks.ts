@@ -9,163 +9,92 @@ import {
 import { sourceLabel } from "../url"
 import { taskElapsedMs } from "./time"
 
-type ExplorationStep = DiscoveryStep & {
-  kind: "page"
-  url: string
-}
+type Discovery = NonNullable<OrganizationDiscovery>
 
 export function createDiscoveryTasks(
-  discovery: NonNullable<OrganizationDiscovery>,
+  discovery: Discovery,
   now: number
 ): DiscoveryTask[] {
-  return [
-    ...explorationTasks(discovery, now),
-    ...summaryTasks(discovery, now),
-  ].sort((left, right) => left.startedAt - right.startedAt)
-}
-
-function explorationTasks(
-  discovery: NonNullable<OrganizationDiscovery>,
-  now: number
-) {
-  return taskGroups(discovery).map((group) =>
-    toExplorationTask(discovery, group, now)
-  )
-}
-
-function taskGroups(discovery: NonNullable<OrganizationDiscovery>) {
   const groups = new Map<string, DiscoveryTaskItem[]>()
+  const summaries: DiscoveryTask[] = []
 
   for (const step of discovery.steps) {
-    if (!isExplorationStep(step)) {
-      continue
+    const item = stepState(discovery, step)
+
+    if (step.kind === "summary") {
+      summaries.push({
+        ...item,
+        elapsedMs: Math.max(0, (item.endedAt ?? now) - item.startedAt),
+        items: [],
+        label: step.label,
+        type: "summary",
+      })
+    } else if (step.kind === "page" && step.url !== undefined) {
+      const key = domainKey(step.url)
+      const items = groups.get(key) ?? []
+      items.push({ ...item, label: pageLabel(step.url), url: step.url })
+      groups.set(key, items)
     }
-
-    const item = toItem(discovery, step)
-    const key = domainKey(item.url)
-    groups.set(key, [...(groups.get(key) ?? []), item])
   }
 
-  return [...groups.entries()]
-}
+  // Exploration precedes summaries when their start times tie.
+  const exploration = [...groups].map(([key, items]): DiscoveryTask => {
+    const status = taskStatus(discovery, items)
 
-function toExplorationTask(
-  discovery: NonNullable<OrganizationDiscovery>,
-  [key, items]: [string, DiscoveryTaskItem[]],
-  now: number
-): DiscoveryTask {
-  const status = taskStatus(discovery, items)
+    return {
+      elapsedMs: taskElapsedMs(items, now),
+      key,
+      items,
+      label: key,
+      startedAt: Math.min(...items.map((item) => item.startedAt)),
+      status,
+      type: "exploration",
+      ...(status === "active" || status === "queued"
+        ? {}
+        : {
+            endedAt: Math.max(
+              ...items.map((item) => item.endedAt ?? item.startedAt)
+            ),
+          }),
+    }
+  })
 
-  return {
-    elapsedMs: taskElapsedMs(items, now),
-    key,
-    items,
-    label: key,
-    startedAt: Math.min(...items.map((item) => item.startedAt)),
-    status,
-    type: "exploration",
-    ...taskEnd(items, status),
-  }
-}
-
-function summaryTasks(
-  discovery: NonNullable<OrganizationDiscovery>,
-  now: number
-) {
-  return discovery.steps.flatMap((step) =>
-    step.kind === "summary" ? [toSummaryTask(discovery, step, now)] : []
+  return [...exploration, ...summaries].sort(
+    (left, right) => left.startedAt - right.startedAt
   )
 }
 
-function toSummaryTask(
-  discovery: NonNullable<OrganizationDiscovery>,
-  step: DiscoveryStep,
-  now: number
-): DiscoveryTask {
-  const status = stepStatus(discovery, step)
-  const endedAt = stepEnd(discovery, step, status)
-  const startedAt = stepTime(discovery, step)
+/** Page items and summaries share the same lifecycle and timing fallbacks. */
+function stepState(discovery: Discovery, step: DiscoveryStep) {
+  const endedAt = stepCompletedAt(discovery, step)
+  let status: DiscoveryItemStatus = "active"
 
-  return {
-    elapsedMs: summaryElapsedMs(startedAt, endedAt, now),
-    items: [],
-    key: stepKey(step),
-    label: step.label,
-    startedAt,
-    status,
-    type: "summary",
-    ...(endedAt === undefined ? {} : { endedAt }),
-  }
-}
-
-function toItem(
-  discovery: NonNullable<OrganizationDiscovery>,
-  step: ExplorationStep
-): DiscoveryTaskItem {
-  const status = stepStatus(discovery, step)
-  const endedAt = stepEnd(discovery, step, status)
-  const startedAt = stepTime(discovery, step)
-
-  return {
-    key: stepKey(step),
-    label: pageLabel(step.url),
-    startedAt,
-    status,
-    url: step.url,
-    ...(endedAt === undefined ? {} : { endedAt }),
-  }
-}
-
-function isExplorationStep(step: DiscoveryStep): step is ExplorationStep {
-  return step.kind === "page" && step.url !== undefined
-}
-
-function stepStatus(
-  discovery: NonNullable<OrganizationDiscovery>,
-  step: DiscoveryStep
-): DiscoveryItemStatus {
   if (step.error !== undefined) {
-    return "failed"
+    status = "failed"
+  } else if (endedAt !== undefined) {
+    status = "completed"
+  } else if (step.activeAt === undefined && step.queuedAt !== undefined) {
+    status = "queued"
   }
 
-  const completedAt = stepCompletedAt(discovery, step)
-
-  if (completedAt !== undefined) {
-    return "completed"
+  return {
+    key: step.id ?? `${step.startedAt ?? step.queuedAt ?? 0}-${step.label}`,
+    startedAt:
+      step.activeAt ?? step.startedAt ?? step.queuedAt ?? discovery.startedAt,
+    status,
+    ...(endedAt === undefined ? {} : { endedAt }),
   }
-
-  if (step.activeAt === undefined && step.queuedAt !== undefined) {
-    return "queued"
-  }
-
-  return "active"
 }
 
-function stepEnd(
-  discovery: NonNullable<OrganizationDiscovery>,
-  step: DiscoveryStep,
-  status: DiscoveryItemStatus
-) {
-  if (status === "active" || status === "queued") {
-    return undefined
-  }
-
-  return stepCompletedAt(discovery, step)
-}
-
-function stepCompletedAt(
-  discovery: NonNullable<OrganizationDiscovery>,
-  step: DiscoveryStep
-) {
-  return step.completedAt ?? completedRunFallback(discovery)
-}
-
-function completedRunFallback(discovery: NonNullable<OrganizationDiscovery>) {
-  return discovery.status === "completed" ? discovery.endedAt : undefined
+function stepCompletedAt(discovery: Discovery, step: DiscoveryStep) {
+  return (
+    step.completedAt ??
+    (discovery.status === "completed" ? discovery.endedAt : undefined)
+  )
 }
 
 function taskStatus(
-  discovery: NonNullable<OrganizationDiscovery>,
+  discovery: Discovery,
   items: DiscoveryTaskItem[]
 ): DiscoveryTaskStatus {
   if (items.some((item) => item.status === "active")) {
@@ -180,40 +109,10 @@ function taskStatus(
     return discoveryFailed(discovery) ? "failed" : "warning"
   }
 
-  return discovery.status === "running" && !hasSummaryStep(discovery.steps)
+  return discovery.status === "running" &&
+    !discovery.steps.some((step) => step.kind === "summary")
     ? "active"
     : "completed"
-}
-
-function summaryElapsedMs(
-  startedAt: number,
-  endedAt: number | undefined,
-  now: number
-) {
-  return Math.max(0, (endedAt ?? now) - startedAt)
-}
-
-function taskEnd(items: DiscoveryTaskItem[], status: DiscoveryTaskStatus) {
-  const endedAt = Math.max(
-    ...items.map((item) => item.endedAt ?? item.startedAt)
-  )
-
-  return status === "active" || status === "queued" ? {} : { endedAt }
-}
-
-function stepKey(step: DiscoveryStep) {
-  return step.id ?? `${step.startedAt ?? step.queuedAt ?? 0}-${step.label}`
-}
-
-function stepTime(
-  discovery: NonNullable<OrganizationDiscovery>,
-  step: DiscoveryStep
-) {
-  return step.activeAt ?? step.startedAt ?? step.queuedAt ?? discovery.startedAt
-}
-
-function hasSummaryStep(steps: DiscoveryStep[]) {
-  return steps.some((step) => step.kind === "summary")
 }
 
 function domainKey(url: string) {
@@ -224,11 +123,7 @@ function domainKey(url: string) {
   }
 }
 
-function pageLabel(url: string | undefined) {
-  if (url === undefined) {
-    return "Website"
-  }
-
+function pageLabel(url: string) {
   try {
     const parsed = new URL(url)
     const path = `${parsed.pathname}${parsed.search}`.replace(/\/$/, "")

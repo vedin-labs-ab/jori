@@ -28,6 +28,23 @@ describe("createDiscoveryTasks", () => {
     })
   })
 
+  test("keeps exploration before summaries with the same start time", () => {
+    const tasks = createDiscoveryTasks(
+      discovery([
+        summaryStep(5, 10, "Drafting profile"),
+        pageStep(5, 10, "https://example.com/"),
+        pageStep(5, 10, "https://other.example/"),
+      ]),
+      10_000
+    )
+
+    expect(tasks.map((task) => task.label)).toEqual([
+      "example.com",
+      "other.example",
+      "Drafting profile",
+    ])
+  })
+
   test("excludes idle gaps from task elapsed time", () => {
     const [task] = createDiscoveryTasks(
       discovery([
