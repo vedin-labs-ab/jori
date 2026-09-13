@@ -3,16 +3,8 @@ import { type FunctionReference } from "convex/server"
 import { useDeferredValue, useState } from "react"
 import { type CountedNoun } from "@/shared/console/count"
 import { type MoveResourceTarget } from "@/shared/console/folders/types"
-import {
-  type ListConfig,
-  resettingControls,
-  useListControls,
-} from "@/shared/console/list/controls"
-import {
-  useClientPagination,
-  useResettingSetter,
-} from "@/shared/console/list/pagination"
-import { useRowSelection } from "@/shared/console/list/selection"
+import { type ListConfig, useListState } from "@/shared/console/list/controls"
+import { useResettingSetter } from "@/shared/console/list/pagination"
 import { type FolderNames } from "@/shared/console/materials/folders"
 import { useFolderNames } from "./names"
 
@@ -55,34 +47,25 @@ export function useMaterialListPage<Row, Result extends { status: string }>({
     includeArchived: false,
   })
   const rows = list === undefined ? [] : rowsOf(list)
-  const listConfig = config(folders, rows)
-  const controls = useListControls(listConfig)
-  const hasFilters = query.trim() !== "" || controls.hasActiveControls
-  const pagination = useClientPagination({
-    hasFilters,
-    isReady: list?.status === "ready",
-    itemLabel: noun,
-    items: controls.apply(rows),
-  })
-  const selection = useRowSelection({
+  const listing = useListState({
+    config: config(folders, rows),
+    hasFilters: query.trim() !== "",
     identify,
-    rows: pagination.visibleRows,
+    isReady: list?.status === "ready",
+    noun,
+    rows,
   })
 
   return {
-    config: listConfig,
-    controls: resettingControls(controls, pagination.reset),
+    ...listing,
     editing,
     folders,
-    hasFilters,
     list,
     moving,
-    pagination,
     query,
-    selection,
     setEditing,
     setMoving,
-    setQueryAndReset: useResettingSetter(setQuery, pagination.reset),
+    setQueryAndReset: useResettingSetter(setQuery, listing.pagination.reset),
     setSharing,
     sharing,
   }

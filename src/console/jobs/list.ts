@@ -12,18 +12,9 @@ import {
   matchesAudienceFilter,
 } from "@/shared/console/list/audience"
 import { useBulkRunner } from "@/shared/console/list/bulk"
-import {
-  resettingControls,
-  useListControls,
-} from "@/shared/console/list/controls"
-import {
-  useClientPagination,
-  useResettingSetter,
-} from "@/shared/console/list/pagination"
-import {
-  type RowSelection,
-  useRowSelection,
-} from "@/shared/console/list/selection"
+import { useListState } from "@/shared/console/list/controls"
+import { useResettingSetter } from "@/shared/console/list/pagination"
+import { type RowSelection } from "@/shared/console/list/selection"
 import { api } from "../../../convex/_generated/api"
 import { useFolderNames } from "../shared/materials/names"
 import { hasJobFilters } from "./filter"
@@ -48,37 +39,25 @@ export function useJobListPage(organizationId: string) {
     list?.status === "ready"
       ? list.jobs.filter((job) => matchesAudienceFilter(job.audience, audience))
       : []
-  const config = jobListConfig(folders, rows)
-  const controls = useListControls(config)
-  const hasFilters =
-    hasJobFilters(deferredQuery, filter) ||
-    audience !== "all" ||
-    controls.hasActiveControls
-  const pagination = useClientPagination({
-    hasFilters,
-    isReady: list?.status === "ready",
-    itemLabel: jobNoun,
-    items: controls.apply(rows),
-  })
-  const selection = useRowSelection({
+  const listing = useListState({
+    config: jobListConfig(folders, rows),
+    hasFilters: hasJobFilters(deferredQuery, filter) || audience !== "all",
     identify: (job: Job) => job.id,
-    rows: pagination.visibleRows,
+    isReady: list?.status === "ready",
+    noun: jobNoun,
+    rows,
   })
 
   return {
     audience,
-    config,
-    controls: resettingControls(controls, pagination.reset),
+    ...listing,
     filter,
     folders,
-    hasFilters,
     list,
-    pagination,
     query,
-    selection,
-    setAudience: useResettingSetter(setAudience, pagination.reset),
-    setFilter: useResettingSetter(setFilter, pagination.reset),
-    setQuery: useResettingSetter(setQuery, pagination.reset),
+    setAudience: useResettingSetter(setAudience, listing.pagination.reset),
+    setFilter: useResettingSetter(setFilter, listing.pagination.reset),
+    setQuery: useResettingSetter(setQuery, listing.pagination.reset),
   }
 }
 

@@ -1,15 +1,7 @@
 import { useState } from "react"
 import { type CountedNoun } from "@/shared/console/count"
-import {
-  type ListConfig,
-  resettingControls,
-  useListControls,
-} from "@/shared/console/list/controls"
-import {
-  useClientPagination,
-  useResettingSetter,
-} from "@/shared/console/list/pagination"
-import { useRowSelection } from "@/shared/console/list/selection"
+import { type ListConfig, useListState } from "@/shared/console/list/controls"
+import { useResettingSetter } from "@/shared/console/list/pagination"
 
 /** What every material list page keeps: the header's sorts and facets, a
  *  search over names, the pager, and a selection over the visible rows. */
@@ -25,27 +17,21 @@ export function useMaterialListing<Row extends { name: string }>({
   rows: Row[]
 }) {
   const [query, setQuery] = useState("")
-  const controls = useListControls(config)
   const needle = query.trim().toLowerCase()
-  const listed = controls
-    .apply(rows)
-    .filter((row) => needle === "" || row.name.toLowerCase().includes(needle))
-  const hasFilters = needle !== "" || controls.hasActiveControls
-  const pagination = useClientPagination({
-    hasFilters,
+  const listing = useListState({
+    config,
+    hasFilters: needle !== "",
+    identify,
     isReady: true,
-    itemLabel: noun,
-    items: listed,
+    noun,
+    rows: rows.filter(
+      (row) => needle === "" || row.name.toLowerCase().includes(needle)
+    ),
   })
-  const selection = useRowSelection({ identify, rows: pagination.visibleRows })
 
   return {
-    config,
-    controls: resettingControls(controls, pagination.reset),
-    hasFilters,
-    pagination,
+    ...listing,
     query,
-    selection,
-    setQuery: useResettingSetter(setQuery, pagination.reset),
+    setQuery: useResettingSetter(setQuery, listing.pagination.reset),
   }
 }

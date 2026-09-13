@@ -1,5 +1,8 @@
 import { type LucideIcon } from "lucide-react"
 import { useCallback, useState } from "react"
+import { type CountedNoun } from "../count"
+import { useClientPagination } from "./pagination"
+import { useRowSelection } from "./selection"
 
 // Header-embedded sorting and filtering for client-side list pages. Each
 // page declares a config — sort accessors and facet dimensions — and the
@@ -95,6 +98,45 @@ export function useListControls<Row>(
     setFacet,
     sort,
     toggleSort,
+  }
+}
+
+/** Filters and sorts before paging; selection follows the visible page.
+ *  Header changes reset pagination, just like the caller's search controls. */
+export function useListState<Row>({
+  config,
+  hasFilters,
+  identify,
+  isReady,
+  noun,
+  rows,
+  totalCount,
+}: {
+  config: ListConfig<Row>
+  hasFilters?: boolean
+  identify: (row: Row) => string
+  isReady: boolean
+  noun: CountedNoun
+  rows: Row[]
+  totalCount?: number
+}) {
+  const controls = useListControls(config)
+  const filtered = hasFilters === true || controls.hasActiveControls
+  const pagination = useClientPagination({
+    hasFilters: filtered,
+    isReady,
+    itemLabel: noun,
+    items: controls.apply(rows),
+    totalCount,
+  })
+  const selection = useRowSelection({ identify, rows: pagination.visibleRows })
+
+  return {
+    config,
+    controls: resettingControls(controls, pagination.reset),
+    hasFilters: filtered,
+    pagination,
+    selection,
   }
 }
 

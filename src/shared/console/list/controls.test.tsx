@@ -9,6 +9,7 @@ import {
   resettingControls,
   toggledFacet,
   useListControls,
+  useListState,
 } from "./controls"
 
 afterEach(cleanup)
@@ -203,4 +204,92 @@ test("facet entries pick menu content off the config in order", () => {
     { key: "status", label: "Status", options: config.facets.status?.options },
     { key: "folder", label: "Folder", options: config.facets.folder?.options },
   ])
+})
+
+const stateRows = Array.from({ length: 30 }, (_, index) => index + 1)
+const stateConfig: ListConfig<number> = {
+  facets: {
+    parity: {
+      label: "Parity",
+      options: [
+        { label: "Even", value: "0" },
+        { label: "Odd", value: "1" },
+      ],
+      resolve: (row) => String(row % 2),
+    },
+  },
+  sorts: { rank: (row) => row },
+}
+const stateOptions = {
+  config: stateConfig,
+  identify: String,
+  isReady: true,
+  noun: { singular: "row", plural: "rows" },
+  rows: stateRows,
+}
+
+test("filters and sorts the full list, resets the page, and selects only visible rows", () => {
+  const { result } = renderHook(() => useListState(stateOptions))
+  act(result.current.pagination.next)
+  act(result.current.selection.toggleAll)
+  expect(result.current.selection.selected).toEqual(stateRows.slice(12, 24))
+
+  act(() => result.current.controls.setFacet("parity", ["0"]))
+  expect(result.current.pagination.pageIndex).toBe(0)
+  expect(result.current.pagination.visibleRows).toEqual([
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24,
+  ])
+  expect(result.current.selection.selected).toEqual([14, 16, 18, 20, 22, 24])
+  expect(result.current.pagination.footerLabel).toBe(
+    "Showing 1–12 of 15 matching rows"
+  )
+
+  act(result.current.pagination.next)
+  act(() => result.current.controls.toggleSort("rank"))
+  expect(result.current.pagination.pageIndex).toBe(0)
+  act(() => result.current.controls.toggleSort("rank"))
+  expect(result.current.pagination.visibleRows).toEqual([
+    30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8,
+  ])
+  act(result.current.selection.toggleAll)
+  expect(result.current.selection.selected).toEqual(
+    result.current.pagination.visibleRows
+  )
+  act(result.current.pagination.next)
+  expect(result.current.selection.count).toBe(0)
+})
+
+test("keeps caller filters and unfiltered totals separate from header controls", () => {
+  const { result, rerender } = renderHook(
+    ({ hasFilters }) =>
+      useListState({ ...stateOptions, hasFilters, totalCount: 40 }),
+    { initialProps: { hasFilters: true } }
+  )
+  expect(result.current.hasFilters).toBe(true)
+  expect(result.current.pagination.footerLabel).toBe(
+    "Showing 1–12 of 30 matching rows (40 total)"
+  )
+  act(() => result.current.controls.toggleSort("rank"))
+  rerender({ hasFilters: false })
+  expect(result.current.hasFilters).toBe(true)
+  act(() => result.current.controls.toggleSort("rank"))
+  act(() => result.current.controls.toggleSort("rank"))
+  expect(result.current.hasFilters).toBe(false)
+})
+
+test("preserves readiness and clamps the page when loaded rows disappear", () => {
+  const { result, rerender } = renderHook(
+    (props) => useListState({ ...stateOptions, ...props }),
+    { initialProps: { rows: stateRows, isReady: true } }
+  )
+  act(result.current.pagination.next)
+  act(result.current.selection.toggleAll)
+  rerender({ rows: [], isReady: false })
+  expect(result.current.pagination.isReady).toBe(false)
+  expect(result.current.pagination.pageIndex).toBe(0)
+  expect(result.current.pagination.footerLabel).toBeUndefined()
+  expect(result.current.selection.count).toBe(0)
+  rerender({ rows: [], isReady: true })
+  expect(result.current.pagination.isReady).toBe(true)
+  expect(result.current.pagination.canGoNext).toBe(false)
 })

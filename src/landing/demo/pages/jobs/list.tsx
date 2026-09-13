@@ -13,17 +13,12 @@ import {
 import { JobFilters } from "@/shared/console/jobs/list/filters"
 import { type Job } from "@/shared/console/jobs/types"
 import { SelectionActionsBar } from "@/shared/console/list/bar"
-import {
-  resettingControls,
-  useListControls,
-} from "@/shared/console/list/controls"
+import { useListState } from "@/shared/console/list/controls"
 import {
   ConsoleListFooter,
   ConsoleListLayout,
 } from "@/shared/console/list/frame"
 import { ConsoleListPager } from "@/shared/console/list/pager"
-import { useClientPagination } from "@/shared/console/list/pagination"
-import { useRowSelection } from "@/shared/console/list/selection"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { folderNames } from "../../derive/folders"
 import {
@@ -53,29 +48,22 @@ function useJobsListing() {
     () => filterJobs(state.jobs, filters),
     [state.jobs, filters]
   )
-  const controls = useListControls(jobListConfig(folders, jobs))
-  const hasFilters = hasJobFilters(filters) || controls.hasActiveControls
-  const pagination = useClientPagination({
-    hasFilters,
-    isReady: true,
-    itemLabel: jobNoun,
-    items: controls.apply(jobs),
-  })
-  const selection = useRowSelection({
+  const listing = useListState({
+    config: jobListConfig(folders, jobs),
+    hasFilters: hasJobFilters(filters),
     identify: (job: Job) => job.id,
-    rows: pagination.visibleRows,
+    isReady: true,
+    noun: jobNoun,
+    rows: jobs,
   })
 
   return {
-    controls: resettingControls(controls, pagination.reset),
+    ...listing,
     filters,
     folders,
-    hasFilters,
-    pagination,
-    selection,
     update: (patch: Partial<JobFilterValues>) => {
       setFilters((current) => ({ ...current, ...patch }))
-      pagination.reset()
+      listing.pagination.reset()
     },
   }
 }

@@ -19,17 +19,12 @@ import {
   ConsoleHeaderButton,
 } from "@/shared/console/layout"
 import { SelectionActionsBar } from "@/shared/console/list/bar"
-import {
-  resettingControls,
-  useListControls,
-} from "@/shared/console/list/controls"
+import { useListState } from "@/shared/console/list/controls"
 import {
   ConsoleListFooter,
   ConsoleListLayout,
 } from "@/shared/console/list/frame"
 import { ConsoleListPager } from "@/shared/console/list/pager"
-import { useClientPagination } from "@/shared/console/list/pagination"
-import { useRowSelection } from "@/shared/console/list/selection"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
@@ -51,25 +46,16 @@ export function FilesPage() {
 function useFileList(organizationId: string) {
   const files = useQuery(api.files.console.list, { organizationId })
   const folders = useFolderNames(organizationId)
-  const config = fileListConfig(folders, files ?? [])
-  const controls = useListControls(config)
-  const rows = controls.apply(files ?? [])
-  const pagination = useClientPagination({
-    hasFilters: controls.hasActiveControls,
+  const listing = useListState({
+    config: fileListConfig(folders, files ?? []),
+    identify: (file: FileRow) => file.fileId,
     isReady: files !== undefined,
-    itemLabel: fileNoun,
-    items: rows,
+    noun: fileNoun,
+    rows: files ?? [],
     totalCount: files?.length ?? 0,
   })
 
-  return {
-    config,
-    controls: resettingControls(controls, pagination.reset),
-    folders,
-    hasFilters: controls.hasActiveControls,
-    isLoading: files === undefined,
-    pagination,
-  }
+  return { ...listing, folders, isLoading: files === undefined }
 }
 
 /** One bag of page state, so the view and its overlays stay small. */
@@ -82,20 +68,15 @@ function useFilesPage(organizationId: string) {
   const actions = useFileActions(organizationId, {
     onSaved: () => setEditFile(undefined),
   })
-  const selection = useRowSelection({
-    identify: (file: FileRow) => file.fileId,
-    rows: list.pagination.visibleRows,
-  })
 
   return {
     ...list,
     accessFile,
     actions,
-    bulk: useFileBulk(organizationId, selection),
+    bulk: useFileBulk(organizationId, list.selection),
     editFile,
     isUploadOpen,
     moving,
-    selection,
     setAccessFile,
     setEditFile,
     setIsUploadOpen,
