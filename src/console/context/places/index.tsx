@@ -3,7 +3,10 @@ import { useQuery } from "convex/react"
 import { Cable, Signpost } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ConsoleEmptyState } from "@/shared/console/list/empty"
+import {
+  ConsoleEmptyState,
+  ConsoleListEmpty,
+} from "@/shared/console/list/empty"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { useNow } from "@/shared/console/time"
 import { api } from "../../../../convex/_generated/api"
@@ -35,7 +38,7 @@ function PlacesView({ organizationId }: { organizationId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <PlaceGroups places={places} onOpen={(place) => setOpenId(place.id)} />
       <PlaceDetail place={open} onClose={() => setOpenId(null)} />
     </div>
@@ -54,7 +57,11 @@ function PlaceGroups({
   const warming = places.filter((place) => place.claims.length === 0)
 
   if (places.length === 0) {
-    return <PlacesEmpty />
+    return (
+      <ConsoleListEmpty>
+        <PlacesEmpty />
+      </ConsoleListEmpty>
+    )
   }
 
   return (

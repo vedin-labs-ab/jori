@@ -1,7 +1,10 @@
 import { BookOpenText, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ConsoleScrollableGrid } from "@/shared/console/layout"
-import { ConsoleEmptyState } from "@/shared/console/list/empty"
+import {
+  ConsoleEmptyState,
+  ConsoleListEmpty,
+} from "@/shared/console/list/empty"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type Skill, type SkillFilterView } from "../types"
 import { SkillCard } from "./card"
@@ -38,9 +41,9 @@ export function SkillContent({
   const isFiltering = searchTerm.trim().length > 0
   const now = Date.now()
 
-  return (
-    <ConsoleScrollableGrid className="md:grid-cols-2 xl:grid-cols-3">
-      {filteredCount === 0 ? (
+  if (filteredCount === 0) {
+    return (
+      <ConsoleListEmpty>
         <ConsoleEmptyState
           // Global skills are curated, not created, so only views that can
           // hold an organization skill offer the create action.
@@ -52,13 +55,16 @@ export function SkillContent({
               </Button>
             )
           }
-          className="col-span-full"
           description={emptyDescription(view, isFiltering)}
           icon={BookOpenText}
           title={emptyTitle(view, isFiltering)}
         />
-      ) : null}
+      </ConsoleListEmpty>
+    )
+  }
 
+  return (
+    <ConsoleScrollableGrid className="md:grid-cols-2 xl:grid-cols-3">
       {skills.map((skill) => (
         <SkillCard
           key={skill._id}
