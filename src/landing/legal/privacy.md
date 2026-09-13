@@ -84,8 +84,8 @@ about the safeguards that apply to your data and how to obtain a copy.
 
 ## How long we keep information
 
-We keep workspace content while your subscription or trial is active. After
-cancellation takes effect or a trial expires, we retain the workspace for 90 days
+We keep workspace content while your subscription is active. After
+cancellation takes effect, we retain the workspace for 90 days
 and give notice before deletion. You can request earlier deletion or a copy of
 your content through support. Deleting a workspace does not delete your account
 or content in other workspaces.

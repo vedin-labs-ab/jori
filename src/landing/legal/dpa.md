@@ -83,8 +83,8 @@ This agreement is not itself an international-transfer mechanism.
 
 On ending the service, you may choose return or deletion of your personal data.
 Contact support for an export or earlier deletion. Without other instructions,
-we retain workspace content for 90 days after cancellation takes effect or the
-trial expires, give advance notice, then delete it. We delete existing copies
+we retain workspace content for 90 days after cancellation takes effect, give
+advance notice, then delete it. We delete existing copies
 unless EU or member-state law requires storage. Backup copies remain protected
 until overwritten through the applicable deletion cycle and are not restored
 to ordinary use. We can confirm completion on request.
