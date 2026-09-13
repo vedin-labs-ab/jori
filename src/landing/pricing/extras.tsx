@@ -14,7 +14,7 @@ export function Extras() {
     >
       <dl className="divide-y border-y">
         <Row
-          note="Prepaid in dollars. Every run shows its charge, and credit carries forward."
+          note="Prepaid in dollars. Every run shows its charge, and purchased credit carries forward."
           term="Additional AI usage"
           value="Published model rates"
         />

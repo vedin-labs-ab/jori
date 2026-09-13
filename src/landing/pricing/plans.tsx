@@ -65,7 +65,7 @@ const plans: readonly Plan[] = [
         icon: Zap,
         term: "AI usage",
         value: `$${cloud.monthlyAllowanceUsd} a month`,
-        note: "Shared by every job and chat",
+        note: "Resets each month, shared by every job and chat",
       },
       {
         icon: Folder,
