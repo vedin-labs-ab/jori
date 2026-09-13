@@ -24,10 +24,10 @@ Same word, same meaning, wherever you write:
 
 - The admin work that keeps a business alive is work nobody wants. If a
   user needs an engineer to do it in Jori, the design is wrong.
-- Folders are the unit. Jobs, materials, and chats live in the tree, a
-  folder is the ceiling on who sees what it holds, and spend rolls up by
-  folder. A new primitive joins the tree instead of bringing its own
-  sharing or billing.
+- Folders are the unit. Jobs, materials, and chats live in the tree; a
+  folder is the ceiling on who sees what it holds, what it holds can
+  narrow that further, and spend rolls up by folder. A new primitive uses
+  that sharing and billing instead of bringing its own.
 - Reliable before magical. A primitive a person can drive beats an
   automation that guesses, until the primitives are boring.
 
