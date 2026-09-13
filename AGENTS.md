@@ -13,7 +13,7 @@ Same word, same meaning, wherever you write:
 - **you** means the coding agent reading this and making changes to Jori.
 - **the developer**, **the owner**, and **me** mean Albin, who's building
   Jori as Vedin Labs and is talking to you now.
-- **we** and **us** mean Albin and you, building Jori together.
+- **we** and **us** mean you and me.
 - **Jori** means the product, and the agent inside it that users talk to.
   Jori's they, never it.
 - **user** means a person using Jori.
