@@ -1,35 +1,22 @@
 import { modelAvailabilityReason } from "@contracts/models/availability"
 import { useQuery } from "convex/react"
-import { type FunctionArgs } from "convex/server"
 import { type GenericId } from "convex/values"
 import { useCallback } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatPane } from "@/shared/console/chat/pane"
 import { useReplyReferences } from "@/shared/console/chat/pane/auto"
-import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
-import { ChatThread, type ChooseHandler } from "@/shared/console/chat/thread"
 import { isLiveRun } from "@/shared/console/chat/types"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
-import { type MentionSources } from "@/shared/console/mentions/sources"
 import { useDocumentTitle } from "@/shared/console/shell/title"
-import { useNow } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
-import {
-  type ReferenceTarget,
-  type ResolveReference,
-} from "../../shared/console/references"
+import { type ReferenceTarget } from "../../shared/console/references"
 import { ConsolePage } from "../page"
 import { type LiveConversation, useConversation } from "./conversation"
-import { ConversationDraft } from "./draft"
 import { ConversationFiling } from "./filing"
-import { type useConversationMessages } from "./messages"
 import { useAvailableModels } from "./models"
 import { ConversationPaneBody } from "./pane"
 import { ChatProgress } from "./progress"
-import { sendAnswer } from "./send"
-
-type SendAnswer = FunctionArgs<typeof api.conversations.console.send>["answer"]
-type SendMessage = (text: string, answer?: SendAnswer) => void
+import { ConversationTurns } from "./turns"
 
 /** One conversation with Jori: its turns, the run answering the latest
  *  one, the composer that sends into it, and beside them the pane the
@@ -153,15 +140,19 @@ function ConversationThread({
           organizationId={organizationId}
           page={page}
           resolveReference={resolveReference}
-          send={handlers.sendMessage}
+          send={thread.send}
+          progress={
+            isLiveRun(live.run) ? (
+              <ChatProgress organizationId={organizationId} run={live.run} />
+            ) : null
+          }
         />
       </ChatPane>
     </>
   )
 }
 
-/** The pane's body for a target, the composer's send, and the turns'
- *  send, each made once per conversation. */
+/** The pane body and composer send keep their identity per conversation. */
 function useThreadHandlers(
   organizationId: string,
   conversationId: GenericId<"conversations">,
@@ -187,71 +178,5 @@ function useThreadHandlers(
         }),
       [conversationId, send]
     ),
-    sendMessage: useCallback<SendMessage>(
-      (text, answer) =>
-        sendAnswer(send, {
-          conversationId,
-          text,
-          ...(answer === undefined ? {} : { answer }),
-        }),
-      [conversationId, send]
-    ),
   }
-}
-
-/** The conversation's turns and, while Jori answers, the run's progress
- *  and its draft bound to Convex under the latest one. */
-function ConversationTurns({
-  conversationId,
-  live,
-  mentions,
-  onOpenReference,
-  organizationId,
-  page,
-  resolveReference,
-  send,
-}: {
-  conversationId: GenericId<"conversations">
-  live: LiveConversation
-  mentions: MentionSources
-  onOpenReference: OpenTarget
-  organizationId: string
-  page: ReturnType<typeof useConversationMessages>
-  resolveReference: ResolveReference
-  send: SendMessage
-}) {
-  const run = live.run
-  const now = useNow(60_000)
-  const onChoose = useCallback<ChooseHandler>(
-    (messageId, answers, text) =>
-      send(text, { messageId: messageId as GenericId<"messages">, answers }),
-    [send]
-  )
-
-  return (
-    <ChatThread
-      draft={
-        <ConversationDraft
-          conversationId={conversationId}
-          organizationId={organizationId}
-        />
-      }
-      hasMore={page.hasMore}
-      isLoading={page.isLoading}
-      live={run}
-      mentions={mentions}
-      messages={page.messages}
-      now={now}
-      onChoose={onChoose}
-      onLoadMore={page.loadMore}
-      onOpenReference={onOpenReference}
-      progress={
-        isLiveRun(run) ? (
-          <ChatProgress organizationId={organizationId} run={run} />
-        ) : null
-      }
-      resolveReference={resolveReference}
-      usage={live.context}
-    />
-  )
 }
