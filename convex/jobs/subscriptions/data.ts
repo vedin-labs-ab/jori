@@ -1,6 +1,7 @@
 import { jobEventMatchKey } from "../../../contracts/jobs/events"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { isSameEventTrigger } from "../timing"
 
 type EventTrigger = Extract<Doc<"jobs">["trigger"], { event: string }>
 
@@ -92,14 +93,6 @@ async function hasMatchingJob(
       return false
     }
 
-    const trigger = job.trigger
-
-    return (
-      job.type === "event" &&
-      "integrationId" in trigger &&
-      trigger.integrationId === args.trigger.integrationId &&
-      trigger.event === args.trigger.event &&
-      jobEventMatchKey(trigger.match) === jobEventMatchKey(args.trigger.match)
-    )
+    return job.type === "event" && isSameEventTrigger(job.trigger, args.trigger)
   })
 }

@@ -11,7 +11,7 @@ import {
 import { type JobAccessInput, resolveAccessInput } from "../access"
 import { findJobByKey, jobKeyPartition } from "../keys"
 import { type JobTriggerInput, type JobType } from "../schema"
-import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
+import { releaseSubscription } from "../subscriptions/data"
 import {
   isSameEventTrigger,
   normalizeRequiredText,
@@ -19,7 +19,7 @@ import {
 } from "../timing"
 import { deleteOwnedJobs, requireValidOwnershipUpdate } from "./children"
 import { getOrganizationJob, getRequiredJob } from "./read"
-import { cancelTrigger, resolveTrigger, scheduleTrigger } from "./trigger"
+import { activateTrigger, cancelTrigger, resolveTrigger } from "./trigger"
 
 type UpdateJobArgs = {
   organizationId: string
@@ -199,19 +199,13 @@ async function buildTriggerPatch(
   const status = existing.status === "paused" ? "paused" : "active"
   const storedTrigger =
     status === "active"
-      ? await scheduleTrigger(ctx, { jobId, trigger })
+      ? await activateTrigger(ctx, {
+          jobId,
+          organizationId: existing.organizationId,
+          type,
+          trigger,
+        })
       : trigger
-
-  if (
-    status === "active" &&
-    type === "event" &&
-    "integrationId" in storedTrigger
-  ) {
-    await ensureSubscription(ctx, {
-      organizationId: existing.organizationId,
-      trigger: storedTrigger,
-    })
-  }
 
   return { status, trigger: storedTrigger, type }
 }

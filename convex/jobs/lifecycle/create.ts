@@ -16,11 +16,10 @@ import {
   sameJobDefinition,
 } from "../keys"
 import { type JobTriggerInput, type JobType } from "../schema"
-import { ensureSubscription } from "../subscriptions/data"
 import { normalizeRequiredText } from "../timing"
 import { sameJobPrincipal } from "./children"
 import { getRequiredJob } from "./read"
-import { resolveTrigger, scheduleJobIfNeeded } from "./trigger"
+import { activateTrigger, resolveTrigger } from "./trigger"
 
 type CreateJobArgs = {
   organizationId: string
@@ -62,7 +61,11 @@ export async function createJob(
     updatedAt: now,
   })
 
-  await activateJob(ctx, jobId, prepared)
+  const trigger = await activateTrigger(ctx, { ...prepared, jobId })
+
+  if (trigger !== prepared.trigger) {
+    await ctx.db.patch(jobId, { trigger })
+  }
 
   return { ...(await getRequiredJob(ctx, jobId)), created: true }
 }
@@ -187,19 +190,4 @@ async function keyedJob(
         key: prepared.key,
         keyPartition: prepared.keyPartition,
       })
-}
-
-async function activateJob(
-  ctx: MutationCtx,
-  jobId: Id<"jobs">,
-  prepared: Awaited<ReturnType<typeof prepareJob>>
-) {
-  await scheduleJobIfNeeded(ctx, jobId, prepared.trigger)
-
-  if (prepared.type === "event" && "integrationId" in prepared.trigger) {
-    await ensureSubscription(ctx, {
-      organizationId: prepared.organizationId,
-      trigger: prepared.trigger,
-    })
-  }
 }

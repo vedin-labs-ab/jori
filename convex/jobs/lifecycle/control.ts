@@ -1,9 +1,9 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { ensureSubscription, releaseSubscription } from "../subscriptions/data"
+import { releaseSubscription } from "../subscriptions/data"
 import { deleteOwnedJobs } from "./children"
 import { getOrganizationJob, getRequiredJob } from "./read"
-import { cancelTrigger, scheduleNextCronJob } from "./trigger"
+import { activateTrigger, cancelTrigger, scheduleNextCronJob } from "./trigger"
 
 export async function pauseJob(
   ctx: MutationCtx,
@@ -59,14 +59,11 @@ export async function resumeJob(
 
   const now = Date.now()
   const trigger =
-    job.type === "cron" ? await scheduleNextCronJob(ctx, job, now) : job.trigger
-
-  if (job.type === "event" && "integrationId" in trigger) {
-    await ensureSubscription(ctx, {
-      organizationId: job.organizationId,
-      trigger,
-    })
-  }
+    job.type === "cron"
+      ? await scheduleNextCronJob(ctx, job, now)
+      : "integrationId" in job.trigger
+        ? await activateTrigger(ctx, { ...job, jobId: job._id })
+        : job.trigger
 
   await ctx.db.patch(job._id, {
     trigger,

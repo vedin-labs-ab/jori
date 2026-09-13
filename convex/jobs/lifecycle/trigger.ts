@@ -9,6 +9,7 @@ import { type MutationCtx } from "../../_generated/server"
 import { resolveIntegrationForPrincipal } from "../../integrations/resolve"
 import { type ExecutionPrincipal } from "../../runs/principal"
 import { type JobTriggerInput, type JobType } from "../schema"
+import { ensureSubscription } from "../subscriptions/data"
 import { getTimeTrigger, getTimeTriggerAt } from "../timing"
 
 export async function resolveTrigger(
@@ -74,19 +75,23 @@ export async function resolveTrigger(
   )
 }
 
-export async function scheduleJobIfNeeded(
+export async function activateTrigger(
   ctx: MutationCtx,
-  jobId: Id<"jobs">,
-  trigger: Doc<"jobs">["trigger"]
-) {
-  const scheduledTrigger = await scheduleTrigger(ctx, {
-    jobId,
-    trigger,
-  })
-
-  if (scheduledTrigger !== trigger) {
-    await ctx.db.patch(jobId, { trigger: scheduledTrigger })
+  args: {
+    jobId: Id<"jobs">
+    organizationId: string
+    type: JobType
+    trigger: Doc<"jobs">["trigger"]
   }
+) {
+  if (args.type === "event" && "integrationId" in args.trigger) {
+    await ensureSubscription(ctx, {
+      organizationId: args.organizationId,
+      trigger: args.trigger,
+    })
+  }
+
+  return await scheduleTrigger(ctx, args)
 }
 
 export async function scheduleNextCronJob(
@@ -122,7 +127,7 @@ export async function cancelTrigger(
   }
 }
 
-export async function scheduleTrigger(
+async function scheduleTrigger(
   ctx: MutationCtx,
   args: {
     jobId: Id<"jobs">
