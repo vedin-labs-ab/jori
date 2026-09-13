@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, test, vi } from "vitest"
 import { googleToolInputSchemas } from "../../../../contracts/tools/google"
 import { googleToolResponseSchemas } from "../../../../contracts/tools/responses/google"
+import { mockJsonFetch } from "../../../../test/convex/broker"
 import { schemaViolations } from "../../../../test/convex/schema"
+import { integration } from "../../../../test/convex/tools"
 import { validateSchemaValue } from "../../input/validation"
+import { callGoogleTool } from "."
 import { searchGmailThreads } from "./read"
 
 afterEach(() => vi.unstubAllGlobals())
@@ -80,5 +83,53 @@ describe("Gmail search pagination", () => {
         googleToolInputSchemas.google_gmail_search_threads
       )
     ).not.toEqual([])
+  })
+})
+
+describe("Gmail batch read tools", () => {
+  test("reads multiple Gmail threads with one broker tool call", async () => {
+    const calls = mockJsonFetch((url) => ({
+      id: url.pathname.split("/").at(-1),
+    }))
+
+    const result = await callGoogleTool(
+      integration("gmail"),
+      "google_gmail_get_threads",
+      {
+        threadIds: ["thread-a", "thread-b"],
+      }
+    )
+
+    expect(result).toEqual([
+      { threadId: "thread-a", messages: [] },
+      { threadId: "thread-b", messages: [] },
+    ])
+    expect(calls.map((call) => call.url)).toEqual([
+      "https://gmail.googleapis.com/gmail/v1/users/me/threads/thread-a?format=full",
+      "https://gmail.googleapis.com/gmail/v1/users/me/threads/thread-b?format=full",
+    ])
+  })
+
+  test("reads multiple Gmail messages with one broker tool call", async () => {
+    const calls = mockJsonFetch((url) => ({
+      id: url.pathname.split("/").at(-1),
+    }))
+
+    const result = await callGoogleTool(
+      integration("gmail"),
+      "google_gmail_get_messages",
+      {
+        messageIds: ["message-a", "message-b"],
+      }
+    )
+
+    expect(result).toMatchObject([
+      { provider: "gmail", messageId: "message-a", to: [], cc: [] },
+      { provider: "gmail", messageId: "message-b", to: [], cc: [] },
+    ])
+    expect(calls.map((call) => call.url)).toEqual([
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/message-a?format=full",
+      "https://gmail.googleapis.com/gmail/v1/users/me/messages/message-b?format=full",
+    ])
   })
 })

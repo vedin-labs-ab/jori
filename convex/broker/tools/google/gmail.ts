@@ -86,11 +86,8 @@ async function replyToGmailThread(
         method: "POST",
         body: {
           raw: createMimeMessage({
-            to: reply.to,
-            subject: reply.subject,
+            ...reply,
             body: requiredString(args.body, "body"),
-            inReplyTo: reply.inReplyTo,
-            references: reply.references,
           }),
           threadId,
         },
@@ -111,10 +108,7 @@ async function sendGmailMessage(
       {
         method: "POST",
         body: {
-          raw: createMimeMessage({
-            ...gmailMessageInput(args),
-            attachments: await readAttachments(context, args.files),
-          }),
+          raw: await prepareGmailMessage(args, context),
         },
       }
     )
@@ -128,16 +122,10 @@ async function createGmailDraft(
   context?: AttachmentContext
 ) {
   const threadId = optionalString(args.threadId)
-
-  if (threadId !== undefined) {
-    return await createGmailThreadDraft(
-      integration,
-      token,
-      threadId,
-      args,
-      context
-    )
-  }
+  const reply =
+    threadId === undefined
+      ? undefined
+      : await readGmailReplyContext(integration, token, threadId)
 
   return gmailDraftResult(
     await googleJson(
@@ -147,44 +135,8 @@ async function createGmailDraft(
         method: "POST",
         body: {
           message: {
-            raw: createMimeMessage({
-              ...gmailMessageInput(args),
-              attachments: await readAttachments(context, args.files),
-            }),
-          },
-        },
-      }
-    )
-  )
-}
-
-async function createGmailThreadDraft(
-  integration: Doc<"integrations">,
-  token: string,
-  threadId: string,
-  args: Record<string, unknown>,
-  context?: AttachmentContext
-) {
-  const reply = await readGmailReplyContext(integration, token, threadId)
-
-  return gmailDraftResult(
-    await googleJson(
-      token,
-      "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
-      {
-        method: "POST",
-        body: {
-          message: {
-            raw: createMimeMessage({
-              to: reply.to,
-              subject: reply.subject,
-              body: requiredString(args.body, "body"),
-              bodyType: args.bodyType === "HTML" ? "HTML" : "Text",
-              inReplyTo: reply.inReplyTo,
-              references: reply.references,
-              attachments: await readAttachments(context, args.files),
-            }),
-            threadId,
+            raw: await prepareGmailMessage(args, context, reply),
+            ...(threadId === undefined ? {} : { threadId }),
           },
         },
       }
@@ -234,15 +186,22 @@ async function readGmailReplyContext(
   }
 }
 
-function gmailMessageInput(args: Record<string, unknown>) {
-  return {
-    to: requiredAddressList(args.to, "to"),
-    cc: optionalAddressList(args.cc),
-    bcc: optionalAddressList(args.bcc),
-    subject: requiredString(args.subject, "subject"),
+async function prepareGmailMessage(
+  args: Record<string, unknown>,
+  context: AttachmentContext | undefined,
+  reply?: Awaited<ReturnType<typeof readGmailReplyContext>>
+) {
+  return createMimeMessage({
+    ...(reply ?? {
+      to: requiredAddressList(args.to, "to"),
+      cc: optionalAddressList(args.cc),
+      bcc: optionalAddressList(args.bcc),
+      subject: requiredString(args.subject, "subject"),
+    }),
     body: requiredString(args.body, "body"),
-    bodyType: args.bodyType === "HTML" ? ("HTML" as const) : ("Text" as const),
-  }
+    bodyType: args.bodyType === "HTML" ? "HTML" : "Text",
+    attachments: await readAttachments(context, args.files),
+  })
 }
 
 function requiredAddressList(value: unknown, name: string) {
