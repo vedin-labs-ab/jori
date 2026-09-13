@@ -42,8 +42,8 @@ Same word, same meaning, wherever you write:
   finish. Run `task` and `land` from the primary checkout, everything else
   in the worktree.
 - `pnpm dev:up` serves `main` and keeps it current; `pnpm dev:check` says
-  where. Landing runs it, so look there before reaching for a worktree
-  preview.
+  where. Landed work shows up there on its own, so preview a worktree only
+  for what has not landed.
 - Land only pure documentation with `--no-verify`. Anything the build
   reads, including prompts, skills, and legal pages, is not documentation.
 
