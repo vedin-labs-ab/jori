@@ -11,7 +11,7 @@ import { ChatPane } from "@/shared/console/chat/pane"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { usePaneTabs } from "@/shared/console/chat/pane/tabs"
 import { type ReferenceTarget } from "../../../src/shared/console/references"
-import { delay } from "./service"
+import { delay } from "../fixture/service"
 
 export function PaneState({
   children,

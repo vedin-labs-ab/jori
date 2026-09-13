@@ -1,8 +1,8 @@
 import { ConvexReactClient } from "convex/react"
 import { type FunctionReference, getFunctionName } from "convex/server"
 
-/** Local query/mutation boundary used by the real Convex React hooks.
- * Each scenario uses one argument set per query name. No socket is opened. */
+/** Local data for real Convex React hooks. Each scenario uses one argument
+ * set per query name; subscribed queries and writes never open a socket. */
 export function localService() {
   const values = new Map<string, unknown>()
   const listeners = new Set<() => void>()
@@ -10,7 +10,8 @@ export function localService() {
     unsavedChangesWarning: false,
   })
   const controls = {
-    mutate: async (_args: Record<string, unknown>): Promise<unknown> => ({}),
+    action: async (_args: Record<string, unknown>) => ({}),
+    mutation: async (_args: Record<string, unknown>): Promise<unknown> => ({}),
   }
   Object.assign(client, {
     watchQuery: (query: FunctionReference<"query">) => ({
@@ -24,7 +25,11 @@ export function localService() {
     mutation: (
       _query: FunctionReference<"mutation">,
       args: Record<string, unknown>
-    ) => controls.mutate(args),
+    ) => controls.mutation(args),
+    action: (
+      _query: FunctionReference<"action">,
+      args: Record<string, unknown>
+    ) => controls.action(args),
   })
   return {
     client,

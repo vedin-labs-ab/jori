@@ -8,7 +8,7 @@ import {
 } from "react"
 import { demoConversations } from "@/landing/demo/fixtures/chat"
 import { type ChatMessage } from "@/shared/console/chat/types"
-import { delay, type localService } from "./service"
+import { delay, type localService } from "../fixture/service"
 
 export function useMessages(
   state: string,
@@ -20,7 +20,7 @@ export function useMessages(
   const more = useMore(state, setMessages, now)
   useEffect(() => {
     let attempts = 0
-    service.controls.send = async (args) => {
+    service.controls.mutation = async (args) => {
       await delay()
       attempts += 1
       if (state === "send-reject" && attempts === 1) {

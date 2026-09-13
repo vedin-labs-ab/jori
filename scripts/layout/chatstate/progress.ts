@@ -3,7 +3,7 @@ import { useEffect } from "react"
 import { type useDemoWorkspace } from "@/landing/demo/workspace"
 import { makeOffer } from "@/shared/console/runs/fixtures"
 import { api } from "../../../convex/_generated/api"
-import { delay, type localService } from "./service"
+import { delay, type localService } from "../fixture/service"
 
 export function useProgress(
   state: string,
@@ -47,7 +47,7 @@ export function useProgress(
       phase ? workspace.activity[original.id] : undefined
     )
     let attempts = 0
-    service.controls.decide = async (args) => {
+    service.controls.action = async (args) => {
       await delay()
       attempts += 1
       if (state === "progress-reject" && attempts === 1) {

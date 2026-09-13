@@ -5,7 +5,7 @@ import { OrganizationVisibilityDialog } from "@/console/shared/visibility/dialog
 import { demoId } from "@/landing/demo/fixtures/ids"
 import { people, teams, viewerId } from "@/landing/demo/fixtures/people"
 import { api } from "../../../convex/_generated/api"
-import { delay, localService } from "./service"
+import { delay, localService } from "../fixture/service"
 
 /** The actual console binding, including permission/audience queries and save. */
 export function AccessState({ state }: { state: string }) {
@@ -13,7 +13,7 @@ export function AccessState({ state }: { state: string }) {
   const [open, setOpen] = useState(true)
   useEffect(() => {
     let attempts = 0
-    service.controls.mutate = async () => {
+    service.controls.mutation = async () => {
       const attempt = attempts++
       await delay()
       if (state === "access-error" && attempt === 0) {

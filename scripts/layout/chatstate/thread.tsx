@@ -5,8 +5,8 @@ import { useSendMessage } from "@/console/chat/send"
 import { chatContext, chatSelection } from "@/landing/demo/fixtures/chat"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { ChatThread } from "@/shared/console/chat/thread"
+import { localService } from "../fixture/service"
 import { PaneState } from "./pane"
-import { localService } from "./service"
 import { useThread } from "./threadstate"
 
 export function ChatStates({ state }: { state: string }) {

@@ -5,7 +5,7 @@ import { useDemoWorkspace } from "@/landing/demo/workspace"
 import { FileBody } from "@/shared/console/files/body"
 import { noSiblings } from "@/shared/console/files/siblings"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
-import { delay } from "./service"
+import { delay } from "../fixture/service"
 
 const html =
   '<!doctype html>\n<html lang="en">\n<head><meta charset="utf-8"><title>Renewal summary</title></head>\n<body><h1>Customer renewals</h1><p>Four upcoming renewals are ready for review.</p><ul><li>Harbor House</li><li>Beacon Works</li><li>Juniper Supply</li><li>Larkspur Hotels</li></ul></body>\n</html>\n'

@@ -7,9 +7,9 @@ import { type ChatThread } from "@/shared/console/chat/thread"
 import { ChatDraftTurn } from "@/shared/console/chat/thread/draft"
 import { type ChatRun } from "@/shared/console/chat/types"
 import { type ReferenceTarget } from "../../../src/shared/console/references"
+import { delay, type localService } from "../fixture/service"
 import { useMessages } from "./messages"
 import { useProgress } from "./progress"
-import { delay, type localService } from "./service"
 
 export function useThread(
   state: string,

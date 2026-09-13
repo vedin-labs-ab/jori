@@ -6,7 +6,7 @@ import { demoId } from "@/landing/demo/fixtures/ids"
 import { useDemoFolders } from "@/landing/demo/workspace"
 import { MoveDialog } from "@/shared/console/folders/dialogs/move"
 import { api } from "../../../convex/_generated/api"
-import { delay, localService } from "./service"
+import { delay, localService } from "../fixture/service"
 
 /** Actual move dialog and useMoveConfirmation; only query timing/data is local. */
 export function MoveState({ state }: { state: string }) {
