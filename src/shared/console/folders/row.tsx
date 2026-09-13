@@ -102,10 +102,12 @@ export function FolderTreeItem({
         // The default sub-list insets both edges, so at the backend's
         // depth-8 nesting cap rows would shrink from the right and lose
         // their actions column. Keep the guide line but move the whole
-        // per-level step to the left (16px: 10px margin + 6px padding),
+        // per-level spacing to the left (10px margin + 6px padding),
         // so every row at every depth ends on the same right edge and
-        // still fits a readable name at depth 8.
-        <SidebarMenuSub className="mr-0 ml-2.5 pr-0 pl-1.5">
+        // still fits a readable name at depth 8. Cancel the default 1px
+        // translation too: it accumulates with nesting and clips the
+        // inset focus ring at the tree's scroll viewport.
+        <SidebarMenuSub className="mr-0 ml-2.5 translate-x-0 pr-0 pl-1.5">
           {pending ? (
             <SidebarMenuItem>
               <PendingFolderName name={pending.name} />
