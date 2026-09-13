@@ -40,6 +40,7 @@ if (!isClean(directory)) {
 rebase()
 await gate()
 fastForward()
+await runCommand(packageCommand("dev:up"))
 
 process.stdout.write(
   `${branch} landed on main at ${git(["rev-parse", "--short", "main"])}.\n`

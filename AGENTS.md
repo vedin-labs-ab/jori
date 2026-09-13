@@ -39,6 +39,8 @@ Same word, same meaning, wherever you write:
 - `pnpm land <name>` rebases on `main` and runs the full gate, unless the
   tree already passed it. Run `task` and `land` from the primary checkout,
   everything else in the worktree.
+- `pnpm dev:up` serves `main` at localhost:8050 and keeps it current.
+  Landing runs it, so check there before reaching for a worktree preview.
 - Only pure documentation lands with `--no-verify`. Anything the build reads,
   including prompts, skills, and legal pages, is not documentation.
 
