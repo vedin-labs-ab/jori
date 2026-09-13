@@ -1,7 +1,7 @@
 import { type ReactNode, useId } from "react"
 import { cn } from "@/lib/utils"
 import { PrivacyChoices } from "@/shared/analytics/preferences"
-import { brandHeadline } from "@/shared/brand/content"
+import { brandHeadline, repositoryUrl } from "@/shared/brand/content"
 import { wordmarkPaths } from "@/shared/brand/lettering"
 import { BrandLink } from "@/shared/brand/link"
 import { regionConfig } from "@/shared/region/config"
@@ -29,7 +29,7 @@ const footerColumns: { links: PageLinkTarget[]; title: string }[] = [
   {
     title: "Company",
     links: [
-      { label: "GitHub", href: "https://github.com/vedin-labs-ab/jori" },
+      { label: "GitHub", href: repositoryUrl },
       { label: "Contact", href: "mailto:hello@usejori.com" },
       { label: "Sign in", href: signInUrl },
     ],

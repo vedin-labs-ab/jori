@@ -1,22 +1,53 @@
 import { formatUsd, interactiveGraceMicros, trial } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
-import { Definition, Section } from "../section"
+import { type ReactNode } from "react"
+import { Section } from "../section"
 
 /**
- * Five questions, and only the five.
- *
- * The block above says the numbers are not final, and a reader left with just
- * that fills the gap with the worst version of it: an AI product that bills
- * whatever it likes. So this answers the fears that would stop someone
- * joining, and nothing else. A question that restates the principles above it,
- * or that the trust page already answers properly, is not a question.
+ * Five questions, and only the five: the ones that would stop someone
+ * joining. A question the plan above already answers, or that the trust
+ * page answers properly, is not a question.
  */
+const questions: readonly { answer: ReactNode; question: string }[] = [
+  {
+    question: "What happens when the included AI usage runs out?",
+    answer: (
+      <>
+        Scheduled runs pause. Interactive work carries{" "}
+        {formatUsd(interactiveGraceMicros)} of grace below zero, so Jori never
+        goes silent halfway through an answer. Add credit, or wait for the
+        monthly reset.
+      </>
+    ),
+  },
+  {
+    question: "Does inviting someone change the price?",
+    answer:
+      "No. Everyone joins, including the people who only ever open a page someone handed them.",
+  },
+  {
+    question: "How is AI usage priced?",
+    answer:
+      "In dollars, at the provider's published rates for the model that answered. What we make on it is what good caching saves, never a multiplier on your bill.",
+  },
+  {
+    question: "Is there a trial?",
+    answer: `${trial.days} days and ${formatUsd(trial.allowanceMicros)} of usage, no card. It ends when either runs out.`,
+  },
+  {
+    question: "What happens if we cancel?",
+    answer:
+      "Jobs pause and nothing is deleted. Your data, integrations, and history stay put, and everything resumes when you come back.",
+  },
+]
+
 export function Faq() {
   return (
     <Section
+      beside
       lede={
         <>
-          The short version. For access and data,{" "}
+          For access and data,{" "}
           <Link
             className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
             to="/trust"
@@ -26,31 +57,17 @@ export function Faq() {
           goes deeper.
         </>
       }
-      title="What people ask"
+      title="Good to know before you start."
     >
-      <dl className="grid gap-x-12 gap-y-8 md:grid-cols-2">
-        <Definition term="What happens when usage runs out?">
-          Scheduled runs stop at zero. Interactive work carries{" "}
-          {formatUsd(interactiveGraceMicros)} of grace below it, so Jori never
-          goes silent halfway through answering you.
-        </Definition>
-        <Definition term="What does a run cost?">
-          Keeping a page current costs cents a day. A deep research run can cost
-          a few dollars. The receipt shows the exact figure.
-        </Definition>
-        <Definition term="Is there a free trial?">
-          Yes. {trial.days} days and {formatUsd(trial.allowanceMicros)} of
-          usage, no card. It ends when either runs out.
-        </Definition>
-        <Definition term="What happens if I cancel?">
-          Jobs pause and nothing is deleted. Your data, integrations, and
-          history stay put, and everything resumes when you come back.
-        </Definition>
-        <Definition term="How do I see what a team spends?">
-          Open Usage on the team's folder. Spend rolls up by subfolder and by
-          source for the window you choose, and every number opens to the runs
-          behind it.
-        </Definition>
+      <dl className="divide-y border-y">
+        {questions.map((entry) => (
+          <div className="py-5" key={entry.question}>
+            <dt className="font-medium">{entry.question}</dt>
+            <dd className="mt-1.5 max-w-xl text-muted-foreground text-sm leading-relaxed">
+              {entry.answer}
+            </dd>
+          </div>
+        ))}
       </dl>
     </Section>
   )

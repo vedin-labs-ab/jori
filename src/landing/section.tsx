@@ -9,8 +9,12 @@ import { RegionFlag } from "@/shared/region/flags"
  * making; a supporting one qualifies the argument beside it. Giving them the
  * same height and the same heading size is what makes a long page read as one
  * undifferentiated stack, so the choice is deliberate at every call site.
+ *
+ * Either rhythm can set its heading `beside` the content instead of over it,
+ * for a list that reads on its own once the heading has named it.
  */
 export function Section({
+  beside = false,
   children,
   className,
   id,
@@ -18,6 +22,7 @@ export function Section({
   support = false,
   title,
 }: {
+  beside?: boolean
   children?: ReactNode
   className?: string
   id?: string
@@ -34,8 +39,14 @@ export function Section({
       )}
       id={id}
     >
-      <div className="mx-auto w-full max-w-6xl px-6">
-        <div className="max-w-2xl">
+      <div
+        className={cn(
+          "mx-auto w-full max-w-6xl px-6",
+          beside &&
+            "md:grid md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-x-12 lg:gap-x-16"
+        )}
+      >
+        <div className={beside ? "max-w-sm" : "max-w-2xl"}>
           <h2
             className={cn(
               "font-medium text-balance tracking-tight",
@@ -58,7 +69,9 @@ export function Section({
         {/* A section with no children is a statement band: the heading and
             lede are the whole content, so no empty block reserves space. */}
         {children === undefined ? null : (
-          <div className={support ? "mt-8" : "mt-12"}>{children}</div>
+          <div className={cn(support ? "mt-8" : "mt-12", beside && "md:mt-0")}>
+            {children}
+          </div>
         )}
       </div>
     </section>

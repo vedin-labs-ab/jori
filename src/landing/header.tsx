@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { repositoryUrl } from "@/shared/brand/content"
 import { BrandLink } from "@/shared/brand/link"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { regionConfig } from "@/shared/region/config"
@@ -14,7 +15,6 @@ import { GetStarted } from "./cta"
 import { PageLink } from "./link"
 
 const signInUrl = new URL("/sign-in", regionConfig.publicOrigin).toString()
-const githubUrl = "https://github.com/vedin-labs-ab/jori"
 
 const navLinks = [
   { label: "Trust", to: "/trust" },
@@ -80,7 +80,7 @@ function MobileNav() {
           </DropdownMenuItem>
         ))}
         <DropdownMenuItem asChild>
-          <a href={githubUrl} rel="noreferrer" target="_blank">
+          <a href={repositoryUrl} rel="noreferrer" target="_blank">
             <IntegrationLogo decorative integration="github" />
             GitHub
           </a>
@@ -102,7 +102,7 @@ function HeaderActions({ onWaitlistPage }: { onWaitlistPage: boolean }) {
         size="lg"
         variant="outline"
       >
-        <a href={githubUrl} rel="noreferrer" target="_blank">
+        <a href={repositoryUrl} rel="noreferrer" target="_blank">
           <IntegrationLogo
             data-icon="inline-start"
             decorative
