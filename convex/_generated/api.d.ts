@@ -187,6 +187,7 @@ import type * as folders_spend from "../folders/spend.js";
 import type * as folders_tree from "../folders/tree.js";
 import type * as folders_usage from "../folders/usage.js";
 import type * as http from "../http.js";
+import type * as integrations_connect_callback from "../integrations/connect/callback.js";
 import type * as integrations_connect_credentials from "../integrations/connect/credentials.js";
 import type * as integrations_connect_handoff from "../integrations/connect/handoff.js";
 import type * as integrations_connect_http from "../integrations/connect/http.js";
@@ -434,6 +435,7 @@ import type * as retention_erasure_quiesce from "../retention/erasure/quiesce.js
 import type * as retention_erasure_sandboxes from "../retention/erasure/sandboxes.js";
 import type * as retention_erasure_tables from "../retention/erasure/tables.js";
 import type * as retention_notice from "../retention/notice.js";
+import type * as retention_ownership from "../retention/ownership.js";
 import type * as retention_records from "../retention/records.js";
 import type * as retention_sweep from "../retention/sweep.js";
 import type * as retention_write from "../retention/write.js";
@@ -888,6 +890,7 @@ declare const fullApi: ApiFromModules<{
   "folders/tree": typeof folders_tree;
   "folders/usage": typeof folders_usage;
   http: typeof http;
+  "integrations/connect/callback": typeof integrations_connect_callback;
   "integrations/connect/credentials": typeof integrations_connect_credentials;
   "integrations/connect/handoff": typeof integrations_connect_handoff;
   "integrations/connect/http": typeof integrations_connect_http;
@@ -1135,6 +1138,7 @@ declare const fullApi: ApiFromModules<{
   "retention/erasure/sandboxes": typeof retention_erasure_sandboxes;
   "retention/erasure/tables": typeof retention_erasure_tables;
   "retention/notice": typeof retention_notice;
+  "retention/ownership": typeof retention_ownership;
   "retention/records": typeof retention_records;
   "retention/sweep": typeof retention_sweep;
   "retention/write": typeof retention_write;
