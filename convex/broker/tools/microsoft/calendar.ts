@@ -11,6 +11,7 @@ import {
   requiredObject,
   requiredString,
 } from "../../../shared/input"
+import { scanCalendarEvents } from "../events"
 import { listMicrosoftCalendarSummaries } from "./calendars"
 import { stampMicrosoftEvent } from "./events"
 
@@ -96,44 +97,19 @@ async function listAllCalendarEvents(
 ) {
   const limit = boundedNumber(args.top, 250, 1, 250)
   const calendarPage = readRecord(await listMicrosoftCalendars(token, 100))
-  const calendars = readArray(calendarPage.value).map(readRecord)
-  const events: Record<string, unknown>[] = []
-  const gaps: string[] = []
-  let truncated = optionalString(calendarPage["@odata.nextLink"]) !== undefined
-  let calendarsScanned = 0
-
-  for (const calendar of calendars) {
-    const calendarId = optionalString(calendar.id)
-    if (calendarId === undefined) {
-      continue
-    }
-    if (events.length >= limit) {
-      truncated = true
-      break
-    }
-
-    const calendarName = optionalString(calendar.name)
-    try {
-      const result = await scanMicrosoftCalendar(token, args, {
-        calendarId,
-        calendarName,
-        limit: limit - events.length,
-      })
-      events.push(...result.events)
-      truncated ||= result.truncated
-      calendarsScanned += 1
-    } catch {
-      gaps.push(`Could not read ${calendarName ?? "one calendar"}.`)
-    }
-  }
-
-  return {
-    events: sortMicrosoftEvents(events),
-    calendarsScanned,
-    gaps: gaps.slice(0, 10),
-    status: gaps.length > 0 || truncated ? "partial" : "ready",
-    truncated,
-  }
+  return await scanCalendarEvents({
+    calendars: readArray(calendarPage.value).map((value) => {
+      const calendar = readRecord(value)
+      return {
+        calendarId: optionalString(calendar.id),
+        calendarName: optionalString(calendar.name),
+      }
+    }),
+    limit,
+    truncated: optionalString(calendarPage["@odata.nextLink"]) !== undefined,
+    scan: (calendar) => scanMicrosoftCalendar(token, args, calendar),
+    eventTime: microsoftEventStart,
+  })
 }
 
 async function scanMicrosoftCalendar(
@@ -208,12 +184,6 @@ async function listCalendarEventPage(
           new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       },
     }
-  )
-}
-
-function sortMicrosoftEvents(events: Record<string, unknown>[]) {
-  return events.sort((left, right) =>
-    microsoftEventStart(left).localeCompare(microsoftEventStart(right))
   )
 }
 

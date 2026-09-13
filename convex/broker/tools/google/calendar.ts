@@ -10,7 +10,11 @@ import {
   requiredString,
   setOptionalSearchParam,
 } from "../../../shared/input"
-import { type CalendarEventContent, stampCalendarEvent } from "../events"
+import {
+  type CalendarEventContent,
+  scanCalendarEvents,
+  stampCalendarEvent,
+} from "../events"
 import { listGoogleCalendarSummaries } from "./calendars"
 import { getCalendarId } from "./format"
 
@@ -75,46 +79,19 @@ async function listAllCalendarEvents(
       showHidden: true,
     })
   )
-  const calendars = readArray(calendarPage.items).map(readRecord)
-  const items: Record<string, unknown>[] = []
-  const gaps: string[] = []
-  let truncated = optionalString(calendarPage.nextPageToken) !== undefined
-  let calendarsScanned = 0
-
-  for (const calendar of calendars) {
-    const calendarId = optionalString(calendar.id)
-    if (calendarId === undefined) {
-      continue
-    }
-    if (items.length >= limit) {
-      truncated = true
-      break
-    }
-
-    const calendarName = optionalString(calendar.summary)
-    try {
-      const result = await scanGoogleCalendar(token, args, {
-        calendarId,
-        calendarName,
-        limit: limit - items.length,
-      })
-      items.push(...result.items)
-      truncated ||= result.truncated
-      calendarsScanned += 1
-    } catch {
-      gaps.push(`Could not read ${calendarName ?? "one calendar"}.`)
-    }
-  }
-
-  return {
-    events: items.sort((left, right) =>
-      googleEventTime(left.start).localeCompare(googleEventTime(right.start))
-    ),
-    calendarsScanned,
-    gaps: gaps.slice(0, 10),
-    status: gaps.length > 0 || truncated ? "partial" : "ready",
-    truncated,
-  }
+  return await scanCalendarEvents({
+    calendars: readArray(calendarPage.items).map((value) => {
+      const calendar = readRecord(value)
+      return {
+        calendarId: optionalString(calendar.id),
+        calendarName: optionalString(calendar.summary),
+      }
+    }),
+    limit,
+    truncated: optionalString(calendarPage.nextPageToken) !== undefined,
+    scan: (calendar) => scanGoogleCalendar(token, args, calendar),
+    eventTime: (event) => googleEventTime(event.start),
+  })
 }
 
 async function scanGoogleCalendar(
@@ -152,7 +129,7 @@ async function scanGoogleCalendar(
     pageToken = optionalString(page.nextPageToken)
   } while (pageToken !== undefined && items.length < calendar.limit)
 
-  return { items, truncated: pageToken !== undefined }
+  return { events: items, truncated: pageToken !== undefined }
 }
 
 async function listCalendarEventPage(

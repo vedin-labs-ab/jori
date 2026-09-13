@@ -85,3 +85,55 @@ export type CalendarSummary = {
   owner?: string
   hidden?: boolean
 }
+
+/** Combine readable calendars under one result limit, retaining gaps when a
+ * provider cannot read a calendar. Providers own pagination and event shapes. */
+export async function scanCalendarEvents(args: {
+  calendars: { calendarId?: string; calendarName?: string }[]
+  limit: number
+  truncated: boolean
+  scan: (calendar: {
+    calendarId: string
+    calendarName?: string
+    limit: number
+  }) => Promise<{ events: Record<string, unknown>[]; truncated: boolean }>
+  eventTime: (event: Record<string, unknown>) => string
+}) {
+  const events: Record<string, unknown>[] = []
+  const gaps: string[] = []
+  let truncated = args.truncated
+  let calendarsScanned = 0
+
+  for (const { calendarId, calendarName } of args.calendars) {
+    if (calendarId === undefined) {
+      continue
+    }
+    if (events.length >= args.limit) {
+      truncated = true
+      break
+    }
+
+    try {
+      const result = await args.scan({
+        calendarId,
+        calendarName,
+        limit: args.limit - events.length,
+      })
+      events.push(...result.events)
+      truncated ||= result.truncated
+      calendarsScanned += 1
+    } catch {
+      gaps.push(`Could not read ${calendarName ?? "one calendar"}.`)
+    }
+  }
+
+  return {
+    events: events.sort((left, right) =>
+      args.eventTime(left).localeCompare(args.eventTime(right))
+    ),
+    calendarsScanned,
+    gaps: gaps.slice(0, 10),
+    status: gaps.length > 0 || truncated ? "partial" : "ready",
+    truncated,
+  }
+}
