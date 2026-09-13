@@ -2,7 +2,11 @@ import { readdir, readFile } from "node:fs/promises"
 import path from "node:path"
 
 export async function renderPromptTemplates(root: string) {
-  const promptTemplates = await readPromptTemplates(path.join(root, "prompts"))
+  const sources: Record<string, string> = {}
+  await readPromptSources(path.join(root, "prompts"), "", sources)
+  const promptTemplates = Object.fromEntries(
+    Object.entries(sources).sort(([left], [right]) => left.localeCompare(right))
+  )
 
   return {
     content: [
@@ -15,34 +19,19 @@ export async function renderPromptTemplates(root: string) {
   }
 }
 
-async function readPromptTemplates(
-  directory: string
-): Promise<Record<string, string>> {
-  const sources = await readPromptSources(directory)
-
-  return sortObject(
-    Object.fromEntries(
-      Object.entries(sources).map(([id, source]) => [id, source.trim()])
-    )
-  )
-}
-
 async function readPromptSources(
   directory: string,
-  prefix = ""
-): Promise<Record<string, string>> {
+  prefix: string,
+  sources: Record<string, string>
+): Promise<void> {
   const entries = await readdir(directory, { withFileTypes: true })
-  let result: Record<string, string> = {}
 
   for (const entry of entries) {
     const entryPath = path.join(directory, entry.name)
     const id = prefix === "" ? entry.name : `${prefix}/${entry.name}`
 
     if (entry.isDirectory()) {
-      result = {
-        ...result,
-        ...(await readPromptSources(entryPath, id)),
-      }
+      await readPromptSources(entryPath, id, sources)
       continue
     }
 
@@ -50,11 +39,9 @@ async function readPromptSources(
       const promptId = id.replace(/\.md$/, "")
 
       validatePromptId(promptId)
-      result[promptId] = await readFile(entryPath, "utf8")
+      sources[promptId] = (await readFile(entryPath, "utf8")).trim()
     }
   }
-
-  return sortObject(result)
 }
 
 function validatePromptId(id: string) {
@@ -67,12 +54,4 @@ function validatePromptId(id: string) {
       `Prompt path segment must be a single lowercase word: ${invalidSegment}`
     )
   }
-}
-
-function sortObject<Value>(
-  value: Record<string, Value>
-): Record<string, Value> {
-  return Object.fromEntries(
-    Object.entries(value).sort(([left], [right]) => left.localeCompare(right))
-  )
 }
