@@ -2,6 +2,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { subscribedAccount } from "../../../../test/convex/billing"
 import { internal } from "../../../_generated/api"
 import schema from "../../../schema"
 import { mentionsLinearApp } from "./messages"
@@ -214,6 +215,7 @@ function message(text: string) {
 async function setup(region: string) {
   const t = convexTest(schema, modules)
   const personId = await t.run(async (ctx) => {
+    await ctx.db.insert("accounts", subscribedAccount("test"))
     const createdBy = await ctx.db.insert("persons", {
       organizationId: "test",
       createdAt: 0,
