@@ -31,7 +31,7 @@ async function setup() {
     async (ctx) =>
       await ctx.db.insert("accounts", {
         organizationId: "org",
-        state: { kind: "paused", plan: "starter", interval: "month" },
+        state: { kind: "paused" },
         micros: { allowance: 0, wallet: 0 },
         topUp: { charged: { micros: 0 } },
         stripe: { customerId: "cus_org", subscriptionId: "sub_unrelated" },

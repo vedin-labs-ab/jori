@@ -43,7 +43,7 @@ export async function ensureNotice(
   const date = new Date(Math.max(row.deletesAt, Date.now() + noticeMs))
     .toISOString()
     .slice(0, 10)
-  const text = `Your Jori workspace "${recipient.name}" is scheduled for deletion on or after ${date} because its subscription ended or its trial expired. Export your workspace from Settings before then, or reactivate it to keep your data. Contact support@usejori.com for help or an earlier deletion.\n\n${requireOrigin()}/runs`
+  const text = `Your Jori workspace "${recipient.name}" is scheduled for deletion on or after ${date} because its subscription ended. Export your workspace from Settings before then, or reactivate it to keep your data. Contact support@usejori.com for help or an earlier deletion.\n\n${requireOrigin()}/runs`
   const noticeId = await ctx.runMutation(internal.email.queue.enqueue, {
     organizationId: row.organizationId,
     message: {

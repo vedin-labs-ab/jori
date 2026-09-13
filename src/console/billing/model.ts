@@ -50,16 +50,12 @@ function entryLabel(entry: BillingEntry) {
     return entry.auto ? "Auto top-up" : "Top-up"
   }
 
-  if (entry.source === "manual") {
-    return "Manual allowance"
-  }
-
-  return entry.source === "trial" ? "Trial allowance" : "Monthly allowance"
+  return entry.source === "manual" ? "Manual allowance" : "Monthly allowance"
 }
 
 function entryDot(entry: BillingEntry) {
   if (entry.type === "allowance") {
-    return entry.source === "trial" ? "bg-warning" : "bg-primary"
+    return "bg-primary"
   }
 
   return entry.type === "topup" ? "bg-informational" : undefined

@@ -62,8 +62,7 @@ Separately purchased credits carry forward until used or refunded.
 
 You can enable automatic credit top-ups and choose their limits. Turning them
 off stops future automatic purchases. Charges already incurred remain payable.
-Trial or promotional credits have no cash refund value. Trials do not become
-paid subscriptions without a purchase.
+Promotional credits have no cash refund value.
 
 Cancel renewal through billing settings or contact support. Ordinary cancellation
 takes effect at the end of the paid term. We will tell you about price changes
@@ -81,8 +80,8 @@ with $15 of included credits has a $25 refund if you have used $5 of those
 credits. We do not deduct that same usage from a separate credit purchase.
 Refunds cannot exceed the amount actually paid for the relevant purchase.
 
-This offer applies to monthly and annual subscriptions and does not restart on renewal.
-Free trial and promotional credit usage is not deducted from your refund. After that window, ordinary
+This offer does not restart on renewal.
+Promotional credit usage is not deducted from your refund. After that window, ordinary
 cancellation ends at the end of the paid term without a partial subscription
 refund. This does not limit your statutory rights.
 
@@ -98,7 +97,7 @@ will explain the reason and give you an opportunity to resolve it. If we end a
 paid service for reasons unrelated to your breach, we will refund the unused
 portion of the paid term and unused purchased credits.
 
-After your subscription ends or your trial expires, we retain your workspace
+After your subscription ends, we retain your workspace
 for 90 days before deletion and notify you in advance. You can request earlier
 deletion through support. Contact us before deletion if you need help obtaining
 your content. Records we must keep for accounting, legal claims or security

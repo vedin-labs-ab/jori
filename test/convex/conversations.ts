@@ -3,6 +3,7 @@ import { vi } from "vitest"
 import { sendConsoleMessage } from "../../convex/conversations/console/send"
 import schema from "../../convex/schema"
 import { databaseContext, type TestDatabase } from "./database"
+import { subscribedAccount } from "./usage"
 
 type MutationCtx = import("../../convex/_generated/server").MutationCtx
 
@@ -26,10 +27,19 @@ export function inserted(ctx: FakeCtx, table: string) {
     .map((insert) => insert.doc)
 }
 
-export function fakeMutationCtx(seed: Seed[] = []): FakeCtx {
+/** Every fake starts with its organization on a plan; a seed that names
+ *  another organization runs against that one instead. */
+export function fakeMutationCtx(
+  seed: Seed[] = [],
+  organization = "organization"
+): FakeCtx {
   const inserts: Array<{ table: string; doc: unknown }> = []
   const patches: Array<{ id: string; patch: unknown }> = []
-  const rows = new Map(seed.map(([, doc]) => [String(doc._id), doc]))
+  const seeded: Seed[] = [
+    ["accounts", { _id: "account-0", ...subscribedAccount(organization) }],
+    ...seed,
+  ]
+  const rows = new Map(seeded.map(([, doc]) => [String(doc._id), doc]))
   const counters = new Map<string, number>()
 
   return {
@@ -133,7 +143,14 @@ export function consoleContext() {
     }),
   }
 
-  return { ...databaseContext({ scheduler }), scheduler }
+  const context = databaseContext({ scheduler })
+
+  // The fake insert settles before it yields, so the account is in place
+  // before the first message: the organization is on a plan, the way every
+  // organization that can send one is.
+  void context.database.insert("accounts", subscribedAccount(organizationId))
+
+  return { ...context, scheduler }
 }
 
 export async function person(database: TestDatabase) {
@@ -172,6 +189,7 @@ const modules = import.meta.glob("/convex/**/*.{ts,js}")
 export async function transactionalConsoleContext() {
   const t = convexTest(schema, modules)
   const initial = await t.run(async (ctx) => {
+    await ctx.db.insert("accounts", subscribedAccount(organizationId))
     const people = await Promise.all(
       ["Owner", "Teammate"].map(() =>
         ctx.db.insert("persons", {

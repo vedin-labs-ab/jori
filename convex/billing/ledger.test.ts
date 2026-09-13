@@ -7,7 +7,7 @@ const account = (overrides: Partial<Doc<"accounts">> = {}) =>
   ({
     _id: "account-1",
     organizationId: "organization-1",
-    state: { kind: "active", plan: "starter", interval: "month" },
+    state: { kind: "active" },
     micros: { allowance: 1_000_000, wallet: 500_000 },
     topUp: { charged: { micros: 0 } },
     updatedAt: 0,

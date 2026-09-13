@@ -1,6 +1,7 @@
 /**
- * Jori's commercial model in one place: org-wide plans, usage billed in
- * dollars at the model provider's public list rates, and a prepaid wallet.
+ * Jori's commercial model in one place: one plan for the whole organization,
+ * usage billed in dollars at the model provider's public list rates, and a
+ * prepaid wallet. Self-hosting is free and never reaches billing.
  *
  * Every amount is an integer count of micro-dollars (1e-6 USD) so per-token
  * pricing stays exact integer math end to end.
@@ -10,37 +11,17 @@ import { type ModelRate, modelRate } from "./models/catalog"
 
 export const microsPerDollar = 1_000_000
 
-export const plans = {
-  starter: {
-    key: "starter",
-    label: "Starter",
-    monthlyPriceUsd: 34,
-    annualPriceUsd: 324,
-    monthlyAllowanceMicros: 15 * microsPerDollar,
-    memberLimit: 10,
-  },
-  team: {
-    key: "team",
-    label: "Team",
-    monthlyPriceUsd: 124,
-    annualPriceUsd: 1188,
-    monthlyAllowanceMicros: 75 * microsPerDollar,
-    memberLimit: 50,
-  },
+/** The plan: everyone in the organization, billed monthly, with usage
+ *  and file storage included. */
+export const plan = {
+  label: "Cloud",
+  monthlyPriceUsd: 49,
+  monthlyAllowanceMicros: 20 * microsPerDollar,
+  storageGb: 25,
 } as const
 
-export type PlanKey = keyof typeof plans
-
-export const planKeys = Object.keys(plans) as PlanKey[]
-
-export const billingIntervals = ["month", "year"] as const
-
-export type BillingInterval = (typeof billingIntervals)[number]
-
-export const trial = {
-  days: 14,
-  allowanceMicros: 25 * microsPerDollar,
-}
+/** File storage past the plan's, billed for the time it is stored. */
+export const storageUsdPerGbMonth = 0.1
 
 /**
  * Interactive work (console instructions, mentions) may dip slightly below a
@@ -52,15 +33,15 @@ export const interactiveGraceMicros = 2 * microsPerDollar
 /** Why new work may not start: the state Jori is in, and what ends it.
  *  Every surface says both around its own consequence, so the composer's
  *  toast, the refused mutation, and the stopped run agree. */
-export type BudgetReason = "trial-ended" | "paused" | "out-of-usage"
+export type BudgetReason = "unsubscribed" | "paused" | "out-of-usage"
 
 export const budgetBlocks: Record<
   BudgetReason,
   { clause: string; remedy: string }
 > = {
-  "trial-ended": {
-    clause: "The trial has ended",
-    remedy: "Choose a plan in Billing settings to keep Jori working.",
+  unsubscribed: {
+    clause: "The organization isn't on a plan yet",
+    remedy: "Choose a plan in Billing settings to get Jori working.",
   },
   paused: {
     clause: "The subscription is paused",
@@ -163,4 +144,4 @@ export type ProviderUsage = {
 }
 
 /** Bump when changing the terms customers accept at purchase. */
-export const termsVersion = "2026-09-12"
+export const termsVersion = "2026-09-13"

@@ -14,8 +14,7 @@ const handle = (
 
 beforeEach(() => {
   vi.stubEnv("JORI_REGION", "eu")
-  vi.stubEnv("STRIPE_PRICE_STARTER_MONTH", "price_starter")
-  vi.stubEnv("STRIPE_PRICE_TEAM_MONTH", "price_team")
+  vi.stubEnv("STRIPE_PRICE_CLOUD", "price_cloud")
 })
 afterEach(() => vi.unstubAllEnvs())
 
@@ -103,14 +102,14 @@ test("failed delayed checkout never grants funds or changes the plan", async () 
 })
 
 test("subscription updates cannot activate an unpaid checkout", async () => {
-  vi.stubEnv("STRIPE_PRICE_STARTER_MONTH", "price_starter")
+  vi.stubEnv("STRIPE_PRICE_CLOUD", "price_cloud")
   const { ctx, insert, patch } = context()
   await handle(ctx, {
     event: event(
       {
         id: "sub_1",
         status: "active",
-        items: { data: [{ price: { id: "price_starter" } }] },
+        items: { data: [{ price: { id: "price_cloud" } }] },
       },
       "customer.subscription.updated"
     ),
@@ -128,8 +127,6 @@ test("a paid delayed subscription is activated once", async () => {
         organizationId: "organization-1",
         region: "eu",
         kind: "plan",
-        plan: "starter",
-        interval: "month",
       },
     },
     "checkout.session.async_payment_succeeded"
@@ -146,7 +143,7 @@ test("a paid delayed subscription is activated once", async () => {
   expect(patch).toHaveBeenCalledWith(
     "account-1",
     expect.objectContaining({
-      state: { kind: "active", plan: "starter", interval: "month" },
+      state: { kind: "active" },
       stripe: { customerId: "cus_1", subscriptionId: "sub_1" },
     })
   )
@@ -171,8 +168,8 @@ test.each(["canceled", "incomplete", "incomplete_expired", "unpaid"])(
   }
 )
 
-test("paid checkout uses the current price instead of stale checkout metadata", async () => {
-  const { ctx, patch } = context()
+test("a paid checkout for a price that is not the plan activates nothing", async () => {
+  const { ctx, insert, patch } = context()
   await handle(ctx, {
     event: event({
       subscription: "sub_1",
@@ -180,21 +177,15 @@ test("paid checkout uses the current price instead of stale checkout metadata", 
         organizationId: "organization-1",
         region: "eu",
         kind: "plan",
-        plan: "starter",
-        interval: "month",
       },
     }),
     subscription: {
       ...currentSubscription(),
-      items: { data: [{ price: { id: "price_team" } }] },
+      items: { data: [{ price: { id: "price_other" } }] },
     },
   })
-  expect(patch).toHaveBeenCalledWith(
-    "account-1",
-    expect.objectContaining({
-      state: { kind: "active", plan: "team", interval: "month" },
-    })
-  )
+  expect(insert).not.toHaveBeenCalled()
+  expect(patch).not.toHaveBeenCalled()
 })
 
 function currentSubscription() {
@@ -203,7 +194,7 @@ function currentSubscription() {
     customer: "cus_1",
     status: "active",
     metadata: { organizationId: "organization-1", region: "eu" },
-    items: { data: [{ price: { id: "price_starter" } }] },
+    items: { data: [{ price: { id: "price_cloud" } }] },
   }
 }
 
@@ -235,7 +226,7 @@ function context(
     _id: "account-1" as Doc<"accounts">["_id"],
     organizationId: "organization-1",
     stripe: { customerId: "cus_1" },
-    state: { kind: "trial", endsAt: 0 },
+    state: { kind: "unsubscribed" },
     micros: { allowance: 0, wallet: 0 },
     topUp: { charged: { micros: 0 } },
   }

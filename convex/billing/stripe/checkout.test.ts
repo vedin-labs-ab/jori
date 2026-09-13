@@ -15,7 +15,7 @@ vi.mock("./client", async (original) => ({
 
 const common = {
   businessPurchase: true,
-  termsVersion: "2026-09-12",
+  termsVersion: "2026-09-13",
   organizationId: "organization-1",
   returnUrl: "https://eu.usejori.com/settings?tab=billing",
 }
@@ -26,7 +26,7 @@ beforeEach(() => {
   for (const name of stripeEnvironmentNames) {
     vi.stubEnv(name, "configured-test-value")
   }
-  vi.stubEnv("STRIPE_PRICE_STARTER_MONTH", "price_starter_month")
+  vi.stubEnv("STRIPE_PRICE_CLOUD", "price_cloud")
   vi.clearAllMocks()
 })
 afterEach(() => vi.unstubAllEnvs())
@@ -39,8 +39,6 @@ test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
     await expect(
       invoke(action, ctx, {
         ...common,
-        plan: "starter",
-        interval: "month",
         amountUsd: 25,
       })
     ).rejects.toThrow("Billing is not available in this instance yet.")
@@ -57,8 +55,6 @@ test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
       invoke(action, ctx, {
         ...common,
         returnUrl: "https://us.usejori.com/settings",
-        plan: "starter",
-        interval: "month",
         amountUsd: 25,
       })
     ).rejects.toThrow("Return URL must point to the Jori app.")
@@ -70,8 +66,6 @@ test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
 test("subscription checkout uses regional metadata and dynamic methods", async () => {
   await invoke(startPlanCheckout, context().ctx, {
     ...common,
-    plan: "starter",
-    interval: "month",
   })
   expect(stripeRequest).toHaveBeenCalledWith("/v1/checkout/sessions", {
     params: expect.objectContaining({
@@ -109,8 +103,6 @@ test("top-up checkout tags both session and payment intent", async () => {
 test("new Stripe customers carry the deployment region", async () => {
   await invoke(startPlanCheckout, context(false).ctx, {
     ...common,
-    plan: "starter",
-    interval: "month",
   })
   expect(stripeRequest).toHaveBeenCalledWith("/v1/customers", {
     params: {
@@ -144,7 +136,7 @@ function invoke(
 
 function context(hasCustomer = true) {
   const runMutation = vi.fn(async () => ({
-    state: { kind: "active", plan: "starter", interval: "month" },
+    state: { kind: "active" },
     ...(hasCustomer ? { stripe: { customerId: "cus_1" } } : {}),
   }))
   const ctx = {
@@ -172,8 +164,6 @@ test.each([startPlanCheckout, startTopUpCheckout])(
     await expect(
       invoke(action, ctx, {
         ...common,
-        plan: "starter",
-        interval: "month",
         amountUsd: 25,
         businessPurchase: false,
       })
@@ -181,8 +171,6 @@ test.each([startPlanCheckout, startTopUpCheckout])(
     await expect(
       invoke(action, ctx, {
         ...common,
-        plan: "starter",
-        interval: "month",
         amountUsd: 25,
         termsVersion: "old",
       })

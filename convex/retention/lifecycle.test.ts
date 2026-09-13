@@ -52,11 +52,11 @@ test("active subscriptions and purchased balances require settlement before dele
   await t.run(async (ctx) => {
     const account = await ensureAccount(ctx, "org")
     await ctx.db.patch(account._id, {
-      state: { kind: "active", plan: "starter", interval: "month" },
+      state: { kind: "active" },
     })
     await expect(beginDeletion(ctx, "org")).rejects.toThrow("Cancel")
     await ctx.db.patch(account._id, {
-      state: { kind: "paused", plan: "starter", interval: "month" },
+      state: { kind: "paused" },
       micros: { allowance: 0, wallet: 10 },
     })
     await expect(beginDeletion(ctx, "org")).rejects.toThrow("unused purchased")
@@ -122,7 +122,7 @@ test("renewal cancellation does not start retention until Stripe reports the eff
   await t.run(async (ctx) => {
     const account = await ensureAccount(ctx, "org")
     await ctx.db.patch(account._id, {
-      state: { kind: "active", plan: "starter", interval: "month" },
+      state: { kind: "active" },
       stripe: { customerId: "cus_test", subscriptionId: "sub_test" },
     })
   })

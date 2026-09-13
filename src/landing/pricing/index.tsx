@@ -1,16 +1,20 @@
 import { PageIntro } from "../section"
 import { MarketingShell } from "../shell"
+import { Custom } from "./custom"
+import { Extras } from "./extras"
 import { Faq } from "./faq"
-import { Shape } from "./shape"
+import { Plans } from "./plans"
 
 export function PricingPage() {
   return (
-    <MarketingShell closing="Join the waitlist and you'll see the numbers before they're public.">
+    <MarketingShell closing="Tell us what your team does by hand every week. We'll set the pilot up with you.">
       <PageIntro
-        lede="Not per seat, and not marked up. The shape is settled. The numbers are not, and we'd rather say so."
-        title="One price for the whole organization."
+        lede="Bring the people and the work. Choose who takes care of the rest."
+        title="Your whole company. One price."
       />
-      <Shape />
+      <Plans />
+      <Extras />
+      <Custom />
       <Faq />
     </MarketingShell>
   )

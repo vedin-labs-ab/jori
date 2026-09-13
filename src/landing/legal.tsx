@@ -41,7 +41,7 @@ function LegalDocument({ title, text }: { title: string; text: string }) {
             {title}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Last updated <time dateTime={termsVersion}>12 September 2026</time>
+            Last updated <time dateTime={termsVersion}>13 September 2026</time>
           </p>
           <nav
             aria-label="Legal documents"

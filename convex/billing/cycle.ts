@@ -1,4 +1,4 @@
-import { plans } from "../../contracts/billing"
+import { plan } from "../../contracts/billing"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
@@ -28,9 +28,9 @@ export function addMonths(timestamp: number, months: number) {
 
 /**
  * Hourly heartbeat that refreshes the monthly allowance on each account's
- * billing anchor. Allowances are cron-driven rather than webhook-driven so
- * annual plans still refresh monthly and a missed webhook cannot skip a cycle;
- * unpaid accounts are paused by the Stripe edge, which clears their anchor.
+ * billing anchor. Allowances are cron-driven rather than webhook-driven so a
+ * missed webhook cannot skip a cycle; unpaid accounts are paused by the
+ * Stripe edge, which clears their anchor.
  */
 export const sweep = internalMutation({
   args: {},
@@ -60,8 +60,8 @@ async function refreshCycle(
 ) {
   const { state, renewsAt } = account
 
-  // Only an active plan renews; a trial or a paused subscription that still
-  // carries an anchor loses it here rather than earning another allowance.
+  // Only an active plan renews; a paused subscription that still carries an
+  // anchor loses it here rather than earning another allowance.
   if (state.kind !== "active" || renewsAt === undefined) {
     await ctx.db.patch(account._id, { renewsAt: undefined })
 
@@ -70,7 +70,7 @@ async function refreshCycle(
 
   await resetAllowance(ctx, {
     account,
-    micros: plans[state.plan].monthlyAllowanceMicros,
+    micros: plan.monthlyAllowanceMicros,
     source: "cycle",
     now,
   })

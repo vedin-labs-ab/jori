@@ -106,12 +106,14 @@ test("a blocked budget keeps the message without a run", async () => {
   const { database, ctx } = consoleContext()
   const personId = await person(database)
 
-  await database.insert("accounts", {
-    organizationId,
+  const [account] = await rows<Doc<"accounts">>(database, "accounts")
+
+  if (account === undefined) {
+    throw new Error("Account missing")
+  }
+
+  await database.patch(account._id, {
     state: { kind: "paused" },
-    micros: { allowance: 0, wallet: 0 },
-    topUp: { charged: { micros: 0 } },
-    updatedAt: 0,
   })
 
   const result = await sendConsoleMessage(ctx, {

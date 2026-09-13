@@ -14,7 +14,7 @@ afterEach(() => {
   vi.mocked(toast.info).mockReset()
 })
 
-test("explains why trial organizations cannot top up", () => {
+test("explains why organizations without a plan cannot top up", () => {
   render(<TopUpDialog available={false} organizationId="organization" />)
 
   fireEvent.click(screen.getByRole("button", { name: "Top up" }))

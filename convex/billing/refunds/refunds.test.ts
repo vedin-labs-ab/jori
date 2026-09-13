@@ -61,7 +61,7 @@ test("freeze blocks new interactive work even while a subscription is active and
   await t.run(
     async (ctx) =>
       await ctx.db.patch(id, {
-        state: { kind: "active", plan: "starter", interval: "month" },
+        state: { kind: "active" },
         topUp: {
           micros: { threshold: 1, amount: 2, cap: 3 },
           charged: { micros: 0 },

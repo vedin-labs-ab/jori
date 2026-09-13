@@ -22,7 +22,7 @@ const tokens = { input: 1_000, output: 200 }
 const configuredAccount = {
   _id: "account-1",
   organizationId: "organization-1",
-  state: { kind: "trial", endsAt: Date.now() + 1000 },
+  state: { kind: "unsubscribed" },
   micros: { allowance: 0, wallet: 0 },
   topUp: {
     micros: {
@@ -104,7 +104,7 @@ test("the live model rate prices the same tokens and amount for the ledger and r
   )
 })
 
-test("a trial cannot schedule an auto top-up", async () => {
+test("an organization without a plan cannot schedule an auto top-up", async () => {
   const schedule = vi.fn()
 
   await meterOnce(configuredAccount, schedule)
@@ -119,7 +119,7 @@ test("an active plan can schedule its configured auto top-up", async () => {
   await meterOnce(
     {
       ...configuredAccount,
-      state: { kind: "active", plan: "starter", interval: "month" },
+      state: { kind: "active" },
     },
     schedule
   )
@@ -134,7 +134,7 @@ test("a spent monthly cap holds the charge back", async () => {
   await meterOnce(
     {
       ...configuredAccount,
-      state: { kind: "active", plan: "starter", interval: "month" },
+      state: { kind: "active" },
       topUp: {
         ...configuredAccount.topUp,
         charged: { micros: 90_000_000 },
