@@ -22,7 +22,7 @@ export function DraggableTableRow({
       {...props}
       {...drag.attributes}
       {...drag.listeners}
-      className={cn(rowDragClasses(drag), className)}
+      className={cn(rowFocusClasses, rowDragClasses(drag), className)}
       onClick={(event) => {
         onClick?.(event)
         followRowLink(event)
@@ -40,6 +40,11 @@ export function DraggableTableRow({
     />
   )
 }
+
+// Keep the anchor as the keyboard target, but show its focus on the whole
+// clickable row. Other controls, including inline editors, focus themselves.
+const rowFocusClasses =
+  "has-[[data-row-link]_a:focus-visible]:outline-2 has-[[data-row-link]_a:focus-visible]:-outline-offset-2 has-[[data-row-link]_a:focus-visible]:outline-ring [&_[data-row-link]_a:focus-visible]:outline-none"
 
 const interactiveSelector = [
   "a[href]",
