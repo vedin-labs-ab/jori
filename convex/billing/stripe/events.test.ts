@@ -235,7 +235,7 @@ function context(
     _id: "account-1" as Doc<"accounts">["_id"],
     organizationId: "organization-1",
     stripe: { customerId: "cus_1" },
-    state: { kind: "trial", endsAt: 0 },
+    state: { kind: "unsubscribed" },
     micros: { allowance: 0, wallet: 0 },
     topUp: { charged: { micros: 0 } },
   }

@@ -59,16 +59,13 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
     )
   }
 
-  const trialEnded =
-    account.state.kind === "trial" && account.state.endsAt < Date.now()
-
-  if (trialEnded) {
+  if (account.state.kind === "unsubscribed") {
     return (
       <Alert>
-        <AlertTitle>Trial ended</AlertTitle>
+        <AlertTitle>No plan yet</AlertTitle>
         <AlertDescription>
-          Jori is paused until the organization is on a plan. Everything is
-          saved and resumes the moment you subscribe.
+          Jori starts working once the organization is on a plan. Everything you
+          set up is kept.
         </AlertDescription>
       </Alert>
     )

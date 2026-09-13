@@ -4,7 +4,6 @@ import { type MutationCtx } from "../../_generated/server"
 import { isWorkspaceDeleting } from "../../retention/access"
 import { resumeWorkspace } from "../../retention/data"
 import { readArray, readRecord, readString } from "../../shared/input"
-import { trialRemainderMicros } from "../account"
 import { addMonths } from "../cycle"
 import { resetAllowance } from "../ledger"
 import { queueCancellation } from "./cancellation"
@@ -72,9 +71,7 @@ export async function applyPlanCheckout(
   const now = Date.now()
   await resetAllowance(ctx, {
     account,
-    micros:
-      plans[sold.plan].monthlyAllowanceMicros +
-      trialRemainderMicros(account, now),
+    micros: plans[sold.plan].monthlyAllowanceMicros,
     source: "plan",
     now,
   })

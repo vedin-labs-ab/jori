@@ -10,9 +10,10 @@ export const interval = v.union(v.literal("month"), v.literal("year"))
  * allotment and resets each cycle; `wallet` is prepaid, rolls over, and may
  * dip slightly negative while in-flight runs finish.
  *
- * A trial knows when it ends and a plan is only a fact once one is bought, so
- * `state` carries each with the shape it belongs to rather than leaving a
- * reader to check optional columns against a status.
+ * A plan is only a fact once one is bought, so `state` carries it with the
+ * shape it belongs to rather than leaving a reader to check optional columns
+ * against a status. An organization that has bought nothing is unsubscribed
+ * and can run nothing.
  */
 export const accounts = defineTable({
   organizationId: v.string(),
@@ -20,7 +21,7 @@ export const accounts = defineTable({
   refundHold: v.optional(v.string()),
   refundHeldAt: v.optional(v.number()),
   state: v.union(
-    v.object({ kind: v.literal("trial"), endsAt: v.number() }),
+    v.object({ kind: v.literal("unsubscribed") }),
     v.object({ kind: v.literal("active"), plan, interval }),
     v.object({ kind: v.literal("paused"), plan, interval })
   ),
@@ -88,11 +89,7 @@ export const transactions = defineTable(
       timestamp: v.number(),
       type: v.literal("allowance"),
       micros: v.object({ amount: v.number(), balance: v.number() }),
-      source: v.union(
-        v.literal("trial"),
-        v.literal("cycle"),
-        v.literal("plan")
-      ),
+      source: v.union(v.literal("cycle"), v.literal("plan")),
     }),
     v.object({
       organizationId: v.string(),

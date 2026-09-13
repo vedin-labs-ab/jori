@@ -1,4 +1,4 @@
-import { formatUsd, plans, trial } from "@contracts/billing"
+import { formatUsd, plans } from "@contracts/billing"
 import { CreditCard } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -43,7 +43,7 @@ function PlanCell({
   organizationId: string
 }) {
   const checkout = useBillingCheckout(organizationId)
-  const subscribed = account !== null && account.state.kind !== "trial"
+  const subscribed = account !== null && account.state.kind !== "unsubscribed"
 
   return (
     <CardContent className="min-w-0 py-4">
@@ -77,20 +77,16 @@ function PlanCell({
 }
 
 function planName(account: BillingAccount | null) {
-  if (account === null || account.state.kind === "trial") {
-    return "Trial"
+  if (account === null || account.state.kind === "unsubscribed") {
+    return "No plan"
   }
 
   return plans[account.state.plan].label
 }
 
 function planDetail(account: BillingAccount | null) {
-  if (account === null) {
-    return "14 days of everything Jori does. Starts with the first run."
-  }
-
-  if (account.state.kind === "trial") {
-    return `Everything Jori does, until ${shortDate(account.state.endsAt)}.`
+  if (account === null || account.state.kind === "unsubscribed") {
+    return "One price for the whole organization. Choose a plan to start."
   }
 
   const plan = plans[account.state.plan]
@@ -107,16 +103,13 @@ function AvailableCell({
   account: BillingAccount | null
   organizationId: string
 }) {
-  const remainingMicros = Math.max(
-    account?.micros.allowance ?? trial.allowanceMicros,
-    0
-  )
+  const remainingMicros = Math.max(account?.micros.allowance ?? 0, 0)
   const walletMicros = account?.micros.wallet ?? 0
-  // Subscribing mid-trial folds the trial remainder into the first cycle, so
-  // the balance can exceed the plan allowance; the denominator follows it.
+  // A manual allowance can lift the balance above the plan's, so the
+  // denominator follows it. Without a plan there is no allowance to meter.
   const allowanceMicros = Math.max(
-    account === null || account.state.kind === "trial"
-      ? trial.allowanceMicros
+    account === null || account.state.kind === "unsubscribed"
+      ? 0
       : plans[account.state.plan].monthlyAllowanceMicros,
     remainingMicros
   )
@@ -138,15 +131,15 @@ function AvailableCell({
         </div>
       </div>
       <div className="mt-1.5 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2.5 text-sm sm:items-center">
-        <span className="text-muted-foreground">
-          {account === null || account.state.kind === "trial"
-            ? "Trial"
-            : "Monthly"}
-        </span>
+        <span className="text-muted-foreground">Monthly</span>
         <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
           <Progress
             className="order-2 h-1.5 w-full sm:order-none sm:flex-1"
-            value={Math.min(100, (remainingMicros / allowanceMicros) * 100)}
+            value={
+              allowanceMicros === 0
+                ? 0
+                : Math.min(100, (remainingMicros / allowanceMicros) * 100)
+            }
           />
           <span className="tabular-nums sm:whitespace-nowrap">
             {formatUsd(remainingMicros)}{" "}
@@ -178,12 +171,8 @@ function MetricLabel({ children }: { children: ReactNode }) {
 }
 
 function resetLabel(account: BillingAccount | null) {
-  if (account === null) {
-    return "starts with the first run"
-  }
-
-  if (account.state.kind === "trial") {
-    return `ends ${shortDate(account.state.endsAt)}`
+  if (account === null || account.state.kind === "unsubscribed") {
+    return "starts with a plan"
   }
 
   return account.renewsAt === undefined

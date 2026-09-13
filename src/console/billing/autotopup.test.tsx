@@ -50,13 +50,13 @@ test("names each inline auto top-up control", () => {
   ).toBeDefined()
 })
 
-test("explains why trial organizations cannot enable auto top-up", () => {
+test("explains why organizations without a plan cannot enable auto top-up", () => {
   render(
     <AutoTopUpRow
       account={
         {
           canFundWallet: false,
-          state: { kind: "trial", endsAt: Date.now() + 1000 },
+          state: { kind: "unsubscribed" },
           topUp: { charged: { micros: 0 } },
         } as BillingAccount
       }

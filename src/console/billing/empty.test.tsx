@@ -35,7 +35,7 @@ const entries: BillingEntry[] = [
     organizationId: "organization",
     timestamp: 1,
     type: "allowance",
-    source: "trial",
+    source: "cycle",
     micros: { amount: 10_000_000, balance: 10_000_000 },
   },
   {
@@ -70,17 +70,17 @@ function labels() {
 
 test("activity starts newest first and sorts time and signed amounts both ways", () => {
   render(<Activity entries={entries} />)
-  expect(labels()).toEqual(["Top-up", "Research", "Trial allowance"])
+  expect(labels()).toEqual(["Top-up", "Research", "Monthly allowance"])
 
   fireEvent.click(screen.getByRole("button", { name: "When" }))
-  expect(labels()).toEqual(["Trial allowance", "Research", "Top-up"])
+  expect(labels()).toEqual(["Monthly allowance", "Research", "Top-up"])
   fireEvent.click(screen.getByRole("button", { name: "When" }))
-  expect(labels()).toEqual(["Top-up", "Research", "Trial allowance"])
+  expect(labels()).toEqual(["Top-up", "Research", "Monthly allowance"])
 
   fireEvent.click(screen.getByRole("button", { name: "Amount" }))
-  expect(labels()).toEqual(["Research", "Trial allowance", "Top-up"])
+  expect(labels()).toEqual(["Research", "Monthly allowance", "Top-up"])
   fireEvent.click(screen.getByRole("button", { name: "Amount" }))
-  expect(labels()).toEqual(["Top-up", "Trial allowance", "Research"])
+  expect(labels()).toEqual(["Top-up", "Monthly allowance", "Research"])
 
   const run = screen.getByRole("link", { name: "Research" })
   expect(run.getAttribute("href")).toContain("run=run")
@@ -96,9 +96,9 @@ test("activity filters each kind, restores everything, and distinguishes no matc
   let current = "What"
   for (const [kind, expected] of [
     ["Runs", ["Research"]],
-    ["Allowances", ["Trial allowance"]],
+    ["Allowances", ["Monthly allowance"]],
     ["Top-ups", ["Top-up"]],
-    ["Everything", ["Top-up", "Research", "Trial allowance"]],
+    ["Everything", ["Top-up", "Research", "Monthly allowance"]],
   ] as const) {
     fireEvent.pointerDown(screen.getByRole("button", { name: current }), {
       button: 0,

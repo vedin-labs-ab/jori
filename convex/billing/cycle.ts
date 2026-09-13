@@ -60,8 +60,8 @@ async function refreshCycle(
 ) {
   const { state, renewsAt } = account
 
-  // Only an active plan renews; a trial or a paused subscription that still
-  // carries an anchor loses it here rather than earning another allowance.
+  // Only an active plan renews; a paused subscription that still carries an
+  // anchor loses it here rather than earning another allowance.
   if (state.kind !== "active" || renewsAt === undefined) {
     await ctx.db.patch(account._id, { renewsAt: undefined })
 

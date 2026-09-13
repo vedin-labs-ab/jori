@@ -167,7 +167,7 @@ async function applySubscription(
 }
 
 /** Which plan a subscription change applies to: what Stripe now sells,
- *  falling back to what the account carries. A trial that bought nothing has
+ *  falling back to what the account carries. An unsubscribed account has
  *  neither, so there is nothing to pause or resume. */
 function subscribedPlan(
   account: Doc<"accounts">,
@@ -179,7 +179,7 @@ function subscribedPlan(
 
   return (
     (priceId === undefined ? undefined : planForPriceId(priceId)) ??
-    (state.kind === "trial"
+    (state.kind === "unsubscribed"
       ? undefined
       : { plan: state.plan, interval: state.interval })
   )

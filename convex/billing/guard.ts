@@ -19,14 +19,13 @@ export async function checkRunBudget(
   args: { organizationId: string; interactive: boolean }
 ): Promise<RunBudget> {
   const account = await ensureAccount(ctx, args.organizationId)
-  const now = Date.now()
 
   if (account.state.kind === "paused" || account.refundHold !== undefined) {
     return { ok: false, reason: "paused" }
   }
 
-  if (account.state.kind === "trial" && account.state.endsAt < now) {
-    return { ok: false, reason: "trial-ended" }
+  if (account.state.kind === "unsubscribed") {
+    return { ok: false, reason: "unsubscribed" }
   }
 
   const floor = args.interactive ? -interactiveGraceMicros : 0

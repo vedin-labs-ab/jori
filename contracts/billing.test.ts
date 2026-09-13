@@ -61,8 +61,8 @@ test("a budget sentence names the state, the consequence, and the remedy", () =>
     "The subscription is paused, so new work cannot start. Visit Billing settings to reactivate it."
   )
   expect(
-    budgetSentence("trial-ended", "the run stopped before its next turn")
+    budgetSentence("unsubscribed", "the run stopped before its next turn")
   ).toBe(
-    "The trial has ended, so the run stopped before its next turn. Choose a plan in Billing settings to keep Jori working."
+    "The organization isn't on a plan yet, so the run stopped before its next turn. Choose a plan in Billing settings to get Jori working."
   )
 })

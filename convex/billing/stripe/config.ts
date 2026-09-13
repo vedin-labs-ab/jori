@@ -19,7 +19,7 @@ export const stripeEnvironmentNames = [
   ),
 ]
 
-/** Deployment can serve the waitlist and trials without accepting payments.
+/** Deployment can serve the waitlist without accepting payments.
  * Partial configuration must not create customers or initiate charges. */
 export function isStripeConfigured() {
   return stripeEnvironmentNames.every(

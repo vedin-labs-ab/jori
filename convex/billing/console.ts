@@ -10,8 +10,8 @@ const entryPageSize = 30
 
 /**
  * Everything Billing settings renders. `account` is null until the
- * organization's first metered run or checkout creates one; the view shows the
- * trial as not yet started in that case.
+ * organization's first run attempt or checkout creates one; the view shows
+ * no plan in that case.
  */
 export const overview = query({
   args: { organizationId: v.string() },

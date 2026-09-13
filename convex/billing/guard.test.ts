@@ -41,9 +41,9 @@ test("paused accounts block all new work", async () => {
   expect(budget).toEqual({ ok: false, reason: "paused" })
 })
 
-test("an expired trial blocks even with usage left", async () => {
+test("an organization without a plan is blocked even with usage left", async () => {
   accountWith({
-    state: { kind: "trial", endsAt: Date.now() - 1000 },
+    state: { kind: "unsubscribed" },
     micros: { allowance: 5_000_000, wallet: 0 },
   })
 
@@ -52,7 +52,7 @@ test("an expired trial blocks even with usage left", async () => {
     interactive: true,
   })
 
-  expect(budget).toEqual({ ok: false, reason: "trial-ended" })
+  expect(budget).toEqual({ ok: false, reason: "unsubscribed" })
 })
 
 test("scheduled work stops at zero while interactive work has grace", async () => {

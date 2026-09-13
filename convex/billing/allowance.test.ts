@@ -30,7 +30,7 @@ const args = {
 type Account = Omit<Doc<"accounts">, "_id" | "_creationTime">
 const account: Account = {
   organizationId: args.organizationId,
-  state: { kind: "trial", endsAt: Date.now() + 100_000 },
+  state: { kind: "unsubscribed" },
   micros: { allowance: 0, wallet: -2_150_380 },
   renewsAt: 123,
   topUp: {

@@ -1,10 +1,10 @@
-import { formatUsd, interactiveGraceMicros, trial } from "@contracts/billing"
+import { formatUsd, interactiveGraceMicros } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
 import { type ReactNode } from "react"
 import { Section } from "../section"
 
 /**
- * Five questions, and only the five: the ones that would stop someone
+ * Four questions, and only the four: the ones that would stop someone
  * joining. A question the plan above already answers, or that the trust
  * page answers properly, is not a question.
  */
@@ -29,10 +29,6 @@ const questions: readonly { answer: ReactNode; question: string }[] = [
     question: "How is AI usage priced?",
     answer:
       "In dollars, at the provider's published rates for the model that answered. What we make on it is what good caching saves, never a multiplier on your bill.",
-  },
-  {
-    question: "Is there a trial?",
-    answer: `${trial.days} days and ${formatUsd(trial.allowanceMicros)} of usage, no card. It ends when either runs out.`,
   },
   {
     question: "What happens if we cancel?",

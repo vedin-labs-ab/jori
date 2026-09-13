@@ -37,11 +37,6 @@ export const billingIntervals = ["month", "year"] as const
 
 export type BillingInterval = (typeof billingIntervals)[number]
 
-export const trial = {
-  days: 14,
-  allowanceMicros: 25 * microsPerDollar,
-}
-
 /**
  * Interactive work (console instructions, mentions) may dip slightly below a
  * zero balance so Jori never goes silent mid-conversation. Scheduled work
@@ -52,15 +47,15 @@ export const interactiveGraceMicros = 2 * microsPerDollar
 /** Why new work may not start: the state Jori is in, and what ends it.
  *  Every surface says both around its own consequence, so the composer's
  *  toast, the refused mutation, and the stopped run agree. */
-export type BudgetReason = "trial-ended" | "paused" | "out-of-usage"
+export type BudgetReason = "unsubscribed" | "paused" | "out-of-usage"
 
 export const budgetBlocks: Record<
   BudgetReason,
   { clause: string; remedy: string }
 > = {
-  "trial-ended": {
-    clause: "The trial has ended",
-    remedy: "Choose a plan in Billing settings to keep Jori working.",
+  unsubscribed: {
+    clause: "The organization isn't on a plan yet",
+    remedy: "Choose a plan in Billing settings to get Jori working.",
   },
   paused: {
     clause: "The subscription is paused",

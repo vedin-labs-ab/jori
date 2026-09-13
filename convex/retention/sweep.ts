@@ -40,7 +40,7 @@ export const run = internalMutation({
   },
 })
 
-/** Bounded bootstrap also handles pre-policy expired trials and paused accounts. */
+/** Bounded bootstrap also handles pre-policy paused accounts. */
 export const accounts = internalMutation({
   args: { cursor: v.union(v.string(), v.null()) },
   returns: v.null(),
@@ -50,11 +50,6 @@ export const accounts = internalMutation({
       .paginate({ cursor: args.cursor, numItems: 50 })
     for (const account of page.page) {
       if (
-        account.state.kind === "trial" &&
-        account.state.endsAt <= Date.now()
-      ) {
-        await retainWorkspace(ctx, account.organizationId, account.state.endsAt)
-      } else if (
         account.state.kind === "paused" &&
         !(await findRetention(ctx, account.organizationId))
       ) {
