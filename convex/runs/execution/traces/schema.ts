@@ -93,125 +93,104 @@ const compactionData = v.object({
   tokensBefore: v.number(),
 })
 
-const runPrepared = v.object({
-  ...base,
-  type: v.literal("run.prepared"),
-  data: preparedData,
-})
-const runStopped = v.object({ ...base, type: v.literal("run.stopped") })
-
-const offerRequested = v.object({
-  ...timeline,
-  type: v.literal("offer.requested"),
-  data: offerData,
-})
-const offerResolved = v.object({
-  ...timeline,
-  type: v.literal("offer.resolved"),
-  data: offerData,
-})
-const approvalRequested = v.object({
-  ...timeline,
-  type: v.literal("approval.requested"),
-  data: approvalData,
-})
-const approvalResolved = v.object({
-  ...timeline,
-  type: v.literal("approval.resolved"),
-  data: approvalData,
-})
-const fileSaved = v.object({
-  ...timeline,
-  type: v.literal("file.saved"),
-  data: fileData,
-})
-const agentStarted = v.object({
-  ...timeline,
-  type: v.literal("agent.started"),
-  data: agentData,
-})
-const runWaiting = v.object({
-  ...timeline,
-  type: v.literal("run.waiting"),
-  data: waiterData,
-})
-const runResumed = v.object({
-  ...timeline,
-  type: v.literal("run.resumed"),
-  data: waiterData,
-})
-
-const runStarted = v.object({ ...timeline, type: v.literal("run.started") })
-const runCompleted = v.object({
-  ...timeline,
-  type: v.literal("run.completed"),
-})
-const runFailed = v.object({
-  ...timeline,
-  type: v.literal("run.failed"),
-  data: errorData,
-})
-
-const modelStarted = v.object({ ...timeline, type: v.literal("model.started") })
-const modelCompleted = v.object({
-  ...timeline,
-  type: v.literal("model.completed"),
-  data: modelData,
-})
-const modelFailed = v.object({
-  ...timeline,
-  type: v.literal("model.failed"),
-  data: errorData,
-})
-
-const toolStarted = v.object({
-  ...call,
-  type: v.literal("tool.started"),
-  data: toolStartedData,
-})
-const toolCompleted = v.object({
-  ...call,
-  type: v.literal("tool.completed"),
-  data: toolCompletedData,
-})
-const toolFailed = v.object({
-  ...call,
-  type: v.literal("tool.failed"),
-  data: toolFailedData,
-})
-const toolWaiting = v.object({
-  ...call,
-  type: v.literal("tool.waiting"),
-  data: toolWaitingData,
-})
-const transcriptCompacted = v.object({
-  ...timeline,
-  type: v.literal("transcript.compacted"),
-  data: compactionData,
-})
+// The row variants also supply the record mutation's event names.
+const variants = [
+  v.object({
+    ...base,
+    type: v.literal("run.prepared"),
+    data: preparedData,
+  }),
+  v.object({ ...base, type: v.literal("run.stopped") }),
+  v.object({ ...timeline, type: v.literal("run.started") }),
+  v.object({
+    ...timeline,
+    type: v.literal("run.completed"),
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("run.failed"),
+    data: errorData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("run.waiting"),
+    data: waiterData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("run.resumed"),
+    data: waiterData,
+  }),
+  v.object({ ...timeline, type: v.literal("model.started") }),
+  v.object({
+    ...timeline,
+    type: v.literal("model.completed"),
+    data: modelData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("model.failed"),
+    data: errorData,
+  }),
+  v.object({
+    ...call,
+    type: v.literal("tool.started"),
+    data: toolStartedData,
+  }),
+  v.object({
+    ...call,
+    type: v.literal("tool.completed"),
+    data: toolCompletedData,
+  }),
+  v.object({
+    ...call,
+    type: v.literal("tool.failed"),
+    data: toolFailedData,
+  }),
+  v.object({
+    ...call,
+    type: v.literal("tool.waiting"),
+    data: toolWaitingData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("offer.requested"),
+    data: offerData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("offer.resolved"),
+    data: offerData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("approval.requested"),
+    data: approvalData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("approval.resolved"),
+    data: approvalData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("file.saved"),
+    data: fileData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("agent.started"),
+    data: agentData,
+  }),
+  v.object({
+    ...timeline,
+    type: v.literal("transcript.compacted"),
+    data: compactionData,
+  }),
+] as const
 
 export const traceType = v.union(
-  v.literal("run.prepared"),
-  v.literal("run.stopped"),
-  v.literal("run.started"),
-  v.literal("run.completed"),
-  v.literal("run.failed"),
-  v.literal("run.waiting"),
-  v.literal("run.resumed"),
-  v.literal("model.started"),
-  v.literal("model.completed"),
-  v.literal("model.failed"),
-  v.literal("tool.started"),
-  v.literal("tool.completed"),
-  v.literal("tool.failed"),
-  v.literal("tool.waiting"),
-  v.literal("offer.requested"),
-  v.literal("offer.resolved"),
-  v.literal("approval.requested"),
-  v.literal("approval.resolved"),
-  v.literal("file.saved"),
-  v.literal("agent.started"),
-  v.literal("transcript.compacted")
+  ...variants.map((variant) => variant.fields.type)
 )
 
 export const traceData = v.union(
@@ -230,30 +209,6 @@ export const traceData = v.union(
   compactionData
 )
 
-export const traces = defineTable(
-  v.union(
-    runPrepared,
-    runStopped,
-    runStarted,
-    runCompleted,
-    runFailed,
-    runWaiting,
-    runResumed,
-    modelStarted,
-    modelCompleted,
-    modelFailed,
-    toolStarted,
-    toolCompleted,
-    toolFailed,
-    toolWaiting,
-    offerRequested,
-    offerResolved,
-    approvalRequested,
-    approvalResolved,
-    fileSaved,
-    agentStarted,
-    transcriptCompacted
-  )
-)
+export const traces = defineTable(v.union(...variants))
   .index("by_run_and_timestamp", ["runId", "timestamp"])
   .index("by_key", ["key"])
