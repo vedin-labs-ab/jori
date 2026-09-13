@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from "node:child_process"
+import { execFileSync, spawn, spawnSync } from "node:child_process"
 import {
   existsSync,
   mkdirSync,
@@ -172,23 +172,56 @@ async function start() {
   throw new Error(`main did not come up on ${port}. See ${logFile}.`)
 }
 
+/** Vite leaves the process group its ancestors share, so the group alone
+ *  would orphan it on the port. The whole tree is listed before anything
+ *  is signalled, then signalled leaf first. */
 async function stop() {
   const record = readRecord()
 
   if (record !== undefined && isAlive(record.pid)) {
-    process.kill(-record.pid, "SIGTERM")
-    for (
-      let waited = 0;
-      waited < 15_000 && isAlive(record.pid);
-      waited += 250
-    ) {
+    const tree = descendants(record.pid).reverse()
+
+    signal(tree, "SIGTERM")
+    for (let waited = 0; waited < 15_000 && tree.some(isAlive); waited += 250) {
       await sleep(250)
     }
-    if (isAlive(record.pid)) {
-      process.kill(-record.pid, "SIGKILL")
-    }
+    signal(tree.filter(isAlive), "SIGKILL")
   }
   rmSync(recordFile, { force: true })
+}
+
+/** The process and everything under it, parents before children. */
+function descendants(root: number) {
+  const children = new Map<number, number[]>()
+
+  for (const line of execFileSync("ps", ["-axo", "pid=,ppid="], {
+    encoding: "utf8",
+  }).split("\n")) {
+    const [pid, ppid] = line.trim().split(/\s+/).map(Number)
+
+    if (pid && ppid) {
+      children.set(ppid, [...(children.get(ppid) ?? []), pid])
+    }
+  }
+
+  const tree: number[] = []
+  const queue = [root]
+  for (let pid = queue.shift(); pid !== undefined; pid = queue.shift()) {
+    tree.push(pid)
+    queue.push(...(children.get(pid) ?? []))
+  }
+
+  return tree
+}
+
+function signal(pids: number[], name: NodeJS.Signals) {
+  for (const pid of pids) {
+    try {
+      process.kill(pid, name)
+    } catch {
+      // Already gone.
+    }
+  }
 }
 
 /** Vite binds whichever localhost the machine resolves first, so ask both. */
