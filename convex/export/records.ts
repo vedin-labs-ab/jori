@@ -1,6 +1,7 @@
 import { v } from "convex/values"
-import { type Doc, type TableNames } from "../_generated/dataModel"
-import { internalQuery, type QueryCtx } from "../_generated/server"
+import { type TableNames } from "../_generated/dataModel"
+import { internalQuery } from "../_generated/server"
+import { belongsToWorkspace } from "../retention/ownership"
 
 export const tables = [
   "webhookDeliveries",
@@ -58,37 +59,13 @@ export const page = internalQuery({
     })
     const page: unknown[] = []
     for (const row of result.page) {
-      if (await belongs(ctx, row, args.organizationId)) {
+      if (await belongsToWorkspace(ctx, row, args.organizationId)) {
         page.push(sanitize(args.table, row))
       }
     }
     return { ...result, page }
   },
 })
-
-async function belongs(
-  ctx: QueryCtx,
-  row: Doc<TableNames>,
-  organizationId: string
-) {
-  if ("organizationId" in row) {
-    return row.organizationId === organizationId
-  }
-  if ("collectionId" in row) {
-    return (
-      (await ctx.db.get(row.collectionId))?.organizationId === organizationId
-    )
-  }
-  if ("conversationId" in row && row.conversationId) {
-    return (
-      (await ctx.db.get(row.conversationId))?.organizationId === organizationId
-    )
-  }
-  if ("runId" in row && row.runId) {
-    return (await ctx.db.get(row.runId))?.organizationId === organizationId
-  }
-  return false
-}
 
 // Credentials are not customer-return data. Provider-specific integration data
 // can also hold installation tokens, so only its display fields are exported.

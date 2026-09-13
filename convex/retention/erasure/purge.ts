@@ -1,7 +1,8 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { purgeFile } from "../../files/records"
-import { belongsToWorkspace, contentTables } from "./tables"
+import { belongsToWorkspace } from "../ownership"
+import { contentTables } from "./tables"
 
 export async function purgeContent(
   ctx: MutationCtx,
