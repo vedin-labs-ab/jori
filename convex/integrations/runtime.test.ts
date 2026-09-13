@@ -7,6 +7,7 @@ import { type ActionCtx } from "../_generated/server"
 import { prepareIntegrationForRuntime } from "./runtime"
 
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.unstubAllEnvs()
   vi.unstubAllGlobals()
 })
@@ -83,6 +84,88 @@ test("mints and persists a stale GitHub installation token", async () => {
   })
   expect(new Headers(init?.headers).get("authorization")).toMatch(/^Bearer /)
 })
+
+test.each(["linear", "gmail", "googleCalendar"] as const)(
+  "%s reuses fresh OAuth credentials without exchange or persistence",
+  async (integration) => {
+    const fetch = vi.fn()
+    vi.stubGlobal("fetch", fetch)
+    const runMutation = vi.fn()
+    const row = integrationDoc({
+      integration,
+      credentials: {
+        tokens: { access: "cached-access", refresh: "cached-refresh" },
+        expiresAt: Date.now() + 600_000,
+      },
+    })
+
+    expect(
+      await prepareIntegrationForRuntime(
+        { runMutation } as unknown as ActionCtx,
+        { integration: row }
+      )
+    ).toBe(row)
+    expect(fetch).not.toHaveBeenCalled()
+    expect(runMutation).not.toHaveBeenCalled()
+  }
+)
+
+test.each(["linear", "gmail", "googleCalendar"] as const)(
+  "%s refreshes at the buffer boundary with its original snapshot and token policy",
+  async (integration) => {
+    const now = 1_800_000_000_000
+    vi.spyOn(Date, "now").mockReturnValue(now)
+    const provider = integration === "linear" ? "linear" : "google"
+    vi.stubEnv(`${provider.toUpperCase()}_CLIENT_ID`, "client")
+    vi.stubEnv(`${provider.toUpperCase()}_CLIENT_SECRET`, "secret")
+    const refreshToken = provider === "linear" ? "rotated-refresh" : undefined
+    const fetch = vi.fn().mockResolvedValue(
+      Response.json({
+        access_token: "rotated-access",
+        refresh_token: refreshToken,
+        expires_in: 3600,
+        scope: provider === "linear" ? ["read", "write"] : "read write",
+      })
+    )
+    vi.stubGlobal("fetch", fetch)
+    const credentials = {
+      tokens: { access: "persisted-access", refresh: "persisted-refresh" },
+      expiresAt: now + 3_600_000,
+    }
+    const runMutation = vi.fn().mockResolvedValue(credentials)
+    const row = integrationDoc({
+      integration,
+      connectionGeneration: 3,
+      credentialVersion: 8,
+      credentials: {
+        tokens: { access: "old-access", refresh: "old-refresh" },
+        expiresAt: now + 300_000,
+      },
+    })
+    const prepared = await prepareIntegrationForRuntime(
+      { runMutation } as unknown as ActionCtx,
+      { integration: row }
+    )
+
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(
+      new URLSearchParams(fetch.mock.calls[0][1].body).get("refresh_token")
+    ).toBe("old-refresh")
+    expect(runMutation).toHaveBeenCalledTimes(1)
+    expect(getFunctionName(runMutation.mock.calls[0][0])).toBe(
+      `integrations/${provider}/install:updateOAuthCredentials`
+    )
+    expect(runMutation.mock.calls[0][1]).toEqual({
+      integrationId: row._id,
+      expectedSnapshot: { connectionGeneration: 3, credentialVersion: 8 },
+      accessToken: "rotated-access",
+      refreshToken,
+      expiresAt: now + 3_600_000,
+      scope: "read write",
+    })
+    expect(prepared).toEqual({ ...row, credentials, credentialVersion: 9 })
+  }
+)
 
 test("marks a Google integration expired when the refresh grant is dead", async () => {
   vi.stubEnv("GOOGLE_CLIENT_ID", "google-client")

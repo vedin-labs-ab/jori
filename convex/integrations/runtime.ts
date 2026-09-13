@@ -15,8 +15,8 @@ import { getLinearTokenScope, refreshLinearAccessToken } from "./linear/oauth"
 import { requireMicrosoftCredentials } from "./microsoft/credentials"
 import { refreshMicrosoftAccessToken } from "./microsoft/oauth"
 import {
-  failOAuthRefresh,
   hasFreshTokenExpiration,
+  refreshOAuthIntegration,
   withCredentials,
 } from "./refresh"
 import { prepareSlackIntegrationForRuntime } from "./slack/install"
@@ -25,18 +25,29 @@ type RuntimeIntegration = Doc<"integrations">
 
 export async function prepareIntegrationForRuntime(
   ctx: ActionCtx,
-  args: {
-    integration: RuntimeIntegration
-  }
+  { integration }: { integration: RuntimeIntegration }
 ) {
-  const integration = args.integration
-
   if (integration.integration === "github") {
     return await prepareGitHubIntegrationForRuntime(ctx, integration)
   }
 
   if (integration.integration === "linear") {
-    return await prepareLinearIntegrationForRuntime(ctx, integration)
+    const credentials = requireLinearCredentials(integration)
+
+    return await refreshOAuthIntegration(ctx, integration, {
+      expiresAt: credentials.expiresAt,
+      label: "Linear",
+      refresh: () => refreshLinearAccessToken(credentials.tokens.refresh),
+      save: (token, update) =>
+        ctx.runMutation(
+          internal.integrations.linear.install.updateOAuthCredentials,
+          {
+            ...update,
+            refreshToken: token.refresh_token,
+            scope: getLinearTokenScope(token.scope),
+          }
+        ),
+    })
   }
 
   if (integration.integration === "slack") {
@@ -44,7 +55,22 @@ export async function prepareIntegrationForRuntime(
   }
 
   if (isGoogleIntegration(integration.integration)) {
-    return await prepareGoogleIntegrationForRuntime(ctx, integration)
+    const credentials = requireGoogleCredentials(integration)
+
+    return await refreshOAuthIntegration(ctx, integration, {
+      expiresAt: credentials.expiresAt,
+      label: "Google Workspace",
+      refresh: () => refreshGoogleAccessToken(credentials.tokens.refresh),
+      save: (token, update) =>
+        ctx.runMutation(
+          internal.integrations.google.install.updateOAuthCredentials,
+          {
+            ...update,
+            refreshToken: token.refresh_token,
+            scope: token.scope,
+          }
+        ),
+    })
   }
 
   if (isMicrosoftIntegration(integration.integration)) {
@@ -86,109 +112,35 @@ async function prepareGitHubIntegrationForRuntime(
   return withCredentials(integration, refreshedCredentials)
 }
 
-async function prepareLinearIntegrationForRuntime(
-  ctx: ActionCtx,
-  integration: RuntimeIntegration
-) {
-  const credentials = requireLinearCredentials(integration)
-
-  if (hasFreshTokenExpiration(credentials.expiresAt)) {
-    return integration
-  }
-
-  const tokenResult = await refreshLinearAccessToken(credentials.tokens.refresh)
-
-  if ("error" in tokenResult) {
-    return await failOAuthRefresh(ctx, integration, "Linear", tokenResult)
-  }
-
-  const refreshedCredentials = await ctx.runMutation(
-    internal.integrations.linear.install.updateOAuthCredentials,
-    {
-      integrationId: integration._id,
-      expectedSnapshot: credentialSnapshot(integration),
-      accessToken: tokenResult.access_token,
-      refreshToken: tokenResult.refresh_token,
-      expiresAt: Date.now() + tokenResult.expires_in * 1000,
-      scope: getLinearTokenScope(tokenResult.scope),
-    }
-  )
-
-  return withCredentials(integration, refreshedCredentials)
-}
-
-async function prepareGoogleIntegrationForRuntime(
-  ctx: ActionCtx,
-  integration: RuntimeIntegration
-) {
-  const credentials = requireGoogleCredentials(integration)
-
-  if (hasFreshTokenExpiration(credentials.expiresAt)) {
-    return integration
-  }
-
-  const tokenResult = await refreshGoogleAccessToken(credentials.tokens.refresh)
-
-  if ("error" in tokenResult) {
-    return await failOAuthRefresh(
-      ctx,
-      integration,
-      "Google Workspace",
-      tokenResult
-    )
-  }
-
-  const refreshedCredentials = await ctx.runMutation(
-    internal.integrations.google.install.updateOAuthCredentials,
-    {
-      integrationId: integration._id,
-      expectedSnapshot: credentialSnapshot(integration),
-      accessToken: tokenResult.access_token,
-      refreshToken: tokenResult.refresh_token,
-      expiresAt: Date.now() + tokenResult.expires_in * 1000,
-      scope: tokenResult.scope,
-    }
-  )
-
-  return withCredentials(integration, refreshedCredentials)
-}
-
 async function prepareMicrosoftIntegrationForRuntime(
   ctx: ActionCtx,
   integration: RuntimeIntegration
 ) {
   const credentials = requireMicrosoftCredentials(integration)
 
-  if (hasFreshTokenExpiration(credentials.expiresAt)) {
-    return integration
-  }
+  return await refreshOAuthIntegration(ctx, integration, {
+    expiresAt: credentials.expiresAt,
+    label: "Microsoft",
+    refresh: () =>
+      refreshMicrosoftAccessToken({
+        refreshToken: credentials.tokens.refresh,
+        tenantId: credentials.tenantId,
+      }),
+    save: async (token, update) => {
+      if (token.refresh_token === undefined) {
+        throw new Error("Microsoft token refresh failed: missing refresh token")
+      }
 
-  const tokenResult = await refreshMicrosoftAccessToken({
-    refreshToken: credentials.tokens.refresh,
-    tenantId: credentials.tenantId,
+      return await ctx.runMutation(
+        internal.integrations.microsoft.install.updateOAuthCredentials,
+        {
+          ...update,
+          refreshToken: token.refresh_token,
+          scope: token.scope,
+        }
+      )
+    },
   })
-
-  if ("error" in tokenResult) {
-    return await failOAuthRefresh(ctx, integration, "Microsoft", tokenResult)
-  }
-
-  if (tokenResult.refresh_token === undefined) {
-    throw new Error("Microsoft token refresh failed: missing refresh token")
-  }
-
-  const refreshedCredentials = await ctx.runMutation(
-    internal.integrations.microsoft.install.updateOAuthCredentials,
-    {
-      integrationId: integration._id,
-      expectedSnapshot: credentialSnapshot(integration),
-      accessToken: tokenResult.access_token,
-      refreshToken: tokenResult.refresh_token,
-      expiresAt: Date.now() + tokenResult.expires_in * 1000,
-      scope: tokenResult.scope,
-    }
-  )
-
-  return withCredentials(integration, refreshedCredentials)
 }
 
 function hasFreshGitHubToken(credentials: {
