@@ -178,11 +178,14 @@ function FolderRowLink({
       >
         <FolderIcon />
         <span className="min-w-0 truncate">{name}</span>
-        <VisibilityMark
-          visibility={folder.visibility}
-          folderId={folder.parentId}
-          ownerId={folder.createdBy}
-        />
+        {/* The tree shows where restrictions are set; descendants inherit. */}
+        {folder.visibility.mode !== "organization" ? (
+          <VisibilityMark
+            visibility={folder.visibility}
+            folderId={folder.parentId}
+            ownerId={folder.createdBy}
+          />
+        ) : null}
       </ConsoleLink>
     </SidebarMenuButton>
   )
