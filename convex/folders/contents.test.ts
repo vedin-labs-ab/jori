@@ -7,8 +7,8 @@ import {
 } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
-import { type Doc, type Id } from "../_generated/dataModel"
-import { folderChildren, summarizeTree } from "./contents"
+import { type Id } from "../_generated/dataModel"
+import { folderChildren } from "./contents"
 import { folderResources } from "./resources"
 
 const other = "persons:other" as Id<"persons">
@@ -46,8 +46,8 @@ test("subfolders come back name-sorted, counting their direct children", async (
     folderDoc({ parentId: folderId, name: "Empty" })
   )
   // Zeta holds only a subfolder, Alpha only filed resources: both count
-  // and mark a child folder on their own. Deeper content stays out — Deep's
-  // own children would not affect Zeta's number.
+  // toward their parent folder's total. Deep's own children would not
+  // affect Zeta's number.
   await database.insert(
     "folders",
     folderDoc({ parentId: zetaId, name: "Deep" })
@@ -66,12 +66,11 @@ test("subfolders come back name-sorted, counting their direct children", async (
       child.name,
       child.folderCount,
       child.resourceCount,
-      child.hasContents,
     ])
   ).toEqual([
-    ["Alpha", 0, 2, true],
-    ["Empty", 0, 0, false],
-    ["Zeta", 1, 0, true],
+    ["Alpha", 0, 2],
+    ["Empty", 0, 0],
+    ["Zeta", 1, 0],
   ])
 })
 
@@ -121,11 +120,9 @@ test("child counts skip what the viewer cannot see", async () => {
   // The owner counts the personal file; nobody counts the archived table.
   expect(forOwner.find((child) => child.name === "Mine")).toMatchObject({
     resourceCount: 1,
-    hasContents: true,
   })
   expect(forOther.find((child) => child.name === "Mine")).toMatchObject({
     resourceCount: 0,
-    hasContents: false,
   })
 })
 
@@ -275,29 +272,5 @@ test("listed rows carry their owner, and none for what Jori owns", async () => {
     ["Digest", undefined, undefined],
     ["Leads", testOwner, "Ada Lovelace"],
     ["run.md", undefined, undefined],
-  ])
-})
-
-test("tree rows mark the folders that hold anything", async () => {
-  const { database, ctx } = databaseContext()
-  const parentId = await database.insert("folders", folderDoc({ name: "Docs" }))
-
-  await database.insert("folders", folderDoc({ name: "Child", parentId }))
-
-  const filedId = await database.insert("folders", folderDoc({ name: "Data" }))
-
-  await database.insert("files", fileDoc({ folderId: filedId }))
-  await database.insert("folders", folderDoc({ name: "Empty" }))
-
-  const folders = (await database
-    .query("folders")
-    .collect()) as Doc<"folders">[]
-  const rows = await summarizeTree(ctx, folders)
-
-  expect(rows.map((row) => [row.name, row.hasContents])).toEqual([
-    ["Docs", true],
-    ["Child", false],
-    ["Data", true],
-    ["Empty", false],
   ])
 })

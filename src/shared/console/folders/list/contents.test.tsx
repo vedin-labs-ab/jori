@@ -24,7 +24,6 @@ const readyContents = {
       createdBy: "persons:owner",
       createdAt: 1,
       updatedAt: Date.now(),
-      hasContents: true,
       folderCount: 1,
       resourceCount: 2,
       ownerId: "persons:owner",
@@ -38,7 +37,6 @@ const readyContents = {
       parentId: "folder-0",
       createdAt: 1,
       updatedAt: Date.now(),
-      hasContents: false,
       folderCount: 0,
       resourceCount: 0,
       ownerId: "persons:other",
@@ -144,15 +142,14 @@ test("the Items header sorts folders by their count", () => {
   expect(names).toEqual(["Scratch", "Guides", "Leads", "Digest"])
 })
 
-test("a dotted icon marks the subfolders that hold anything", () => {
+test("empty and populated subfolders use the same plain icon", () => {
   renderContents(readyContents)
 
-  const dotted = screen.getByRole("link", { name: /^Guides(?:\s*·|$)/ })
-  const plain = screen.getByRole("link", { name: /^Scratch(?:\s*·|$)/ })
-
-  expect(dotted.querySelector(".lucide-folder-dot")).not.toBeNull()
-  expect(plain.querySelector(".lucide-folder-dot")).toBeNull()
-  expect(plain.querySelector(".lucide-folder")).not.toBeNull()
+  for (const name of [/^Guides(?:\s*·|$)/, /^Scratch(?:\s*·|$)/]) {
+    const folder = screen.getByRole("link", { name })
+    expect(folder.querySelector(".lucide-folder")).not.toBeNull()
+    expect(folder.querySelector(".lucide-folder-dot")).toBeNull()
+  }
 })
 
 test("loading shows the centered spinner instead of a table", () => {

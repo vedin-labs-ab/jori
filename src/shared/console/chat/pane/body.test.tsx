@@ -182,7 +182,6 @@ const folderContents = {
       createdBy: "persons:owner",
       createdAt: 1,
       updatedAt: Date.now(),
-      hasContents: false,
       folderCount: 0,
       resourceCount: 0,
       ownerId: "persons:owner",

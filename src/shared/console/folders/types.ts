@@ -24,7 +24,6 @@ export type ListedFolder = Pick<
   | "createdBy"
   | "folderCount"
   | "folderId"
-  | "hasContents"
   | "name"
   | "ownerId"
   | "ownerImage"

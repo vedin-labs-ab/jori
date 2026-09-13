@@ -1,4 +1,4 @@
-import { ChevronRight, MoreHorizontal } from "lucide-react"
+import { ChevronRight, Folder, FolderOpen, MoreHorizontal } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,6 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { folderIcon } from "../materials/folders"
 import { menuWidth } from "../menu"
 import { ConsoleLink } from "../shell/link"
 import { VisibilityMark } from "../visibility/badge"
@@ -76,7 +75,6 @@ export function FolderTreeItem({
             drag={drag}
             folderId={node.folderId}
             hasChildren={hasChildren}
-            hasContents={node.hasContents}
             isActive={activeFolderId(pathname) === node.folderId}
             isExpanded={isExpanded}
             name={node.name}
@@ -134,7 +132,6 @@ function FolderRowLink({
   drag,
   folderId,
   hasChildren,
-  hasContents,
   isActive,
   isExpanded,
   name,
@@ -144,13 +141,12 @@ function FolderRowLink({
   drag: FolderRowDrag
   folderId: string
   hasChildren: boolean
-  hasContents: boolean
   isActive: boolean
   isExpanded: boolean
   name: string
   onNavigate: () => void
 }) {
-  const FolderIcon = folderIcon(hasContents, isExpanded)
+  const FolderIcon = isExpanded ? FolderOpen : Folder
 
   return (
     <SidebarMenuButton

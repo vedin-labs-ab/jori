@@ -23,7 +23,6 @@ function folderRow(overrides: Record<string, unknown>) {
     createdBy: "persons:owner",
     createdAt: 1,
     updatedAt: Date.now(),
-    hasContents: false,
     folderCount: 0,
     resourceCount: 0,
     ownerId: "persons:owner",
@@ -63,9 +62,7 @@ function stubSelectionActions(): FolderSelectionActions {
 test("root folders land in the same table as a folder's contents", () => {
   renderList({
     status: "ready",
-    folders: [
-      folderRow({ hasContents: true, folderCount: 2, resourceCount: 3 }),
-    ],
+    folders: [folderRow({ folderCount: 2, resourceCount: 3 })],
   } as FolderRootsResult)
 
   for (const header of ["Name", "Kind", "Owner", "Items", "Updated"]) {
@@ -76,7 +73,7 @@ test("root folders land in the same table as a folder's contents", () => {
   expect(root.getAttribute("href")).toBe("/folders/folder-1")
   // The Owner column names whoever created the folder.
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
-  expect(root.querySelector(".lucide-folder-dot")).not.toBeNull()
+  expect(root.querySelector(".lucide-folder")).not.toBeNull()
   // One combined number; the tooltip carries the breakdown.
   const items = screen.getByTitle("2 folders, 3 resources")
   expect(items.textContent).toContain("5")

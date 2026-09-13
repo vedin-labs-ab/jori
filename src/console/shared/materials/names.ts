@@ -16,7 +16,6 @@ export function useFolderNames(organizationId: string) {
     tree.folders.map((folder) => [
       folder.folderId as string,
       {
-        hasContents: folder.hasContents,
         name: folder.name,
         parentId: folder.parentId as string | undefined,
       },

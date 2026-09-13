@@ -10,7 +10,7 @@ import {
 import { type TestDatabase } from "../../test/convex/database"
 import { folderDoc } from "../../test/convex/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
-import { folderChildren, summarizeTree } from "../folders/contents"
+import { folderChildren } from "../folders/contents"
 import { fileResource } from "../folders/filing"
 import { folderResources } from "../folders/resources"
 import { sendConsoleMessage } from "./console"
@@ -187,13 +187,6 @@ test("filing a chat does not expose it to other folder viewers", async () => {
   })
   expect(ownFolders[0]?.resourceCount).toBe(1)
   expect(otherFolders[0]?.resourceCount).toBe(0)
-  const folder = (await database.get(folderId)) as Doc<"folders">
-  expect((await summarizeTree(ctx, [folder], personId))[0]?.hasContents).toBe(
-    true
-  )
-  expect((await summarizeTree(ctx, [folder], otherId))[0]?.hasContents).toBe(
-    false
-  )
 })
 
 async function seedPrivateChats(

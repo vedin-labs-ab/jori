@@ -149,7 +149,6 @@ const folderRow = {
   createdBy: "persons:owner",
   createdAt: 1,
   updatedAt: Date.now(),
-  hasContents: true,
   folderCount: 0,
   resourceCount: 0,
   ownerId: "persons:owner",

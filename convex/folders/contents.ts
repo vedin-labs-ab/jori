@@ -3,7 +3,7 @@ import { withOwnerDisplays } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 import { filedTables } from "./filing"
-import { folderChats, sightedResources } from "./resources"
+import { sightedResources } from "./resources"
 import { descendantFolderIds, summarizeFolder, treeCap } from "./tree"
 
 // A folder's listing: subfolders plus the filed resources the caller may
@@ -77,79 +77,7 @@ async function countChild(
     ownerId: child.createdBy,
     folderCount,
     resourceCount,
-    hasContents: folderCount + resourceCount > 0,
   }
-}
-
-/** One tree row per folder: the summary plus a single honest signal —
- *  whether anything sits inside it, meaning a subfolder or any filed
- *  resource. Existence only: a folder whose subfolder is also listed costs
- *  nothing, the rest at most one cheap indexed probe per filed table plus
- *  one for subfolders. */
-export async function summarizeTree(
-  ctx: QueryLikeCtx,
-  folders: Doc<"folders">[],
-  personId?: Id<"persons">
-) {
-  const parentIds = new Set(folders.map((folder) => folder.parentId))
-
-  return await Promise.all(
-    folders.map(async (folder) => ({
-      ...summarizeFolder(folder),
-      hasContents:
-        parentIds.has(folder._id) ||
-        (await hasFiledResources(ctx, folder, personId)) ||
-        (await hasSubfolders(ctx, folder)),
-    }))
-  )
-}
-
-async function hasSubfolders(ctx: QueryLikeCtx, folder: Doc<"folders">) {
-  const child = await ctx.db
-    .query("folders")
-    .withIndex("by_organization_and_parent", (index) =>
-      index
-        .eq("organizationId", folder.organizationId)
-        .eq("parentId", folder._id)
-    )
-    .first()
-
-  return child !== null
-}
-
-async function hasFiledResources(
-  ctx: QueryLikeCtx,
-  folder: Doc<"folders">,
-  personId: Id<"persons"> | undefined
-) {
-  const folderId = folder._id
-  for (const table of filedTables) {
-    if (table === "conversations") {
-      const chats = await folderChats(
-        ctx,
-        createSight(ctx, {
-          organizationId: folder.organizationId,
-          personId,
-        }),
-        folderId
-      )
-      if (chats.length > 0) {
-        return true
-      }
-      continue
-    }
-
-    const filed = await ctx.db
-      .query(table)
-      .withIndex("by_folder", (index) => index.eq("folderId", folderId))
-      .first()
-
-    if (filed !== null) {
-      return true
-    }
-  }
-
-  return false
 }
 
 /** What deleting a folder would take with it: the folders below it and

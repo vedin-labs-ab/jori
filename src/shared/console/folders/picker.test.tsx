@@ -18,7 +18,6 @@ function row(folderId: string, name: string, parentId?: string) {
     folderId,
     name,
     parentId,
-    hasContents: false,
     createdAt: 1,
     updatedAt: 1,
   }

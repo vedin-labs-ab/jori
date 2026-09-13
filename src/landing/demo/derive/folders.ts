@@ -23,12 +23,9 @@ export function folderOf(state: DemoState, folderId: string) {
   return state.folders.find((folder) => folder.folderId === folderId)
 }
 
-/** The sidebar's rows: every folder, marked when anything sits inside. */
+/** The sidebar's rows: every folder, regardless of contents. */
 export function folderRows(state: DemoState): FolderRow[] {
-  return state.folders.map((folder) => ({
-    ...folder,
-    hasContents: hasContents(state, folder.folderId),
-  }))
+  return state.folders
 }
 
 export function rootFolders(state: DemoState): FolderRootsResult {
@@ -76,7 +73,6 @@ export function folderNames(state: DemoState): FolderNames {
     state.folders.map((folder) => [
       folder.folderId as string,
       {
-        hasContents: hasContents(state, folder.folderId),
         name: folder.name,
         parentId: folder.parentId as string | undefined,
       },
@@ -125,7 +121,6 @@ function listedFolders(state: DemoState, parentId: FolderId | undefined) {
         ownerImage: undefined,
         folderCount,
         resourceCount,
-        hasContents: folderCount + resourceCount > 0,
       }
     })
 }
@@ -177,15 +172,6 @@ function folderResources(state: DemoState, folderId: FolderId) {
     )
 
   return [...materials, ...jobs, ...chats].sort(byName)
-}
-
-function hasContents(state: DemoState, folderId: FolderId) {
-  return (
-    state.folders.some((folder) => folder.parentId === folderId) ||
-    state.materials.some((material) => material.folderId === folderId) ||
-    state.jobs.some((job) => job.folderId === folderId) ||
-    state.chat.conversations.some((chat) => chat.folderId === folderId)
-  )
 }
 
 function byName(left: { name: string }, right: { name: string }) {

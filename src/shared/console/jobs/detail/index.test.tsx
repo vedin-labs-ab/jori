@@ -47,7 +47,7 @@ function job(overrides: Partial<Job> = {}): Job {
 }
 
 const folders = new Map([
-  ["folder-1", { hasContents: true, name: "Renewals", parentId: undefined }],
+  ["folder-1", { name: "Renewals", parentId: undefined }],
 ])
 
 test("reads like a run's opened detail: brief, trigger, access, filing", () => {

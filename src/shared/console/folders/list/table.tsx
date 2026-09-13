@@ -1,4 +1,4 @@
-import { Layers } from "lucide-react"
+import { Folder, Layers } from "lucide-react"
 import { type ReactNode } from "react"
 import {
   TableBody,
@@ -20,7 +20,6 @@ import { FilterHead, SortHead } from "../../list/head"
 import { type RowSelection } from "../../list/selection"
 import { MaterialMeasureCell } from "../../materials/cells/measure"
 import { MaterialOwnerCell } from "../../materials/cells/owner"
-import { folderIcon } from "../../materials/folders"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
@@ -104,8 +103,7 @@ export function FolderListTable({
 
 /** One folder row, wherever folders list: it links to the folder's page
  *  and drags like a sidebar row, and a selected row takes the rest of the
- *  selection — folders and resources alike — with it. A dotted icon marks
- *  a folder holding anything, matching the sidebar tree's cue, and the
+ *  selection with it. Folder icons are independent of contents, and the
  *  Owner cell shows whoever made it. */
 export function FolderListRow({
   folder,
@@ -125,7 +123,6 @@ export function FolderListRow({
     selected
   )
   const now = useNow(30_000)
-  const FolderIcon = folderIcon(folder.hasContents)
 
   return (
     <DraggableTableRow
@@ -146,7 +143,7 @@ export function FolderListRow({
             title={folder.name}
             to="/folders/$folderId"
           >
-            <FolderIcon className="size-4 shrink-0 text-muted-foreground" />
+            <Folder className="size-4 shrink-0 text-muted-foreground" />
             <span className="truncate">{folder.name}</span>
             <VisibilityNameMark
               visibility={folder.visibility}

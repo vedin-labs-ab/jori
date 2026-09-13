@@ -1,28 +1,8 @@
-import {
-  Folder,
-  FolderDot,
-  FolderOpen,
-  FolderOpenDot,
-  FolderRoot,
-} from "lucide-react"
+import { Folder, FolderRoot } from "lucide-react"
 import { type ListFacet } from "../list/controls"
 
-/** The icon for a folder row anywhere folders show: a dot marks a folder
- *  holding anything — subfolders or filed resources — and an open body
- *  marks expansion, orthogonally. */
-export function folderIcon(hasContents: boolean, isExpanded = false) {
-  if (isExpanded) {
-    return hasContents ? FolderOpenDot : FolderOpen
-  }
-
-  return hasContents ? FolderDot : Folder
-}
-
-/** What a list needs to know about a folder: its label, whether it holds
- *  anything — the same cue the sidebar tree's icons carry — and its parent,
- *  for telling identically named folders apart. */
+/** Folder labels and parents, for telling identically named folders apart. */
 type FolderEntry = {
-  hasContents: boolean
   name: string
   parentId?: string
 }
@@ -40,7 +20,7 @@ export function folderFacet(
   const named = [...map]
     .map(([value, entry]) => ({
       hint: duplicateHint(map, entry),
-      icon: folderIcon(entry.hasContents),
+      icon: Folder,
       label: entry.name,
       value,
     }))

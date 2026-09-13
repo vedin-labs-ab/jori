@@ -4,7 +4,7 @@ import { mutation, type QueryCtx, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { createSight } from "../visibility/sight"
-import { folderChildren, subtreeImpact, summarizeTree } from "./contents"
+import { folderChildren, subtreeImpact } from "./contents"
 import { filedResourceType, fileResource } from "./filing"
 import { createFolder, moveFolder, removeFolder, renameFolder } from "./records"
 import { folderResources } from "./resources"
@@ -17,8 +17,7 @@ import {
 } from "./tree"
 
 /** Every folder of the organization as one flat list; the client builds the
- *  tree. Each row carries hasContents so empty folders can read differently.
- *  Capped generously at treeCap (see tree.ts). */
+ *  tree. Capped generously at treeCap (see tree.ts). */
 export const tree = query({
   args: {
     organizationId: v.string(),
@@ -50,7 +49,7 @@ export const tree = query({
 
     return {
       status: "ready" as const,
-      folders: await summarizeTree(ctx, visible, personId),
+      folders: visible.map(summarizeFolder),
     }
   },
 })

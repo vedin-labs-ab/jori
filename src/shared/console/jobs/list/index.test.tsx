@@ -46,7 +46,7 @@ function job(overrides: Partial<Job> = {}): Job {
 }
 
 const folders = new Map([
-  ["folder-1", { hasContents: true, name: "Renewals", parentId: undefined }],
+  ["folder-1", { name: "Renewals", parentId: undefined }],
 ])
 
 function renderList(
