@@ -37,15 +37,15 @@ Same word, same meaning, wherever you write:
 - `pnpm test <paths>` runs the tests for what you changed. It never waits
   for a gate and gets two workers, so keep the paths narrow.
   `pnpm check:fix` formats and regenerates compiled content.
-- `pnpm land <name>` rebases on `main`, runs the full gate, and
-  fast-forwards. One gate runs at a time on the machine, so a landing
-  takes minutes and may queue behind another; start it in the background
-  and let it finish. Run `task` and `land` from the primary checkout,
-  everything else in the worktree.
-- `pnpm dev:up` serves `main` at localhost:8050 and keeps it current.
-  Landing runs it, so check there before reaching for a worktree preview.
-- Only pure documentation lands with `--no-verify`. Anything the build reads,
-  including prompts, skills, and legal pages, is not documentation.
+- `pnpm land <name>` rebases on `main`, runs the gate, and fast-forwards.
+  Gates run one at a time, so start it in the background and let it
+  finish. Run `task` and `land` from the primary checkout, everything else
+  in the worktree.
+- `pnpm dev:up` serves `main` and keeps it current; `pnpm dev:check` says
+  where. Landing runs it, so look there before reaching for a worktree
+  preview.
+- Land only pure documentation with `--no-verify`. Anything the build
+  reads, including prompts, skills, and legal pages, is not documentation.
 
 ## Code
 
