@@ -52,7 +52,6 @@ export function useJobInstructionsEditor(props: JobInstructionsFieldProps) {
 
   useInstructionSync({
     catalog,
-    additionalSurfaces: props.additionalSurfaces,
     editor,
     props,
     refs,

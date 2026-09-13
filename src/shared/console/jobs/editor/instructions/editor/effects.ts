@@ -10,10 +10,8 @@ import {
 import { type InstructionSuggestionState } from "../suggestion/suggest"
 import { type InstructionRefs, type JobInstructionsFieldProps } from "../types"
 
-/** The per-render sync pair: latest props into refs, external value into
- *  the editor document. */
+/** Keep callback refs current before applying external document changes. */
 export function useInstructionSync(args: {
-  additionalSurfaces: JobInstructionsFieldProps["surfaces"]
   catalog: JobMentionCatalog
   editor: Editor | null
   props: JobInstructionsFieldProps
@@ -23,35 +21,12 @@ export function useInstructionSync(args: {
   suggestion: InstructionSuggestionState | null
   updateSuggestion: (editor: Editor, activeIndex?: number) => void
 }) {
-  useLatestInstructionRefs(args)
-  useExternalInstructionValue({
-    ...args,
-    contentKey: `${args.props.policyKey}|${args.props.skills.join(",")}`,
-  })
-}
-
-function useLatestInstructionRefs({
-  additionalSurfaces,
-  catalog,
-  editor,
-  props,
-  refs,
-  sources,
-  suggestion,
-}: {
-  additionalSurfaces: JobInstructionsFieldProps["surfaces"]
-  catalog: JobMentionCatalog
-  editor: Editor | null
-  props: JobInstructionsFieldProps
-  refs: InstructionRefs
-  sources: JobMentionSources
-  suggestion: InstructionSuggestionState | null
-}) {
+  const { catalog, editor, props, refs, sources, suggestion } = args
   const renderedWebSearch = useRef(props.webSearch)
   const renderedScope = useRef(props.scope)
 
   useEffect(() => {
-    refs.additionalSurfaces.current = additionalSurfaces
+    refs.additionalSurfaces.current = props.additionalSurfaces
     refs.catalog.current = catalog
     refs.editor.current = editor
     refs.onWebSearchChange.current = props.onWebSearchChange
@@ -69,30 +44,21 @@ function useLatestInstructionRefs({
     }
     renderedWebSearch.current = props.webSearch
     renderedScope.current = props.scope
-  }, [additionalSurfaces, catalog, editor, props, refs, sources, suggestion])
+  }, [catalog, editor, props, refs, sources, suggestion])
+
+  useExternalInstructionValue(args)
 }
 
 function useExternalInstructionValue({
-  additionalSurfaces,
   catalog,
-  contentKey,
   editor,
   props,
   refs,
   setIsEmpty,
   updateSuggestion,
-}: {
-  additionalSurfaces: JobInstructionsFieldProps["surfaces"]
-  catalog: JobMentionCatalog
-  /** Rebuild marker for inputs the serialized value cannot express — the
-   *  policy snapshot and the mention catalogs. */
-  contentKey: string
-  editor: Editor | null
-  props: JobInstructionsFieldProps
-  refs: InstructionRefs
-  setIsEmpty: Dispatch<SetStateAction<boolean>>
-  updateSuggestion: (editor: Editor, activeIndex?: number) => void
-}) {
+}: Parameters<typeof useInstructionSync>[0]) {
+  // Policy and catalog changes can rebuild markers without changing the value.
+  const contentKey = `${props.policyKey}|${props.skills.join(",")}`
   const renderedContentKey = useRef(contentKey)
   const appliedExternalKey = useRef(
     jobInstructionKey({
@@ -123,7 +89,7 @@ function useExternalInstructionValue({
     const currentValue = serializeJobInstructionDocument(editor.getJSON())
     currentValue.surfaces = mergeJobSurfaces(
       currentValue.surfaces,
-      additionalSurfaces
+      props.additionalSurfaces
     )
 
     if (nextKey !== jobInstructionKey(currentValue) || keyChanged) {
@@ -142,16 +108,7 @@ function useExternalInstructionValue({
 
     appliedExternalKey.current = nextKey
     renderedContentKey.current = contentKey
-  }, [
-    additionalSurfaces,
-    catalog,
-    contentKey,
-    editor,
-    props,
-    refs,
-    setIsEmpty,
-    updateSuggestion,
-  ])
+  }, [catalog, contentKey, editor, props, refs, setIsEmpty, updateSuggestion])
 }
 
 export function useInstructionValidationA11y({
