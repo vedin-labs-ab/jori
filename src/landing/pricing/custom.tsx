@@ -3,14 +3,13 @@ import { Button } from "@/components/ui/button"
 import { Jori } from "../section"
 
 /** The third folder is a conversation, not a plan, so it is not a tab. It
- *  is set in the opposite scheme with the brand green mixed in: on the light
- *  page a deep green, on the dark page a pale one, both from the tokens.
- *  Mixed in oklab, not oklch: a neutral carries hue 0, and mixing hues
- *  would land the green in brown. */
+ *  is a dark green card in either scheme: the dark tokens, with the brand
+ *  green mixed into their ground. Mixed in oklab, not oklch: a neutral
+ *  carries hue 0, and mixing hues would land the green in brown. */
 export function Custom() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-6 md:py-8">
-      <div className="inverted rounded-2xl bg-[color-mix(in_oklab,var(--background),var(--primary)_55%)] px-6 py-10 text-foreground sm:px-10 md:px-12 md:py-14">
+    <section className="mx-auto w-full max-w-6xl px-6 py-14 md:py-18">
+      <div className="dark rounded-2xl bg-[color-mix(in_oklab,var(--background),var(--primary)_55%)] px-6 py-10 text-foreground sm:px-10 md:px-12 md:py-14">
         <div className="grid gap-8 md:grid-cols-2 md:items-center md:gap-12">
           <h2 className="font-medium text-3xl text-balance tracking-tight sm:text-4xl">
             Run it your way.

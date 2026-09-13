@@ -145,7 +145,7 @@ const plans: readonly Plan[] = [
  *  drawer does. */
 export function Plans() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 pt-14 md:pt-20">
+    <section className="mx-auto w-full max-w-6xl px-6 pt-12 md:pt-16">
       <TabsPrimitive.Root defaultValue="cloud">
         <TabsPrimitive.List
           aria-label="Plans"
@@ -200,7 +200,7 @@ function PlanBody({ plan }: { plan: Plan }) {
         </div>
         {/* Four facts across rather than four rows down: the folder spans
             the page, and a two-column row across it is mostly air. */}
-        <dl className="mt-8 grid gap-x-8 gap-y-8 border-t pt-8 sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="mt-8 grid gap-x-12 gap-y-8 border-t pt-8 sm:grid-cols-2 lg:grid-cols-4">
           {plan.rows.map((row) => (
             <div key={row.term}>
               <dt className="flex items-center gap-2 text-muted-foreground text-sm">
