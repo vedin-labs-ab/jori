@@ -71,10 +71,13 @@ export function GrantPicker({
           <ChevronsUpDown className="text-muted-foreground" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-64 p-0">
-        <Command filter={grantFilter}>
+      <PopoverContent align="start" className="w-64 p-0" collisionPadding={8}>
+        <Command
+          className="max-h-(--radix-popover-content-available-height)"
+          filter={grantFilter}
+        >
           <CommandInput placeholder={placeholder} />
-          <CommandList>
+          <CommandList className="min-h-0">
             <CommandEmpty>No matches.</CommandEmpty>
             <CommandGroup>
               {(options ?? []).map((option) => (

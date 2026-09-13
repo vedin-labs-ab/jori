@@ -1,5 +1,4 @@
 import { Fragment, type ReactNode, useEffect, useRef } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { scrollFadeViewport } from "@/shared/fade"
+import { scrollFade } from "@/shared/fade"
 import { useChatDrag } from "../chat/drag"
 import { type ChatConversation } from "../chat/types"
 import { VisibilityMark } from "../visibility/badge"
@@ -201,9 +200,7 @@ function ChatsScroll({
   }
 
   return (
-    <ScrollArea className={cn(scrollFadeViewport, "h-24")}>
-      {children}
-    </ScrollArea>
+    <div className={cn(scrollFade, "h-24 overflow-y-auto")}>{children}</div>
   )
 }
 

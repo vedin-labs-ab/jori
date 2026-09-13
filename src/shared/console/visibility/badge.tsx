@@ -85,7 +85,7 @@ export function VisibilityButton({
     <Button
       aria-label={`Audience: ${summary.label}`}
       className={cn(
-        "max-w-32 shrink-0 gap-1.5 @2xl/inset:max-w-48 [&_svg]:size-3.5!",
+        "max-w-32 shrink-0 gap-1.5 @max-2xl/inset:size-7 @max-2xl/inset:px-0 @2xl/inset:max-w-48 [&_svg]:size-3.5!",
         className
       )}
       onClick={onClick}
@@ -94,7 +94,7 @@ export function VisibilityButton({
       variant="ghost"
     >
       <VisibilityIcon mode={summary.icon} />
-      <span className="truncate">{summary.label}</span>
+      <span className="truncate @max-2xl/inset:hidden">{summary.label}</span>
     </Button>
   )
 }

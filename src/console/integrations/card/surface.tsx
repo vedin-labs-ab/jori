@@ -34,7 +34,7 @@ export function IntegrationCardSurface({
 }) {
   return (
     <Card className="gap-0 py-0">
-      <CardHeader className="gap-3 p-4 sm:grid-cols-[1fr_auto] sm:p-5">
+      <CardHeader className="gap-3 p-4 has-data-[slot=card-action]:grid-cols-1 @lg/inset:has-data-[slot=card-action]:grid-cols-[minmax(0,1fr)_auto] sm:p-5">
         <div className="flex min-w-0 items-start gap-3">
           <IntegrationLogoMark logo={logo} />
           <div className="grid min-w-0 gap-2">
@@ -48,7 +48,7 @@ export function IntegrationCardSurface({
           </div>
         </div>
         {action === undefined ? null : (
-          <CardAction className="static row-auto self-start justify-self-start sm:col-start-2 sm:row-start-1 sm:justify-self-end">
+          <CardAction className="static col-start-auto row-span-1 row-start-auto self-start justify-self-start @lg/inset:col-start-2 @lg/inset:row-start-1 @lg/inset:justify-self-end">
             {action}
           </CardAction>
         )}

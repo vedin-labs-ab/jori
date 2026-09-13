@@ -1,5 +1,9 @@
 import { expect, test } from "vitest"
-import { consoleDocumentTitle, isNavigationActive } from "./routes"
+import {
+  consoleDocumentTitle,
+  isMaterialPage,
+  isNavigationActive,
+} from "./routes"
 
 test("titles the browser tab with the page, then the product", () => {
   expect(consoleDocumentTitle("/runs")).toBe("Activity · Jori")
@@ -24,3 +28,13 @@ test("New chat is active on its own path alone; the rest on their pages too", ()
   ).toBe(false)
   expect(isNavigationActive("/jobs/jobs_watch", "/jobs")).toBe(true)
 })
+
+test.each(["/jobs/", "/tables/", "/stores/", "/files/", "/folders/", "/chat/"])(
+  "%s retains its list heading with a trailing slash",
+  (pathname) => {
+    expect(isMaterialPage(pathname)).toBe(false)
+    expect(consoleDocumentTitle(pathname)).toBe(
+      consoleDocumentTitle(pathname.slice(0, -1))
+    )
+  }
+)

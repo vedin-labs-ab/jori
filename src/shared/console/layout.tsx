@@ -111,11 +111,11 @@ export function ConsoleHeaderButton({
   return (
     <Button
       aria-label={label}
-      className={cn("@max-lg/inset:size-7 @max-lg/inset:px-0", className)}
+      className={cn("@max-2xl/inset:size-7 @max-2xl/inset:px-0", className)}
       {...props}
     >
       {icon}
-      <span className="@max-lg/inset:hidden">{label}</span>
+      <span className="@max-2xl/inset:hidden">{label}</span>
       {children}
     </Button>
   )

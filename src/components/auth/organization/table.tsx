@@ -260,7 +260,7 @@ export function OrganizationTableEmpty({
   return (
     <TableRow>
       <TableCell colSpan={colSpan}>
-        <Empty className="min-h-40 rounded-none p-4">
+        <Empty className="sticky left-4 min-h-40 w-[calc(100cqw-2rem)] max-w-full rounded-none p-4 whitespace-normal">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <Icon />

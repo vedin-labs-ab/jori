@@ -90,8 +90,9 @@ const materialNouns: Record<string, string> = {
 /** The surface a material detail page belongs to, when the path is one;
  *  list pages and non-material surfaces stay a single heading. */
 export function getMaterialSurface(pathname: string) {
+  const path = pathname.replace(/\/$/, "")
   return consoleSurfaces.find(
-    (item) => item.to in materialNouns && pathname.startsWith(`${item.to}/`)
+    (item) => item.to in materialNouns && path.startsWith(`${item.to}/`)
   )
 }
 
@@ -99,10 +100,11 @@ export function getMaterialSurface(pathname: string) {
  *  the material detail pages, folder pages, whose whole ancestry is data,
  *  and a conversation's page, named by its title. */
 export function isMaterialPage(pathname: string) {
+  const path = pathname.replace(/\/$/, "")
   return (
-    getMaterialSurface(pathname) !== undefined ||
-    pathname.startsWith("/folders/") ||
-    pathname.startsWith("/chat/")
+    getMaterialSurface(path) !== undefined ||
+    path.startsWith("/folders/") ||
+    path.startsWith("/chat/")
   )
 }
 

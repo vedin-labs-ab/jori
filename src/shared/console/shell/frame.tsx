@@ -227,14 +227,14 @@ function MaterialTrail({
         {trail.map((segment, index) => (
           <Fragment key={segmentKey(segment)}>
             {index === 0 ? null : (
-              <BreadcrumbSeparator className="@max-lg/inset:hidden" />
+              <BreadcrumbSeparator className="@max-2xl/inset:hidden" />
             )}
             <BreadcrumbItem
               className={cn(
                 "min-w-0",
                 index < trail.length - 1
-                  ? "@max-lg/inset:hidden"
-                  : "@max-xs/inset:hidden"
+                  ? "@max-2xl/inset:hidden"
+                  : "@max-lg/inset:hidden"
               )}
             >
               <BreadcrumbLink asChild className="truncate">
@@ -246,7 +246,7 @@ function MaterialTrail({
           </Fragment>
         ))}
         {trail.length === 0 ? null : (
-          <BreadcrumbSeparator className="@max-xs/inset:hidden" />
+          <BreadcrumbSeparator className="@max-lg/inset:hidden" />
         )}
         <BreadcrumbItem className="min-w-0">
           <MaterialName material={material} />
@@ -278,7 +278,7 @@ function MaterialNameContent({ material }: { material: MaterialBreadcrumb }) {
             transition smoothing the shift. The weight is the breadcrumb's,
             not the button's: the name reads as the crumb it replaces. */}
         <Button
-          className="min-w-0 gap-1 px-0 font-normal text-foreground hover:px-1.5 focus-visible:px-1.5 aria-expanded:px-1.5"
+          className="max-w-full min-w-0 gap-1 px-0 font-normal text-foreground hover:px-1.5 focus-visible:px-1.5 aria-expanded:px-1.5"
           type="button"
           variant="ghost"
         >
