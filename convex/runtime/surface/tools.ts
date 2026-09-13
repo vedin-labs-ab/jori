@@ -2,6 +2,7 @@ import { type JsonObject, toJsonObject } from "../../../contracts/json"
 import { replyPartsSchema } from "../../../contracts/replies/parts"
 import { finalProperty } from "../../../contracts/runtime/tools"
 import { withOptionalFieldGuidance } from "../../../contracts/tools"
+import { githubReactionContentProperty } from "../../../contracts/tools/fragments/reactions"
 import {
   communicationCapabilities,
   replyPartKinds,
@@ -135,20 +136,7 @@ function addReactionSchema(surface: MessageIntegration): JsonObject {
 
 function reactionProperty(surface: MessageIntegration): JsonObject {
   if (surface === "github") {
-    return {
-      type: "string",
-      enum: [
-        "+1",
-        "-1",
-        "laugh",
-        "confused",
-        "heart",
-        "hooray",
-        "rocket",
-        "eyes",
-      ],
-      description: "GitHub reaction keyword.",
-    }
+    return githubReactionContentProperty("GitHub reaction keyword.")
   }
 
   return {

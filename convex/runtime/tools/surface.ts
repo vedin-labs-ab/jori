@@ -2,6 +2,10 @@ import { type JsonObject } from "../../../contracts/json"
 import { readReplyParts } from "../../../contracts/replies/parts"
 import { type SurfaceReactionTarget } from "../../../contracts/runtime/surface"
 import { readFinal } from "../../../contracts/runtime/tools"
+import {
+  githubReactionContents,
+  isGitHubReactionContent,
+} from "../../../contracts/tools/fragments/reactions"
 import { replyPartKinds } from "../../messages/capabilities"
 import { optionalString, requiredString } from "../../shared/input"
 import {
@@ -143,9 +147,9 @@ function requiredReaction(value: unknown, surface: string) {
 
   const reaction = requiredString(value, "reaction")
 
-  if (surface === "github" && !githubReactions.has(reaction)) {
+  if (surface === "github" && !isGitHubReactionContent(reaction)) {
     throw new Error(
-      `reaction must be one of ${[...githubReactions].join(", ")}`
+      `reaction must be one of ${githubReactionContents.join(", ")}`
     )
   }
 
@@ -221,14 +225,3 @@ function requiredPositiveInteger(value: unknown, name: string) {
 
   return value
 }
-
-const githubReactions = new Set([
-  "+1",
-  "-1",
-  "laugh",
-  "confused",
-  "heart",
-  "hooray",
-  "rocket",
-  "eyes",
-])

@@ -1,18 +1,22 @@
+import { enumProperty } from "./common"
+
+export const githubReactionContents: readonly string[] = [
+  "+1",
+  "-1",
+  "laugh",
+  "confused",
+  "heart",
+  "hooray",
+  "rocket",
+  "eyes",
+]
+
+export function isGitHubReactionContent(value: unknown): value is string {
+  return typeof value === "string" && githubReactionContents.includes(value)
+}
+
 export function githubReactionContentProperty(description: string) {
-  return {
-    type: "string",
-    enum: [
-      "+1",
-      "-1",
-      "laugh",
-      "confused",
-      "heart",
-      "hooray",
-      "rocket",
-      "eyes",
-    ],
-    description,
-  }
+  return enumProperty(githubReactionContents, description)
 }
 
 export function githubCommentReactionSubjectProperty() {

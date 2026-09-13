@@ -1,4 +1,5 @@
 import { compactRecord } from "../../../../contracts/json"
+import { isGitHubReactionContent } from "../../../../contracts/tools/fragments/reactions"
 import {
   readNested,
   requiredNumber,
@@ -96,16 +97,7 @@ function requiredCommentSubject(value: unknown) {
 }
 
 function requiredReactionContent(value: unknown) {
-  if (
-    value === "+1" ||
-    value === "-1" ||
-    value === "laugh" ||
-    value === "confused" ||
-    value === "heart" ||
-    value === "hooray" ||
-    value === "rocket" ||
-    value === "eyes"
-  ) {
+  if (isGitHubReactionContent(value)) {
     return value
   }
 
