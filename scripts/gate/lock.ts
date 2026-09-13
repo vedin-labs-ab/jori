@@ -46,7 +46,7 @@ export async function acquireLock(file = defaultLockFile()) {
       if (!announced && current !== undefined) {
         announced = true
         process.stderr.write(
-          `Another gate has been running in ${current.cwd} for ${age(current)}. Gates take a few minutes; this one starts by itself when that finishes.\n`
+          `Queued behind the gate in ${current.cwd}, running for ${age(current)}. Gates take a few minutes; yours starts when it finishes.\n`
         )
       }
 

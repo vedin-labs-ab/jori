@@ -34,14 +34,13 @@ Same word, same meaning, wherever you write:
 
 - `pnpm task <name>` starts a branch and worktree, one per task or agent.
   Work and commit there.
-- `pnpm test <paths>` runs the tests for what you changed, on two workers
-  and without waiting for anyone. `pnpm check:fix` formats and regenerates
-  compiled content.
-- `pnpm land <name>` rebases on `main` and runs the full gate, unless the
-  tree already passed it. One gate runs at a time on a machine; other
-  agents' gates queue behind it, and the wait says whose it is. A landing
-  takes a few minutes, more when it queues, so run it in the background
-  and keep working. Run `task` and `land` from the primary checkout,
+- `pnpm test <paths>` runs the tests for what you changed. It never waits
+  for a gate and gets two workers, so keep the paths narrow.
+  `pnpm check:fix` formats and regenerates compiled content.
+- `pnpm land <name>` rebases on `main`, runs the full gate, and
+  fast-forwards. One gate runs at a time on the machine, so a landing
+  takes minutes and may queue behind another; start it in the background
+  and let it finish. Run `task` and `land` from the primary checkout,
   everything else in the worktree.
 - `pnpm dev:up` serves `main` at localhost:8050 and keeps it current.
   Landing runs it, so check there before reaching for a worktree preview.
@@ -74,8 +73,7 @@ per concept everywhere. A synonym is a rename, not a choice.
 
 ## Boundaries
 
-- Skipping the gate is for pure documentation only. Ask before loosening a
-  check or deleting a test to get past a failure.
+- Ask before loosening a check or deleting a test to get past a failure.
 - Dev is yours to deploy, seed, and truncate. Ship production, run functions
   against it, or change its data only when asked.
 - Never read `.env.prod-*.local` or print a deployment's environment. The

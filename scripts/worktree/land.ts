@@ -12,9 +12,8 @@ import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
  * fast-forwards `main` from here, in that order and only in that order. The
  * merge runs from the primary checkout because a merge run inside the
  * worktree merges the branch into itself and reports success. The gate lock
- * is held from before the rebase until after the merge, so one landing at
- * a time verifies the tree it lands and no gate runs against a `main` that
- * is about to move. `--no-verify` skips the gate without recording a
+ * is held from rebase to merge: one landing at a time, each gating the
+ * tree it lands. `--no-verify` skips the gate without recording a
  * verification pass.
  */
 requirePrimaryCheckout("Landing")
