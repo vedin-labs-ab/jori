@@ -1,4 +1,4 @@
-import { execFileSync, spawn, spawnSync } from "node:child_process"
+import { execFileSync, spawn } from "node:child_process"
 import {
   existsSync,
   mkdirSync,
@@ -12,6 +12,7 @@ import { connect } from "node:net"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 import { commonDirectory } from "../git.ts"
+import { installCommand, runCommand } from "../process.ts"
 import { type Facts, needsInstall, stateOf } from "./state.ts"
 
 /**
@@ -89,7 +90,8 @@ async function up() {
     await stop()
   }
   if (needsInstall(facts)) {
-    install()
+    write("Installing dependencies the lockfile added.")
+    await runCommand(installCommand(primary))
   }
   await start()
 }
@@ -122,19 +124,6 @@ async function gather(): Promise<Facts> {
     lockModified: modified("pnpm-lock.yaml"),
     modulesModified: modified("node_modules/.modules.yaml"),
     envModified: modified(".env.local"),
-  }
-}
-
-function install() {
-  write("Installing dependencies the lockfile added.")
-  const result = spawnSync(
-    pnpm,
-    ["install", "--prefer-offline", "--frozen-lockfile"],
-    { cwd: primary, env: { ...process.env, CI: "true" }, stdio: "inherit" }
-  )
-
-  if (result.status !== 0) {
-    throw new Error("Installing dependencies failed.")
   }
 }
 

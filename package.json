@@ -24,7 +24,7 @@
     "check:entrypoints": "node --experimental-strip-types scripts/entrypoints.ts",
     "check:fix": "pnpm content:compile && biome check --write .",
     "check:structure": "node --experimental-strip-types scripts/structure/index.ts",
-    "check:typecheck": "tsc --noEmit",
+    "check:typecheck": "node node_modules/@typescript/native/bin/tsc --noEmit",
     "check:versions": "node --experimental-strip-types scripts/versions.ts",
     "content:compile": "node --experimental-strip-types scripts/content/index.ts --write",
     "test": "node --experimental-strip-types scripts/test.ts",

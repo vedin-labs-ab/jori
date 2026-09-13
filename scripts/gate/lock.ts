@@ -1,39 +1,52 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
 
 /**
- * Serializes the test gate across every worktree of this repository on one
- * machine. Full suites concurrently oversubscribe the CPU (each spawns a
- * worker per core), which starves per-test wall-clock budgets and turns
- * sound tests flaky; queueing them is also faster in total than letting
- * them thrash. The lock lives in the system temp dir, keyed by repository
- * name, so all worktrees contend on the same one.
+ * Serializes the heavy gates, the check set and the full suite, across every
+ * worktree of this repository on one machine. Two gates at once oversubscribe
+ * the CPU and, on 16 GB, swap; queued they finish sooner in total, and the
+ * partial runs agents make meanwhile stay fast. The lock is a file in the
+ * system temp dir keyed by repository name, naming who holds it, so a waiter
+ * can say whose gate it is waiting for.
+ *
+ * The holder passes itself to its children in JORI_GATE_HOLDER, so `land`
+ * can hold the lock from rebase to merge while the check and test it runs
+ * inside acquire nothing.
  */
-const lockDirectory = path.join(tmpdir(), "jori-gate.lock")
-const pidFile = path.join(lockDirectory, "pid")
+const holderVariable = "JORI_GATE_HOLDER"
 const pollMs = 2_000
+/** How long an unreadable lock may be a holder still writing its record. */
+const settleMs = 10_000
+
+export type Holder = { pid: number; cwd: string; startedAt: number }
 
 /** Waits for the lock and returns the function that releases it. */
-export async function acquireLock() {
+export async function acquireLock(file = defaultLockFile()) {
+  if (Number(process.env[holderVariable]) === readHolder(file)?.pid) {
+    return () => undefined
+  }
+
   let announced = false
 
   for (;;) {
     try {
-      mkdirSync(lockDirectory)
-      writeFileSync(pidFile, String(process.pid))
+      writeFileSync(file, JSON.stringify(holder()), { flag: "wx" })
+      process.env[holderVariable] = String(process.pid)
 
-      return releaseLock
+      return () => releaseLock(file)
     } catch {
-      if (holderIsDead()) {
-        rmSync(lockDirectory, { force: true, recursive: true })
+      const current = readHolder(file)
+
+      if (isStale(current, file)) {
+        rmSync(file, { force: true })
         continue
       }
 
-      if (!announced) {
+      if (!announced && current !== undefined) {
         announced = true
         process.stderr.write(
-          "Another test gate is running on this machine; waiting for it.\n"
+          `Another gate has been running in ${current.cwd} for ${age(current)}; waiting for it.\n`
         )
       }
 
@@ -42,17 +55,32 @@ export async function acquireLock() {
   }
 }
 
-/** A lock whose recorded process no longer exists is stale (crashed or
- *  killed gate); an unreadable pid file counts as stale too. */
-function holderIsDead() {
-  try {
-    const pid = Number(readFileSync(pidFile, "utf8"))
+function defaultLockFile() {
+  return path.join(tmpdir(), "jori-gate.lock")
+}
 
-    if (!Number.isInteger(pid) || pid <= 0) {
+function holder(): Holder {
+  return { pid: process.pid, cwd: process.cwd(), startedAt: Date.now() }
+}
+
+function age(current: Holder) {
+  return `${Math.round((Date.now() - current.startedAt) / 1000)}s`
+}
+
+/** A lock whose process no longer exists is stale (crashed or killed gate).
+ *  One that cannot be read is a holder between creating the file and
+ *  writing its record, unless it has stayed unreadable past any such gap. */
+function isStale(current: Holder | undefined, file: string) {
+  if (current === undefined) {
+    try {
+      return Date.now() - statSync(file).mtimeMs > settleMs
+    } catch {
       return true
     }
+  }
 
-    process.kill(pid, 0)
+  try {
+    process.kill(current.pid, 0)
 
     return false
   } catch (error) {
@@ -60,12 +88,23 @@ function holderIsDead() {
   }
 }
 
-function releaseLock() {
+function readHolder(file: string): Holder | undefined {
   try {
-    if (Number(readFileSync(pidFile, "utf8")) === process.pid) {
-      rmSync(lockDirectory, { force: true, recursive: true })
-    }
+    const record = JSON.parse(readFileSync(file, "utf8")) as Partial<Holder>
+    const { pid } = record
+
+    return typeof pid === "number" && Number.isInteger(pid) && pid > 0
+      ? (record as Holder)
+      : undefined
   } catch {
-    // Already released or stolen as stale; nothing to clean up.
+    return undefined
+  }
+}
+
+function releaseLock(file: string) {
+  delete process.env[holderVariable]
+
+  if (readHolder(file)?.pid === process.pid) {
+    rmSync(file, { force: true })
   }
 }

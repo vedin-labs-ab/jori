@@ -34,11 +34,13 @@ Same word, same meaning, wherever you write:
 
 - `pnpm task <name>` starts a branch and worktree, one per task or agent.
   Work and commit there.
-- `pnpm test <paths>` runs the tests for what you changed.
-  `pnpm check:fix` formats and regenerates compiled content.
+- `pnpm test <paths>` runs the tests for what you changed, on two workers
+  and without waiting for anyone. `pnpm check:fix` formats and regenerates
+  compiled content.
 - `pnpm land <name>` rebases on `main` and runs the full gate, unless the
-  tree already passed it. Run `task` and `land` from the primary checkout,
-  everything else in the worktree.
+  tree already passed it. One gate runs at a time on a machine; other
+  agents' gates queue behind it, and the wait says whose it is. Run `task`
+  and `land` from the primary checkout, everything else in the worktree.
 - `pnpm dev:up` serves `main` at localhost:8050 and keeps it current.
   Landing runs it, so check there before reaching for a worktree preview.
 - Only pure documentation lands with `--no-verify`. Anything the build reads,

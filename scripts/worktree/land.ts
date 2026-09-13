@@ -1,7 +1,8 @@
 import { existsSync } from "node:fs"
+import { acquireLock } from "../gate/lock.ts"
 import { isVerified } from "../gate/stamp.ts"
 import { git, isClean, requirePrimaryCheckout } from "../git.ts"
-import { packageCommand, runCommand } from "../process.ts"
+import { installCommand, packageCommand, runCommand } from "../process.ts"
 import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
 
 /**
@@ -10,10 +11,11 @@ import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
  * Rebases the task on `main`, runs the gate in the task's worktree, and
  * fast-forwards `main` from here, in that order and only in that order. The
  * merge runs from the primary checkout because a merge run inside the
- * worktree merges the branch into itself and reports success. If `main`
- * moved while the gate ran, nothing lands and the command says to run it
- * again, which repeats the rebase on the new `main`. `--no-verify` skips
- * the gate without recording a verification pass.
+ * worktree merges the branch into itself and reports success. The gate lock
+ * is held from before the rebase until after the merge, so one landing at
+ * a time verifies the tree it lands and no gate runs against a `main` that
+ * is about to move. `--no-verify` skips the gate without recording a
+ * verification pass.
  */
 requirePrimaryCheckout("Landing")
 
@@ -37,20 +39,33 @@ if (!isClean(directory)) {
   throw new Error(`${directory} has uncommitted changes. Commit them first.`)
 }
 
-rebase()
-await gate()
-fastForward()
+const release = await acquireLock()
+
+try {
+  if (rebase()) {
+    await runCommand(installCommand(directory))
+  }
+  await gate()
+  fastForward()
+} finally {
+  release()
+}
+
 await runCommand(packageCommand("dev:up"))
 
 process.stdout.write(
   `${branch} landed on main at ${git(["rev-parse", "--short", "main"])}.\n`
 )
 
+/** Rebases when main moved; tells whether that brought a lockfile change,
+ *  which the worktree has to install before it is gated. */
 function rebase() {
   // Preserve merged branches when the task already includes main.
   if (git(["merge-base", "main", branch]) === git(["rev-parse", "main"])) {
-    return
+    return false
   }
+
+  const lockfile = git(["rev-parse", "HEAD:pnpm-lock.yaml"], directory)
 
   try {
     git(["rebase", "main"], directory)
@@ -62,6 +77,8 @@ function rebase() {
       { cause: error }
     )
   }
+
+  return git(["rev-parse", "HEAD:pnpm-lock.yaml"], directory) !== lockfile
 }
 
 /** The gate runs in the worktree, on the rebased tree, and records its pass
@@ -90,5 +107,6 @@ function fastForward() {
 
   git(["merge", "--ff-only", branch])
   git(["worktree", "remove", directory])
-  git(["branch", "-d", branch])
+  // `-d` refuses a branch whose upstream lacks the merge main just took.
+  git(["branch", "-D", branch])
 }
