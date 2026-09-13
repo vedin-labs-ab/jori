@@ -12,9 +12,7 @@ import {
   hostFromUrl,
 } from "./crawl"
 import { extractFacts } from "./extract"
-import { type OrganizationFacts } from "./facts"
 import { selectLinks } from "./select"
-import { type SourceSnapshot } from "./sources"
 
 const maxPages = 7
 
@@ -23,11 +21,6 @@ type StepKind = "page" | "summary"
 type Discovery = {
   ctx: ActionCtx
   organizationId: string
-}
-
-type DraftResult = {
-  facts: OrganizationFacts
-  stepId: string
 }
 
 type QueuedCrawl = {
@@ -88,22 +81,30 @@ async function discover(discovery: Discovery, primaryUrl: string) {
     }
   }
 
-  const draft = await extractDraft(discovery, primaryUrl, pages)
-  await proposeDraft(discovery, primaryUrl, pages, draft)
+  await proposeDraft(discovery, primaryUrl, pages)
 }
 
 async function proposeDraft(
   discovery: Discovery,
   primaryUrl: string,
-  pages: CrawledPage[],
-  draft: DraftResult
+  pages: CrawledPage[]
 ) {
-  const sources = pages.map(toSource)
+  const stepId = await startStep(discovery, "summary", "Drafting profile")
 
   try {
+    const facts = await extractFacts({
+      primaryUrl,
+      pages: pages.map(({ url, text }) => ({ url, text })),
+    })
+    const sources = pages.map(({ url, hash }, index) => ({
+      url,
+      hash,
+      primary: index === 0,
+    }))
+
     await discovery.ctx.runMutation(internal.organization.profile.propose, {
       organizationId: discovery.organizationId,
-      facts: draft.facts,
+      facts,
       sources,
       website: primaryUrl,
     })
@@ -113,9 +114,9 @@ async function proposeDraft(
       organizationId: discovery.organizationId,
       sources,
     })
-    await completeStep(discovery, draft.stepId)
+    await completeStep(discovery, stepId)
   } catch (error) {
-    await completeStep(discovery, draft.stepId, messageFrom(error))
+    await completeStep(discovery, stepId, messageFrom(error))
     throw error
   }
 }
@@ -166,32 +167,6 @@ async function crawlStep(discovery: Discovery, stepId: string, url: string) {
   await completeStep(discovery, stepId, `Could not read ${shortPath(url)}`)
 
   return null
-}
-
-async function extractDraft(
-  discovery: Discovery,
-  primaryUrl: string,
-  pages: CrawledPage[]
-): Promise<DraftResult> {
-  const stepId = await startStep(discovery, "summary", "Drafting profile")
-
-  try {
-    return {
-      facts: await extractFacts({ primaryUrl, pages: extractionPages(pages) }),
-      stepId,
-    }
-  } catch (error) {
-    await completeStep(discovery, stepId, messageFrom(error))
-    throw error
-  }
-}
-
-function extractionPages(pages: CrawledPage[]) {
-  return pages.map((page) => ({ url: page.url, text: page.text }))
-}
-
-function toSource(page: CrawledPage, index: number): SourceSnapshot {
-  return { url: page.url, hash: page.hash, primary: index === 0 }
 }
 
 async function startStep(
