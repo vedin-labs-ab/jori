@@ -38,6 +38,72 @@ async function fixture() {
   }
 }
 
+test.each(["activity", "live"] as const)(
+  "%s run details follow current chat access and conceal foreign or missing runs",
+  async (view) => {
+    const { caller, conversationId, personId, runId, t } = await fixture()
+    const query =
+      view === "activity"
+        ? api.runs.activity.index.list
+        : api.runs.console.live.get
+    const args = { organizationId: "verification", runId }
+    const missing =
+      view === "activity" ? { items: [], status: "missing" } : null
+
+    expect(await caller.query(query, args)).toEqual(missing)
+    await t.run(async (ctx) => {
+      await ctx.db.patch(conversationId, {
+        visibility: { mode: "people", personIds: [personId] },
+      })
+    })
+    expect(await caller.query(query, args)).toMatchObject(
+      view === "activity" ? { status: "loaded" } : { id: runId }
+    )
+    await t.run(async (ctx) => {
+      await ctx.db.patch(conversationId, { visibility: { mode: "private" } })
+    })
+    expect(await caller.query(query, args)).toEqual(missing)
+    await t.run(async (ctx) => {
+      await ctx.db.patch(runId, {
+        organizationId: "elsewhere",
+        conversationId: undefined,
+      })
+    })
+    expect(await caller.query(query, args)).toEqual(missing)
+    await t.run(async (ctx) => await ctx.db.delete(runId))
+    expect(await caller.query(query, args)).toEqual(missing)
+  }
+)
+
+test.each(["activity", "live"] as const)(
+  "%s run details require organization access but allow a still-syncing person",
+  async (view) => {
+    const { runId, t } = await fixture()
+    const query =
+      view === "activity"
+        ? api.runs.activity.index.list
+        : api.runs.console.live.get
+    const args = { organizationId: "verification", runId }
+
+    await expect(t.query(query, args)).rejects.toThrow(
+      "Sign in to access this organization."
+    )
+    await expect(
+      t
+        .withIdentity({ subject: "new-user", org: "elsewhere" })
+        .query(query, args)
+    ).rejects.toThrow("This data belongs to another organization.")
+    await t.run(async (ctx) => {
+      await ctx.db.patch(runId, { conversationId: undefined })
+    })
+    expect(
+      await t
+        .withIdentity({ subject: "new-user", org: "verification" })
+        .query(query, args)
+    ).toMatchObject(view === "activity" ? { status: "loaded" } : { id: runId })
+  }
+)
+
 test("only people with current chat access can stop its run", async () => {
   const { caller, conversationId, personId, runId, t } = await fixture()
   const args = { organizationId: "verification", runId }

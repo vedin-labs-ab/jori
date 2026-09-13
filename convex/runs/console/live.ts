@@ -1,8 +1,7 @@
 import { v } from "convex/values"
 import { query } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
-import { resolveConsolePerson } from "../../persons/account"
-import { canSeeRun } from "../visibility"
+import { resolveConsoleRun } from "../visibility"
 import { summarizeRun } from "./summaries"
 
 /** One run as the Activity page would list it, for a surface following
@@ -15,21 +14,13 @@ export const get = query({
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
-    const personId = await resolveConsolePerson(
-      ctx,
-      args.organizationId,
-      identity
-    )
-    const run = await ctx.db.get(args.runId)
+    const visible = await resolveConsoleRun(ctx, args, identity)
 
-    if (
-      run === null ||
-      run.organizationId !== args.organizationId ||
-      !(await canSeeRun(ctx, run, personId))
-    ) {
+    if (visible === null) {
       return null
     }
 
+    const { run, personId } = visible
     return await summarizeRun(ctx, run, personId)
   },
 })
