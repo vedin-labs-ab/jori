@@ -6,7 +6,7 @@ import { transitionConversationVisibility } from "../conversations/execution/sha
 import { insertConsoleReply } from "../messages/console/records"
 import { writeRunDraft } from "../runs/execution/drafts/data"
 import { listOrganizationViewerIds } from "../visibility/audience"
-import { findSession } from "./data"
+import { findSession } from "./read"
 import { runExecutionIsCurrent } from "./scope"
 
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))

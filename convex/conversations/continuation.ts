@@ -3,6 +3,7 @@ import { type MutationCtx } from "../_generated/server"
 import { messageHasText, resolveMessageOwner } from "../messages/data"
 import { maxPendingReadLimit } from "../sessions/batch"
 import { readPendingMessages, stopSession } from "../sessions/data"
+import { findSessionByRun } from "../sessions/read"
 import { isPersonActor } from "../shared/actor"
 import { startMessageRun } from "./execution/index"
 
@@ -13,10 +14,7 @@ export async function continuePendingConversationRun(
     now: number
   }
 ) {
-  const session = await ctx.db
-    .query("sessions")
-    .withIndex("by_run", (query) => query.eq("runId", args.runId))
-    .first()
+  const session = await findSessionByRun(ctx, args.runId)
 
   if (session === null || session.runId !== args.runId) {
     return

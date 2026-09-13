@@ -7,8 +7,8 @@ import {
   upsertSandbox,
 } from "../../runs/execution/sandboxes/data"
 import { createInstructionRun } from "../../runs/instruction"
-import { findSession } from "../../sessions/data"
 import { drainSession } from "../../sessions/drain"
+import { findSession } from "../../sessions/read"
 import { listOrganizationViewerIds } from "../../visibility/audience"
 import { transitionConversationVisibility } from "./sharing"
 

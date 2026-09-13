@@ -68,7 +68,7 @@ export const domainRules = [
     comment:
       "Intake and execution compose adapters; conversation, session, and reaction persistence take resolved values.",
     from: {
-      path: "^convex/(?:conversations/records|sessions/(?:data|batch)|reactions/(?:data|apply))[.]ts$",
+      path: "^convex/(?:conversations/records|sessions/(?:data|batch|read)|reactions/(?:data|apply))[.]ts$",
     },
     to: { path: "^convex/integrations/" },
   },

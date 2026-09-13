@@ -4,7 +4,7 @@ import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { resetConversationExecution } from "../conversations/execution/sharing"
 import { stopRunTree } from "../runs/tree"
-import { findSession } from "./data"
+import { findSession } from "./read"
 import { runExecutionIsCurrent, sessionExecutionIsCurrent } from "./scope"
 
 export async function currentConversationSession(

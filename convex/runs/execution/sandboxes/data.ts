@@ -3,6 +3,7 @@ import { internal } from "../../../_generated/api"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { isWorkspaceDeleting } from "../../../retention/access"
+import { findSessionByRun } from "../../../sessions/read"
 import { type QueryLikeCtx } from "../../../shared/context"
 
 const idleSandboxLeaseMs = 5 * 60 * 1000
@@ -187,13 +188,6 @@ export async function claimReusableSandbox(
   })
 
   return { externalId: reusable.externalId }
-}
-
-async function findSessionByRun(ctx: QueryLikeCtx, runId: Id<"runs">) {
-  return await ctx.db
-    .query("sessions")
-    .withIndex("by_run", (query) => query.eq("runId", runId))
-    .first()
 }
 
 async function findReusableSandbox(

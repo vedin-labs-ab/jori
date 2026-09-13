@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { runModel, runSelection } from "../model/selection"
 import { modelWindow } from "../model/window"
-import { findSession } from "../sessions/data"
+import { findSession } from "../sessions/read"
 import { sessionExecutionIsCurrent } from "../sessions/scope"
 import { type QueryLikeCtx } from "../shared/context"
 

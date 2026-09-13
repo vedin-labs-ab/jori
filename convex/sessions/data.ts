@@ -15,6 +15,7 @@ import {
   type PendingBatch,
 } from "./batch"
 import { initialCursor } from "./cursor"
+import { findSession, findSessionByRun } from "./read"
 import { initialRecency } from "./recency"
 
 export async function isReusableSession(
@@ -144,24 +145,9 @@ export const getByRun = internalQuery({
   },
   returns: v.any(),
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query("sessions")
-      .withIndex("by_run", (query) => query.eq("runId", args.runId))
-      .first()
+    return await findSessionByRun(ctx, args.runId)
   },
 })
-
-export async function findSession(
-  ctx: QueryLikeCtx,
-  conversationId: Id<"conversations">
-) {
-  return await ctx.db
-    .query("sessions")
-    .withIndex("by_conversation", (query) =>
-      query.eq("conversationId", conversationId)
-    )
-    .first()
-}
 
 async function queryConversationMessages(
   ctx: QueryLikeCtx,

@@ -4,7 +4,7 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { insertRow } from "../../retention/write"
 import { clearRunDraft } from "../../runs/execution/drafts/data"
-import { findSession } from "../../sessions/data"
+import { findSession } from "../../sessions/read"
 import { runExecutionIsCurrent } from "../../sessions/scope"
 import { type Actor } from "../../shared/actor"
 

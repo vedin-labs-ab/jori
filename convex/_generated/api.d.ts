@@ -634,6 +634,7 @@ import type * as sessions_data from "../sessions/data.js";
 import type * as sessions_drain from "../sessions/drain.js";
 import type * as sessions_execution from "../sessions/execution.js";
 import type * as sessions_integration from "../sessions/integration.js";
+import type * as sessions_read from "../sessions/read.js";
 import type * as sessions_recency from "../sessions/recency.js";
 import type * as sessions_scope from "../sessions/scope.js";
 import type * as shared_actor from "../shared/actor.js";
@@ -1333,6 +1334,7 @@ declare const fullApi: ApiFromModules<{
   "sessions/drain": typeof sessions_drain;
   "sessions/execution": typeof sessions_execution;
   "sessions/integration": typeof sessions_integration;
+  "sessions/read": typeof sessions_read;
   "sessions/recency": typeof sessions_recency;
   "sessions/scope": typeof sessions_scope;
   "shared/actor": typeof shared_actor;

@@ -1,7 +1,7 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { transactionalConsoleContext } from "../../../test/convex/conversations"
-import { findSession } from "../../sessions/data"
 import { drainSession } from "../../sessions/drain"
+import { findSession } from "../../sessions/read"
 import { listOrganizationViewerIds } from "../../visibility/audience"
 import { transitionConversationVisibility } from "../execution/sharing"
 import { recentConversation } from "../history/index"

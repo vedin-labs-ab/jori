@@ -1,7 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { stopRunTree } from "../../runs/tree"
-import { findSession } from "../../sessions/data"
+import { findSession } from "../../sessions/read"
 import { createPersonActor } from "../../shared/actor"
 import { type StoredVisibility } from "../../visibility/schema"
 import { conversationVisibility } from "../access"

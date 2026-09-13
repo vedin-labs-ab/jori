@@ -1,7 +1,7 @@
 import { type Doc } from "../_generated/dataModel"
 import { conversationExecutionScope } from "../conversations/execution/principal"
 import { type QueryLikeCtx } from "../shared/context"
-import { findSession } from "./data"
+import { findSession } from "./read"
 
 /** A context is reusable only for the audience that originally populated it. */
 export async function sessionExecutionIsCurrent(

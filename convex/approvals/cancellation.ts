@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { findSessionByRun } from "../sessions/read"
 import { type Actor } from "../shared/actor"
 
 export async function resolveCancellationActor(
@@ -20,10 +21,7 @@ export async function resolveCancellationActor(
     return null
   }
 
-  const session = await ctx.db
-    .query("sessions")
-    .withIndex("by_run", (query) => query.eq("runId", args.runId))
-    .first()
+  const session = await findSessionByRun(ctx, args.runId)
 
   if (session === null) {
     return null
