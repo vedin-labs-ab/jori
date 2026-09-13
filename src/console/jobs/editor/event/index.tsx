@@ -1,7 +1,6 @@
 import {
   getDefaultJobEvent,
   getJobEventDefinition,
-  type JobEventDefinition,
   type JobEventIntegration,
   jobEventCatalog,
 } from "@contracts/jobs/events"
@@ -76,49 +75,25 @@ export function EventFields({
           </Select>
         </div>
       </div>
-      <EventParameterFields
-        organizationId={organizationId}
-        integration={values.eventIntegration}
-        event={selectedEvent}
-        onValuesChange={(eventMatch) =>
-          onValuesChange({ ...values, eventMatch })
-        }
-        values={values.eventMatch}
-      />
-    </div>
-  )
-}
-
-function EventParameterFields({
-  organizationId,
-  integration,
-  event,
-  onValuesChange,
-  values,
-}: {
-  organizationId: string
-  integration: JobEventIntegration
-  event: JobEventDefinition
-  onValuesChange: (values: Record<string, string>) => void
-  values: Record<string, string>
-}) {
-  return (
-    <div className="grid gap-3">
-      {event.availability.status === "pending" ? (
-        <Alert className="py-2">
-          <Info className="size-4" />
-          <AlertDescription className="text-xs">
-            {event.availability.message}
-          </AlertDescription>
-        </Alert>
-      ) : null}
-      <EventScopeFields
-        key={`${integration}:${event.value}`}
-        organizationId={organizationId}
-        event={event}
-        onValuesChange={onValuesChange}
-        values={values}
-      />
+      <div className="grid gap-3">
+        {selectedEvent.availability.status === "pending" ? (
+          <Alert className="py-2">
+            <Info className="size-4" />
+            <AlertDescription className="text-xs">
+              {selectedEvent.availability.message}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        <EventScopeFields
+          key={`${values.eventIntegration}:${selectedEvent.value}`}
+          organizationId={organizationId}
+          event={selectedEvent}
+          onValuesChange={(eventMatch) =>
+            onValuesChange({ ...values, eventMatch })
+          }
+          values={values.eventMatch}
+        />
+      </div>
     </div>
   )
 }

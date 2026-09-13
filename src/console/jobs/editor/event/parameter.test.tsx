@@ -11,7 +11,7 @@ import {
 import { useState } from "react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { EventOptionField } from "./resource"
+import { EventParameterControl } from "./parameter"
 
 const convexMocks = vi.hoisted(() => ({
   useAction: vi.fn(),
@@ -83,6 +83,15 @@ test("selects a loaded option inside a dialog without dismissing it", async () =
   })
   expect(screen.getByRole("dialog")).toBeDefined()
   expect(onOpenChange).not.toHaveBeenCalledWith(false)
+
+  fireEvent.click(screen.getByRole("button", { name: "Clear Channel" }))
+  await waitFor(() => {
+    expect(onValueChange).toHaveBeenLastCalledWith("")
+    expect(
+      (screen.getByRole("combobox", { name: "Channel" }) as HTMLInputElement)
+        .value
+    ).toBe("")
+  })
 })
 
 function renderDialog(
@@ -103,14 +112,12 @@ function renderDialog(
       >
         <DialogContent showCloseButton={false}>
           <DialogTitle>Job</DialogTitle>
-          <EventOptionField
+          <EventParameterControl
             organizationId="organization"
             parameter={channelParameter}
-            match={{}}
-            disabled={false}
-            disabledMessage={undefined}
+            parameters={[channelParameter]}
+            values={{ channel: value }}
             id="job-event-channel"
-            value={value}
             onValueChange={(next) => {
               setValue(next)
               onValueChange(next)

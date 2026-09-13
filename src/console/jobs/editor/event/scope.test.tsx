@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { fireEvent, screen } from "@testing-library/react"
 import { describe, expect, test, vi } from "vitest"
+import { emptyJobForm } from "@/shared/console/jobs/types"
 import { renderEventFields } from "./fixtures"
+import { EventFields } from "./index"
 
 describe("job event conditions", () => {
   test("hides optional parameters until they are added as conditions", () => {
@@ -54,6 +56,32 @@ describe("job event conditions", () => {
     )
     expect(screen.queryByRole("button", { name: "Add condition" })).toBeNull()
   })
+})
+
+test("resets unsaved condition choices when the event changes", () => {
+  const { rerender } = renderEventFields({
+    eventIntegration: "linear",
+    event: "issue.comment.created",
+  })
+  openAddConditionPicker()
+  fireEvent.click(screen.getByRole("menuitem", { name: /Team/ }))
+  expect(screen.getByLabelText("Team")).toBeDefined()
+
+  rerender(
+    <EventFields
+      organizationId="organization"
+      onValuesChange={() => undefined}
+      values={{
+        ...emptyJobForm,
+        type: "event",
+        eventIntegration: "linear",
+        event: "issue.comment.edited",
+      }}
+    />
+  )
+
+  expect(screen.queryByLabelText("Team")).toBeNull()
+  expect(screen.getByRole("button", { name: "Add condition" })).toBeDefined()
 })
 
 describe("job event condition editing", () => {

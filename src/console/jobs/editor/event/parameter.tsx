@@ -1,6 +1,7 @@
 import { type JobEventParameter } from "@contracts/jobs/events"
 import { Input } from "@/components/ui/input"
-import { EventOptionField } from "./resource"
+import { IntegrationOptionPicker } from "@/console/integrations/options"
+import { cn } from "@/lib/utils"
 
 export function EventParameterControl({
   organizationId,
@@ -19,24 +20,33 @@ export function EventParameterControl({
   className?: string
   onValueChange: (value: string) => void
 }) {
-  const dependencyLabel = missingDependencyLabel(parameter, parameters, values)
+  const value = values[parameter.key] ?? ""
 
   if (parameter.type === "option") {
+    const dependencyLabel = missingDependencyLabel(
+      parameter,
+      parameters,
+      values
+    )
+
     return (
-      <EventOptionField
-        organizationId={organizationId}
-        parameter={parameter}
-        match={values}
+      <IntegrationOptionPicker
+        ariaLabel={parameter.label}
+        className={cn("w-full", className)}
+        clearLabel={`Clear ${parameter.label}`}
         disabled={dependencyLabel !== undefined}
-        disabledMessage={
+        emptyLabel="No options found."
+        id={id}
+        match={values}
+        onChange={(option) => onValueChange(option?.value ?? "")}
+        placeholder={
           dependencyLabel === undefined
-            ? undefined
+            ? parameter.placeholder
             : `Choose ${dependencyLabel} first`
         }
-        id={id}
-        className={className}
-        value={values[parameter.key] ?? ""}
-        onValueChange={onValueChange}
+        source={parameter.source}
+        organizationId={organizationId}
+        value={value === "" ? null : { label: value, value }}
       />
     )
   }
@@ -51,20 +61,16 @@ export function EventParameterControl({
       placeholder={parameter.placeholder}
       step={parameter.type === "number" ? parameter.step : undefined}
       type={parameter.type}
-      value={values[parameter.key] ?? ""}
+      value={value}
     />
   )
 }
 
 function missingDependencyLabel(
-  parameter: JobEventParameter,
+  parameter: Extract<JobEventParameter, { type: "option" }>,
   parameters: readonly JobEventParameter[],
   values: Record<string, string>
 ) {
-  if (parameter.type !== "option") {
-    return undefined
-  }
-
   const missingKey = parameter.dependsOn?.find(
     (key) => values[key]?.trim() === "" || values[key] === undefined
   )

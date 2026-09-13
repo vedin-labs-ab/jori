@@ -41,7 +41,7 @@ export function renderEventFields(
   values: Partial<JobFormValues> = {},
   onValuesChange: (values: JobFormValues) => void = () => undefined
 ) {
-  render(
+  return render(
     <EventFields
       organizationId="organization"
       onValuesChange={onValuesChange}
