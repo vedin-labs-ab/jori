@@ -1,5 +1,5 @@
 import { Folder, Plus } from "lucide-react"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
@@ -17,9 +17,11 @@ import { groupLabelButton } from "../shell/group"
 import { ConsoleLink } from "../shell/link"
 import { NewInFolderMenu } from "./create"
 import { useExpandHoverHandler, useRootDrop } from "./drag/state"
+import { PendingFolderName } from "./edit/pending"
+import { useFolderEditing, usePendingFolder } from "./edit/state"
 import { type FolderExpansion } from "./expansion"
 import { FolderTreeItem } from "./row"
-import { buildFolderTree } from "./tree"
+import { ancestorFolderIds, buildFolderTree } from "./tree"
 import {
   type CreationRequest,
   type FolderDialogRequest,
@@ -45,6 +47,23 @@ export function FolderTree({
   onNewFolder: () => void
   pathname: string
 }) {
+  const editing = useFolderEditing()
+  const reveal =
+    editing?.edit?.surface === "sidebar" ? editing.edit.folder : undefined
+  useEffect(() => {
+    if (!reveal) {
+      return
+    }
+    const ids = [
+      ...ancestorFolderIds(folders ?? [], reveal.folderId),
+      reveal.parentId,
+    ]
+    for (const id of ids) {
+      if (id !== undefined) {
+        expansion.expand(id)
+      }
+    }
+  }, [reveal, folders, expansion])
   // The drag context lives at the shell, above both panes; hand it this
   // tree's dwell-to-expand handler so drags can descend into the sidebar.
   useExpandHoverHandler(useExpandOnHover(folders, expansion))
@@ -164,6 +183,7 @@ function FolderTreeItems({
   onNewFolder: () => void
   pathname: string
 }) {
+  const pending = usePendingFolder(undefined, "sidebar")
   const nodes = useMemo(() => buildFolderTree(folders ?? []), [folders])
 
   if (folders === undefined) {
@@ -179,7 +199,7 @@ function FolderTreeItems({
     )
   }
 
-  if (nodes.length === 0) {
+  if (nodes.length === 0 && !pending) {
     return (
       <SidebarMenuItem>
         <SidebarMenuButton
@@ -196,6 +216,11 @@ function FolderTreeItems({
 
   return (
     <>
+      {pending ? (
+        <SidebarMenuItem>
+          <PendingFolderName name={pending.name} />
+        </SidebarMenuItem>
+      ) : null}
       {nodes.map((node) => (
         <FolderTreeItem
           expansion={expansion}

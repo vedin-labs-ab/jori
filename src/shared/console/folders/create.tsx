@@ -17,6 +17,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useFolderMenuFocus } from "./edit/state"
 import { type FolderCreation } from "./types"
 
 // The console's "New" entries — a folder plus every resource that can be
@@ -26,7 +27,7 @@ import { type FolderCreation } from "./types"
 type NewMenuHandlers = {
   /** Ran with the resource type to create; the owner opens its dialog. */
   onCreate: (creation: FolderCreation) => void
-  /** Ran for the folder entry; the owner opens the folder name dialog. */
+  /** Ran for the folder entry; the owner creates and starts renaming inline. */
   onNewFolder: () => void
 }
 
@@ -70,10 +71,15 @@ export function NewInFolderMenu({
   children,
   ...handlers
 }: NewMenuHandlers & { children: ReactNode }) {
+  const onCloseAutoFocus = useFolderMenuFocus()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
+      <DropdownMenuContent
+        align="end"
+        className="w-44"
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         <NewResourceItems labels="prefixed" {...handlers} />
       </DropdownMenuContent>
     </DropdownMenu>

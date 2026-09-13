@@ -1,14 +1,9 @@
-import { useMutation } from "convex/react"
-import { type GenericId } from "convex/values"
-import { toast } from "sonner"
-import { FolderNameDialog } from "@/shared/console/folders/dialogs/name"
 import {
   type FolderDialogRequest,
   folderSubject,
   type ManagedFolder,
 } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
-import { api } from "../../../convex/_generated/api"
 import { FolderAccessDialog } from "./access"
 import { DeleteFolder } from "./delete/dialog"
 import { MoveToFolderDialog } from "./move"
@@ -29,8 +24,6 @@ export function FolderDialogs({
   onDeleted: (folder: ManagedFolder) => void
   organizationId: string
 }) {
-  const create = useRetained(dialog?.type === "create" ? dialog : undefined)
-  const rename = useRetained(dialog?.type === "rename" ? dialog : undefined)
   const remove = useRetained(dialog?.type === "delete" ? dialog : undefined)
   const access = useRetained(dialog?.type === "access" ? dialog : undefined)
 
@@ -38,18 +31,6 @@ export function FolderDialogs({
 
   return (
     <>
-      <CreateFolderDialog
-        isOpen={dialog?.type === "create"}
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-        parentId={create?.parentId}
-      />
-      <RenameFolderDialog
-        folder={rename?.folder}
-        isOpen={dialog?.type === "rename"}
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-      />
       <MoveToFolderDialog
         onOpenChange={closeWhenDismissed}
         organizationId={organizationId}
@@ -71,70 +52,5 @@ export function FolderDialogs({
         organizationId={organizationId}
       />
     </>
-  )
-}
-
-function CreateFolderDialog({
-  isOpen,
-  onOpenChange,
-  organizationId,
-  parentId,
-}: {
-  isOpen: boolean
-  onOpenChange: (isOpen: boolean) => void
-  organizationId: string
-  parentId?: string
-}) {
-  const create = useMutation(api.folders.console.create)
-
-  return (
-    <FolderNameDialog
-      initialName=""
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      onSubmit={async (name) => {
-        await create({
-          organizationId,
-          name,
-          parentId: parentId as GenericId<"folders"> | undefined,
-        })
-        toast.success(`Created ${name}.`)
-      }}
-      submitLabel="Create folder"
-      title="New folder"
-    />
-  )
-}
-
-function RenameFolderDialog({
-  folder,
-  isOpen,
-  onOpenChange,
-  organizationId,
-}: {
-  folder: ManagedFolder | undefined
-  isOpen: boolean
-  onOpenChange: (isOpen: boolean) => void
-  organizationId: string
-}) {
-  const update = useMutation(api.folders.console.update)
-
-  if (folder === undefined) {
-    return null
-  }
-
-  return (
-    <FolderNameDialog
-      initialName={folder.name}
-      isOpen={isOpen}
-      key={`${folder.folderId}:${folder.name}`}
-      onOpenChange={onOpenChange}
-      onSubmit={async (name) => {
-        await update({ organizationId, folderId: folder.folderId, name })
-        toast.success(`Renamed to ${name}.`)
-      }}
-      submitLabel="Rename"
-      title={`Rename "${folder.name}"`}
-    />
   )
 }

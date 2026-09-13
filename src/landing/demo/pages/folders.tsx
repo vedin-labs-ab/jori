@@ -1,8 +1,10 @@
 import { formatUsd } from "@contracts/billing"
 import { Plus } from "lucide-react"
-import { useContext, useMemo, useState } from "react"
+import { useContext, useMemo } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AskJoriAction } from "@/shared/console/chat/pane/ask"
+import { FolderName } from "@/shared/console/folders/edit/name"
+import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { FolderHeaderActions } from "@/shared/console/folders/header"
 import { FolderContents } from "@/shared/console/folders/list/contents"
 import { RootFolderList } from "@/shared/console/folders/list/roots"
@@ -42,7 +44,7 @@ import { useDemoFolderSelection } from "./select"
 /** The tree's landing page: the root folders in the shared table. */
 export function RootFoldersPage() {
   const { state } = useDemoWorkspace()
-  const [dialog, setDialog] = useState<FolderDialogRequest>()
+  const [dialog, setDialog] = useFolderRequests("contents")
   const roots = useMemo(() => rootFolders(state), [state])
   const selection = useDemoFolderSelection()
   const create = () => setDialog({ type: "create" })
@@ -165,6 +167,11 @@ function folderCrumb(
         ownerId={folder.createdBy}
         onClick={() => onDialog({ type: "access", folder })}
       />
+    ),
+    renderName: (name) => (
+      <FolderName folder={folder} surface="title">
+        {name}
+      </FolderName>
     ),
     menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
     name: folder.name,

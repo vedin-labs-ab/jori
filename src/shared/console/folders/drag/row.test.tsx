@@ -5,6 +5,7 @@ import { type MouseEvent } from "react"
 import { createPortal } from "react-dom"
 import { afterEach, expect, test, vi } from "vitest"
 import { TableBody, TableCell } from "@/components/ui/table"
+import { type FolderEditing, FolderEditingContext } from "../edit/state"
 import { dragActivationDistance, emptyPayload } from "./plan"
 import { DraggableTableRow } from "./row"
 import { useResourceRowDrag } from "./state"
@@ -18,7 +19,7 @@ afterEach(() => {
   }
 })
 
-function renderRow() {
+function renderRow(editing?: FolderEditing) {
   const handlers = {
     onDragStart: vi.fn(),
     onMenu: vi.fn(),
@@ -26,7 +27,11 @@ function renderRow() {
     onSecondary: vi.fn((event: MouseEvent) => event.preventDefault()),
   }
 
-  render(tableFixture(handlers))
+  render(
+    <FolderEditingContext value={editing}>
+      {tableFixture(handlers)}
+    </FolderEditingContext>
+  )
 
   return handlers
 }
@@ -193,3 +198,30 @@ test.each(["Select Leads", "Sales", "Actions", "Note", "Portaled action"])(
     expect(onDragStart).not.toHaveBeenCalled()
   }
 )
+
+// Pausing drag must leave the row's form controls available to assistive tech.
+test("inline editing suspends dragging without disabling the row's controls", () => {
+  const { onDragStart } = renderRow({
+    edit: {
+      folder: { folderId: "new", name: "New folder" },
+      surface: "contents",
+    },
+    begin: vi.fn(),
+    create: vi.fn(),
+    save: vi.fn(),
+    close: vi.fn(),
+    register: vi.fn(),
+    claim: vi.fn(),
+  })
+  startDrag(screen.getByText("Ada Lovelace"))
+  expect(onDragStart).not.toHaveBeenCalled()
+  expect(
+    screen.getByRole("textbox").closest('[aria-disabled="true"]')
+  ).toBeNull()
+  fireEvent.change(screen.getByRole("textbox"), {
+    target: { value: "Contracts" },
+  })
+  expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe(
+    "Contracts"
+  )
+})

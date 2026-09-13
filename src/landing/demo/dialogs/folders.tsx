@@ -1,6 +1,5 @@
 import { useMemo } from "react"
 import { DeleteFolderDialog } from "@/shared/console/folders/dialogs/delete"
-import { FolderNameDialog } from "@/shared/console/folders/dialogs/name"
 import {
   type FolderDialogRequest,
   folderSubject,
@@ -34,8 +33,6 @@ export function DemoFolderDialogs({
 
   return (
     <>
-      <CreateFolderDialog dialog={dialog} onOpenChange={closeWhenDismissed} />
-      <RenameFolderDialog dialog={dialog} onOpenChange={closeWhenDismissed} />
       <DemoMoveDialog
         onOpenChange={closeWhenDismissed}
         subject={
@@ -52,51 +49,6 @@ export function DemoFolderDialogs({
         onOpenChange={closeWhenDismissed}
       />
     </>
-  )
-}
-
-function CreateFolderDialog({ dialog, onOpenChange }: DialogProps) {
-  const { actions } = useDemoWorkspace()
-  const create = useRetained(dialog?.type === "create" ? dialog : undefined)
-
-  return (
-    <FolderNameDialog
-      initialName=""
-      isOpen={dialog?.type === "create"}
-      onOpenChange={onOpenChange}
-      onSubmit={(name) => {
-        actions.createFolder(name, create?.parentId as FolderId | undefined)
-
-        return Promise.resolve()
-      }}
-      submitLabel="Create folder"
-      title="New folder"
-    />
-  )
-}
-
-function RenameFolderDialog({ dialog, onOpenChange }: DialogProps) {
-  const { actions } = useDemoWorkspace()
-  const rename = useRetained(dialog?.type === "rename" ? dialog : undefined)
-
-  if (rename === undefined) {
-    return null
-  }
-
-  return (
-    <FolderNameDialog
-      initialName={rename.folder.name}
-      isOpen={dialog?.type === "rename"}
-      key={`${rename.folder.folderId}:${rename.folder.name}`}
-      onOpenChange={onOpenChange}
-      onSubmit={(name) => {
-        actions.renameFolder(rename.folder.folderId as FolderId, name)
-
-        return Promise.resolve()
-      }}
-      submitLabel="Rename"
-      title={`Rename "${rename.folder.name}"`}
-    />
   )
 }
 

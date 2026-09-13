@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { menuWidth, RowMenuTrigger } from "../menu"
 import { ConsoleLink } from "../shell/link"
+import { useFolderEditing, useFolderMenuFocus } from "./edit/state"
 import { type FolderDialogRequest, type ManagedFolder } from "./types"
 
 // The canonical menu for a folder, as items only: what it costs, what it
@@ -70,9 +71,22 @@ export function FolderTitleMenu({
   folder: ManagedFolder
   onDialog: (request: FolderDialogRequest) => void
 }) {
+  const editing = useFolderEditing()
+  const onCloseAutoFocus = useFolderMenuFocus()
   return (
-    <DropdownMenuContent align="start" className={menuWidth}>
-      <FolderMenuItems folder={folder} onDialog={onDialog} />
+    <DropdownMenuContent
+      align="start"
+      className={menuWidth}
+      onCloseAutoFocus={onCloseAutoFocus}
+    >
+      <FolderMenuItems
+        folder={folder}
+        onDialog={(request) =>
+          request.type === "rename"
+            ? editing?.begin(folder, "title")
+            : onDialog(request)
+        }
+      />
     </DropdownMenuContent>
   )
 }
@@ -85,10 +99,15 @@ export function FolderRowMenu({
   folder: ManagedFolder
   onDialog: (request: FolderDialogRequest) => void
 }) {
+  const onCloseAutoFocus = useFolderMenuFocus()
   return (
     <DropdownMenu>
       <RowMenuTrigger name={folder.name} />
-      <DropdownMenuContent align="end" className={menuWidth}>
+      <DropdownMenuContent
+        align="end"
+        className={menuWidth}
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         <FolderMenuItems folder={folder} onDialog={onDialog} />
       </DropdownMenuContent>
     </DropdownMenu>

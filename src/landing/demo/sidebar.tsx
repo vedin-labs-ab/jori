@@ -1,10 +1,8 @@
 import { useState } from "react"
+import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { FolderTree } from "@/shared/console/folders/section"
 import { activeFolderId } from "@/shared/console/folders/tree"
-import {
-  type CreationRequest,
-  type FolderDialogRequest,
-} from "@/shared/console/folders/types"
+import { type CreationRequest } from "@/shared/console/folders/types"
 import { ConsoleSidebar } from "@/shared/console/shell/navigation"
 import { SidebarOrganization } from "@/shared/console/shell/organization"
 import { chatViews } from "./derive/chat"
@@ -22,7 +20,7 @@ export function DemoSidebar({ pathname }: { pathname: string }) {
   const folders = useDemoFolders()
   const { state } = useDemoWorkspace()
   const expansion = useDemoExpansion(activeFolderId(pathname), folders)
-  const [dialog, setDialog] = useState<FolderDialogRequest>()
+  const [dialog, setDialog] = useFolderRequests("sidebar")
   const [creation, setCreation] = useState<CreationRequest>()
 
   return (

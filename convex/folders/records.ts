@@ -1,7 +1,9 @@
 import { v } from "convex/values"
+import { availableFolderName } from "../../contracts/folders/name"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { createSight } from "../visibility/sight"
 import { filedTables, purgeRow, refileRow } from "./filing"
 import { reparentSpend } from "./spend"
 import {
@@ -13,6 +15,7 @@ import {
   requireOrganizationFolder,
   requireVisibleFolder,
   subtreeHeight,
+  treeCap,
 } from "./tree"
 
 // Folder records: create, rename, move, and the subtree delete. Sibling
@@ -27,7 +30,7 @@ export async function createFolder(
   args: {
     organizationId: string
     personId: Id<"persons">
-    name: string
+    name?: string
     parentId?: Id<"folders">
   }
 ) {
@@ -44,7 +47,7 @@ export async function createFolder(
   const now = Date.now()
   const folderId = await ctx.db.insert("folders", {
     organizationId: args.organizationId,
-    name: normalizeFolderName(args.name),
+    name: normalizeFolderName(args.name ?? (await generatedName(ctx, args))),
     // New folders gate nothing; people narrow them in the console.
     visibility: { mode: "organization" },
     parentId: args.parentId,
@@ -261,4 +264,33 @@ function assertDepth(depth: number) {
   if (depth > maxTreeDepth) {
     throw new Error(`Folders can nest at most ${maxTreeDepth} levels deep.`)
   }
+}
+
+/** Runs inside creation's transaction, so concurrent creates retry against
+ *  the new sibling. Hidden names never influence the generated label. */
+async function generatedName(
+  ctx: MutationCtx,
+  args: {
+    organizationId: string
+    personId: Id<"persons">
+    parentId?: Id<"folders">
+  }
+) {
+  const siblings = await ctx.db
+    .query("folders")
+    .withIndex("by_organization_and_parent", (q) =>
+      q.eq("organizationId", args.organizationId).eq("parentId", args.parentId)
+    )
+    .take(treeCap + 1)
+  if (siblings.length > treeCap) {
+    throw new Error("This folder has too many subfolders.")
+  }
+  const sight = createSight(ctx, args)
+  const names: string[] = []
+  for (const sibling of siblings) {
+    if (await sight.canSeeFolder(sibling)) {
+      names.push(sibling.name)
+    }
+  }
+  return availableFolderName(names)
 }

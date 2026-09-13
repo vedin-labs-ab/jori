@@ -1,9 +1,9 @@
 import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
+import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { RootFolderList } from "@/shared/console/folders/list/roots"
 import { FoldersTitleMenu } from "@/shared/console/folders/menu"
-import { type FolderDialogRequest } from "@/shared/console/folders/types"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -29,7 +29,7 @@ export function FoldersOverview() {
 
 function RootFolders({ organizationId }: { organizationId: string }) {
   const roots = useQuery(api.folders.console.roots, { organizationId })
-  const [dialog, setDialog] = useState<FolderDialogRequest>()
+  const [dialog, setDialog] = useFolderRequests("contents")
   const create = () => setDialog({ type: "create" })
   const selection = useFolderSelectionActions(organizationId)
 

@@ -1,5 +1,6 @@
 import { type ComponentProps, type ReactNode, useMemo, useState } from "react"
 import { NewInFolderButton } from "@/shared/console/folders/create"
+import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { type FolderContents } from "@/shared/console/folders/list/contents"
 import {
   type FolderCreation,
@@ -30,7 +31,7 @@ export function useDemoFolderContents(
   overlays: ReactNode
 } {
   const { state } = useDemoWorkspace()
-  const [dialog, setDialog] = useState<FolderDialogRequest>()
+  const [dialog, setDialog] = useFolderRequests("contents")
   const [creation, setCreation] = useState<FolderCreation>()
   const selection = useDemoFolderSelection()
   const contents = useMemo(

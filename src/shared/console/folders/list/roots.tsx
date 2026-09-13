@@ -8,6 +8,8 @@ import {
 } from "../../list/empty"
 import { ConsoleListContent } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
+import { PendingFolderRow } from "../edit/pending"
+import { usePendingFolder } from "../edit/state"
 import { type FolderDialogRequest, type FolderRootsResult } from "../types"
 import { FolderSelectionBar } from "./bar"
 import { selectionPayload, useFolderListing } from "./controls"
@@ -28,6 +30,7 @@ export function RootFolderList({
   roots: FolderRootsResult | undefined
   selectionActions: FolderSelectionActions
 }) {
+  const pending = usePendingFolder(undefined, "contents")
   const list = useFolderListing({
     folders: roots?.status === "ready" ? roots.folders : [],
     resources: [],
@@ -52,22 +55,8 @@ export function RootFolderList({
     )
   }
 
-  if (roots.folders.length === 0) {
-    return (
-      <ConsoleListContent>
-        <ConsoleEmptyState
-          action={
-            <Button onClick={onCreate} type="button">
-              <Plus />
-              New folder
-            </Button>
-          }
-          description="Folders organize your chats and the tables, stores, files, and jobs your team shares."
-          icon={Folder}
-          title="No folders yet"
-        />
-      </ConsoleListContent>
-    )
+  if (roots.folders.length === 0 && !pending) {
+    return <EmptyRoots onCreate={onCreate} />
   }
 
   return (
@@ -78,7 +67,10 @@ export function RootFolderList({
         owners={list.owners}
         selection={list.selection}
       >
-        {list.folders.length === 0 ? (
+        {pending ? (
+          <PendingFolderRow name={pending.name} colSpan={folderTableColumns} />
+        ) : null}
+        {list.folders.length === 0 && !pending ? (
           <EmptyRow colSpan={folderTableColumns}>
             <FilterableEmptyState
               description="Folders organize your chats and the tables, stores, files, and jobs your team shares."
@@ -105,5 +97,23 @@ export function RootFolderList({
         selection={list.selection}
       />
     </>
+  )
+}
+
+function EmptyRoots({ onCreate }: { onCreate: () => void }) {
+  return (
+    <ConsoleListContent>
+      <ConsoleEmptyState
+        action={
+          <Button onClick={onCreate} type="button">
+            <Plus />
+            New folder
+          </Button>
+        }
+        description="Folders organize your chats and the tables, stores, files, and jobs your team shares."
+        icon={Folder}
+        title="No folders yet"
+      />
+    </ConsoleListContent>
   )
 }

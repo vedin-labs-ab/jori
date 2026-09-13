@@ -155,3 +155,30 @@ test("moving rejects sinking a subtree below the depth cap", async () => {
     })
   ).rejects.toThrow("Folders can nest at most 8 levels deep.")
 })
+
+test("automatic creation finds a free visible sibling name while explicit duplicates remain valid", async () => {
+  const { ctx } = databaseContext()
+  const first = await createFolder(ctx, base)
+  const second = await createFolder(ctx, base)
+  expect(first.name).toBe("New folder")
+  expect(second.name).toBe("New folder 1")
+  expect((await createFolder(ctx, { ...base, parentId: first._id })).name).toBe(
+    "New folder"
+  )
+  expect((await createFolder(ctx, { ...base, name: "New folder" })).name).toBe(
+    "New folder"
+  )
+})
+
+test("hidden sibling names do not leak through automatic numbering", async () => {
+  const { ctx, database } = databaseContext()
+  await database.insert(
+    "folders",
+    folderDoc({
+      name: "New folder",
+      createdBy: "other" as Id<"persons">,
+      visibility: { mode: "private" },
+    })
+  )
+  expect((await createFolder(ctx, base)).name).toBe("New folder")
+})

@@ -55,6 +55,11 @@ vi.mock("../shared/visibility/directory", () => ({
     children: React.ReactNode
   }) => children,
 }))
+vi.mock("../folders/edit", () => ({
+  ConsoleFolderEditing: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+}))
 vi.mock("../folders/section", () => ({ SidebarFolders: () => null }))
 vi.mock("../chat/recent", () => ({ useSidebarChats: () => [] }))
 vi.mock("./account", () => ({ SidebarUserButton: () => null }))

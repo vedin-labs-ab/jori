@@ -260,6 +260,11 @@ function MaterialTrail({
 /** The current material's name — plain, or the trigger of the page's own
  *  menu when the view published one. */
 function MaterialName({ material }: { material: MaterialBreadcrumb }) {
+  const name = <MaterialNameContent material={material} />
+  return material.renderName ? material.renderName(name) : name
+}
+
+function MaterialNameContent({ material }: { material: MaterialBreadcrumb }) {
   if (material.menu === undefined) {
     return <BreadcrumbPage className="truncate">{material.name}</BreadcrumbPage>
   }

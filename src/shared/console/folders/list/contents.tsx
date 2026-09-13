@@ -9,6 +9,8 @@ import {
 import { ConsoleListContent } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
 import { type RowSelection } from "../../list/selection"
+import { PendingFolderRow } from "../edit/pending"
+import { usePendingFolder } from "../edit/state"
 import {
   type FolderContentsResult,
   type FolderDialogRequest,
@@ -47,6 +49,7 @@ export function FolderContents({
   resourceMenu: (resource: FolderResource) => ReactNode
   selectionActions: FolderSelectionActions
 }) {
+  const pending = usePendingFolder(folderId, "contents")
   if (contents === undefined) {
     return (
       <ConsoleListContent>
@@ -70,7 +73,11 @@ export function FolderContents({
     )
   }
 
-  if (contents.folders.length === 0 && contents.resources.length === 0) {
+  if (
+    contents.folders.length === 0 &&
+    contents.resources.length === 0 &&
+    !pending
+  ) {
     return (
       <ConsoleListContent>
         <ConsoleEmptyState
@@ -159,9 +166,10 @@ function FolderContentRows({
   resources: FolderResource[]
   selection: RowSelection<FolderListEntry>
 }) {
+  const pending = usePendingFolder(folderId, "contents")
   const selected = selectionPayload(selection.selected, folderId)
 
-  if (folders.length === 0 && resources.length === 0) {
+  if (folders.length === 0 && resources.length === 0 && !pending) {
     return (
       <EmptyRow colSpan={folderTableColumns}>
         <FilterableEmptyState
@@ -176,6 +184,9 @@ function FolderContentRows({
 
   return (
     <>
+      {pending ? (
+        <PendingFolderRow name={pending.name} colSpan={folderTableColumns} />
+      ) : null}
       {folders.map((folder) => (
         <FolderListRow
           folder={folder}

@@ -22,6 +22,7 @@ export type MaterialBreadcrumbSegment = {
 }
 
 export type MaterialBreadcrumb = {
+  renderName?: (name: ReactNode) => ReactNode
   name: string
   /** Ancestor segments, root-first. When present, the header links these
    *  instead of the parent surface it derives from the path. */

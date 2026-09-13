@@ -32,6 +32,7 @@ import {
 import { type DragPayload } from "../drag/plan"
 import { DraggableTableRow } from "../drag/row"
 import { useFolderRowDrag } from "../drag/state"
+import { FolderName } from "../edit/name"
 import { FolderRowMenu } from "../menu"
 import { type FolderDialogRequest, type ListedFolder } from "../types"
 import { type FolderListEntry } from "./controls"
@@ -137,21 +138,23 @@ export function FolderListRow({
         selection={selection}
       />
       <TableCell data-row-link>
-        <ConsoleLink
-          className={nameLinkClassName}
-          draggable={false}
-          params={{ folderId: folder.folderId }}
-          title={folder.name}
-          to="/folders/$folderId"
-        >
-          <FolderIcon className="size-4 shrink-0 text-muted-foreground" />
-          <span className="truncate">{folder.name}</span>
-          <VisibilityNameMark
-            visibility={folder.visibility}
-            folderId={folder.parentId}
-            ownerId={folder.createdBy}
-          />
-        </ConsoleLink>
+        <FolderName folder={folder} surface="contents">
+          <ConsoleLink
+            className={nameLinkClassName}
+            draggable={false}
+            params={{ folderId: folder.folderId }}
+            title={folder.name}
+            to="/folders/$folderId"
+          >
+            <FolderIcon className="size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate">{folder.name}</span>
+            <VisibilityNameMark
+              visibility={folder.visibility}
+              folderId={folder.parentId}
+              ownerId={folder.createdBy}
+            />
+          </ConsoleLink>
+        </FolderName>
       </TableCell>
       <VisibilityCell
         visibility={folder.visibility}

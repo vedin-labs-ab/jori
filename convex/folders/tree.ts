@@ -1,3 +1,4 @@
+import { folderNameLimit } from "../../contracts/folders/name"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
@@ -19,7 +20,7 @@ export function normalizeFolderName(value: unknown) {
     throw new Error("A name is required.")
   }
 
-  return name.slice(0, 120)
+  return name.slice(0, folderNameLimit)
 }
 
 export function summarizeFolder(folder: Doc<"folders">) {

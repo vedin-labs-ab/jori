@@ -1,5 +1,6 @@
 import { useQuery } from "convex/react"
 import { useMemo, useState } from "react"
+import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { useFolderExpansion } from "@/shared/console/folders/expansion"
 import { FolderTree } from "@/shared/console/folders/section"
 import {
@@ -8,7 +9,6 @@ import {
 } from "@/shared/console/folders/tree"
 import {
   type CreationRequest,
-  type FolderDialogRequest,
   type FolderRow,
 } from "@/shared/console/folders/types"
 import { useActiveOrganization } from "@/shared/session/auth"
@@ -39,7 +39,7 @@ function FoldersGroup({
 }) {
   const tree = useQuery(api.folders.console.tree, { organizationId })
   const folders = tree?.status === "ready" ? tree.folders : undefined
-  const [dialog, setDialog] = useState<FolderDialogRequest>()
+  const [dialog, setDialog] = useFolderRequests("sidebar")
   const [creation, setCreation] = useState<CreationRequest>()
   const activeId = activeFolderId(pathname)
   const expansion = useFolderExpansion(activeId, folders)

@@ -167,7 +167,7 @@ export const roots = query({
 export const create = mutation({
   args: {
     organizationId: v.string(),
-    name: v.string(),
+    name: v.optional(v.string()),
     parentId: v.optional(v.id("folders")),
   },
   handler: async (ctx, args) => {

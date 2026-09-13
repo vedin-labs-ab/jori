@@ -1,7 +1,9 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { type ReactNode, useMemo, useState } from "react"
+import { type ReactNode, useMemo } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { FolderName } from "@/shared/console/folders/edit/name"
+import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { FolderTitleMenu } from "@/shared/console/folders/menu"
 import {
   type FolderDetail,
@@ -88,7 +90,7 @@ function FolderResolver({
 }) {
   const detail = useQuery(api.folders.console.get, { organizationId, folderId })
   const folder = detail?.status === "ready" ? detail.folder : undefined
-  const [dialog, setDialog] = useState<FolderDialogRequest>()
+  const [dialog, setDialog] = useFolderRequests("contents")
   // The page's own trail: deleting any folder on it takes this page too.
   const leaveDeletedFolder = useLeaveDeletedFolder(
     useMemo(
@@ -199,6 +201,11 @@ function folderCrumb({
         ownerId={folder.createdBy}
         onClick={() => onDialog({ type: "access", folder })}
       />
+    ),
+    renderName: (name) => (
+      <FolderName folder={folder} surface="title">
+        {name}
+      </FolderName>
     ),
     menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
     name: folder.name,

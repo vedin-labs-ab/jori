@@ -1,5 +1,4 @@
 import { ChevronRight, MoreHorizontal } from "lucide-react"
-import { type ReactNode } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +18,13 @@ import { ConsoleLink } from "../shell/link"
 import { VisibilityMark } from "../visibility/badge"
 import { NewInFolderSub } from "./create"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
+import { FolderName } from "./edit/name"
+import { PendingFolderName } from "./edit/pending"
+import {
+  useFolderEditing,
+  useFolderMenuFocus,
+  usePendingFolder,
+} from "./edit/state"
 import { type FolderExpansion } from "./expansion"
 import { FolderMenuItems } from "./menu"
 import { activeFolderId, type FolderNode } from "./tree"
@@ -49,7 +55,12 @@ export function FolderTreeItem({
     folderId: node.folderId,
     name: node.name,
   })
-  const hasChildren = node.children.length > 0
+  const editing = useFolderEditing()
+  const isEditing =
+    editing?.edit?.surface === "sidebar" &&
+    editing.edit.folder.folderId === node.folderId
+  const pending = usePendingFolder(node.folderId, "sidebar")
+  const hasChildren = node.children.length > 0 || pending !== undefined
   const isExpanded = hasChildren && expansion.isExpanded(node.folderId)
 
   return (
@@ -59,24 +70,20 @@ export function FolderTreeItem({
           hover boundary: actions inside reveal only when THIS row is
           hovered, and position against it, not the subtree. */}
       <div className="group/row relative">
-        <FolderRowLink
-          audience={
-            <VisibilityMark
-              visibility={node.visibility}
-              folderId={node.parentId}
-              ownerId={node.createdBy}
-            />
-          }
-          drag={drag}
-          folderId={node.folderId}
-          hasChildren={hasChildren}
-          hasContents={node.hasContents}
-          isActive={activeFolderId(pathname) === node.folderId}
-          isExpanded={isExpanded}
-          name={node.name}
-          onNavigate={() => expansion.expand(node.folderId)}
-        />
-        {hasChildren ? (
+        <FolderName folder={node} surface="sidebar">
+          <FolderRowLink
+            folder={node}
+            drag={drag}
+            folderId={node.folderId}
+            hasChildren={hasChildren}
+            hasContents={node.hasContents}
+            isActive={activeFolderId(pathname) === node.folderId}
+            isExpanded={isExpanded}
+            name={node.name}
+            onNavigate={() => expansion.expand(node.folderId)}
+          />
+        </FolderName>
+        {hasChildren && !isEditing ? (
           <RowChevron
             isDragActive={drag.isDragActive}
             isExpanded={isExpanded}
@@ -84,12 +91,14 @@ export function FolderTreeItem({
             onToggle={() => expansion.toggle(node.folderId)}
           />
         ) : null}
-        <FolderTreeMenu
-          folder={node}
-          isDragActive={drag.isDragActive}
-          onCreate={onCreate}
-          onDialog={onDialog}
-        />
+        {!isEditing ? (
+          <FolderTreeMenu
+            folder={node}
+            isDragActive={drag.isDragActive}
+            onCreate={onCreate}
+            onDialog={onDialog}
+          />
+        ) : null}
       </div>
       {isExpanded ? (
         // The default sub-list insets both edges, so at the backend's
@@ -99,6 +108,11 @@ export function FolderTreeItem({
         // so every row at every depth ends on the same right edge and
         // still fits a readable name at depth 8.
         <SidebarMenuSub className="mr-0 ml-2.5 pr-0 pl-1.5">
+          {pending ? (
+            <SidebarMenuItem>
+              <PendingFolderName name={pending.name} />
+            </SidebarMenuItem>
+          ) : null}
           {node.children.map((child) => (
             <FolderTreeItem
               expansion={expansion}
@@ -116,7 +130,7 @@ export function FolderTreeItem({
 }
 
 function FolderRowLink({
-  audience,
+  folder,
   drag,
   folderId,
   hasChildren,
@@ -126,7 +140,7 @@ function FolderRowLink({
   name,
   onNavigate,
 }: {
-  audience: ReactNode
+  folder: FolderNode
   drag: FolderRowDrag
   folderId: string
   hasChildren: boolean
@@ -166,7 +180,11 @@ function FolderRowLink({
       >
         <FolderIcon />
         <span className="min-w-0 truncate">{name}</span>
-        {audience}
+        <VisibilityMark
+          visibility={folder.visibility}
+          folderId={folder.parentId}
+          ownerId={folder.createdBy}
+        />
       </ConsoleLink>
     </SidebarMenuButton>
   )
@@ -240,6 +258,7 @@ function FolderTreeMenu({
   onCreate: (request: CreationRequest) => void
   onDialog: (request: FolderDialogRequest) => void
 }) {
+  const onCloseAutoFocus = useFolderMenuFocus()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -259,7 +278,12 @@ function FolderTreeMenu({
           <MoreHorizontal />
         </SidebarMenuAction>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className={menuWidth} side="right">
+      <DropdownMenuContent
+        align="start"
+        className={menuWidth}
+        side="right"
+        onCloseAutoFocus={onCloseAutoFocus}
+      >
         <NewInFolderSub
           onCreate={(creation) =>
             onCreate({ creation, folderId: folder.folderId })
