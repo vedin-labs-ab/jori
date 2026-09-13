@@ -80,7 +80,7 @@ with $15 of included credits has a $25 refund if you have used $5 of those
 credits. We do not deduct that same usage from a separate credit purchase.
 Refunds cannot exceed the amount actually paid for the relevant purchase.
 
-This offer applies to monthly and annual subscriptions and does not restart on renewal.
+This offer does not restart on renewal.
 Promotional credit usage is not deducted from your refund. After that window, ordinary
 cancellation ends at the end of the paid term without a partial subscription
 refund. This does not limit your statutory rights.
