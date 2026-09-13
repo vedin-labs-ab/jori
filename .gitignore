@@ -19,3 +19,5 @@ todos.json
 
 .gstack
 .impeccable
+# Dev server logs written by tool launches.
+.dev/
