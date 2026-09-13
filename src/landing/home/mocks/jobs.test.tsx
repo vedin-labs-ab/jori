@@ -1,6 +1,7 @@
 /* @vitest-environment jsdom */
 
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -27,6 +28,9 @@ test("seeds the editor with the chase brief and files a job from it", async () =
       <Jobs />
     </DemoWorkspaceProvider>
   )
+
+  // Settle the lazy editor import before the form's interaction checks.
+  await act(() => vi.dynamicImportSettled())
 
   const name = await screen.findByLabelText("Name")
 
