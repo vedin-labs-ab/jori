@@ -19,6 +19,7 @@ import {
 import { fileOwner } from "@/shared/console/materials/owners"
 import { absoluteTime, relativeTime } from "@/shared/console/time"
 import { formatFileSize } from "@/shared/files/size"
+import { visibilityColumn } from "../../materials/cells/columns"
 import { FileRowMenu } from "../menu"
 import { type FileRow } from "../types"
 import { FileNameCell, FileTypeCell } from "./cells"
@@ -38,16 +39,17 @@ const columns: MaterialColumn<FileRow>[] = [
     label: "Type",
     tier: "2xl",
   },
-  folderColumn("lg"),
+  visibilityColumn<FileRow>(),
+  folderColumn("3xl"),
   {
     cell: (file, context) => relativeTime(file.createdAt, context.now),
     className: "text-muted-foreground",
     head: { sortKey: "created" },
     label: "Created",
-    tier: "3xl",
+    tier: "5xl",
     title: (file) => absoluteTime(file.createdAt),
   },
-  ownerColumn(fileOwner, "xl"),
+  ownerColumn(fileOwner, "4xl"),
   {
     cell: (file, context) => relativeTime(file.updatedAt, context.now),
     className: "text-muted-foreground",

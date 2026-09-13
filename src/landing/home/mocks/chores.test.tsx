@@ -32,16 +32,15 @@ test("lists the jobs and pauses one from its row", () => {
     expect(document.getElementById(href?.slice(1) ?? "")).not.toBeNull()
   }
 
-  // The paused job is listed too, wearing its badge beside the filter
-  // panel's own Paused option.
-  expect(screen.getAllByText("Paused")).toHaveLength(2)
+  // Both responsive status placements exist in jsdom, beside the filter option.
+  expect(screen.getAllByText("Paused")).toHaveLength(3)
 
   openActions("Ticket triage")
   fireEvent.click(screen.getByRole("menuitem", { name: "Pause" }))
   openActions("Ticket triage")
 
   expect(screen.getByRole("menuitem", { name: "Resume" })).toBeDefined()
-  expect(screen.getAllByText("Paused")).toHaveLength(3)
+  expect(screen.getAllByText("Paused")).toHaveLength(5)
 })
 
 test("a row's name opens the job's page inside the same console", async () => {

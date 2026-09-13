@@ -12,6 +12,7 @@ import {
   MaterialList,
 } from "@/shared/console/materials/list"
 import { materialOwner } from "@/shared/console/materials/owners"
+import { visibilityColumn } from "../../materials/cells/columns"
 import { type Job } from "../types"
 import { JobRowMenu } from "./actions"
 import { JobNameCell, JobTriggerCell } from "./cells"
@@ -43,11 +44,12 @@ const drag = (job: Job): ResourceDragItem => ({
  *  filed and whose it is, then when it last ran and when it runs next. */
 const columns: MaterialColumn<Job>[] = [
   { cell: (job) => <JobTriggerCell job={job} />, label: "Trigger", tier: "md" },
-  { cell: (job) => <JobToolSummary job={job} />, label: "Tools", tier: "4xl" },
-  folderColumn("lg"),
-  ownerColumn(materialOwner, "xl"),
-  timeColumn("Last run", "fired", (job) => job.firedAt, "4xl"),
-  timeColumn("Next run", "next", nextRunAt, "3xl"),
+  { cell: (job) => <JobToolSummary job={job} />, label: "Tools", tier: "5xl" },
+  visibilityColumn<Job>(),
+  folderColumn("3xl"),
+  ownerColumn(materialOwner, "4xl"),
+  timeColumn("Last run", "fired", (job) => job.firedAt, "5xl"),
+  timeColumn("Next run", "next", nextRunAt, "4xl"),
 ]
 
 export function JobList({

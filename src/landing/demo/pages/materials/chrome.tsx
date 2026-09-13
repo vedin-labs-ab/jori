@@ -13,6 +13,7 @@ import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { TableLead } from "@/shared/console/tables/menu"
 import { type TableDetail } from "@/shared/console/tables/types"
+import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { fileRowOf } from "../../derive/materials"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import {
@@ -71,7 +72,11 @@ export function CollectionTitle({
         />
       ),
       [material, table]
-    )
+    ),
+    <VisibilityButton
+      {...table}
+      onClick={() => setRequest({ kind: "access", material })}
+    />
   )
 
   return (

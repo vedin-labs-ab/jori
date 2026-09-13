@@ -26,6 +26,7 @@ import { FileViewer } from "./viewer/section"
  *  the menu around this view's own lines. Keyed by the file, so a step to
  *  a neighbor starts every view fresh. */
 export function FileBody(props: {
+  audience?: ReactNode
   file: FileDetail
   /** Persists the text editor's buffer; see `FileSave`. */
   onSave: FileSave
@@ -38,6 +39,7 @@ export function FileBody(props: {
 }
 
 function FileContent({
+  audience,
   file,
   onSave,
   siblings,
@@ -52,6 +54,7 @@ function FileContent({
       : undefined
 
   useFileCrumb({
+    audience,
     file,
     menu: titleMenu(
       <FileLead
@@ -100,18 +103,20 @@ function FileContent({
 /** Publishes the file's crumb: its name with the menu hung off it, and
  *  the save state the shell shows in the name while a save is in motion. */
 function useFileCrumb({
+  audience,
   file,
   menu,
   saveStatus,
 }: {
   file: FileDetail
+  audience?: ReactNode
   menu: ReactNode
   saveStatus: FileEditorState["saveStatus"] | undefined
 }) {
   useMaterialTrail(
     useMemo(
-      () => ({ menu, name: file.name, saveStatus }),
-      [file.name, menu, saveStatus]
+      () => ({ audience, menu, name: file.name, saveStatus }),
+      [audience, file.name, menu, saveStatus]
     )
   )
 }

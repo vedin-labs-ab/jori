@@ -46,7 +46,7 @@ test("leads with the view's lines, then the file's management actions, in order"
   expect(screen.getByText("Updated just now")).toBeDefined()
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Rename…", "Visibility…", "Move to folder…", "Delete"])
+  ).toEqual(["Rename…", "Audience…", "Move to folder…", "Delete"])
 })
 
 test("leaves the links to the header the detail page already has", () => {
@@ -59,7 +59,7 @@ test("leaves the links to the header the detail page already has", () => {
 test("opens the page's dialogs and confirms a delete before it happens", () => {
   renderTitleMenu()
 
-  fireEvent.click(screen.getByRole("menuitem", { name: "Visibility…" }))
+  fireEvent.click(screen.getByRole("menuitem", { name: "Audience…" }))
 
   expect(onOpen).toHaveBeenCalledWith("access")
 })

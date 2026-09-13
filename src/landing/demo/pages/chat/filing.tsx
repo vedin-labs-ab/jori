@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { ChatTitleMenu } from "@/shared/console/chat/menu"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
+import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { folderDetail } from "../../derive/folders"
 import { useDemoChatMenu } from "../../dialogs/chat"
 import { type DemoConversation } from "../../fixtures/chat"
@@ -23,7 +24,13 @@ export function DemoChatFiling({
 
       return {
         name: conversation.title,
-        visibility: conversation.visibility,
+        audience: (
+          <VisibilityButton
+            {...conversation}
+            ownerId={conversation.createdBy}
+            onClick={items.onAccess}
+          />
+        ),
         trail: folder?.path.map((segment) => ({
           name: segment.name,
           to: "/folders/$folderId",

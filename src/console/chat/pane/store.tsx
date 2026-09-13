@@ -4,6 +4,7 @@ import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type StoreDetail } from "@/shared/console/stores/types"
 import { api } from "../../../../convex/_generated/api"
+import { OrganizationVisibilityButton } from "../../shared/visibility/button"
 import { useStoreWrites } from "../../stores/writes"
 
 /** A store in the pane: its value and schema editors over the same
@@ -40,5 +41,20 @@ function PaneValue({
 }) {
   const writes = useStoreWrites(organizationId, store.storeId)
 
-  return <ChatPaneBody material={{ kind: "store", store, ...writes }} />
+  return (
+    <ChatPaneBody
+      material={{
+        kind: "store",
+        audience: (
+          <OrganizationVisibilityButton
+            {...store}
+            organizationId={organizationId}
+            target={{ kind: "store", id: store.storeId }}
+          />
+        ),
+        store,
+        ...writes,
+      }}
+    />
+  )
 }

@@ -29,6 +29,7 @@ import {
   useMaterialTrail,
 } from "@/shared/console/materials/breadcrumb"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
+import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { folderDetail, rootFolders } from "../derive/folders"
 import { usageSpend } from "../derive/usage"
 import { DemoFolderDialogs } from "../dialogs/folders"
@@ -156,6 +157,14 @@ function folderCrumb(
           folderId={folder.folderId}
         />
       </ConsoleHeaderAside>
+    ),
+    audience: (
+      <VisibilityButton
+        visibility={folder.visibility}
+        folderId={folder.parentId}
+        ownerId={folder.createdBy}
+        onClick={() => onDialog({ type: "access", folder })}
+      />
     ),
     menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
     name: folder.name,

@@ -222,9 +222,7 @@ function RecentConversation({
         ref={drag.setNodeRef}
       >
         <span className="min-w-0 flex-1 truncate">{conversation.title}</span>
-        {conversation.visibility === "organization" ? null : (
-          <VisibilityMark visibility={conversation.visibility} />
-        )}
+        <VisibilityMark {...conversation} ownerId={conversation.createdBy} />
         <span className="shrink-0 text-muted-foreground text-xs">
           {relativeTime(conversation.updatedAt, now)}
         </span>

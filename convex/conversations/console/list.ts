@@ -49,7 +49,7 @@ function conversationView(conversation: Doc<"conversations">) {
     id: conversation._id,
     title: conversation.title ?? "",
     folderId: conversation.folderId,
-    visibility: conversationVisibility(conversation).mode,
+    visibility: conversationVisibility(conversation),
     createdBy: conversation.createdBy,
     updatedAt: conversation.updatedAt ?? conversation._creationTime,
   }

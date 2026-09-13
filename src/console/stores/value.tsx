@@ -4,15 +4,24 @@ import { StoreValue as StoreValueView } from "@/shared/console/stores/value/sect
 import { useStoreWrites } from "./writes"
 
 export function StoreValue({
+  audience,
   organizationId,
   store,
   titleMenu,
 }: {
+  audience?: ReactNode
   organizationId: string
   store: StoreDetail
   titleMenu: (lead: ReactNode) => ReactNode
 }) {
   const writes = useStoreWrites(organizationId, store.storeId)
 
-  return <StoreValueView {...writes} store={store} titleMenu={titleMenu} />
+  return (
+    <StoreValueView
+      audience={audience}
+      {...writes}
+      store={store}
+      titleMenu={titleMenu}
+    />
+  )
 }

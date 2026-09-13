@@ -1,10 +1,10 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
-import { useMemo, useState } from "react"
+import { type ReactNode, useMemo, useState } from "react"
 import { ChatTitleMenu } from "@/shared/console/chat/menu"
 import { moveTarget, resourceSubject } from "@/shared/console/folders/types"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
-import { VisibilityMark } from "@/shared/console/visibility/badge"
+import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../../convex/_generated/api"
 import { MoveResourceDialog } from "../../folders/move"
 import { useMoveRun } from "../../folders/move/run"
@@ -34,32 +34,26 @@ export function ConversationFiling({
     [conversationId, live.title, live.folderId]
   )
 
-  useMaterialTrail(
-    useMemo(
-      () => ({
-        name: live.title,
-        suffix: <VisibilityMark visibility={live.visibility} />,
-        trail: folder?.folder?.path.map((segment) => ({
-          name: segment.name,
-          to: "/folders/$folderId",
-          params: { folderId: segment.folderId },
-        })),
-        menu: (
-          <ChatTitleMenu
-            onAccess={() => setSharing(true)}
-            onMoveToFolder={() => setMoving(true)}
-            onUnfile={
-              live.folderId === undefined
-                ? undefined
-                : () => {
-                    void move.run(resourceSubject([target]), null)
-                  }
+  useConversationTrail(
+    live,
+    folder,
+    <ChatTitleMenu
+      onAccess={() => setSharing(true)}
+      onMoveToFolder={() => setMoving(true)}
+      onUnfile={
+        live.folderId === undefined
+          ? undefined
+          : () => {
+              void move.run(resourceSubject([target]), null)
             }
-          />
-        ),
-      }),
-      [folder, live.title, live.folderId, live.visibility, move.run, target]
-    )
+      }
+    />,
+    <VisibilityButton
+      visibility={live.visibility}
+      folderId={live.folderId}
+      ownerId={live.createdBy}
+      onClick={() => setSharing(true)}
+    />
   )
 
   return (
@@ -88,5 +82,28 @@ function useConversationFolder(
   return useQuery(
     api.folders.console.get,
     folderId === undefined ? "skip" : { organizationId, folderId }
+  )
+}
+
+function useConversationTrail(
+  live: LiveConversation,
+  folder: ReturnType<typeof useConversationFolder>,
+  menu: ReactNode,
+  audience: ReactNode
+) {
+  useMaterialTrail(
+    useMemo(
+      () => ({
+        name: live.title,
+        trail: folder?.folder?.path.map((segment) => ({
+          name: segment.name,
+          to: "/folders/$folderId",
+          params: { folderId: segment.folderId },
+        })),
+        menu,
+        audience,
+      }),
+      [live.title, folder, menu, audience]
+    )
   )
 }

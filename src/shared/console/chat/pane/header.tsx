@@ -53,6 +53,7 @@ export function PaneHeader({
       <span className="shrink-0 text-muted-foreground text-xs">
         {isUnavailable ? "No longer available" : presentation.label}
       </span>
+      {isUnavailable ? null : crumb?.audience}
       {crumb?.menu === undefined ? null : (
         <PaneMenu menu={crumb.menu} name={name} saveStatus={crumb.saveStatus} />
       )}

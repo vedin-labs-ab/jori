@@ -10,6 +10,7 @@ import { useLatestCallback } from "@/shared/console/retain"
 import { useNow } from "@/shared/console/time"
 import { api } from "../../../../convex/_generated/api"
 import { ConversationDraft } from "../draft"
+import { ConversationFiling } from "../filing"
 import { useConversationMessages } from "../messages"
 import { useReferences } from "../references"
 import { sendAnswer, useSendMessage } from "../send"
@@ -82,28 +83,35 @@ function PaneTurns({
   )
 
   return (
-    <ChatPaneBody
-      material={{
-        kind: "chat",
-        thread: {
-          draft: (
-            <ConversationDraft
-              conversationId={conversationId}
-              organizationId={organizationId}
-            />
-          ),
-          hasMore: page.hasMore,
-          isLoading: page.isLoading,
-          live: live.run,
-          messages: page.messages,
-          now,
-          onChoose,
-          onLoadMore: page.loadMore,
-          onOpenReference,
-          resolveReference,
-          usage: live.context,
-        },
-      }}
-    />
+    <>
+      <ConversationFiling
+        conversationId={conversationId}
+        live={live}
+        organizationId={organizationId}
+      />
+      <ChatPaneBody
+        material={{
+          kind: "chat",
+          thread: {
+            draft: (
+              <ConversationDraft
+                conversationId={conversationId}
+                organizationId={organizationId}
+              />
+            ),
+            hasMore: page.hasMore,
+            isLoading: page.isLoading,
+            live: live.run,
+            messages: page.messages,
+            now,
+            onChoose,
+            onLoadMore: page.loadMore,
+            onOpenReference,
+            resolveReference,
+            usage: live.context,
+          },
+        }}
+      />
+    </>
   )
 }

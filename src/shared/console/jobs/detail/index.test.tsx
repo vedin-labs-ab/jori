@@ -72,7 +72,7 @@ test("reads like a run's opened detail: brief, trigger, access, filing", () => {
   expect(screen.getByRole("button", { name: "Open Slack tools" })).toBeDefined()
   expect(screen.getByText("Blocked")).toBeDefined()
   expect(screen.getByRole("link", { name: "Renewals" })).toBeDefined()
-  expect(screen.getByText("Specific teams · 1 team")).toBeDefined()
+  expect(screen.getByText("1 team")).toBeDefined()
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
   expect(screen.getByRole("heading", { name: "Runs" })).toBeDefined()
   expect(screen.getByText("The runs.")).toBeDefined()

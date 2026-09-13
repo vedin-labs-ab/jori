@@ -171,38 +171,38 @@ test("a run shows as its Activity row held open, and the pane's name leads to th
   expect(within(pane).queryByRole("button", { expanded: false })).toBeNull()
 })
 
-test("a folder shows its listing, each row leading where it does on the page", async () => {
-  const contents = {
-    status: "ready",
-    folders: [
-      {
-        folderId: "folder-2",
-        name: "Renewals",
-        parentId: "folder-1",
-        visibility: { mode: "organization" },
-        createdBy: "persons:owner",
-        createdAt: 1,
-        updatedAt: Date.now(),
-        hasContents: false,
-        folderCount: 0,
-        resourceCount: 0,
-        ownerId: "persons:owner",
-        ownerName: "Ada Lovelace",
-      },
-    ],
-    resources: [
-      {
-        type: "table",
-        id: "table-1",
-        name: "Leads",
-        visibility: "organization",
-        updatedAt: Date.now(),
-        ownerId: "persons:owner",
-        ownerName: "Ada Lovelace",
-      },
-    ],
-  } as FolderContentsResult
+const folderContents = {
+  status: "ready",
+  folders: [
+    {
+      folderId: "folder-2",
+      name: "Renewals",
+      parentId: "folder-1",
+      visibility: { mode: "organization" },
+      createdBy: "persons:owner",
+      createdAt: 1,
+      updatedAt: Date.now(),
+      hasContents: false,
+      folderCount: 0,
+      resourceCount: 0,
+      ownerId: "persons:owner",
+      ownerName: "Ada Lovelace",
+    },
+  ],
+  resources: [
+    {
+      type: "table",
+      id: "table-1",
+      name: "Leads",
+      visibility: { mode: "organization" },
+      updatedAt: Date.now(),
+      ownerId: "persons:owner",
+      ownerName: "Ada Lovelace",
+    },
+  ],
+} as FolderContentsResult
 
+test("a folder shows its listing, each row leading where it does on the page", async () => {
   render(
     <TooltipProvider>
       <DndContext>
@@ -210,7 +210,7 @@ test("a folder shows its listing, each row leading where it does on the page", a
           material={{
             kind: "folder",
             contents: {
-              contents,
+              contents: folderContents,
               folderId: "folder-1",
               newMenu: null,
               onDialog: vi.fn(),
@@ -230,11 +230,13 @@ test("a folder shows its listing, each row leading where it does on the page", a
   )
 
   expect(
-    (await screen.findByRole("link", { name: "Renewals" })).getAttribute("href")
+    (
+      await screen.findByRole("link", { name: /^Renewals(?:\s*·|$)/ })
+    ).getAttribute("href")
   ).toBe("/folders/folder-2")
-  expect(screen.getByRole("link", { name: "Leads" }).getAttribute("href")).toBe(
-    "/tables/table-1"
-  )
+  expect(
+    screen.getByRole("link", { name: /^Leads(?:\s*·|$)/ }).getAttribute("href")
+  ).toBe("/tables/table-1")
   expect(screen.getByRole("button", { name: "Leads menu" })).toBeDefined()
 })
 

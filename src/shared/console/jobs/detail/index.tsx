@@ -9,12 +9,14 @@ import { DetailLine, DetailRow, DetailValue } from "../../runs/details"
 import { RunSectionLabel } from "../../runs/section"
 import { absoluteTime, relativeTime } from "../../time"
 import { ToolGroupsValue } from "../../tools/groups"
-import { visibilityIcon, visibilityLabel } from "../../visibility/marks"
+import { VisibilityLabel } from "../../visibility/badge"
+import { visibilityIcon } from "../../visibility/marks"
 import { jobTriggerSummary, jobTypeIcon, nextRunAt } from "../list/trigger"
 import { type Job } from "../types"
 import { jobToolGroups } from "./tools"
 
 export type JobDetailProps = {
+  showAudience?: boolean
   folders: FolderNames | undefined
   /** The Instructions row's body. The host loads the renderer, which
    *  carries the markdown codec, so the page's own chunk stays light. */
@@ -34,6 +36,7 @@ export function JobDetail({
   job,
   now,
   runs,
+  showAudience = true,
 }: JobDetailProps) {
   const groups = jobToolGroups(job)
   const toolCount = groups.reduce((sum, group) => sum + group.tools.length, 0)
@@ -79,14 +82,20 @@ export function JobDetail({
             <MaterialFolderCell folderId={job.folderId} folders={folders} />
           </DetailLine>
         </DetailRow>
-        <DetailRow
-          icon={visibilityIcon(job.visibility.mode)}
-          label="Visibility"
-        >
-          <DetailLine>
-            <DetailValue>{visibilityLabel(job.visibility)}</DetailValue>
-          </DetailLine>
-        </DetailRow>
+        {showAudience ? (
+          <DetailRow
+            icon={visibilityIcon(job.visibility.mode)}
+            label="Audience"
+          >
+            <DetailLine>
+              <VisibilityLabel
+                visibility={job.visibility}
+                folderId={job.folderId}
+                ownerId={job.ownerId}
+              />
+            </DetailLine>
+          </DetailRow>
+        ) : null}
         <DetailRow icon={UserRound} label="Created">
           <DetailLine>
             <MaterialOwnerCell compact owner={materialOwner(job)} />

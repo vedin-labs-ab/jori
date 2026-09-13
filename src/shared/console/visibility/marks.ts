@@ -1,9 +1,5 @@
-import {
-  type Visibility,
-  type VisibilityMode,
-  visibilityModeMarks,
-} from "@contracts/visibility"
-import { Building2, Group, Lock, Users } from "lucide-react"
+import { type VisibilityMode } from "@contracts/visibility"
+import { Building2, FolderLock, Group, Lock, Users } from "lucide-react"
 
 // One icon and one wording per visibility mode, for every surface that
 // marks who may see something. Teams wear the same grouped-objects icon
@@ -14,26 +10,9 @@ const visibilityIcons = {
   people: Users,
   teams: Group,
   organization: Building2,
+  folder: FolderLock,
 } as const
 
-export function visibilityIcon(mode: VisibilityMode) {
+export function visibilityIcon(mode: VisibilityMode | "folder") {
   return visibilityIcons[mode]
-}
-
-/** The mark's wording: the mode, and how many it names when it names
- *  people or teams. */
-export function visibilityLabel(visibility: Visibility) {
-  if (visibility.mode === "people") {
-    const count = visibility.personIds.length
-
-    return `${visibilityModeMarks.people} · ${count === 1 ? "1 person" : `${count} people`}`
-  }
-
-  if (visibility.mode === "teams") {
-    const count = visibility.teamIds.length
-
-    return `${visibilityModeMarks.teams} · ${count === 1 ? "1 team" : `${count} teams`}`
-  }
-
-  return visibilityModeMarks[visibility.mode]
 }

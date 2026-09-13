@@ -47,6 +47,10 @@ vi.mock("@/console/integrations/callback", () => ({
 vi.mock("@/console/folders/drag/context", () => ({
   ConsoleFolderDrag: ({ children }: { children: ReactNode }) => children,
 }))
+vi.mock("@/console/shared/visibility/directory", () => ({
+  OrganizationVisibilityDirectory: ({ children }: { children: ReactNode }) =>
+    children,
+}))
 vi.mock("@/console/folders/section", () => ({ SidebarFolders: () => null }))
 vi.mock("@/console/chat/recent", () => ({ useSidebarChats: () => [] }))
 vi.mock("@/console/shell/account", () => ({ SidebarUserButton: () => null }))

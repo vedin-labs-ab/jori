@@ -17,6 +17,7 @@ import { RowGrid } from "@/shared/console/tables/grid"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { TableLead } from "@/shared/console/tables/menu"
 import { type TableDetail } from "@/shared/console/tables/types"
+import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../../convex/_generated/api"
 import { ConsolePage } from "../../page"
 import { useTableRemoval } from "../manage"
@@ -124,7 +125,8 @@ function TableReadyView({
       onEdit={() => setDialog("edit")}
       onMoveToFolder={() => setDialog("move")}
       onRestore={() => void removal.restoreMaterial(table)}
-    />
+    />,
+    <VisibilityButton {...table} onClick={() => setDialog("access")} />
   )
 
   return (

@@ -17,6 +17,7 @@ import {
   type MaterialBreadcrumbSegment,
   useMaterialTrail,
 } from "@/shared/console/materials/breadcrumb"
+import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useLeaveDeletedFolder } from "./delete/leave"
@@ -189,6 +190,14 @@ function folderCrumb({
       <FolderUsageHint
         folderId={folder.folderId as GenericId<"folders">}
         organizationId={organizationId}
+      />
+    ),
+    audience: (
+      <VisibilityButton
+        visibility={folder.visibility}
+        folderId={folder.parentId}
+        ownerId={folder.createdBy}
+        onClick={() => onDialog({ type: "access", folder })}
       />
     ),
     menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,

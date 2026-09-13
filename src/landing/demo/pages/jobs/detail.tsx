@@ -17,6 +17,7 @@ import { useExecutionClock } from "@/shared/console/runs/time"
 import { pageSize } from "@/shared/console/runs/types"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { useNow } from "@/shared/console/time"
+import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { folderNames } from "../../derive/folders"
 import { jobMoveSubject } from "../../derive/jobs"
 import { DemoMoveDialog } from "../../dialogs/move"
@@ -59,6 +60,7 @@ function JobReadyPage({ job }: { job: Job }) {
         <AskJoriAction target={{ kind: "job", id: job.id }} />
       </JobHeaderActions>
       <JobDetail
+        showAudience={false}
         folders={folders}
         instructions={
           <JobInstructions
@@ -88,6 +90,20 @@ export function JobPaneBody({ jobId }: { jobId: string }) {
   const folders = useMemo(() => folderNames(state), [state])
   const now = useNow(30_000)
 
+  const editor = useJobEditor()
+  useMaterialBreadcrumb(
+    job?.name ?? "Job",
+    undefined,
+    job === undefined ? undefined : (
+      <VisibilityButton
+        visibility={job.visibility}
+        folderId={job.folderId}
+        ownerId={job.ownerId}
+        onClick={() => editor.openEditForm(job)}
+      />
+    )
+  )
+
   if (job === undefined) {
     return null
   }
@@ -97,6 +113,7 @@ export function JobPaneBody({ jobId }: { jobId: string }) {
       material={{
         kind: "job",
         detail: {
+          showAudience: false,
           folders,
           instructions: (
             <JobInstructions
@@ -135,6 +152,12 @@ function useJobCrumb(job: Job, onMoveToFolder: () => void) {
       onEdit={editor.openEditForm}
       onMoveToFolder={onMoveToFolder}
       onPausedChange={actions.setJobPaused}
+    />,
+    <VisibilityButton
+      visibility={job.visibility}
+      folderId={job.folderId}
+      ownerId={job.ownerId}
+      onClick={() => editor.openEditForm(job)}
     />
   )
 }

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
+import { DemoVisibilityDirectory } from "./directory"
 import { DemoDragProvider } from "./drag"
 import { type DemoNavigation } from "./navigation"
 import { DemoPage } from "./pages/router"
@@ -44,20 +45,24 @@ export function DemoConsole({
   return (
     <ConsoleNavigationContext.Provider value={navigation}>
       <div className={cn(frameClassName, className)} id={navigation.anchor}>
-        <DemoDragProvider>
-          <ConsoleFrame
-            className="h-full min-h-0"
-            heading="h3"
-            onSidebarOpenChange={setSidebarOpen}
-            pathname={location.pathname}
-            sidebar={
-              sidebar ? <DemoSidebar pathname={location.pathname} /> : undefined
-            }
-            sidebarOpen={sidebarOpen}
-          >
-            <DemoPage location={location} openRunId={openRunId} />
-          </ConsoleFrame>
-        </DemoDragProvider>
+        <DemoVisibilityDirectory>
+          <DemoDragProvider>
+            <ConsoleFrame
+              className="h-full min-h-0"
+              heading="h3"
+              onSidebarOpenChange={setSidebarOpen}
+              pathname={location.pathname}
+              sidebar={
+                sidebar ? (
+                  <DemoSidebar pathname={location.pathname} />
+                ) : undefined
+              }
+              sidebarOpen={sidebarOpen}
+            >
+              <DemoPage location={location} openRunId={openRunId} />
+            </ConsoleFrame>
+          </DemoDragProvider>
+        </DemoVisibilityDirectory>
       </div>
     </ConsoleNavigationContext.Provider>
   )

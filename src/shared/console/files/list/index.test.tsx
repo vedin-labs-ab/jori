@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
+
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { type ComponentProps } from "react"
 import { afterEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { absoluteTime } from "@/shared/console/time"
 import { listControls } from "../../../../../test/list/controls"
 import { emptySelection } from "../../../../../test/list/selection"
@@ -42,22 +44,24 @@ function renderTable(
   }: Partial<ComponentProps<typeof FileTable>> = {}
 ) {
   render(
-    <FileTable
-      onAccess={vi.fn()}
-      config={fileListConfig(undefined, files)}
-      controls={controls}
-      files={files}
-      folders={undefined}
-      hasFilters={hasFilters}
-      isLoading={false}
-      onDelete={() => undefined}
-      onEdit={() => undefined}
-      onMoveToFolder={() => undefined}
-      onUpload={() => undefined}
-      pendingFileId={undefined}
-      selection={emptySelection()}
-      {...props}
-    />
+    <TooltipProvider>
+      <FileTable
+        onAccess={vi.fn()}
+        config={fileListConfig(undefined, files)}
+        controls={controls}
+        files={files}
+        folders={undefined}
+        hasFilters={hasFilters}
+        isLoading={false}
+        onDelete={() => undefined}
+        onEdit={() => undefined}
+        onMoveToFolder={() => undefined}
+        onUpload={() => undefined}
+        pendingFileId={undefined}
+        selection={emptySelection()}
+        {...props}
+      />
+    </TooltipProvider>
   )
 }
 
@@ -136,7 +140,7 @@ test("row actions target their file and disable mutations while pending", () => 
   renderTable([file], { pendingFileId: file.fileId })
   openMenu(file)
 
-  for (const name of ["Rename…", "Visibility…", "Move to folder…", "Delete"]) {
+  for (const name of ["Rename…", "Audience…", "Move to folder…", "Delete"]) {
     expect(
       screen.getByRole("menuitem", { name }).getAttribute("aria-disabled")
     ).toBe("true")

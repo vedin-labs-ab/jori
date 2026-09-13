@@ -1,12 +1,8 @@
-import { Check, type LucideIcon, Pause } from "lucide-react"
 import { type ReactNode } from "react"
 import { TableCell } from "@/components/ui/table"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import { SeparatorDot } from "../../dot"
+import { JobStatus } from "../../jobs/status"
 import { SelectionRowCell } from "../../list/bar"
 import { columnTier } from "../../list/controls"
 import { type RowSelection } from "../../list/selection"
@@ -14,7 +10,7 @@ import { MaterialOwnerCell } from "../../materials/cells/owner"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
-import { VisibilityMark } from "../../visibility/badge"
+import { VisibilityCell, VisibilityNameMark } from "../../visibility/table"
 import { type DragPayload } from "../drag/plan"
 import { DraggableTableRow } from "../drag/row"
 import { useResourceRowDrag } from "../drag/state"
@@ -63,12 +59,18 @@ export function ResourceListRow({
         selection={selection}
       />
       <TableCell data-row-link>
-        <ResourceLink resource={resource} />
+        <ResourceLink resource={resource} folderId={folderId} />
       </TableCell>
+      <VisibilityCell {...resource} folderId={folderId} />
       <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
         <span className="inline-flex items-center gap-1.5">
           {resourcePresentation(resource).label}
-          <ResourceStatusMark status={resource.status} />
+          {resource.status === "paused" || resource.status === "completed" ? (
+            <>
+              <SeparatorDot />
+              <JobStatus status={resource.status} />
+            </>
+          ) : null}
         </span>
       </TableCell>
       <TableCell className={columnTier.lg}>
@@ -90,41 +92,14 @@ export function ResourceListRow({
   )
 }
 
-/** A job that is not running says so with a muted glyph, in the
- *  same quiet idiom as the visibility mark beside its name — a badge in a
- *  Kind cell reads as a second kind. Active resources carry no mark. */
-function ResourceStatusMark({ status }: { status: FolderResource["status"] }) {
-  const mark = status === undefined ? undefined : statusMarks[status]
-
-  if (mark === undefined) {
-    return null
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className="shrink-0">
-          <mark.icon aria-hidden className="size-3.5" />
-          <span className="sr-only">{mark.label}</span>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>{mark.label}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-const statusMarks: Partial<
-  Record<
-    NonNullable<FolderResource["status"]>,
-    { icon: LucideIcon; label: string }
-  >
-> = {
-  completed: { icon: Check, label: "Completed" },
-  paused: { icon: Pause, label: "Paused" },
-}
-
 /** The resource's own surface. */
-function ResourceLink({ resource }: { resource: FolderResource }) {
+function ResourceLink({
+  resource,
+  folderId,
+}: {
+  resource: FolderResource
+  folderId: string
+}) {
   const Icon = resourcePresentation(resource).icon
 
   return (
@@ -136,9 +111,7 @@ function ResourceLink({ resource }: { resource: FolderResource }) {
     >
       <Icon className="size-4 shrink-0 text-muted-foreground" />
       <span className="truncate">{resource.name}</span>
-      {resource.visibility === "organization" ? null : (
-        <VisibilityMark visibility={resource.visibility} />
-      )}
+      <VisibilityNameMark {...resource} folderId={folderId} />
     </ConsoleLink>
   )
 }

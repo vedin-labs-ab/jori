@@ -1,7 +1,9 @@
 import { useMemo } from "react"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { type FolderDetail } from "@/shared/console/folders/types"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { folderDetail } from "../../../derive/folders"
+import { DemoVisibilityButton } from "../../../dialogs/button"
 import { useDemoWorkspace } from "../../../workspace"
 import { useDemoFolderContents } from "../../contents"
 
@@ -16,6 +18,16 @@ export function DemoPaneFolder({ folderId }: { folderId: string }) {
 
 function DemoPaneContents({ folder }: { folder: FolderDetail }) {
   const listing = useDemoFolderContents(folder)
+  useMaterialBreadcrumb(
+    folder.name,
+    undefined,
+    <DemoVisibilityButton
+      visibility={folder.visibility}
+      ownerId={folder.createdBy}
+      folderId={folder.parentId}
+      target={{ kind: "folder", id: folder.folderId }}
+    />
+  )
 
   return (
     <ChatPaneBody

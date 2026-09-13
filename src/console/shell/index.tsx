@@ -9,6 +9,7 @@ import { mainContentId, SkipToContent } from "@/shared/skip"
 import { useSidebarChats } from "../chat/recent"
 import { ConsoleFolderDrag } from "../folders/drag/context"
 import { SidebarFolders } from "../folders/section"
+import { OrganizationVisibilityDirectory } from "../shared/visibility/directory"
 import { SidebarUserButton } from "./account"
 import { ConsolePageBoundary } from "./boundary"
 import { SidebarOrganizationSwitcher } from "./organization"
@@ -28,27 +29,29 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
   return (
     // One drag context above both panes, so folder-page rows can drop
     // onto the sidebar tree and vice versa. Renders no DOM of its own.
-    <ConsoleFolderDrag>
-      <SkipToContent />
-      <ConsoleFrame
-        contentId={mainContentId}
-        filterStorageKey="console.filters"
-        pathname={pathname}
-        sidebar={
-          <ConsoleSidebar
-            account={<SidebarUserButton />}
-            chats={chats}
-            folders={<SidebarFolders pathname={pathname} />}
-            organization={<SidebarOrganizationSwitcher />}
-            pathname={pathname}
-            platform={<PlatformNavigation pathname={pathname} />}
-          />
-        }
-      >
-        {/* Below the chrome, so a page that throws leaves the sidebar and
+    <OrganizationVisibilityDirectory>
+      <ConsoleFolderDrag>
+        <SkipToContent />
+        <ConsoleFrame
+          contentId={mainContentId}
+          filterStorageKey="console.filters"
+          pathname={pathname}
+          sidebar={
+            <ConsoleSidebar
+              account={<SidebarUserButton />}
+              chats={chats}
+              folders={<SidebarFolders pathname={pathname} />}
+              organization={<SidebarOrganizationSwitcher />}
+              pathname={pathname}
+              platform={<PlatformNavigation pathname={pathname} />}
+            />
+          }
+        >
+          {/* Below the chrome, so a page that throws leaves the sidebar and
             header standing to navigate away with. */}
-        <ConsolePageBoundary resetKey={match}>{children}</ConsolePageBoundary>
-      </ConsoleFrame>
-    </ConsoleFolderDrag>
+          <ConsolePageBoundary resetKey={match}>{children}</ConsolePageBoundary>
+        </ConsoleFrame>
+      </ConsoleFolderDrag>
+    </OrganizationVisibilityDirectory>
   )
 }

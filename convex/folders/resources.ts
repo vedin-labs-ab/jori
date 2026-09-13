@@ -1,4 +1,4 @@
-import { type VisibilityMode } from "../../contracts/visibility"
+import { type Visibility } from "../../contracts/visibility"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   conversationGate,
@@ -23,7 +23,7 @@ export type FolderResource = {
   type: "table" | "store" | "file" | "job" | "chat"
   id: Id<"collections"> | Id<"files"> | Id<"jobs"> | Id<"conversations">
   name: string
-  visibility: VisibilityMode
+  visibility: Visibility
   updatedAt: number
   /** Who the row belongs to. Absent for the kinds no person owns — an
    *  job, or a file an agent run saved — which read as Jori's own. */
@@ -85,7 +85,7 @@ async function folderCollections(
         type: row.kind === "table" ? "table" : "store",
         id: row._id,
         name: row.name,
-        visibility: row.visibility.mode,
+        visibility: row.visibility,
         updatedAt: row.updatedAt,
         ownerId: row.ownerId,
       })
@@ -112,7 +112,7 @@ async function folderFiles(
         type: "file",
         id: row._id,
         name: row.name,
-        visibility: row.visibility.mode,
+        visibility: row.visibility,
         updatedAt: row.updatedAt,
         // An agent run saves a file without an owner; it reads as Jori's.
         ownerId: row.ownerId,
@@ -144,7 +144,7 @@ async function folderJobs(
         type: "job",
         id: row._id,
         name: row.name,
-        visibility: row.visibility.mode,
+        visibility: row.visibility,
         updatedAt: row.updatedAt,
         status: row.status,
       })
@@ -173,7 +173,7 @@ export async function folderChats(
         type: "chat",
         id: row._id,
         name: row.title || "New chat",
-        visibility: conversationVisibility(row).mode,
+        visibility: conversationVisibility(row),
         updatedAt: row.updatedAt ?? row._creationTime,
         ownerId: row.createdBy,
       })

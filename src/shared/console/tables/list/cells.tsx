@@ -7,7 +7,7 @@ import {
   materialNameLinkClassName,
 } from "@/shared/console/materials/cells/name"
 import { type TableSummary } from "@/shared/console/tables/types"
-import { VisibilityMark } from "@/shared/console/visibility/badge"
+import { VisibilityNameMark } from "@/shared/console/visibility/table"
 import { ConsoleLink } from "../../shell/link"
 
 /** Name column: the table icon, a link to the table, and the list's badge
@@ -25,9 +25,7 @@ export function TableNameCell({ table }: { table: TableSummary }) {
       >
         {table.name}
       </ConsoleLink>
-      {table.visibility.mode === "organization" ? null : (
-        <VisibilityMark visibility={table.visibility} />
-      )}
+      <VisibilityNameMark {...table} />
       {table.archivedAt === undefined ? null : (
         <Badge variant="secondary">Archived</Badge>
       )}

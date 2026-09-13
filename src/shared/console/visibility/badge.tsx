@@ -1,10 +1,14 @@
+import { type VisibilityMode } from "@contracts/visibility"
+import { Button } from "@/components/ui/button"
 import {
-  type Visibility,
-  type VisibilityMode,
-  visibilityModeMarks,
-} from "@contracts/visibility"
-import { RowMark } from "../list/mark"
-import { visibilityIcon, visibilityLabel } from "./marks"
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+import { useVisibilityDirectory } from "./directory"
+import { visibilityIcon } from "./marks"
+import { type VisibilitySubject, visibilitySummary } from "./summary"
 
 // The quiet visibility vocabulary every material surface shares: one icon
 // per mode, named in a tooltip.
@@ -14,42 +18,83 @@ export function VisibilityIcon({
   mode,
 }: {
   className?: string
-  mode: VisibilityMode
+  mode: VisibilityMode | "folder"
 }) {
   const Icon = visibilityIcon(mode)
 
   return <Icon className={className} aria-hidden />
 }
 
-/** Muted visibility icon with the audience in a tooltip and for screen
- *  readers: the one treatment every list row and breadcrumb uses, so a
- *  team-scoped folder and a team-scoped table wear the same mark.
- *  Organization-wide is the default and stays unmarked in lists, so
- *  callers render this for every other mode. */
+/** Compact metadata for navigation and narrow rows. Organization-wide
+ * items stay unmarked only when no folder limits their audience. */
 export function VisibilityMark({
-  visibility,
-}: {
-  visibility: Visibility | VisibilityMode
-}) {
-  const value: Visibility =
-    typeof visibility === "string" ? modeOnly(visibility) : visibility
-  // A bare mode says nothing about how many it names, so it stays a mode.
-  const label =
-    typeof visibility === "string"
-      ? visibilityModeMarks[visibility]
-      : visibilityLabel(value)
-
-  return <RowMark icon={<VisibilityIcon mode={value.mode} />} label={label} />
+  className,
+  ...props
+}: VisibilitySubject & { className?: string }) {
+  const summary = visibilitySummary(props, useVisibilityDirectory())
+  if (!summary.marked) {
+    return null
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          className={cn(
+            "inline-flex shrink-0 items-center rounded-sm text-muted-foreground [&_svg]:size-3.5!",
+            className
+          )}
+        >
+          <VisibilityIcon mode={summary.icon} />
+          <span className="sr-only"> · {summary.label}</span>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{summary.description}</TooltipContent>
+    </Tooltip>
+  )
 }
 
-function modeOnly(mode: VisibilityMode): Visibility {
-  if (mode === "people") {
-    return { mode, personIds: [] }
-  }
+export function VisibilityLabel({
+  separateFolder = false,
+  ...props
+}: VisibilitySubject & { separateFolder?: boolean }) {
+  const summary = visibilitySummary(props, useVisibilityDirectory())
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex max-w-48 items-center gap-1.5 text-muted-foreground text-xs [&_svg]:size-3.5!">
+          <VisibilityIcon mode={separateFolder ? summary.mode : summary.icon} />
+          <span className="truncate">
+            {separateFolder ? summary.configuredLabel : summary.label}
+          </span>
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{summary.description}</TooltipContent>
+    </Tooltip>
+  )
+}
 
-  if (mode === "teams") {
-    return { mode, teamIds: [] }
-  }
-
-  return { mode }
+/** A real button, unlike passive row metadata. Opens the existing access
+ * dialog, which resolves folder constraints and enforces owner permissions. */
+export function VisibilityButton({
+  onClick,
+  className,
+  ...subject
+}: VisibilitySubject & { onClick: () => void; className?: string }) {
+  const summary = visibilitySummary(subject, useVisibilityDirectory())
+  return (
+    <Button
+      aria-label={`Audience: ${summary.label}`}
+      className={cn(
+        "max-w-32 shrink-0 gap-1.5 @2xl/inset:max-w-48 [&_svg]:size-3.5!",
+        className
+      )}
+      onClick={onClick}
+      title={summary.description}
+      type="button"
+      variant="ghost"
+    >
+      <VisibilityIcon mode={summary.icon} />
+      <span className="truncate">{summary.label}</span>
+    </Button>
+  )
 }

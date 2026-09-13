@@ -65,9 +65,7 @@ export function ChatsPicker({
                   value={`${chat.title} ${chat.id}`}
                 >
                   <span className="min-w-0 flex-1 truncate">{chat.title}</span>
-                  {chat.visibility === "organization" ? null : (
-                    <VisibilityMark visibility={chat.visibility} />
-                  )}
+                  <VisibilityMark {...chat} ownerId={chat.createdBy} />
                 </CommandItem>
               ))}
             </CommandGroup>

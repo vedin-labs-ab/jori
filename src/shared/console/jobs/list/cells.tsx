@@ -1,19 +1,17 @@
-import { Pause, Workflow } from "lucide-react"
+import { Workflow } from "lucide-react"
 import { SeparatorDot } from "../../dot"
-import { RowMark } from "../../list/mark"
 import {
   MaterialNameCell,
   materialNameLinkClassName,
 } from "../../materials/cells/name"
 import { ConsoleLink } from "../../shell/link"
-import { VisibilityMark } from "../../visibility/badge"
+import { VisibilityNameMark } from "../../visibility/table"
+import { JobStatus } from "../status"
 import { type Job } from "../types"
 import { jobTriggerSummary } from "./trigger"
 
-/** Name column: the mark every surface files jobs under, a link to the
- *  job's page, the visibility mark for anything narrower than the
- *  organization, and the pause mark while the job is paused. What the job
- *  waits on is the Trigger column's to say. */
+/** Object identity leads; compact audience and lifecycle metadata follow
+ * only while their full cells are hidden. */
 export function JobNameCell({ job }: { job: Job }) {
   return (
     <MaterialNameCell icon={Workflow}>
@@ -26,12 +24,16 @@ export function JobNameCell({ job }: { job: Job }) {
       >
         {job.name}
       </ConsoleLink>
-      {job.visibility.mode === "organization" ? null : (
-        <VisibilityMark visibility={job.visibility} />
+      {job.status === "active" ? null : (
+        <span className="@md/list:hidden">
+          <JobStatus status={job.status} />
+        </span>
       )}
-      {job.status === "paused" ? (
-        <RowMark icon={<Pause />} label="Paused" />
-      ) : null}
+      <VisibilityNameMark
+        visibility={job.visibility}
+        folderId={job.folderId}
+        ownerId={job.ownerId}
+      />
     </MaterialNameCell>
   )
 }
@@ -45,6 +47,12 @@ export function JobTriggerCell({ job }: { job: Job }) {
   return (
     <span className="flex min-w-0 max-w-64 items-center gap-1.5">
       <span className="shrink-0 font-medium">{trigger.title}</span>
+      {job.status !== "active" ? (
+        <>
+          <SeparatorDot className="text-muted-foreground/60" />
+          <JobStatus status={job.status} />
+        </>
+      ) : null}
       {trigger.detail === undefined ? null : (
         <>
           <SeparatorDot className="shrink-0 text-muted-foreground/60" />

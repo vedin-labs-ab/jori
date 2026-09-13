@@ -135,10 +135,10 @@ test("event and one-time triggers read as their source and their date", () => {
   expect(screen.getAllByText("—")).toHaveLength(1)
 })
 
-test("a paused job wears a badge and has no next run", () => {
+test("a paused job has readable status in both responsive placements and no next run", () => {
   renderList([job({ status: "paused" })])
 
-  expect(screen.getByText("Paused")).toBeDefined()
+  expect(screen.getAllByText("Paused")).toHaveLength(2)
   expect(screen.getByText("—")).toBeDefined()
 })
 

@@ -44,7 +44,7 @@ export function FolderMenuItems({
       </DropdownMenuItem>
       <DropdownMenuItem onSelect={() => onDialog({ type: "access", folder })}>
         <LockKeyhole />
-        Visibility…
+        Audience…
       </DropdownMenuItem>
       <DropdownMenuItem onSelect={() => onDialog({ type: "move", folder })}>
         <FolderInput />

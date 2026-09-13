@@ -44,7 +44,7 @@ export function VisibilityDialog({
         onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Visibility</DialogTitle>
+          <DialogTitle>Audience</DialogTitle>
           <DialogDescription>
             {canEdit
               ? `Choose who can see this ${noun}.`

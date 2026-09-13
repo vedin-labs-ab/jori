@@ -20,6 +20,7 @@ import {
  *  supplies as the menu around this view's own items. A store the console
  *  does not edit — schemaless or archived — reads as a document. */
 export function StoreValue({
+  audience,
   onWriteSchema,
   onWriteValue,
   store,
@@ -27,6 +28,7 @@ export function StoreValue({
 }: {
   /** Replaces the store's schema; null removes it. A rejection's message
    *  surfaces under the schema editor. */
+  audience?: ReactNode
   onWriteSchema: SchemaWrite
   onWriteValue: ValueWrite
   store: StoreDetail
@@ -42,6 +44,7 @@ export function StoreValue({
   const isEditable = schema !== undefined
 
   useStoreCrumb({
+    audience,
     menu: titleMenu(
       <StoreMenuItems
         onSchema={openSchema}
@@ -81,18 +84,20 @@ export function StoreValue({
 /** Publishes the store's crumb: its name with the menu hung off it, and
  *  the save state the shell shows in the name while a save is in motion. */
 function useStoreCrumb({
+  audience,
   menu,
   saveStatus,
   store,
 }: {
+  audience?: ReactNode
   menu: ReactNode
   saveStatus: ValueEditorState["saveStatus"] | undefined
   store: StoreDetail
 }) {
   useMaterialTrail(
     useMemo(
-      () => ({ menu, name: store.name, saveStatus }),
-      [menu, saveStatus, store.name]
+      () => ({ audience, menu, name: store.name, saveStatus }),
+      [audience, menu, saveStatus, store.name]
     )
   )
 }

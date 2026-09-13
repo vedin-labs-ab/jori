@@ -14,13 +14,13 @@ test("chat sharing keeps extra guidance in field help and saves the chosen audie
 
   renderSharing(save)
   expect(screen.queryByText(chatVisibilityHelp)).toBeNull()
-  fireEvent.focus(screen.getByRole("button", { name: "Visibility help" }))
+  fireEvent.focus(screen.getByRole("button", { name: "Audience help" }))
   expect((await screen.findByRole("tooltip")).textContent).toContain(
     chatVisibilityHelp
   )
-  fireEvent.blur(screen.getByRole("button", { name: "Visibility help" }))
+  fireEvent.blur(screen.getByRole("button", { name: "Audience help" }))
 
-  fireEvent.click(screen.getByRole("combobox", { name: "Visibility" }))
+  fireEvent.click(screen.getByRole("combobox", { name: "Audience" }))
   fireEvent.click(
     screen.getByRole("option", { name: "Everyone in the organization" })
   )

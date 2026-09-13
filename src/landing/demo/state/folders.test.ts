@@ -44,7 +44,7 @@ test("filing a chat lists it privately and moves its historical spend without ch
       type: "chat",
       id: original.id,
       name: original.title,
-      visibility: "private",
+      visibility: { mode: "private" },
     })
   )
   const resourceCount = (state: DemoState) =>

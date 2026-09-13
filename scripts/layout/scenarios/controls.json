@@ -2661,7 +2661,7 @@
   },
   {
     "id": "C048-help-show",
-    "title": "Visibility help tooltip open",
+    "title": "Audience help tooltip open",
     "path": "/tables",
     "mutating": false,
     "setup": [
@@ -2677,13 +2677,13 @@
     "steps": [
       {
         "action": "hover",
-        "selector": "[aria-label=\"Visibility help\"]"
+        "selector": "[aria-label=\"Audience help\"]"
       }
     ]
   },
   {
     "id": "C048-help-hide",
-    "title": "Visibility help tooltip close",
+    "title": "Audience help tooltip close",
     "path": "/tables",
     "mutating": false,
     "setup": [
@@ -2697,7 +2697,7 @@
       },
       {
         "action": "hover",
-        "selector": "[aria-label=\"Visibility help\"]"
+        "selector": "[aria-label=\"Audience help\"]"
       }
     ],
     "steps": [

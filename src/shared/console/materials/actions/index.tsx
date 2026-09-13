@@ -117,7 +117,7 @@ export function MaterialFilingItems({
     <>
       <DropdownMenuItem disabled={isPending} onSelect={onAccess}>
         <LockKeyhole />
-        Visibility…
+        Audience…
       </DropdownMenuItem>
       <DropdownMenuItem disabled={isPending} onSelect={onMoveToFolder}>
         <FolderInput />

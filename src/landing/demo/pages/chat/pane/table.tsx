@@ -1,7 +1,9 @@
 import { useMemo } from "react"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { type TableDetail, type TableRow } from "@/shared/console/tables/types"
 import { tableDetail, tableRows } from "../../../derive/materials"
+import { DemoVisibilityButton } from "../../../dialogs/button"
 import { useDemoWorkspace } from "../../../workspace"
 import { useDemoGrid } from "../../materials/rows"
 
@@ -23,6 +25,14 @@ function DemoPaneGrid({
   table: TableDetail
 }) {
   const grid = useDemoGrid(table, rows)
+  useMaterialBreadcrumb(
+    table.name,
+    undefined,
+    <DemoVisibilityButton
+      {...table}
+      target={{ kind: "table", id: table.tableId }}
+    />
+  )
 
   return (
     <ChatPaneBody

@@ -143,7 +143,7 @@ test("the sidebar leads with New chat and lists the conversations under Activity
   expect(links.slice(0, 3)).toEqual([
     "New chat",
     "Activity",
-    "Which renewals are at risk this month?Only me",
+    "Which renewals are at risk this month? · Only me",
   ])
   expect(
     screen.getByRole("link", { name: "New chat" }).getAttribute("data-active")
@@ -175,7 +175,7 @@ test("sharing from the chat menu shows the selected audience and persists it", a
     button: 0,
     ctrlKey: false,
   })
-  fireEvent.click(await screen.findByRole("menuitem", { name: "Visibility…" }))
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Audience…" }))
   const dialog = await screen.findByRole("dialog")
   expect(within(dialog).getByText("Visible only to you.")).toBeDefined()
   fireEvent.click(within(dialog).getByRole("combobox"))
@@ -190,7 +190,7 @@ test("sharing from the chat menu shows the selected audience and persists it", a
     button: 0,
     ctrlKey: false,
   })
-  fireEvent.click(await screen.findByRole("menuitem", { name: "Visibility…" }))
+  fireEvent.click(await screen.findByRole("menuitem", { name: "Audience…" }))
   expect(
     within(await screen.findByRole("dialog")).getByRole("combobox").textContent
   ).toBe("Everyone in the organization")

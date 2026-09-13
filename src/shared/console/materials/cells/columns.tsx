@@ -1,6 +1,8 @@
 import { type ReactNode } from "react"
 import { type ColumnTier } from "../../list/controls"
 import { absoluteTime, relativeTime } from "../../time"
+import { VisibilityLabel } from "../../visibility/badge"
+import { type VisibilitySubject } from "../../visibility/summary"
 import { type MaterialColumn } from "../list"
 import { summaryOwner } from "../owners"
 import { MaterialFolderCell } from "./folder"
@@ -87,14 +89,32 @@ type MaterialSummaryRow = {
  *  the folder, when it was made, whose it is, and when it last changed.
  *  When it last changed is the one every list keeps down to a phone; the
  *  rest come back as the list widens, in the order they are worth. */
-export function materialColumns<Row extends MaterialSummaryRow>(
-  measures: MaterialColumn<Row>[]
-): MaterialColumn<Row>[] {
+export function materialColumns<
+  Row extends MaterialSummaryRow & VisibilitySubject,
+>(measures: MaterialColumn<Row>[]): MaterialColumn<Row>[] {
   return [
     ...measures,
-    folderColumn("lg"),
-    timeColumn("Created", "created", (row) => row.createdAt, "3xl"),
-    ownerColumn(summaryOwner, "xl"),
+    visibilityColumn<Row>(),
+    folderColumn("3xl"),
+    timeColumn("Created", "created", (row) => row.createdAt, "5xl"),
+    ownerColumn(summaryOwner, "4xl"),
     timeColumn("Last Updated", "updated", (row) => row.updatedAt, "xs"),
   ]
+}
+
+export function visibilityColumn<
+  Row extends VisibilitySubject,
+>(): MaterialColumn<Row> {
+  return {
+    label: "Sharing",
+    tier: "3xl",
+    cell: (row) => (
+      <VisibilityLabel
+        separateFolder
+        visibility={row.visibility}
+        folderId={row.folderId}
+        ownerId={row.ownerId}
+      />
+    ),
+  }
 }

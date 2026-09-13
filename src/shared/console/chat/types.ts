@@ -3,7 +3,7 @@ import {
   type MessageContext,
 } from "@contracts/replies/answers"
 import { type ReplyPart } from "@contracts/replies/parts"
-import { type VisibilityMode } from "@contracts/visibility"
+import { type Visibility } from "@contracts/visibility"
 
 // What the chat views read. The console maps its rows to these and the
 // landing page's demo builds them from fixtures; the views know only
@@ -33,7 +33,8 @@ export type ChatConversation = {
   title: string
   updatedAt: number
   folderId?: string
-  visibility: VisibilityMode
+  visibility: Visibility
+  createdBy?: string
 }
 
 export type ChatRunStatus =

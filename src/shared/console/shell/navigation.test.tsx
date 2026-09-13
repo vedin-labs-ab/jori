@@ -29,13 +29,13 @@ const chats = [
     id: "conversations_renewals",
     title: "Renewals at risk",
     updatedAt: 2,
-    visibility: "organization" as const,
+    visibility: { mode: "organization" as const },
   },
   {
     id: "conversations_flaky",
     title: "Flaky payroll test",
     updatedAt: 1,
-    visibility: "organization" as const,
+    visibility: { mode: "organization" as const },
   },
 ]
 
@@ -101,7 +101,9 @@ test("dragging a sidebar chat carries its current folder without navigating", ()
   const chat = { ...chats[0], folderId: "finance" }
 
   renderSidebar("/chat", [chat], { onDragStart, navigate })
-  const link = screen.getByRole("link", { name: chat.title })
+  const link = screen.getByRole("link", {
+    name: (label) => label === chat.title || label.startsWith(`${chat.title}·`),
+  })
 
   fireEvent.pointerDown(link, {
     button: 0,
@@ -157,7 +159,7 @@ test.each(["/chat/conversations_flaky", "/chat/conversations_flaky/"])(
     ).toBe("true")
     expect(
       screen
-        .getByRole("link", { name: "Renewals at risk" })
+        .getByRole("link", { name: /^Renewals at risk(?:\s*·|$)/ })
         .getAttribute("data-active")
     ).toBe("false")
     expect(
@@ -189,7 +191,9 @@ test("Chats and Resources close from their labels, and stay closed on the next v
   fireEvent.click(screen.getByRole("button", { name: "Resources" }))
 
   expect(screen.queryByRole("link", { name: "Jobs" })).toBeNull()
-  expect(screen.getByRole("link", { name: "Renewals at risk" })).toBeDefined()
+  expect(
+    screen.getByRole("link", { name: /^Renewals at risk(?:\s*·|$)/ })
+  ).toBeDefined()
   expect(
     screen
       .getByRole("button", { name: "Resources" })
@@ -198,13 +202,17 @@ test("Chats and Resources close from their labels, and stay closed on the next v
 
   fireEvent.click(screen.getByRole("button", { name: "Chats" }))
 
-  expect(screen.queryByRole("link", { name: "Renewals at risk" })).toBeNull()
+  expect(
+    screen.queryByRole("link", { name: /^Renewals at risk(?:\s*·|$)/ })
+  ).toBeNull()
 
   unmount()
   renderSidebar("/chat")
 
   expect(screen.queryByRole("link", { name: "Jobs" })).toBeNull()
-  expect(screen.queryByRole("link", { name: "Renewals at risk" })).toBeNull()
+  expect(
+    screen.queryByRole("link", { name: /^Renewals at risk(?:\s*·|$)/ })
+  ).toBeNull()
 
   fireEvent.click(screen.getByRole("button", { name: "Resources" }))
 
@@ -228,7 +236,7 @@ test.each(["/chat/conversations_flaky", "/chat/conversations_flaky/"])(
     })
 
     expect(
-      screen.queryByRole("option", { name: "Renewals at risk" })
+      screen.queryByRole("option", { name: /^Renewals at risk(?:\s*·|$)/ })
     ).toBeNull()
 
     fireEvent.click(screen.getByRole("option", { name: "Flaky payroll test" }))

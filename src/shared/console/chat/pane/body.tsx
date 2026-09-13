@@ -54,12 +54,13 @@ export type ChatPaneMaterial =
       rowCount: number
     }
   | {
+      audience?: ReactNode
       kind: "store"
       onWriteSchema: SchemaWrite
       onWriteValue: ValueWrite
       store: StoreDetail
     }
-  | { kind: "file"; file: FileDetail; onSave: FileSave }
+  | { kind: "file"; file: FileDetail; onSave: FileSave; audience?: ReactNode }
   | {
       kind: "run"
       execution: ExecutionItem
@@ -146,6 +147,7 @@ function TableBody({ grid, overlays, rowCount }: PaneMaterial<"table">) {
 }
 
 function StoreBody({
+  audience,
   onWriteSchema,
   onWriteValue,
   store,
@@ -154,6 +156,7 @@ function StoreBody({
     <ConsoleListLayout>
       <Arriving>
         <StoreValue
+          audience={audience}
           onWriteSchema={onWriteSchema}
           onWriteValue={onWriteValue}
           store={store}
@@ -164,11 +167,12 @@ function StoreBody({
   )
 }
 
-function FileBody({ file, onSave }: PaneMaterial<"file">) {
+function FileBody({ file, onSave, audience }: PaneMaterial<"file">) {
   return (
     <ConsoleListLayout>
       <Arriving>
         <FileViewer
+          audience={audience}
           file={file}
           onSave={onSave}
           siblings={noSiblings}

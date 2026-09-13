@@ -16,7 +16,8 @@ export function chatViews(state: DemoState): ChatConversation[] {
     title: chat.title,
     folderId: chat.folderId,
     updatedAt: chat.updatedAt,
-    visibility: chat.visibility.mode,
+    visibility: chat.visibility,
+    createdBy: chat.createdBy,
   }))
 }
 

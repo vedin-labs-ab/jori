@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
+
 import { DndContext } from "@dnd-kit/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { type FolderDialogRequest, type FolderRootsResult } from "../types"
 import { RootFolderList } from "./roots"
 import { type FolderSelectionActions } from "./select"
@@ -41,14 +43,16 @@ function renderList(
   } = {}
 ) {
   render(
-    <DndContext>
-      <RootFolderList
-        onCreate={() => undefined}
-        onDialog={onDialog}
-        roots={roots}
-        selectionActions={selectionActions}
-      />
-    </DndContext>
+    <TooltipProvider>
+      <DndContext>
+        <RootFolderList
+          onCreate={() => undefined}
+          onDialog={onDialog}
+          roots={roots}
+          selectionActions={selectionActions}
+        />
+      </DndContext>
+    </TooltipProvider>
   )
 }
 
@@ -117,7 +121,7 @@ test("a root folder row opens the folder's own menu", () => {
 
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Usage", "Rename", "Visibility…", "Move to folder…", "Delete"])
+  ).toEqual(["Usage", "Rename", "Audience…", "Move to folder…", "Delete"])
 
   fireEvent.click(screen.getByRole("menuitem", { name: "Rename" }))
 

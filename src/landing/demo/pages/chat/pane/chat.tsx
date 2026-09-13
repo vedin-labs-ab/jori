@@ -2,9 +2,11 @@ import { useCallback } from "react"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
 import { type ChatRun } from "@/shared/console/chat/types"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { useNow } from "@/shared/console/time"
 import { type ReferenceTarget } from "../../../../../shared/console/references"
 import { resolveReference } from "../../../derive/chat"
+import { DemoVisibilityButton } from "../../../dialogs/button"
 import { chatContext } from "../../../fixtures/chat"
 import { useDemoWorkspace } from "../../../workspace"
 import { DemoDraft } from "../draft"
@@ -29,6 +31,19 @@ export function DemoPaneChat({
   const resolve = useCallback(
     (target: ReferenceTarget) => resolveReference(state, target),
     [state]
+  )
+
+  useMaterialBreadcrumb(
+    conversation?.title ?? "Chat",
+    undefined,
+    conversation === undefined ? undefined : (
+      <DemoVisibilityButton
+        visibility={conversation.visibility}
+        ownerId={conversation.createdBy}
+        folderId={conversation.folderId}
+        target={{ kind: "chat", id: conversationId }}
+      />
+    )
   )
 
   if (conversation === undefined) {

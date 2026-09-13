@@ -1,4 +1,5 @@
 import { ChevronRight, MoreHorizontal } from "lucide-react"
+import { type ReactNode } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils"
 import { folderIcon } from "../materials/folders"
 import { menuWidth } from "../menu"
 import { ConsoleLink } from "../shell/link"
+import { VisibilityMark } from "../visibility/badge"
 import { NewInFolderSub } from "./create"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
 import { type FolderExpansion } from "./expansion"
@@ -58,6 +60,13 @@ export function FolderTreeItem({
           hovered, and position against it, not the subtree. */}
       <div className="group/row relative">
         <FolderRowLink
+          audience={
+            <VisibilityMark
+              visibility={node.visibility}
+              folderId={node.parentId}
+              ownerId={node.createdBy}
+            />
+          }
           drag={drag}
           folderId={node.folderId}
           hasChildren={hasChildren}
@@ -107,6 +116,7 @@ export function FolderTreeItem({
 }
 
 function FolderRowLink({
+  audience,
   drag,
   folderId,
   hasChildren,
@@ -116,6 +126,7 @@ function FolderRowLink({
   name,
   onNavigate,
 }: {
+  audience: ReactNode
   drag: FolderRowDrag
   folderId: string
   hasChildren: boolean
@@ -155,6 +166,7 @@ function FolderRowLink({
       >
         <FolderIcon />
         <span className="min-w-0 truncate">{name}</span>
+        {audience}
       </ConsoleLink>
     </SidebarMenuButton>
   )

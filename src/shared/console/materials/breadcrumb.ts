@@ -40,6 +40,8 @@ export type MaterialBreadcrumb = {
    *  The shell sets it right after the name, inside the crumb, with no
    *  divider: it belongs to the name rather than standing beside it. */
   suffix?: ReactNode
+  /** The audience control, outside the breadcrumb navigation. */
+  audience?: ReactNode
   /** What the page's autosave is doing, for a page that saves as it goes.
    *  The shell shows it in the name itself: the name shimmers while a
    *  save is in flight, and the menu's chevron gives way to the save's
@@ -66,9 +68,15 @@ export function useMaterialTrail(material: MaterialBreadcrumb | undefined) {
 
 /** Publish the material's display name to the console header breadcrumb
  *  for as long as the calling detail view is mounted. */
-export function useMaterialBreadcrumb(name: string, menu?: ReactNode) {
+export function useMaterialBreadcrumb(
+  name: string,
+  menu?: ReactNode,
+  audience?: ReactNode
+) {
   // A menu element gets a fresh identity per caller render, so it triggers
   // a republish each time — harmless, because the shell's children keep
   // their element identity and bail out of the re-render.
-  useMaterialTrail(useMemo(() => ({ name, menu }), [name, menu]))
+  useMaterialTrail(
+    useMemo(() => ({ name, menu, audience }), [name, menu, audience])
+  )
 }

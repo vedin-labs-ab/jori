@@ -16,6 +16,7 @@ export const columnTier = {
   "2xl": "@max-2xl/list:hidden",
   "3xl": "@max-3xl/list:hidden",
   "4xl": "@max-4xl/list:hidden",
+  "5xl": "@max-5xl/list:hidden",
   lg: "@max-lg/list:hidden",
   md: "@max-md/list:hidden",
   xl: "@max-xl/list:hidden",

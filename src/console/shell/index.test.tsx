@@ -48,6 +48,13 @@ vi.mock("../folders/drag/context", () => ({
     <>{children}</>
   ),
 }))
+vi.mock("../shared/visibility/directory", () => ({
+  OrganizationVisibilityDirectory: ({
+    children,
+  }: {
+    children: React.ReactNode
+  }) => children,
+}))
 vi.mock("../folders/section", () => ({ SidebarFolders: () => null }))
 vi.mock("../chat/recent", () => ({ useSidebarChats: () => [] }))
 vi.mock("./account", () => ({ SidebarUserButton: () => null }))

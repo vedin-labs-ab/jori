@@ -24,6 +24,11 @@ import { folderIcon } from "../../materials/folders"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
+import {
+  VisibilityCell,
+  VisibilityHead,
+  VisibilityNameMark,
+} from "../../visibility/table"
 import { type DragPayload } from "../drag/plan"
 import { DraggableTableRow } from "../drag/row"
 import { useFolderRowDrag } from "../drag/state"
@@ -33,7 +38,7 @@ import { type FolderListEntry } from "./controls"
 import { nameLinkClassName } from "./style"
 
 /** How many columns the table spans, for a row that stands in for all. */
-export const folderTableColumns = 7
+export const folderTableColumns = 8
 
 /** The full-bleed table both folder surfaces share: the /folders overview
  *  lists the root folders, a folder's page its contents. The selection
@@ -63,6 +68,7 @@ export function FolderListTable({
         <TableRow>
           <SelectionHeadCell selection={selection} />
           <SortHead controls={controls} label="Name" sortKey="name" />
+          <VisibilityHead />
           <FilterHead
             className={columnTier.xl}
             controls={controls}
@@ -140,8 +146,18 @@ export function FolderListRow({
         >
           <FolderIcon className="size-4 shrink-0 text-muted-foreground" />
           <span className="truncate">{folder.name}</span>
+          <VisibilityNameMark
+            visibility={folder.visibility}
+            folderId={folder.parentId}
+            ownerId={folder.createdBy}
+          />
         </ConsoleLink>
       </TableCell>
+      <VisibilityCell
+        visibility={folder.visibility}
+        folderId={folder.parentId}
+        ownerId={folder.createdBy}
+      />
       <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
         Folder
       </TableCell>

@@ -33,6 +33,8 @@ const readyContents = {
     {
       folderId: "folder-2",
       name: "Scratch",
+      visibility: { mode: "organization" },
+      createdBy: "persons:other",
       parentId: "folder-0",
       createdAt: 1,
       updatedAt: Date.now(),
@@ -48,7 +50,7 @@ const readyContents = {
       type: "table",
       id: "table-1",
       name: "Leads",
-      visibility: "organization",
+      visibility: { mode: "organization" },
       updatedAt: Date.now(),
       ownerId: "persons:owner",
       ownerName: "Ada Lovelace",
@@ -57,7 +59,7 @@ const readyContents = {
       type: "job",
       id: "job-1",
       name: "Digest",
-      visibility: "organization",
+      visibility: { mode: "organization" },
       updatedAt: Date.now(),
       status: "paused",
     },
@@ -101,20 +103,18 @@ function renderContents(
 test("lists folders and resources with their owners and item counts", () => {
   renderContents(readyContents)
 
-  for (const header of ["Name", "Kind", "Owner", "Items", "Updated"]) {
+  for (const header of "Name,Sharing,Kind,Owner,Items,Updated".split(",")) {
     expect(screen.getByRole("columnheader", { name: header })).toBeDefined()
   }
 
   expect(
-    screen.getByRole("link", { name: "Guides" }).getAttribute("href")
+    screen.getByRole("link", { name: /^Guides(?:\s*·|$)/ }).getAttribute("href")
   ).toBe("/folders/folder-1")
-  expect(screen.getByRole("link", { name: "Leads" }).getAttribute("href")).toBe(
-    "/tables/table-1"
-  )
-  // A paused job is marked with a muted glyph, not a badge: the
-  // Kind cell says what the thing is, and a second word there reads as a
-  // second kind.
-  expect(screen.getByText("Paused").className).toContain("sr-only")
+  expect(
+    screen.getByRole("link", { name: /^Leads(?:\s*·|$)/ }).getAttribute("href")
+  ).toBe("/tables/table-1")
+  // Lifecycle state is readable text, separate from the name and audience.
+  expect(screen.getByText("Paused").className).not.toContain("sr-only")
   expect(
     screen.getByRole("button", { name: "Open actions for Leads" })
   ).toBeDefined()
@@ -137,7 +137,7 @@ test("the Items header sorts folders by their count", () => {
 
   const names = screen
     .getAllByRole("link")
-    .map((link) => link.textContent?.trim())
+    .map((link) => link.querySelector("span.truncate")?.textContent?.trim())
 
   // Ascending puts empty Scratch first; resources all rank alike, so they
   // trail in their given order.
@@ -147,8 +147,8 @@ test("the Items header sorts folders by their count", () => {
 test("a dotted icon marks the subfolders that hold anything", () => {
   renderContents(readyContents)
 
-  const dotted = screen.getByRole("link", { name: "Guides" })
-  const plain = screen.getByRole("link", { name: "Scratch" })
+  const dotted = screen.getByRole("link", { name: /^Guides(?:\s*·|$)/ })
+  const plain = screen.getByRole("link", { name: /^Scratch(?:\s*·|$)/ })
 
   expect(dotted.querySelector(".lucide-folder-dot")).not.toBeNull()
   expect(plain.querySelector(".lucide-folder-dot")).toBeNull()
@@ -197,7 +197,11 @@ test("every row drags, and rows select into one bar over both groups", () => {
 
   // Folders and resources alike are drag sources, cursor and all.
   for (const name of ["Guides", "Leads", "Digest"]) {
-    const row = screen.getByRole("link", { name }).closest("tr")
+    const row = screen
+      .getByRole("link", {
+        name: (label) => label === name || label.startsWith(`${name}·`),
+      })
+      .closest("tr")
 
     expect(row?.className).toContain("cursor-grab")
     expect(row?.getAttribute("aria-roledescription")).toBe("draggable")
@@ -262,7 +266,7 @@ test("filed chats join bulk moves and removal keeps their history", () => {
     type: "chat",
     id: "chat-1",
     name: "Renewals at risk",
-    visibility: "private",
+    visibility: { mode: "private" },
     updatedAt: Date.now(),
   } as FolderResource
   const actions = { isBusy: false, onMove: vi.fn(), onRemove: vi.fn() }

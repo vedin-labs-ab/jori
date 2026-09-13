@@ -63,7 +63,7 @@ test("shared chats honor direct grants and every ancestor while owners retain ac
     (
       await folderResources(ctx, { organizationId, personId: member, folderId })
     )[0]
-  ).toMatchObject({ type: "chat", visibility: "organization" })
+  ).toMatchObject({ type: "chat", visibility: { mode: "organization" } })
   expect(
     (
       await listConsoleConversations(ctx, {

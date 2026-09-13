@@ -35,13 +35,13 @@ test("a filed table offers the menu its own list row offers, plus unfiling", () 
 
   expect(itemLabels()).toEqual([
     "Rename…",
-    "Visibility…",
+    "Audience…",
     "Move to folder…",
     "Remove from folder",
     "Archive",
   ])
 
-  fireEvent.click(screen.getByRole("menuitem", { name: "Visibility…" }))
+  fireEvent.click(screen.getByRole("menuitem", { name: "Audience…" }))
 
   expect(actions.onAccess).toHaveBeenCalledOnce()
 })
@@ -55,7 +55,7 @@ test("a subfolder row opens the folder's own menu", () => {
   expect(itemLabels()).toEqual([
     "Usage",
     "Rename",
-    "Visibility…",
+    "Audience…",
     "Move to folder…",
     "Delete",
   ])
@@ -76,7 +76,7 @@ test("a filed file offers its own menu; the links resolve on demand", () => {
   // carry; everything the row already knows is there at once.
   expect(itemLabels()).toEqual([
     "Rename…",
-    "Visibility…",
+    "Audience…",
     "Move to folder…",
     "Remove from folder",
     "Delete",
@@ -119,7 +119,7 @@ test("a filed chat opens its conversation and can move without deleting its hist
     type: "chat",
     id: "chat-1",
     name: "Renewals at risk",
-    visibility: "private",
+    visibility: { mode: "private" },
     updatedAt: Date.now(),
   }
 
@@ -130,11 +130,11 @@ test("a filed chat opens its conversation and can move without deleting its hist
   ).toBe("/chat/chat-1")
   openActions("Renewals at risk")
   expect(itemLabels()).toEqual([
-    "Visibility…",
+    "Audience…",
     "Move to folder…",
     "Remove from folder",
   ])
-  fireEvent.click(screen.getByRole("menuitem", { name: "Visibility…" }))
+  fireEvent.click(screen.getByRole("menuitem", { name: "Audience…" }))
   expect(actions.onAccess).toHaveBeenCalledWith(resource)
   openActions("Renewals at risk")
   fireEvent.click(screen.getByRole("menuitem", { name: "Remove from folder" }))
@@ -160,7 +160,7 @@ const tableResource = {
   type: "table",
   id: "table-1",
   name: "Leads",
-  visibility: "organization",
+  visibility: { mode: "organization" },
   updatedAt: Date.now(),
 }
 
@@ -169,7 +169,7 @@ const fileResource = {
   id: "file-1",
   name: "costs.csv",
   mimeType: "text/csv",
-  visibility: "organization",
+  visibility: { mode: "organization" },
   updatedAt: Date.now(),
 }
 
@@ -177,7 +177,7 @@ const jobResource = {
   type: "job",
   id: "job-1",
   name: "Digest",
-  visibility: "organization",
+  visibility: { mode: "organization" },
   status: "paused",
   updatedAt: Date.now(),
 }

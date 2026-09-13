@@ -171,7 +171,7 @@ test("filing a chat does not expose it to other folder viewers", async () => {
       type: "chat",
       id: sent.conversationId,
       ownerId: personId,
-      visibility: "private",
+      visibility: { mode: "private" },
     },
   ])
   expect(await folderResources(ctx, { ...view, personId: otherId })).toEqual([])
