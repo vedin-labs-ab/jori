@@ -140,7 +140,7 @@ function FolderRowLink({
   name,
   onNavigate,
 }: {
-  folder: FolderNode
+  folder: FolderNode<FolderRow>
   drag: FolderRowDrag
   folderId: string
   hasChildren: boolean
