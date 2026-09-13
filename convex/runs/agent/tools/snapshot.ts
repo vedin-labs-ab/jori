@@ -5,7 +5,6 @@ import { type RuntimeToolCapability } from "./types"
 export type RunToolSnapshot = Infer<typeof toolSnapshot>
 export type RunToolSnapshotTool =
   RunToolSnapshot["groups"][number]["tools"][number]
-type RunToolSnapshotGroup = RunToolSnapshot["groups"][number]
 
 export function createRunToolSnapshot(input: {
   activeSurfaceTools?: RunToolSnapshotTool[]
@@ -32,7 +31,9 @@ export function createRunToolSnapshot(input: {
 export function consolidateJoriToolGroups(
   groups: RunToolSnapshot["groups"]
 ): RunToolSnapshot["groups"] {
-  const tools = joriTools(groups)
+  const tools = groups.flatMap((group) =>
+    group.surface === "jori" ? group.tools : []
+  )
 
   if (tools.length === 0) {
     return groups
@@ -54,14 +55,6 @@ export function consolidateJoriToolGroups(
   }
 
   return result
-}
-
-function joriTools(groups: RunToolSnapshot["groups"]) {
-  return groups.flatMap((group) => (isJoriGroup(group) ? group.tools : []))
-}
-
-function isJoriGroup(group: RunToolSnapshotGroup) {
-  return group.surface === "jori"
 }
 
 /** A Jori-surface group under `label`, or nothing when the run prepared no

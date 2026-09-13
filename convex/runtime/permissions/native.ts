@@ -12,31 +12,6 @@ export function nativeToolUsage(tool: string, route: NativeToolRoute) {
   return nativeToolPermission(tool, route).usage
 }
 
-function nativeToolSnapshot(args: {
-  access: ToolAccess
-  route: NativeToolRoute
-  tool: string
-}): RunToolSnapshotTool {
-  const permission = nativeToolPermission(args.tool, args.route)
-
-  return {
-    access: args.access,
-    description: permission.description,
-    label: permission.label,
-    tool: permission.tool,
-  }
-}
-
-function visibleNativeToolSnapshot(args: {
-  access: ToolAccess
-  route: NativeToolRoute
-  tool: string
-}): RunToolSnapshotTool | undefined {
-  return isUserVisibleToolPermission(args.tool)
-    ? nativeToolSnapshot(args)
-    : undefined
-}
-
 export function visibleNativeToolSnapshots(
   tools: readonly {
     access: ToolAccess
@@ -45,13 +20,20 @@ export function visibleNativeToolSnapshots(
   }[]
 ): RunToolSnapshotTool[] {
   return tools.flatMap((tool) => {
-    const snapshot = visibleNativeToolSnapshot({
-      access: tool.access,
-      route: tool.route,
-      tool: tool.name,
-    })
+    if (!isUserVisibleToolPermission(tool.name)) {
+      return []
+    }
 
-    return snapshot === undefined ? [] : [snapshot]
+    const permission = nativeToolPermission(tool.name, tool.route)
+
+    return [
+      {
+        access: tool.access,
+        description: permission.description,
+        label: permission.label,
+        tool: permission.tool,
+      },
+    ]
   })
 }
 

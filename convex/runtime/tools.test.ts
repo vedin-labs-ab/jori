@@ -99,6 +99,26 @@ test("native runtime tools use catalog usage for agents and descriptions for use
   )
 })
 
+test("native snapshots validate visible tool routes after hiding internal tools", () => {
+  expect(
+    visibleNativeToolSnapshots([
+      { access: "write", name: "finish_run", route: "sandbox" },
+    ])
+  ).toEqual([])
+
+  expect(() =>
+    visibleNativeToolSnapshots([
+      { access: "read", name: "read", route: "surface" },
+    ])
+  ).toThrow("Missing surface tool permission: read")
+
+  expect(() =>
+    visibleNativeToolSnapshots([
+      { access: "read", name: "unknown_tool", route: "sandbox" },
+    ])
+  ).toThrow("Missing sandbox tool permission: unknown_tool")
+})
+
 function schemaDescription(schema: Record<string, unknown>) {
   return typeof schema.description === "string" ? schema.description : ""
 }
