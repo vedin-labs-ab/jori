@@ -4,7 +4,7 @@ import { OrganizationTableActionMenu } from "@/components/auth/organization/tabl
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { TableCell, TableRow } from "@/components/ui/table"
 import { TeamDeleteDialog } from "./delete"
-import { TeamRenameDialog } from "./rename"
+import { TeamNameDialog } from "./name"
 import { type RosterMember, TeamRoster } from "./roster"
 
 export type Team = {
@@ -64,7 +64,7 @@ export function TeamRow({
           </OrganizationTableActionMenu>
         ) : null}
 
-        <TeamRenameDialog
+        <TeamNameDialog
           onOpenChange={setRenameOpen}
           open={renameOpen}
           team={team}
