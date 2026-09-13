@@ -44,6 +44,10 @@ vi.mock("@/console/context/organization/onboarding/gate", () => ({
 vi.mock("@/console/integrations/callback", () => ({
   IntegrationCallbackToasts: () => null,
 }))
+vi.mock("@/console/folders/edit", () => ({
+  ConsoleFolderEditing: ({ children }: { children: ReactNode }) => children,
+}))
+
 vi.mock("@/console/folders/drag/context", () => ({
   ConsoleFolderDrag: ({ children }: { children: ReactNode }) => children,
 }))
