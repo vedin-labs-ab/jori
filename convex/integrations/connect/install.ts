@@ -8,10 +8,12 @@ import {
   mutation,
 } from "../../_generated/server"
 import { ensureCurrentPerson } from "../../persons/account"
+import { linkSetupIdentity } from "../../persons/install"
 import { assertWorkspaceAvailable } from "../../retention/access"
 import {
   type Integration,
   integrationValidator,
+  providerForIntegration,
 } from "../../shared/integrations"
 import { requireReturnUrl } from "../../shared/origin"
 import { createGitHubInstallState } from "../github/signing"
@@ -22,6 +24,7 @@ import { microsoftIntegrationConfigs } from "../microsoft/config"
 import { createSignedMicrosoftState } from "../microsoft/signing"
 import { createSignedNotionState } from "../notion/signing"
 import { createSignedSlackState } from "../slack/signing"
+import { requireRefreshToken } from "./credentials"
 import { redirectWithStatus } from "./http"
 import { type ProviderInstallState } from "./signing"
 import { createInstallAttempt } from "./state"
@@ -115,23 +118,60 @@ type IntegrationValues = Omit<
   "createdAt"
 >
 
-export async function findUserIntegrationForInstall(
+export async function recordUserOAuthInstallation(
   ctx: MutationCtx,
-  args: {
-    organizationId: string
-    integration: Integration
-    createdBy: Id<"persons">
-  }
+  values: Omit<
+    IntegrationValues,
+    "integration" | "scope" | "ownerId" | "status" | "updatedAt" | "credentials"
+  > & {
+    integration:
+      | "gmail"
+      | "googleCalendar"
+      | "microsoftCalendar"
+      | "microsoftEmail"
+    credentials: Record<string, unknown> & {
+      tokens: { access: string; refresh?: string }
+    }
+  },
+  refreshTokenError: string
 ) {
-  return await ctx.db
+  const now = Date.now()
+  const existing = await ctx.db
     .query("integrations")
     .withIndex("by_organization_and_integration_and_owner", (query) =>
       query
-        .eq("organizationId", args.organizationId)
-        .eq("integration", args.integration)
-        .eq("ownerId", args.createdBy)
+        .eq("organizationId", values.organizationId)
+        .eq("integration", values.integration)
+        .eq("ownerId", values.createdBy)
     )
     .first()
+  const refresh = requireRefreshToken(
+    values.credentials.tokens.refresh,
+    existing?.credentials,
+    refreshTokenError
+  )
+  const integrationId = await upsertIntegration(ctx, existing, {
+    ...values,
+    scope: "user",
+    ownerId: values.createdBy,
+    status: "active",
+    updatedAt: now,
+    credentials: {
+      ...values.credentials,
+      tokens: { ...values.credentials.tokens, refresh },
+    },
+  })
+  await linkSetupIdentity(ctx, {
+    organizationId: values.organizationId,
+    personId: values.createdBy,
+    provider: providerForIntegration(values.integration),
+    identity: {
+      externalId: values.externalId,
+      email: values.email,
+      name: values.name,
+    },
+  })
+  return integrationId
 }
 
 // Every provider install lands through here: a reinstall revives the

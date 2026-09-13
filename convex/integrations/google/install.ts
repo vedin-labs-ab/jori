@@ -1,18 +1,12 @@
 import { v } from "convex/values"
-import { type Id } from "../../_generated/dataModel"
 import { internalMutation } from "../../_generated/server"
-import { linkSetupIdentity } from "../../persons/install"
 import {
   requireProviderIntegration,
   requireRefreshToken,
   saveOAuthCredentials,
 } from "../connect/credentials"
-import {
-  findUserIntegrationForInstall,
-  upsertIntegration,
-} from "../connect/install"
+import { recordUserOAuthInstallation } from "../connect/install"
 import { credentialSnapshotValidator } from "../connect/snapshot"
-import { type GoogleIntegration } from "./config"
 
 const googleIntegration = v.union(
   v.literal("gmail"),
@@ -36,83 +30,28 @@ export const recordOAuthInstallation = internalMutation({
     }),
   },
   handler: async (ctx, args) => {
-    const now = Date.now()
-    const existing = await findUserIntegrationForInstall(ctx, args)
-
-    const refreshToken = requireRefreshToken(
-      args.refreshToken,
-      existing?.credentials,
+    return await recordUserOAuthInstallation(
+      ctx,
+      {
+        organizationId: args.organizationId,
+        integration: args.integration,
+        createdBy: args.createdBy,
+        externalId: args.profile.id,
+        name: args.profile.name,
+        email: args.profile.email,
+        avatar: args.profile.picture,
+        credentials: {
+          tokens: { access: args.accessToken, refresh: args.refreshToken },
+          expiresAt: args.expiresAt,
+          scope: args.scope,
+        },
+        // Google rows carry no provider data; clear any stale value on reinstall.
+        data: undefined,
+      },
       "Google OAuth did not return a refresh token"
     )
-
-    const credentials = {
-      tokens: {
-        access: args.accessToken,
-        refresh: refreshToken,
-      },
-      expiresAt: args.expiresAt,
-      scope: args.scope,
-    }
-    const integrationId = await upsertIntegration(
-      ctx,
-      existing,
-      createGoogleIntegrationValues(args, credentials, now)
-    )
-
-    await linkSetupIdentity(ctx, {
-      organizationId: args.organizationId,
-      personId: args.createdBy,
-      provider: "google",
-      identity: {
-        externalId: args.profile.id,
-        email: args.profile.email,
-        name: args.profile.name,
-      },
-    })
-
-    return integrationId
   },
 })
-
-function createGoogleIntegrationValues(
-  args: {
-    integration: GoogleIntegration
-    organizationId: string
-    createdBy: Id<"persons">
-    profile: {
-      id: string
-      email: string
-      name?: string
-      picture?: string
-    }
-  },
-  credentials: {
-    tokens: {
-      access: string
-      refresh: string
-    }
-    expiresAt: number
-    scope: string | undefined
-  },
-  now: number
-) {
-  return {
-    organizationId: args.organizationId,
-    integration: args.integration,
-    scope: "user" as const,
-    ownerId: args.createdBy,
-    externalId: args.profile.id,
-    name: args.profile.name,
-    email: args.profile.email,
-    avatar: args.profile.picture,
-    credentials,
-    status: "active" as const,
-    createdBy: args.createdBy,
-    updatedAt: now,
-    // Google rows carry no provider data; clear any stale value on reinstall.
-    data: undefined,
-  }
-}
 
 export const updateOAuthCredentials = internalMutation({
   args: {

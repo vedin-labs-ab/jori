@@ -1,15 +1,11 @@
 import { v } from "convex/values"
 import { internalMutation } from "../../_generated/server"
-import { linkSetupIdentity } from "../../persons/install"
 import {
   requireProviderIntegration,
   requireRefreshToken,
   saveOAuthCredentials,
 } from "../connect/credentials"
-import {
-  findUserIntegrationForInstall,
-  upsertIntegration,
-} from "../connect/install"
+import { recordUserOAuthInstallation } from "../connect/install"
 import { credentialSnapshotValidator } from "../connect/snapshot"
 import { getMicrosoftIdentityEmail } from "./data"
 
@@ -42,54 +38,25 @@ export const recordOAuthInstallation = internalMutation({
     }),
   },
   handler: async (ctx, args) => {
-    const now = Date.now()
-    const existing = await findUserIntegrationForInstall(ctx, args)
-
-    const refreshToken = requireRefreshToken(
-      args.refreshToken,
-      existing?.credentials,
+    return await recordUserOAuthInstallation(
+      ctx,
+      {
+        organizationId: args.organizationId,
+        integration: args.integration,
+        createdBy: args.createdBy,
+        externalId: args.profile.user.id,
+        name: args.profile.user.displayName,
+        email: getMicrosoftIdentityEmail(args.profile),
+        credentials: {
+          tokens: { access: args.accessToken, refresh: args.refreshToken },
+          expiresAt: args.expiresAt,
+          scope: args.scope,
+          tenantId: args.microsoftTenantId,
+        },
+        data: { tenantName: args.profile.tenant.displayName },
+      },
       "Microsoft OAuth did not return a refresh token"
     )
-
-    const credentials = {
-      tokens: {
-        access: args.accessToken,
-        refresh: refreshToken,
-      },
-      expiresAt: args.expiresAt,
-      scope: args.scope,
-      tenantId: args.microsoftTenantId,
-    }
-    const email = getMicrosoftIdentityEmail(args.profile)
-    const integrationId = await upsertIntegration(ctx, existing, {
-      organizationId: args.organizationId,
-      integration: args.integration,
-      scope: "user",
-      ownerId: args.createdBy,
-      externalId: args.profile.user.id,
-      name: args.profile.user.displayName,
-      email,
-      credentials,
-      status: "active",
-      createdBy: args.createdBy,
-      updatedAt: now,
-      data: {
-        tenantName: args.profile.tenant.displayName,
-      },
-    })
-
-    await linkSetupIdentity(ctx, {
-      organizationId: args.organizationId,
-      personId: args.createdBy,
-      provider: "microsoft",
-      identity: {
-        externalId: args.profile.user.id,
-        email,
-        name: args.profile.user.displayName,
-      },
-    })
-
-    return integrationId
   },
 })
 
