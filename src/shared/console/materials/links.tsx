@@ -31,7 +31,7 @@ const expiryOptions = [
 
 /** Share-link management every material detail view reuses: mint with an
  *  expiry, copy the fresh link, and see or revoke earlier ones. The domain
- *  wrappers wire the Convex functions; this stays presentation-only. */
+ *  binding supplies the Convex functions; this stays presentation-only. */
 export function MaterialLinksDialog<Share extends ShareRow>({
   noun,
   onMint,

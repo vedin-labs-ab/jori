@@ -17,10 +17,10 @@ import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
+import { MaterialLinksDialog } from "../shared/materials/links"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 import { EditStoreDialog } from "./edit"
 import { useStoreRemoval } from "./manage"
-import { StoreLinksDialog } from "./share"
 import { StoreValue } from "./value"
 
 type StoreDialog = "access" | "edit" | "move" | "share"
@@ -182,11 +182,11 @@ function StoreDialogs({
         target={{ kind: "store", id: store.storeId }}
         value={store.visibility}
       />
-      <StoreLinksDialog
+      <MaterialLinksDialog
         onOpenChange={closeWhenDismissed}
         open={dialog === "share"}
         organizationId={organizationId}
-        storeId={store.storeId}
+        target={{ kind: "store", id: store.storeId }}
       />
       <MoveResourceDialog
         onClose={onClose}

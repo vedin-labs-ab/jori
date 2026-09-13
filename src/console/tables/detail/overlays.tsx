@@ -2,9 +2,9 @@ import { moveTarget } from "@/shared/console/folders/types"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { type TableDetail } from "@/shared/console/tables/types"
 import { MoveResourceDialog } from "../../folders/move"
+import { MaterialLinksDialog } from "../../shared/materials/links"
 import { OrganizationVisibilityDialog } from "../../shared/visibility/dialog"
 import { EditTableDialog } from "../edit"
-import { TableLinksDialog } from "./share"
 
 export type TableDialog = "access" | "edit" | "move" | "share"
 
@@ -39,11 +39,11 @@ export function TableDialogs({
         target={{ kind: "table", id: table.tableId }}
         value={table.visibility}
       />
-      <TableLinksDialog
+      <MaterialLinksDialog
         onOpenChange={closeWhenDismissed}
         open={dialog === "share"}
         organizationId={organizationId}
-        tableId={table.tableId}
+        target={{ kind: "table", id: table.tableId }}
       />
       <MoveResourceDialog
         onClose={onClose}

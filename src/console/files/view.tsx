@@ -12,9 +12,9 @@ import { useMemberUrl } from "@/shared/console/materials/fragment"
 import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
+import { MaterialLinksDialog } from "../shared/materials/links"
 import { useFileActions } from "./manage"
 import { useFileSave } from "./save"
-import { FileLinksDialog } from "./share"
 import { useFileSiblings } from "./siblings"
 import { type FileDialog, FileDialogs, FileTitleMenu } from "./title"
 
@@ -122,11 +122,11 @@ function FileReadyView({
         siblings={siblings}
         titleMenu={titleMenu}
       />
-      <FileLinksDialog
-        fileId={file.fileId}
+      <MaterialLinksDialog
         onOpenChange={setIsShareOpen}
         open={isShareOpen}
         organizationId={organizationId}
+        target={{ kind: "file", id: file.fileId }}
       />
       <FileDialogs
         dialog={dialog}
