@@ -67,8 +67,6 @@ test("a signed-in waitlisted caller without an organization cannot use billing A
       organizationId,
       businessPurchase: true,
       termsVersion: "2026-09-13",
-      plan: "starter",
-      interval: "month",
       returnUrl: "https://eu.usejori.com/console",
     })
   ).rejects.toThrow("no active organization")

@@ -1,22 +1,16 @@
 import {
-  type BillingInterval,
-  billingIntervals,
-  type PlanKey,
-  planKeys,
-} from "../../../contracts/billing"
-import {
   readEnvironmentVariable,
   requireEnvironmentVariable,
 } from "../../shared/environment"
 import { readRecord, readString } from "../../shared/input"
 import { requireRegion } from "../../shared/origin"
 
+const priceEnvironmentName = "STRIPE_PRICE_CLOUD"
+
 export const stripeEnvironmentNames = [
   "STRIPE_SECRET_KEY",
   "STRIPE_WEBHOOK_SECRET",
-  ...planKeys.flatMap((plan) =>
-    billingIntervals.map((interval) => priceEnvironmentName(plan, interval))
-  ),
+  priceEnvironmentName,
 ]
 
 /** Deployment can serve the waitlist without accepting payments.
@@ -50,27 +44,13 @@ export function requireStripeWebhookSecret() {
   return requireEnvironmentVariable("STRIPE_WEBHOOK_SECRET")
 }
 
-function priceEnvironmentName(plan: PlanKey, interval: BillingInterval) {
-  return `STRIPE_PRICE_${plan.toUpperCase()}_${interval.toUpperCase()}`
+export function stripePriceId() {
+  return requireEnvironmentVariable(priceEnvironmentName)
 }
 
-export function stripePriceId(plan: PlanKey, interval: BillingInterval) {
-  return requireEnvironmentVariable(priceEnvironmentName(plan, interval))
-}
-
-/** Reverse mapping for webhook payloads: which plan a Stripe price sells.
- *  Unknown prices return undefined so unrelated products cannot flip plans. */
-export function planForPriceId(priceId: string) {
-  for (const plan of planKeys) {
-    for (const interval of billingIntervals) {
-      if (
-        readEnvironmentVariable(priceEnvironmentName(plan, interval)) ===
-        priceId
-      ) {
-        return { plan, interval }
-      }
-    }
-  }
-
-  return undefined
+/** Reverse check for webhook payloads: whether a Stripe price is the plan.
+ *  An unknown price is not, so unrelated products cannot activate an
+ *  account. */
+export function sellsPlan(priceId: string) {
+  return readEnvironmentVariable(priceEnvironmentName) === priceId
 }

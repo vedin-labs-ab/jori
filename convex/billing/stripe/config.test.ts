@@ -16,8 +16,12 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-test("billing readiness requires credentials, webhook verification and all prices", () => {
-  expect(stripeEnvironmentNames).toHaveLength(6)
+test("billing readiness requires credentials, webhook verification and the plan's price", () => {
+  expect(stripeEnvironmentNames).toEqual([
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_PRICE_CLOUD",
+  ])
   expect(isStripeConfigured()).toBe(true)
   expect(() => requireStripeConfiguration()).not.toThrow()
 })

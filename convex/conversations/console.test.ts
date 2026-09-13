@@ -113,7 +113,7 @@ test("a blocked budget keeps the message without a run", async () => {
   }
 
   await database.patch(account._id, {
-    state: { kind: "paused", plan: "starter", interval: "month" },
+    state: { kind: "paused" },
   })
 
   const result = await sendConsoleMessage(ctx, {

@@ -19,7 +19,7 @@ function accountWith(overrides: Partial<Doc<"accounts">>) {
   vi.mocked(ensureAccount).mockResolvedValue({
     _id: "account-1",
     organizationId: "organization-1",
-    state: { kind: "active", plan: "starter", interval: "month" },
+    state: { kind: "active" },
     micros: { allowance: 0, wallet: 0 },
     topUp: { charged: { micros: 0 } },
     updatedAt: 0,
@@ -29,7 +29,7 @@ function accountWith(overrides: Partial<Doc<"accounts">>) {
 
 test("paused accounts block all new work", async () => {
   accountWith({
-    state: { kind: "paused", plan: "starter", interval: "month" },
+    state: { kind: "paused" },
     micros: { allowance: 5_000_000, wallet: 0 },
   })
 

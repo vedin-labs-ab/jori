@@ -1,9 +1,4 @@
-import {
-  type BillingInterval,
-  formatUsd,
-  type PlanKey,
-  plans,
-} from "@contracts/billing"
+import { formatUsd, plan } from "@contracts/billing"
 import { ArrowRight } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -16,23 +11,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useBillingCheckout } from "./actions"
 import { PurchaseAgreement } from "./agreement"
 
+/** There is one plan, so choosing it is confirming it: the price, what it
+ *  includes, and the purchase agreement, then Stripe. */
 export function PlanPicker({ organizationId }: { organizationId: string }) {
   const [accepted, setAccepted] = useState(false)
   const checkout = useBillingCheckout(organizationId)
-  const [interval, setInterval] = useState<BillingInterval>("month")
-  const [chosen, setChosen] = useState<PlanKey | null>(null)
-
-  const choose = (plan: PlanKey) => {
-    if (!accepted) {
-      return
-    }
-    setChosen(plan)
-    void checkout.choosePlan(plan, interval)
-  }
 
   return (
     <Dialog onOpenChange={() => setAccepted(false)}>
@@ -41,71 +27,28 @@ export function PlanPicker({ organizationId }: { organizationId: string }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Choose a plan</DialogTitle>
+          <DialogTitle>Subscribe to {plan.label}</DialogTitle>
           <DialogDescription>
-            One price for the whole organization. Every plan includes every
-            integration; usage is billed at provider list rates.
+            One price for the whole organization. Every integration included;
+            usage is billed at provider list rates.
           </DialogDescription>
         </DialogHeader>
-        <Tabs
-          onValueChange={(value) => setInterval(value as BillingInterval)}
-          value={interval}
-        >
-          <TabsList>
-            <TabsTrigger value="month">Monthly</TabsTrigger>
-            <TabsTrigger value="year">Annual, 20% off</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        <PurchaseAgreement accepted={accepted} onChange={setAccepted} />
-        <div className="flex flex-col gap-3">
-          {Object.values(plans).map((plan) => (
-            <PlanOption
-              interval={interval}
-              key={plan.key}
-              onChoose={choose}
-              pending={!accepted || checkout.pending !== null}
-              plan={plan.key}
-              spinning={checkout.pending === "plan" && chosen === plan.key}
-            />
-          ))}
+        <div className="rounded-lg border p-4">
+          <p className="font-medium">{plan.label}</p>
+          <p className="text-muted-foreground text-sm">
+            ${plan.monthlyPriceUsd} / month · everyone included ·{" "}
+            {formatUsd(plan.monthlyAllowanceMicros)} usage included monthly
+          </p>
         </div>
+        <PurchaseAgreement accepted={accepted} onChange={setAccepted} />
+        <Button
+          disabled={!accepted || checkout.pending !== null}
+          onClick={() => void checkout.subscribe()}
+        >
+          {checkout.pending === "plan" ? <Spinner /> : <ArrowRight />}
+          Continue to checkout
+        </Button>
       </DialogContent>
     </Dialog>
-  )
-}
-
-function PlanOption({
-  interval,
-  onChoose,
-  pending,
-  plan,
-  spinning,
-}: {
-  interval: BillingInterval
-  onChoose: (plan: PlanKey) => void
-  pending: boolean
-  plan: PlanKey
-  spinning: boolean
-}) {
-  const details = plans[plan]
-  const price =
-    interval === "year"
-      ? `$${details.annualPriceUsd.toLocaleString("en-US")} / year`
-      : `$${details.monthlyPriceUsd} / month`
-
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border p-4">
-      <div>
-        <p className="font-medium">{details.label}</p>
-        <p className="text-muted-foreground text-sm">
-          {price} · up to {details.memberLimit} members ·{" "}
-          {formatUsd(details.monthlyAllowanceMicros)} usage included monthly
-        </p>
-      </div>
-      <Button disabled={pending} onClick={() => onChoose(plan)}>
-        {spinning ? <Spinner /> : <ArrowRight />}
-        Choose
-      </Button>
-    </div>
   )
 }

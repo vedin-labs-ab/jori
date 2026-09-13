@@ -10,7 +10,6 @@ import { type ActionCtx, action } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
 import { requireReturnUrl } from "../../shared/origin"
 import { requireActivePlan, requireNoRefundHold } from "../account"
-import { interval, plan } from "../schema"
 import { requireString, stripeRequest } from "./client"
 import {
   requireStripeConfiguration,
@@ -27,8 +26,6 @@ import {
 export const startPlanCheckout = action({
   args: {
     organizationId: v.string(),
-    plan,
-    interval,
     returnUrl: v.string(),
     businessPurchase: v.literal(true),
     termsVersion: v.literal(termsVersion),
@@ -55,15 +52,13 @@ export const startPlanCheckout = action({
         success_url: billingReturnUrl(returnUrl, "subscribed"),
         cancel_url: billingReturnUrl(returnUrl, "canceled"),
         line_items: {
-          "0": { price: stripePriceId(args.plan, args.interval), quantity: 1 },
+          "0": { price: stripePriceId(), quantity: 1 },
         },
         metadata: stripeMetadata({
           organizationId: args.organizationId,
           kind: "plan",
           termsVersion,
           businessPurchase: "true",
-          plan: args.plan,
-          interval: args.interval,
         }),
         subscription_data: {
           metadata: stripeMetadata({ organizationId: args.organizationId }),

@@ -1,6 +1,7 @@
 /**
- * Jori's commercial model in one place: org-wide plans, usage billed in
- * dollars at the model provider's public list rates, and a prepaid wallet.
+ * Jori's commercial model in one place: one plan for the whole organization,
+ * usage billed in dollars at the model provider's public list rates, and a
+ * prepaid wallet. Self-hosting is free and never reaches billing.
  *
  * Every amount is an integer count of micro-dollars (1e-6 USD) so per-token
  * pricing stays exact integer math end to end.
@@ -10,32 +11,17 @@ import { type ModelRate, modelRate } from "./models/catalog"
 
 export const microsPerDollar = 1_000_000
 
-export const plans = {
-  starter: {
-    key: "starter",
-    label: "Starter",
-    monthlyPriceUsd: 34,
-    annualPriceUsd: 324,
-    monthlyAllowanceMicros: 15 * microsPerDollar,
-    memberLimit: 10,
-  },
-  team: {
-    key: "team",
-    label: "Team",
-    monthlyPriceUsd: 124,
-    annualPriceUsd: 1188,
-    monthlyAllowanceMicros: 75 * microsPerDollar,
-    memberLimit: 50,
-  },
+/** The plan: everyone in the organization, billed monthly, with usage
+ *  and file storage included. */
+export const plan = {
+  label: "Cloud",
+  monthlyPriceUsd: 49,
+  monthlyAllowanceMicros: 20 * microsPerDollar,
+  storageGb: 25,
 } as const
 
-export type PlanKey = keyof typeof plans
-
-export const planKeys = Object.keys(plans) as PlanKey[]
-
-export const billingIntervals = ["month", "year"] as const
-
-export type BillingInterval = (typeof billingIntervals)[number]
+/** File storage past the plan's, billed for the time it is stored. */
+export const storageUsdPerGbMonth = 0.1
 
 /**
  * Interactive work (console instructions, mentions) may dip slightly below a

@@ -1,3 +1,4 @@
+import { storageUsdPerGbMonth } from "@contracts/billing"
 import { type ReactNode } from "react"
 import { Section } from "../section"
 
@@ -21,7 +22,7 @@ export function Extras() {
         <Row
           note="Billed for the time you store it, under a limit you set."
           term="Additional file storage"
-          value="$0.10 per GB-month"
+          value={`$${storageUsdPerGbMonth.toFixed(2)} per GB-month`}
         />
       </dl>
     </Section>

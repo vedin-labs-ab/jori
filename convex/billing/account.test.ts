@@ -13,10 +13,10 @@ function account(overrides: Partial<Doc<"accounts">>) {
 
 test("wallet funding requires an active plan", () => {
   const active = account({
-    state: { kind: "active", plan: "starter", interval: "month" },
+    state: { kind: "active" },
   })
   const paused = account({
-    state: { kind: "paused", plan: "starter", interval: "month" },
+    state: { kind: "paused" },
   })
 
   expect(() => requireActivePlan(active)).not.toThrow()

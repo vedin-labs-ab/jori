@@ -2,7 +2,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { subscribedAccount } from "../../../../test/convex/billing"
+import { subscribedAccount } from "../../../../test/convex/usage"
 import { internal } from "../../../_generated/api"
 import schema from "../../../schema"
 import { mentionsLinearApp } from "./messages"

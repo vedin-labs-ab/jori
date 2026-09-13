@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { autoTopUp, plans } from "../../../contracts/billing"
+import { autoTopUp, plan } from "../../../contracts/billing"
 import { type Doc } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
 import { isWorkspaceDeleting } from "../../retention/access"
@@ -8,7 +8,7 @@ import { readArray, readRecord, readString } from "../../shared/input"
 import { getAccount, holdAutoTopUp } from "../account"
 import { addMonths } from "../cycle"
 import { creditTopUp, resetAllowance } from "../ledger"
-import { belongsToRegion, planForPriceId } from "./config"
+import { belongsToRegion, sellsPlan } from "./config"
 import { applyPlanCheckout, isCheckoutSuccess } from "./fulfillment"
 
 /**
@@ -109,10 +109,7 @@ async function applySubscription(
   if (account?.stripe?.subscriptionId !== readString(subscription, "id")) {
     return
   }
-  const sold =
-    account === null ? undefined : subscribedPlan(account, subscription)
-
-  if (account === null || sold === undefined) {
+  if (account === null || !isPlanSubscription(account, subscription)) {
     return
   }
 
@@ -128,7 +125,7 @@ async function applySubscription(
     const endedAt = subscriptionEnd(subscription, now)
     await retainWorkspace(ctx, account.organizationId, endedAt)
     await ctx.db.patch(account._id, {
-      state: { kind: "paused", ...sold },
+      state: { kind: "paused" },
       renewsAt: undefined,
       // The customer outlives the subscription: the saved card and the
       // invoice history stay reachable after a cancellation.
@@ -145,43 +142,38 @@ async function applySubscription(
 
   await resumeWorkspace(ctx, account.organizationId)
   const resumed = account.state.kind !== "active" && status === "active"
-  const planChanged =
-    account.state.kind === "active" && account.state.plan !== sold.plan
 
   await ctx.db.patch(account._id, {
-    state: { kind: "active", ...sold },
+    state: { kind: "active" },
     ...(resumed && account.renewsAt === undefined
       ? { renewsAt: addMonths(now, 1) }
       : {}),
     updatedAt: now,
   })
 
-  if (planChanged || resumed) {
+  if (resumed) {
     await resetAllowance(ctx, {
       account,
-      micros: plans[sold.plan].monthlyAllowanceMicros,
+      micros: plan.monthlyAllowanceMicros,
       source: "plan",
       now,
     })
   }
 }
 
-/** Which plan a subscription change applies to: what Stripe now sells,
- *  falling back to what the account carries. An unsubscribed account has
- *  neither, so there is nothing to pause or resume. */
-function subscribedPlan(
+/** Whether a subscription change is about the plan: what Stripe now sells,
+ *  falling back to the account already being on it. An unsubscribed account
+ *  has neither, so there is nothing to pause or resume. */
+function isPlanSubscription(
   account: Doc<"accounts">,
   subscription: Record<string, unknown>
 ) {
   const item = readArray(readRecord(subscription.items).data)[0]
   const priceId = readString(readRecord(item).price, "id")
-  const state = account.state
 
   return (
-    (priceId === undefined ? undefined : planForPriceId(priceId)) ??
-    (state.kind === "unsubscribed"
-      ? undefined
-      : { plan: state.plan, interval: state.interval })
+    (priceId !== undefined && sellsPlan(priceId)) ||
+    account.state.kind !== "unsubscribed"
   )
 }
 

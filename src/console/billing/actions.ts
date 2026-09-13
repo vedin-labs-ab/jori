@@ -1,8 +1,4 @@
-import {
-  type BillingInterval,
-  type PlanKey,
-  termsVersion,
-} from "@contracts/billing"
+import { termsVersion } from "@contracts/billing"
 import { useAction } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { useState } from "react"
@@ -63,16 +59,10 @@ export function useBillingCheckout(organizationId: string) {
 
   return {
     pending,
-    choosePlan: (plan: PlanKey, interval: BillingInterval) =>
+    subscribe: () =>
       redirect(
         "plan",
-        () =>
-          startPlanCheckout({
-            organizationId,
-            plan,
-            interval,
-            ...purchaseAgreement(),
-          }),
+        () => startPlanCheckout({ organizationId, ...purchaseAgreement() }),
         "Could not open checkout."
       ),
     topUp: (amountUsd: number) =>

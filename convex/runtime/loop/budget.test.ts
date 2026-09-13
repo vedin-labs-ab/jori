@@ -11,7 +11,7 @@ test("a run whose organization ran dry fails before its next turn, with the reas
 
   await database.insert("accounts", {
     organizationId,
-    state: { kind: "active", plan: "starter", interval: "month" },
+    state: { kind: "active" },
     micros: { allowance: 0, wallet: -3_000_000 },
     topUp: { charged: { micros: 0 } },
     updatedAt: 0,
@@ -43,7 +43,7 @@ test("interactive work keeps its grace below zero; scheduled work stops at it", 
 
   await database.insert("accounts", {
     organizationId,
-    state: { kind: "active", plan: "starter", interval: "month" },
+    state: { kind: "active" },
     micros: { allowance: 0, wallet: -500_000 },
     topUp: { charged: { micros: 0 } },
     updatedAt: 0,

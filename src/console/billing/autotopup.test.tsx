@@ -22,7 +22,7 @@ test("names each inline auto top-up control", () => {
       account={
         {
           canFundWallet: true,
-          state: { kind: "active", plan: "starter", interval: "month" },
+          state: { kind: "active" },
           topUp: {
             micros: {
               threshold: 5_000_000,

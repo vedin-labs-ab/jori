@@ -1,9 +1,6 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
-export const plan = v.union(v.literal("starter"), v.literal("team"))
-export const interval = v.union(v.literal("month"), v.literal("year"))
-
 /**
  * One row per organization: what the organization is paying for, plus the two
  * spendable pots in integer micro-dollars. `allowance` is the monthly
@@ -22,8 +19,8 @@ export const accounts = defineTable({
   refundHeldAt: v.optional(v.number()),
   state: v.union(
     v.object({ kind: v.literal("unsubscribed") }),
-    v.object({ kind: v.literal("active"), plan, interval }),
-    v.object({ kind: v.literal("paused"), plan, interval })
+    v.object({ kind: v.literal("active") }),
+    v.object({ kind: v.literal("paused") })
   ),
   micros: v.object({ allowance: v.number(), wallet: v.number() }),
   /** When the next cycle allowance lands. */

@@ -1,3 +1,4 @@
+import { microsToDollars, plan } from "@contracts/billing"
 import {
   ArrowUpRight,
   CloudUpload,
@@ -13,14 +14,6 @@ import { cn } from "@/lib/utils"
 import { repositoryUrl } from "@/shared/brand/content"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { GetStarted } from "../cta"
-
-/** Marketing's numbers for the cloud plan. `contracts/billing.ts` still
- *  carries the plans the console sells, and it changes when billing does. */
-const cloud = {
-  monthlyPriceUsd: 49,
-  monthlyAllowanceUsd: 20,
-  storageGb: 25,
-}
 
 type Plan = {
   action: ReactNode
@@ -52,7 +45,7 @@ const plans: readonly Plan[] = [
         The upkeep is ours.
       </>
     ),
-    price: `$${cloud.monthlyPriceUsd}`,
+    price: `$${plan.monthlyPriceUsd}`,
     priceNote: "per month",
     rows: [
       {
@@ -64,13 +57,13 @@ const plans: readonly Plan[] = [
       {
         icon: Zap,
         term: "AI usage",
-        value: `$${cloud.monthlyAllowanceUsd} a month`,
+        value: `$${microsToDollars(plan.monthlyAllowanceMicros)} a month`,
         note: "Resets each month, shared by every job and chat",
       },
       {
         icon: Folder,
         term: "File storage",
-        value: `${cloud.storageGb} GB`,
+        value: `${plan.storageGb} GB`,
         note: "One place for the team's materials",
       },
       {

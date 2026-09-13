@@ -119,7 +119,7 @@ test("an active plan can schedule its configured auto top-up", async () => {
   await meterOnce(
     {
       ...configuredAccount,
-      state: { kind: "active", plan: "starter", interval: "month" },
+      state: { kind: "active" },
     },
     schedule
   )
@@ -134,7 +134,7 @@ test("a spent monthly cap holds the charge back", async () => {
   await meterOnce(
     {
       ...configuredAccount,
-      state: { kind: "active", plan: "starter", interval: "month" },
+      state: { kind: "active" },
       topUp: {
         ...configuredAccount.topUp,
         charged: { micros: 90_000_000 },

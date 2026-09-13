@@ -1,4 +1,4 @@
-import { plans } from "../../../contracts/billing"
+import { plan } from "../../../contracts/billing"
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { isWorkspaceDeleting } from "../../retention/access"
@@ -8,7 +8,7 @@ import { addMonths } from "../cycle"
 import { resetAllowance } from "../ledger"
 import { queueCancellation } from "./cancellation"
 import { stripeRequest } from "./client"
-import { belongsToRegion, planForPriceId } from "./config"
+import { belongsToRegion, sellsPlan } from "./config"
 
 export function isCheckoutSuccess(type: string | undefined) {
   return (
@@ -47,9 +47,8 @@ export async function applyPlanCheckout(
 ) {
   const subscriptionId = readString(subscription, "id")
   const customerId = readString(subscription, "customer")
-  const sold = paidSubscriptionPlan(account, session, subscription)
   if (
-    sold === undefined ||
+    !isPaidPlanSubscription(account, session, subscription) ||
     subscriptionId === undefined ||
     customerId === undefined
   ) {
@@ -71,12 +70,12 @@ export async function applyPlanCheckout(
   const now = Date.now()
   await resetAllowance(ctx, {
     account,
-    micros: plans[sold.plan].monthlyAllowanceMicros,
+    micros: plan.monthlyAllowanceMicros,
     source: "plan",
     now,
   })
   await ctx.db.patch(account._id, {
-    state: { kind: "active", ...sold },
+    state: { kind: "active" },
     topUp: { charged: { micros: 0 } },
     stripe: { customerId, subscriptionId },
     renewsAt: addMonths(now, 1),
@@ -84,7 +83,11 @@ export async function applyPlanCheckout(
   })
 }
 
-function paidSubscriptionPlan(
+/** Whether the subscription a checkout completed is the plan, live, and
+ *  new to this account. The price is checked against what Stripe holds now
+ *  rather than the checkout's metadata, so a stale session cannot sell
+ *  something else. */
+function isPaidPlanSubscription(
   account: Doc<"accounts">,
   session: Record<string, unknown>,
   subscription: Record<string, unknown>
@@ -98,9 +101,9 @@ function paidSubscriptionPlan(
     account.stripe?.subscriptionId === subscription.id ||
     (subscription.status !== "active" && subscription.status !== "past_due")
   ) {
-    return undefined
+    return false
   }
   const item = readArray(readRecord(subscription.items).data)[0]
   const priceId = readString(readRecord(item).price, "id")
-  return priceId === undefined ? undefined : planForPriceId(priceId)
+  return priceId !== undefined && sellsPlan(priceId)
 }

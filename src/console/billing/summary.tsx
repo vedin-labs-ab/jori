@@ -1,4 +1,4 @@
-import { formatUsd, plans } from "@contracts/billing"
+import { formatUsd, plan } from "@contracts/billing"
 import { CreditCard } from "lucide-react"
 import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -81,7 +81,7 @@ function planName(account: BillingAccount | null) {
     return "No plan"
   }
 
-  return plans[account.state.plan].label
+  return plan.label
 }
 
 function planDetail(account: BillingAccount | null) {
@@ -89,11 +89,7 @@ function planDetail(account: BillingAccount | null) {
     return "One price for the whole organization. Choose a plan to start."
   }
 
-  const plan = plans[account.state.plan]
-
-  return account.state.interval === "year"
-    ? `$${plan.annualPriceUsd.toLocaleString("en-US")} a year, for the whole organization.`
-    : `$${plan.monthlyPriceUsd} a month, for the whole organization.`
+  return `$${plan.monthlyPriceUsd} a month, for the whole organization.`
 }
 
 function AvailableCell({
@@ -110,7 +106,7 @@ function AvailableCell({
   const allowanceMicros = Math.max(
     account === null || account.state.kind === "unsubscribed"
       ? 0
-      : plans[account.state.plan].monthlyAllowanceMicros,
+      : plan.monthlyAllowanceMicros,
     remainingMicros
   )
 
