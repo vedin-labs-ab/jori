@@ -7,6 +7,8 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { folderBreadcrumb } from "../folders/breadcrumb"
+import { type FolderDetail } from "../folders/types"
 import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
@@ -206,21 +208,50 @@ test("hangs a published aside off the trail, outside its navigation", () => {
   ).toBeGreaterThan(0)
 })
 
-test("keeps a published suffix inside the breadcrumb", () => {
-  const { publish } = renderWithPublisher("/folders/usage")
+test("folder usage links back through its ancestors and keeps its suffix inside the breadcrumb", () => {
+  const { publish } = renderWithPublisher("/folders/leaf1/usage")
+  const folder = {
+    folderId: "leaf1",
+    name: "Invoices",
+    parentId: "root1",
+    visibility: { mode: "organization" },
+    createdBy: "owner",
+    createdAt: 1,
+    updatedAt: 1,
+    path: [
+      { folderId: "root1", name: "Finance" },
+      { folderId: "leaf1", name: "Invoices" },
+    ],
+  } as FolderDetail
 
   act(() =>
-    publish.current?.({
-      name: "Usage",
-      suffix: <button type="button">About these figures</button>,
-      trail: [],
-    })
+    publish.current?.(
+      folderBreadcrumb({
+        folder,
+        onDialog: vi.fn(),
+        view: "usage",
+        aside: <span>Folder spend</span>,
+        suffix: <button type="button">About these figures</button>,
+      })
+    )
   )
 
   const trail = screen.getByRole("navigation", { name: "breadcrumb" })
   const suffix = screen.getByRole("button", { name: "About these figures" })
 
   expect(trail.contains(suffix)).toBe(true)
+  expect(
+    screen.getByRole("link", { name: "Folders" }).getAttribute("href")
+  ).toBe("/folders")
+  expect(
+    screen.getByRole("link", { name: "Finance" }).getAttribute("href")
+  ).toBe("/folders/root1")
+  expect(
+    screen.getByRole("link", { name: "Invoices" }).getAttribute("href")
+  ).toBe("/folders/leaf1")
+  expect(screen.getByText("Usage").getAttribute("aria-current")).toBe("page")
+  expect(screen.queryByText("Folder spend")).toBeNull()
+  expect(screen.queryByRole("button", { name: /^Audience:/ })).toBeNull()
 })
 
 test("carries the skip link's landing id only when handed one", () => {

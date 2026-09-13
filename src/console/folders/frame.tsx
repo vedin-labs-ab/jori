@@ -2,9 +2,8 @@ import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useMemo } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { FolderName } from "@/shared/console/folders/edit/name"
+import { folderBreadcrumb } from "@/shared/console/folders/breadcrumb"
 import { useFolderRequests } from "@/shared/console/folders/edit/state"
-import { FolderTitleMenu } from "@/shared/console/folders/menu"
 import {
   type FolderDetail,
   type FolderDialogRequest,
@@ -14,12 +13,7 @@ import {
   ConsoleListLayout,
 } from "@/shared/console/list/frame"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
-import {
-  type MaterialBreadcrumb,
-  type MaterialBreadcrumbSegment,
-  useMaterialTrail,
-} from "@/shared/console/materials/breadcrumb"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
+import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useLeaveDeletedFolder } from "./delete/leave"
@@ -99,7 +93,26 @@ function FolderResolver({
     )
   )
 
-  useFolderCrumb({ folder, onDialog: setDialog, organizationId, suffix, view })
+  useMaterialTrail(
+    useMemo(
+      () =>
+        folder === undefined
+          ? undefined
+          : folderBreadcrumb({
+              folder,
+              onDialog: setDialog,
+              view,
+              suffix: view === "usage" ? suffix?.(organizationId) : undefined,
+              aside: (
+                <FolderUsageHint
+                  folderId={folder.folderId as GenericId<"folders">}
+                  organizationId={organizationId}
+                />
+              ),
+            }),
+      [folder, setDialog, organizationId, suffix, view]
+    )
+  )
 
   return (
     <ConsoleListLayout>
@@ -123,94 +136,6 @@ function FolderResolver({
       />
     </ConsoleListLayout>
   )
-}
-
-type FolderCrumb = {
-  folder: FolderDetail | undefined
-  onDialog: (request: FolderDialogRequest) => void
-  organizationId: string
-  suffix?: (organizationId: string) => ReactNode
-  view: FolderView
-}
-
-/** The folder's header crumb: the /folders overview leads the trail — every
- *  material page starts from its parent surface — then the ancestor
- *  folders. The folder's own page ends there, its name opening the folder's
- *  menu and its spend sitting beside it; its usage page hangs one more
- *  crumb off the name, which becomes the way back — and needs no hint,
- *  being the page the hint points at, though it may mark its own name. */
-function useFolderCrumb(args: FolderCrumb) {
-  const { folder, onDialog, organizationId, suffix, view } = args
-
-  useMaterialTrail(
-    // The menu and the aside are fresh elements per call, so the crumb is
-    // memoized on what they are made of rather than on themselves.
-    useMemo(
-      () => folderCrumb({ folder, onDialog, organizationId, suffix, view }),
-      [folder, onDialog, organizationId, suffix, view]
-    )
-  )
-}
-
-function folderCrumb({
-  folder,
-  onDialog,
-  organizationId,
-  suffix,
-  view,
-}: FolderCrumb): MaterialBreadcrumb | undefined {
-  if (folder === undefined) {
-    return undefined
-  }
-
-  const ancestors: MaterialBreadcrumbSegment[] = [
-    { name: "Folders", to: "/folders" },
-    ...folder.path.slice(0, -1).map((segment) => ({
-      name: segment.name,
-      params: { folderId: segment.folderId },
-      to: "/folders/$folderId",
-    })),
-  ]
-
-  if (view === "usage") {
-    return {
-      name: "Usage",
-      suffix: suffix?.(organizationId),
-      trail: [
-        ...ancestors,
-        {
-          name: folder.name,
-          params: { folderId: folder.folderId },
-          to: "/folders/$folderId",
-        },
-      ],
-    }
-  }
-
-  return {
-    aside: (
-      <FolderUsageHint
-        folderId={folder.folderId as GenericId<"folders">}
-        organizationId={organizationId}
-      />
-    ),
-    audience: (
-      <VisibilityButton
-        visibility={folder.visibility}
-        folderId={folder.parentId}
-        ownerId={folder.createdBy}
-        onClick={() => onDialog({ type: "access", folder })}
-      />
-    ),
-    renderName: (name) => (
-      <FolderName folder={folder} surface="title">
-        {name}
-      </FolderName>
-    ),
-    menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
-    name: folder.name,
-    trail: ancestors,
-  }
 }
 
 /** What stands in for the page before there is a folder to show it for. */

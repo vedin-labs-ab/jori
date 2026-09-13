@@ -3,19 +3,13 @@ import { Plus } from "lucide-react"
 import { useContext, useMemo } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AskJoriAction } from "@/shared/console/chat/pane/ask"
-import { FolderName } from "@/shared/console/folders/edit/name"
+import { folderBreadcrumb } from "@/shared/console/folders/breadcrumb"
 import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { FolderHeaderActions } from "@/shared/console/folders/header"
 import { FolderContents } from "@/shared/console/folders/list/contents"
 import { RootFolderList } from "@/shared/console/folders/list/roots"
-import {
-  FoldersTitleMenu,
-  FolderTitleMenu,
-} from "@/shared/console/folders/menu"
-import {
-  type FolderDetail,
-  type FolderDialogRequest,
-} from "@/shared/console/folders/types"
+import { FoldersTitleMenu } from "@/shared/console/folders/menu"
+import { type FolderDetail } from "@/shared/console/folders/types"
 import { UsageHintButton } from "@/shared/console/folders/usage/hint"
 import {
   ConsoleHeaderActions,
@@ -26,17 +20,12 @@ import {
   ConsoleListContent,
   ConsoleListLayout,
 } from "@/shared/console/list/frame"
-import {
-  type MaterialBreadcrumb,
-  useMaterialTrail,
-} from "@/shared/console/materials/breadcrumb"
+import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { folderDetail, rootFolders } from "../derive/folders"
 import { usageSpend } from "../derive/usage"
 import { DemoFolderDialogs } from "../dialogs/folders"
 import { type FolderId } from "../fixtures/types"
-import { type DemoState } from "../state/types"
 import { useDemoWorkspace } from "../workspace"
 import { useDemoFolderContents } from "./contents"
 import { useDemoFolderSelection } from "./select"
@@ -125,7 +114,21 @@ function FolderContentsPage({ folder }: { folder: FolderDetail }) {
 
   useMaterialTrail(
     useMemo(
-      () => folderCrumb(state, folder, onDialog),
+      () =>
+        folderBreadcrumb({
+          folder,
+          onDialog,
+          aside: (
+            <ConsoleHeaderAside>
+              <UsageHintButton
+                amount={formatUsd(
+                  usageSpend(state, folder.folderId as FolderId)
+                )}
+                folderId={folder.folderId}
+              />
+            </ConsoleHeaderAside>
+          ),
+        }),
       [state, folder, onDialog]
     )
   )
@@ -142,46 +145,4 @@ function FolderContentsPage({ folder }: { folder: FolderDetail }) {
       {listing.overlays}
     </ConsoleListLayout>
   )
-}
-
-/** The folder's header crumb: the overview leads the trail, then the
- *  ancestors; the folder's own name opens its menu, with its spend beside. */
-function folderCrumb(
-  state: DemoState,
-  folder: FolderDetail,
-  onDialog: (request: FolderDialogRequest) => void
-): MaterialBreadcrumb {
-  return {
-    aside: (
-      <ConsoleHeaderAside>
-        <UsageHintButton
-          amount={formatUsd(usageSpend(state, folder.folderId as FolderId))}
-          folderId={folder.folderId}
-        />
-      </ConsoleHeaderAside>
-    ),
-    audience: (
-      <VisibilityButton
-        visibility={folder.visibility}
-        folderId={folder.parentId}
-        ownerId={folder.createdBy}
-        onClick={() => onDialog({ type: "access", folder })}
-      />
-    ),
-    renderName: (name) => (
-      <FolderName folder={folder} surface="title">
-        {name}
-      </FolderName>
-    ),
-    menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
-    name: folder.name,
-    trail: [
-      { name: "Folders", to: "/folders" },
-      ...folder.path.slice(0, -1).map((segment) => ({
-        name: segment.name,
-        params: { folderId: segment.folderId },
-        to: "/folders/$folderId",
-      })),
-    ],
-  }
 }
