@@ -1,6 +1,6 @@
 import { EditorContent } from "@tiptap/react"
 import { X } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { type ReactNode } from "react"
 import { Badge } from "@/components/ui/badge"
 import { InputGroupAddon } from "@/components/ui/input-group"
 import { MentionSuggestions } from "../../mentions/suggest/listbox"
@@ -64,7 +64,7 @@ function emptySuggestionMessage({
   }
 }
 
-/** Keep the context's row after it is cleared so the field stays put. */
+/** The resource row takes space only while the chat has context. */
 export function ComposerContext({
   onClear,
   reference,
@@ -72,20 +72,13 @@ export function ComposerContext({
   onClear: (() => void) | undefined
   reference: ReferenceView | undefined
 }) {
-  const [hasContext, setHasContext] = useState(reference !== undefined)
-  if (reference !== undefined && !hasContext) {
-    setHasContext(true)
-  }
-
-  if (!hasContext) {
+  if (reference === undefined) {
     return null
   }
 
   return (
     <InputGroupAddon align="block-start" className="min-h-9">
-      {reference === undefined ? null : (
-        <ContextChip onClear={onClear} reference={reference} />
-      )}
+      <ContextChip onClear={onClear} reference={reference} />
     </InputGroupAddon>
   )
 }

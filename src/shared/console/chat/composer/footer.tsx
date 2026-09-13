@@ -84,19 +84,17 @@ export function ComposerFooter({
           {usage === undefined || usage === null ? null : (
             <ContextIndicator usage={usage} />
           )}
-          <span className="size-7 shrink-0">
-            {isLive ? (
-              <InputGroupButton
-                aria-label="Stop run"
-                onClick={onStop}
-                size="icon-sm"
-                type="button"
-                variant="ghost"
-              >
-                <Square className="fill-current" />
-              </InputGroupButton>
-            ) : null}
-          </span>
+          {isLive ? (
+            <InputGroupButton
+              aria-label="Stop run"
+              onClick={onStop}
+              size="icon-sm"
+              type="button"
+              variant="ghost"
+            >
+              <Square className="fill-current" />
+            </InputGroupButton>
+          ) : null}
           <SendControl canSend={canSend} pending={pending} />
         </span>
       </InputGroupAddon>
