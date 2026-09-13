@@ -7,7 +7,6 @@ import {
   searchCollections,
 } from "../collections/access"
 import { type CollectionDoc } from "../collections/spec"
-import { personDisplay } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { type ResourceViewer } from "../visibility/resources"
 import { storeSpec } from "./spec"
@@ -63,24 +62,6 @@ export function summarizeStoreValue(document: Doc<"documents"> | null) {
     value: (document?.value ?? null) as unknown,
     version: document?.version ?? 0,
     valueUpdatedAt: document?.updatedAt ?? null,
-  }
-}
-
-/** Console summary: the base summary plus the owner's display. A store
- *  without a resolvable named owner reads as Jori's own in the console. */
-export async function summarizeStoreWithOwner(
-  ctx: QueryLikeCtx,
-  store: StoreDoc
-) {
-  const owner =
-    store.ownerId === undefined
-      ? undefined
-      : await personDisplay(ctx, store.ownerId)
-
-  return {
-    ...summarizeStore(store),
-    ownerName: owner?.name,
-    ownerImage: owner?.image,
   }
 }
 

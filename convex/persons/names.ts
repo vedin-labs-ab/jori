@@ -88,6 +88,14 @@ export async function personDisplay(
   }
 }
 
+export async function withOwnerDisplay<Row extends { ownerId?: Id<"persons"> }>(
+  ctx: QueryLikeCtx,
+  row: Row
+) {
+  const [display] = await withOwnerDisplays(ctx, [row])
+  return display
+}
+
 /** Console rows with their owner's display attached, resolved once per
  *  distinct person rather than once per row: a listing is usually a
  *  handful of people over many rows, and every lookup reads that person's

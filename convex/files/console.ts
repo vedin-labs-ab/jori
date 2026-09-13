@@ -8,7 +8,7 @@ import {
 } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { resolveConsolePerson } from "../persons/account"
-import { personDisplay } from "../persons/names"
+import { withOwnerDisplay, withOwnerDisplays } from "../persons/names"
 import { visibilityValidator } from "../visibility/schema"
 import { createSight } from "../visibility/sight"
 import { canViewFile, type FileViewer, visibleFiles } from "./data"
@@ -37,8 +37,9 @@ export const list = query({
       .take(maxConsoleFiles)
     const visible = await visibleFiles(createSight(ctx, viewer), files)
 
-    return await Promise.all(
-      visible.map(async (file) => await toConsoleRow(ctx, file))
+    return await withOwnerDisplays(
+      ctx,
+      await Promise.all(visible.map((file) => toConsoleRow(ctx, file)))
     )
   },
 })
@@ -57,7 +58,10 @@ export const get = query({
       return { status: "not_found" as const, file: null }
     }
 
-    return { status: "ready" as const, file: await toConsoleRow(ctx, file) }
+    return {
+      status: "ready" as const,
+      file: await withOwnerDisplay(ctx, await toConsoleRow(ctx, file)),
+    }
   },
 })
 
@@ -149,11 +153,6 @@ async function resolveViewer(
  *  an agent-saved file has run provenance and no owner, and the console
  *  shows it as Jori's own. */
 export async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
-  const owner =
-    file.ownerId === undefined
-      ? undefined
-      : await personDisplay(ctx, file.ownerId)
-
   return {
     fileId: file._id,
     name: file.name,
@@ -164,8 +163,6 @@ export async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
     source: file.runId === undefined ? ("upload" as const) : ("run" as const),
     runId: file.runId,
     ownerId: file.ownerId,
-    ownerName: owner?.name,
-    ownerImage: owner?.image,
     createdAt: file.createdAt,
     updatedAt: file.updatedAt,
     url: await ctx.storage.getUrl(file.storageId),

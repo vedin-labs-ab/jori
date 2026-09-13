@@ -1,6 +1,7 @@
 import { expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
+import { withOwnerDisplay } from "../persons/names"
 import { toConsoleRow } from "./console"
 import {
   insertUploadedFile,
@@ -214,7 +215,10 @@ test("console rows name the uploading person as the owner", async () => {
     storage: { getUrl: vi.fn(async () => "https://files.example/costs.csv") },
   } as unknown as QueryCtx
 
-  const row = await toConsoleRow(ctx, { ...organizationFile(), ownerId: owner })
+  const row = await withOwnerDisplay(
+    ctx,
+    await toConsoleRow(ctx, { ...organizationFile(), ownerId: owner })
+  )
 
   expect(row).toMatchObject({
     source: "upload",
@@ -230,7 +234,10 @@ test("agent-saved rows carry run provenance and no owner name", async () => {
   } as unknown as QueryCtx
   const runId = "run-id" as Id<"runs">
 
-  const row = await toConsoleRow(ctx, { ...organizationFile(), runId })
+  const row = await withOwnerDisplay(
+    ctx,
+    await toConsoleRow(ctx, { ...organizationFile(), runId })
+  )
 
   expect(row).toMatchObject({ source: "run", runId, ownerName: undefined })
 })

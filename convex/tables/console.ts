@@ -6,13 +6,14 @@ import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { pageDocuments } from "../collections/documents"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
+import { withOwnerDisplay, withOwnerDisplays } from "../persons/names"
 import { visibilityValidator } from "../visibility/schema"
 import {
   findAccessibleTable,
   getAccessibleTable,
   searchTables,
   summarizeRow,
-  summarizeTableWithOwner,
+  summarizeTable,
 } from "./access"
 import { rowAnchorValidator } from "./rows"
 
@@ -44,9 +45,7 @@ export const list = query({
 
     return {
       status: "ready" as const,
-      tables: await Promise.all(
-        tables.map(async (table) => await summarizeTableWithOwner(ctx, table))
-      ),
+      tables: await withOwnerDisplays(ctx, tables.map(summarizeTable)),
     }
   },
 })
@@ -76,7 +75,7 @@ export const get = query({
 
     return {
       status: "ready" as const,
-      table: await summarizeTableWithOwner(ctx, table),
+      table: await withOwnerDisplay(ctx, summarizeTable(table)),
     }
   },
 })

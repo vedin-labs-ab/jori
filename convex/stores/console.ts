@@ -5,12 +5,9 @@ import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { findSingletonDocument } from "../collections/documents"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
+import { withOwnerDisplay, withOwnerDisplays } from "../persons/names"
 import { visibilityValidator } from "../visibility/schema"
-import {
-  findAccessibleStore,
-  searchStores,
-  summarizeStoreWithOwner,
-} from "./access"
+import { findAccessibleStore, searchStores, summarizeStore } from "./access"
 
 export const list = query({
   args: {
@@ -40,11 +37,15 @@ export const list = query({
 
     return {
       status: "ready" as const,
-      stores: await Promise.all(
-        stores.map(async (store) => ({
-          ...(await summarizeStoreWithOwner(ctx, store)),
-          version: (await findSingletonDocument(ctx, store._id))?.version ?? 0,
-        }))
+      stores: await withOwnerDisplays(
+        ctx,
+        await Promise.all(
+          stores.map(async (store) => ({
+            ...summarizeStore(store),
+            version:
+              (await findSingletonDocument(ctx, store._id))?.version ?? 0,
+          }))
+        )
       ),
     }
   },
@@ -78,7 +79,7 @@ export const get = query({
     return {
       status: "ready" as const,
       store: {
-        ...(await summarizeStoreWithOwner(ctx, store)),
+        ...(await withOwnerDisplay(ctx, summarizeStore(store))),
         value: (document?.value ?? null) as unknown,
         version: document?.version ?? 0,
       },

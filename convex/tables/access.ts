@@ -5,7 +5,6 @@ import {
   searchCollections,
 } from "../collections/access"
 import { type CollectionDoc } from "../collections/spec"
-import { personDisplay } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
 import { type ResourceViewer } from "../visibility/resources"
 import { tableSpec } from "./spec"
@@ -57,24 +56,6 @@ export function agentTableSummary(summary: ReturnType<typeof summarizeTable>) {
   return {
     ...summary,
     columns: summary.columns.map(({ id: _id, ...column }) => column),
-  }
-}
-
-/** Console summary: the base summary plus the owner's display. A table
- *  without a resolvable named owner reads as Jori's own in the console. */
-export async function summarizeTableWithOwner(
-  ctx: QueryLikeCtx,
-  table: TableDoc
-) {
-  const owner =
-    table.ownerId === undefined
-      ? undefined
-      : await personDisplay(ctx, table.ownerId)
-
-  return {
-    ...summarizeTable(table),
-    ownerName: owner?.name,
-    ownerImage: owner?.image,
   }
 }
 

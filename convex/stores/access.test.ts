@@ -6,7 +6,8 @@ import {
 } from "../../test/convex/collections"
 import { databaseContext, id } from "../../test/convex/database"
 import { type CollectionDoc } from "../collections/spec"
-import { summarizeStore, summarizeStoreWithOwner } from "./access"
+import { withOwnerDisplay } from "../persons/names"
+import { summarizeStore } from "./access"
 
 function store(overrides: StoreOverrides = {}): CollectionDoc<"store"> {
   return {
@@ -100,7 +101,7 @@ describe("resolving the owner name", () => {
     })
 
     const document = store()
-    const summary = await summarizeStoreWithOwner(ctx, document)
+    const summary = await withOwnerDisplay(ctx, summarizeStore(document))
 
     expect(summary.ownerName).toBe("Ada Lovelace")
   })
@@ -109,7 +110,10 @@ describe("resolving the owner name", () => {
     "leaves the name unset for an owner without an identity: %s",
     async (ownerId) => {
       const { ctx } = databaseContext()
-      const summary = await summarizeStoreWithOwner(ctx, store({ ownerId }))
+      const summary = await withOwnerDisplay(
+        ctx,
+        summarizeStore(store({ ownerId }))
+      )
       expect(summary.ownerName).toBeUndefined()
     }
   )

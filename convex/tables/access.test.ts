@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 import {
   type TableOverrides,
   tableDoc,
@@ -6,7 +6,8 @@ import {
 } from "../../test/convex/collections"
 import { databaseContext, id } from "../../test/convex/database"
 import { type CollectionDoc } from "../collections/spec"
-import { summarizeTableWithOwner } from "./access"
+import { withOwnerDisplay, withOwnerDisplays } from "../persons/names"
+import { summarizeTable } from "./access"
 
 function table(overrides: TableOverrides = {}): CollectionDoc<"table"> {
   return {
@@ -17,7 +18,7 @@ function table(overrides: TableOverrides = {}): CollectionDoc<"table"> {
 }
 
 describe("resolving the owner name", () => {
-  test("includes the row count and the owner from a linked identity", async () => {
+  test("enriches table rows in order with one lookup per owner", async () => {
     const { database, ctx } = databaseContext()
 
     await database.insert("identities", {
@@ -28,10 +29,19 @@ describe("resolving the owner name", () => {
       name: "Ada Lovelace",
     })
 
-    const document = table({ documentCount: 42 })
-    const summary = await summarizeTableWithOwner(ctx, document)
+    const query = vi.spyOn(database, "query")
+    const summaries = await withOwnerDisplays(ctx, [
+      summarizeTable(table({ documentCount: 42 })),
+      summarizeTable(table({ documentCount: 1, ownerId: undefined })),
+      summarizeTable(table({ documentCount: 7 })),
+    ])
 
-    expect(summary).toMatchObject({ rowCount: 42, ownerName: "Ada Lovelace" })
+    expect(summaries).toMatchObject([
+      { rowCount: 42, ownerName: "Ada Lovelace" },
+      { rowCount: 1, ownerName: undefined, ownerImage: undefined },
+      { rowCount: 7, ownerName: "Ada Lovelace" },
+    ])
+    expect(query).toHaveBeenCalledExactlyOnceWith("identities")
   })
 
   test("carries the sign-in avatar from the linked auth account", async () => {
@@ -50,7 +60,7 @@ describe("resolving the owner name", () => {
     })
 
     const document = table()
-    const summary = await summarizeTableWithOwner(ctx, document)
+    const summary = await withOwnerDisplay(ctx, summarizeTable(document))
 
     expect(summary.ownerName).toBe("Ada Lovelace")
     expect(summary.ownerImage).toBe("https://lh3.example/avatar.png")
@@ -60,7 +70,10 @@ describe("resolving the owner name", () => {
     "leaves the name unset for an owner without an identity: %s",
     async (ownerId) => {
       const { ctx } = databaseContext()
-      const summary = await summarizeTableWithOwner(ctx, table({ ownerId }))
+      const summary = await withOwnerDisplay(
+        ctx,
+        summarizeTable(table({ ownerId }))
+      )
       expect(summary.ownerName).toBeUndefined()
     }
   )
