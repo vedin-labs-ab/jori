@@ -34,7 +34,7 @@ test("organization grants remain marked when a parent limits access", () => {
   expect(summary.marked).toBe(true)
   expect(summary.description).toContain('"Finance"')
   expect(summary.description).not.toContain(
-    "Everyone in the organization can see"
+    "Everyone in your organization can see"
   )
   expect(
     visibilitySummary(
@@ -67,18 +67,26 @@ test("unknown folders and cycles never imply organization-wide access", () => {
 })
 
 test("private wording distinguishes the viewer from another owner", () => {
-  expect(
-    visibilitySummary(
-      { visibility: { mode: "private" }, ownerId: "maya" },
+  for (const ownerId of [undefined, "maya", "priya"]) {
+    const summary = visibilitySummary(
+      { visibility: { mode: "private" }, ownerId },
       directory
-    ).label
-  ).toBe("Only me")
+    )
+    expect(summary).toMatchObject(
+      ownerId === "priya"
+        ? {
+            label: "Owner only",
+            description: "Only the owner can see this item.",
+          }
+        : { label: "Only me", description: "Only you can see this item." }
+    )
+  }
   expect(
-    visibilitySummary(
-      { visibility: { mode: "private" }, ownerId: "priya" },
-      directory
-    ).label
-  ).toBe("Owner only")
+    visibilitySummary({ visibility: { mode: "private" }, ownerId: "maya" }, {})
+  ).toMatchObject({
+    label: "Owner only",
+    description: "Only the owner can see this item.",
+  })
 })
 
 test("selected grants name known recipients without claiming a reader count", () => {
@@ -90,7 +98,7 @@ test("selected grants name known recipients without claiming a reader count", ()
     directory
   )
   expect(summary.label).toBe("Finance")
-  expect(summary.description).toContain("The owner keeps access")
+  expect(summary.description).toContain("You keep access")
   expect(summary.description).toContain(
     'Restrictions from the "Finance" folder also apply.'
   )
@@ -112,6 +120,12 @@ test("selected grants name known recipients without claiming a reader count", ()
       directory
     ).label
   ).toBe("1 team")
+  expect(
+    visibilitySummary(
+      { visibility: { mode: "people", personIds: ["maya"] }, ownerId: "priya" },
+      directory
+    ).description
+  ).toContain("The owner keeps access.")
 })
 
 test("empty grants do not promise access to a team or person", () => {
@@ -120,7 +134,20 @@ test("empty grants do not promise access to a team or person", () => {
       { visibility: { mode: "people", personIds: [] } },
       directory
     )
-  ).toMatchObject({ label: "Owner only", marked: true })
+  ).toMatchObject({
+    label: "Only me",
+    description: "Only you can see this item.",
+    marked: true,
+  })
+  expect(
+    visibilitySummary(
+      { visibility: { mode: "teams", teamIds: [] }, ownerId: "priya" },
+      directory
+    )
+  ).toMatchObject({
+    label: "Owner only",
+    description: "Only the owner can see this item.",
+  })
 })
 
 test("explanations identify team members and join people's names naturally", () => {
@@ -159,7 +186,7 @@ test("explanations identify team members and join people's names naturally", () 
     [{ mode: "people", personIds: ["maya", "unknown"] }, "2 selected people"],
   ] satisfies [Visibility, string][]) {
     expect(visibilitySummary({ visibility }, namedDirectory).description).toBe(
-      `Access is granted to ${recipients}. The owner keeps access.`
+      `Shared with ${recipients}. You keep access.`
     )
   }
 })

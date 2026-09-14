@@ -243,7 +243,9 @@ test("mixed-folder rows keep the baseline quiet and an explicit repeated audienc
   expect(within(explicit).getByText("Billing")).toBeDefined()
   const unfiled = screen.getByRole("row", { name: /Unfiled job/ })
   expect(within(unfiled).getByText("Unfiled")).toBeDefined()
-  expect(within(unfiled).getByText("Organization default")).toBeDefined()
+  expect(
+    within(unfiled).getByText("Everyone in your organization")
+  ).toBeDefined()
   expect(screen.queryByText("Via folder")).toBeNull()
   expect(screen.queryByText("Organization")).toBeNull()
 })

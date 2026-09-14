@@ -1,4 +1,4 @@
-import { Check, Folder, FolderMinus } from "lucide-react"
+import { Check, Folder, FolderRoot } from "lucide-react"
 import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -50,7 +50,7 @@ export function FolderPicker({
         <PickerRow
           depth={0}
           icon={
-            <FolderMinus className="size-4 shrink-0 text-muted-foreground" />
+            <FolderRoot className="size-4 shrink-0 text-muted-foreground" />
           }
           isCurrent={currentId === null}
           isSelected={selectedId === null}

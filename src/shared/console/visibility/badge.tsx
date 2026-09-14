@@ -60,7 +60,9 @@ export function VisibilityLabel({
   const summary = visibilitySummary(props, useVisibilityDirectory())
   if (quietDefault && props.visibility.mode === "organization") {
     const description =
-      props.folderId === undefined ? "Organization default" : "Same as folder"
+      props.folderId === undefined
+        ? "Everyone in your organization"
+        : "Same as folder"
     return (
       <span className="text-muted-foreground" title={description}>
         <span aria-hidden>—</span>

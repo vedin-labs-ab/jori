@@ -1,4 +1,4 @@
-import { Folder, X } from "lucide-react"
+import { Folder, FolderRoot, X } from "lucide-react"
 import { type ReactNode, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -40,6 +40,7 @@ function FolderControl({
 }: Omit<LocationProps, "audience">) {
   const trigger = useRef<HTMLButtonElement>(null)
   const selected = folderId !== null
+  const Icon = selected ? Folder : FolderRoot
   const name = selected
     ? (folders?.find((folder) => folder.folderId === folderId)?.name ??
       folderName ??
@@ -50,7 +51,7 @@ function FolderControl({
     : "Choose folder"
 
   return (
-    <div className="group/location relative min-w-0 rounded-md transition-colors hover:bg-muted focus-within:bg-muted">
+    <div className="group/location relative min-w-0 rounded-md transition-colors hover:bg-muted">
       <FolderSelect folders={folders} onChange={onChange} value={folderId}>
         <Button
           aria-label={description}
@@ -60,19 +61,14 @@ function FolderControl({
           )}
           disabled={disabled}
           ref={trigger}
-          title={
-            selected
-              ? `${description}. Click to change folder.`
-              : "Choose where to save this chat. Currently outside any folder."
-          }
+          title={selected ? "Change folder" : "Choose where to save this chat"}
           type="button"
           variant="ghost"
         >
-          <Folder
+          <Icon
             className={cn(
               "size-3.5 shrink-0",
-              selected &&
-                "group-hover/location:invisible group-focus-within/location:invisible pointer-coarse:invisible"
+              selected && "group-hover/location:invisible"
             )}
           />
           <span className="truncate">{name}</span>
@@ -81,7 +77,7 @@ function FolderControl({
       {selected ? (
         <Button
           aria-label="Remove folder"
-          className="pointer-events-none absolute top-0.5 left-1 size-6 rounded-sm text-muted-foreground opacity-0 group-hover/location:pointer-events-auto group-hover/location:opacity-100 group-focus-within/location:pointer-events-auto group-focus-within/location:opacity-100 pointer-coarse:pointer-events-auto pointer-coarse:opacity-100"
+          className="invisible absolute top-0.5 left-1 size-6 rounded-sm text-muted-foreground group-hover/location:visible"
           disabled={disabled}
           onClick={() => {
             onChange(null)

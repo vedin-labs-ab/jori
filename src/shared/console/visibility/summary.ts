@@ -33,7 +33,7 @@ export function visibilitySummary(
     icon: mode === "organization" ? ("folder" as const) : mode,
     configuredLabel: audience.label,
     label: mode === "organization" ? "Via folder" : audience.label,
-    description: `${mode === "organization" ? "Access follows the folder. The owner keeps access." : audience.description} ${restriction}`,
+    description: `${mode === "organization" ? `Access follows the folder. ${ownerAccess(subject, directory)}` : audience.description} ${restriction}`,
     marked: true,
   }
 }
@@ -45,24 +45,19 @@ function audienceSummary(
   const value = subject.visibility
   const mode = value.mode
   if (mode === "private") {
-    return {
-      label:
-        subject.ownerId !== undefined && subject.ownerId !== directory.viewerId
-          ? "Owner only"
-          : "Only me",
-      description: "Only the owner can see this item.",
-    }
+    return privateAudience(subject, directory)
   }
   if (value.mode === "teams" || value.mode === "people") {
-    return selectedAudience(value, directory)
+    return selectedAudience(subject, value, directory)
   }
   return {
     label: visibilityModeMarks[mode],
-    description: "Everyone in the organization can see this item.",
+    description: "Everyone in your organization can see this item.",
   }
 }
 
 function selectedAudience(
+  subject: VisibilitySubject,
   value: Extract<Visibility, { mode: "people" | "teams" }>,
   directory: VisibilityDirectory
 ) {
@@ -73,10 +68,7 @@ function selectedAudience(
     (id) => options?.find((option) => option.id === id)?.name
   )
   if (ids.length === 0) {
-    return {
-      label: "Owner only",
-      description: "No additional access is granted. The owner keeps access.",
-    }
+    return privateAudience(subject, directory)
   }
   const noun = teams ? "team" : "selected person"
   const plural = teams ? "teams" : "selected people"
@@ -86,7 +78,7 @@ function selectedAudience(
       : `${ids.length} ${ids.length === 1 ? noun : plural}`
   return {
     label,
-    description: `Access is granted to ${selectedRecipients(names, teams)}. The owner keeps access.`,
+    description: `Shared with ${selectedRecipients(names, teams)}. ${ownerAccess(subject, directory)}`,
   }
 }
 
@@ -100,4 +92,29 @@ function selectedRecipients(names: (string | undefined)[], teams: boolean) {
   const noun = teams ? "team" : "person"
   const plural = teams ? "teams" : "people"
   return `${teams ? "members of " : ""}${names.length} selected ${names.length === 1 ? noun : plural}`
+}
+
+function viewerOwns(
+  subject: VisibilitySubject,
+  directory: VisibilityDirectory
+) {
+  return subject.ownerId === undefined || subject.ownerId === directory.viewerId
+}
+
+function privateAudience(
+  subject: VisibilitySubject,
+  directory: VisibilityDirectory
+) {
+  return viewerOwns(subject, directory)
+    ? { label: "Only me", description: "Only you can see this item." }
+    : { label: "Owner only", description: "Only the owner can see this item." }
+}
+
+function ownerAccess(
+  subject: VisibilitySubject,
+  directory: VisibilityDirectory
+) {
+  return viewerOwns(subject, directory)
+    ? "You keep access."
+    : "The owner keeps access."
 }
