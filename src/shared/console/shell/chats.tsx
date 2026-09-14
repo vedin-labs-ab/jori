@@ -1,4 +1,4 @@
-import { MessagesSquare } from "lucide-react"
+import { MessageCircle } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import {
   Command,
@@ -99,7 +99,7 @@ export function ChatsMenu({
             )}
             tooltip="Chats"
           >
-            <MessagesSquare />
+            <MessageCircle />
             <span>Chats</span>
           </SidebarMenuButton>
         </ChatsPicker>

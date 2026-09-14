@@ -2,7 +2,7 @@ import { type FunctionArgs, type FunctionReturnType } from "convex/server"
 import {
   Database,
   type LucideIcon,
-  MessageSquare,
+  MessageCircle,
   Table2,
   Workflow,
 } from "lucide-react"
@@ -76,7 +76,7 @@ export function resourcePresentation(resource: {
     case "job":
       return { icon: Workflow, label: "Job" }
     case "chat":
-      return { icon: MessageSquare, label: "Chat" }
+      return { icon: MessageCircle, label: "Chat" }
   }
 }
 

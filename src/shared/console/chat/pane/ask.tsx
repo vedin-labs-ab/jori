@@ -1,4 +1,4 @@
-import { MessageSquare } from "lucide-react"
+import { MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { type ReferenceTarget } from "../../references"
 import { ConsoleLink } from "../../shell/link"
@@ -12,7 +12,7 @@ export function AskJoriAction({ target }: { target: ReferenceTarget }) {
   return (
     <Button asChild className="max-sm:size-7 max-sm:px-0" variant="outline">
       <ConsoleLink aria-label="Ask Jori" {...chatDestination(target)}>
-        <MessageSquare />
+        <MessageCircle />
         <span className="max-sm:hidden">Ask Jori</span>
       </ConsoleLink>
     </Button>
