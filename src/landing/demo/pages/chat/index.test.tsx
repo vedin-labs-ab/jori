@@ -10,8 +10,8 @@ import {
 } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
+import { advanceUntil } from "../../../../../test/demo/timers"
 import { typeInto } from "../../../../../test/editor"
-import { advanceUntil } from "../../../../../test/timers"
 import { renewalsConversationId } from "../../fixtures/chat"
 
 // Load the real lazy views before the tests start. Cold module transforms
