@@ -688,6 +688,7 @@ import type * as usage_rollup from "../usage/rollup.js";
 import type * as visibility_audience from "../visibility/audience.js";
 import type * as visibility_console from "../visibility/console.js";
 import type * as visibility_execution from "../visibility/execution.js";
+import type * as visibility_inherited from "../visibility/inherited.js";
 import type * as visibility_resources from "../visibility/resources.js";
 import type * as visibility_sight from "../visibility/sight.js";
 import type * as visibility_target from "../visibility/target.js";
@@ -1391,6 +1392,7 @@ declare const fullApi: ApiFromModules<{
   "visibility/audience": typeof visibility_audience;
   "visibility/console": typeof visibility_console;
   "visibility/execution": typeof visibility_execution;
+  "visibility/inherited": typeof visibility_inherited;
   "visibility/resources": typeof visibility_resources;
   "visibility/sight": typeof visibility_sight;
   "visibility/target": typeof visibility_target;
