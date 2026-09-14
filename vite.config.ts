@@ -110,12 +110,8 @@ const config = defineConfig({
     // polls above were the result. Five leaves the transformer and the
     // browser their share.
     maxWorkers: 5,
-    experimental: {
-      // Transformed modules kept on disk: the next run in the same worktree,
-      // usually the land gate after the agent's own runs, skips most of the
-      // transform phase (3.7s to 0.9s on src/shared/console/jobs).
-      fsModuleCache: true,
-    },
+    // Keep transformed modules in memory only. The experimental disk cache
+    // can retain resolved import paths after files move between runs.
     onConsoleLog(log, type) {
       if (type === "stderr" && reactOrAccessibilityWarning.test(log)) {
         throw new Error(`Unexpected React or accessibility warning:\n${log}`)
