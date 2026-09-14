@@ -47,7 +47,7 @@ test("a folder entry can be cleared and sends without an extra resource badge", 
   typeInto(field, "A question outside the folder")
   fireEvent.keyDown(field, { key: "Enter" })
   expect(
-    await screen.findByRole("button", { name: "Saved in: No folder" })
+    await screen.findByRole("button", { name: "Choose folder" })
   ).toBeDefined()
   expect(
     screen.getByRole("button", { name: "Audience: Only me" })
