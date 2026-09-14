@@ -23,5 +23,5 @@ export function folderRestriction(
   }
   return names.length === 0
     ? null
-    : `Folder restrictions also apply: ${names.map((name) => `"${name}"`).join(", ")}.`
+    : `Restrictions from ${new Intl.ListFormat("en").format(names.map((name) => `the "${name}" folder`))} also apply.`
 }

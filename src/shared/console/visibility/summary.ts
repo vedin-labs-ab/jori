@@ -86,6 +86,18 @@ function selectedAudience(
       : `${ids.length} ${ids.length === 1 ? noun : plural}`
   return {
     label,
-    description: `Access is granted to ${names.every(Boolean) ? names.join(", ") : label}. The owner keeps access.`,
+    description: `Access is granted to ${selectedRecipients(names, teams)}. The owner keeps access.`,
   }
+}
+
+function selectedRecipients(names: (string | undefined)[], teams: boolean) {
+  if (names.every((name): name is string => Boolean(name))) {
+    const recipients = new Intl.ListFormat("en").format(
+      teams ? names.map((name) => `the ${name} team`) : names
+    )
+    return teams ? `members of ${recipients}` : recipients
+  }
+  const noun = teams ? "team" : "person"
+  const plural = teams ? "teams" : "people"
+  return `${teams ? "members of " : ""}${names.length} selected ${names.length === 1 ? noun : plural}`
 }

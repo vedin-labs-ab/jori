@@ -18,8 +18,8 @@ export function InheritedRestrictions({
     >
       <h3 className="font-medium text-sm">Inherited restrictions</h3>
       <p className="text-muted-foreground text-xs">
-        Access must also meet each folder's audience. Owners keep access to
-        their own items.
+        People also need access to each parent folder to see this item. Owners
+        keep access to their own items.
       </p>
       {inherited.folders.length === 0 ? null : (
         <ol className="grid gap-2">

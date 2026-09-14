@@ -1,3 +1,4 @@
+import { type Visibility } from "@contracts/visibility"
 import { expect, test } from "vitest"
 import { type VisibilityDirectory } from "./directory"
 import { visibilitySummary } from "./summary"
@@ -90,7 +91,9 @@ test("selected grants name known recipients without claiming a reader count", ()
   )
   expect(summary.label).toBe("Finance")
   expect(summary.description).toContain("The owner keeps access")
-  expect(summary.description).toContain("Folder restrictions also apply")
+  expect(summary.description).toContain(
+    'Restrictions from the "Finance" folder also apply.'
+  )
   expect(
     visibilitySummary(
       { visibility: { mode: "people", personIds: ["priya"] } },
@@ -118,4 +121,45 @@ test("empty grants do not promise access to a team or person", () => {
       directory
     )
   ).toMatchObject({ label: "Owner only", marked: true })
+})
+
+test("explanations identify team members and join people's names naturally", () => {
+  const namedDirectory = {
+    teams: [
+      { id: "billing", name: "Billing" },
+      { id: "finance", name: "Finance" },
+    ],
+    people: [
+      { id: "maya", name: "Maya" },
+      { id: "priya", name: "Priya" },
+      { id: "alex", name: "Alex" },
+    ],
+  }
+  for (const [visibility, recipients] of [
+    [
+      { mode: "teams", teamIds: ["billing", "billing"] },
+      "members of the Billing team",
+    ],
+    [
+      { mode: "teams", teamIds: ["billing", "finance"] },
+      "members of the Billing team and the Finance team",
+    ],
+    [{ mode: "teams", teamIds: ["unknown"] }, "members of 1 selected team"],
+    [
+      { mode: "teams", teamIds: ["billing", "unknown"] },
+      "members of 2 selected teams",
+    ],
+    [{ mode: "people", personIds: ["maya"] }, "Maya"],
+    [{ mode: "people", personIds: ["maya", "priya"] }, "Maya and Priya"],
+    [
+      { mode: "people", personIds: ["maya", "priya", "alex"] },
+      "Maya, Priya, and Alex",
+    ],
+    [{ mode: "people", personIds: ["unknown"] }, "1 selected person"],
+    [{ mode: "people", personIds: ["maya", "unknown"] }, "2 selected people"],
+  ] satisfies [Visibility, string][]) {
+    expect(visibilitySummary({ visibility }, namedDirectory).description).toBe(
+      `Access is granted to ${recipients}. The owner keeps access.`
+    )
+  }
 })

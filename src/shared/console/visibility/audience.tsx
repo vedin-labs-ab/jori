@@ -39,8 +39,8 @@ export function AudienceLine({
         mode === "organization" ? null : (
           <>
             {" "}
-            Narrowed to <NarrowingFolder name={audience.narrowedBy} /> by the
-            folder it's in.
+            Access is also limited by the{" "}
+            <NarrowingFolder name={audience.narrowedBy} /> folder.
           </>
         )}
       </p>
@@ -56,15 +56,15 @@ export function AudienceLine({
  *  audiences are counted, with the names a hover away. */
 function AudienceSentence({ audience, mode, viewerId }: AudienceProps) {
   if (mode === "organization" && audience.inherited.unavailable) {
-    return "Folder restrictions apply. Some inherited details are unavailable."
+    return "Folder restrictions apply. Some parent folders are unavailable to you."
   }
   if (mode === "organization") {
     return audience.narrowedBy === null ? (
       "Visible to everyone in the organization."
     ) : (
       <>
-        Visible to everyone who can see{" "}
-        <NarrowingFolder name={audience.narrowedBy} />.
+        Visible to everyone who can see the{" "}
+        <NarrowingFolder name={audience.narrowedBy} /> folder.
       </>
     )
   }

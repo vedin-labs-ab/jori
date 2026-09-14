@@ -56,8 +56,8 @@ export function VisibilityField({
         <Label htmlFor={id}>Audience</Label>
         <FieldHelp label="Audience help">
           <p>
-            Who can see this {noun}. Whoever can see it can also use and edit
-            it; you always keep access to what you own.
+            Who can see, use, and edit this {noun}. You always keep access to
+            what you own.
           </p>
           {help === undefined ? null : <p>{help}</p>}
         </FieldHelp>
@@ -101,7 +101,7 @@ function GrantFields({
           })
         }
         options={options.people}
-        placeholder="Search members…"
+        placeholder="Search people…"
         selected={value.personIds}
       />
     )

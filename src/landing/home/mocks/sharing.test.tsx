@@ -20,7 +20,9 @@ test("says who the table reaches and revokes its live link in place", () => {
   )
 
   expect(screen.getByRole("button", { name: "6 people" })).toBeDefined()
-  expect(screen.getByText(/Narrowed to/).textContent).toContain("Finance")
+  expect(
+    screen.getByText(/Access is also limited by the/).textContent
+  ).toContain("Finance folder")
 
   fireEvent.click(screen.getByRole("button", { name: "Revoke" }))
 
