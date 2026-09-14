@@ -29,7 +29,7 @@ import {
 } from "./types"
 
 const contentClassName =
-  "max-h-48 min-h-9 w-full overflow-y-auto whitespace-pre-wrap break-words px-2 py-2 text-foreground text-sm outline-none [overflow-wrap:anywhere] aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+  "max-h-48 min-h-9 w-full overflow-y-auto whitespace-pre-wrap break-words px-2 py-2 text-foreground text-sm outline-none [overflow-wrap:anywhere]"
 
 /** The composer's editor: plain text with mention chips, a listbox under
  *  a sigil, Enter to send and Shift+Enter for a line, paste as text. */
@@ -70,13 +70,10 @@ export function useComposerEditor(args: ComposerEditorArgs) {
       updateSuggestion(editor)
     }
   }, [args.sources, editor, refs, updateSuggestion])
-  useEffect(() => {
-    editor?.setEditable(!args.disabled)
-  }, [args.disabled, editor])
 
   return {
     dismissSuggestions: () => setSuggestion(null),
-    canSend: args.open && !isEmpty && !pending,
+    canSend: !isEmpty && !pending,
     editor,
     insertMention: (item: MentionSuggestion) => insertMention(refs, item),
     isEmpty,
@@ -223,8 +220,10 @@ function createEditorOptions({
       handleKeyDown: (_view, event) =>
         handleComposerKey({ event, refs, setPending, setSuggestion }),
       handlePaste: (view, event) =>
+        refs.sending ||
         insertPastedText(view, event, refs.latest.current.catalog),
       handleTextInput: (view, from, to, text) =>
+        refs.sending ||
         completeTypedMention({
           catalog: refs.latest.current.catalog,
           from,

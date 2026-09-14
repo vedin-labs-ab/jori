@@ -5,7 +5,6 @@ import {
   RouterProvider,
 } from "@tanstack/react-router"
 import { createRoot } from "react-dom/client"
-import { Toaster } from "@/components/ui/sonner"
 import { DemoConsole } from "@/landing/demo/console"
 import { DemoDragProvider } from "@/landing/demo/drag"
 import { useDemoNavigation } from "@/landing/demo/navigation"
@@ -30,7 +29,6 @@ export function StatePage() {
   const navigation = useDemoNavigation(route)
   return (
     <DemoWorkspaceProvider now={Date.now()}>
-      <Toaster />
       {state === "current-clock" || state.startsWith("copy-") ? (
         <DemoConsole
           className="h-dvh rounded-none border-0 shadow-none"

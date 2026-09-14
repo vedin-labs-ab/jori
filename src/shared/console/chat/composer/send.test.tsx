@@ -40,14 +40,26 @@ test("a send the host is still answering holds the draft, then clears it", async
   )
   const { field } = await renderComposer({ onSend })
 
-  typeInto(field, "Chase the invoices")
+  typeInto(field, "Chase +[job:jobs_digest] now")
+  await screen.findByRole("button", { name: "Remove Renewals digest" })
   fireEvent.keyDown(field, { key: "Enter" })
 
   expect(onSend).toHaveBeenCalledTimes(1)
-  expect(field.textContent).toBe("Chase the invoices")
+  expect(field.textContent).toContain("Chase")
   expect(field.getAttribute("aria-disabled")).toBe("true")
+  expect(field.getAttribute("contenteditable")).toBe("false")
   expect(screen.queryByRole("button", { name: "Send message" })).toBeNull()
   expect(screen.getByRole("status", { name: "Sending" })).toBeDefined()
+
+  // Editing through paste or chip controls also waits with the send.
+  typeInto(field, "Unsent change")
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Remove Renewals digest" })
+  )
+  expect(field.textContent).not.toContain("Unsent change")
+  expect(
+    screen.getByRole("button", { name: "Remove Renewals digest" })
+  ).toBeDefined()
 
   // A second Enter waits with the first.
   fireEvent.keyDown(field, { key: "Enter" })
@@ -76,6 +88,10 @@ test("a send that fails leaves the draft where it was", async () => {
     screen.getByRole("button", { name: "Remove Renewals digest" })
   ).toBeDefined()
   expect(field.getAttribute("aria-disabled")).toBeNull()
+  expect(field.getAttribute("contenteditable")).toBe("true")
+  expect(
+    screen.getByRole("button", { name: "Mention a resource" })
+  ).toBeDefined()
 
   // The words go again on the next try.
   fireEvent.keyDown(field, { key: "Enter" })
@@ -151,21 +167,6 @@ test("follow-ups can be sent while Jori works, and stopping stays separate", asy
   fireEvent.click(screen.getByRole("button", { name: "Stop run" }))
 
   expect(onStop).toHaveBeenCalledTimes(1)
-})
-
-test("disabled, it says why", async () => {
-  const { field } = await renderComposer({
-    disabled: true,
-    reason: "Spending is paused for this folder.",
-  })
-
-  expect(field.getAttribute("aria-disabled")).toBe("true")
-  expect(field.getAttribute("contenteditable")).toBe("false")
-  expect(screen.getByText("Spending is paused for this folder.")).toBeDefined()
-  expect(field.getAttribute("aria-describedby")).not.toBeNull()
-  expect(
-    screen.queryByRole("button", { name: "Mention a resource" })
-  ).toBeNull()
 })
 
 test("a click on the frame beside the controls puts the caret in the field", async () => {

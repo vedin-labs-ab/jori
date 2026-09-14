@@ -61,7 +61,7 @@ export function selectSuggestion(
 ) {
   const { editor, suggestion: state } = refs.latest.current
 
-  if (editor === null || state === null || item.disabled) {
+  if (editor === null || state === null || item.disabled || refs.sending) {
     return
   }
 
@@ -76,7 +76,7 @@ export function selectSuggestion(
 export function insertMention(refs: ComposerRefs, item: MentionSuggestion) {
   const { editor } = refs.latest.current
 
-  if (editor === null) {
+  if (editor === null || refs.sending) {
     return
   }
 
@@ -136,7 +136,7 @@ export function completeTypedMention({
 }
 
 /** The draft leaves as text with its tokens and the resources they
- *  name; nothing leaves while sending is closed or the draft is blank. A
+ *  name; nothing leaves while a send is pending or the draft is blank. A
  *  host that answers with a promise keeps the draft in the field until
  *  the message has landed, and the field clears on success alone: a send
  *  that fails leaves the words where they were for another try, and the
@@ -147,7 +147,7 @@ export function sendDraft(
 ) {
   const { args, editor } = refs.latest.current
 
-  if (editor === null || !args.open || refs.sending) {
+  if (editor === null || refs.sending) {
     return
   }
 

@@ -22,7 +22,14 @@ const blockedMessage = budgetSentence("out-of-usage", "this message waits")
  *  rejects, so the composer keeps the draft for another try. */
 export function useSendMessage(
   organizationId: string,
-  author?: MessageRow["author"]
+  {
+    author,
+    validate,
+  }: {
+    author?: MessageRow["author"]
+    /** Submission checks share the request's toast and rejection handling. */
+    validate?: () => void
+  } = {}
 ) {
   const send = useMutation(api.conversations.console.send).withOptimisticUpdate(
     (localStore, args) => {
@@ -57,6 +64,7 @@ export function useSendMessage(
   return useCallback(
     async (args: SendArgs) => {
       try {
+        validate?.()
         const result = await send({ organizationId, ...args })
 
         if (result.status === "blocked") {
@@ -70,7 +78,7 @@ export function useSendMessage(
         throw error
       }
     },
-    [organizationId, send]
+    [organizationId, send, validate]
   )
 }
 

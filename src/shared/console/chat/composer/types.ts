@@ -17,7 +17,6 @@ export type SetComposerSuggestion = Dispatch<
 
 export type ComposerEditorArgs = {
   initialReference?: ReferenceView
-  disabled: boolean
   /** Takes each resource as it is put in, however it was picked. */
   onMention: ((target: MessageContext) => void) | undefined
   /** Takes each resource as its chip leaves the text, by deletion; a
@@ -26,8 +25,6 @@ export type ComposerEditorArgs = {
   /** Takes the message; answering with a promise holds the draft in the
    *  field until it settles. */
   onSend: (text: string, references: MessageContext[]) => unknown
-  /** Whether a message may leave now. */
-  open: boolean
   resolve: ResolveReference | undefined
   sources: MentionSources
 }

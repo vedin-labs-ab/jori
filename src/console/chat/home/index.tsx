@@ -47,10 +47,10 @@ function ChatHomeContent({
   organizationId: string
 }) {
   const navigate = useConsoleNavigate()
-  const send = useSendMessage(organizationId)
   const recent = useRecentConversations(organizationId, recentCount)
   const now = useNow(60_000)
   const location = useChatEntry(organizationId, context)
+  const send = useSendMessage(organizationId, { validate: location.validate })
   const mentions = useMentionSources(organizationId)
   const [selection, setSelection] = useState<ModelSelection>(defaultSelection)
   const availableModels = useAvailableModels()
@@ -76,7 +76,6 @@ function ChatHomeContent({
         <ChatComposer
           autoFocus
           availableModels={availableModels}
-          disabled={location.reason !== undefined}
           initialReference={location.initialReference}
           metadata={
             <ChatLocation
@@ -90,7 +89,6 @@ function ChatHomeContent({
           onSend={start}
           onStop={() => {}}
           placeholder={placeholder}
-          reason={location.reason}
           selection={selection}
         />
       }

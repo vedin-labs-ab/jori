@@ -7,6 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { getFunctionName } from "convex/server"
+import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { ItemName } from "@/shared/console/edit/name"
 import { type EditKind, useEditing } from "@/shared/console/edit/state"
@@ -29,8 +30,10 @@ vi.mock("@/shared/console/shell/location", () => ({
 vi.mock("@/shared/session/auth", () => ({
   useActiveOrganization: () => ({ data: { id: "org-1" } }),
 }))
+vi.mock("sonner", () => ({ toast: { error: vi.fn() } }))
 afterEach(cleanup)
 beforeEach(() => {
+  vi.mocked(toast.error).mockClear()
   create.mockReset()
   rename.mockReset()
   navigate.mockReset()
@@ -189,9 +192,11 @@ test("a failed rename preserves the text and blocks another creation until resol
   fireEvent.change(input, { target: { value: "Invoices" } })
   fireEvent.click(screen.getByText("New item"))
   await waitFor(() =>
-    expect(screen.getByRole("alert").textContent).toBe("Connection lost")
+    expect(toast.error).toHaveBeenCalledExactlyOnceWith("Connection lost")
   )
   expect(create).toHaveBeenCalledOnce()
+  expect(screen.queryByRole("alert")).toBeNull()
+  expect(input.getAttribute("aria-invalid")).toBeNull()
   expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe(
     "Invoices"
   )

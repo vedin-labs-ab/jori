@@ -47,7 +47,7 @@ export function useConversation(
       mentioned.targets
     ),
     send: useLatestCallback(
-      useSendMessage(organizationId, live.viewer ?? undefined)
+      useSendMessage(organizationId, { author: live.viewer ?? undefined })
     ),
     stop: useStopRun(organizationId, live.run),
   }

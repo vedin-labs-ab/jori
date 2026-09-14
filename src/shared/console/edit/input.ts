@@ -1,5 +1,5 @@
 import { type RefObject, useEffect, useRef, useState } from "react"
-import { readErrorMessage, showErrorToast } from "../error"
+import { showErrorToast } from "../error"
 
 export type NameInputProps = {
   scrollBlock?: ScrollLogicalPosition
@@ -125,13 +125,7 @@ async function persistName(
     }
     return true
   } catch (cause) {
-    if (session.mounted) {
-      session.setState({
-        error: readErrorMessage(cause, "Could not save the name. Try again."),
-      })
-    } else {
-      showErrorToast(cause, `Could not rename to "${value}".`)
-    }
+    showErrorToast(cause, `Could not rename to "${value}".`)
     return false
   } finally {
     session.pending = undefined

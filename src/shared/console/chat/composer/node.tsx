@@ -6,6 +6,7 @@ import { type ComposerMentionOptions } from "./extensions"
 /** A mention in the composer: the chat's chip, removable. */
 export function ComposerMentionView({
   deleteNode,
+  editor,
   extension,
   node,
   selected,
@@ -27,7 +28,11 @@ export function ComposerMentionView({
       <ChatMentionChip
         id={mention.id}
         kind={mention.kind}
-        onRemove={deleteNode}
+        onRemove={() => {
+          if (editor.isEditable) {
+            deleteNode()
+          }
+        }}
         resolve={options.getResolve()}
         selected={selected}
       />

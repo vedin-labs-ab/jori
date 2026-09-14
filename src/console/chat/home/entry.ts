@@ -18,7 +18,7 @@ export function useChatEntry(
     context === undefined
       ? undefined
       : entry === undefined
-        ? "Loading resource…"
+        ? "This resource is still loading. Try sending again in a moment."
         : reference === undefined
           ? "This resource is no longer available. Open a new chat to continue."
           : undefined
@@ -26,6 +26,10 @@ export function useChatEntry(
     ...location,
     reference,
     folders: tree?.status === "ready" ? tree.folders : undefined,
-    reason,
+    validate: () => {
+      if (reason !== undefined) {
+        throw new Error(reason)
+      }
+    },
   }
 }

@@ -27,7 +27,7 @@ import { ComposerFooter, HintsPeek } from "./footer"
  *  sends and Shift+Enter breaks the line; while a run is live the stop
  *  control stays beside send, and while the host is still
  *  answering a send the draft waits in the field behind a spinner.
- *  Disabled with a reason, it says why under the field. The model picker
+ *  Failed sends keep the draft and the host reports them in a toast. The picker
  *  stands with the context ring, left of it, when the host offers a
  *  selection; changing it mid-chat is fine, the next run takes it.
  *  Memoized: the host's handlers must keep their identity, and then a
@@ -37,7 +37,6 @@ export const ChatComposer = memo(function ChatComposer({
   availableModels,
   initialReference,
   metadata,
-  disabled = false,
   isLive = false,
   mentions = emptyMentionSources,
   onMention,
@@ -46,7 +45,6 @@ export const ChatComposer = memo(function ChatComposer({
   onUnmention,
   onStop,
   placeholder = "Tell Jori what needs doing",
-  reason,
   resolve,
   selection,
   usage,
@@ -57,7 +55,6 @@ export const ChatComposer = memo(function ChatComposer({
   initialReference?: ReferenceView
   /** Conversation filing and audience, outside the message field. */
   metadata?: ReactNode
-  disabled?: boolean
   /** A run is answering: follow-ups can still be sent, or work stopped. */
   isLive?: boolean
   /** What can be mentioned: the host's lists, and its search. */
@@ -77,8 +74,6 @@ export const ChatComposer = memo(function ChatComposer({
   /** What the empty field says; the home types asks into it, as a node
    *  that keeps its ticks to itself. */
   placeholder?: ReactNode
-  /** Why the composer is disabled, shown when it is. */
-  reason?: string
   /** Names the resources mentioned, for their chips. */
   resolve?: ResolveReference
   /** The model and effort the next run uses, shown as the picker. */
@@ -87,27 +82,18 @@ export const ChatComposer = memo(function ChatComposer({
    *  shown as a ring left of the send control; nothing before a run. */
   usage?: ChatContextUsage | null
 }) {
-  const reasonId = useId()
   const hints = useHintsBand()
-  const shownReason =
-    disabled && reason !== undefined
-      ? { id: reasonId, text: reason }
-      : undefined
   const composer = useComposerEditor({
-    disabled,
     initialReference,
     onMention,
     onSend,
     onUnmention,
-    open: !disabled,
     resolve,
     sources: mentions,
   })
 
   useFieldState(composer.editor, {
     autoFocus,
-    describedBy: shownReason?.id,
-    disabled,
     pending: composer.pending,
   })
 
@@ -135,7 +121,6 @@ export const ChatComposer = memo(function ChatComposer({
             onSelect={onSelect}
             onStop={onStop}
             pending={composer.pending}
-            reason={shownReason}
             selection={selection}
             usage={usage}
           />
@@ -167,49 +152,30 @@ function useHintsBand() {
   }
 }
 
-/** What the field says of itself beyond its words: focused on arrival
- *  when asked — unless the pointer is a finger, where the focus would
- *  raise a keyboard over the page — and disabled with the reason under
- *  it, or while a send is still on its way. */
+/** Focus on arrival, without opening a phone keyboard. A pending send
+ * holds the draft read-only until it succeeds or can be retried. */
 function useFieldState(
   editor: ReturnType<typeof useComposerEditor>["editor"],
-  {
-    autoFocus,
-    describedBy,
-    disabled,
-    pending,
-  }: {
-    autoFocus: boolean
-    describedBy: string | undefined
-    disabled: boolean
-    pending: boolean
-  }
+  { autoFocus, pending }: { autoFocus: boolean; pending: boolean }
 ) {
   useEffect(() => {
-    if (autoFocus && editor !== null && !disabled && !hasCoarsePointer()) {
+    if (autoFocus && editor !== null && !hasCoarsePointer()) {
       editor.commands.focus("end")
     }
-  }, [autoFocus, disabled, editor])
+  }, [autoFocus, editor])
 
   useEffect(() => {
-    const element = editor?.view.dom
-
-    if (element === undefined) {
+    if (editor === null) {
       return
     }
-
-    if (disabled || pending) {
+    editor.setEditable(!pending)
+    const element = editor.view.dom
+    if (pending) {
       element.setAttribute("aria-disabled", "true")
     } else {
       element.removeAttribute("aria-disabled")
     }
-
-    if (describedBy === undefined) {
-      element.removeAttribute("aria-describedby")
-    } else {
-      element.setAttribute("aria-describedby", describedBy)
-    }
-  }, [describedBy, disabled, editor, pending])
+  }, [editor, pending])
 }
 
 function hasCoarsePointer() {

@@ -7,15 +7,19 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { useState } from "react"
+import { toast } from "sonner"
 import { afterEach, expect, test, vi } from "vitest"
 import { EditingProvider } from "../../edit/provider"
 import { type EditSurface, useEditing } from "../../edit/state"
 import { FolderName } from "./name"
 
+vi.mock("sonner", () => ({ toast: { error: vi.fn() } }))
+
 const folder = { folderId: "one", name: "New folder" }
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
+  vi.clearAllMocks()
 })
 function start(
   save = vi.fn().mockResolvedValue(undefined),
@@ -124,10 +128,12 @@ test("a failed save preserves the draft and offers retry", async () => {
   fireEvent.change(input(), { target: { value: "Reports" } })
   fireEvent.keyDown(input(), { key: "Enter" })
   await waitFor(() =>
-    expect(screen.getByRole("alert").textContent).toBe("Connection lost.")
+    expect(toast.error).toHaveBeenCalledExactlyOnceWith("Connection lost.")
   )
   expect(input().value).toBe("Reports")
-  fireEvent.click(screen.getByRole("button", { name: "Save name" }))
+  expect(input().getAttribute("aria-invalid")).toBeNull()
+  expect(screen.queryByRole("alert")).toBeNull()
+  fireEvent.keyDown(input(), { key: "Enter" })
   await waitFor(() =>
     expect(screen.getByRole("link").textContent).toBe("Reports")
   )

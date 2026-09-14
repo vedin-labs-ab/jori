@@ -21,8 +21,8 @@ const sigilHints = [
   { kind: "tool", label: "tools" },
 ] as const
 
-/** Under the field: the "+" on the left, or the reason the field is
- *  disabled; the model, the ring, and the send or stop control on the
+/** Under the field: the "+" on the left; the model, the ring, and the
+ *  send or stop control on the
  *  right — a spinner in the send's place while a send is on its way; and
  *  under them, on the quiet band the job field has, the sigils, while
  *  the person keeps the band open. */
@@ -37,7 +37,6 @@ export function ComposerFooter({
   onHideHints,
   onStop,
   pending,
-  reason,
   selection,
   usage,
 }: {
@@ -54,7 +53,6 @@ export function ComposerFooter({
   onHideHints: (() => void) | undefined
   /** A send the host is still answering. */
   pending: boolean
-  reason: { id: string; text: string } | undefined
   selection: ModelSelection | undefined
   usage: ChatContextUsage | null | undefined
 }) {
@@ -62,16 +60,7 @@ export function ComposerFooter({
     <>
       <InputGroupAddon align="block-end" className="justify-between gap-2">
         <span className="flex min-h-7 min-w-0 items-center gap-1">
-          {reason === undefined ? (
-            <AttachMenu onPick={onPick} sources={mentions} />
-          ) : (
-            <span
-              className="min-w-0 truncate text-muted-foreground text-xs"
-              id={reason.id}
-            >
-              {reason.text}
-            </span>
-          )}
+          <AttachMenu onPick={onPick} sources={mentions} />
         </span>
         <span className="flex items-center gap-1">
           {selection === undefined || onSelect === undefined ? null : (
