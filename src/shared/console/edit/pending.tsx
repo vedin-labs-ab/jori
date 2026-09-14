@@ -21,7 +21,9 @@ export function PendingItemName({
       )}
     >
       <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-      <span className="shimmer truncate">{item.name}</span>
+      <span className="shimmer truncate text-muted-foreground [animation-delay:-1s]">
+        {item.name}
+      </span>
       <span className="sr-only">Creating {item.kind}.</span>
     </div>
   )
