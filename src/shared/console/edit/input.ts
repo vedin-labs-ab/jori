@@ -86,7 +86,7 @@ function commitName(
   const value = name.trim()
   if (!value) {
     session.setState({
-      error: "Enter a name, or press Escape to keep the previous name.",
+      error: "Enter a name, or cancel to keep the previous name.",
     })
     return Promise.resolve(false)
   }

@@ -1,6 +1,7 @@
 import { type ReactNode } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { TableCell, TableRow } from "@/components/ui/table"
+import { nameColumnClassName } from "../list/controls"
 import { nameCellWidth } from "../materials/cells/name"
 import { RowMenuTrigger } from "../menu"
 import { ConsoleLink } from "../shell/link"
@@ -27,13 +28,13 @@ export function CreatedItemRow({
       <TableCell className="w-8">
         <Checkbox disabled aria-label={`Select ${item.name}`} />
       </TableCell>
-      <TableCell>
+      <TableCell className={nameColumnClassName}>
         <div className={nameCellWidth}>
           {edit.creating ? (
             <div
               aria-busy="true"
               role="status"
-              className="flex h-6 items-center gap-2 text-muted-foreground text-sm"
+              className="flex h-6 items-center gap-2 text-muted-foreground text-xs"
             >
               <Icon className="size-4 shrink-0" />
               <span className="shimmer truncate">{item.name}</span>

@@ -98,7 +98,7 @@ export function materialColumns<
     folderColumn("3xl"),
     timeColumn("Created", "created", (row) => row.createdAt, "5xl"),
     ownerColumn(summaryOwner, "4xl"),
-    timeColumn("Last Updated", "updated", (row) => row.updatedAt, "xs"),
+    timeColumn("Last Updated", "updated", (row) => row.updatedAt, "sm"),
   ]
 }
 

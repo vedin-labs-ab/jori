@@ -2,8 +2,8 @@ import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
-/** Leave room for selection, updated time, and actions on narrow lists. */
-export const nameCellWidth = "max-w-[min(16rem,50cqw)]"
+/** Cap long names within the space the name column has left. */
+export const nameCellWidth = "max-w-64"
 
 /** Name-cell shell shared by the material list tables: the kind icon and
  *  the caller's link and badges.

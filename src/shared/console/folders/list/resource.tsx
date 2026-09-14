@@ -6,7 +6,7 @@ import { CreatedItemRow } from "../../edit/row"
 import { type Edit } from "../../edit/state"
 import { JobStatus } from "../../jobs/status"
 import { SelectionRowCell } from "../../list/bar"
-import { columnTier } from "../../list/controls"
+import { columnTier, nameColumnClassName } from "../../list/controls"
 import { type RowSelection } from "../../list/selection"
 import { MaterialOwnerCell } from "../../materials/cells/owner"
 import { materialOwner } from "../../materials/owners"
@@ -59,7 +59,7 @@ export function ResourceListRow({
         row={resource}
         selection={selection}
       />
-      <TableCell data-row-link>
+      <TableCell data-row-link className={nameColumnClassName}>
         <ResourceLink resource={resource} folderId={folderId} />
       </TableCell>
       <ResourceCells resource={resource} folderId={folderId} />
@@ -157,7 +157,7 @@ function ResourceCells({
         &mdash;
       </TableCell>
       <TableCell
-        className={cn("text-muted-foreground", columnTier.xs)}
+        className={cn("text-muted-foreground", columnTier.sm)}
         title={resource ? absoluteTime(resource.updatedAt) : undefined}
       >
         {resource ? relativeTime(resource.updatedAt, now) : "—"}

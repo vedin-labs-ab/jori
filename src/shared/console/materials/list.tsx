@@ -22,6 +22,7 @@ import {
   facetEntries,
   type ListConfig,
   type ListControls,
+  nameColumnClassName,
 } from "../list/controls"
 import { ConsoleListEmpty, FilterableEmptyState } from "../list/empty"
 import { ConsoleListContent, ConsoleListTable } from "../list/frame"
@@ -268,7 +269,9 @@ function MaterialListRow<Row extends MaterialListRow>({
         row={row}
         selection={selection}
       />
-      <TableCell data-row-link>{kind.nameCell(row)}</TableCell>
+      <TableCell data-row-link className={nameColumnClassName}>
+        {kind.nameCell(row)}
+      </TableCell>
       <MaterialCells kind={kind} row={row} folders={folders} />
       <TableCell className="text-right">{kind.menu(row)}</TableCell>
     </DraggableTableRow>

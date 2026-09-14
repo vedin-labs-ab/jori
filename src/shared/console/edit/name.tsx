@@ -104,7 +104,7 @@ function NameInput(props: NameInputProps & { noun: EditItem["kind"] }) {
         }
       }}
     >
-      <div className="flex min-w-0 items-center gap-0.5">
+      <div className="flex min-w-0 items-center gap-1">
         <Input
           ref={editor.input}
           aria-label={`${props.noun[0].toUpperCase()}${props.noun.slice(1)} name`}
@@ -113,9 +113,10 @@ function NameInput(props: NameInputProps & { noun: EditItem["kind"] }) {
           aria-busy={editor.saving}
           readOnly={editor.saving}
           maxLength={120}
+          enterKeyHint="done"
           value={editor.name}
           className={cn(
-            "h-6 rounded-sm border-ring bg-background px-1 text-sm shadow-none focus-visible:ring-1 focus-visible:ring-ring md:text-xs/relaxed pointer-coarse:h-8 pointer-coarse:text-base",
+            "h-6 rounded-sm bg-background px-1 text-sm shadow-none focus-visible:ring-1 md:text-xs/relaxed",
             editor.saving && "shimmer"
           )}
           onChange={(event) => editor.change(event.target.value)}
@@ -125,7 +126,9 @@ function NameInput(props: NameInputProps & { noun: EditItem["kind"] }) {
       <span
         id={description}
         className={
-          editor.error ? "block py-1 text-destructive text-xs" : "sr-only"
+          editor.error
+            ? "block whitespace-normal py-1 text-destructive text-xs"
+            : "sr-only"
         }
         role={editor.error ? "alert" : "status"}
       >
@@ -137,37 +140,40 @@ function NameInput(props: NameInputProps & { noun: EditItem["kind"] }) {
     </fieldset>
   )
 }
+const controlHitArea =
+  "relative pointer-coarse:after:absolute pointer-coarse:after:-inset-1"
+
 function NameControls({ editor }: { editor: ReturnType<typeof useNameInput> }) {
   return (
     <div
       className={cn(
-        "hidden shrink-0 gap-0.5 pointer-coarse:flex",
+        "hidden shrink-0 gap-2 pointer-coarse:flex",
         editor.error && "flex"
       )}
     >
       <Button
         aria-label="Save name"
-        className="size-7 pointer-coarse:size-9"
+        className={controlHitArea}
         disabled={editor.saving}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => void editor.commit(true)}
-        size="icon"
+        size="icon-sm"
         type="button"
         variant="ghost"
       >
-        <Check className="size-3.5" />
+        <Check />
       </Button>
       <Button
         aria-label="Cancel rename"
-        className="size-7 pointer-coarse:size-9"
+        className={controlHitArea}
         disabled={editor.saving}
         onMouseDown={(event) => event.preventDefault()}
         onClick={editor.cancel}
-        size="icon"
+        size="icon-sm"
         type="button"
         variant="ghost"
       >
-        <X className="size-3.5" />
+        <X />
       </Button>
     </div>
   )

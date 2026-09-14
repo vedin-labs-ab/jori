@@ -14,6 +14,7 @@ import {
   columnTier,
   type FacetEntry,
   type ListControls,
+  nameColumnClassName,
 } from "../../list/controls"
 import { ConsoleListTable } from "../../list/frame"
 import { FilterHead, SortHead } from "../../list/head"
@@ -88,7 +89,7 @@ export function FolderListTable({
             sortKey="items"
           />
           <SortHead
-            className={columnTier.xs}
+            className={columnTier.sm}
             controls={controls}
             label="Updated"
             sortKey="updated"
@@ -134,7 +135,7 @@ export function FolderListRow({
         row={folder}
         selection={selection}
       />
-      <TableCell data-row-link>
+      <TableCell data-row-link className={nameColumnClassName}>
         <FolderName folder={folder} surface="contents">
           <ConsoleLink
             className={nameLinkClassName}
@@ -166,7 +167,7 @@ export function FolderListRow({
       </TableCell>
       <ItemsCell folder={folder} />
       <TableCell
-        className={cn("text-muted-foreground", columnTier.xs)}
+        className={cn("text-muted-foreground", columnTier.sm)}
         title={absoluteTime(folder.updatedAt)}
       >
         {relativeTime(folder.updatedAt, now)}

@@ -24,7 +24,11 @@ export const columnTier = {
   md: "@max-md/list:hidden",
   xl: "@max-xl/list:hidden",
   xs: "@max-xs/list:hidden",
+  sm: "@max-sm/list:hidden",
 } as const
+
+/** The name takes the remaining width and truncates within it. */
+export const nameColumnClassName = "w-full max-w-0"
 
 export type ColumnTier = keyof typeof columnTier
 
