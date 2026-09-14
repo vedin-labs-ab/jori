@@ -59,16 +59,10 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
     )
   }
 
+  // No plan is not a warning: the plan cell says so and offers the plan,
+  // and an empty balance is what no plan looks like, not a shortfall.
   if (account.state.kind === "unsubscribed") {
-    return (
-      <Alert>
-        <AlertTitle>No plan yet</AlertTitle>
-        <AlertDescription>
-          Jori starts working once the organization is on a plan. Everything you
-          set up is kept.
-        </AlertDescription>
-      </Alert>
-    )
+    return null
   }
 
   if (account.micros.allowance + account.micros.wallet <= 0) {

@@ -42,11 +42,12 @@ export function PlanPicker({ organizationId }: { organizationId: string }) {
             <FolderTab
               active
               className="h-8 px-3.5 text-xs data-[state=active]:h-9"
+              tone="muted"
             >
               {plan.label}
             </FolderTab>
           </FolderTabs>
-          <Folder className="p-4">
+          <Folder className="p-4" tone="muted">
             <div className="flex items-start justify-between gap-4">
               <p className="font-medium text-base leading-snug tracking-tight">
                 {planTitle[0]}

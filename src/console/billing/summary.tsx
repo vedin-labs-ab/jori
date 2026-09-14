@@ -86,7 +86,7 @@ function planName(account: BillingAccount | null) {
 
 function planDetail(account: BillingAccount | null) {
   if (account === null || account.state.kind === "unsubscribed") {
-    return `${plan.label} is $${plan.monthlyPriceUsd} a month for the whole organization.`
+    return `${plan.label} is $${plan.monthlyPriceUsd} a month for the whole organization. Jori starts working once you subscribe.`
   }
 
   return `$${plan.monthlyPriceUsd} a month, for the whole organization.`
@@ -99,16 +99,15 @@ function AvailableCell({
   account: BillingAccount | null
   organizationId: string
 }) {
+  // Without a plan there is no allowance to meter, so the monthly row says
+  // when one starts instead of measuring nothing against nothing.
+  const subscribed =
+    account === null || account.state.kind === "unsubscribed" ? null : account
   const remainingMicros = Math.max(account?.micros.allowance ?? 0, 0)
   const walletMicros = account?.micros.wallet ?? 0
   // A manual allowance can lift the balance above the plan's, so the
-  // denominator follows it. Without a plan there is no allowance to meter.
-  const allowanceMicros = Math.max(
-    account === null || account.state.kind === "unsubscribed"
-      ? 0
-      : plan.monthlyAllowanceMicros,
-    remainingMicros
-  )
+  // denominator follows it.
+  const allowanceMicros = Math.max(plan.monthlyAllowanceMicros, remainingMicros)
 
   return (
     <>
@@ -128,22 +127,22 @@ function AvailableCell({
       </div>
       <div className="mt-1.5 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-start gap-x-4 gap-y-2.5 text-sm sm:items-center">
         <span className="text-muted-foreground">Monthly</span>
-        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-          <Progress
-            className="order-2 h-1.5 w-full sm:order-none sm:flex-1"
-            value={
-              allowanceMicros === 0
-                ? 0
-                : Math.min(100, (remainingMicros / allowanceMicros) * 100)
-            }
-          />
-          <span className="tabular-nums sm:whitespace-nowrap">
-            {formatUsd(remainingMicros)}{" "}
-            <span className="text-muted-foreground">
-              of {formatUsd(allowanceMicros)} · {resetLabel(account)}
+        {subscribed === null ? (
+          <span className="text-muted-foreground">Starts with a plan</span>
+        ) : (
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <Progress
+              className="order-2 h-1.5 w-full sm:order-none sm:flex-1"
+              value={Math.min(100, (remainingMicros / allowanceMicros) * 100)}
+            />
+            <span className="tabular-nums sm:whitespace-nowrap">
+              {formatUsd(remainingMicros)}{" "}
+              <span className="text-muted-foreground">
+                of {formatUsd(allowanceMicros)} · {resetLabel(subscribed)}
+              </span>
             </span>
-          </span>
-        </div>
+          </div>
+        )}
         <span className="text-muted-foreground">Wallet</span>
         <span className="flex min-w-0 flex-wrap items-center gap-1.5 tabular-nums">
           {formatUsd(walletMicros)}{" "}
@@ -166,11 +165,7 @@ function MetricLabel({ children }: { children: ReactNode }) {
   )
 }
 
-function resetLabel(account: BillingAccount | null) {
-  if (account === null || account.state.kind === "unsubscribed") {
-    return "starts with a plan"
-  }
-
+function resetLabel(account: BillingAccount) {
   return account.renewsAt === undefined
     ? "resets monthly"
     : `resets ${shortDate(account.renewsAt)}`
