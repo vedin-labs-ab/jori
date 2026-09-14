@@ -142,6 +142,16 @@ test("unfiling a contextual chat keeps later runs unfiled", async () => {
     conversationId: sent.conversationId,
   })
 
+  expect(
+    await folderResources(ctx, {
+      organizationId,
+      personId,
+      folderId: undefined,
+    })
+  ).toEqual([])
+  expect(
+    await folderResources(ctx, { organizationId, personId, folderId })
+  ).toEqual([])
   expect((await database.get(next.messageId))?.data).toBeUndefined()
   expect((await database.get(sent.conversationId))?.folderId).toBeUndefined()
   expect(

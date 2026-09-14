@@ -64,13 +64,12 @@ async function seedHidden(database: TestDatabase) {
   }
 }
 
-test("the root lists visible folder-less resources of every kind in this organization", async () => {
+test("the root lists visible unfiled resources but excludes chats for every viewer", async () => {
   const { database, ctx } = databaseContext()
   await seedRoot(database)
   const args = { organizationId: "org", folderId: undefined }
   const resources = await folderResources(ctx, { ...args, personId: other })
   expect(resources.map((row) => [row.type, row.name])).toEqual([
-    ["chat", "Root chat"],
     ["file", "Root file"],
     ["job", "Root job"],
     ["store", "Root store"],
@@ -78,5 +77,5 @@ test("the root lists visible folder-less resources of every kind in this organiz
   ])
   const owned = await folderResources(ctx, { ...args, personId: testOwner })
   expect(owned.map((row) => row.name)).toContain("Private")
-  expect(owned.map((row) => row.name)).toContain("Private chat")
+  expect(owned.some((row) => row.type === "chat")).toBe(false)
 })

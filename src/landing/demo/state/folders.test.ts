@@ -37,6 +37,9 @@ test("filing a chat lists it privately and moves its historical spend without ch
   const destination = folderId("engineering")
   const before = usageSpend(initial, destination)
   const original = initial.chat.conversations[0]
+  expect(
+    rootFolders(initial).resources.some((row) => row.type === "chat")
+  ).toBe(false)
   const filed = fileChat(initial, destination)
 
   expect(folderContents(filed, destination).resources).toContainEqual(
@@ -69,6 +72,14 @@ test("filing a chat lists it privately and moves its historical spend without ch
   ).toBe(false)
 
   const unfiled = fileChat(moved, null)
+  expect(
+    rootFolders(unfiled).resources.some((row) => row.type === "chat")
+  ).toBe(false)
+  expect(
+    folderContents(unfiled, folderId("renewals")).resources.some(
+      (row) => row.type === "chat"
+    )
+  ).toBe(false)
   expect(unfiled.chat.conversations[0]).toEqual({
     ...original,
     folderId: undefined,

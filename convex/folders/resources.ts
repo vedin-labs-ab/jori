@@ -165,6 +165,11 @@ export async function folderChats(
   sight: Sight,
   folderId: Id<"folders"> | undefined
 ): Promise<FolderResource[]> {
+  // Unfiled chats live in chat history; only assigned chats join a folder.
+  if (folderId === undefined) {
+    return []
+  }
+
   const rows = ctx.db
     .query("conversations")
     .withIndex("by_organization_and_folder", (index) =>

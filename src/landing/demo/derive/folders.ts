@@ -162,7 +162,7 @@ function folderResources(state: DemoState, folderId: FolderId | undefined) {
     )
 
   const chats = state.chat.conversations
-    .filter((chat) => chat.folderId === folderId)
+    .filter((chat) => folderId !== undefined && chat.folderId === folderId)
     .map(
       (chat): FolderResource => ({
         type: "chat",
