@@ -98,7 +98,7 @@ function Suggestions({
     <div className={chatColumnClassName}>
       <ul
         aria-label="Suggestions"
-        className="relative -my-1 flex min-h-8 flex-nowrap gap-2 overflow-clip py-1 [overflow-clip-margin:4px] pointer-coarse:min-h-11"
+        className="relative -my-1 flex min-h-8 flex-nowrap justify-center gap-2 overflow-clip py-1 [overflow-clip-margin:4px] pointer-coarse:min-h-11"
         ref={listRef}
       >
         {suggestions.map(({ icon: Icon, text }, index) => (
