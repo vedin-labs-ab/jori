@@ -22,20 +22,6 @@ export function measureColumn<Row>(
   return { cell, head: { sortKey }, label, tier }
 }
 
-/** Where the row is filed, with the folder facet on its head. */
-export function folderColumn<Row extends { folderId?: string }>(
-  tier: ColumnTier
-): MaterialColumn<Row> {
-  return {
-    cell: (row, context) => (
-      <MaterialFolderCell folderId={row.folderId} folders={context.folders} />
-    ),
-    head: { facets: ["folder"] },
-    label: "Folder",
-    tier,
-  }
-}
-
 /** Who the row belongs to, with the owner facet on its head. */
 export function ownerColumn<Row>(
   owner: (row: Row) => MaterialOwner,
@@ -94,27 +80,38 @@ export function materialColumns<
 >(measures: MaterialColumn<Row>[]): MaterialColumn<Row>[] {
   return [
     ...measures,
-    visibilityColumn<Row>(),
-    folderColumn("3xl"),
+    ...accessColumns<Row>(),
     timeColumn("Created", "created", (row) => row.createdAt, "5xl"),
     ownerColumn(summaryOwner, "4xl"),
     timeColumn("Last Updated", "updated", (row) => row.updatedAt, "sm"),
   ]
 }
 
-export function visibilityColumn<
+/** Location establishes the baseline; Audience shows only this item's own
+ * restriction. Keep the pair together at every resource-list breakpoint. */
+export function accessColumns<
   Row extends VisibilitySubject,
->(): MaterialColumn<Row> {
-  return {
-    label: "Audience",
-    tier: "3xl",
-    cell: (row) => (
-      <VisibilityLabel
-        quietDefault={row.folderId === undefined}
-        visibility={row.visibility}
-        folderId={row.folderId}
-        ownerId={row.ownerId}
-      />
-    ),
-  }
+>(): MaterialColumn<Row>[] {
+  return [
+    {
+      cell: (row, context) => (
+        <MaterialFolderCell folderId={row.folderId} folders={context.folders} />
+      ),
+      head: { facets: ["folder"] },
+      label: "Folder",
+      tier: "3xl",
+    },
+    {
+      label: "Audience",
+      tier: "3xl",
+      cell: (row) => (
+        <VisibilityLabel
+          quietDefault
+          visibility={row.visibility}
+          folderId={row.folderId}
+          ownerId={row.ownerId}
+        />
+      ),
+    },
+  ]
 }

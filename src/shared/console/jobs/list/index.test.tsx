@@ -1,10 +1,17 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ListControls } from "@/shared/console/list/controls"
 import { listControls } from "../../../../../test/list/controls"
 import { emptySelection } from "../../../../../test/list/selection"
+import { VisibilityDirectoryContext } from "../../visibility/directory"
 import { type Job } from "../types"
 import { JobList } from "."
 import { jobListConfig } from "./config"
@@ -63,22 +70,35 @@ function renderList(
 ) {
   render(
     <TooltipProvider>
-      <JobList
-        config={jobListConfig(folders, jobs)}
-        controllingJobId={undefined}
-        controls={controls}
-        deletingJobId={undefined}
-        folders={folders}
-        hasFilters={false}
-        jobs={jobs}
-        onCreate={() => undefined}
-        onDelete={onDelete}
-        onEdit={() => undefined}
-        onMoveToFolder={() => undefined}
-        onPausedChange={onPausedChange}
-        selection={emptySelection()}
-        unauthorizedMessage={undefined}
-      />
+      <VisibilityDirectoryContext.Provider
+        value={{
+          teams: [{ id: "billing", name: "Billing" }],
+          folders: [
+            {
+              folderId: "folder-1",
+              name: "Renewals",
+              visibility: { mode: "teams", teamIds: ["billing"] },
+            },
+          ],
+        }}
+      >
+        <JobList
+          config={jobListConfig(folders, jobs)}
+          controllingJobId={undefined}
+          controls={controls}
+          deletingJobId={undefined}
+          folders={folders}
+          hasFilters={false}
+          jobs={jobs}
+          onCreate={() => undefined}
+          onDelete={onDelete}
+          onEdit={() => undefined}
+          onMoveToFolder={() => undefined}
+          onPausedChange={onPausedChange}
+          selection={emptySelection()}
+          unauthorizedMessage={undefined}
+        />
+      </VisibilityDirectoryContext.Provider>
     </TooltipProvider>
   )
 }
@@ -132,14 +152,16 @@ test("event and one-time triggers read as their source and their date", () => {
   ).toBeDefined()
   expect(screen.getByText("Once")).toBeDefined()
   // An event job runs when something happens, so it has no next run.
-  expect(screen.getAllByText("—")).toHaveLength(1)
+  const eventRow = screen.getByRole("row", { name: /Triage/ })
+  expect(within(eventRow).getAllByRole("cell").at(-2)?.textContent).toBe("—")
 })
 
 test("a paused job has readable status in both responsive placements and no next run", () => {
   renderList([job({ status: "paused" })])
 
   expect(screen.getAllByText("Paused")).toHaveLength(2)
-  expect(screen.getByText("—")).toBeDefined()
+  const row = screen.getByRole("row", { name: /Weekly digest/ })
+  expect(within(row).getAllByRole("cell").at(-2)?.textContent).toBe("—")
 })
 
 test("header buttons drive the sort and expose the facet menus", () => {
@@ -191,3 +213,37 @@ function openActions() {
     { button: 0, ctrlKey: false }
   )
 }
+
+test("mixed-folder rows keep the baseline quiet and an explicit repeated audience visible", () => {
+  renderList([
+    job(),
+    job({
+      id: "explicit" as Job["id"],
+      name: "Billing choice",
+      visibility: { mode: "teams", teamIds: ["billing"] },
+    }),
+    job({
+      id: "unfiled" as Job["id"],
+      name: "Unfiled job",
+      folderId: undefined,
+    }),
+  ])
+  const headers = screen
+    .getAllByRole("columnheader")
+    .map((header) => header.textContent)
+  expect(headers.indexOf("Audience")).toBe(headers.indexOf("Folder") + 1)
+  const inherited = screen.getByRole("row", { name: /Weekly digest/ })
+  expect(within(inherited).getByText("Same as folder")).toBeDefined()
+  expect(
+    within(inherited)
+      .getByRole("link", { name: "Renewals" })
+      .getAttribute("title")
+  ).toContain('"Renewals" folder')
+  const explicit = screen.getByRole("row", { name: /Billing choice/ })
+  expect(within(explicit).getByText("Billing")).toBeDefined()
+  const unfiled = screen.getByRole("row", { name: /Unfiled job/ })
+  expect(within(unfiled).getByText("Unfiled")).toBeDefined()
+  expect(within(unfiled).getByText("Organization default")).toBeDefined()
+  expect(screen.queryByText("Via folder")).toBeNull()
+  expect(screen.queryByText("Organization")).toBeNull()
+})

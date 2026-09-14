@@ -2,11 +2,10 @@ import { Folder, FolderLock } from "lucide-react"
 import { ConsoleLink } from "../../shell/link"
 import { useVisibilityDirectory } from "../../visibility/directory"
 import { folderRestriction } from "../../visibility/restriction"
-import { type FolderNames } from "../folders"
+import { type FolderNames, folderHint, folderPath } from "../folders"
 
 /** Folder column: where the row's material is filed, linking to the folder.
- *  Unfiled materials show a quiet dash; while names are still loading the
- *  cell stays empty rather than flashing a wrong state. */
+ *  Parent paths distinguish repeated names and remain available on hover. */
 export function MaterialFolderCell({
   folderId,
   folders,
@@ -16,14 +15,19 @@ export function MaterialFolderCell({
 }) {
   const directory = useVisibilityDirectory()
   if (folderId === undefined) {
-    return <span className="text-muted-foreground">—</span>
+    return <span className="text-muted-foreground">Unfiled</span>
   }
 
-  const name = folders?.get(folderId)?.name
-
-  if (name === undefined) {
+  if (folders === undefined) {
     return null
   }
+  const name = folders.get(folderId)?.name
+  if (name === undefined) {
+    return <span className="text-muted-foreground">Unavailable folder</span>
+  }
+  const hint = folderHint(folders, folderId)
+  const path = folderPath(folders, folderId)
+  const label = hint === undefined ? name : `${hint} / ${name}`
 
   const restriction = folderRestriction(folderId, directory)
   const Icon = restriction === null ? Folder : FolderLock
@@ -32,12 +36,12 @@ export function MaterialFolderCell({
     <ConsoleLink
       className="flex max-w-40 items-center gap-1.5 text-muted-foreground hover:text-foreground"
       params={{ folderId }}
-      title={restriction === null ? name : `${name}. ${restriction}`}
+      title={restriction === null ? path : `${path}. ${restriction}`}
       aria-description={restriction ?? undefined}
       to="/folders/$folderId"
     >
       <Icon aria-hidden className="size-4 shrink-0" />
-      <span className="truncate">{name}</span>
+      <span className="truncate">{label}</span>
     </ConsoleLink>
   )
 }

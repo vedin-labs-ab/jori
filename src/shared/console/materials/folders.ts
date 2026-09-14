@@ -19,7 +19,7 @@ export function folderFacet(
   const map = folders ?? new Map<string, FolderEntry>()
   const named = [...map]
     .map(([value, entry]) => ({
-      hint: duplicateHint(map, entry),
+      hint: folderHint(map, value),
       icon: Folder,
       label: entry.name,
       value,
@@ -29,33 +29,45 @@ export function folderFacet(
   return {
     label: "Folder",
     options: [
-      { icon: FolderRoot, label: "No folder", value: noFolder },
+      { icon: FolderRoot, label: "Unfiled", value: noFolder },
       ...named,
     ],
     resolve: (row) => row.folderId ?? noFolder,
   }
 }
 
-/** Identically named folders read the same in a flat menu, so each gets
- *  its parent's name as a muted hint — Root for top-level ones. Uniquely
- *  named folders need none. */
-function duplicateHint(
-  folders: ReadonlyMap<string, FolderEntry>,
-  entry: FolderEntry
-) {
-  let sameName = 0
-
-  for (const other of folders.values()) {
-    if (other.name === entry.name) {
-      sameName += 1
+/** Full parent context is shared by the folder facet and its row links.
+ * Missing ancestors and cycles stay explicit instead of looking like root. */
+export function folderPath(folders: FolderNames, folderId: string): string {
+  const names: string[] = []
+  const visited = new Set<string>()
+  let current: string | undefined = folderId
+  while (current !== undefined) {
+    const folder = folders.get(current)
+    if (folder === undefined || visited.has(current)) {
+      names.unshift("Unavailable folder")
+      break
     }
+    visited.add(current)
+    names.unshift(folder.name)
+    current = folder.parentId
   }
+  return names.join(" / ")
+}
 
-  if (sameName < 2) {
+/** Only repeated names need their parent path visible. */
+export function folderHint(folders: FolderNames, folderId: string) {
+  const entry = folders.get(folderId)
+  if (entry === undefined) {
     return undefined
   }
-
+  const duplicate = [...folders].some(
+    ([id, other]) => id !== folderId && other.name === entry.name
+  )
+  if (!duplicate) {
+    return undefined
+  }
   return entry.parentId === undefined
     ? "Root"
-    : (folders.get(entry.parentId)?.name ?? "Root")
+    : folderPath(folders, entry.parentId)
 }

@@ -3,7 +3,7 @@ import { type ComponentProps } from "react"
 import { Button } from "@/components/ui/button"
 import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
-  folderColumn,
+  accessColumns,
   ownerColumn,
   timeColumn,
 } from "@/shared/console/materials/cells/columns"
@@ -12,7 +12,6 @@ import {
   MaterialList,
 } from "@/shared/console/materials/list"
 import { materialOwner } from "@/shared/console/materials/owners"
-import { visibilityColumn } from "../../materials/cells/columns"
 import { type Job } from "../types"
 import { JobRowMenu } from "./actions"
 import { JobNameCell, JobTriggerCell } from "./cells"
@@ -45,8 +44,7 @@ const drag = (job: Job): ResourceDragItem => ({
 const columns: MaterialColumn<Job>[] = [
   { cell: (job) => <JobTriggerCell job={job} />, label: "Trigger", tier: "md" },
   { cell: (job) => <JobToolSummary job={job} />, label: "Tools", tier: "5xl" },
-  visibilityColumn<Job>(),
-  folderColumn("3xl"),
+  ...accessColumns<Job>(),
   ownerColumn(materialOwner, "4xl"),
   timeColumn("Last run", "fired", (job) => job.firedAt, "5xl"),
   timeColumn("Next run", "next", nextRunAt, "4xl"),

@@ -8,7 +8,7 @@ import {
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type RowSelection } from "@/shared/console/list/selection"
 import {
-  folderColumn,
+  accessColumns,
   ownerColumn,
 } from "@/shared/console/materials/cells/columns"
 import { type FolderNames } from "@/shared/console/materials/folders"
@@ -19,7 +19,6 @@ import {
 import { fileOwner } from "@/shared/console/materials/owners"
 import { absoluteTime, relativeTime } from "@/shared/console/time"
 import { formatFileSize } from "@/shared/files/size"
-import { visibilityColumn } from "../../materials/cells/columns"
 import { FileRowMenu } from "../menu"
 import { type FileRow } from "../types"
 import { FileNameCell, FileTypeCell } from "./cells"
@@ -39,8 +38,7 @@ const columns: MaterialColumn<FileRow>[] = [
     label: "Type",
     tier: "2xl",
   },
-  visibilityColumn<FileRow>(),
-  folderColumn("3xl"),
+  ...accessColumns<FileRow>(),
   {
     cell: (file, context) => relativeTime(file.createdAt, context.now),
     className: "text-muted-foreground",
