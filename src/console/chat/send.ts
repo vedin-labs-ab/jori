@@ -43,7 +43,6 @@ export function useSendMessage(
           ...(author === undefined ? {} : { author }),
           text: args.text,
           data: {
-            ...(args.context === undefined ? {} : { context: args.context }),
             ...(args.references === undefined
               ? {}
               : { references: args.references }),

@@ -4,7 +4,9 @@ import { type MessageContext } from "@contracts/replies/answers"
 import { useCallback, useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { TypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
+import { useChatLocation } from "@/shared/console/chat/draft"
 import { ChatHome } from "@/shared/console/chat/home"
+import { ChatLocation } from "@/shared/console/chat/location"
 import { ChatPane } from "@/shared/console/chat/pane"
 import { useReplyReferences } from "@/shared/console/chat/pane/auto"
 import { usePaneTabs } from "@/shared/console/chat/pane/tabs"
@@ -34,9 +36,11 @@ import {
   chatContext,
   chatSelection,
   chatSuggestions,
+  type DemoConversation,
 } from "../../fixtures/chat"
+import { type FolderId } from "../../fixtures/types"
 import { type DemoLiveReply, type DemoState } from "../../state/types"
-import { useDemoWorkspace } from "../../workspace"
+import { useDemoFolders, useDemoWorkspace } from "../../workspace"
 import { DemoDraft } from "./draft"
 import { DemoChatFiling } from "./filing"
 import { DemoPaneBody } from "./pane"
@@ -46,22 +50,28 @@ const noMessages: ChatMessage[] = []
 
 /** Where a chat starts, over the workspace: the first message opens a
  *  conversation and the console moves to it. Opened from a resource's
- *  page, the resource is the composer's chip and goes with the message. */
+ *  page, its folder is suggested and the resource is mentioned inline. */
 export function ChatHomePage({ context }: { context?: MessageContext }) {
+  return <Home context={context} key={`${context?.kind}:${context?.id}`} />
+}
+
+function Home({ context }: { context?: MessageContext }) {
   const { actions, state } = useDemoWorkspace()
   const navigate = useConsoleNavigate()
   const now = useNow(60_000)
   const [selection, setSelection] = useState<ModelSelection>(chatSelection)
-  const [suggestions] = useState(() => rotateSuggestions(chatSuggestions, 0))
-  const [phrases] = useState(() =>
-    suggestions.slice(shownSuggestions).map(({ text }) => text)
-  )
+  const { phrases, suggestions } = useDemoSuggestions()
   const mentions = useMemo(() => mentionSources(state), [state])
   const reference =
     context === undefined ? undefined : resolveReference(state, context)
+  const location = useChatLocation(reference)
+  const folders = useDemoFolders()
   const send = (text: string, references: MessageContext[] = []) => {
     const conversationId = actions.sendChatMessage(text, undefined, {
-      context: reference === undefined ? undefined : context,
+      folderId:
+        location.folderId === null
+          ? undefined
+          : (location.folderId as FolderId),
       references,
     })
 
@@ -74,9 +84,15 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
         <ChatComposer
           availableModels={modelSlugs}
           autoFocus
-          context={reference}
+          initialReference={location.initialReference}
+          metadata={
+            <ChatLocation
+              folderId={location.folderId}
+              folders={folders}
+              onChange={location.select}
+            />
+          }
           mentions={mentions}
-          onClearContext={() => navigate({ to: "/chat" })}
           onSelect={setSelection}
           onSend={send}
           onStop={() => {}}
@@ -93,9 +109,19 @@ export function ChatHomePage({ context }: { context?: MessageContext }) {
       now={now}
       onSuggestion={send}
       recent={chatViews(state)}
-      suggestions={suggestions.slice(0, shownSuggestions)}
+      suggestions={
+        context === undefined ? suggestions.slice(0, shownSuggestions) : []
+      }
     />
   )
+}
+
+function useDemoSuggestions() {
+  const [suggestions] = useState(() => rotateSuggestions(chatSuggestions, 0))
+  const [phrases] = useState(() =>
+    suggestions.slice(shownSuggestions).map(({ text }) => text)
+  )
+  return { phrases, suggestions }
 }
 
 /** One conversation over the workspace. Keyed by the conversation, so a
@@ -135,46 +161,41 @@ function Conversation({ conversationId }: { conversationId: string }) {
   }
 
   return (
-    <>
-      <DemoChatFiling conversation={conversation} />
-      <ChatPane
-        {...pane}
-        body={(target) => (
-          <DemoPaneBody onOpenReference={openTarget} target={target} />
-        )}
-        composer={
-          <DemoComposer
-            conversationId={conversationId}
-            mentions={mentions}
-            resolve={resolve}
-            run={run}
-          />
-        }
-        resolve={resolve}
-      >
-        <ChatThread
-          draft={
-            <DemoDraft chat={state.chat} conversationId={conversationId} />
-          }
-          hasMore={false}
-          isLoading={false}
-          live={run}
+    <ChatPane
+      {...pane}
+      body={(target) => (
+        <DemoPaneBody onOpenReference={openTarget} target={target} />
+      )}
+      composer={
+        <DemoComposer
+          conversation={conversation}
           mentions={mentions}
-          messages={conversation.messages}
-          now={now}
-          onChoose={(messageId, answers, text) =>
-            actions.sendChatMessage(text, conversationId, {
-              answer: { messageId, answers },
-            })
-          }
-          onLoadMore={() => {}}
-          onOpenReference={openTarget}
-          progress={<LiveProgress live={live} now={now} />}
-          resolveReference={resolve}
-          usage={chatContext}
+          resolve={resolve}
+          run={run}
         />
-      </ChatPane>
-    </>
+      }
+      resolve={resolve}
+    >
+      <ChatThread
+        draft={<DemoDraft chat={state.chat} conversationId={conversationId} />}
+        hasMore={false}
+        isLoading={false}
+        live={run}
+        mentions={mentions}
+        messages={conversation.messages}
+        now={now}
+        onChoose={(messageId, answers, text) =>
+          actions.sendChatMessage(text, conversationId, {
+            answer: { messageId, answers },
+          })
+        }
+        onLoadMore={() => {}}
+        onOpenReference={openTarget}
+        progress={<LiveProgress live={live} now={now} />}
+        resolveReference={resolve}
+        usage={chatContext}
+      />
+    </ChatPane>
   )
 }
 
@@ -193,12 +214,12 @@ function useWorkspaceBindings(state: DemoState) {
 /** The composer bound to send into the conversation, to stop the run
  *  answering it, and to hold the model the next one runs on. */
 function DemoComposer({
-  conversationId,
+  conversation,
   mentions,
   resolve,
   run,
 }: {
-  conversationId: string
+  conversation: DemoConversation
   mentions: MentionSources
   resolve: ResolveReference
   run: ChatRun | null
@@ -211,10 +232,11 @@ function DemoComposer({
       availableModels={modelSlugs}
       autoFocus
       isLive={isLiveRun(run)}
+      metadata={<DemoChatFiling conversation={conversation} />}
       mentions={mentions}
       onSelect={setSelection}
       onSend={(text, references) => {
-        actions.sendChatMessage(text, conversationId, { references })
+        actions.sendChatMessage(text, conversation.id, { references })
       }}
       onStop={actions.stopChatRun}
       resolve={resolve}

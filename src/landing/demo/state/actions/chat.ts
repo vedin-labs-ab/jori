@@ -16,7 +16,7 @@ export function chatActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
       text: string,
       conversationId?: string,
       carried?: {
-        context?: MessageContext
+        folderId?: string
         references?: MessageContext[]
         answer?: ChoicesAnswer
       }
@@ -30,7 +30,7 @@ export function chatActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
         messageId: mint("messages"),
         runId: mint("runs"),
         text,
-        context: carried?.context,
+        folderId: carried?.folderId,
         references: carried?.references,
         answer: carried?.answer,
         reply: demoReply(text),

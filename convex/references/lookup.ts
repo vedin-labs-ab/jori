@@ -115,7 +115,7 @@ async function loadRun(ctx: QueryLikeCtx, sight: Sight, id: string) {
   return run !== null &&
     run.organizationId === sight.organizationId &&
     (await canSeeRun(ctx, run, sight.personId, sight))
-    ? { name: run.snapshot.title, status: run.status }
+    ? { name: run.snapshot.title, status: run.status, folderId: run.folderId }
     : null
 }
 
@@ -136,7 +136,11 @@ async function loadChat(ctx: QueryLikeCtx, sight: Sight, id: string) {
 
   return conversation === null
     ? null
-    : { name: conversation.title ?? "", status: "Chat" }
+    : {
+        name: conversation.title ?? "",
+        status: "Chat",
+        folderId: conversation.folderId,
+      }
 }
 
 /** The row an id names in the table its kind implies; an id of another

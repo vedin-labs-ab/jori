@@ -36,7 +36,6 @@ function renderAsk(text: string, onOpen: OpenTarget = vi.fn()) {
     <TooltipProvider>
       <PersonMessage
         catalog={catalog}
-        context={undefined}
         message={ask}
         now={now}
         onOpenReference={onOpen}

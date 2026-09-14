@@ -42,6 +42,7 @@ export function resolveReference(
             id,
             name: conversation.title,
             detail: trail(state, conversation.folderId),
+            folderId: conversation.folderId,
           }
     }
     case "folder": {
@@ -49,14 +50,26 @@ export function resolveReference(
 
       return folder === undefined
         ? undefined
-        : { kind, id, name: folder.name, detail: trail(state, folder.parentId) }
+        : {
+            kind,
+            id,
+            name: folder.name,
+            detail: trail(state, folder.parentId),
+            folderId: folder.parentId,
+          }
     }
     case "job": {
       const job = state.jobs.find((candidate) => candidate.id === id)
 
       return job === undefined
         ? undefined
-        : { kind, id, name: job.name, detail: trail(state, job.folderId) }
+        : {
+            kind,
+            id,
+            name: job.name,
+            detail: trail(state, job.folderId),
+            folderId: job.folderId,
+          }
     }
     case "run": {
       const run = state.runs.find((candidate) => candidate.id === id)
@@ -75,6 +88,7 @@ export function resolveReference(
             id,
             name: material.name,
             detail: trail(state, material.folderId),
+            folderId: material.folderId,
           }
     }
   }

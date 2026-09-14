@@ -103,12 +103,12 @@ test("a console message's context and mentions reach the model as lines under it
 
   expect(entries.map((entry) => entry.context)).toEqual([
     [
-      `Opened about folder «Finance» (folderId: ${folderId})`,
+      `Working in folder «Finance» (folderId: ${folderId})`,
       `+[table:${tableId}] mentions table «Customer renewals» (tableId: ${tableId})`,
       "+[job:gone] mentions a job that is no longer available (jobId: gone)",
     ].join("\n"),
     [
-      "Opened about a table that is no longer available (tableId: collections:404)",
+      "Working in a table that is no longer available (tableId: collections:404)",
       `+[chat:${chatId}] mentions chat «Renewals» (conversationId: ${chatId})`,
     ].join("\n"),
   ])

@@ -19,8 +19,6 @@ export type ChatMessage = {
   /** Markdown for Jori's messages, plain text for a person's. */
   text: string
   parts: ReplyPart[]
-  /** The resource or folder the person opened the chat about. */
-  context?: MessageContext
   /** The resources a person's text mentions, as `+[kind:id]` tokens. */
   references?: MessageContext[]
   /** The reply's questions this message answers. */

@@ -1,4 +1,5 @@
 import { type Infer } from "convex/values"
+import { nameMentions } from "../../../contracts/replies/tokens"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import {
@@ -8,18 +9,13 @@ import {
 import { insertConsoleMessage } from "../../messages/console/records"
 import { type referenceTargetValidator } from "../../messages/references"
 import { type modelSelectionValidator } from "../../model/selection"
-import { nameMentions } from "../../references/tokens"
 import { createPersonActor } from "../../shared/actor"
 import { createSight } from "../../visibility/sight"
 import { createConversationSight } from "../access"
 import { startMessageRun } from "../execution/index"
 import { requireVisibleConsoleConversation } from "../resolve"
 import { scheduleConversationSummary } from "../summary/schedule"
-import {
-  createConsoleConversation,
-  normalizeConsoleContext,
-  normalizeConsoleReferences,
-} from "./create"
+import { createConsoleConversation, normalizeConsoleReferences } from "./create"
 
 export type ConsoleSendArgs = {
   organizationId: string
@@ -27,7 +23,8 @@ export type ConsoleSendArgs = {
   profile: { name?: string; email?: string }
   conversationId?: Id<"conversations">
   text: string
-  context?: Infer<typeof referenceTargetValidator>
+  /** Used only when creating a chat; existing chats move through filing. */
+  folderId?: Id<"folders">
   /** The resources the text mentions, as `+[kind:id]` tokens in it. */
   references?: Infer<typeof referenceTargetValidator>[]
   answer?: Infer<typeof consoleAnswerValidator>
@@ -96,13 +93,8 @@ async function prepareMessage(
           organizationId: args.organizationId,
           personId: args.personId,
         })
-  const context =
-    args.context === undefined
-      ? undefined
-      : normalizeConsoleContext(ctx, args.context)
-
-  if (context === null) {
-    throw new Error(`Context id is not a ${args.context?.kind}.`)
+  if (existing !== null && args.folderId !== undefined) {
+    throw new Error("Move an existing chat using its folder controls.")
   }
 
   const references = await normalizeConsoleReferences(
@@ -125,5 +117,9 @@ async function prepareMessage(
     createConversationSight(ctx, conversation),
     references
   )
+  const context =
+    conversation.folderId === undefined
+      ? undefined
+      : { kind: "folder" as const, id: conversation.folderId }
   return { conversation, context, references }
 }

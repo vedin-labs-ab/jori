@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { subtreeFolderIds } from "@/shared/console/folders/tree"
 import { type FolderRow } from "@/shared/console/folders/types"
-import { FolderPicker } from "./picker"
+import { FolderPicker } from "."
 
 afterEach(cleanup)
 
@@ -91,4 +91,28 @@ test("marks the current location and reports selections", () => {
   fireEvent.click(screen.getByRole("button", { name: "No folder" }))
 
   expect(onSelect).toHaveBeenCalledWith(null)
+})
+
+test("search keeps matching folders under their ancestors and allows clearing", () => {
+  const onSelect = vi.fn()
+  render(
+    <FolderPicker
+      currentId="invoices"
+      folders={folders}
+      onSelect={onSelect}
+      selectedId="invoices"
+    />
+  )
+  fireEvent.change(screen.getByRole("textbox", { name: "Search folders" }), {
+    target: { value: "invoice" },
+  })
+  expect(
+    screen.getAllByRole("button").map((option) => option.textContent)
+  ).toEqual(["No folder", "Finance", "Invoices"])
+  fireEvent.click(screen.getByRole("button", { name: "No folder" }))
+  expect(onSelect).toHaveBeenCalledWith(null)
+  fireEvent.change(screen.getByRole("textbox", { name: "Search folders" }), {
+    target: { value: "missing" },
+  })
+  expect(screen.getByText("No matching folders.")).toBeDefined()
 })

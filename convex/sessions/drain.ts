@@ -6,19 +6,17 @@ import {
 import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { formatRuntimeMessage } from "../integrations/messages/runtime"
 import {
   defaultReactionDrainLimit,
   formatRuntimeReaction,
   readPendingReactions,
 } from "../reactions/cursor"
-import { reactionSummariesForMessages } from "../reactions/summary"
-import { type QueryLikeCtx } from "../shared/context"
 import { boundedNumber } from "../shared/input"
 import { defaultDrainLimit, maxDrainLimit } from "./batch"
 import { cursorWithMessage, cursorWithReaction } from "./cursor"
 import { readPendingBatch } from "./data"
 import { reconcileRunExecution } from "./execution"
+import { formatSessionMessages } from "./messages"
 import { emitRecencyContexts, type RecencyEmission } from "./recency"
 import { runExecutionIsCurrent } from "./scope"
 
@@ -73,7 +71,11 @@ export async function drainSession(
     message: batch.cursor,
     reaction: reactions.cursor,
   })
-  const messages = await formatRuntimeMessages(ctx, batch.messages)
+  const messages = await formatSessionMessages(
+    ctx,
+    session.conversationId,
+    batch.messages
+  )
 
   await patchSession(ctx, session, {
     cursor,
@@ -119,17 +121,6 @@ async function patchSession(
     ...(target === undefined ? {} : { target }),
     updatedAt: Date.now(),
   })
-}
-
-async function formatRuntimeMessages(
-  ctx: QueryLikeCtx,
-  messages: Doc<"messages">[]
-) {
-  const reactions = await reactionSummariesForMessages(ctx, messages)
-
-  return messages.map((message) =>
-    formatRuntimeMessage(message, reactions.get(message._id))
-  )
 }
 
 function nextSessionCursor(

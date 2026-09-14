@@ -30,7 +30,7 @@ test("a conversation opened from a folder files every run under it", async () =>
     personId,
     profile: {},
     text: "Summarize this folder.",
-    context: { kind: "folder", id: folderId },
+    folderId,
   })
   await finishRun(database)
   const second = await sendConsoleMessage(ctx, {
@@ -59,7 +59,7 @@ test("a conversation opened from a folder files every run under it", async () =>
   )
 })
 
-test("a conversation opened from a filed table files its runs under the table's folder, and says so", async () => {
+test("a new chat is private in its chosen folder and mentions its entry table independently", async () => {
   const { database, ctx } = consoleContext()
   const personId = await person(database)
   const renewalsId = await database.insert(
@@ -75,21 +75,29 @@ test("a conversation opened from a filed table files its runs under the table's 
     organizationId,
     personId,
     profile: {},
-    text: "Which renewals are at risk?",
-    context: { kind: "table", id: tableId },
+    text: `Which entries in +[table:${tableId}] need attention?`,
+    folderId: renewalsId,
+    references: [{ kind: "table", id: tableId }],
   })
   const [run] = await rows<Doc<"runs">>(database, "runs")
 
   expect(await database.get(sent.messageId)).toMatchObject({
-    data: { context: { kind: "table", id: tableId } },
+    data: {
+      context: { kind: "folder", id: renewalsId },
+      references: [{ kind: "table", id: tableId }],
+    },
+  })
+  expect(await database.get(sent.conversationId)).toMatchObject({
+    folderId: renewalsId,
+    visibility: { mode: "private" },
   })
   expect(run).toMatchObject({
     folderId: renewalsId,
-    snapshot: { context: [{ type: "table", label: "Customer renewals" }] },
+    snapshot: { context: [{ type: "folder", label: "Renewals" }] },
   })
 })
 
-test("a context whose id is not of its kind is refused before anything is kept", async () => {
+test("an invalid inline reference is refused before anything is kept", async () => {
   const { database, ctx } = consoleContext()
   const personId = await person(database)
 
@@ -99,9 +107,9 @@ test("a context whose id is not of its kind is refused before anything is kept",
       personId,
       profile: {},
       text: "About this",
-      context: { kind: "job", id: "not-an-id" },
+      references: [{ kind: "job", id: "not-an-id" }],
     })
-  ).rejects.toThrow("Context id is not a job.")
+  ).rejects.toThrow("The mentioned job is not available.")
   expect(await rows(database, "messages")).toEqual([])
 })
 
@@ -114,7 +122,7 @@ test("unfiling a contextual chat keeps later runs unfiled", async () => {
     personId,
     profile: {},
     text: "Plan this folder.",
-    context: { kind: "folder", id: folderId },
+    folderId,
   })
   expect(await database.get(sent.conversationId)).toMatchObject({ folderId })
 
@@ -126,7 +134,7 @@ test("unfiling a contextual chat keeps later runs unfiled", async () => {
     folderId: null,
   })
   await finishRun(database)
-  await sendConsoleMessage(ctx, {
+  const next = await sendConsoleMessage(ctx, {
     organizationId,
     personId,
     profile: {},
@@ -134,6 +142,7 @@ test("unfiling a contextual chat keeps later runs unfiled", async () => {
     conversationId: sent.conversationId,
   })
 
+  expect((await database.get(next.messageId))?.data).toBeUndefined()
   expect((await database.get(sent.conversationId))?.folderId).toBeUndefined()
   expect(
     (await rows<Doc<"runs">>(database, "runs")).map((run) => run.folderId)

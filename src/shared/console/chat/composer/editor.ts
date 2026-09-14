@@ -1,5 +1,5 @@
 import { type Editor, useEditor } from "@tiptap/react"
-import { useCallback, useEffect, useId, useMemo, useState } from "react"
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { mentionKinds } from "../../mentions/scan"
 import {
   createMentionCatalog,
@@ -57,6 +57,21 @@ export function useComposerEditor(args: ComposerEditorArgs) {
 
   // The handlers were made once; this is what they read of this render.
   refs.latest.current = { args, catalog, editor, suggestion }
+
+  const seeded = useRef(false)
+  useEffect(() => {
+    const reference = args.initialReference
+    if (editor === null || reference === undefined || seeded.current) {
+      return
+    }
+    seeded.current = true
+    insertMention(refs, {
+      kind: "resource",
+      id: targetKey(reference),
+      label: reference.name,
+      target: { kind: reference.kind, id: reference.id },
+    })
+  }, [args.initialReference, editor, refs])
 
   useAutocompleteA11y({ editor, listboxId, suggestion })
   useResourceSearch(args.sources, suggestion)

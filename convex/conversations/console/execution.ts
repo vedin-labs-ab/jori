@@ -1,18 +1,15 @@
+import { nameMentions } from "../../../contracts/replies/tokens"
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { conversationMessages } from "../../messages/read"
 import {
   type ResolvedContext,
   resolveConsoleContext,
   resolveConsoleReferences,
 } from "../../messages/references"
-import { nameMentions } from "../../references/tokens"
 import { createConversationSight } from "../access"
 
-/** What a console conversation was opened about, as its current audience
- *  can see it — the context rides on their first message, and
- *  the message's text with its mentions named, for the run's title.
- *  The chat's own folder determines attribution independently of context. */
+/** The folder when this message was sent, visible to the chat's current
+ * audience, and its text with mentions named for the run title. */
 export async function consoleRunDetails(
   ctx: MutationCtx,
   conversation: Doc<"conversations">,
@@ -22,17 +19,11 @@ export async function consoleRunDetails(
     return { context: undefined }
   }
 
-  const first = await conversationMessages(ctx, {
-    ...conversation,
-    integrationId: undefined,
-  })
-    .order("asc")
-    .first()
   const sight = createConversationSight(ctx, conversation)
   const references = await resolveConsoleReferences(ctx, sight, message.data)
 
   return {
-    context: await resolveConsoleContext(ctx, sight, first?.data),
+    context: await resolveConsoleContext(ctx, sight, message.data),
     ...(references.length === 0
       ? {}
       : { title: nameMentions(message.text ?? "", references) }),

@@ -57,6 +57,8 @@ export type DrainedSessionBatch = {
 }
 
 export type RuntimeMessage = {
+  /** Resource and folder metadata, resolved for the execution audience. */
+  context?: string
   actor: string | null
   actorIds: string[]
   authority: "authoritative" | "soft"

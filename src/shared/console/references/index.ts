@@ -21,6 +21,8 @@ export type ReferenceView = {
   kind: ReferenceKind
   id: string
   name: string
+  /** The resource's containing folder, independently of its reference. */
+  folderId?: string
   /** One line under the name: where it is filed, what it holds. */
   detail?: string
   /** The host knows the target but can no longer open it. */

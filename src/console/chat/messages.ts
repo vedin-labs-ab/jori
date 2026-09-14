@@ -1,6 +1,5 @@
 import {
   readChoicesAnswer,
-  readMessageContext,
   readMessageReferences,
 } from "@contracts/replies/answers"
 import { parseReplyParts } from "@contracts/replies/parts"
@@ -17,11 +16,10 @@ export type MessageRow = FunctionReturnType<
 
 export const messagePageSize = 40
 
-/** A stored message as the thread reads it: the parts, context,
+/** A stored message as the thread reads it: the parts,
  *  mentions, and answer its `data` carries parsed out, each absent when
  *  it is not there. */
 export function toChatMessage(row: MessageRow): ChatMessage {
-  const context = readMessageContext(row.data)
   const references = readMessageReferences(row.data)
   const answer = readChoicesAnswer(row.data)
 
@@ -31,7 +29,6 @@ export function toChatMessage(row: MessageRow): ChatMessage {
     ...(row.author === undefined ? {} : { author: row.author }),
     text: row.text,
     parts: parseReplyParts(row.data),
-    ...(context === undefined ? {} : { context }),
     ...(references.length === 0 ? {} : { references }),
     ...(answer === undefined ? {} : { answer }),
     createdAt: row.createdAt,

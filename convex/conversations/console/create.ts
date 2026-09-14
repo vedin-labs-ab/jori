@@ -2,12 +2,12 @@ import { type Infer } from "convex/values"
 import { type MessageContext } from "../../../contracts/replies/answers"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { resolveConsoleContext } from "../../messages/references"
+import { resolveCreationFolder } from "../../folders/tree"
 import { type modelSelectionValidator } from "../../model/selection"
 import { loadReference, referenceTable } from "../../references/lookup"
 import { insertRow } from "../../retention/write"
 import { type QueryLikeCtx } from "../../shared/context"
-import { createSight, type Sight } from "../../visibility/sight"
+import { type Sight } from "../../visibility/sight"
 
 const titleMaxLength = 80
 
@@ -20,19 +20,16 @@ export async function createConsoleConversation(
     organizationId: string
     personId: Id<"persons">
     text: string
-    context?: MessageContext
+    folderId?: Id<"folders">
     model?: Infer<typeof modelSelectionValidator>
     now: number
   }
 ) {
-  const context = await resolveConsoleContext(
-    ctx,
-    createSight(ctx, {
-      organizationId: args.organizationId,
-      personId: args.personId,
-    }),
-    { context: args.context }
-  )
+  const folderId = await resolveCreationFolder(ctx, {
+    organizationId: args.organizationId,
+    personId: args.personId,
+    folderId: args.folderId,
+  })
   const conversation = await insertRow(ctx, "conversations", {
     organizationId: args.organizationId,
     surface: "console",
@@ -40,7 +37,7 @@ export async function createConsoleConversation(
     scope: "person",
     visibility: { mode: "private" },
     title: conversationTitle(args.text),
-    folderId: context?.folderId,
+    folderId,
     createdBy: args.personId,
     updatedAt: args.now,
     ...(args.model === undefined ? {} : { model: args.model }),
@@ -60,10 +57,10 @@ function conversationTitle(text: string) {
     : title
 }
 
-/** The context's id in its kind's own table, or nothing for an id of
+/** The reference's id in its kind's own table, or nothing for an id of
  *  another shape — the check `references.resolve` makes, made before the
  *  message is kept. */
-export function normalizeConsoleContext(
+export function normalizeConsoleReference(
   ctx: QueryLikeCtx,
   context: MessageContext
 ): MessageContext | null {
@@ -85,7 +82,7 @@ export async function normalizeConsoleReferences(
   const normalized: Array<MessageContext & { name: string }> = []
 
   for (const reference of references) {
-    const target = normalizeConsoleContext(ctx, reference)
+    const target = normalizeConsoleReference(ctx, reference)
     const loaded =
       target === null ? null : await loadReference(ctx, sight, target)
 

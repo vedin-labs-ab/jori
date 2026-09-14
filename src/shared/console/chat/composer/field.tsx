@@ -1,11 +1,6 @@
 import { EditorContent } from "@tiptap/react"
-import { X } from "lucide-react"
 import { type ReactNode } from "react"
-import { Badge } from "@/components/ui/badge"
-import { InputGroupAddon } from "@/components/ui/input-group"
 import { MentionSuggestions } from "../../mentions/suggest/listbox"
-import { type ReferenceView } from "../../references"
-import { referencePresentation } from "../../references/presentation"
 import { type useComposerEditor } from "./editor"
 
 type Composer = ReturnType<typeof useComposerEditor>
@@ -62,57 +57,4 @@ function emptySuggestionMessage({
     case "tool":
       return active.query === "" ? "No tools to mention." : "No matching tools."
   }
-}
-
-/** The resource row takes space only while the chat has context. */
-export function ComposerContext({
-  onClear,
-  reference,
-}: {
-  onClear: (() => void) | undefined
-  reference: ReferenceView | undefined
-}) {
-  if (reference === undefined) {
-    return null
-  }
-
-  return (
-    <InputGroupAddon align="block-start" className="min-h-9">
-      <ContextChip onClear={onClear} reference={reference} />
-    </InputGroupAddon>
-  )
-}
-
-/** The resource the chat was opened about, named by its kind's icon, with
- *  a control to send the next message without it — larger under a
- *  finger, without growing the chip. */
-export function ContextChip({
-  onClear,
-  reference,
-}: {
-  onClear: (() => void) | undefined
-  reference: ReferenceView
-}) {
-  const { icon: Icon, label } = referencePresentation(
-    reference.kind,
-    reference.name
-  )
-
-  return (
-    <Badge className="max-w-full gap-1 pr-1" variant="outline">
-      <Icon aria-hidden="true" />
-      <span className="sr-only">{label}: </span>
-      <span className="min-w-0 truncate">{reference.name}</span>
-      {onClear === undefined ? null : (
-        <button
-          aria-label={`Remove ${reference.name}`}
-          className="grid size-4 cursor-pointer place-items-center rounded-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:-my-1.5 pointer-coarse:size-7"
-          onClick={onClear}
-          type="button"
-        >
-          <X aria-hidden="true" className="size-3" />
-        </button>
-      )}
-    </Badge>
-  )
 }

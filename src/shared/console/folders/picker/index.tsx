@@ -1,4 +1,6 @@
 import { Check, Folder, FolderMinus } from "lucide-react"
+import { useState } from "react"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { buildFolderTree, type FolderNode } from "@/shared/console/folders/tree"
 import { type FolderRow } from "@/shared/console/folders/types"
@@ -28,37 +30,66 @@ export function FolderPicker({
   onSelect: (folderId: string | null) => void
   selectedId: string | null
 }) {
-  const tree = buildFolderTree(folders)
+  const [search, setSearch] = useState("")
+  const tree = searchTree(buildFolderTree(folders), search.trim().toLowerCase())
 
   return (
-    <div
-      className={cn(
-        scrollFade,
-        "grid max-h-64 content-start gap-0.5 overflow-y-auto",
-        className
-      )}
-    >
-      <PickerRow
-        depth={0}
-        icon={<FolderMinus className="size-4 shrink-0 text-muted-foreground" />}
-        isCurrent={currentId === null}
-        isSelected={selectedId === null}
-        name="No folder"
-        onSelect={() => onSelect(null)}
+    <div className={cn("grid gap-1", className)}>
+      <Input
+        aria-label="Search folders"
+        placeholder="Search folders…"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
       />
-      {tree.map((node) => (
-        <PickerBranch
-          currentId={currentId}
+      <div
+        className={cn(
+          scrollFade,
+          "grid max-h-64 content-start gap-0.5 overflow-y-auto"
+        )}
+      >
+        <PickerRow
           depth={0}
-          disabledIds={disabledIds}
-          key={node.folderId}
-          node={node}
-          onSelect={onSelect}
-          selectedId={selectedId}
+          icon={
+            <FolderMinus className="size-4 shrink-0 text-muted-foreground" />
+          }
+          isCurrent={currentId === null}
+          isSelected={selectedId === null}
+          name="No folder"
+          onSelect={() => onSelect(null)}
         />
-      ))}
+        {tree.map((node) => (
+          <PickerBranch
+            currentId={currentId}
+            depth={0}
+            disabledIds={disabledIds}
+            key={node.folderId}
+            node={node}
+            onSelect={onSelect}
+            selectedId={selectedId}
+          />
+        ))}
+        {tree.length === 0 && search.trim() !== "" ? (
+          <p className="px-2 py-3 text-muted-foreground text-sm">
+            No matching folders.
+          </p>
+        ) : null}
+      </div>
     </div>
   )
+}
+
+/** Keep ancestors so similarly named folders retain their place in the tree. */
+function searchTree(
+  tree: FolderNode<FolderRow>[],
+  query: string
+): FolderNode<FolderRow>[] {
+  return tree.flatMap((node) => {
+    if (node.name.toLowerCase().includes(query)) {
+      return [node]
+    }
+    const children = searchTree(node.children, query)
+    return children.length === 0 ? [] : [{ ...node, children }]
+  })
 }
 
 function PickerBranch({

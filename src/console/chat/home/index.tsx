@@ -4,11 +4,12 @@ import {
   type ModelSelection,
 } from "@contracts/models/selection"
 import { type MessageContext } from "@contracts/replies/answers"
-import { useNavigate } from "@tanstack/react-router"
+import { type GenericId } from "convex/values"
 import { useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { TypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
 import { ChatHome } from "@/shared/console/chat/home"
+import { ChatLocation } from "@/shared/console/chat/location"
 import {
   chatSuggestionPool,
   rotateSuggestions,
@@ -17,24 +18,23 @@ import {
 import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
-import { ConsolePage } from "../page"
-import { useMentionSources } from "./mentions"
-import { useAvailableModels } from "./models"
-import { recentCount, useRecentConversations } from "./recent"
-import { useReferenceTargets } from "./references"
-import { useSendMessage } from "./send"
+import { ConsolePage } from "../../page"
+import { useMentionSources } from "../mentions"
+import { useAvailableModels } from "../models"
+import { recentCount, useRecentConversations } from "../recent"
+import { useSendMessage } from "../send"
+import { useChatEntry } from "./entry"
 
-const noTargets: MessageContext[] = []
-
-/** Where a chat starts: the first message opens a conversation and the
- *  console moves to it. Opened from a resource's page, the chat carries
- *  that resource as its context, shown as the composer's chip and sent
- *  with the first message, as is the model picked for it. */
+/** Ask Jori suggests a home for the chat; its resource is an inline mention. */
 export function ChatHomePage({ context }: { context?: MessageContext }) {
   return (
     <ConsolePage>
       {(organizationId) => (
-        <ChatHomeContent context={context} organizationId={organizationId} />
+        <ChatHomeContent
+          context={context}
+          key={`${organizationId}:${context?.kind}:${context?.id}`}
+          organizationId={organizationId}
+        />
       )}
     </ConsolePage>
   )
@@ -51,11 +51,12 @@ function ChatHomeContent({
   const send = useSendMessage(organizationId)
   const recent = useRecentConversations(organizationId, recentCount)
   const now = useNow(60_000)
-  const reference = useChatContext(organizationId, context)
+  const location = useChatEntry(organizationId, context)
   const mentions = useMentionSources(organizationId)
   const [selection, setSelection] = useState<ModelSelection>(defaultSelection)
   const availableModels = useAvailableModels()
-  const unavailable = modelAvailabilityReason(availableModels, selection)
+  const unavailable =
+    location.reason ?? modelAvailabilityReason(availableModels, selection)
   const { placeholder, suggestions } = useHomeSuggestions()
   // A blocked budget still opens the conversation with the message in it,
   // so the console moves there either way; a failure rejects, and the
@@ -65,9 +66,9 @@ function ChatHomeContent({
       text,
       model: selection,
       ...(references.length === 0 ? {} : { references }),
-      ...(reference.context === undefined
+      ...(location.folderId === null
         ? {}
-        : { context: reference.context }),
+        : { folderId: location.folderId as GenericId<"folders"> }),
     }).then((result) =>
       navigate(conversationDestination(result.conversationId))
     )
@@ -79,9 +80,15 @@ function ChatHomeContent({
           autoFocus
           availableModels={availableModels}
           disabled={unavailable !== undefined}
-          context={reference.reference}
+          initialReference={location.initialReference}
+          metadata={
+            <ChatLocation
+              folderId={location.folderId}
+              folders={location.folders}
+              onChange={location.select}
+            />
+          }
           mentions={mentions}
-          onClearContext={reference.clear}
           onSelect={setSelection}
           onSend={start}
           onStop={() => {}}
@@ -93,7 +100,7 @@ function ChatHomeContent({
       now={now}
       onSuggestion={start}
       recent={recent}
-      suggestions={suggestions}
+      suggestions={context === undefined ? suggestions : []}
     />
   )
 }
@@ -118,28 +125,5 @@ function useHomeSuggestions() {
       <TypedPlaceholder fallback="Tell Jori what needs doing" phrases={rest} />
     ),
     suggestions: rotated.slice(0, shownSuggestions),
-  }
-}
-
-/** The context the chat was opened with, named for the chip through the
- *  same query the thread's cards use. One the viewer may not see, or that
- *  is gone, drops out: no chip, and nothing sent. Clearing it leaves the
- *  search behind, so the plain /chat is what stays in history. */
-function useChatContext(
-  organizationId: string,
-  context: MessageContext | undefined
-) {
-  const navigate = useNavigate()
-  const targets = useMemo(
-    () => (context === undefined ? noTargets : [context]),
-    [context]
-  )
-  const resolve = useReferenceTargets(organizationId, targets)
-  const reference = context === undefined ? undefined : resolve(context)
-
-  return {
-    context: reference === undefined ? undefined : context,
-    reference,
-    clear: () => void navigate({ to: "/chat", search: {}, replace: true }),
   }
 }

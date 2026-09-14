@@ -17,15 +17,9 @@ import { loadReference } from "../references/lookup"
 import { type QueryLikeCtx } from "../shared/context"
 import { createSight, type Sight } from "../visibility/sight"
 
-// What a reply's references and a message's context and mentions point
-// at, named for the console. Every kind reads through the predicate its
-// own page uses, and a miss of any sort — gone, foreign, invisible,
-// malformed — comes back unavailable, so a reference can neither probe nor
-// leak. A console message's context is the same shape — the resource or
-// folder whose page the chat was opened from — and so are the resources
-// its text mentions; both are read back here for the run: where to file
-// it, what to say in its snapshot, and what to tell the model. The check
-// made before a message is kept lives with the conversation that keeps it.
+// Every reference reads through its resource's visibility predicate. Missing,
+// foreign and invisible targets all resolve as unavailable. A console message
+// records its folder when sent; inline resources resolve independently.
 
 export const referenceTargetValidator = v.object({
   kind: v.union(...referenceKinds.map((kind) => v.literal(kind))),
@@ -46,6 +40,7 @@ export type ResolvedReference = ReferenceTarget & {
   name: string
   /** Where it is filed, root folder first; a run says how it stands. */
   detail?: string
+  folderId?: Id<"folders">
   unavailable: boolean
 }
 
@@ -92,6 +87,7 @@ export async function resolveReferenceTarget(
   return {
     ...target,
     name: found.name,
+    ...(found.folderId === undefined ? {} : { folderId: found.folderId }),
     ...(detail === undefined ? {} : { detail }),
     unavailable: false,
   }

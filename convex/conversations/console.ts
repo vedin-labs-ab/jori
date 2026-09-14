@@ -39,7 +39,7 @@ export const send = mutation({
     organizationId: v.string(),
     conversationId: v.optional(v.id("conversations")),
     text: v.string(),
-    context: v.optional(referenceTargetValidator),
+    folderId: v.optional(v.id("folders")),
     references: v.optional(v.array(referenceTargetValidator)),
     answer: v.optional(consoleAnswerValidator),
     model: v.optional(modelSelectionValidator),

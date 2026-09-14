@@ -103,52 +103,52 @@ function ConversationThread({
   useReplyReferences(conversationId, page.messages, thread.autoOpen)
 
   return (
-    <>
-      <ConversationFiling
+    <ChatPane
+      {...thread.pane}
+      body={handlers.body}
+      composer={
+        <ChatComposer
+          autoFocus
+          availableModels={availableModels}
+          disabled={unavailable !== undefined}
+          isLive={isLiveRun(live.run)}
+          metadata={
+            <ConversationFiling
+              conversationId={conversationId}
+              live={live}
+              organizationId={organizationId}
+            />
+          }
+          mentions={thread.mentions}
+          onMention={thread.mentioned.open}
+          onSelect={thread.choose}
+          onSend={handlers.sendText}
+          onStop={thread.stop}
+          onUnmention={thread.releaseTarget}
+          resolve={resolveReference}
+          reason={unavailable}
+          selection={live.model}
+          usage={live.context}
+        />
+      }
+      resolve={resolveReference}
+    >
+      <ConversationTurns
         conversationId={conversationId}
         live={live}
+        mentions={thread.mentions}
+        onOpenReference={openTarget}
         organizationId={organizationId}
-      />
-      <ChatPane
-        {...thread.pane}
-        body={handlers.body}
-        composer={
-          <ChatComposer
-            autoFocus
-            availableModels={availableModels}
-            disabled={unavailable !== undefined}
-            isLive={isLiveRun(live.run)}
-            mentions={thread.mentions}
-            onMention={thread.mentioned.open}
-            onSelect={thread.choose}
-            onSend={handlers.sendText}
-            onStop={thread.stop}
-            onUnmention={thread.releaseTarget}
-            resolve={resolveReference}
-            reason={unavailable}
-            selection={live.model}
-            usage={live.context}
-          />
+        page={page}
+        resolveReference={resolveReference}
+        send={thread.send}
+        progress={
+          isLiveRun(live.run) ? (
+            <ChatProgress organizationId={organizationId} run={live.run} />
+          ) : null
         }
-        resolve={resolveReference}
-      >
-        <ConversationTurns
-          conversationId={conversationId}
-          live={live}
-          mentions={thread.mentions}
-          onOpenReference={openTarget}
-          organizationId={organizationId}
-          page={page}
-          resolveReference={resolveReference}
-          send={thread.send}
-          progress={
-            isLiveRun(live.run) ? (
-              <ChatProgress organizationId={organizationId} run={live.run} />
-            ) : null
-          }
-        />
-      </ChatPane>
-    </>
+      />
+    </ChatPane>
   )
 }
 

@@ -1,39 +1,10 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { TooltipProvider } from "@/components/ui/tooltip"
 import { renderComposer } from "../../../../../test/composer"
 import { typeInto } from "../../../../../test/editor"
-import { ChatComposer } from "."
 
 afterEach(cleanup)
-
-test("dropping context removes its row and keeps the draft in the same editor", async () => {
-  const props = { onSend: vi.fn(), onStop: vi.fn() }
-  const onClearContext = vi.fn(() => {
-    view.rerender(<ChatComposer {...props} />)
-  })
-  const view = render(
-    <ChatComposer
-      {...props}
-      context={{ kind: "folder", id: "folders_finance", name: "Finance" }}
-      onClearContext={onClearContext}
-    />,
-    { wrapper: TooltipProvider }
-  )
-  const field = await screen.findByRole("textbox", { name: "Message" })
-  const row = screen.getByText("Finance").closest("[data-align=block-start]")
-
-  expect(row).not.toBeNull()
-  typeInto(field, "Keep this draft")
-
-  fireEvent.click(screen.getByRole("button", { name: "Remove Finance" }))
-
-  expect(onClearContext).toHaveBeenCalledTimes(1)
-  expect(row?.isConnected).toBe(false)
-  expect(screen.getByRole("textbox", { name: "Message" })).toBe(field)
-  expect(field.textContent).toBe("Keep this draft")
-})
 
 test("the context ring sits by the send control once a run has measured the window", async () => {
   const usage = {

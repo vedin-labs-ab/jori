@@ -18,13 +18,13 @@ vi.mock("@tanstack/react-router", async () => ({
 
 afterEach(cleanup)
 
-test("renders both turns: the ask in its bubble with its context, the reply as prose with its cards", () => {
+test("renders both turns: the ask in its bubble without a separate filing row, the reply as prose with its cards", () => {
   const onOpenReference = vi.fn<OpenTarget>()
 
   renderThread({ messages: [ask, reply], onOpenReference })
 
   expect(screen.getByText("Which renewals are at risk?")).toBeDefined()
-  expect(screen.getAllByText("Customer renewals")).toHaveLength(2)
+  expect(screen.getAllByText("Customer renewals")).toHaveLength(1)
   expect(screen.getByText("Harbor House").tagName).toBe("STRONG")
 
   fireEvent.click(screen.getByRole("button", { name: /Customer renewals/ }))

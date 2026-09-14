@@ -20,7 +20,7 @@ function renderMessages() {
   })
   render(
     <TooltipProvider>
-      <PersonMessage context={undefined} message={ask} now={now} />
+      <PersonMessage message={ask} now={now} />
       <JoriMessage>
         <p>The reply</p>
         <MessageActions message={justSent} now={now} />
@@ -81,13 +81,8 @@ test("person messages identify the sender and reserve You for the viewer", () =>
 
   render(
     <TooltipProvider>
+      <PersonMessage message={{ ...ask, author }} now={now} />
       <PersonMessage
-        context={undefined}
-        message={{ ...ask, author }}
-        now={now}
-      />
-      <PersonMessage
-        context={undefined}
         message={{ ...ask, id: "mine", author: { ...author, isViewer: true } }}
         now={now}
       />

@@ -1,4 +1,4 @@
-import { resourceTokensPattern } from "../../contracts/replies/parts"
+import { resourceTokensPattern } from "./parts"
 
 // A message mentions a resource as `+[kind:id]`, a token the run reads by
 // id. Wherever the text is read by a person instead — a conversation's

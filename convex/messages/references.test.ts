@@ -100,13 +100,14 @@ async function run(
 }
 
 test("names what the viewer may see, with where it is filed", async () => {
-  const { jobId, renewalsId, resolveAs, tableId } = await seed()
+  const { financeId, jobId, renewalsId, resolveAs, tableId } = await seed()
 
   expect(await resolveAs(other, { kind: "table", id: tableId })).toEqual({
     kind: "table",
     id: tableId,
     name: "Customer renewals",
     detail: "Finance › Renewals",
+    folderId: renewalsId,
     unavailable: false,
   })
   expect(await resolveAs(other, { kind: "job", id: jobId })).toEqual({
@@ -122,6 +123,7 @@ test("names what the viewer may see, with where it is filed", async () => {
     id: renewalsId,
     name: "Renewals",
     detail: "Finance",
+    folderId: financeId,
     unavailable: false,
   })
 })

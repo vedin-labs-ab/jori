@@ -1,9 +1,11 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useMemo, useState } from "react"
+import { ChatLocation } from "@/shared/console/chat/location"
 import { ChatTitleMenu } from "@/shared/console/chat/menu"
 import { moveTarget, resourceSubject } from "@/shared/console/folders/types"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
+import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../../convex/_generated/api"
 import { MoveResourceDialog } from "../../folders/move"
 import { useMoveRun } from "../../folders/move/run"
@@ -20,18 +22,13 @@ export function ConversationFiling({
   live: LiveConversation
   organizationId: string
 }) {
+  const { folder, target, tree, move } = useFiling(
+    organizationId,
+    conversationId,
+    live
+  )
   const [moving, setMoving] = useState(false)
   const [sharing, setSharing] = useState(false)
-  const move = useMoveRun(organizationId)
-  const folder = useConversationFolder(organizationId, live.folderId)
-  const target = useMemo(
-    () =>
-      moveTarget("chat", conversationId, {
-        name: live.title,
-        folderId: live.folderId,
-      }),
-    [conversationId, live.title, live.folderId]
-  )
 
   useConversationTrail(
     live,
@@ -52,6 +49,26 @@ export function ConversationFiling({
 
   return (
     <>
+      <ChatLocation
+        saved
+        disabled={move.isBusy}
+        folderId={live.folderId ?? null}
+        folderName={folder?.folder?.name}
+        folders={tree?.status === "ready" ? tree.folders : undefined}
+        onChange={(folderId) => {
+          if (folderId !== (live.folderId ?? null)) {
+            void move.run(resourceSubject([target]), folderId)
+          }
+        }}
+        audience={
+          <VisibilityButton
+            visibility={live.visibility}
+            folderId={live.folderId}
+            ownerId={live.createdBy}
+            onClick={() => setSharing(true)}
+          />
+        }
+      />
       <ConversationVisibility
         conversationId={conversationId}
         live={live}
@@ -67,6 +84,26 @@ export function ConversationFiling({
       {move.dialog}
     </>
   )
+}
+
+function useFiling(
+  organizationId: string,
+  conversationId: GenericId<"conversations">,
+  live: LiveConversation
+) {
+  const move = useMoveRun(organizationId)
+  const folder = useConversationFolder(organizationId, live.folderId)
+  const tree = useQuery(api.folders.console.tree, { organizationId })
+  const target = useMemo(
+    () =>
+      moveTarget("chat", conversationId, {
+        name: live.title,
+        folderId: live.folderId,
+      }),
+    [conversationId, live.title, live.folderId]
+  )
+
+  return { move, folder, tree, target }
 }
 
 function useConversationFolder(

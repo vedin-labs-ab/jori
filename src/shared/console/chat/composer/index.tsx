@@ -19,7 +19,7 @@ import { type ReferenceView, type ResolveReference } from "../../references"
 import { chatColumnClassName } from "../thread"
 import { type ChatContextUsage } from "../types"
 import { useComposerEditor } from "./editor"
-import { ComposerContext, ComposerField } from "./field"
+import { ComposerField } from "./field"
 import { ComposerFooter, HintsPeek } from "./footer"
 
 /** Where the person writes: plain text with the things it mentions as
@@ -35,11 +35,11 @@ import { ComposerFooter, HintsPeek } from "./footer"
 export const ChatComposer = memo(function ChatComposer({
   autoFocus = false,
   availableModels,
-  context,
+  initialReference,
+  metadata,
   disabled = false,
   isLive = false,
   mentions = emptyMentionSources,
-  onClearContext,
   onMention,
   onSelect,
   onSend,
@@ -53,14 +53,15 @@ export const ChatComposer = memo(function ChatComposer({
 }: {
   autoFocus?: boolean
   availableModels?: readonly ModelSlug[]
-  /** The resource the chat is about, shown as a chip the person can drop. */
-  context?: ReferenceView
+  /** Seeded once as a normal, removable mention in the text. */
+  initialReference?: ReferenceView
+  /** Conversation filing and audience, outside the message field. */
+  metadata?: ReactNode
   disabled?: boolean
   /** A run is answering: follow-ups can still be sent, or work stopped. */
   isLive?: boolean
   /** What can be mentioned: the host's lists, and its search. */
   mentions?: MentionSources
-  onClearContext?: () => void
   /** Takes each resource as it is mentioned, so a host with a pane can
    *  show what the person is talking about. */
   onMention?: (target: MessageContext) => void
@@ -94,6 +95,7 @@ export const ChatComposer = memo(function ChatComposer({
       : undefined
   const composer = useComposerEditor({
     disabled,
+    initialReference,
     onMention,
     onSend,
     onUnmention,
@@ -110,38 +112,37 @@ export const ChatComposer = memo(function ChatComposer({
   })
 
   return (
-    <form
-      className={chatColumnClassName}
-      onSubmit={(event) => sendOnSubmit(event, composer.send)}
-    >
-      <InputGroup
-        className="bg-background"
-        onClick={(event) => focusFromFrame(event, composer.editor)}
-      >
-        <ComposerContext onClear={onClearContext} reference={context} />
-        <ComposerField
-          composer={composer}
-          onSelect={composer.selectSuggestion}
-          placeholder={placeholder}
-        />
-        <ComposerFooter
-          availableModels={availableModels}
-          canSend={composer.canSend}
-          hintsId={hints.id}
-          isLive={isLive}
-          mentions={mentions}
-          onHideHints={hints.open ? hints.hide : undefined}
-          onPick={composer.insertMention}
-          onSelect={onSelect}
-          onStop={onStop}
-          pending={composer.pending}
-          reason={shownReason}
-          selection={selection}
-          usage={usage}
-        />
-      </InputGroup>
-      <HintsPeek hintsId={hints.id} onShow={hints.show} />
-    </form>
+    <div className={chatColumnClassName}>
+      {metadata}
+      <form onSubmit={(event) => sendOnSubmit(event, composer.send)}>
+        <InputGroup
+          className="bg-background"
+          onClick={(event) => focusFromFrame(event, composer.editor)}
+        >
+          <ComposerField
+            composer={composer}
+            onSelect={composer.selectSuggestion}
+            placeholder={placeholder}
+          />
+          <ComposerFooter
+            availableModels={availableModels}
+            canSend={composer.canSend}
+            hintsId={hints.id}
+            isLive={isLive}
+            mentions={mentions}
+            onHideHints={hints.open ? hints.hide : undefined}
+            onPick={composer.insertMention}
+            onSelect={onSelect}
+            onStop={onStop}
+            pending={composer.pending}
+            reason={shownReason}
+            selection={selection}
+            usage={usage}
+          />
+        </InputGroup>
+        <HintsPeek hintsId={hints.id} onShow={hints.show} />
+      </form>
+    </div>
   )
 })
 

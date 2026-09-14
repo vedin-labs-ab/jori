@@ -15,9 +15,7 @@ type ResolvedReference = FunctionReturnType<
   typeof api.messages.references.resolve
 >[number]
 
-/** Every target the loaded messages point at, once each: the context a
- *  person's message was sent from, the resources its text mentions, and
- *  the references in Jori's replies. */
+/** Every inline mention and reply reference in the loaded messages, once. */
 export function referenceTargets(
   messages: ChatMessage[],
   extra: ReferenceTarget[] = none
@@ -29,10 +27,6 @@ export function referenceTargets(
   }
 
   for (const message of messages) {
-    if (message.context !== undefined) {
-      targets.set(targetKey(message.context), message.context)
-    }
-
     for (const reference of message.references ?? []) {
       targets.set(targetKey(reference), reference)
     }
@@ -114,6 +108,7 @@ function toChatReference(reference: ResolvedReference) {
         kind: reference.kind,
         id: reference.id,
         name: reference.name,
+        folderId: reference.folderId,
         ...(reference.detail === undefined ? {} : { detail: reference.detail }),
       }
 }

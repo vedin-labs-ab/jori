@@ -4,7 +4,7 @@ import { databaseContext } from "../../../test/convex/database"
 import { fileDoc } from "../../../test/convex/folders"
 import { type Id } from "../../_generated/dataModel"
 import { createSight } from "../../visibility/sight"
-import { normalizeConsoleContext, normalizeConsoleReferences } from "./create"
+import { normalizeConsoleReference, normalizeConsoleReferences } from "./create"
 
 const other = "persons:other" as Id<"persons">
 
@@ -23,14 +23,16 @@ async function seed() {
   return { ctx, secretId, sight, tableId }
 }
 
-test("a context's id is kept only in its kind's own table", async () => {
+test("a reference's id is kept only in its kind's own table", async () => {
   const { ctx, tableId } = await seed()
 
-  expect(normalizeConsoleContext(ctx, { kind: "table", id: tableId })).toEqual({
+  expect(
+    normalizeConsoleReference(ctx, { kind: "table", id: tableId })
+  ).toEqual({
     kind: "table",
     id: tableId,
   })
-  expect(normalizeConsoleContext(ctx, { kind: "job", id: "nope" })).toBeNull()
+  expect(normalizeConsoleReference(ctx, { kind: "job", id: "nope" })).toBeNull()
 })
 
 test("a message's mentions are kept once each, in their own tables, and only when the sender can see them", async () => {

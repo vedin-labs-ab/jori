@@ -1,8 +1,10 @@
+import { nameMentions } from "@contracts/replies/tokens"
 import {
   type ChatDraft,
   type ChatMessage,
   isLiveRun,
 } from "@/shared/console/chat/types"
+import { resolveReference } from "../derive/chat"
 import {
   chatRunMicros,
   type DemoConversation,
@@ -18,7 +20,7 @@ const revealStep = 14
 export function reduceChat(state: DemoState, action: DemoAction): DemoState {
   switch (action.type) {
     case "sendChatMessage":
-      return { ...state, chat: sent(state.chat, action) }
+      return { ...state, chat: sent(state, action) }
     case "advanceChatReply":
       return settled(state, advanced(state.chat, action.at), action.at)
     case "stopChatRun":
@@ -64,16 +66,23 @@ function settled(state: DemoState, chat: DemoChat, at: number): DemoState {
 /** The person's message lands in its conversation, opening one when
  *  there is none, and a run starts on it. */
 function sent(
-  chat: DemoChat,
+  state: DemoState,
   action: Extract<DemoAction, { type: "sendChatMessage" }>
 ): DemoChat {
+  const chat = state.chat
+  const title = nameMentions(
+    action.text,
+    (action.references ?? []).map((target) => ({
+      ...target,
+      name: resolveReference(state, target)?.name ?? null,
+    }))
+  )
   const message: ChatMessage = {
     id: action.messageId,
     role: "person",
     author: demoChatAuthor,
     text: action.text,
     parts: [],
-    context: action.context,
     references: action.references,
     answer: action.answer,
     createdAt: action.at,
@@ -85,9 +94,10 @@ function sent(
     existing === undefined
       ? {
           id: action.conversationId as DemoConversation["id"],
-          title: action.text,
+          title,
           createdBy: viewerId,
           visibility: { mode: "private" },
+          folderId: action.folderId as DemoConversation["folderId"],
           updatedAt: action.at,
           messages: [message],
         }

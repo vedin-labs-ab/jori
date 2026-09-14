@@ -49,7 +49,7 @@ async function setup() {
     personId,
     profile: {},
     text: "Plan the launch.",
-    context: { kind: "folder", id: folderId },
+    folderId,
   })
   const [run] = await rows<Doc<"runs">>(database, "runs")
   if (run === undefined) {

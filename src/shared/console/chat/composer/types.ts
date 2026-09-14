@@ -7,7 +7,7 @@ import {
   type MentionSuggestion,
 } from "../../mentions/sources"
 import { type SuggestionState } from "../../mentions/suggest/state"
-import { type ResolveReference } from "../../references"
+import { type ReferenceView, type ResolveReference } from "../../references"
 
 export type ComposerSuggestionState = SuggestionState<MentionSuggestion>
 
@@ -16,6 +16,7 @@ export type SetComposerSuggestion = Dispatch<
 >
 
 export type ComposerEditorArgs = {
+  initialReference?: ReferenceView
   disabled: boolean
   /** Takes each resource as it is put in, however it was picked. */
   onMention: ((target: MessageContext) => void) | undefined

@@ -15,7 +15,7 @@ function row(
   }
 }
 
-test("a person's message carries its context and answer, and no parts", () => {
+test("a person's message carries its answer without rendering its filing metadata", () => {
   expect(
     toChatMessage(
       row({
@@ -48,7 +48,6 @@ test("a person's message carries its context and answer, and no parts", () => {
     },
     text: "Yes, post it",
     parts: [],
-    context: { kind: "folder", id: "folders:7" },
     answer: {
       messageId: "messages:0",
       answers: [{ part: 0, values: ["post"] }],

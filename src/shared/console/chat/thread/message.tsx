@@ -9,8 +9,7 @@ import { cn } from "@/lib/utils"
 import { BrandIcon } from "@/shared/brand"
 import { CopyButton } from "../../copy"
 import { type MentionCatalog, splitByMentions } from "../../mentions/scan"
-import { type ReferenceView, type ResolveReference } from "../../references"
-import { referencePresentation } from "../../references/presentation"
+import { type ResolveReference } from "../../references"
 import { absoluteTime, relativeTime } from "../../time"
 import { ChatMentionChip } from "../mentions"
 import { type OpenTarget } from "../pane/tabs"
@@ -20,13 +19,11 @@ import { type ChatMessage } from "../types"
 const resourceCatalog: MentionCatalog = { resource: true }
 
 /** A person's turn: contained, on the right, and clamped when it runs
- *  long, so a pasted brief does not push the reply off the screen. The
- *  resource the chat was opened about sits above the words; what the
- *  words mention stands in them as chips. Memoized, since the clamp
+ *  long, so a pasted brief does not push the reply off the screen.
+ *  Resources stand inline where the words mention them. Memoized, since the clamp
  *  measures itself on every render it gets. */
 export const PersonMessage = memo(function PersonMessage({
   catalog = resourceCatalog,
-  context,
   message,
   now,
   onOpenReference,
@@ -34,8 +31,6 @@ export const PersonMessage = memo(function PersonMessage({
 }: {
   /** What the text's tokens may name, beyond resources. */
   catalog?: MentionCatalog
-  /** The message's context, as the host resolved it. */
-  context: ReferenceView | undefined
   message: ChatMessage
   now: number
   onOpenReference?: OpenTarget
@@ -49,7 +44,6 @@ export const PersonMessage = memo(function PersonMessage({
         </span>
       )}
       <div className="min-w-0 max-w-[75%] rounded-lg bg-muted px-3 py-2 text-sm">
-        {context === undefined ? null : <ContextLine reference={context} />}
         <ExpandableText maxLines={8}>
           <div className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
             <MentionedText
@@ -65,21 +59,6 @@ export const PersonMessage = memo(function PersonMessage({
     </div>
   )
 })
-
-function ContextLine({ reference }: { reference: ReferenceView }) {
-  const { icon: Icon, label } = referencePresentation(
-    reference.kind,
-    reference.name
-  )
-
-  return (
-    <p className="mb-1 flex items-center gap-1 text-muted-foreground text-xs">
-      <Icon aria-hidden="true" className="size-3 shrink-0" />
-      <span className="sr-only">{label}: </span>
-      <span className="min-w-0 truncate">{reference.name}</span>
-    </p>
-  )
-}
 
 /** Jori's turn: flat and full-width under the mark, never clamped. A
  *  reply still arriving says so to assistive technology. A turn that

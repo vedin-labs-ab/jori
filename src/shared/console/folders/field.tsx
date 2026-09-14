@@ -1,14 +1,7 @@
 import { ChevronsUpDown, Folder } from "lucide-react"
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Skeleton } from "@/components/ui/skeleton"
-import { FolderPicker } from "./picker"
+import { FolderSelect } from "./picker/select"
 import { type FolderRow } from "./types"
 
 /** Optional "Folder" field for resource create dialogs: the shared folder
@@ -28,53 +21,29 @@ export function FolderPickerField({
   onChange: (folderId: string | null) => void
   value: string | null
 }) {
-  const [isOpen, setIsOpen] = useState(false)
   const selected = folders?.find((folder) => folder.folderId === value)
 
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>Folder</Label>
-      <Popover onOpenChange={setIsOpen} open={isOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            className="justify-between font-normal"
-            id={id}
-            type="button"
-            variant="outline"
-          >
-            {selected === undefined ? (
-              <span className="text-muted-foreground">No folder</span>
-            ) : (
-              <span className="flex min-w-0 items-center gap-2">
-                <Folder className="size-4 shrink-0 text-muted-foreground" />
-                <span className="truncate">{selected.name}</span>
-              </span>
-            )}
-            <ChevronsUpDown className="text-muted-foreground" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          className="w-(--radix-popover-trigger-width) p-1"
+      <FolderSelect folders={folders} onChange={onChange} value={value}>
+        <Button
+          className="justify-between font-normal"
+          id={id}
+          type="button"
+          variant="outline"
         >
-          {folders === undefined ? (
-            <div className="grid gap-2">
-              <Skeleton className="h-6" />
-              <Skeleton className="h-6" />
-            </div>
+          {selected === undefined ? (
+            <span className="text-muted-foreground">No folder</span>
           ) : (
-            <FolderPicker
-              currentId={value}
-              folders={folders}
-              onSelect={(folderId) => {
-                onChange(folderId)
-                setIsOpen(false)
-              }}
-              selectedId={value}
-            />
+            <span className="flex min-w-0 items-center gap-2">
+              <Folder className="size-4 shrink-0 text-muted-foreground" />
+              <span className="truncate">{selected.name}</span>
+            </span>
           )}
-        </PopoverContent>
-      </Popover>
+          <ChevronsUpDown className="text-muted-foreground" />
+        </Button>
+      </FolderSelect>
     </div>
   )
 }

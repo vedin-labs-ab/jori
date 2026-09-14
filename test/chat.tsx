@@ -42,7 +42,6 @@ export const ask = message({
   id: "m1",
   role: "person",
   text: "Which renewals are at risk?",
-  context: { kind: "table", id: "collections_renewals" },
 })
 
 export const reply = message({
