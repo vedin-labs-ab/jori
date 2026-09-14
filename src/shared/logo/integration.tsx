@@ -1,15 +1,10 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { type ComponentProps } from "react"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { LogoImage } from "./image"
 import { providerLogo } from "./registry"
 
-type IntegrationLogoSize = "sm" | "md"
+import { type LogoSize, LogoStack } from "./stack"
 
 export function IntegrationLogo({
   className,
@@ -20,7 +15,7 @@ export function IntegrationLogo({
 }: Omit<ComponentProps<"img">, "alt" | "src"> & {
   decorative?: boolean
   integration: Integration
-  size?: IntegrationLogoSize
+  size?: LogoSize
 }) {
   const logo = providerLogo(integration)
 
@@ -44,72 +39,20 @@ export function IntegrationLogoStack({
   size = "sm",
 }: {
   integrations: readonly Integration[]
-  size?: IntegrationLogoSize
+  size?: LogoSize
 }) {
-  const uniqueIntegrations = [...new Set(integrations)]
-  const visibleCount = uniqueIntegrations.length > 3 ? 2 : 3
-  const visibleIntegrations = uniqueIntegrations.slice(0, visibleCount)
-  const hiddenIntegrations = uniqueIntegrations.slice(visibleCount)
-
-  if (visibleIntegrations.length === 0) {
-    return null
-  }
-
   return (
-    <span className="inline-flex shrink-0 items-center">
-      <span className="-space-x-1 inline-flex">
-        {/* The backdrop sits on a wrapper, not the mark: an ink mark
-            inverts on a dark ground, and its backdrop must not. */}
-        {visibleIntegrations.map((integration) => (
-          <span
-            className="inline-flex rounded-sm bg-background ring-2 ring-card"
-            key={integration}
-          >
-            <IntegrationLogo integration={integration} size={size} />
-          </span>
-        ))}
-      </span>
-      {hiddenIntegrations.length > 0 ? (
-        <HiddenIntegrationCount integrations={hiddenIntegrations} size={size} />
-      ) : null}
-    </span>
+    <LogoStack
+      items={integrations}
+      label={integrationLabel}
+      renderLogo={(integration) => (
+        <IntegrationLogo integration={integration} size={size} />
+      )}
+      size={size}
+    />
   )
 }
 
-function HiddenIntegrationCount({
-  integrations,
-  size,
-}: {
-  integrations: Integration[]
-  size: IntegrationLogoSize
-}) {
-  const hiddenTitle = integrations.map(integrationLabel).join(", ")
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          aria-label={`Show ${integrations.length} more integrations: ${hiddenTitle}`}
-          className={cn(
-            "ml-1 inline-flex items-center justify-center rounded-sm border bg-background px-1 text-muted-foreground leading-none outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/35",
-            overflowCountClassName(size)
-          )}
-          type="button"
-        >
-          +{integrations.length}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent>{hiddenTitle}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-function logoSizeClassName(size: IntegrationLogoSize) {
+function logoSizeClassName(size: LogoSize) {
   return size === "md" ? "size-5" : "size-4"
-}
-
-function overflowCountClassName(size: IntegrationLogoSize) {
-  return size === "md"
-    ? "h-5 min-w-5 text-[0.6875rem]"
-    : "h-4 min-w-4 text-[0.625rem]"
 }
