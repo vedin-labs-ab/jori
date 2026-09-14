@@ -57,10 +57,14 @@ const covers: Record<Tone, string> = {
   muted: "data-[state=active]:bg-muted data-[state=active]:after:bg-muted",
 }
 
-/** The open tab hides the body's top edge under it with a strip of its own
- *  ground two pixels tall, one into the body, so a fractional layout
- *  position (a centred dialog, say) cannot leave a hairline of the edge
- *  showing between the two. */
+/**
+ * The open tab hides the body's top edge under it. The tab's box overlaps
+ * the body by one pixel, and a strip of the tab's own ground, four pixels
+ * tall, is drawn from two pixels above that edge to one pixel below it
+ * inside the body. Layout can put the edge on a fraction of a pixel (a
+ * dialog is centred with a transform), which antialiases the line across
+ * two device rows; the strip overdraws both, so no hairline survives.
+ */
 export function FolderTab({
   active = false,
   className,
@@ -73,7 +77,7 @@ export function FolderTab({
         "relative inline-flex h-11 items-center rounded-t-xl border bg-muted px-5 font-medium text-muted-foreground text-sm transition-colors outline-none",
         "hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
         "data-[state=active]:h-12 data-[state=active]:border-b-transparent data-[state=active]:text-foreground",
-        "data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-px data-[state=active]:after:h-0.5 data-[state=active]:after:content-['']",
+        "data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-0.5 data-[state=active]:after:h-1 data-[state=active]:after:content-['']",
         covers[tone],
         className
       )}
