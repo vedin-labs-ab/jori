@@ -167,9 +167,11 @@ function Sidebar({
   children,
   dir,
   onCloseAutoFocus,
+  onEscapeKeyDown,
   ...props
 }: React.ComponentProps<"div"> & {
   onCloseAutoFocus?: React.ComponentProps<typeof SheetContent>["onCloseAutoFocus"]
+  onEscapeKeyDown?: React.ComponentProps<typeof SheetContent>["onEscapeKeyDown"]
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
@@ -197,6 +199,7 @@ function Sidebar({
         <SheetContent
           dir={dir}
           onCloseAutoFocus={onCloseAutoFocus}
+          onEscapeKeyDown={onEscapeKeyDown}
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"

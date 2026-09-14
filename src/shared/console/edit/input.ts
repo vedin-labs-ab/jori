@@ -26,6 +26,7 @@ export function useNameInput(props: NameInputProps) {
     saving: false,
   })
   const input = useRef<HTMLInputElement>(null)
+  const blurFrame = useRef(0)
   const latest = useRef({ ...props, name: state.name })
   latest.current = { ...props, name: state.name }
   const [session] = useState<SaveSession>(() => ({
@@ -55,6 +56,7 @@ export function useNameInput(props: NameInputProps) {
     return () => {
       session.mounted = false
       cancelAnimationFrame(frame)
+      cancelAnimationFrame(blurFrame.current)
       props.register(undefined)
     }
   }, [commit, props.register, props.scrollBlock, session])
@@ -62,6 +64,17 @@ export function useNameInput(props: NameInputProps) {
     ...state,
     input,
     commit,
+    blur: (container: HTMLFieldSetElement) => {
+      // Finish the browser's focus move before saving can reorder the row
+      // or unmount its input. A modal's focus trap otherwise grabs focus
+      // while the browser is still between the old and new controls.
+      cancelAnimationFrame(blurFrame.current)
+      blurFrame.current = requestAnimationFrame(() => {
+        if (!container.contains(document.activeElement)) {
+          void commit()
+        }
+      })
+    },
     change: (name: string) => session.setState({ name, error: undefined }),
     cancel: () => {
       if (session.pending !== undefined) {

@@ -100,7 +100,7 @@ function NameInput(props: NameInputProps & { noun: EditItem["kind"] }) {
       }}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          void editor.commit()
+          editor.blur(event.currentTarget)
         }
       }}
     >

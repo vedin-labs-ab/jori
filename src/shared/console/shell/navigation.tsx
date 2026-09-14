@@ -70,7 +70,12 @@ export function ConsoleSidebar({
   }, [pathname, setOpenMobile, revealContents])
 
   return (
-    <Sidebar collapsible="icon" onCloseAutoFocus={onCloseAutoFocus}>
+    <Sidebar
+      collapsible="icon"
+      onCloseAutoFocus={onCloseAutoFocus}
+      // The input owns Escape while renaming inside the mobile sheet.
+      onEscapeKeyDown={onCloseAutoFocus}
+    >
       <SidebarHeader>{organization}</SidebarHeader>
       <SidebarContent>
         {consoleNavigation.map((group, index) => (
