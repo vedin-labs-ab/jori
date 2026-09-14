@@ -74,6 +74,7 @@ export function OrganizationVisibilityDialog({
     <VisibilityDialog
       audience={
         <AudienceSummary
+          showInherited
           organizationId={organizationId}
           target={target}
           value={draft}

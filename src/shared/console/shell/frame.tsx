@@ -135,7 +135,6 @@ export function ConsoleFrame({
             material={material}
             pathname={pathname}
           />
-          {material?.audience}
           <div
             className="ml-auto flex shrink-0 items-center gap-2"
             ref={setHeaderSlot}

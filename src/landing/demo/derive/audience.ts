@@ -37,6 +37,18 @@ export function resolveAudience(
   )
 
   return {
+    inherited: {
+      folders: chain
+        .filter((folder) => folder.visibility.mode !== "organization")
+        .reverse()
+        .map((folder) => ({
+          folderId: folder.folderId,
+          name: folder.name,
+          visibility: folder.visibility,
+          ownerId: folder.createdBy,
+        })),
+      unavailable: false,
+    },
     people: people
       .filter(
         (person) =>

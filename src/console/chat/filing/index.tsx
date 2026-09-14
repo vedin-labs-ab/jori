@@ -4,7 +4,6 @@ import { type ReactNode, useMemo, useState } from "react"
 import { ChatTitleMenu } from "@/shared/console/chat/menu"
 import { moveTarget, resourceSubject } from "@/shared/console/folders/types"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../../convex/_generated/api"
 import { MoveResourceDialog } from "../../folders/move"
 import { useMoveRun } from "../../folders/move/run"
@@ -47,12 +46,6 @@ export function ConversationFiling({
               void move.run(resourceSubject([target]), null)
             }
       }
-    />,
-    <VisibilityButton
-      visibility={live.visibility}
-      folderId={live.folderId}
-      ownerId={live.createdBy}
-      onClick={() => setSharing(true)}
     />
   )
 
@@ -88,8 +81,7 @@ function useConversationFolder(
 function useConversationTrail(
   live: LiveConversation,
   folder: ReturnType<typeof useConversationFolder>,
-  menu: ReactNode,
-  audience: ReactNode
+  menu: ReactNode
 ) {
   useMaterialTrail(
     useMemo(
@@ -101,9 +93,8 @@ function useConversationTrail(
           params: { folderId: segment.folderId },
         })),
         menu,
-        audience,
       }),
-      [live.title, folder, menu, audience]
+      [live.title, folder, menu]
     )
   )
 }

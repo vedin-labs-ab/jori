@@ -3,7 +3,6 @@ import {
   type MaterialBreadcrumb,
   type MaterialBreadcrumbSegment,
 } from "../materials/breadcrumb"
-import { VisibilityButton } from "../visibility/badge"
 import { FolderName } from "./edit/name"
 import { FolderTitleMenu } from "./menu"
 import { type FolderDetail, type FolderDialogRequest } from "./types"
@@ -47,14 +46,6 @@ export function folderBreadcrumb({
 
   return {
     aside,
-    audience: (
-      <VisibilityButton
-        visibility={folder.visibility}
-        folderId={folder.parentId}
-        ownerId={folder.createdBy}
-        onClick={() => onDialog({ type: "access", folder })}
-      />
-    ),
     renderName: (name) => (
       <FolderName folder={folder} surface="title">
         {name}

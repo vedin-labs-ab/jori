@@ -36,7 +36,7 @@ export function DemoVisibilityDialog({
 
   return (
     <VisibilityDialog
-      audience={<DemoAudience target={target} value={draft} />}
+      audience={<DemoAudience showInherited target={target} value={draft} />}
       canEdit
       field={
         <VisibilityField
@@ -63,16 +63,23 @@ export function DemoVisibilityDialog({
 /** Who a draft visibility reaches, with the folder that narrows it named
  *  the way the console names it. */
 export function DemoAudience({
+  showInherited = false,
   target,
   value,
 }: {
   target: AudienceTarget
+  showInherited?: boolean
   value: Visibility
 }) {
   const { state } = useDemoWorkspace()
   const audience = resolveAudience(state, target, value)
 
   return (
-    <AudienceLine audience={audience} mode={value.mode} viewerId={viewerId} />
+    <AudienceLine
+      showInherited={showInherited}
+      audience={audience}
+      mode={value.mode}
+      viewerId={viewerId}
+    />
   )
 }

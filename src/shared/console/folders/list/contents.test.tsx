@@ -101,7 +101,7 @@ function renderContents(
 test("lists folders and resources with their owners and item counts", () => {
   renderContents(readyContents)
 
-  for (const header of "Name,Sharing,Kind,Owner,Items,Updated".split(",")) {
+  for (const header of "Name,Audience,Kind,Owner,Items,Updated".split(",")) {
     expect(screen.getByRole("columnheader", { name: header })).toBeDefined()
   }
 
@@ -125,7 +125,12 @@ test("lists folders and resources with their owners and item counts", () => {
   // tooltip; empty Scratch shows an honest zero.
   expect(screen.getByTitle("1 folder, 2 resources").textContent).toContain("3")
   expect(screen.getByTitle("Empty folder").textContent).toContain("0")
-  expect(screen.getAllByText("—")).toHaveLength(2)
+  for (const name of ["Leads", "Digest"]) {
+    expect(screen.getByText(name).closest("tr")?.children[5]?.textContent).toBe(
+      "—"
+    )
+  }
+  expect(screen.getAllByText("Same as folder")).toHaveLength(4)
 })
 
 test("the Items header sorts folders by their count", () => {

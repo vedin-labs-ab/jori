@@ -10,10 +10,11 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import {
   compareAudiences,
   compareMove,
-  narrowingFolderName,
   type OrganizationMember,
   resolveAudience,
 } from "./audience"
+import { inheritedRestrictions } from "./inherited"
+import { createSight } from "./sight"
 import { folderGate } from "./target"
 
 // The audience the console shows: the stored mode resolved against the
@@ -88,6 +89,7 @@ describe("resolving an audience", () => {
 describe("naming the narrowing folder", () => {
   test("answers the innermost ancestor that is not organization-wide", async () => {
     const { database, ctx } = databaseContext()
+    const sight = createSight(ctx, { organizationId: "org", personId: owner })
     const outerId = await database.insert(
       "folders",
       folderDoc({ name: "Finance", visibility: { mode: "private" } })
@@ -101,19 +103,32 @@ describe("naming the narrowing folder", () => {
       })
     )
 
-    expect(await narrowingFolderName(ctx, "org", innerId)).toBe("Finance")
-    expect(await narrowingFolderName(ctx, "org", outerId)).toBe("Finance")
+    expect(
+      (await inheritedRestrictions(ctx, sight, innerId)).folders.at(-1)?.name ??
+        null
+    ).toBe("Finance")
+    expect(
+      (await inheritedRestrictions(ctx, sight, outerId)).folders.at(-1)?.name ??
+        null
+    ).toBe("Finance")
   })
 
   test("answers nothing when no folder above narrows anything", async () => {
     const { database, ctx } = databaseContext()
+    const sight = createSight(ctx, { organizationId: "org", personId: owner })
     const folderId = await database.insert(
       "folders",
       folderDoc({ visibility: { mode: "organization" } })
     )
 
-    expect(await narrowingFolderName(ctx, "org", folderId)).toBeNull()
-    expect(await narrowingFolderName(ctx, "org", undefined)).toBeNull()
+    expect(
+      (await inheritedRestrictions(ctx, sight, folderId)).folders.at(-1)
+        ?.name ?? null
+    ).toBeNull()
+    expect(
+      (await inheritedRestrictions(ctx, sight, undefined)).folders.at(-1)
+        ?.name ?? null
+    ).toBeNull()
   })
 })
 

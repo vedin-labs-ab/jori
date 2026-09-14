@@ -54,18 +54,26 @@ export function VisibilityMark({
 }
 
 export function VisibilityLabel({
-  separateFolder = false,
+  quietDefault = false,
   ...props
-}: VisibilitySubject & { separateFolder?: boolean }) {
+}: VisibilitySubject & { quietDefault?: boolean }) {
   const summary = visibilitySummary(props, useVisibilityDirectory())
+  if (quietDefault && props.visibility.mode === "organization") {
+    const description =
+      props.folderId === undefined ? "Organization default" : "Same as folder"
+    return (
+      <span className="text-muted-foreground" title={description}>
+        <span aria-hidden>—</span>
+        <span className="sr-only">{description}</span>
+      </span>
+    )
+  }
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="inline-flex max-w-48 items-center gap-1.5 text-muted-foreground text-xs [&_svg]:size-3.5!">
-          <VisibilityIcon mode={separateFolder ? summary.mode : summary.icon} />
-          <span className="truncate">
-            {separateFolder ? summary.configuredLabel : summary.label}
-          </span>
+          <VisibilityIcon mode={summary.icon} />
+          <span className="truncate">{summary.label}</span>
         </span>
       </TooltipTrigger>
       <TooltipContent>{summary.description}</TooltipContent>

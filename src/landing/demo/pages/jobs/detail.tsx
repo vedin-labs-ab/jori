@@ -152,12 +152,6 @@ function useJobCrumb(job: Job, onMoveToFolder: () => void) {
       onEdit={editor.openEditForm}
       onMoveToFolder={onMoveToFolder}
       onPausedChange={actions.setJobPaused}
-    />,
-    <VisibilityButton
-      visibility={job.visibility}
-      folderId={job.folderId}
-      ownerId={job.ownerId}
-      onClick={() => editor.openEditForm(job)}
     />
   )
 }

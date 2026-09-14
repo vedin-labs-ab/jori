@@ -9,7 +9,6 @@ import { type FileDetail } from "@/shared/console/files/types"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { MaterialLinksDialog } from "../shared/materials/links"
@@ -114,9 +113,6 @@ function FileReadyView({
         <AskJoriAction target={{ kind: "file", id: file.fileId }} />
       </FileHeaderActions>
       <FileBody
-        audience={
-          <VisibilityButton {...file} onClick={() => setDialog("access")} />
-        }
         file={file}
         onSave={save}
         siblings={siblings}

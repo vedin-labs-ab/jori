@@ -106,11 +106,11 @@ export function visibilityColumn<
   Row extends VisibilitySubject,
 >(): MaterialColumn<Row> {
   return {
-    label: "Sharing",
+    label: "Audience",
     tier: "3xl",
     cell: (row) => (
       <VisibilityLabel
-        separateFolder
+        quietDefault={row.folderId === undefined}
         visibility={row.visibility}
         folderId={row.folderId}
         ownerId={row.ownerId}

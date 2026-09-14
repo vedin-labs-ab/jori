@@ -12,9 +12,9 @@ import { type QueryLikeCtx } from "../shared/context"
 import {
   compareMove,
   listOrganizationMembers,
-  narrowingFolderName,
   resolveAudience,
 } from "./audience"
+import { inheritedRestrictions } from "./inherited"
 import {
   normalizeStoredVisibility,
   type StoredVisibility,
@@ -86,14 +86,13 @@ export const audience = query({
     }
     const members = await listOrganizationMembers(ctx, args.organizationId)
 
+    const inherited = await inheritedRestrictions(ctx, sight, gate.folderId)
+
     return {
+      inherited,
       people: await resolveAudience(ctx, gate, members),
       memberCount: members.length,
-      narrowedBy: await narrowingFolderName(
-        ctx,
-        args.organizationId,
-        gate.folderId
-      ),
+      narrowedBy: inherited.folders.at(-1)?.name ?? null,
     }
   },
 })

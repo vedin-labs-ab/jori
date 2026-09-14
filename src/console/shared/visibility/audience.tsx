@@ -16,10 +16,12 @@ export function AudienceSummary({
   organizationId,
   target,
   value,
+  showInherited = false,
 }: {
   organizationId: string
   target: AudienceTarget
   value: Visibility
+  showInherited?: boolean
 }) {
   const audience = useQuery(api.visibility.console.audience, {
     organizationId,
@@ -37,6 +39,7 @@ export function AudienceSummary({
   return (
     <AudienceLine
       audience={audience}
+      showInherited={showInherited}
       mode={value.mode}
       viewerId={viewerId ?? null}
     />

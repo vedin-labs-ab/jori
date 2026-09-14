@@ -4,7 +4,6 @@ import { authComponent, createAdapterOptions } from "../auth"
 import { resolvePersonByIdentity } from "../persons/identity/links"
 import { personDisplay } from "../persons/names"
 import { type QueryLikeCtx } from "../shared/context"
-import { type StoredVisibility } from "./schema"
 import { createSight, type Gate } from "./sight"
 
 // Who a stored visibility actually reaches, resolved against the live
@@ -92,40 +91,6 @@ export function compareAudiences(args: {
     becomesOrganizationWide:
       after.size === args.memberCount && before.size < args.memberCount,
   }
-}
-
-/** The innermost ancestor folder that narrows what it holds below the
- *  whole organization, named so the console can say where the narrowing
- *  comes from. Null when nothing above the material narrows it. */
-export async function narrowingFolderName(
-  ctx: QueryLikeCtx,
-  organizationId: string,
-  folderId: Id<"folders"> | undefined
-): Promise<string | null> {
-  const walked = new Set<string>()
-  let current = folderId
-
-  while (current !== undefined && !walked.has(current)) {
-    walked.add(current)
-
-    const folder = await ctx.db.get(current)
-
-    if (folder === null || folder.organizationId !== organizationId) {
-      return null
-    }
-
-    if (narrows(folder.visibility)) {
-      return folder.name
-    }
-
-    current = folder.parentId
-  }
-
-  return null
-}
-
-function narrows(visibility: StoredVisibility) {
-  return visibility.mode !== "organization"
 }
 
 async function toOrganizationMember(

@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { type api } from "../../../../convex/_generated/api"
+import { InheritedRestrictions } from "./inherited"
 
 /** Who a visibility actually reaches once the folders above it have had
  *  their say. */
@@ -18,22 +19,35 @@ type AudienceProps = {
   audience: ResolvedAudience
   mode: Visibility["mode"]
   viewerId: string | null
+  showInherited?: boolean
 }
 
 /** The line under a visibility field: who the draft reaches, and the
  *  folder that narrowed it when one did. */
-export function AudienceLine({ audience, mode, viewerId }: AudienceProps) {
+export function AudienceLine({
+  audience,
+  mode,
+  viewerId,
+  showInherited = false,
+}: AudienceProps) {
   return (
-    <p className="text-muted-foreground text-xs">
-      <AudienceSentence audience={audience} mode={mode} viewerId={viewerId} />
-      {audience.narrowedBy === null || mode === "organization" ? null : (
-        <>
-          {" "}
-          Narrowed to <NarrowingFolder name={audience.narrowedBy} /> by the
-          folder it's in.
-        </>
-      )}
-    </p>
+    <>
+      <p className="text-muted-foreground text-xs">
+        <AudienceSentence audience={audience} mode={mode} viewerId={viewerId} />
+        {showInherited ||
+        audience.narrowedBy === null ||
+        mode === "organization" ? null : (
+          <>
+            {" "}
+            Narrowed to <NarrowingFolder name={audience.narrowedBy} /> by the
+            folder it's in.
+          </>
+        )}
+      </p>
+      {showInherited ? (
+        <InheritedRestrictions inherited={audience.inherited} />
+      ) : null}
+    </>
   )
 }
 
@@ -41,6 +55,9 @@ export function AudienceLine({ audience, mode, viewerId }: AudienceProps) {
  *  a narrowing folder the honest audience is that folder's. Grant-shaped
  *  audiences are counted, with the names a hover away. */
 function AudienceSentence({ audience, mode, viewerId }: AudienceProps) {
+  if (mode === "organization" && audience.inherited.unavailable) {
+    return "Folder restrictions apply. Some inherited details are unavailable."
+  }
   if (mode === "organization") {
     return audience.narrowedBy === null ? (
       "Visible to everyone in the organization."

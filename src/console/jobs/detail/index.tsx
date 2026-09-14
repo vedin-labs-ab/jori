@@ -12,7 +12,6 @@ import { ConsolePageLayout } from "@/shared/console/layout"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useDocumentTitle } from "@/shared/console/shell/title"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../../convex/_generated/api"
 import { MoveResourceDialog } from "../../folders/move"
 import { ConsolePage } from "../../page"
@@ -141,12 +140,6 @@ function useJobCrumb(
       onEdit={editor.openEditForm}
       onMoveToFolder={() => page.setIsMoving(true)}
       onPausedChange={setPaused}
-    />,
-    <VisibilityButton
-      visibility={job.visibility}
-      folderId={job.folderId}
-      ownerId={job.ownerId}
-      onClick={() => editor.openEditForm(job)}
     />
   )
 }

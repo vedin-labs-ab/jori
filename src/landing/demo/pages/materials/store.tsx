@@ -12,7 +12,6 @@ import { exportStoreJson } from "@/shared/console/stores/export"
 import { type SchemaWrite } from "@/shared/console/stores/schema/dialog"
 import { type StoreDetail } from "@/shared/console/stores/types"
 import { StoreValue } from "@/shared/console/stores/value/section"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { materialOf, storeDetail } from "../../derive/materials"
 import { DemoLinksDialog } from "../../dialogs/links"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
@@ -49,12 +48,6 @@ export function StorePage({ storeId }: { storeId: string }) {
       </MaterialHeaderActions>
       <ClientOnly fallback={<ConsoleListLoading />}>
         <StoreValue
-          audience={
-            <VisibilityButton
-              {...store}
-              onClick={() => setRequest({ kind: "access", material })}
-            />
-          }
           onWriteSchema={schemaWrite(store, actions.writeStoreSchema)}
           onWriteValue={(value) => {
             actions.writeStoreValue(store.storeId, value)

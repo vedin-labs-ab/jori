@@ -13,7 +13,6 @@ import { closeOnDismiss } from "@/shared/console/retain"
 import { exportStoreJson } from "@/shared/console/stores/export"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { type StoreDetail } from "@/shared/console/stores/types"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
@@ -136,9 +135,6 @@ function StoreReadyView({
         <AskJoriAction target={{ kind: "store", id: store.storeId }} />
       </MaterialHeaderActions>
       <StoreValue
-        audience={
-          <VisibilityButton {...store} onClick={() => setDialog("access")} />
-        }
         organizationId={organizationId}
         store={store}
         titleMenu={titleMenu}

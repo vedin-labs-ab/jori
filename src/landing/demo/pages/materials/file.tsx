@@ -5,7 +5,6 @@ import { FileBody } from "@/shared/console/files/body"
 import { FileHeaderActions } from "@/shared/console/files/header"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { fileDetail, fileSiblingsOf, materialOf } from "../../derive/materials"
 import { DemoLinksDialog } from "../../dialogs/links"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
@@ -39,12 +38,6 @@ export function FilePage({ fileId }: { fileId: string }) {
       </FileHeaderActions>
       <ClientOnly fallback={<ConsoleListLoading />}>
         <FileBody
-          audience={
-            <VisibilityButton
-              {...file}
-              onClick={() => setRequest({ kind: "access", material })}
-            />
-          }
           file={file}
           onSave={(text) => {
             actions.writeFileText(file.fileId, text)

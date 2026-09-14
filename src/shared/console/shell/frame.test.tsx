@@ -172,6 +172,7 @@ test("hangs the page's menu off its name when the view publishes one", () => {
   act(() =>
     publish.current?.({
       name: "Folders",
+      audience: <button type="button">Audience: Via folder</button>,
       menu: (
         <DropdownMenuContent>
           <DropdownMenuItem>Usage</DropdownMenuItem>
@@ -183,6 +184,7 @@ test("hangs the page's menu off its name when the view publishes one", () => {
   // Even a surface with no trail above it: the name becomes the trigger,
   // so the heading it would otherwise be is gone.
   expect(screen.getByRole("button", { name: "Folders" })).toBeDefined()
+  expect(screen.queryByRole("button", { name: /^Audience:/ })).toBeNull()
   expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
 })
 

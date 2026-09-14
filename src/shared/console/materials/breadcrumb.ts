@@ -41,7 +41,7 @@ export type MaterialBreadcrumb = {
    *  The shell sets it right after the name, inside the crumb, with no
    *  divider: it belongs to the name rather than standing beside it. */
   suffix?: ReactNode
-  /** The audience control, outside the breadcrumb navigation. */
+  /** An audience shortcut for embedded panes without a full breadcrumb menu. */
   audience?: ReactNode
   /** What the page's autosave is doing, for a page that saves as it goes.
    *  The shell shows it in the name itself: the name shimmers while a
