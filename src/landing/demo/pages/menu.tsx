@@ -95,7 +95,11 @@ function MaterialResourceMenu({ material }: { material: DemoMaterial }) {
         onEdit={() => setRequest({ kind: "edit", material })}
         onMoveToFolder={() => setRequest({ kind: "move", material })}
         onRestore={() => undefined}
-        onUnfile={() => actions.fileResource("collection", material.id, null)}
+        onUnfile={
+          material.folderId === undefined
+            ? undefined
+            : () => actions.fileResource("collection", material.id, null)
+        }
       />
       <MaterialDialogs
         onClose={() => setRequest(undefined)}
@@ -122,7 +126,11 @@ function FileResourceMenu({ material }: { material: DemoMaterial }) {
             onEdit={() => setRequest({ kind: "edit", material })}
             onMoveToFolder={() => setRequest({ kind: "move", material })}
             onRemove={() => setIsDeleteOpen(true)}
-            onUnfile={() => actions.fileResource("file", material.id, null)}
+            onUnfile={
+              material.folderId === undefined
+                ? undefined
+                : () => actions.fileResource("file", material.id, null)
+            }
             withLinks
           />
         </DropdownMenuContent>
@@ -160,7 +168,11 @@ function JobResourceMenu({ resource }: { resource: FolderResource }) {
         onEdit={editor.openEditForm}
         onMoveToFolder={() => setIsMoveOpen(true)}
         onPausedChange={actions.setJobPaused}
-        onUnfile={() => actions.fileResource("job", job.id, null)}
+        onUnfile={
+          job.folderId === undefined
+            ? undefined
+            : () => actions.fileResource("job", job.id, null)
+        }
       />
       <DemoMoveDialog
         onOpenChange={setIsMoveOpen}

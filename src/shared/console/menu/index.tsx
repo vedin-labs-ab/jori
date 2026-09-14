@@ -36,17 +36,27 @@ export function TitleMenuContent({
 
 /** The "…" button a list row opens its menu from, named for the row so
  *  screen readers tell one row's actions from another's. */
-export function RowMenuTrigger({ name }: { name: string }) {
-  return (
-    <DropdownMenuTrigger asChild>
-      <Button
-        aria-label={`Open actions for ${name}`}
-        size="icon-sm"
-        type="button"
-        variant="ghost"
-      >
-        <MoreHorizontal />
-      </Button>
-    </DropdownMenuTrigger>
+export function RowMenuTrigger({
+  name,
+  disabled = false,
+}: {
+  name: string
+  disabled?: boolean
+}) {
+  const button = (
+    <Button
+      disabled={disabled}
+      aria-label={`Open actions for ${name}`}
+      size="icon-sm"
+      type="button"
+      variant="ghost"
+    >
+      <MoreHorizontal />
+    </Button>
+  )
+  return disabled ? (
+    button
+  ) : (
+    <DropdownMenuTrigger asChild>{button}</DropdownMenuTrigger>
   )
 }

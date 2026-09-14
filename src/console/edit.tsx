@@ -43,10 +43,10 @@ function usePersistence(organizationId: string): EditPersistence {
               .map((f) => f.name)
           )
         : `New ${kind}`,
-    onReveal: (kind, folderId) =>
+    onReveal: (_kind, folderId) =>
       navigate(
         folderId === undefined
-          ? { to: `/${kind}s` }
+          ? { to: "/folders" }
           : { to: "/folders/$folderId", params: { folderId } }
       ),
   }
@@ -77,10 +77,22 @@ function useChanges(
       }
       if (kind === "table") {
         const table = await tableCreate(args)
-        return { id: table.tableId, kind, name: table.name, parentId }
+        return {
+          id: table.tableId,
+          kind,
+          name: table.name,
+          parentId,
+          table: table,
+        }
       }
       const store = await storeCreate(args)
-      return { id: store.storeId, kind, name: store.name, parentId }
+      return {
+        id: store.storeId,
+        kind,
+        name: store.name,
+        parentId,
+        store: { ...store, version: 0 },
+      }
     },
     onRename: (item, name) => {
       if (item.kind === "folder") {

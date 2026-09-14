@@ -42,7 +42,9 @@ function CreationControls() {
       </Button>
       <Table>
         <TableBody>
-          {created ? <CreatedItemRow edit={created} colSpan={2} /> : null}
+          {created ? (
+            <CreatedItemRow edit={created}>{null}</CreatedItemRow>
+          ) : null}
         </TableBody>
       </Table>
     </div>

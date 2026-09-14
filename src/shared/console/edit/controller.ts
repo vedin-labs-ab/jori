@@ -98,7 +98,7 @@ async function create(
   const name = latest.current.name(kind, parentId)
   if (surface === "sidebar" && kind !== "folder") {
     latest.current.onReveal?.(kind, parentId)
-    surface = parentId === undefined ? kind : "contents"
+    surface = "contents"
   }
   setEdit({
     item: { id: "pending", kind, parentId, name },

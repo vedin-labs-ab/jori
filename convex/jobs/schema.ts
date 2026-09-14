@@ -114,6 +114,7 @@ export const jobs = defineTable({
     "parent.id",
   ])
   .index("by_folder", ["folderId"])
+  .index("by_organization_and_folder", ["organizationId", "folderId"])
 
 export type JobTriggerInput = Infer<typeof triggerInput>
 export type JobType = Infer<typeof jobType>

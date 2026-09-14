@@ -70,7 +70,7 @@ export function storeDetail(
     : undefined
 }
 
-function storeSummary(material: DemoStore): StoreSummary {
+export function storeSummary(material: DemoStore): StoreSummary {
   return {
     ...owned(material),
     storeId: material.id,
@@ -131,7 +131,7 @@ function fileUrl(material: DemoFile) {
   return material.asset ?? null
 }
 
-function tableSummary(
+export function tableSummary(
   material: Extract<DemoMaterial, { kind: "table" }>
 ): TableSummary {
   return {

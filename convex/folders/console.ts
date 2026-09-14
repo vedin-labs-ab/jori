@@ -149,6 +149,7 @@ export const roots = query({
         status: "unauthorized" as const,
         message: access.message,
         folders: [],
+        resources: [],
       }
     }
 
@@ -156,6 +157,11 @@ export const roots = query({
 
     return {
       status: "ready" as const,
+      resources: await folderResources(ctx, {
+        organizationId: args.organizationId,
+        personId,
+        folderId: undefined,
+      }),
       folders: await folderChildren(ctx, {
         organizationId: args.organizationId,
         personId,

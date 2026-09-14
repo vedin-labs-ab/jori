@@ -29,7 +29,11 @@ export function folderRows(state: DemoState): FolderRow[] {
 }
 
 export function rootFolders(state: DemoState): FolderRootsResult {
-  return { status: "ready", folders: listedFolders(state, undefined) }
+  return {
+    status: "ready",
+    folders: listedFolders(state, undefined),
+    resources: folderResources(state, undefined),
+  }
 }
 
 export function folderContents(
@@ -127,7 +131,7 @@ function listedFolders(state: DemoState, parentId: FolderId | undefined) {
     })
 }
 
-function folderResources(state: DemoState, folderId: FolderId) {
+function folderResources(state: DemoState, folderId: FolderId | undefined) {
   const materials = state.materials
     .filter((material) => material.folderId === folderId)
     .map(

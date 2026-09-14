@@ -1,4 +1,6 @@
 import { createContext, useContext, useRef } from "react"
+import { type StoreSummary } from "../stores/types"
+import { type TableSummary } from "../tables/types"
 
 export type EditKind = "folder" | "table" | "store"
 export type EditSurface = "sidebar" | "contents" | "title" | "table" | "store"
@@ -7,6 +9,8 @@ export type EditItem = {
   kind: EditKind
   name: string
   parentId?: string
+  table?: TableSummary
+  store?: StoreSummary
 }
 export type Edit = {
   item: EditItem

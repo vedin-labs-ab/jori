@@ -28,3 +28,4 @@ export const files = defineTable({
   .index("by_run", ["runId"])
   .index("by_organization_and_created_at", ["organizationId", "createdAt"])
   .index("by_folder", ["folderId"])
+  .index("by_organization_and_folder", ["organizationId", "folderId"])

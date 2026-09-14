@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { type CountedNoun } from "@/shared/console/count"
+import { useEditing } from "@/shared/console/edit/state"
 import { type ListConfig, useListState } from "@/shared/console/list/controls"
 import { useResettingSetter } from "@/shared/console/list/pagination"
 
@@ -18,7 +19,9 @@ export function useMaterialListing<Row extends { name: string }>({
 }) {
   const [query, setQuery] = useState("")
   const needle = query.trim().toLowerCase()
+  const edit = useEditing()?.edit
   const listing = useListState({
+    disabled: (row) => identify(row) === edit?.item.id,
     config,
     hasFilters: needle !== "",
     identify,

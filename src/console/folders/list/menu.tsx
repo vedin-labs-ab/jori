@@ -57,7 +57,9 @@ function ChatResourceMenu({ actions, resource }: ResourceMenu) {
         <MaterialFilingItems
           onAccess={() => actions.onAccess(resource)}
           onMoveToFolder={() => actions.onMove(resource)}
-          onUnfile={() => actions.onUnfile(resource)}
+          onUnfile={
+            actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
+          }
         />
       </DropdownMenuContent>
     </DropdownMenu>
@@ -83,7 +85,9 @@ function MaterialResourceMenu({ actions, resource }: ResourceMenu) {
       onEdit={() => actions.onEdit(resource)}
       onMoveToFolder={() => actions.onMove(resource)}
       onRestore={() => actions.removal.restore(resource)}
-      onUnfile={() => actions.onUnfile(resource)}
+      onUnfile={
+        actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
+      }
     />
   )
 }
@@ -120,7 +124,9 @@ function FileResourceMenu({ actions, resource }: ResourceMenu) {
             onEdit={() => actions.onEdit(resource)}
             onMoveToFolder={() => actions.onMove(resource)}
             onRemove={() => setIsDeleteOpen(true)}
-            onUnfile={() => actions.onUnfile(resource)}
+            onUnfile={
+              actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
+            }
             withLinks
           />
         </DropdownMenuContent>
@@ -154,7 +160,9 @@ function JobResourceMenu({ actions, resource }: ResourceMenu) {
       onPausedChange={(target, paused) =>
         void actions.editor.setJobPaused(target, paused)
       }
-      onUnfile={() => actions.onUnfile(resource)}
+      onUnfile={
+        actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
+      }
     />
   )
 }
@@ -168,10 +176,12 @@ function FilingOnlyMenu({ actions, resource }: ResourceMenu) {
           <FolderInput />
           Move to folder…
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => actions.onUnfile(resource)}>
-          <FolderMinus />
-          Remove from folder
-        </DropdownMenuItem>
+        {actions.onUnfile ? (
+          <DropdownMenuItem onSelect={() => actions.onUnfile?.(resource)}>
+            <FolderMinus />
+            Remove from folder
+          </DropdownMenuItem>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   )

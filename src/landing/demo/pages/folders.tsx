@@ -1,20 +1,17 @@
 import { formatUsd } from "@contracts/billing"
-import { Plus } from "lucide-react"
 import { useContext, useMemo } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { folderBreadcrumb } from "@/shared/console/folders/breadcrumb"
-import { useFolderRequests } from "@/shared/console/folders/edit/state"
+import { NewInFolderButton } from "@/shared/console/folders/create"
 import { FolderHeaderActions } from "@/shared/console/folders/header"
 import { FolderContents } from "@/shared/console/folders/list/contents"
-import { RootFolderList } from "@/shared/console/folders/list/roots"
 import { FoldersTitleMenu } from "@/shared/console/folders/menu"
 import { type FolderDetail } from "@/shared/console/folders/types"
 import { UsageHintButton } from "@/shared/console/folders/usage/hint"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderAside,
-  ConsoleHeaderButton,
 } from "@/shared/console/layout"
 import {
   ConsoleListContent,
@@ -22,21 +19,16 @@ import {
 } from "@/shared/console/list/frame"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
-import { folderDetail, rootFolders } from "../derive/folders"
+import { folderDetail } from "../derive/folders"
 import { usageSpend } from "../derive/usage"
-import { DemoFolderDialogs } from "../dialogs/folders"
 import { type FolderId } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
 import { useDemoFolderContents } from "./contents"
-import { useDemoFolderSelection } from "./select"
 
 /** The tree's landing page: the root folders in the shared table. */
 export function RootFoldersPage() {
   const { state } = useDemoWorkspace()
-  const [dialog, setDialog] = useFolderRequests("contents")
-  const roots = useMemo(() => rootFolders(state), [state])
-  const selection = useDemoFolderSelection()
-  const create = () => setDialog({ type: "create" })
+  const listing = useDemoFolderContents(undefined)
 
   useMaterialTrail(
     useMemo(
@@ -56,21 +48,13 @@ export function RootFoldersPage() {
   return (
     <ConsoleListLayout>
       <ConsoleHeaderActions>
-        <ConsoleHeaderButton
-          icon={<Plus />}
-          label="New folder"
-          onClick={create}
-          type="button"
+        <NewInFolderButton
+          onCreate={listing.onCreate}
+          onNewFolder={listing.onNewFolder}
         />
       </ConsoleHeaderActions>
-      <RootFolderList
-        onCreate={create}
-        onDialog={setDialog}
-        roots={roots}
-        selectionActions={selection.actions}
-      />
-      <DemoFolderDialogs dialog={dialog} onClose={() => setDialog(undefined)} />
-      {selection.dialog}
+      <FolderContents {...listing.contents} />
+      {listing.overlays}
     </ConsoleListLayout>
   )
 }

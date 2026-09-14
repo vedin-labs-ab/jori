@@ -1,5 +1,9 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
+import { cn } from "@/lib/utils"
+
+/** Leave room for selection, updated time, and actions on narrow lists. */
+export const nameCellWidth = "max-w-[min(16rem,50cqw)]"
 
 /** Name-cell shell shared by the material list tables: the kind icon and
  *  the caller's link and badges.
@@ -17,7 +21,7 @@ export function MaterialNameCell({
   icon: LucideIcon
 }) {
   return (
-    <div className="flex min-w-0 max-w-64 items-center gap-2">
+    <div className={cn("flex min-w-0 items-center gap-2", nameCellWidth)}>
       <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
       {children}
     </div>

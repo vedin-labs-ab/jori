@@ -2,6 +2,7 @@ import { type RefObject, useEffect, useRef, useState } from "react"
 import { readErrorMessage, showErrorToast } from "../error"
 
 export type NameInputProps = {
+  scrollBlock?: ScrollLogicalPosition
   initialName: string
   onClose: (restoreFocus: boolean) => void
   onSave: (name: string) => Promise<unknown>
@@ -44,7 +45,11 @@ export function useNameInput(props: NameInputProps) {
     const frame = requestAnimationFrame(() => {
       input.current?.focus({ preventScroll: true })
       input.current?.select()
-      input.current?.scrollIntoView?.({ block: "nearest" })
+      input.current?.scrollIntoView?.({
+        block: props.scrollBlock ?? "nearest",
+        inline: "nearest",
+        behavior: "instant",
+      })
     })
     props.register(commit)
     return () => {
@@ -52,7 +57,7 @@ export function useNameInput(props: NameInputProps) {
       cancelAnimationFrame(frame)
       props.register(undefined)
     }
-  }, [commit, props.register, session])
+  }, [commit, props.register, props.scrollBlock, session])
   return {
     ...state,
     input,

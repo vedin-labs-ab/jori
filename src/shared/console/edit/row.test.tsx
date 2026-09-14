@@ -60,7 +60,14 @@ function example({
           kind={{
             creationKind: "table",
             action: null,
-            columns: [],
+            createdRow: () => row,
+            columns: [
+              {
+                label: "Owner",
+                tier: "lg",
+                cell: () => <button type="button">Ada</button>,
+              },
+            ],
             description: "Tables",
             drag: (r) => ({ type: "table", id: r.id, name: r.name }),
             icon: Table2,
@@ -96,7 +103,24 @@ test("a query refresh cannot duplicate the new row or replace its typed name", a
   expect(screen.getByRole("textbox")).toBe(input)
   expect((input as HTMLInputElement).value).toBe("Customer renewals")
   expect(screen.queryByRole("link", { name: "New table" })).toBeNull()
+  const editingRow = input.closest("tr")
+  expect(editingRow?.querySelectorAll("td")).toHaveLength(4)
+  expect(editingRow?.querySelector("[colspan]")).toBeNull()
+  expect(
+    editingRow?.querySelector('[role="checkbox"]')?.hasAttribute("disabled")
+  ).toBe(true)
+  expect(
+    editingRow
+      ?.querySelector('button[aria-label="Open actions for New table"]')
+      ?.hasAttribute("disabled")
+  ).toBe(true)
+  expect(screen.getByText("Ada").closest("td")?.hasAttribute("inert")).toBe(
+    true
+  )
   fireEvent.keyDown(input, { key: "Escape" })
+  expect(screen.getByText("Ada").closest("td")?.hasAttribute("inert")).toBe(
+    false
+  )
   const link = screen.getByRole("link", { name: "New table" })
   await waitFor(() => expect(document.activeElement).toBe(link))
 })

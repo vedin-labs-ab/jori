@@ -2,6 +2,8 @@ import { type ReactNode } from "react"
 import { TableCell } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../dot"
+import { CreatedItemRow } from "../../edit/row"
+import { type Edit } from "../../edit/state"
 import { JobStatus } from "../../jobs/status"
 import { SelectionRowCell } from "../../list/bar"
 import { columnTier } from "../../list/controls"
@@ -35,7 +37,7 @@ export function ResourceListRow({
   selection,
 }: {
   /** The folder being viewed — the one the resource already sits in. */
-  folderId: string
+  folderId: string | undefined
   menu: ReactNode
   resource: FolderResource
   /** The selection, as a drag would carry it. */
@@ -46,7 +48,6 @@ export function ResourceListRow({
     resourceDragItem(resource, folderId),
     selected
   )
-  const now = useNow(30_000)
 
   return (
     <DraggableTableRow
@@ -61,32 +62,7 @@ export function ResourceListRow({
       <TableCell data-row-link>
         <ResourceLink resource={resource} folderId={folderId} />
       </TableCell>
-      <VisibilityCell {...resource} folderId={folderId} />
-      <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
-        <span className="inline-flex items-center gap-1.5">
-          {resourcePresentation(resource).label}
-          {resource.status === "paused" || resource.status === "completed" ? (
-            <>
-              <SeparatorDot />
-              <JobStatus status={resource.status} />
-            </>
-          ) : null}
-        </span>
-      </TableCell>
-      <TableCell className={columnTier.lg}>
-        <MaterialOwnerCell owner={materialOwner(resource)} />
-      </TableCell>
-      {/* Resources hold nothing, so the Items column carries a quiet dash —
-          an empty cell under a sortable header would read as missing data. */}
-      <TableCell className={cn("text-muted-foreground/60", columnTier["2xl"])}>
-        &mdash;
-      </TableCell>
-      <TableCell
-        className={cn("text-muted-foreground", columnTier.xs)}
-        title={absoluteTime(resource.updatedAt)}
-      >
-        {relativeTime(resource.updatedAt, now)}
-      </TableCell>
+      <ResourceCells resource={resource} folderId={folderId} />
       <TableCell className="text-right">{menu}</TableCell>
     </DraggableTableRow>
   )
@@ -98,7 +74,7 @@ function ResourceLink({
   folderId,
 }: {
   resource: FolderResource
-  folderId: string
+  folderId: string | undefined
 }) {
   const Icon = resourcePresentation(resource).icon
 
@@ -114,5 +90,78 @@ function ResourceLink({
       <span className="truncate">{resource.name}</span>
       <VisibilityNameMark {...resource} folderId={folderId} />
     </ConsoleLink>
+  )
+}
+
+export function CreatedResourceRow({
+  edit,
+  resource,
+}: {
+  edit: Edit
+  resource: FolderResource | undefined
+}) {
+  const material = edit.item.table ?? edit.item.store
+  const snapshot: FolderResource | undefined =
+    material === undefined
+      ? undefined
+      : {
+          ...material,
+          id: "tableId" in material ? material.tableId : material.storeId,
+          type: edit.item.kind === "store" ? "store" : "table",
+        }
+  return (
+    <CreatedItemRow edit={edit}>
+      <ResourceCells
+        resource={resource ?? snapshot}
+        folderId={edit.item.parentId}
+        inert
+      />
+    </CreatedItemRow>
+  )
+}
+function ResourceCells({
+  resource,
+  folderId,
+  inert,
+}: {
+  resource: FolderResource | undefined
+  folderId: string | undefined
+  inert?: boolean
+}) {
+  const now = useNow(30_000)
+  return (
+    <>
+      <VisibilityCell
+        {...resource}
+        visibility={resource?.visibility ?? { mode: "organization" }}
+        folderId={folderId}
+        inert={inert}
+      />
+      <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
+        <span className="inline-flex items-center gap-1.5">
+          {resource ? resourcePresentation(resource).label : "—"}
+          {resource?.status === "paused" || resource?.status === "completed" ? (
+            <>
+              <SeparatorDot />
+              <JobStatus status={resource.status} />
+            </>
+          ) : null}
+        </span>
+      </TableCell>
+      <TableCell className={columnTier.lg}>
+        {resource ? <MaterialOwnerCell owner={materialOwner(resource)} /> : "—"}
+      </TableCell>
+      {/* Resources hold nothing, so the Items column carries a quiet dash —
+          an empty cell under a sortable header would read as missing data. */}
+      <TableCell className={cn("text-muted-foreground/60", columnTier["2xl"])}>
+        &mdash;
+      </TableCell>
+      <TableCell
+        className={cn("text-muted-foreground", columnTier.xs)}
+        title={resource ? absoluteTime(resource.updatedAt) : undefined}
+      >
+        {resource ? relativeTime(resource.updatedAt, now) : "—"}
+      </TableCell>
+    </>
   )
 }

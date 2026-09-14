@@ -106,16 +106,24 @@ export const create = mutation({
     folderId: v.optional(v.id("folders")),
     columns: v.optional(v.any()),
   },
-  handler: async (ctx, args): Promise<ReturnType<typeof summarizeTable>> => {
+  handler: async (
+    ctx,
+    args
+  ): Promise<
+    Awaited<
+      ReturnType<typeof withOwnerDisplay<ReturnType<typeof summarizeTable>>>
+    >
+  > => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
-    return await ctx.runMutation(internal.tables.records.create, {
+    const created = await ctx.runMutation(internal.tables.records.create, {
       ...args,
       name:
         args.name ??
         (await newCollectionName(ctx, { ...args, personId }, "table")),
       personId,
     })
+    return await withOwnerDisplay(ctx, created)
   },
 })
 

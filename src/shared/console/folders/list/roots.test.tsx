@@ -4,8 +4,12 @@ import { DndContext } from "@dnd-kit/core"
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { type FolderDialogRequest, type FolderRootsResult } from "../types"
-import { RootFolderList } from "./roots"
+import {
+  type FolderDialogRequest,
+  type FolderResource,
+  type FolderRootsResult,
+} from "../types"
+import { FolderContents } from "./contents"
 import { type FolderSelectionActions } from "./select"
 
 vi.mock("@tanstack/react-router", async () => ({
@@ -27,8 +31,9 @@ function folderRow(overrides: Record<string, unknown>) {
     resourceCount: 0,
     ownerId: "persons:owner",
     ownerName: "Ada Lovelace",
+    ownerImage: undefined,
     ...overrides,
-  }
+  } as FolderRootsResult["folders"][number]
 }
 
 function renderList(
@@ -44,10 +49,12 @@ function renderList(
   render(
     <TooltipProvider>
       <DndContext>
-        <RootFolderList
-          onCreate={() => undefined}
+        <FolderContents
+          folderId={undefined}
+          newMenu={<button type="button">New</button>}
+          resourceMenu={() => null}
           onDialog={onDialog}
-          roots={roots}
+          contents={roots}
           selectionActions={selectionActions}
         />
       </DndContext>
@@ -62,6 +69,7 @@ function stubSelectionActions(): FolderSelectionActions {
 test("root folders land in the same table as a folder's contents", () => {
   renderList({
     status: "ready",
+    resources: [],
     folders: [folderRow({ folderCount: 2, resourceCount: 3 })],
   } as FolderRootsResult)
 
@@ -89,6 +97,7 @@ test("loading shows the centered spinner instead of a table", () => {
 test("an unauthorized result surfaces its message", () => {
   renderList({
     status: "unauthorized",
+    resources: [],
     message: "No seat on this organization.",
     folders: [],
   } as FolderRootsResult)
@@ -98,17 +107,25 @@ test("an unauthorized result surfaces its message", () => {
 })
 
 test("no folders yet introduces the surface with a create action", () => {
-  renderList({ status: "ready", folders: [] } as unknown as FolderRootsResult)
+  renderList({
+    status: "ready",
+    resources: [],
+    folders: [],
+  } as unknown as FolderRootsResult)
 
-  expect(screen.getByText("No folders yet")).toBeDefined()
-  expect(screen.getByRole("button", { name: /New folder/ })).toBeDefined()
+  expect(screen.getByText("Empty folder")).toBeDefined()
+  expect(screen.getByRole("button", { name: "New" })).toBeDefined()
 })
 
 test("a root folder row opens the folder's own menu", () => {
   const onDialog = vi.fn()
 
   renderList(
-    { status: "ready", folders: [folderRow({})] } as FolderRootsResult,
+    {
+      status: "ready",
+      resources: [],
+      folders: [folderRow({})],
+    } as FolderRootsResult,
     { onDialog }
   )
   fireEvent.pointerDown(
@@ -134,6 +151,7 @@ test("selecting root folders offers a move and a delete over them", () => {
   renderList(
     {
       status: "ready",
+      resources: [],
       folders: [
         folderRow({}),
         folderRow({ folderId: "folder-2", name: "Playbooks" }),
@@ -167,4 +185,59 @@ test("selecting root folders offers a move and a delete over them", () => {
     ],
     resources: [],
   })
+})
+
+test("folder-less resources link to their pages and move from the root", () => {
+  const selectionActions = stubSelectionActions()
+  renderList(
+    {
+      status: "ready",
+      folders: [],
+      resources: [
+        {
+          type: "table",
+          id: "collections:root" as FolderResource["id"],
+          name: "Root table",
+          visibility: { mode: "organization" },
+          updatedAt: 1,
+        },
+      ],
+    } as FolderRootsResult,
+    { selectionActions }
+  )
+  expect(
+    screen.getByRole("link", { name: "Root table" }).getAttribute("href")
+  ).toBe("/tables/collections:root")
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select Root table" }))
+  fireEvent.click(screen.getByRole("button", { name: "Move" }))
+  expect(selectionActions.onMove).toHaveBeenCalledWith({
+    folders: [],
+    resources: [
+      {
+        resourceType: "collection",
+        resourceId: "collections:root",
+        name: "Root table",
+        folderId: undefined,
+      },
+    ],
+  })
+})
+
+test("a folder-less chat offers a move without a no-op remove-from-folder action", () => {
+  renderList({
+    status: "ready",
+    folders: [],
+    resources: [
+      {
+        type: "chat",
+        id: "conversations:root" as FolderResource["id"],
+        name: "Root chat",
+        visibility: { mode: "organization" },
+        updatedAt: 1,
+      },
+    ],
+  } as FolderRootsResult)
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select Root chat" }))
+  expect(screen.getByRole("button", { name: "Move" })).toBeDefined()
+  expect(screen.queryByRole("button", { name: "Remove" })).toBeNull()
 })

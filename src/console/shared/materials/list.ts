@@ -2,6 +2,7 @@ import { useQuery } from "convex/react"
 import { type FunctionReference } from "convex/server"
 import { useDeferredValue, useState } from "react"
 import { type CountedNoun } from "@/shared/console/count"
+import { useEditing } from "@/shared/console/edit/state"
 import { type MoveResourceTarget } from "@/shared/console/folders/types"
 import { type ListConfig, useListState } from "@/shared/console/list/controls"
 import { useResettingSetter } from "@/shared/console/list/pagination"
@@ -47,7 +48,9 @@ export function useMaterialListPage<Row, Result extends { status: string }>({
     includeArchived: false,
   })
   const rows = list === undefined ? [] : rowsOf(list)
+  const edit = useEditing()?.edit
   const listing = useListState({
+    disabled: (row) => identify(row) === edit?.item.id,
     config: config(folders, rows),
     hasFilters: query.trim() !== "",
     identify,

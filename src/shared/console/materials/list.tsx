@@ -11,7 +11,7 @@ import {
 import { cn } from "@/lib/utils"
 import { type CountedNoun } from "../count"
 import { CreatedItemRow } from "../edit/row"
-import { type EditKind, useCreatedItem } from "../edit/state"
+import { type EditItem, type EditKind, useCreatedItem } from "../edit/state"
 import { type DragPayload, type ResourceDragItem } from "../folders/drag/plan"
 import { DraggableTableRow } from "../folders/drag/row"
 import { useResourceRowDrag } from "../folders/drag/state"
@@ -61,6 +61,7 @@ export type MaterialColumn<Row> = {
 export type MaterialListKind<Row> = {
   /** What the empty state offers: the page's create actions. */
   creationKind?: Exclude<EditKind, "folder">
+  createdRow?: (item: EditItem) => Row | undefined
   action: ReactNode
   columns: readonly MaterialColumn<Row>[]
   description: string
@@ -128,7 +129,17 @@ export function MaterialList<Row extends MaterialListRow>(
         />
         <TableBody>
           {created ? (
-            <CreatedItemRow edit={created} colSpan={kind.columns.length + 3} />
+            <CreatedItemRow edit={created}>
+              <MaterialCells
+                kind={kind}
+                folders={props.folders}
+                row={
+                  rows.find((row) => kind.identify(row) === created.item.id) ??
+                  kind.createdRow?.(created.item)
+                }
+                inert
+              />
+            </CreatedItemRow>
           ) : null}
           {visible.map((row) => (
             <MaterialListRow
@@ -246,8 +257,6 @@ function MaterialListRow<Row extends MaterialListRow>({
   selected: DragPayload
 }) {
   const drag = useResourceRowDrag(kind.drag(row), selected)
-  const now = useNow(30_000)
-  const context = { folders, now }
 
   return (
     <DraggableTableRow
@@ -260,16 +269,41 @@ function MaterialListRow<Row extends MaterialListRow>({
         selection={selection}
       />
       <TableCell data-row-link>{kind.nameCell(row)}</TableCell>
-      {kind.columns.map((column) => (
-        <TableCell
-          className={cn(column.className, columnTier[column.tier])}
-          key={column.label}
-          title={column.title?.(row)}
-        >
-          {column.cell(row, context)}
-        </TableCell>
-      ))}
+      <MaterialCells kind={kind} row={row} folders={folders} />
       <TableCell className="text-right">{kind.menu(row)}</TableCell>
     </DraggableTableRow>
+  )
+}
+
+function MaterialCells<Row>({
+  kind,
+  row,
+  folders,
+  inert,
+}: {
+  kind: MaterialListKind<Row>
+  row: Row | undefined
+  folders: FolderNames | undefined
+  inert?: boolean
+}) {
+  const now = useNow(30_000)
+  const context = { folders, now }
+  return (
+    <>
+      {kind.columns.map((column) => (
+        <TableCell
+          key={column.label}
+          className={cn(column.className, columnTier[column.tier])}
+          inert={inert}
+          title={row === undefined ? undefined : column.title?.(row)}
+        >
+          {row === undefined ? (
+            <span className="text-muted-foreground/60">&mdash;</span>
+          ) : (
+            column.cell(row, context)
+          )}
+        </TableCell>
+      ))}
+    </>
   )
 }

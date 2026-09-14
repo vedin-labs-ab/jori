@@ -18,9 +18,12 @@ export function VisibilityHead() {
   return <TableHead className={audienceColumnClass}>Audience</TableHead>
 }
 
-export function VisibilityCell(props: VisibilitySubject) {
+export function VisibilityCell({
+  inert,
+  ...props
+}: VisibilitySubject & { inert?: boolean }) {
   return (
-    <TableCell className={audienceColumnClass}>
+    <TableCell className={audienceColumnClass} inert={inert}>
       <VisibilityLabel quietDefault {...props} />
     </TableCell>
   )

@@ -24,7 +24,7 @@ export function useFolderContents({
   onNewFolder,
   organizationId,
 }: {
-  folder: FolderDetail
+  folder: FolderDetail | undefined
   onDialog: (request: FolderDialogRequest) => void
   onNewFolder: () => void
   organizationId: string
@@ -33,13 +33,20 @@ export function useFolderContents({
   onCreate: (creation: FolderCreation) => void
   overlays: ReactNode
 } {
-  const contents = useQuery(api.folders.console.contents, {
-    organizationId,
-    folderId: folder.folderId,
-  })
+  const nested = useQuery(
+    api.folders.console.contents,
+    folder === undefined
+      ? "skip"
+      : { organizationId, folderId: folder.folderId }
+  )
+  const roots = useQuery(
+    api.folders.console.roots,
+    folder === undefined ? { organizationId } : "skip"
+  )
+  const contents = folder === undefined ? roots : nested
   const [creation, requestCreation] = useCreationRequests("contents")
   const setCreation = (creation: FolderCreation) =>
-    requestCreation({ creation, folderId: folder.folderId })
+    requestCreation({ creation, folderId: folder?.folderId })
   const resources = useFolderResourceActions({
     contents,
     folder,
@@ -50,7 +57,7 @@ export function useFolderContents({
   return {
     contents: {
       contents,
-      folderId: folder.folderId,
+      folderId: folder?.folderId,
       newMenu: (
         <NewInFolderButton onCreate={setCreation} onNewFolder={onNewFolder} />
       ),

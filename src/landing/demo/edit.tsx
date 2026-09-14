@@ -2,6 +2,7 @@ import { availableName } from "@contracts/text"
 import { type ReactNode } from "react"
 import { EditingProvider } from "@/shared/console/edit/provider"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
+import { storeSummary, tableSummary } from "./derive/materials"
 import { type FolderId } from "./fixtures/types"
 import { useDemoWorkspace } from "./workspace"
 
@@ -22,24 +23,35 @@ export function DemoEditing({ children }: { children: ReactNode }) {
   return (
     <EditingProvider
       name={name}
-      onReveal={(kind, folderId) =>
+      onReveal={(_kind, folderId) =>
         navigate(
           folderId === undefined
-            ? { to: `/${kind}s` }
+            ? { to: "/folders" }
             : { to: "/folders/$folderId", params: { folderId } }
         )
       }
       onCreate={async (kind, parentId) => {
         const label = name(kind, parentId)
-        const id =
-          kind === "folder"
-            ? actions.createFolder(label, parentId as FolderId | undefined)
-            : actions.createMaterial(kind, {
-                name: label,
-                folderId: parentId,
-                visibility: { mode: "organization" },
-              }).id
-        return { id, kind, name: label, parentId }
+        if (kind === "folder") {
+          const id = actions.createFolder(
+            label,
+            parentId as FolderId | undefined
+          )
+          return { id, kind, name: label, parentId }
+        }
+        const material = actions.createMaterial(kind, {
+          name: label,
+          folderId: parentId,
+          visibility: { mode: "organization" },
+        })
+        return {
+          id: material.id,
+          kind,
+          name: label,
+          parentId,
+          table: material.kind === "table" ? tableSummary(material) : undefined,
+          store: material.kind === "store" ? storeSummary(material) : undefined,
+        }
       }}
       onRename={async (item, name) =>
         item.kind === "folder"

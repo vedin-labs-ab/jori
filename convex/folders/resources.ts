@@ -16,7 +16,7 @@ const contentsCap = 200
 type Viewer = {
   organizationId: string
   personId: Id<"persons">
-  folderId: Id<"folders">
+  folderId: Id<"folders"> | undefined
 }
 
 export type FolderResource = {
@@ -54,7 +54,7 @@ export async function folderResources(
 export async function sightedResources(
   ctx: QueryLikeCtx,
   sight: Sight,
-  folderId: Id<"folders">
+  folderId: Id<"folders"> | undefined
 ): Promise<FolderResource[]> {
   const resources = [
     ...(await folderCollections(ctx, sight, folderId)),
@@ -71,11 +71,13 @@ export async function sightedResources(
 async function folderCollections(
   ctx: QueryLikeCtx,
   sight: Sight,
-  folderId: Id<"folders">
+  folderId: Id<"folders"> | undefined
 ): Promise<FolderResource[]> {
   const rows = await ctx.db
     .query("collections")
-    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
+    .withIndex("by_organization_and_folder", (index) =>
+      index.eq("organizationId", sight.organizationId).eq("folderId", folderId)
+    )
     .take(contentsCap)
   const listed: FolderResource[] = []
 
@@ -98,11 +100,13 @@ async function folderCollections(
 async function folderFiles(
   ctx: QueryLikeCtx,
   sight: Sight,
-  folderId: Id<"folders">
+  folderId: Id<"folders"> | undefined
 ): Promise<FolderResource[]> {
   const rows = await ctx.db
     .query("files")
-    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
+    .withIndex("by_organization_and_folder", (index) =>
+      index.eq("organizationId", sight.organizationId).eq("folderId", folderId)
+    )
     .take(contentsCap)
   const listed: FolderResource[] = []
 
@@ -130,11 +134,13 @@ async function folderFiles(
 async function folderJobs(
   ctx: QueryLikeCtx,
   sight: Sight,
-  folderId: Id<"folders">
+  folderId: Id<"folders"> | undefined
 ): Promise<FolderResource[]> {
   const rows = await ctx.db
     .query("jobs")
-    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
+    .withIndex("by_organization_and_folder", (index) =>
+      index.eq("organizationId", sight.organizationId).eq("folderId", folderId)
+    )
     .take(contentsCap)
   const listed: FolderResource[] = []
 
@@ -157,11 +163,16 @@ async function folderJobs(
 export async function folderChats(
   ctx: QueryLikeCtx,
   sight: Sight,
-  folderId: Id<"folders">
+  folderId: Id<"folders"> | undefined
 ): Promise<FolderResource[]> {
   const rows = ctx.db
     .query("conversations")
-    .withIndex("by_folder", (index) => index.eq("folderId", folderId))
+    .withIndex("by_organization_and_folder", (index) =>
+      index
+        .eq("organizationId", sight.organizationId)
+        .eq("folderId", folderId)
+        .eq("surface", "console")
+    )
   const listed: FolderResource[] = []
 
   for await (const row of rows) {

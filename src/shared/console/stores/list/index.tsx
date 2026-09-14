@@ -89,6 +89,7 @@ export function StoreList({
       {...props}
       kind={{
         creationKind: "store",
+        createdRow: (item) => item.store,
         action: (
           <Button onClick={onCreate} type="button">
             <Plus />

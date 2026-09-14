@@ -100,6 +100,7 @@ export function TableList({
       {...props}
       kind={{
         creationKind: "table",
+        createdRow: (item) => item.table,
         action: (
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button onClick={onCreate} type="button">

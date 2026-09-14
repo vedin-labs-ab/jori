@@ -166,8 +166,10 @@ function Sidebar({
   className,
   children,
   dir,
+  onCloseAutoFocus,
   ...props
 }: React.ComponentProps<"div"> & {
+  onCloseAutoFocus?: React.ComponentProps<typeof SheetContent>["onCloseAutoFocus"]
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
@@ -194,6 +196,7 @@ function Sidebar({
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
           dir={dir}
+          onCloseAutoFocus={onCloseAutoFocus}
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"

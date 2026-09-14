@@ -158,11 +158,11 @@ test.each(["table", "store"] as const)(
   }
 )
 
-test("root sidebar creation opens the item's standalone list", async () => {
+test("root sidebar creation stays in the root folder listing", async () => {
   setup("store", undefined, true)
   fireEvent.click(screen.getByText("New item"))
   await screen.findByRole("textbox")
-  expect(navigate).toHaveBeenCalledExactlyOnceWith({ to: "/stores" })
+  expect(navigate).toHaveBeenCalledExactlyOnceWith({ to: "/folders" })
 })
 
 test("repeated activation during creation cannot create duplicate items", async () => {

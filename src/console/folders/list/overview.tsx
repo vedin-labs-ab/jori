@@ -1,20 +1,15 @@
-import { useQuery } from "convex/react"
-import { Plus } from "lucide-react"
 import { useMemo } from "react"
+import { NewInFolderButton } from "@/shared/console/folders/create"
 import { useFolderRequests } from "@/shared/console/folders/edit/state"
-import { RootFolderList } from "@/shared/console/folders/list/roots"
+import { FolderContents } from "@/shared/console/folders/list/contents"
 import { FoldersTitleMenu } from "@/shared/console/folders/menu"
-import {
-  ConsoleHeaderActions,
-  ConsoleHeaderButton,
-} from "@/shared/console/layout"
+import { ConsoleHeaderActions } from "@/shared/console/layout"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
-import { api } from "../../../../convex/_generated/api"
 import { ConsolePage } from "../../page"
 import { FolderDialogs } from "../manage"
 import { FolderUsageHint } from "../usage/hint"
-import { useFolderSelectionActions } from "./select"
+import { useFolderContents } from "./contents"
 
 /** The folder tree's landing page: the root folders in the same full-bleed
  *  table a folder's own page uses. The icon-collapsed sidebar links here —
@@ -28,10 +23,14 @@ export function FoldersOverview() {
 }
 
 function RootFolders({ organizationId }: { organizationId: string }) {
-  const roots = useQuery(api.folders.console.roots, { organizationId })
   const [dialog, setDialog] = useFolderRequests("contents")
   const create = () => setDialog({ type: "create" })
-  const selection = useFolderSelectionActions(organizationId)
+  const listing = useFolderContents({
+    folder: undefined,
+    organizationId,
+    onDialog: setDialog,
+    onNewFolder: create,
+  })
 
   // The tree's root is not a folder, so its crumb is the surface name, the
   // one thing the whole tree can be asked about, and what all of it costs.
@@ -49,19 +48,9 @@ function RootFolders({ organizationId }: { organizationId: string }) {
   return (
     <ConsoleListLayout>
       <ConsoleHeaderActions>
-        <ConsoleHeaderButton
-          icon={<Plus />}
-          label="New folder"
-          onClick={create}
-          type="button"
-        />
+        <NewInFolderButton onCreate={listing.onCreate} onNewFolder={create} />
       </ConsoleHeaderActions>
-      <RootFolderList
-        onCreate={create}
-        onDialog={setDialog}
-        roots={roots}
-        selectionActions={selection.actions}
-      />
+      <FolderContents {...listing.contents} />
       <FolderDialogs
         dialog={dialog}
         onClose={() => setDialog(undefined)}
@@ -70,7 +59,7 @@ function RootFolders({ organizationId }: { organizationId: string }) {
         onDeleted={() => undefined}
         organizationId={organizationId}
       />
-      {selection.dialog}
+      {listing.overlays}
     </ConsoleListLayout>
   )
 }

@@ -1,7 +1,6 @@
 import { Folder } from "lucide-react"
 import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { CreatedItemRow } from "../../edit/row"
 import { useCreatedItem } from "../../edit/state"
 import {
   ConsoleEmptyState,
@@ -25,7 +24,7 @@ import {
   selectionPayload,
   useFolderListing,
 } from "./controls"
-import { ResourceListRow } from "./resource"
+import { CreatedResourceRow, ResourceListRow } from "./resource"
 import { type FolderSelectionActions } from "./select"
 import { FolderListRow, FolderListTable, folderTableColumns } from "./table"
 
@@ -43,7 +42,7 @@ export function FolderContents({
 }: {
   contents: FolderContentsResult | undefined
   /** The folder being viewed — the one filed resources already sit in. */
-  folderId: string
+  folderId: string | undefined
   /** The header's "New" menu again, as the empty state's call to action. */
   newMenu: ReactNode
   onDialog: (request: FolderDialogRequest) => void
@@ -118,7 +117,7 @@ function FolderListing({
   resources,
   selectionActions,
 }: {
-  folderId: string
+  folderId: string | undefined
   folders: readonly ListedFolder[]
   onDialog: (request: FolderDialogRequest) => void
   resourceMenu: (resource: FolderResource) => ReactNode
@@ -163,7 +162,7 @@ function FolderContentRows({
   resources,
   selection,
 }: {
-  folderId: string
+  folderId: string | undefined
   folders: ListedFolder[]
   onDialog: (request: FolderDialogRequest) => void
   resourceMenu: (resource: FolderResource) => ReactNode
@@ -190,7 +189,12 @@ function FolderContentRows({
   return (
     <>
       {created ? (
-        <CreatedItemRow edit={created} colSpan={folderTableColumns} />
+        <CreatedResourceRow
+          edit={created}
+          resource={resources.find(
+            (resource) => resource.id === created.item.id
+          )}
+        />
       ) : null}
       {pending ? (
         <PendingFolderRow name={pending.name} colSpan={folderTableColumns} />

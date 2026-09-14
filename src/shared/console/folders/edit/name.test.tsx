@@ -9,12 +9,18 @@ import {
 import { useState } from "react"
 import { afterEach, expect, test, vi } from "vitest"
 import { EditingProvider } from "../../edit/provider"
-import { useEditing } from "../../edit/state"
+import { type EditSurface, useEditing } from "../../edit/state"
 import { FolderName } from "./name"
 
 const folder = { folderId: "one", name: "New folder" }
-afterEach(cleanup)
-function start(save = vi.fn().mockResolvedValue(undefined)) {
+afterEach(() => {
+  cleanup()
+  vi.restoreAllMocks()
+})
+function start(
+  save = vi.fn().mockResolvedValue(undefined),
+  surface: EditSurface = "contents"
+) {
   function Example({ save }: { save: (name: string) => Promise<unknown> }) {
     const [name, setName] = useState(folder.name)
     return (
@@ -44,13 +50,13 @@ function start(save = vi.fn().mockResolvedValue(undefined)) {
           onClick={() =>
             editing?.begin(
               { id: folder.folderId, kind: "folder", name },
-              "contents"
+              surface
             )
           }
         >
           Rename
         </button>
-        <FolderName folder={{ ...folder, name }} surface="contents">
+        <FolderName folder={{ ...folder, name }} surface={surface}>
           <a href="#folder">{name}</a>
         </FolderName>
       </>
@@ -139,4 +145,17 @@ test("IME composition does not commit and F2 starts a fresh rename", async () =>
   )
   fireEvent.keyDown(screen.getByRole("link"), { key: "F2" })
   await waitFor(() => expect(input().value).toBe("New folder"))
+})
+
+test("the sidebar focuses the new name and reveals it in the middle of the tree", async () => {
+  const scroll = vi.spyOn(Element.prototype, "scrollIntoView")
+  start(vi.fn(), "sidebar")
+  await waitFor(() => expect(document.activeElement).toBe(input()))
+  expect(scroll).toHaveBeenCalledWith({
+    block: "center",
+    inline: "nearest",
+    behavior: "instant",
+  })
+  expect(input().selectionStart).toBe(0)
+  expect(input().selectionEnd).toBe(folder.name.length)
 })

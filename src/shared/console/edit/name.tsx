@@ -63,6 +63,7 @@ export function ItemName({
             key={item.id}
             initialName={editing.edit.item.name}
             noun={item.kind}
+            scrollBlock={surface === "sidebar" ? "center" : "nearest"}
             onClose={close}
             onSave={(name) => editing.save(item, name)}
             register={editing.register}

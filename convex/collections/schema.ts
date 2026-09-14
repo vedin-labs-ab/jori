@@ -63,6 +63,7 @@ export const collections = defineTable(
     "updatedAt",
   ])
   .index("by_folder", ["folderId"])
+  .index("by_organization_and_folder", ["organizationId", "folderId"])
 
 /** One versioned document: a table's row or a store's single value. Rows
  *  sort by `order` (see collections/order.ts); every creating path stamps

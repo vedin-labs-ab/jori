@@ -17,11 +17,14 @@ export type RowSelection<Row> = {
 export function useRowSelection<Row>({
   identify,
   rows,
+  disabled,
 }: {
   identify: (row: Row) => string
   rows: Row[]
+  disabled?: (row: Row) => boolean
 }): RowSelection<Row> {
   const [ids, setIds] = useState<ReadonlySet<string>>(new Set())
+  rows = rows.filter((row) => !disabled?.(row))
   const selected = rows.filter((row) => ids.has(identify(row)))
   const allSelected = rows.length > 0 && selected.length === rows.length
 
@@ -29,9 +32,13 @@ export function useRowSelection<Row>({
     allSelected,
     clear: () => setIds(new Set()),
     count: selected.length,
-    isSelected: (row) => ids.has(identify(row)),
+    isSelected: (row) => !disabled?.(row) && ids.has(identify(row)),
     selected,
-    toggle: (row) => setIds(withToggled(ids, identify(row))),
+    toggle: (row) => {
+      if (!disabled?.(row)) {
+        setIds(withToggled(ids, identify(row)))
+      }
+    },
     toggleAll: () =>
       setIds(allSelected ? new Set() : new Set(rows.map(identify))),
   }

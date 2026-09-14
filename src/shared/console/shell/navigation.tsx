@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
 import { useChatDrag } from "../chat/drag"
 import { type ChatConversation } from "../chat/types"
+import { useEditing, useEditMenuFocus } from "../edit/state"
 import { VisibilityMark } from "../visibility/badge"
 import { ChatsMenu } from "./chats"
 import { CollapsibleGroup } from "./group"
@@ -56,16 +57,20 @@ export function ConsoleSidebar({
 }) {
   const { setOpenMobile } = useSidebar()
   const previousPath = useRef(pathname)
+  const edit = useEditing()?.edit
+  const onCloseAutoFocus = useEditMenuFocus()
+  const revealContents =
+    edit?.surface === "contents" && (edit.created || edit.creating)
 
   useEffect(() => {
-    if (previousPath.current !== pathname) {
+    if (previousPath.current !== pathname || revealContents) {
       previousPath.current = pathname
       setOpenMobile(false)
     }
-  }, [pathname, setOpenMobile])
+  }, [pathname, setOpenMobile, revealContents])
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" onCloseAutoFocus={onCloseAutoFocus}>
       <SidebarHeader>{organization}</SidebarHeader>
       <SidebarContent>
         {consoleNavigation.map((group, index) => (

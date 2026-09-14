@@ -39,7 +39,7 @@ export function entryId(entry: FolderListEntry) {
  *  viewed, where it already sits. */
 export function resourceDragItem(
   resource: FolderResource,
-  folderId: string
+  folderId: string | undefined
 ): ResourceDragItem {
   return {
     type: resource.type,
@@ -64,9 +64,7 @@ export function selectionPayload(
   return {
     folders: selected.filter(isFolderEntry).map(folderDragItem),
     resources: selected.flatMap((entry) =>
-      isFolderEntry(entry) || folderId === undefined
-        ? []
-        : [resourceDragItem(entry, folderId)]
+      isFolderEntry(entry) ? [] : [resourceDragItem(entry, folderId)]
     ),
   }
 }
@@ -128,6 +126,9 @@ export function useFolderListing(listed: {
   const resources = controls.apply(listed.resources) as FolderResource[]
   const selection = useRowSelection<FolderListEntry>({
     identify: entryId,
+    disabled: (entry) =>
+      entryId(entry) ===
+      `${editing?.edit?.item.kind}:${editing?.edit?.item.id}`,
     rows: [...folders, ...resources],
   })
 

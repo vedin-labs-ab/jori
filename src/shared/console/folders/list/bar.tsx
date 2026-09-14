@@ -29,7 +29,12 @@ export function FolderSelectionBar({
       noun={itemNoun}
       onClear={selection.clear}
       onMove={() => actions.onMove(selectionSubject(selected, folderId))}
-      onRemove={() => actions.onRemove(selected)}
+      onRemove={
+        folderId === undefined &&
+        selected.resources.some((r) => r.type === "chat")
+          ? undefined
+          : () => actions.onRemove(selected)
+      }
       removal={folderSelectionRemoval(selected)}
     />
   )

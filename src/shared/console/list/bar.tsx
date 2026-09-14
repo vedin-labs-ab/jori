@@ -89,7 +89,7 @@ export function SelectionActionsBar({
   onClear: () => void
   onDownload?: () => void
   onMove?: () => void
-  onRemove: () => void
+  onRemove?: () => void
   removal: SelectionRemoval
 }) {
   if (count === 0) {
@@ -138,13 +138,15 @@ export function SelectionActionsBar({
             Download
           </Button>
         )}
-        <SelectionRemoveButton
-          count={count}
-          isBusy={isBusy}
-          noun={noun}
-          onRemove={onRemove}
-          removal={removal}
-        />
+        {onRemove === undefined ? null : (
+          <SelectionRemoveButton
+            count={count}
+            isBusy={isBusy}
+            noun={noun}
+            onRemove={onRemove}
+            removal={removal}
+          />
+        )}
       </DockGroup>
     </Dock>
   )

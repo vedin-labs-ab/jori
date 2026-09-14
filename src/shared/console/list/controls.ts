@@ -111,6 +111,7 @@ export function useListState<Row>({
   noun,
   rows,
   totalCount,
+  disabled,
 }: {
   config: ListConfig<Row>
   hasFilters?: boolean
@@ -119,6 +120,7 @@ export function useListState<Row>({
   noun: CountedNoun
   rows: Row[]
   totalCount?: number
+  disabled?: (row: Row) => boolean
 }) {
   const controls = useListControls(config)
   const filtered = hasFilters === true || controls.hasActiveControls
@@ -129,7 +131,11 @@ export function useListState<Row>({
     items: controls.apply(rows),
     totalCount,
   })
-  const selection = useRowSelection({ identify, rows: pagination.visibleRows })
+  const selection = useRowSelection({
+    identify,
+    rows: pagination.visibleRows,
+    disabled,
+  })
 
   return {
     config,

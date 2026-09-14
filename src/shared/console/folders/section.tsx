@@ -81,7 +81,7 @@ export function FolderTree({
       <SidebarGroup className="min-h-28 flex-1 group-data-[collapsible=icon]:hidden">
         <FoldersLabel />
         {/* The "+" creates at the top level: a root folder, or a resource
-            created unfiled in its own list. */}
+            created in the root listing. */}
         <NewInFolderMenu
           onCreate={(creation) => onCreate({ creation })}
           onNewFolder={onNewFolder}

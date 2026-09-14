@@ -33,7 +33,7 @@ export type FolderResourceActions = {
   onAccess: (resource: FolderResource) => void
   onEdit: (resource: FolderResource) => void
   onMove: (resource: FolderResource) => void
-  onUnfile: (resource: FolderResource) => void
+  onUnfile: ((resource: FolderResource) => void) | undefined
   organizationId: string
   removal: MaterialResourceRemoval
 }
@@ -53,7 +53,7 @@ export function useFolderResourceActions({
   organizationId,
 }: {
   contents: FolderContentsResult | undefined
-  folder: FolderDetail
+  folder: FolderDetail | undefined
   organizationId: string
 }): { actions: FolderResourceActions; dialogs: ReactNode } {
   const [request, setRequest] = useState<ResourceRequest>()
@@ -73,7 +73,7 @@ export function useFolderResourceActions({
       onAccess: (resource) => setRequest({ kind: "access", resource }),
       onEdit: (resource) => setRequest({ kind: "edit", resource }),
       onMove: setMoving,
-      onUnfile: unfile.request,
+      onUnfile: folder === undefined ? undefined : unfile.request,
       organizationId,
       removal,
     },
@@ -92,7 +92,7 @@ export function useFolderResourceActions({
               ? undefined
               : moveTarget(toFiledType(moving.type), moving.id, {
                   name: moving.name,
-                  folderId: folder.folderId,
+                  folderId: folder?.folderId,
                 })
           }
         />
@@ -166,7 +166,10 @@ function useListedJobs(
 
 /** Leaving a folder widens an audience as surely as entering one narrows
  *  it, so unfiling asks the same question a move does. */
-function useUnfileResource(organizationId: string, folder: FolderDetail) {
+function useUnfileResource(
+  organizationId: string,
+  folder: FolderDetail | undefined
+) {
   const file = useMutation(api.folders.console.file)
   const confirmation = useMoveConfirmation(organizationId)
   const unfile = async (resource: FolderResource) => {
@@ -177,7 +180,7 @@ function useUnfileResource(organizationId: string, folder: FolderDetail) {
         resourceId: resource.id,
         folderId: null,
       })
-      toast.success(`Moved ${resource.name} out of ${folder.name}.`)
+      toast.success(`Moved ${resource.name} out of ${folder?.name}.`)
     } catch (error) {
       showErrorToast(error, "Could not remove it from the folder.")
     }

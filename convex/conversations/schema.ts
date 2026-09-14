@@ -43,6 +43,11 @@ export const conversations = defineTable({
     "updatedAt",
   ])
   .index("by_folder", ["folderId"])
+  .index("by_organization_and_folder", [
+    "organizationId",
+    "folderId",
+    "surface",
+  ])
   .index("by_folder_and_created_by", ["folderId", "createdBy"])
   .index("by_organization_and_surface_and_updated_at", [
     "organizationId",

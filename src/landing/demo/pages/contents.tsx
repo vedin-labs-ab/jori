@@ -9,7 +9,7 @@ import {
   type FolderDialogRequest,
   type ManagedFolder,
 } from "@/shared/console/folders/types"
-import { folderContents } from "../derive/folders"
+import { folderContents, rootFolders } from "../derive/folders"
 import { DemoCreationDialogs } from "../dialogs/creation"
 import { DemoFolderDialogs } from "../dialogs/folders"
 import { type FolderId } from "../fixtures/types"
@@ -22,7 +22,7 @@ import { useDemoFolderSelection } from "./select"
  *  selection's actions, and the "New" menu the empty state offers — with
  *  the dialogs those open, rendered once beside the list. */
 export function useDemoFolderContents(
-  folder: FolderDetail,
+  folder: FolderDetail | undefined,
   onDeleted?: (folder: ManagedFolder) => void
 ): {
   contents: ComponentProps<typeof FolderContents>
@@ -35,19 +35,22 @@ export function useDemoFolderContents(
   const [dialog, setDialog] = useFolderRequests("contents")
   const [creation, requestCreation] = useCreationRequests("contents")
   const setCreation = (creation: FolderCreation) =>
-    requestCreation({ creation, folderId: folder.folderId })
+    requestCreation({ creation, folderId: folder?.folderId })
   const selection = useDemoFolderSelection()
   const contents = useMemo(
-    () => folderContents(state, folder.folderId as FolderId),
-    [state, folder.folderId]
+    () =>
+      folder === undefined
+        ? rootFolders(state)
+        : folderContents(state, folder.folderId as FolderId),
+    [state, folder]
   )
   const onNewFolder = () =>
-    setDialog({ type: "create", parentId: folder.folderId })
+    setDialog({ type: "create", parentId: folder?.folderId })
 
   return {
     contents: {
       contents,
-      folderId: folder.folderId,
+      folderId: folder?.folderId,
       newMenu: (
         <NewInFolderButton onCreate={setCreation} onNewFolder={onNewFolder} />
       ),
