@@ -172,7 +172,6 @@ test("hangs the page's menu off its name when the view publishes one", () => {
   act(() =>
     publish.current?.({
       name: "Folders",
-      audience: <button type="button">Audience: Via folder</button>,
       menu: (
         <DropdownMenuContent>
           <DropdownMenuItem>Usage</DropdownMenuItem>

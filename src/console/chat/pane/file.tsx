@@ -5,7 +5,6 @@ import { type FileDetail } from "@/shared/console/files/types"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { api } from "../../../../convex/_generated/api"
 import { useFileSave } from "../../files/save"
-import { OrganizationVisibilityButton } from "../../shared/visibility/button"
 
 /** A file in the pane: its body over the same save its page uses, with
  *  no neighbors to step to. */
@@ -45,13 +44,6 @@ function PaneBody({
     <ChatPaneBody
       material={{
         kind: "file",
-        audience: (
-          <OrganizationVisibilityButton
-            {...file}
-            organizationId={organizationId}
-            target={{ kind: "file", id: file.fileId }}
-          />
-        ),
         file,
         onSave: save,
       }}

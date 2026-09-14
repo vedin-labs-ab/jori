@@ -5,7 +5,6 @@ import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { type FolderDetail } from "@/shared/console/folders/types"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { api } from "../../../../convex/_generated/api"
 import { useFolderContents } from "../../folders/list/contents"
 import { FolderDialogs } from "../../folders/manage"
@@ -44,16 +43,7 @@ function PaneContents({
   organizationId: string
 }) {
   const [dialog, setDialog] = useFolderRequests("contents")
-  useMaterialBreadcrumb(
-    folder.name,
-    undefined,
-    <VisibilityButton
-      visibility={folder.visibility}
-      folderId={folder.parentId}
-      ownerId={folder.createdBy}
-      onClick={() => setDialog({ type: "access", folder })}
-    />
-  )
+  useMaterialBreadcrumb(folder.name)
   const listing = useFolderContents({
     folder,
     onDialog: setDialog,

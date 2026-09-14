@@ -6,7 +6,6 @@ import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { useNow } from "@/shared/console/time"
 import { type ReferenceTarget } from "../../../../../shared/console/references"
 import { resolveReference } from "../../../derive/chat"
-import { DemoVisibilityButton } from "../../../dialogs/button"
 import { chatContext } from "../../../fixtures/chat"
 import { useDemoWorkspace } from "../../../workspace"
 import { DemoDraft } from "../draft"
@@ -33,18 +32,7 @@ export function DemoPaneChat({
     [state]
   )
 
-  useMaterialBreadcrumb(
-    conversation?.title ?? "Chat",
-    undefined,
-    conversation === undefined ? undefined : (
-      <DemoVisibilityButton
-        visibility={conversation.visibility}
-        ownerId={conversation.createdBy}
-        folderId={conversation.folderId}
-        target={{ kind: "chat", id: conversationId }}
-      />
-    )
-  )
+  useMaterialBreadcrumb(conversation?.title ?? "Chat")
 
   if (conversation === undefined) {
     return null

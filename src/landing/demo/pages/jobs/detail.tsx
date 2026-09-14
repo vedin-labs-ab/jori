@@ -17,7 +17,6 @@ import { useExecutionClock } from "@/shared/console/runs/time"
 import { pageSize } from "@/shared/console/runs/types"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { useNow } from "@/shared/console/time"
-import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { folderNames } from "../../derive/folders"
 import { jobMoveSubject } from "../../derive/jobs"
 import { runViews } from "../../derive/runs"
@@ -91,19 +90,7 @@ export function JobPaneBody({ jobId }: { jobId: string }) {
   const folders = useMemo(() => folderNames(state), [state])
   const now = useNow(30_000)
 
-  const editor = useJobEditor()
-  useMaterialBreadcrumb(
-    job?.name ?? "Job",
-    undefined,
-    job === undefined ? undefined : (
-      <VisibilityButton
-        visibility={job.visibility}
-        folderId={job.folderId}
-        ownerId={job.ownerId}
-        onClick={() => editor.openEditForm(job)}
-      />
-    )
-  )
+  useMaterialBreadcrumb(job?.name ?? "Job")
 
   if (job === undefined) {
     return null

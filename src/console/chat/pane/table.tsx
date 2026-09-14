@@ -5,7 +5,6 @@ import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { type TableDetail } from "@/shared/console/tables/types"
 import { api } from "../../../../convex/_generated/api"
-import { OrganizationVisibilityButton } from "../../shared/visibility/button"
 import { useTableGrid } from "../../tables/detail/grid"
 
 /** A table in the pane: the same grid its page mounts, over the same
@@ -42,15 +41,7 @@ function PaneGrid({
   table: TableDetail
 }) {
   const grid = useTableGrid(organizationId, table)
-  useMaterialBreadcrumb(
-    table.name,
-    undefined,
-    <OrganizationVisibilityButton
-      {...table}
-      organizationId={organizationId}
-      target={{ kind: "table", id: table.tableId }}
-    />
-  )
+  useMaterialBreadcrumb(table.name)
 
   return (
     <ChatPaneBody

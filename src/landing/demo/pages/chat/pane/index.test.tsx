@@ -44,6 +44,7 @@ async function expectPaneLink(pane: HTMLElement, name: string, href: string) {
   const link = await within(pane).findByRole("link", {
     name: (label) => label === name || label.startsWith(`${name}·`),
   })
+  expect(within(pane).queryByRole("button", { name: /^Audience:/ })).toBeNull()
   expect(link.getAttribute("data-console-href")).toBe(href)
   const anchor = link.getAttribute("href")
   expect(anchor?.startsWith("#")).toBe(true)
