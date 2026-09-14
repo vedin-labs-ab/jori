@@ -74,10 +74,11 @@ function FolderControl({
           <span className="truncate">{name}</span>
         </Button>
       </FolderSelect>
+      {/* Visibility must switch immediately with the folder icon. */}
       {selected ? (
         <Button
           aria-label="Remove folder"
-          className="invisible absolute top-0.5 left-1 size-6 rounded-sm text-muted-foreground group-hover/location:visible"
+          className="invisible absolute top-0.5 left-1 size-6 rounded-sm text-muted-foreground transition-colors group-hover/location:visible"
           disabled={disabled}
           onClick={() => {
             onChange(null)
