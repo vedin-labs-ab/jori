@@ -1,4 +1,4 @@
-import { formatUsd, plan } from "@contracts/billing"
+import { plan } from "@contracts/billing"
 import { ArrowRight } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -11,11 +11,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Spinner } from "@/components/ui/spinner"
+import { planFacts, planPriceNote, planTitle } from "@/shared/plan"
+import { PlanFacts } from "@/shared/plan/facts"
+import { Folder, FolderTab, FolderTabs } from "@/shared/plan/folder"
 import { useBillingCheckout } from "./actions"
 import { PurchaseAgreement } from "./agreement"
 
-/** There is one plan, so choosing it is confirming it: the price, what it
- *  includes, and the purchase agreement, then Stripe. */
+/** There is one plan, so subscribing is confirming it. The folder is the
+ *  pricing page's, at the dialog's width: the same words and the same
+ *  numbers a person read before signing up, then the agreement, then
+ *  Stripe. */
 export function PlanPicker({ organizationId }: { organizationId: string }) {
   const [accepted, setAccepted] = useState(false)
   const checkout = useBillingCheckout(organizationId)
@@ -23,30 +28,55 @@ export function PlanPicker({ organizationId }: { organizationId: string }) {
   return (
     <Dialog onOpenChange={() => setAccepted(false)}>
       <DialogTrigger asChild>
-        <Button>Choose a plan</Button>
+        <Button>Subscribe</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Subscribe to {plan.label}</DialogTitle>
           <DialogDescription>
-            One price for the whole organization. Every integration included;
-            usage is billed at provider list rates.
+            One price for the whole organization. Cancel any time.
           </DialogDescription>
         </DialogHeader>
-        <div className="rounded-lg border p-4">
-          <p className="font-medium">{plan.label}</p>
-          <p className="text-muted-foreground text-sm">
-            ${plan.monthlyPriceUsd} / month · everyone included ·{" "}
-            {formatUsd(plan.monthlyAllowanceMicros)} usage included monthly
-          </p>
+        <div>
+          <FolderTabs className="pl-4">
+            <FolderTab
+              active
+              className="h-8 px-3.5 text-xs data-[state=active]:h-9"
+            >
+              {plan.label}
+            </FolderTab>
+          </FolderTabs>
+          <Folder className="p-4">
+            <div className="flex items-start justify-between gap-4">
+              <p className="font-medium text-base leading-snug tracking-tight">
+                {planTitle[0]}
+                <br />
+                {planTitle[1]}
+              </p>
+              <p className="shrink-0 text-right">
+                <span className="block font-medium text-2xl tabular-nums tracking-tight">
+                  ${plan.monthlyPriceUsd}
+                </span>
+                <span className="block text-muted-foreground text-xs">
+                  {planPriceNote}
+                </span>
+              </p>
+            </div>
+            <PlanFacts className="mt-4" dense facts={planFacts} />
+          </Folder>
         </div>
         <PurchaseAgreement accepted={accepted} onChange={setAccepted} />
         <Button
           disabled={!accepted || checkout.pending !== null}
           onClick={() => void checkout.subscribe()}
+          size="lg"
         >
-          {checkout.pending === "plan" ? <Spinner /> : <ArrowRight />}
           Continue to checkout
+          {checkout.pending === "plan" ? (
+            <Spinner data-icon="inline-end" />
+          ) : (
+            <ArrowRight data-icon="inline-end" />
+          )}
         </Button>
       </DialogContent>
     </Dialog>

@@ -2097,7 +2097,7 @@
   },
   {
     "id": "C152-plan-open",
-    "title": "Choose a plan dialog open",
+    "title": "Subscribe dialog open",
     "path": "/chat",
     "target": "app",
     "mutating": false,
@@ -2118,14 +2118,14 @@
     "steps": [
       {
         "action": "click",
-        "selector": "button:text-is(\"Choose a plan\")"
+        "selector": "button:text-is(\"Subscribe\")"
       }
     ],
     "widths": [1440]
   },
   {
     "id": "C152-plan-close",
-    "title": "Choose a plan dialog close",
+    "title": "Subscribe dialog close",
     "path": "/chat",
     "target": "app",
     "mutating": false,
@@ -2144,7 +2144,7 @@
       },
       {
         "action": "click",
-        "selector": "button:text-is(\"Choose a plan\")"
+        "selector": "button:text-is(\"Subscribe\")"
       }
     ],
     "steps": [
@@ -6747,7 +6747,7 @@
   },
   {
     "id": "C152-plan-open-mobile",
-    "title": "Mobile Choose a plan dialog open",
+    "title": "Mobile Subscribe dialog open",
     "path": "/chat",
     "target": "app",
     "mutating": false,
@@ -6772,14 +6772,14 @@
     "steps": [
       {
         "action": "click",
-        "selector": "button:text-is(\"Choose a plan\")"
+        "selector": "button:text-is(\"Subscribe\")"
       }
     ],
     "widths": [375]
   },
   {
     "id": "C152-plan-close-mobile",
-    "title": "Mobile Choose a plan dialog close",
+    "title": "Mobile Subscribe dialog close",
     "path": "/chat",
     "target": "app",
     "mutating": false,
@@ -6802,7 +6802,7 @@
       },
       {
         "action": "click",
-        "selector": "button:text-is(\"Choose a plan\")"
+        "selector": "button:text-is(\"Subscribe\")"
       }
     ],
     "steps": [

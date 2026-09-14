@@ -86,7 +86,7 @@ function planName(account: BillingAccount | null) {
 
 function planDetail(account: BillingAccount | null) {
   if (account === null || account.state.kind === "unsubscribed") {
-    return "One price for the whole organization. Choose a plan to start."
+    return `${plan.label} is $${plan.monthlyPriceUsd} a month for the whole organization.`
   }
 
   return `$${plan.monthlyPriceUsd} a month, for the whole organization.`
