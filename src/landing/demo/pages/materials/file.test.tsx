@@ -4,6 +4,10 @@ import { cleanup, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
 
+// Load real lazy views before interaction assertions start their deadlines.
+import "./file"
+import "@/shared/console/mirror/view"
+
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),
   ...(await import("../../../../../test/routing")),

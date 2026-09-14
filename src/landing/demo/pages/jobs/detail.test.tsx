@@ -5,6 +5,11 @@ import { afterEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
 import { jobId } from "../../fixtures/jobs"
 
+// Load real lazy views before interaction assertions start their deadlines.
+import "./detail"
+import "@/shared/console/jobs/editor/dialog"
+import "@/shared/console/jobs/editor/schedule/picker"
+
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),
   ...(await import("../../../../../test/routing")),

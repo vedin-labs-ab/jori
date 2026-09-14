@@ -1,6 +1,7 @@
 /* @vitest-environment jsdom */
 
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -10,9 +11,19 @@ import {
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../../test/demo"
 import { typeInto } from "../../../../../../test/editor"
+import { advanceUntil } from "../../../../../../test/timers"
 import { renewalsConversationId } from "../../../fixtures/chat"
 import { folderId } from "../../../fixtures/folders"
 import { demoId } from "../../../fixtures/ids"
+
+// Load the real lazy views before the tests start. Cold module transforms
+// must not race the query deadlines for chat and pane behavior.
+import "../index"
+import "../../jobs/detail"
+import "./table"
+import "./folder"
+import "./run"
+import "./chat"
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../../test/router")),
@@ -23,7 +34,10 @@ beforeEach(() => {
   window.localStorage.clear()
 })
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
 
 /** The pane's name is the way to the target's page. */
 async function expectPaneLink(pane: HTMLElement, name: string, href: string) {
@@ -77,17 +91,18 @@ test("a reply opens the job it names; Open manually is kept for the browser", as
   const field = await screen.findByRole("textbox", { name: "Message" })
 
   typeInto(field, "Chase the unpaid renewals")
-  fireEvent.keyDown(field, { key: "Enter" })
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })
+  await act(async () => fireEvent.keyDown(field, { key: "Enter" }))
 
-  const tab = await screen.findByRole(
-    "tab",
-    { name: "Renewals watch" },
-    { timeout: 8000 }
+  await advanceUntil(
+    () => screen.queryByRole("tab", { name: "Renewals watch" }) !== null
   )
+  await act(() => vi.dynamicImportSettled())
+  const tab = screen.getByRole("tab", { name: "Renewals watch" })
   const pane = screen.getByRole("complementary", { name: "Resources" })
 
   expect(tab.dataset.state).toBe("active")
-  expect(await within(pane).findByText("Instructions")).toBeDefined()
+  expect(within(pane).getByText("Instructions")).toBeDefined()
 
   fireEvent.click(screen.getByRole("button", { name: "Open manually" }))
 

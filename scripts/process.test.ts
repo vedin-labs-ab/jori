@@ -1,8 +1,16 @@
-import { appendFileSync, existsSync, mkdtempSync, readFileSync } from "node:fs"
+import { ChildProcess, spawn } from "node:child_process"
+import { existsSync, mkdtempSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
-import { expect, test } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { type Command, runCommands } from "./process"
+
+vi.mock("node:child_process", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:child_process")>()
+  return { ...actual, spawn: vi.fn(actual.spawn) }
+})
+
+afterEach(() => vi.mocked(spawn).mockReset())
 
 const directory = mkdtempSync(path.join(tmpdir(), "jori-process-"))
 
@@ -26,20 +34,41 @@ test("stops starting commands once one has failed", async () => {
 })
 
 test("runs at most the given number of commands at once", async () => {
-  const log = path.join(directory, "log")
-  const step = (name: string) =>
-    node(
-      `const fs = require("fs"); fs.appendFileSync(${JSON.stringify(log)}, "start ${name}\\n"); setTimeout(() => fs.appendFileSync(${JSON.stringify(log)}, "end ${name}\\n"), 200)`
-    )
-
-  appendFileSync(log, "")
-  await runCommands(["a", "b", "c", "d"].map(step), 2)
-
-  let running = 0
+  const arrivals = Array.from({ length: 4 }, () => {
+    let resolve!: (child: ChildProcess) => void
+    const promise = new Promise<ChildProcess>((done) => {
+      resolve = done
+    })
+    return { promise, resolve }
+  })
+  const active = new Set<ChildProcess>()
   let peak = 0
-  for (const line of readFileSync(log, "utf8").trim().split("\n")) {
-    running += line.startsWith("start") ? 1 : -1
-    peak = Math.max(peak, running)
-  }
+  let started = 0
+  vi.mocked(spawn).mockImplementation(() => {
+    const child = new ChildProcess()
+    active.add(child)
+    peak = Math.max(peak, active.size)
+    child.once("exit", () => active.delete(child))
+    arrivals[started++].resolve(child)
+    return child
+  })
+
+  const completed = runCommands(["a", "b", "c", "d"].map(node), 2)
+  const [first, second] = await Promise.all(
+    arrivals.slice(0, 2).map(({ promise }) => promise)
+  )
+  expect(started).toBe(2)
+
+  first.emit("exit", 0, null)
+  const third = await arrivals[2].promise
+  expect(started).toBe(3)
+
+  second.emit("exit", 0, null)
+  const fourth = await arrivals[3].promise
+  third.emit("exit", 0, null)
+  fourth.emit("exit", 0, null)
+  await completed
+
   expect(peak).toBe(2)
+  expect(active.size).toBe(0)
 })

@@ -10,6 +10,9 @@ import { afterEach, describe, expect, test } from "vitest"
 import { emptyJobForm, type Job } from "../types"
 import { JobEditorDialog } from "./dialog"
 
+// Load real lazy views before interaction assertions start their deadlines.
+import "./schedule/picker"
+
 afterEach(cleanup)
 
 describe("job dialog name validation", () => {

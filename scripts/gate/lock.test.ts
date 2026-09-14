@@ -8,13 +8,14 @@ import {
 } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
-import { afterEach, expect, test } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { acquireLock, type Holder } from "./lock"
 
 const directory = mkdtempSync(path.join(tmpdir(), "jori-lock-"))
 const file = path.join(directory, "lock")
 
 afterEach(() => {
+  vi.useRealTimers()
   rmSync(file, { force: true })
   delete process.env.JORI_GATE_HOLDER
 })
@@ -53,6 +54,7 @@ test("a child of the holder acquires nothing and releases nothing", async () => 
 })
 
 test("waits for a fresh lock whose record is still being written", async () => {
+  vi.useFakeTimers()
   writeFileSync(file, "")
 
   const acquired = acquireLock(file).then((release) => {
@@ -60,9 +62,10 @@ test("waits for a fresh lock whose record is still being written", async () => {
     return true
   })
 
-  await new Promise((resolve) => setTimeout(resolve, 200))
+  await vi.advanceTimersToNextTimerAsync()
   expect(readFileSync(file, "utf8")).toBe("")
 
   rmSync(file)
+  await vi.advanceTimersToNextTimerAsync()
   expect(await acquired).toBe(true)
 })

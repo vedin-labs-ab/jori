@@ -7,6 +7,9 @@ import { valueEditorNotes } from "./state"
 
 const writeValue = vi.fn()
 
+// Load real lazy views before interaction assertions start their deadlines.
+import "../../mirror/view"
+
 afterEach(() => {
   cleanup()
   vi.useRealTimers()
@@ -212,12 +215,11 @@ describe("value editor no-op saves", () => {
 
 describe("value editor form and code views", () => {
   test("the code view mirrors the form state read-only", async () => {
-    // The mirror is a lazy chunk, so this one waits on real time.
-    vi.useRealTimers()
     renderEditor({ title: "March", total: 2, paid: false })
     switchTab("Code")
 
-    expect(await screen.findByText(/"March"/)).toBeDefined()
+    await act(() => vi.dynamicImportSettled())
+    expect(screen.getByText(/"March"/)).toBeDefined()
     expect(screen.queryByLabelText("Store value JSON")).toBeNull()
   })
 

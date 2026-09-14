@@ -1,6 +1,7 @@
 /* @vitest-environment jsdom */
 
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -10,14 +11,22 @@ import {
 import { afterEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
 import { typeInto } from "../../../../../test/editor"
+import { advanceUntil } from "../../../../../test/timers"
 import { renewalsConversationId } from "../../fixtures/chat"
+
+// Load the real lazy views before the tests start. Cold module transforms
+// must not race the query deadlines for chat and pane behavior.
+import "./index"
 
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),
   ...(await import("../../../../../test/routing")),
 }))
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
 
 test("sends a message from the home, works a moment, then reads the reply", async () => {
   render(<DemoConsoleAt path="/chat" />)
@@ -32,11 +41,12 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   const field = screen.getByRole("textbox", { name: "Message" })
 
   typeInto(field, "Chase the unpaid renewals")
-  fireEvent.keyDown(field, { key: "Enter" })
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })
+  await act(async () => fireEvent.keyDown(field, { key: "Enter" }))
 
   // The console moves to the new conversation, named in the header, where
   // the ask stands and the run works under it with its log folded away.
-  expect(await screen.findByText("Working")).toBeDefined()
+  expect(screen.getByText("Working")).toBeDefined()
   expect(
     screen.getByRole("button", { name: "Chase the unpaid renewals" })
       .textContent
@@ -48,11 +58,11 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
 
   // The thinking shows first, then the reply arrives, with the job it
   // names and its question.
-  expect(await screen.findByText("Thinking")).toBeDefined()
-  expect(await screen.findByText(/Leave/, {}, { timeout: 8000 })).toBeDefined()
-  expect(
-    await screen.findByRole("button", { name: /^Renewals watch/ })
-  ).toBeDefined()
+  await advanceUntil(() => screen.queryByText("Thinking") !== null)
+  expect(screen.getByText("Thinking")).toBeDefined()
+  await advanceUntil(() => screen.queryByText("Working") === null)
+  expect(screen.getByText(/Leave/)).toBeDefined()
+  expect(screen.getByRole("button", { name: /^Renewals watch/ })).toBeDefined()
   expect(
     screen.getByText("Post a summary to #finance when it is done?")
   ).toBeDefined()
@@ -68,9 +78,7 @@ test("sends a message from the home, works a moment, then reads the reply", asyn
   fireEvent.click(screen.getByRole("radio", { name: /^Me/ }))
   fireEvent.click(screen.getByRole("button", { name: "Answer" }))
 
-  expect(
-    await screen.findAllByRole("listitem", { current: true })
-  ).toHaveLength(3)
+  expect(screen.getAllByRole("listitem", { current: true })).toHaveLength(3)
 })
 
 test("files a chat from its title menu, shows its folder trail, and unfiles it from the folder", async () => {
@@ -111,8 +119,9 @@ test("stopping the run leaves a quiet notice under the ask", async () => {
   const field = await screen.findByRole("textbox", { name: "Message" })
 
   typeInto(field, "Chase the unpaid renewals")
-  fireEvent.keyDown(field, { key: "Enter" })
-  fireEvent.click(await screen.findByRole("button", { name: "Stop run" }))
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })
+  await act(async () => fireEvent.keyDown(field, { key: "Enter" }))
+  fireEvent.click(screen.getByRole("button", { name: "Stop run" }))
 
   expect(screen.getByText("Jori stopped before finishing")).toBeDefined()
   expect(screen.queryByText("Working")).toBeNull()
@@ -153,9 +162,10 @@ test("the sidebar leads with New chat and lists the conversations under Activity
   const field = await screen.findByRole("textbox", { name: "Message" })
 
   typeInto(field, "Summarize last week")
-  fireEvent.keyDown(field, { key: "Enter" })
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })
+  await act(async () => fireEvent.keyDown(field, { key: "Enter" }))
 
-  expect(await screen.findByText("Working")).toBeDefined()
+  expect(screen.getByText("Working")).toBeDefined()
   // The header names the conversation too, as the current page; the
   // sidebar's row is the link that moves.
   expect(

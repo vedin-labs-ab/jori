@@ -20,6 +20,12 @@ import { ChatPane, type ChatPaneProps } from "."
 import { ChatPaneBody } from "./body"
 import { type OpenTarget } from "./tabs"
 
+// Load real lazy views before interaction assertions start their deadlines.
+import "../../stores/value/section"
+import "../../mirror/view"
+import "../../runs/row"
+import "../../folders/list/contents"
+
 vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../../test/router")),
   ...(await import("../../../../../test/routing")),

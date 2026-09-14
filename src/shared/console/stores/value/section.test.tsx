@@ -15,6 +15,9 @@ import {
 import { type StoreDetail } from "../types"
 import { StoreValue } from "./section"
 
+// Load real lazy views before interaction assertions start their deadlines.
+import "../../mirror/view"
+
 afterEach(cleanup)
 
 const plainSchema = {
