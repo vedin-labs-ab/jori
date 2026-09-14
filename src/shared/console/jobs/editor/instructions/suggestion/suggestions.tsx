@@ -8,11 +8,13 @@ import { type InstructionSuggestionState } from "./suggest"
 export function InstructionSuggestions({
   listboxId,
   onActiveIndexChange,
+  onDismiss,
   onSelect,
   state,
 }: {
   listboxId: string
   onActiveIndexChange: (activeIndex: number) => void
+  onDismiss: () => void
   onSelect: (suggestion: JobMentionSuggestion) => void
   state: InstructionSuggestionState | null
 }) {
@@ -41,6 +43,7 @@ export function InstructionSuggestions({
       }
       listboxId={listboxId}
       onActiveIndexChange={onActiveIndexChange}
+      onDismiss={onDismiss}
       onSelect={onSelect}
       state={state}
     />

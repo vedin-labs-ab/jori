@@ -84,6 +84,7 @@ export function useJobInstructionsEditor(props: JobInstructionsFieldProps) {
     editor,
     isEmpty,
     listboxId,
+    dismissSuggestions: () => setSuggestion(null),
     selectSuggestion,
     setActiveSuggestionIndex: (activeIndex: number) =>
       updateSuggestionIndex(activeIndex, setSuggestion),

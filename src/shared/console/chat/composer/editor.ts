@@ -58,20 +58,7 @@ export function useComposerEditor(args: ComposerEditorArgs) {
   // The handlers were made once; this is what they read of this render.
   refs.latest.current = { args, catalog, editor, suggestion }
 
-  const seeded = useRef(false)
-  useEffect(() => {
-    const reference = args.initialReference
-    if (editor === null || reference === undefined || seeded.current) {
-      return
-    }
-    seeded.current = true
-    insertMention(refs, {
-      kind: "resource",
-      id: targetKey(reference),
-      label: reference.name,
-      target: { kind: reference.kind, id: reference.id },
-    })
-  }, [args.initialReference, editor, refs])
+  useInitialReference(editor, args.initialReference, refs)
 
   useAutocompleteA11y({ editor, listboxId, suggestion })
   useResourceSearch(args.sources, suggestion)
@@ -88,6 +75,7 @@ export function useComposerEditor(args: ComposerEditorArgs) {
   }, [args.disabled, editor])
 
   return {
+    dismissSuggestions: () => setSuggestion(null),
     canSend: args.open && !isEmpty && !pending,
     editor,
     insertMention: (item: MentionSuggestion) => insertMention(refs, item),
@@ -102,6 +90,27 @@ export function useComposerEditor(args: ComposerEditorArgs) {
       updateSuggestionIndex(activeIndex, setSuggestion),
     suggestion,
   }
+}
+
+/** Seed a resource once, leaving subsequent draft edits to the person. */
+function useInitialReference(
+  editor: Editor | null,
+  reference: ComposerEditorArgs["initialReference"],
+  refs: ComposerRefs
+) {
+  const seeded = useRef(false)
+  useEffect(() => {
+    if (editor === null || reference === undefined || seeded.current) {
+      return
+    }
+    seeded.current = true
+    insertMention(refs, {
+      kind: "resource",
+      id: targetKey(reference),
+      label: reference.name,
+      target: { kind: reference.kind, id: reference.id },
+    })
+  }, [reference, editor, refs])
 }
 
 /** The editor, made once, and the state its handlers write: whether the

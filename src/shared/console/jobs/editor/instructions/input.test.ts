@@ -161,7 +161,11 @@ function suggestionState(): InstructionSuggestionState {
     activeIndex: 0,
     empty: "empty",
     range: { from: 0, to: 0 },
-    style: {},
+    anchor: {
+      contextElement: {} as HTMLElement,
+      getBoundingClientRect: vi.fn(),
+    },
+    side: "bottom",
     suggestions: [],
   }
 }

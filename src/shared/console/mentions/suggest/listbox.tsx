@@ -1,4 +1,5 @@
-import { type ReactNode } from "react"
+import { type ReactNode, useEffect, useRef } from "react"
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { referencePresentation } from "../../references/presentation"
 import { MentionKindIcon } from "../icon"
@@ -25,6 +26,7 @@ export function MentionSuggestions<Suggestion extends MentionSuggestion>({
   footer,
   listboxId,
   onActiveIndexChange,
+  onDismiss,
   onSelect,
   state,
 }: {
@@ -33,6 +35,7 @@ export function MentionSuggestions<Suggestion extends MentionSuggestion>({
   footer?: ReactNode
   listboxId: string
   onActiveIndexChange: (activeIndex: number) => void
+  onDismiss: () => void
   onSelect: (suggestion: Suggestion) => void
   state: SuggestionState<Suggestion> | null
 }) {
@@ -41,35 +44,58 @@ export function MentionSuggestions<Suggestion extends MentionSuggestion>({
   }
 
   return (
-    <div
-      className="absolute z-50 w-72 max-w-[calc(100%-0.5rem)] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
-      style={state.style}
+    <Popover
+      open
+      onOpenChange={(open) => {
+        if (!open) {
+          onDismiss()
+        }
+      }}
     >
-      <div className="p-1">
-        <div id={listboxId} role="listbox">
-          {state.suggestions.map((suggestion, index) => (
-            <SuggestionOption
-              active={index === state.activeIndex}
-              description={describe?.(suggestion)}
-              id={`${listboxId}-${index}`}
-              key={`${suggestion.kind}:${suggestion.id}`}
-              onActivate={() => onActiveIndexChange(index)}
-              onSelect={() => onSelect(suggestion)}
-              suggestion={suggestion}
-            />
-          ))}
-        </div>
-        {state.suggestions.length === 0 ? (
-          <div
-            className="px-2.5 py-2 text-muted-foreground text-xs/relaxed"
-            role="status"
-          >
-            {emptyMessage(state)}
+      <PopoverAnchor virtualRef={{ current: state.anchor }} />
+      <PopoverContent
+        align="start"
+        className="max-h-(--radix-popover-content-available-height) max-w-(--radix-popover-content-available-width) gap-0 overflow-y-auto overscroll-contain rounded-md border p-0 ring-0"
+        collisionPadding={8}
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => event.preventDefault()}
+        onInteractOutside={(event) => {
+          if (
+            event.target instanceof Node &&
+            state.anchor.contextElement.contains(event.target)
+          ) {
+            event.preventDefault()
+          }
+        }}
+        role="presentation"
+        side={state.side}
+      >
+        <div className="p-1">
+          <div id={listboxId} role="listbox">
+            {state.suggestions.map((suggestion, index) => (
+              <SuggestionOption
+                active={index === state.activeIndex}
+                description={describe?.(suggestion)}
+                id={`${listboxId}-${index}`}
+                key={`${suggestion.kind}:${suggestion.id}`}
+                onActivate={() => onActiveIndexChange(index)}
+                onSelect={() => onSelect(suggestion)}
+                suggestion={suggestion}
+              />
+            ))}
           </div>
-        ) : null}
-      </div>
-      {footer}
-    </div>
+          {state.suggestions.length === 0 ? (
+            <div
+              className="px-2.5 py-2 text-muted-foreground text-xs/relaxed"
+              role="status"
+            >
+              {emptyMessage(state)}
+            </div>
+          ) : null}
+        </div>
+        {footer}
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -88,8 +114,16 @@ function SuggestionOption({
   onSelect: () => void
   suggestion: MentionSuggestion
 }) {
+  const ref = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (active) {
+      ref.current?.scrollIntoView({ block: "nearest" })
+    }
+  }, [active])
+
   return (
     <button
+      ref={ref}
       aria-describedby={description?.describedBy}
       aria-selected={active}
       className={cn(

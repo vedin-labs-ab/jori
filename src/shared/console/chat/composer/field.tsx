@@ -28,6 +28,7 @@ export function ComposerField({
         emptyMessage={emptySuggestionMessage}
         listboxId={composer.listboxId}
         onActiveIndexChange={composer.setActiveSuggestionIndex}
+        onDismiss={composer.dismissSuggestions}
         onSelect={onSelect}
         state={composer.suggestion}
       />

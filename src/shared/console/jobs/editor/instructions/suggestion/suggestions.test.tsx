@@ -10,13 +10,18 @@ test("describes only suggestions that add access with the shared hint", () => {
     <InstructionSuggestions
       listboxId="tool-suggestions"
       onActiveIndexChange={vi.fn()}
+      onDismiss={vi.fn()}
       onSelect={vi.fn()}
       state={{
         active: { end: 1, kind: "tool", query: "", start: 0 },
         activeIndex: 0,
         empty: "empty",
         range: { from: 0, to: 1 },
-        style: {},
+        anchor: {
+          contextElement: document.body,
+          getBoundingClientRect: () => new DOMRect(),
+        },
+        side: "bottom",
         suggestions: [
           {
             access: { kind: "builtIn" },

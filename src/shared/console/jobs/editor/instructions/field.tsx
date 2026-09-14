@@ -17,6 +17,7 @@ const sigilHints = [
 export function JobInstructionsField(props: JobInstructionsFieldProps) {
   const errorId = props.error === undefined ? undefined : `${props.id}-error`
   const {
+    dismissSuggestions,
     editor,
     isEmpty,
     listboxId,
@@ -54,6 +55,7 @@ export function JobInstructionsField(props: JobInstructionsFieldProps) {
         <InstructionSuggestions
           listboxId={listboxId}
           onActiveIndexChange={setActiveSuggestionIndex}
+          onDismiss={dismissSuggestions}
           onSelect={selectSuggestion}
           state={suggestion}
         />

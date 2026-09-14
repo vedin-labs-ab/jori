@@ -1,6 +1,5 @@
 import { type ResolvedPos } from "@tiptap/pm/model"
 import { type Editor } from "@tiptap/react"
-import { type CSSProperties } from "react"
 import {
   type ActiveMention,
   findActiveMention,
@@ -20,7 +19,8 @@ export type SuggestionState<Suggestion> = {
     from: number
     to: number
   }
-  style: CSSProperties
+  anchor: { contextElement: HTMLElement; getBoundingClientRect: () => DOMRect }
+  side: "top" | "bottom"
   suggestions: Suggestion[]
 }
 
@@ -85,44 +85,22 @@ export function getSuggestionState<Suggestion>(
       from: selection.from - (textBeforeCursor.length - active.start),
       to: selection.from,
     },
-    style: getSuggestionStyle(
-      editor,
-      selection.from,
-      options.placement ?? "below"
-    ),
+    anchor: {
+      contextElement: editor.view.dom,
+      getBoundingClientRect: () => getCaretRect(editor, selection.from),
+    },
+    side: options.placement === "above" ? "top" : "bottom",
     suggestions,
   }
 }
 
-function getSuggestionStyle(
-  editor: Editor,
-  position: number,
-  placement: "above" | "below"
-): CSSProperties {
-  const fallback =
-    placement === "above"
-      ? { left: 0, bottom: "100%" }
-      : { left: 0, top: "100%" }
-
+/** Read the caret in viewport coordinates each time the popover positions,
+ *  including after its editor or the page scrolls. */
+function getCaretRect(editor: Editor, position: number): DOMRect {
   try {
-    const coords = editor.view.coordsAtPos(position)
-    const container = editor.view.dom.parentElement?.getBoundingClientRect()
-
-    if (container === undefined) {
-      return fallback
-    }
-
-    // Match the menu's w-72 class so horizontal clamping stays accurate.
-    const menuWidth = 288
-    const left = Math.min(
-      Math.max(coords.left - container.left, 0),
-      Math.max(container.width - menuWidth, 0)
-    )
-
-    return placement === "above"
-      ? { left, bottom: container.bottom - coords.top + 4 }
-      : { left, top: coords.bottom - container.top + 4 }
+    const { left, top, bottom } = editor.view.coordsAtPos(position)
+    return new DOMRect(left, top, 0, bottom - top)
   } catch {
-    return fallback
+    return editor.view.dom.getBoundingClientRect()
   }
 }
