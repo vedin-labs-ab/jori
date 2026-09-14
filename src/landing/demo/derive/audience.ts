@@ -1,7 +1,7 @@
 import { type Visibility } from "@contracts/visibility"
 import { ancestorFolderIds } from "@/shared/console/folders/tree"
 import { type ResolvedAudience } from "@/shared/console/visibility/audience"
-import { type DemoPerson, people } from "../fixtures/people"
+import { type DemoPerson, people, viewerId } from "../fixtures/people"
 import { type FolderId, type PersonId } from "../fixtures/types"
 import { type DemoState, type VisibilityTarget } from "../state/types"
 import { folderOf } from "./folders"
@@ -107,8 +107,12 @@ function ownerOf(state: DemoState, target: AudienceTarget) {
     return folderOf(state, target.id)?.createdBy
   }
 
-  if (target.kind === "job" || target.kind === "draft") {
-    return undefined
+  if (target.kind === "draft") {
+    return viewerId
+  }
+
+  if (target.kind === "job") {
+    return state.jobs.find((job) => job.id === target.id)?.ownerId
   }
 
   if (target.kind === "chat") {

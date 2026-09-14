@@ -4,7 +4,7 @@ import { type Job } from "@/shared/console/jobs/types"
 import { day, hour, minute } from "./clock"
 import { folderId } from "./folders"
 import { demoId } from "./ids"
-import { personId, personName, teamIds } from "./people"
+import { ownerFields, personId, teamIds } from "./people"
 import { jobAudience, type StoredVisibility } from "./types"
 
 type JobSurface = Job["access"]["surfaces"][number]
@@ -254,9 +254,7 @@ function baseJob(spec: JobSpec) {
 
   return {
     id: jobId(spec.key),
-    ownerId,
-    ownerName: personName(ownerId),
-    ownerImage: undefined,
+    ...ownerFields(ownerId),
     key: undefined,
     name: spec.name,
     instructions: spec.instructions,

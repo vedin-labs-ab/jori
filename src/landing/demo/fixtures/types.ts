@@ -1,6 +1,7 @@
 import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { type GenericId } from "convex/values"
 import { type FolderRow } from "@/shared/console/folders/types"
+import { type ExecutionItem } from "@/shared/console/runs/types"
 import { type TableColumn, type TableRow } from "@/shared/console/tables/types"
 
 // The workspace's records, typed against what the views read so that a
@@ -73,3 +74,6 @@ export function jobAudience(visibility: { mode: string }) {
     ? ("personal" as const)
     : ("organization" as const)
 }
+
+/** A run keeps its historical content and only the id of its current job link. */
+export type DemoRun = Omit<ExecutionItem, "job"> & { jobId?: JobId }

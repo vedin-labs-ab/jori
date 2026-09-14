@@ -11,7 +11,7 @@ import {
   type FolderRow,
 } from "@/shared/console/folders/types"
 import { type FolderNames } from "@/shared/console/materials/folders"
-import { personName } from "../fixtures/people"
+import { ownerFields } from "../fixtures/people"
 import { type DemoFolder, type FolderId } from "../fixtures/types"
 import { type DemoState } from "../state/types"
 
@@ -116,9 +116,7 @@ function listedFolders(state: DemoState, parentId: FolderId | undefined) {
 
       return {
         ...folder,
-        ownerId: folder.createdBy,
-        ownerName: personName(folder.createdBy),
-        ownerImage: undefined,
+        ...ownerFields(folder.createdBy),
         folderCount,
         resourceCount,
       }
@@ -135,9 +133,7 @@ function folderResources(state: DemoState, folderId: FolderId) {
         name: material.name,
         visibility: material.visibility,
         updatedAt: material.updatedAt,
-        ownerId: material.ownerId,
-        ownerName: personName(material.ownerId),
-        ownerImage: undefined,
+        ...ownerFields(material.ownerId),
         ...(material.kind === "file"
           ? { mimeType: material.mimeType, size: material.size }
           : {}),
@@ -153,6 +149,7 @@ function folderResources(state: DemoState, folderId: FolderId) {
         visibility: job.visibility,
         updatedAt: job.updatedAt,
         status: job.status,
+        ...ownerFields(job.ownerId),
       })
     )
 
@@ -165,9 +162,7 @@ function folderResources(state: DemoState, folderId: FolderId) {
         name: chat.title,
         visibility: chat.visibility,
         updatedAt: chat.updatedAt,
-        ownerId: chat.createdBy,
-        ownerName: personName(chat.createdBy),
-        ownerImage: undefined,
+        ...ownerFields(chat.createdBy),
       })
     )
 

@@ -1,12 +1,22 @@
 /* @vitest-environment jsdom */
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import assert from "node:assert/strict"
+
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { DemoConsoleAt } from "../../../../../test/demo"
+import { folderId } from "../../fixtures/folders"
 import { jobId } from "../../fixtures/jobs"
 
 // Load real lazy views before interaction assertions start their deadlines.
 import "./detail"
+import "../folders"
 import "@/shared/console/jobs/editor/dialog"
 import "@/shared/console/jobs/editor/schedule/picker"
 
@@ -66,4 +76,32 @@ test("a job that is gone reads as not found", async () => {
   render(<DemoConsoleAt path="/jobs/jobs_missing" />)
 
   expect(await screen.findByText("Job not found")).toBeDefined()
+})
+
+test("a filed job keeps the same owner and status through its page and title menu", async () => {
+  render(<DemoConsoleAt path={`/folders/${folderId("design")}`} />)
+  const link = await screen.findByRole("link", { name: "Design review digest" })
+  const row = link.closest("tr")
+  assert(row)
+  expect(within(row).getByText("Hanna Ek")).toBeDefined()
+  expect(within(row).queryByText("Jori")).toBeNull()
+
+  fireEvent.click(link)
+  expect(await screen.findByText("Instructions")).toBeDefined()
+  expect(screen.getByRole("button", { name: "Resume" })).toBeDefined()
+  const title = screen.getByRole("button", { name: "Design review digest" })
+  fireEvent.pointerDown(title)
+  fireEvent.click(title)
+  expect(
+    within(await screen.findByRole("menu")).getByText("Hanna Ek")
+  ).toBeDefined()
+  fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" })
+  fireEvent.click(screen.getByRole("button", { name: "Resume" }))
+  fireEvent.click(screen.getByRole("link", { name: "Design" }))
+  const returned = (
+    await screen.findByRole("link", { name: "Design review digest" })
+  ).closest("tr")
+  assert(returned)
+  expect(within(returned).getByText("Hanna Ek")).toBeDefined()
+  expect(within(returned).queryByText("Paused")).toBeNull()
 })

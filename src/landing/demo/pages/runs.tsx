@@ -6,7 +6,12 @@ import { ExecutionFilters } from "@/shared/console/runs/list/filters"
 import { ExecutionRows } from "@/shared/console/runs/list/rows"
 import { useExecutionClock } from "@/shared/console/runs/time"
 import { pageSize } from "@/shared/console/runs/types"
-import { filterRuns, hasRunFilters, type RunFilters } from "../derive/runs"
+import {
+  filterRuns,
+  hasRunFilters,
+  type RunFilters,
+  runViews,
+} from "../derive/runs"
 import { useDemoWorkspace } from "../workspace"
 import { useRunRowSlots } from "./slots"
 
@@ -23,10 +28,11 @@ export function RunsPage({ openRunId }: { openRunId?: string }) {
     query: "",
     runFilter: "all",
   })
-  const now = useExecutionClock(state.runs, state.now)
+  const runs = useMemo(() => runViews(state), [state])
+  const now = useExecutionClock(runs, state.now)
   const rows = useMemo(
-    () => filterRuns(state.runs, filters, now),
-    [state.runs, filters, now]
+    () => filterRuns(runs, filters, now),
+    [runs, filters, now]
   )
   const hasFilters = hasRunFilters(filters)
   const pagination = useClientPagination({

@@ -2,7 +2,7 @@ import {
   type ActivityItem,
   type ActivityResult,
 } from "@/shared/console/runs/activity/types"
-import { type ExecutionItem } from "@/shared/console/runs/types"
+import { type DemoRun } from "../fixtures/types"
 import { type DemoAction, type DemoState } from "./types"
 
 export function reduceRuns(state: DemoState, action: DemoAction): DemoState {
@@ -65,9 +65,9 @@ export function reduceRuns(state: DemoState, action: DemoAction): DemoState {
 }
 
 function patchRun(
-  runs: ExecutionItem[],
+  runs: DemoRun[],
   runId: string,
-  patch: (run: ExecutionItem) => ExecutionItem
+  patch: (run: DemoRun) => DemoRun
 ) {
   return runs.map((run) => (run.id === runId ? patch(run) : run))
 }
@@ -90,7 +90,7 @@ function patchLog(
 
 /** A stopped run ends now, says who stopped it, and lets any approval it
  *  was waiting on go. */
-function stopped(run: ExecutionItem, actor: string, at: number): ExecutionItem {
+function stopped(run: DemoRun, actor: string, at: number): DemoRun {
   const approvals = run.approvals.map((approval) =>
     approval.state === "pending"
       ? { ...approval, state: "cancelled" as const }
@@ -110,11 +110,11 @@ function stopped(run: ExecutionItem, actor: string, at: number): ExecutionItem {
 }
 
 function decided(
-  run: ExecutionItem,
+  run: DemoRun,
   approvalId: string,
   decision: "approved" | "denied",
   at: number
-): ExecutionItem {
+): DemoRun {
   const approvals = run.approvals.map((approval) =>
     approval.id === approvalId
       ? { ...approval, state: decision, decidedAt: at }

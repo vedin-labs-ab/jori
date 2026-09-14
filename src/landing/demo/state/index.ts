@@ -19,16 +19,18 @@ import { reduceWrites } from "./writes"
 /** Copperline as the page first shows it, with every time an offset from
  *  the moment the page was rendered. */
 export function createWorkspace(now: number): DemoState {
+  const jobs = demoJobs(now)
+
   return {
     activity: demoActivity(now),
     chat: { conversations: demoConversations(now), live: null },
     folders: demoFolders(now),
-    jobs: demoJobs(now),
+    jobs,
     materials: demoMaterials(now),
     now,
     runs: demoRuns(now),
     shares: demoShares(now),
-    usage: demoUsage(now),
+    usage: demoUsage(now, jobs),
   }
 }
 

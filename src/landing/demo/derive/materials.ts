@@ -17,7 +17,7 @@ import {
   type TableDetail,
   type TableSummary,
 } from "@/shared/console/tables/types"
-import { personName } from "../fixtures/people"
+import { ownerFields } from "../fixtures/people"
 import {
   type DemoFile,
   type DemoMaterial,
@@ -148,12 +148,10 @@ function owned(material: DemoMaterial) {
   return {
     name: material.name,
     visibility: material.visibility,
-    ownerId: material.ownerId,
+    ...ownerFields(material.ownerId),
     folderId: material.folderId,
     createdAt: material.createdAt,
     updatedAt: material.updatedAt,
-    ownerName: personName(material.ownerId),
-    ownerImage: undefined,
   }
 }
 

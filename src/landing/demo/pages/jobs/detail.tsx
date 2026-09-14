@@ -20,6 +20,7 @@ import { useNow } from "@/shared/console/time"
 import { VisibilityButton } from "@/shared/console/visibility/badge"
 import { folderNames } from "../../derive/folders"
 import { jobMoveSubject } from "../../derive/jobs"
+import { runViews } from "../../derive/runs"
 import { DemoMoveDialog } from "../../dialogs/move"
 import { useJobEditor } from "../../editor"
 import { demoPermissions, demoSkills } from "../../fixtures/permissions"
@@ -161,8 +162,8 @@ function useJobCrumb(job: Job, onMoveToFolder: () => void) {
 function JobRuns({ jobId }: { jobId: string }) {
   const { actions, state } = useDemoWorkspace()
   const runs = useMemo(
-    () => state.runs.filter((run) => run.job?.id === jobId),
-    [state.runs, jobId]
+    () => runViews(state).filter((run) => run.job?.id === jobId),
+    [state, jobId]
   )
   const now = useExecutionClock(runs, state.now)
   const pagination = useClientPagination({

@@ -1,7 +1,7 @@
 import { makeApproval } from "@/shared/console/runs/fixtures"
-import { type ExecutionItem } from "@/shared/console/runs/types"
 import { hour, minute } from "../clock"
 import { demoId } from "../ids"
+import { type DemoRun } from "../types"
 import { detail, mention, run, tools } from "./details"
 import { chaseRun, scheduledRuns } from "./scheduled"
 
@@ -11,7 +11,7 @@ import { chaseRun, scheduledRuns } from "./scheduled"
 
 export const chaseRunId = demoId("runs", "chase")
 
-export function demoRuns(now: number): ExecutionItem[] {
+export function demoRuns(now: number): DemoRun[] {
   return [
     chaseRun(now),
     harborRun(now),
@@ -122,6 +122,7 @@ function tipRun(now: number) {
 function triageRun(now: number) {
   return run(now, {
     id: "triage",
+    job: "triage",
     title: "Ticket triage",
     task: "Triage COP-88 from the report in the thread.",
     result: "Labeled bug, priority high, assigned to Ravi Menon.",

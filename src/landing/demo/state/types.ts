@@ -8,7 +8,6 @@ import { type FiledResourceType } from "@/shared/console/folders/types"
 import { type Job } from "@/shared/console/jobs/types"
 import { type ShareRow } from "@/shared/console/materials/history"
 import { type ActivityResult } from "@/shared/console/runs/activity/types"
-import { type ExecutionItem } from "@/shared/console/runs/types"
 import {
   type RowInsertAnchor,
   type TableColumn,
@@ -18,6 +17,7 @@ import { type DemoConversation, type DemoReply } from "../fixtures/chat"
 import {
   type DemoFolder,
   type DemoMaterial,
+  type DemoRun,
   type FolderId,
   type StoredVisibility,
 } from "../fixtures/types"
@@ -33,7 +33,7 @@ export type DemoState = {
   jobs: Job[]
   materials: DemoMaterial[]
   now: number
-  runs: ExecutionItem[]
+  runs: DemoRun[]
   shares: Record<string, ShareRow[]>
   usage: UsageRow[]
 }

@@ -93,7 +93,7 @@ function deleteFolder(
       ? state.jobs.filter(survives)
       : state.jobs.map(refiled),
     usage: state.usage.map((row) =>
-      row.conversationId !== undefined && movedChats.has(row.conversationId)
+      row.folderId !== undefined && doomed.has(row.folderId)
         ? { ...row, folderId: parentId }
         : row
     ),

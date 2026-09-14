@@ -10,6 +10,7 @@ import {
 import { toolCapability } from "@/shared/console/tools/model"
 import { demoId } from "../ids"
 import { demoTimezone, jobId } from "../jobs"
+import { type DemoRun } from "../types"
 
 // What a run is made of, built the way the console projects it: a source
 // with its surface and kind, facts with their icons, and the tools it was
@@ -28,11 +29,11 @@ type RunSpec = {
   source: ExecutionSource
   details: ExecutionDetail[]
   approval?: ExecutionItem["approval"]
-  /** The key of the job the run came from; its name is the run's title. */
+  /** The key of the job the run came from; resolved against the workspace when displayed. */
   job?: string
 }
 
-export function run(now: number, spec: RunSpec): ExecutionItem {
+export function run(now: number, spec: RunSpec): DemoRun {
   const createdAt = now - spec.startedAgo
   const status = spec.status ?? "completed"
   const isOngoing = status === "queued" || status === "running"
@@ -41,7 +42,7 @@ export function run(now: number, spec: RunSpec): ExecutionItem {
       ? undefined
       : createdAt + spec.durationMs
 
-  return makeExecution({
+  const { job: _job, ...execution } = makeExecution({
     id: demoId("runs", spec.id),
     title: spec.title,
     task: spec.task,
@@ -53,8 +54,7 @@ export function run(now: number, spec: RunSpec): ExecutionItem {
     endedAt,
     durationMs: endedAt === undefined ? undefined : spec.durationMs,
     source: spec.source,
-    job:
-      spec.job === undefined ? null : { id: jobId(spec.job), name: spec.title },
+    job: null,
     trigger: spec.source.type === "job" ? "Schedule" : "Mention",
     details: spec.details,
     approval: spec.approval ?? null,
@@ -62,6 +62,11 @@ export function run(now: number, spec: RunSpec): ExecutionItem {
       .join(" ")
       .toLowerCase(),
   })
+
+  return {
+    ...execution,
+    jobId: spec.job === undefined ? undefined : jobId(spec.job),
+  }
 }
 
 /** A scheduled job's run, which Jori itself starts. */

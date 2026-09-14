@@ -7,6 +7,8 @@ import {
   type ExecutionItem,
   type RunFilter,
 } from "@/shared/console/runs/types"
+import { type DemoRun } from "../fixtures/types"
+import { type DemoState } from "../state/types"
 
 export type RunFilters = {
   approvalFilter: ApprovalFilter
@@ -75,4 +77,18 @@ function matchesApprovalFilter(
 
     return state === filter
   })
+}
+
+/** Job links use the current record; the run's title and task remain history. */
+export function runView(state: DemoState, run: DemoRun): ExecutionItem {
+  const { jobId, ...snapshot } = run
+  const job = state.jobs.find((job) => job.id === jobId)
+  return {
+    ...snapshot,
+    job: job === undefined ? null : { id: job.id, name: job.name },
+  }
+}
+
+export function runViews(state: DemoState) {
+  return state.runs.map((run) => runView(state, run))
 }

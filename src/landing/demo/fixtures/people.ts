@@ -59,6 +59,11 @@ export function personName(id: PersonId | undefined) {
   return people.find((person) => person.id === id)?.name
 }
 
+/** Owner fields for every mock projection, resolved from the people directory. */
+export function ownerFields<Id extends PersonId | undefined>(ownerId: Id) {
+  return { ownerId, ownerName: personName(ownerId), ownerImage: undefined }
+}
+
 function person(key: string, name: string, teamId: string): DemoPerson {
   return { id: personId(key), name, teamIds: [teamId] }
 }

@@ -14,7 +14,7 @@ import {
   matchesAudienceFilter,
 } from "@/shared/console/list/audience"
 import { jobSurface } from "../fixtures/jobs"
-import { personName, viewerId } from "../fixtures/people"
+import { ownerFields, viewerId } from "../fixtures/people"
 import { demoPermissions } from "../fixtures/permissions"
 import { type FolderId, type JobId, jobAudience } from "../fixtures/types"
 
@@ -84,9 +84,7 @@ function createdJob(
     job: {
       ...rest,
       id,
-      ownerId: viewerId,
-      ownerName: personName(viewerId),
-      ownerImage: undefined,
+      ...ownerFields(viewerId),
       key: undefined,
       audience: jobAudience(stored),
       visibility: stored,

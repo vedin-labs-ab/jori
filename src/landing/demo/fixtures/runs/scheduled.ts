@@ -1,10 +1,10 @@
-import { type ExecutionItem } from "@/shared/console/runs/types"
 import { day, hour, minute } from "../clock"
 import { chaseInstructions } from "../jobs"
+import { type DemoRun } from "../types"
 import { detail, recurring, run, schedule, tools } from "./details"
 
 /** The runs Copperline's scheduled jobs left behind. */
-export function scheduledRuns(now: number): ExecutionItem[] {
+export function scheduledRuns(now: number): DemoRun[] {
   return [watchRun(now), competitorRun(now), digestRun(now), releaseRun(now)]
 }
 
