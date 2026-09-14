@@ -12,9 +12,10 @@ import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
  * fast-forwards `main` from here, in that order and only in that order. The
  * merge runs from the primary checkout because a merge run inside the
  * worktree merges the branch into itself and reports success. The gate lock
- * is held from rebase to merge: one landing at a time, each gating the
- * tree it lands. `--no-verify` skips the gate without recording a
- * verification pass.
+ * is held from rebase through the dev server refresh: one landing at a
+ * time, each gating the tree it lands, and never two refreshes racing for
+ * the port. `--no-verify` skips the gate without recording a verification
+ * pass.
  */
 requirePrimaryCheckout("Landing")
 
@@ -46,11 +47,10 @@ try {
   }
   await gate()
   fastForward()
+  await runCommand(packageCommand("dev:up"))
 } finally {
   release()
 }
-
-await runCommand(packageCommand("dev:up"))
 
 process.stdout.write(
   `${branch} landed on main at ${git(["rev-parse", "--short", "main"])}.\n`

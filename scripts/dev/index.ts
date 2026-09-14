@@ -11,7 +11,7 @@ import {
 import { connect } from "node:net"
 import path from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
-import { commonDirectory } from "../git.ts"
+import { commonDirectory, git } from "../git.ts"
 import { installCommand, runCommand } from "../process.ts"
 import { type Facts, needsInstall, stateOf } from "./state.ts"
 
@@ -32,7 +32,7 @@ const recordFile = path.join(directory, "server.json")
 const logFile = path.join(directory, "server.log")
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm"
 
-type Record = { pid: number; startedAt: number }
+type Record = { pid: number; startedAt: number; commit?: string }
 
 const [action] = process.argv.slice(2)
 
@@ -124,6 +124,33 @@ async function gather(): Promise<Facts> {
     lockModified: modified("pnpm-lock.yaml"),
     modulesModified: modified("node_modules/.modules.yaml"),
     envModified: modified(".env.local"),
+    sourcesMoved:
+      record?.commit !== undefined && sourcesMovedSince(record.commit),
+  }
+}
+
+/** Whether a file Vite serves was deleted or renamed since `commit`; a
+ *  commit git no longer knows counts as nothing moved. */
+function sourcesMovedSince(commit: string) {
+  try {
+    return (
+      git(
+        [
+          "diff",
+          "--name-only",
+          "--diff-filter=DR",
+          commit,
+          "HEAD",
+          "--",
+          "src",
+          "contracts",
+          "public",
+        ],
+        primary
+      ) !== ""
+    )
+  } catch {
+    return false
   }
 }
 
@@ -142,17 +169,20 @@ async function start() {
   if (child.pid === undefined) {
     throw new Error("Starting pnpm dev failed.")
   }
-  writeRecord({ pid: child.pid, startedAt: Date.now() })
+  writeRecord({
+    pid: child.pid,
+    startedAt: Date.now(),
+    commit: git(["rev-parse", "HEAD"], primary),
+  })
   child.unref()
 
   write(`Starting main, logging to ${logFile}.`)
-  for (let waited = 0; waited < 120_000; waited += 500) {
+  // A child that died while the port answers is a second server that lost
+  // the port to a first; only a live child on an answering port is main.
+  for (let waited = 0; waited < 120_000 && isAlive(child.pid); waited += 500) {
     if (await answering()) {
       write(`main is up at ${url}.`)
       return
-    }
-    if (!isAlive(child.pid)) {
-      break
     }
     await sleep(500)
   }

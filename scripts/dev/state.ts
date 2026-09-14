@@ -2,8 +2,9 @@
  * What the development server is doing, from facts anyone can gather:
  * whether the port answers, whether the record `dev:up` wrote still names
  * a live process, and when the inputs the server loads once were last
- * written. Vite reloads code and config on its own, so only dependencies
- * and the env file can leave a running server behind.
+ * written. Vite reloads edits on its own but keeps the import paths it has
+ * resolved, so a file that moved or vanished leaves a running server
+ * behind, as do dependencies and the env file.
  */
 export type Facts = {
   answering: boolean
@@ -12,6 +13,7 @@ export type Facts = {
   lockModified?: number
   modulesModified?: number
   envModified?: number
+  sourcesMoved?: boolean
 }
 
 export type State =
@@ -56,6 +58,11 @@ function staleReasons(facts: Facts, startedAt: number) {
   }
   if (facts.envModified !== undefined && facts.envModified > startedAt) {
     reasons.push(".env.local changed after it started")
+  }
+  if (facts.sourcesMoved) {
+    reasons.push(
+      "files moved or vanished since it started, which Vite cannot follow"
+    )
   }
 
   return reasons

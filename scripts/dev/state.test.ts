@@ -56,3 +56,12 @@ test("a lockfile newer than the installed modules needs an install first", () =>
   })
   expect(needsInstall({ ...running, modulesModified: undefined })).toBe(true)
 })
+
+test("files that moved since the start make it stale", () => {
+  expect(stateOf({ ...running, sourcesMoved: true })).toEqual({
+    kind: "stale",
+    reasons: [
+      "files moved or vanished since it started, which Vite cannot follow",
+    ],
+  })
+})
