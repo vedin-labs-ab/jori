@@ -19,7 +19,7 @@ export function MenuProvenance({
   const now = useNow(30_000)
 
   return (
-    <div className="grid gap-0.5 px-2 py-1.5 text-muted-foreground text-xs">
+    <div className="grid gap-1 px-2 py-1.5 text-muted-foreground text-xs">
       <div className="font-medium text-foreground">
         <MaterialOwnerCell compact owner={owner} />
       </div>
