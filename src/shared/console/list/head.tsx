@@ -32,14 +32,9 @@ import {
   toggledFacet,
 } from "./controls"
 
-// Header-embedded list controls: each header cell houses a small stock
-// ghost button — the cell itself is not the control. At rest the button
-// sheds its horizontal padding so the label sits exactly on the column's
-// text grid; hovering, focusing, opening, or being active grows the
-// padding back (the Button's own transition animates it), the same move
-// the breadcrumb trigger makes.
-const headButtonClassName =
-  "px-0 font-medium hover:px-2 focus-visible:px-2 aria-expanded:px-2"
+// Keep the label on the column's text grid, with room for the hover
+// background already reserved so a dismissed menu cannot resize columns.
+const headButtonClassName = "-ml-2 px-2 font-medium"
 
 // An active sort or filter keeps the ghost hover background, so what is
 // shaping the list stays marked after the pointer leaves.

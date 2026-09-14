@@ -8,7 +8,10 @@ import { JobStatus } from "../../jobs/status"
 import { SelectionRowCell } from "../../list/bar"
 import { columnTier, nameColumnClassName } from "../../list/controls"
 import { type RowSelection } from "../../list/selection"
-import { MaterialOwnerCell } from "../../materials/cells/owner"
+import {
+  MaterialOwnerCell,
+  ownerColumnClassName,
+} from "../../materials/cells/owner"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
@@ -148,7 +151,7 @@ function ResourceCells({
           ) : null}
         </span>
       </TableCell>
-      <TableCell className={columnTier.lg}>
+      <TableCell className={cn(columnTier.lg, ownerColumnClassName)}>
         {resource ? <MaterialOwnerCell owner={materialOwner(resource)} /> : "—"}
       </TableCell>
       {/* Resources hold nothing, so the Items column carries a quiet dash —
@@ -160,7 +163,7 @@ function ResourceCells({
         className={cn("text-muted-foreground", columnTier.sm)}
         title={resource ? absoluteTime(resource.updatedAt) : undefined}
       >
-        {resource ? relativeTime(resource.updatedAt, now) : "—"}
+        {resource ? relativeTime(Math.min(resource.updatedAt, now), now) : "—"}
       </TableCell>
     </>
   )

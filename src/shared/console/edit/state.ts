@@ -51,7 +51,7 @@ export function useEditMenuFocus() {
 export function useCreatedItem(surface: EditSurface, parentId?: string) {
   const edit = useEditing()?.edit
   return edit &&
-    edit.item.kind !== "folder" &&
+    (edit.item.kind !== "folder" || surface === "contents") &&
     edit.surface === surface &&
     (surface !== "contents" || edit.item.parentId === parentId) &&
     (edit.creating || edit.created)

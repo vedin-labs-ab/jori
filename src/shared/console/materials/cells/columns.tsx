@@ -6,7 +6,11 @@ import { type VisibilitySubject } from "../../visibility/summary"
 import { type MaterialColumn } from "../list"
 import { summaryOwner } from "../owners"
 import { MaterialFolderCell } from "./folder"
-import { type MaterialOwner, MaterialOwnerCell } from "./owner"
+import {
+  type MaterialOwner,
+  MaterialOwnerCell,
+  ownerColumnClassName,
+} from "./owner"
 
 // The columns a kind of material list is built from. Tables and stores
 // share the whole set; a job list picks the folder, owner, and time
@@ -29,6 +33,7 @@ export function ownerColumn<Row>(
 ): MaterialColumn<Row> {
   return {
     cell: (row) => <MaterialOwnerCell owner={owner(row)} />,
+    className: ownerColumnClassName,
     head: { facets: ["owner"] },
     label: "Owner",
     tier,
@@ -44,7 +49,9 @@ export function timeColumn<Row>(
   tier: ColumnTier
 ): MaterialColumn<Row> {
   return {
-    cell: (row, context) => timeCell(at(row), context.now),
+    // A created row can arrive between the list clock’s ticks.
+    cell: (row, context) =>
+      timeCell(at(row), Math.max(context.now, Date.now())),
     head: { sortKey },
     label,
     tier,

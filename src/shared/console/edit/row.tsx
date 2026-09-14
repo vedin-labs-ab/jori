@@ -6,8 +6,8 @@ import { nameCellWidth } from "../materials/cells/name"
 import { RowMenuTrigger } from "../menu"
 import { ConsoleLink } from "../shell/link"
 import { type ConsoleDestination } from "../shell/location"
-import { editIcons } from "./icons"
 import { ItemName } from "./name"
+import { PendingItemName } from "./pending"
 import { type Edit } from "./state"
 
 export function CreatedItemRow({
@@ -18,7 +18,6 @@ export function CreatedItemRow({
   children: ReactNode
 }) {
   const { item, surface } = edit
-  const Icon = editIcons[item.kind]
   const destination: ConsoleDestination = {
     to: `/${item.kind}s/$${item.kind}Id`,
     params: { [`${item.kind}Id`]: item.id },
@@ -31,15 +30,7 @@ export function CreatedItemRow({
       <TableCell className={nameColumnClassName}>
         <div className={nameCellWidth}>
           {edit.creating ? (
-            <div
-              aria-busy="true"
-              role="status"
-              className="flex h-6 items-center gap-2 text-muted-foreground text-xs"
-            >
-              <Icon className="size-4 shrink-0" />
-              <span className="shimmer truncate">{item.name}</span>
-              <span className="sr-only">Creating {item.kind}.</span>
-            </div>
+            <PendingItemName item={item} />
           ) : (
             <ItemName item={item} surface={surface}>
               <ConsoleLink {...destination}>{item.name}</ConsoleLink>

@@ -10,8 +10,6 @@ import {
 import { ConsoleListContent } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
 import { type RowSelection } from "../../list/selection"
-import { PendingFolderRow } from "../edit/pending"
-import { usePendingFolder } from "../edit/state"
 import {
   type FolderContentsResult,
   type FolderDialogRequest,
@@ -26,7 +24,12 @@ import {
 } from "./controls"
 import { CreatedResourceRow, ResourceListRow } from "./resource"
 import { type FolderSelectionActions } from "./select"
-import { FolderListRow, FolderListTable, folderTableColumns } from "./table"
+import {
+  CreatedFolderRow,
+  FolderListRow,
+  FolderListTable,
+  folderTableColumns,
+} from "./table"
 
 /** A folder's listing: subfolders first, then the filed resources in one
  *  name-sorted run, in the shared full-bleed table, with the selection's
@@ -50,7 +53,6 @@ export function FolderContents({
   resourceMenu: (resource: FolderResource) => ReactNode
   selectionActions: FolderSelectionActions
 }) {
-  const pending = usePendingFolder(folderId, "contents")
   const created = useCreatedItem("contents", folderId)
   if (contents === undefined) {
     return (
@@ -78,7 +80,6 @@ export function FolderContents({
   if (
     contents.folders.length === 0 &&
     contents.resources.length === 0 &&
-    !pending &&
     !created
   ) {
     return (
@@ -169,11 +170,10 @@ function FolderContentRows({
   resources: FolderResource[]
   selection: RowSelection<FolderListEntry>
 }) {
-  const pending = usePendingFolder(folderId, "contents")
   const created = useCreatedItem("contents", folderId)
   const selected = selectionPayload(selection.selected, folderId)
 
-  if (folders.length === 0 && resources.length === 0 && !pending && !created) {
+  if (folders.length === 0 && resources.length === 0 && !created) {
     return (
       <EmptyRow colSpan={folderTableColumns}>
         <FilterableEmptyState
@@ -188,7 +188,12 @@ function FolderContentRows({
 
   return (
     <>
-      {created ? (
+      {created?.item.kind === "folder" ? (
+        <CreatedFolderRow
+          edit={created}
+          folder={folders.find((folder) => folder.folderId === created.item.id)}
+        />
+      ) : created ? (
         <CreatedResourceRow
           edit={created}
           resource={resources.find(
@@ -196,18 +201,17 @@ function FolderContentRows({
           )}
         />
       ) : null}
-      {pending ? (
-        <PendingFolderRow name={pending.name} colSpan={folderTableColumns} />
-      ) : null}
-      {folders.map((folder) => (
-        <FolderListRow
-          folder={folder}
-          key={folder.folderId}
-          onDialog={onDialog}
-          selected={selected}
-          selection={selection}
-        />
-      ))}
+      {folders
+        .filter((folder) => folder.folderId !== created?.item.id)
+        .map((folder) => (
+          <FolderListRow
+            folder={folder}
+            key={folder.folderId}
+            onDialog={onDialog}
+            selected={selected}
+            selection={selection}
+          />
+        ))}
       {resources
         .filter((resource) => resource.id !== created?.item.id)
         .map((resource) => (

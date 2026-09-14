@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { countLabel } from "../../count"
+import { CreatedItemRow } from "../../edit/row"
+import { type Edit } from "../../edit/state"
 import { SelectionHeadCell, SelectionRowCell } from "../../list/bar"
 import {
   columnTier,
@@ -20,7 +22,10 @@ import { ConsoleListTable } from "../../list/frame"
 import { FilterHead, SortHead } from "../../list/head"
 import { type RowSelection } from "../../list/selection"
 import { MaterialMeasureCell } from "../../materials/cells/measure"
-import { MaterialOwnerCell } from "../../materials/cells/owner"
+import {
+  MaterialOwnerCell,
+  ownerColumnClassName,
+} from "../../materials/cells/owner"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
@@ -77,7 +82,7 @@ export function FolderListTable({
             label="Kind"
           />
           <FilterHead
-            className={columnTier.lg}
+            className={cn(columnTier.lg, ownerColumnClassName)}
             controls={controls}
             facets={owners}
             label="Owner"
@@ -123,7 +128,6 @@ export function FolderListRow({
     { folderId: folder.folderId, name: folder.name },
     selected
   )
-  const now = useNow(30_000)
 
   return (
     <DraggableTableRow
@@ -154,28 +158,67 @@ export function FolderListRow({
           </ConsoleLink>
         </FolderName>
       </TableCell>
-      <VisibilityCell
-        visibility={folder.visibility}
-        folderId={folder.parentId}
-        ownerId={folder.createdBy}
-      />
-      <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
-        Folder
-      </TableCell>
-      <TableCell className={columnTier.lg}>
-        <MaterialOwnerCell owner={materialOwner(folder)} />
-      </TableCell>
-      <ItemsCell folder={folder} />
-      <TableCell
-        className={cn("text-muted-foreground", columnTier.sm)}
-        title={absoluteTime(folder.updatedAt)}
-      >
-        {relativeTime(folder.updatedAt, now)}
-      </TableCell>
+      <FolderCells folder={folder} />
       <TableCell className="text-right">
         <FolderRowMenu folder={folder} onDialog={onDialog} />
       </TableCell>
     </DraggableTableRow>
+  )
+}
+
+export function CreatedFolderRow({
+  edit,
+  folder,
+}: {
+  edit: Edit
+  folder: ListedFolder | undefined
+}) {
+  return (
+    <CreatedItemRow edit={edit}>
+      <FolderCells folder={folder} parentId={edit.item.parentId} inert />
+    </CreatedItemRow>
+  )
+}
+
+function FolderCells({
+  folder,
+  parentId,
+  inert,
+}: {
+  folder: ListedFolder | undefined
+  parentId?: string
+  inert?: boolean
+}) {
+  const now = useNow(30_000)
+  return (
+    <>
+      <VisibilityCell
+        visibility={folder?.visibility ?? { mode: "organization" }}
+        inert={inert}
+        folderId={folder?.parentId ?? parentId}
+        ownerId={folder?.createdBy}
+      />
+      <TableCell className={cn("text-muted-foreground", columnTier.xl)}>
+        Folder
+      </TableCell>
+      <TableCell
+        className={cn(columnTier.lg, ownerColumnClassName)}
+        inert={inert}
+      >
+        {folder ? <MaterialOwnerCell owner={materialOwner(folder)} /> : "—"}
+      </TableCell>
+      {folder ? (
+        <ItemsCell folder={folder} />
+      ) : (
+        <TableCell className={columnTier["2xl"]}>—</TableCell>
+      )}
+      <TableCell
+        className={cn("text-muted-foreground", columnTier.sm)}
+        title={folder ? absoluteTime(folder.updatedAt) : undefined}
+      >
+        {folder ? relativeTime(Math.min(folder.updatedAt, now), now) : "—"}
+      </TableCell>
+    </>
   )
 }
 
