@@ -1,5 +1,5 @@
 import { ArrowRight, ChevronRight } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
@@ -74,12 +74,8 @@ export function ChatHome({
   )
 }
 
-/** A few asks as pills on one line, each behind its domain's icon. The
- *  line is the column, so the third pill steps aside where the column is
- *  too narrow for three, and what still overflows scrolls rather than
- *  wrapping, from its start; the line pads itself inside the scroll box
- *  so a pill's bottom edge is not clipped. A pill pressed shows its send
- *  on its way, and the line waits with it. */
+/** Only whole suggestions that fit the chat column are visible. Hidden
+ *  pills stay measurable, but cannot receive focus or pointer input. */
 function Suggestions({
   onSuggestion,
   suggestions,
@@ -88,6 +84,7 @@ function Suggestions({
   suggestions: readonly ChatSuggestion[]
 }) {
   const [pending, setPending] = useState<string>()
+  const { listRef, visibleCount } = useFittingSuggestions(suggestions)
   const choose = (text: string) => {
     const result = onSuggestion(text)
 
@@ -98,35 +95,76 @@ function Suggestions({
   }
 
   return (
-    <ul
-      aria-label="Suggestions"
-      className={cn(
-        chatColumnClassName,
-        "@container -my-1 flex flex-nowrap justify-center-safe gap-2 overflow-x-auto py-1"
-      )}
-    >
-      {suggestions.map(({ icon: Icon, text }, index) => (
-        <li
-          className={cn("shrink-0", index >= 2 && "hidden @min-[38rem]:block")}
-          key={text}
-        >
-          <Suggestion
-            className="pointer-coarse:h-9"
-            disabled={pending !== undefined}
-            onClick={choose}
-            suggestion={text}
-          >
-            {pending === text ? (
-              <Spinner aria-label="Sending" />
-            ) : (
-              <Icon aria-hidden className="text-muted-foreground" />
+    <div className={chatColumnClassName}>
+      <ul
+        aria-label="Suggestions"
+        className="relative -my-1 flex min-h-8 flex-nowrap gap-2 overflow-clip py-1 [overflow-clip-margin:4px] pointer-coarse:min-h-11"
+        ref={listRef}
+      >
+        {suggestions.map(({ icon: Icon, text }, index) => (
+          <li
+            className={cn(
+              "w-max shrink-0",
+              index >= visibleCount && "invisible absolute pointer-events-none"
             )}
-            {text}
-          </Suggestion>
-        </li>
-      ))}
-    </ul>
+            key={text}
+          >
+            <Suggestion
+              className="transition-colors pointer-coarse:h-9"
+              disabled={pending !== undefined}
+              onClick={choose}
+              suggestion={text}
+            >
+              {pending === text ? (
+                <Spinner aria-label="Sending" />
+              ) : (
+                <Icon aria-hidden className="text-muted-foreground" />
+              )}
+              {text}
+            </Suggestion>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
+}
+
+function useFittingSuggestions(suggestions: readonly ChatSuggestion[]) {
+  const [visibleCount, setVisibleCount] = useState(suggestions.length)
+  const listRef = useRef<HTMLUListElement>(null)
+
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!list) {
+      return
+    }
+
+    const items = suggestions.map((_, index) => list.children[index])
+    const measure = () => {
+      const width = list.getBoundingClientRect().width
+      const gap = Number.parseFloat(getComputedStyle(list).columnGap) || 0
+      let used = 0
+      let count = 0
+
+      for (const item of items) {
+        used += item.getBoundingClientRect().width + (count === 0 ? 0 : gap)
+        if (used > width) {
+          break
+        }
+        count += 1
+      }
+      setVisibleCount(count)
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(list)
+    for (const item of items) {
+      observer.observe(item)
+    }
+    return () => observer.disconnect()
+  }, [suggestions])
+  return { listRef, visibleCount }
 }
 
 /** The recent block's room while the list is on its way: its heading's

@@ -33,8 +33,7 @@ export const chatSuggestionPool: readonly ChatSuggestion[] = [
   { icon: FileText, text: "Write up the last incident" },
 ]
 
-/** How many suggestions the home shows at most: three share the column
- *  at its widest, and the third steps aside where it would not fit. */
+/** The home offers up to three suggestions, showing only those that fit. */
 export const shownSuggestions = 3
 
 /** The pool from `start`, wrapping, so successive visits see different

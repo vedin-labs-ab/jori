@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -16,7 +17,11 @@ vi.mock("@tanstack/react-router", async () => ({
   ...(await import("../../../../test/routing")),
 }))
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.restoreAllMocks()
+  vi.unstubAllGlobals()
+})
 
 const now = 1_700_000_000_000
 
@@ -172,4 +177,67 @@ test("without conversations there is no recent section at all", () => {
   expect(screen.queryByText("Recent")).toBeNull()
   expect(screen.queryByText(/No conversations/)).toBeNull()
   expect(screen.queryByRole("region")).toBeNull()
+})
+
+test("suggestions fit one row and return as the column grows or labels shrink", () => {
+  let width = 420
+  let pillWidth = 130
+  let resize = () => {}
+  const disconnect = vi.fn()
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      constructor(callback: () => void) {
+        resize = callback
+      }
+      observe() {}
+      disconnect = disconnect
+    }
+  )
+  vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+    function (this: Element) {
+      return { width: this.tagName === "UL" ? width : pillWidth } as DOMRect
+    }
+  )
+  vi.spyOn(window, "getComputedStyle").mockReturnValue(
+    Object.assign(document.createElement("div").style, { columnGap: "8px" })
+  )
+
+  const { unmount } = render(
+    <ChatHome
+      composer={null}
+      now={now}
+      onSuggestion={vi.fn()}
+      recent={[]}
+      suggestions={[
+        { icon: History, text: "Review renewals" },
+        { icon: Mail, text: "Summarize finance" },
+        { icon: Mail, text: "Chase invoices" },
+      ]}
+    />
+  )
+  const visible = () =>
+    Array.from(
+      screen.getByRole("list", { name: "Suggestions" }).children
+    ).filter((item) => !item.classList.contains("invisible"))
+  expect(visible()).toHaveLength(3)
+
+  for (const [column, pill, count] of [
+    [267, 130, 1],
+    [268, 130, 2],
+    [129, 130, 0],
+    [420, 130, 3],
+    [420, 210, 1],
+    [420, 130, 3],
+  ]) {
+    act(() => {
+      width = column
+      pillWidth = pill
+      resize()
+    })
+    expect(visible()).toHaveLength(count)
+  }
+
+  unmount()
+  expect(disconnect).toHaveBeenCalledOnce()
 })
