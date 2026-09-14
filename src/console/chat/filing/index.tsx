@@ -37,6 +37,7 @@ export function ConversationFiling({
     live,
     folder,
     <ChatTitleMenu
+      conversation={live}
       onAccess={() => setSharing(true)}
       onMoveToFolder={() => setMoving(true)}
       onUnfile={

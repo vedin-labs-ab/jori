@@ -4,6 +4,7 @@ import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
 import { folderDetail } from "../../derive/folders"
 import { useDemoChatMenu } from "../../dialogs/chat"
 import { type DemoConversation } from "../../fixtures/chat"
+import { ownerFields } from "../../fixtures/people"
 import { useDemoWorkspace } from "../../workspace"
 
 export function DemoChatFiling({
@@ -28,7 +29,15 @@ export function DemoChatFiling({
           to: "/folders/$folderId",
           params: { folderId: segment.folderId },
         })),
-        menu: <ChatTitleMenu {...items} />,
+        menu: (
+          <ChatTitleMenu
+            conversation={{
+              ...conversation,
+              ...ownerFields(conversation.createdBy),
+            }}
+            {...items}
+          />
+        ),
       }
     }, [conversation, items, state])
   )

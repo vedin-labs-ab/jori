@@ -1,23 +1,38 @@
-import { DropdownMenuContent } from "@/components/ui/dropdown-menu"
 import { MaterialFilingItems } from "../materials/actions"
-import { menuWidth } from "../menu"
+import { materialOwner } from "../materials/owners"
+import { TitleMenuContent } from "../menu"
+import { MenuProvenance } from "../menu/provenance"
 
 export function ChatTitleMenu({
+  conversation,
   onAccess,
   onMoveToFolder,
   onUnfile,
 }: {
+  conversation: {
+    ownerId?: string
+    ownerName?: string
+    ownerImage?: string
+    updatedAt: number
+  }
   onAccess: () => void
   onMoveToFolder: () => void
   onUnfile?: () => void
 }) {
   return (
-    <DropdownMenuContent align="start" className={menuWidth}>
+    <TitleMenuContent
+      lead={
+        <MenuProvenance
+          owner={materialOwner(conversation)}
+          updatedAt={conversation.updatedAt}
+        />
+      }
+    >
       <MaterialFilingItems
         onAccess={onAccess}
         onMoveToFolder={onMoveToFolder}
         onUnfile={onUnfile}
       />
-    </DropdownMenuContent>
+    </TitleMenuContent>
   )
 }

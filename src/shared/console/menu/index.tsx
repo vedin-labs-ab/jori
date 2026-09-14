@@ -1,7 +1,8 @@
 import { MoreHorizontal } from "lucide-react"
-import { type ReactNode } from "react"
+import { type ComponentProps, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
+  DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -11,16 +12,25 @@ import {
  *  item lands in the same place wherever the menu was opened from. */
 export const menuWidth = "w-48"
 
-/** The lines a view sets ahead of a menu's shared items — its
- *  provenance, its own tools — divided from what follows. The lead itself
- *  ends without a divider, so a menu that is only the lead, the pane's,
- *  ends cleanly too. */
-export function MenuLead({ children }: { children: ReactNode }) {
-  return children === undefined || children === null ? null : (
-    <>
+/** Breadcrumb menus share their alignment, width, and lead divider. */
+export function TitleMenuContent({
+  children,
+  lead,
+  ...props
+}: Pick<ComponentProps<typeof DropdownMenuContent>, "onCloseAutoFocus"> & {
+  children: ReactNode
+  lead?: ReactNode
+}) {
+  return (
+    <DropdownMenuContent align="start" className={menuWidth} {...props}>
+      {lead === undefined || lead === null ? null : (
+        <>
+          {lead}
+          <DropdownMenuSeparator />
+        </>
+      )}
       {children}
-      <DropdownMenuSeparator />
-    </>
+    </DropdownMenuContent>
   )
 }
 

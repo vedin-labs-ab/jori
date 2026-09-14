@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { type FileRow } from "@/shared/console/files/types"
-import { FileTitleMenu } from "./title"
+import { FileTitleMenu } from "./menu"
 
 afterEach(cleanup)
 

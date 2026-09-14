@@ -88,6 +88,14 @@ test("files a chat from its title menu, shows its folder trail, and unfiles it f
     button: 0,
     ctrlKey: false,
   })
+  const menu = await screen.findByRole("menu")
+  expect(within(menu).getByText("Maya Lund")).toBeDefined()
+  expect(within(menu).getByText(/^Updated /).textContent).not.toContain(" · ")
+  expect(
+    within(menu)
+      .getAllByRole("menuitem")
+      .map((item) => item.textContent)
+  ).toEqual(["Audience…", "Move to folder…"])
   fireEvent.click(
     await screen.findByRole("menuitem", { name: "Move to folder…" })
   )

@@ -1,5 +1,5 @@
+import { MenuProvenance } from "@/shared/console/menu/provenance"
 import { countLabel } from "../count"
-import { MenuProvenance } from "../materials/actions/note"
 import { summaryOwner } from "../materials/owners"
 import { type TableSummary } from "./types"
 

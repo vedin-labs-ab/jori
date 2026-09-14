@@ -1,13 +1,9 @@
 import { type ReactNode, useContext, useMemo, useState } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertDialog } from "@/components/ui/alert-dialog"
-import { DropdownMenuContent } from "@/components/ui/dropdown-menu"
-import { DeleteFileDialog } from "@/shared/console/files/delete"
-import { FileMenuItems } from "@/shared/console/files/menu"
+import { FileTitleMenu } from "@/shared/console/files/menu"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
-import { MenuLead, menuWidth } from "@/shared/console/menu"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
@@ -86,7 +82,7 @@ export function CollectionMenu({
   material,
   onRequest,
 }: {
-  lead?: ReactNode
+  lead: ReactNode
   material: DemoStore | DemoTable
   onRequest: (request: MaterialRequest) => void
 }) {
@@ -130,30 +126,17 @@ export function FileMenu({
 }) {
   const { actions } = useDemoWorkspace()
   const navigation = useContext(ConsoleNavigationContext)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
   return (
-    <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
-      <DropdownMenuContent align="start" className={menuWidth}>
-        <MenuLead>{lead}</MenuLead>
-        <FileMenuItems
-          file={fileRowOf(material)}
-          isPending={false}
-          onAccess={() => onRequest({ kind: "access", material })}
-          onEdit={() => onRequest({ kind: "edit", material })}
-          onMoveToFolder={() => onRequest({ kind: "move", material })}
-          onRemove={() => setIsDeleteOpen(true)}
-          withLinks={false}
-        />
-      </DropdownMenuContent>
-      <DeleteFileDialog
-        file={material}
-        isPending={false}
-        onDelete={() => {
-          actions.removeMaterial(material.id)
-          navigation?.navigate("/files")
-        }}
-      />
-    </AlertDialog>
+    <FileTitleMenu
+      file={fileRowOf(material)}
+      isPending={false}
+      lead={lead}
+      onOpen={(kind) => onRequest({ kind, material })}
+      onDelete={() => {
+        actions.removeMaterial(material.id)
+        navigation?.navigate("/files")
+      }}
+    />
   )
 }

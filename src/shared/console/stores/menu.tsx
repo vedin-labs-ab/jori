@@ -7,8 +7,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { copyText } from "@/shared/console/copy/text"
-import { MenuProvenance } from "@/shared/console/materials/actions/note"
 import { summaryOwner } from "@/shared/console/materials/owners"
+import { MenuProvenance } from "@/shared/console/menu/provenance"
 import { formatJsonText } from "./json"
 import { type StoreDetail } from "./types"
 import { type ValueEditorView } from "./value/state"

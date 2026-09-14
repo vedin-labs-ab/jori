@@ -86,6 +86,19 @@ test("a filed job keeps the same owner and status through its page and title men
   expect(within(row).getByText("Hanna Ek")).toBeDefined()
   expect(within(row).queryByText("Jori")).toBeNull()
 
+  fireEvent.pointerDown(screen.getByRole("button", { name: "Design" }))
+  const folderMenu = await screen.findByRole("menu")
+  expect(within(folderMenu).getByText("Hanna Ek")).toBeDefined()
+  expect(within(folderMenu).getByText(/^Updated /).textContent).not.toContain(
+    " · "
+  )
+  expect(
+    within(folderMenu)
+      .getAllByRole("menuitem")
+      .map((item) => item.textContent)
+  ).toEqual(["Usage", "Rename", "Audience…", "Move to folder…", "Delete"])
+  fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" })
+
   fireEvent.click(link)
   expect(await screen.findByText("Instructions")).toBeDefined()
   expect(screen.getByRole("button", { name: "Resume" })).toBeDefined()

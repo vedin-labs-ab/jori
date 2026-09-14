@@ -14,6 +14,7 @@ import {
   resolveConsolePerson,
   resolveCurrentPerson,
 } from "../persons/account"
+import { withOwnerDisplay } from "../persons/names"
 import { conversationVisibility } from "./access"
 import { listConsoleConversations } from "./console/list"
 
@@ -119,8 +120,10 @@ export const live = query({
       return { status: "not_found" as const }
     }
 
-    return {
+    return await withOwnerDisplay(ctx, {
       status: "ready" as const,
+      ownerId: conversation.createdBy,
+      updatedAt: conversation.updatedAt ?? conversation._creationTime,
       title: conversation.title ?? "",
       folderId: conversation.folderId,
       visibility: conversationVisibility(conversation),
@@ -130,7 +133,7 @@ export const live = query({
           ? null
           : await consoleAuthor(ctx, personId, personId),
       ...(await readLiveState(ctx, conversation)),
-    }
+    })
   },
 })
 

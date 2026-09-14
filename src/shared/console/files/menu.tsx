@@ -1,5 +1,5 @@
 import { Copy, Download, ExternalLink, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
 import {
   DropdownMenu,
@@ -12,9 +12,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { copyText } from "@/shared/console/copy/text"
 import { MaterialCoreItems } from "@/shared/console/materials/actions"
-import { MenuProvenance } from "@/shared/console/materials/actions/note"
 import { fileOwner } from "@/shared/console/materials/owners"
-import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
+import {
+  menuWidth,
+  RowMenuTrigger,
+  TitleMenuContent,
+} from "@/shared/console/menu"
+import { MenuProvenance } from "@/shared/console/menu/provenance"
 import { formatFileSize } from "@/shared/files/size"
 import { fileBlobCache } from "./cache/blob"
 import { DeleteFileDialog } from "./delete"
@@ -213,5 +217,46 @@ function FileLinkItems({
       </DropdownMenuItem>
       <DropdownMenuSeparator />
     </>
+  )
+}
+
+export type FileDialog = "access" | "edit" | "move"
+
+/** The file's actions hung off its name in the breadcrumb — the shell owns
+ *  that trigger and the view publishes the crumb, so this is only the
+ *  menu's content, led by the view's own lines, and the confirmation the
+ *  delete passes through. Open and Download are left out: the detail
+ *  page's header already carries both. */
+export function FileTitleMenu({
+  file,
+  isPending,
+  lead,
+  onDelete,
+  onOpen,
+}: {
+  file: FileRow
+  isPending: boolean
+  lead: ReactNode
+  onDelete: () => void
+  /** Requests one of the actions handled by the page adapter. */
+  onOpen: (dialog: FileDialog) => void
+}) {
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+
+  return (
+    <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
+      <TitleMenuContent lead={lead}>
+        <FileMenuItems
+          file={file}
+          isPending={isPending}
+          onAccess={() => onOpen("access")}
+          onEdit={() => onOpen("edit")}
+          onMoveToFolder={() => onOpen("move")}
+          onRemove={() => setIsDeleteOpen(true)}
+          withLinks={false}
+        />
+      </TitleMenuContent>
+      <DeleteFileDialog file={file} isPending={isPending} onDelete={onDelete} />
+    </AlertDialog>
   )
 }

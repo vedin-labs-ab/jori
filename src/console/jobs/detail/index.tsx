@@ -6,7 +6,7 @@ import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { moveTarget } from "@/shared/console/folders/types"
 import { JobDetail } from "@/shared/console/jobs/detail"
 import { JobHeaderActions } from "@/shared/console/jobs/detail/header"
-import { JobLead, JobTitleMenu } from "@/shared/console/jobs/list/actions"
+import { JobTitleMenu } from "@/shared/console/jobs/list/actions"
 import { type Job } from "@/shared/console/jobs/types"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
@@ -135,7 +135,6 @@ function useJobCrumb(
       isControlling={editor.controllingJobId === job.id}
       isDeleting={editor.deletingJobId === job.id}
       job={job}
-      lead={<JobLead job={job} />}
       onDelete={page.removeAndLeave}
       onEdit={editor.openEditForm}
       onMoveToFolder={() => page.setIsMoving(true)}

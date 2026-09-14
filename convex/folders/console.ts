@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
+import { withOwnerDisplay } from "../persons/names"
 import { createSight } from "../visibility/sight"
 import { folderChildren, subtreeImpact } from "./contents"
 import { filedResourceType, fileResource } from "./filing"
@@ -78,10 +79,11 @@ export const get = query({
 
     return {
       status: "ready" as const,
-      folder: {
+      folder: await withOwnerDisplay(ctx, {
         ...summarizeFolder(visible.folder),
+        ownerId: visible.folder.createdBy,
         path: await ancestorPath(ctx, visible.folder),
-      },
+      }),
     }
   },
 })

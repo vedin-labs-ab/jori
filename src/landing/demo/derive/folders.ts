@@ -51,7 +51,11 @@ export function folderDetail(
 
   return folder === undefined
     ? undefined
-    : { ...folder, path: folderTrail(state, folder) }
+    : {
+        ...folder,
+        ...ownerFields(folder.createdBy),
+        path: folderTrail(state, folder),
+      }
 }
 
 /** Root first, the folder itself last. */

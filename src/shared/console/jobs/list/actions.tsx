@@ -7,16 +7,20 @@ import {
   Play,
   Trash2,
 } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { MenuProvenance } from "@/shared/console/materials/actions/note"
 import { materialOwner } from "@/shared/console/materials/owners"
-import { MenuLead, menuWidth, RowMenuTrigger } from "@/shared/console/menu"
+import {
+  menuWidth,
+  RowMenuTrigger,
+  TitleMenuContent,
+} from "@/shared/console/menu"
+import { MenuProvenance } from "@/shared/console/menu/provenance"
 import { type Job, jobControlAction } from "../types"
 import { DeleteJobDialog } from "./delete"
 import { jobTriggerSummary } from "./trigger"
@@ -113,7 +117,7 @@ function JobControlItem({
 
 /** The job's own first lines for its title menu: whose it is, how fresh
  *  it is, and how it starts. */
-export function JobLead({ job }: { job: Job }) {
+function JobLead({ job }: { job: Job }) {
   return (
     <MenuProvenance
       detail={jobTriggerSummary(job).title}
@@ -126,18 +130,14 @@ export function JobLead({ job }: { job: Job }) {
 /** The job's menu for its breadcrumb name on its page; the shell owns
  *  the trigger, so this publishes the content only, led by the page's
  *  own lines ahead of the actions every job shares. */
-export function JobTitleMenu({
-  lead,
-  ...props
-}: JobMenuActions & { lead?: ReactNode }) {
+export function JobTitleMenu(props: JobMenuActions) {
   const confirm = useDeleteConfirmation(props)
 
   return (
     <>
-      <DropdownMenuContent align="start" className={menuWidth}>
-        <MenuLead>{lead}</MenuLead>
+      <TitleMenuContent lead={<JobLead job={props.job} />}>
         <JobMenuItems {...props} onDeleteRequest={confirm.request} />
-      </DropdownMenuContent>
+      </TitleMenuContent>
       {confirm.dialog}
     </>
   )

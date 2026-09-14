@@ -1,10 +1,4 @@
-import {
-  ChartNoAxesColumn,
-  FolderInput,
-  LockKeyhole,
-  Pencil,
-  Trash2,
-} from "lucide-react"
+import { ChartNoAxesColumn, Pencil, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,9 +6,16 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { useEditing, useEditMenuFocus } from "../edit/state"
-import { menuWidth, RowMenuTrigger } from "../menu"
+import { MaterialFilingItems } from "../materials/actions"
+import { materialOwner } from "../materials/owners"
+import { menuWidth, RowMenuTrigger, TitleMenuContent } from "../menu"
+import { MenuProvenance } from "../menu/provenance"
 import { ConsoleLink } from "../shell/link"
-import { type FolderDialogRequest, type ManagedFolder } from "./types"
+import {
+  type FolderDetail,
+  type FolderDialogRequest,
+  type ManagedFolder,
+} from "./types"
 
 // The canonical menu for a folder, as items only: what it costs, what it
 // is, and what removes it. The breadcrumb, the sidebar tree row, and a
@@ -43,14 +44,10 @@ export function FolderMenuItems({
         <Pencil />
         Rename
       </DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => onDialog({ type: "access", folder })}>
-        <LockKeyhole />
-        Audience…
-      </DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => onDialog({ type: "move", folder })}>
-        <FolderInput />
-        Move to folder…
-      </DropdownMenuItem>
+      <MaterialFilingItems
+        onAccess={() => onDialog({ type: "access", folder })}
+        onMoveToFolder={() => onDialog({ type: "move", folder })}
+      />
       <DropdownMenuSeparator />
       <DropdownMenuItem
         onSelect={() => onDialog({ type: "delete", folder })}
@@ -68,15 +65,19 @@ export function FolderTitleMenu({
   folder,
   onDialog,
 }: {
-  folder: ManagedFolder
+  folder: FolderDetail
   onDialog: (request: FolderDialogRequest) => void
 }) {
   const editing = useEditing()
   const onCloseAutoFocus = useEditMenuFocus()
   return (
-    <DropdownMenuContent
-      align="start"
-      className={menuWidth}
+    <TitleMenuContent
+      lead={
+        <MenuProvenance
+          owner={materialOwner(folder)}
+          updatedAt={folder.updatedAt}
+        />
+      }
       onCloseAutoFocus={onCloseAutoFocus}
     >
       <FolderMenuItems
@@ -95,7 +96,7 @@ export function FolderTitleMenu({
             : onDialog(request)
         }
       />
-    </DropdownMenuContent>
+    </TitleMenuContent>
   )
 }
 
@@ -126,13 +127,13 @@ export function FolderRowMenu({
  *  is all its name has to offer. */
 export function FoldersTitleMenu() {
   return (
-    <DropdownMenuContent align="start" className={menuWidth}>
+    <TitleMenuContent>
       <DropdownMenuItem asChild>
         <ConsoleLink to="/folders/usage">
           <ChartNoAxesColumn />
           Usage
         </ConsoleLink>
       </DropdownMenuItem>
-    </DropdownMenuContent>
+    </TitleMenuContent>
   )
 }

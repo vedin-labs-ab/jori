@@ -3,7 +3,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu"
-import { MenuLead, menuWidth, RowMenuTrigger } from "../../menu"
+import { menuWidth, RowMenuTrigger, TitleMenuContent } from "../../menu"
 import { type MaterialMenuActions, MaterialMenuItems } from "."
 import { ConfirmRemoveDialog } from "./confirm"
 
@@ -25,15 +25,14 @@ type MaterialMenuProps = MaterialMenuActions & {
 export function MaterialTitleMenu({
   lead,
   ...props
-}: MaterialMenuProps & { lead?: ReactNode }) {
+}: MaterialMenuProps & { lead: ReactNode }) {
   const confirm = useRemoveConfirmation(props)
 
   return (
     <>
-      <DropdownMenuContent align="start" className={menuWidth}>
-        <MenuLead>{lead}</MenuLead>
+      <TitleMenuContent lead={lead}>
         <MaterialMenuItems {...props} onRemove={confirm.request} />
-      </DropdownMenuContent>
+      </TitleMenuContent>
       {confirm.dialog}
     </>
   )
