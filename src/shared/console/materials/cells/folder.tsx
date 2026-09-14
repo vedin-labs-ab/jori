@@ -1,4 +1,4 @@
-import { Folder, FolderLock } from "lucide-react"
+import { Folder, FolderLock, FolderRoot } from "lucide-react"
 import { ConsoleLink } from "../../shell/link"
 import { useVisibilityDirectory } from "../../visibility/directory"
 import { folderRestriction } from "../../visibility/restriction"
@@ -15,7 +15,12 @@ export function MaterialFolderCell({
 }) {
   const directory = useVisibilityDirectory()
   if (folderId === undefined) {
-    return <span className="text-muted-foreground">Unfiled</span>
+    return (
+      <span className="flex items-center gap-1.5 text-muted-foreground">
+        <FolderRoot aria-hidden className="size-4 shrink-0" />
+        <span>Unfiled</span>
+      </span>
+    )
   }
 
   if (folders === undefined) {

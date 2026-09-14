@@ -1,4 +1,4 @@
-import { ChevronsUpDown, Folder } from "lucide-react"
+import { ChevronsUpDown, Folder, FolderRoot } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { FolderSelect } from "./picker/select"
@@ -34,7 +34,12 @@ export function FolderPickerField({
           variant="outline"
         >
           {selected === undefined ? (
-            <span className="text-muted-foreground">No folder</span>
+            <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
+              {value === null ? (
+                <FolderRoot aria-hidden className="size-4 shrink-0" />
+              ) : null}
+              <span>No folder</span>
+            </span>
           ) : (
             <span className="flex min-w-0 items-center gap-2">
               <Folder className="size-4 shrink-0 text-muted-foreground" />
