@@ -1,31 +1,53 @@
-import { availableFolderName } from "@contracts/folders/name"
+import { availableName } from "@contracts/text"
 import { type ReactNode } from "react"
-import { FolderEditingProvider } from "@/shared/console/folders/edit/provider"
+import { EditingProvider } from "@/shared/console/edit/provider"
+import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { type FolderId } from "./fixtures/types"
 import { useDemoWorkspace } from "./workspace"
 
-export function DemoFolderEditing({ children }: { children: ReactNode }) {
+export function DemoEditing({ children }: { children: ReactNode }) {
   const { state, actions } = useDemoWorkspace()
-  return (
-    <FolderEditingProvider
-      folders={state.folders}
-      onCreate={async (parentId) => {
-        const name = availableFolderName(
-          state.folders
+  const navigate = useConsoleNavigate()
+  const name = (kind: "folder" | "table" | "store", parentId?: string) =>
+    availableName(
+      `New ${kind}`,
+      kind === "folder"
+        ? state.folders
             .filter((f) => f.parentId === parentId)
             .map((f) => f.name)
+        : state.materials
+            .filter((m) => m.kind === kind && m.folderId === parentId)
+            .map((m) => m.name)
+    )
+  return (
+    <EditingProvider
+      name={name}
+      onReveal={(kind, folderId) =>
+        navigate(
+          folderId === undefined
+            ? { to: `/${kind}s` }
+            : { to: "/folders/$folderId", params: { folderId } }
         )
-        const folderId = actions.createFolder(
-          name,
-          parentId as FolderId | undefined
-        )
-        return { folderId, name, parentId }
+      }
+      onCreate={async (kind, parentId) => {
+        const label = name(kind, parentId)
+        const id =
+          kind === "folder"
+            ? actions.createFolder(label, parentId as FolderId | undefined)
+            : actions.createMaterial(kind, {
+                name: label,
+                folderId: parentId,
+                visibility: { mode: "organization" },
+              }).id
+        return { id, kind, name: label, parentId }
       }}
-      onRename={async (folderId, name) =>
-        actions.renameFolder(folderId as FolderId, name)
+      onRename={async (item, name) =>
+        item.kind === "folder"
+          ? actions.renameFolder(item.id as FolderId, name)
+          : actions.updateMaterial(item.id, { name })
       }
     >
       {children}
-    </FolderEditingProvider>
+    </EditingProvider>
   )
 }

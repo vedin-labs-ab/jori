@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { type CountedNoun } from "../count"
+import { CreatedItemRow } from "../edit/row"
+import { type EditKind, useCreatedItem } from "../edit/state"
 import { type DragPayload, type ResourceDragItem } from "../folders/drag/plan"
 import { DraggableTableRow } from "../folders/drag/row"
 import { useResourceRowDrag } from "../folders/drag/state"
@@ -58,6 +60,7 @@ export type MaterialColumn<Row> = {
 /** What tells one material list from another. */
 export type MaterialListKind<Row> = {
   /** What the empty state offers: the page's create actions. */
+  creationKind?: Exclude<EditKind, "folder">
   action: ReactNode
   columns: readonly MaterialColumn<Row>[]
   description: string
@@ -86,6 +89,10 @@ export function MaterialList<Row extends MaterialListRow>(
   props: MaterialListProps<Row>
 ) {
   const { config, controls, hasFilters, kind, rows, selection } = props
+  const created = useCreatedItem(kind.creationKind ?? "title")
+  const visible = created
+    ? rows.filter((row) => kind.identify(row) !== created.item.id)
+    : rows
   const selected: DragPayload = {
     folders: [],
     resources: selection.selected.map(kind.drag),
@@ -102,7 +109,7 @@ export function MaterialList<Row extends MaterialListRow>(
     )
   }
 
-  if (rows.length === 0 && !hasFilters) {
+  if (rows.length === 0 && !hasFilters && !created) {
     return (
       <ConsoleListEmpty>
         <MaterialEmptyState hasFilters={false} kind={kind} />
@@ -112,7 +119,7 @@ export function MaterialList<Row extends MaterialListRow>(
 
   return (
     <>
-      <ConsoleListTable fill={rows.length > 0}>
+      <ConsoleListTable fill={rows.length > 0 || !!created}>
         <MaterialListHead
           columns={kind.columns}
           config={config}
@@ -120,7 +127,10 @@ export function MaterialList<Row extends MaterialListRow>(
           selection={selection}
         />
         <TableBody>
-          {rows.map((row) => (
+          {created ? (
+            <CreatedItemRow edit={created} colSpan={kind.columns.length + 3} />
+          ) : null}
+          {visible.map((row) => (
             <MaterialListRow
               key={kind.identify(row)}
               row={row}
@@ -130,7 +140,7 @@ export function MaterialList<Row extends MaterialListRow>(
           ))}
         </TableBody>
       </ConsoleListTable>
-      {rows.length === 0 ? (
+      {rows.length === 0 && !created ? (
         <ConsoleListEmpty>
           <MaterialEmptyState hasFilters kind={kind} />
         </ConsoleListEmpty>

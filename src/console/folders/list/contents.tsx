@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
-import { type ComponentProps, type ReactNode, useState } from "react"
+import { type ComponentProps, type ReactNode } from "react"
 import { NewInFolderButton } from "@/shared/console/folders/create"
+import { useCreationRequests } from "@/shared/console/folders/creation"
 import { type FolderContents } from "@/shared/console/folders/list/contents"
 import {
   type FolderCreation,
@@ -36,7 +37,9 @@ export function useFolderContents({
     organizationId,
     folderId: folder.folderId,
   })
-  const [creation, setCreation] = useState<FolderCreation>()
+  const [creation, requestCreation] = useCreationRequests("contents")
+  const setCreation = (creation: FolderCreation) =>
+    requestCreation({ creation, folderId: folder.folderId })
   const resources = useFolderResourceActions({
     contents,
     folder,
@@ -61,13 +64,9 @@ export function useFolderContents({
     overlays: (
       <>
         <CreationDialogs
-          onClose={() => setCreation(undefined)}
+          onClose={() => requestCreation(undefined)}
           organizationId={organizationId}
-          request={
-            creation === undefined
-              ? undefined
-              : { creation, folderId: folder.folderId }
-          }
+          request={creation}
         />
         {resources.dialogs}
         {selection.dialog}

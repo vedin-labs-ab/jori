@@ -5,7 +5,7 @@
 
 import { useDraggable, useDroppable } from "@dnd-kit/core"
 import { createContext, useContext, useEffect, useRef } from "react"
-import { useFolderEditing } from "../edit/state"
+import { useEditing } from "../../edit/state"
 import {
   carriedPayload,
   type DragPayload,
@@ -130,7 +130,7 @@ function dropTarget(folderId: string | null, zone: DragZone): DropTarget {
 /** One drag source with the click-vs-drag guards every draggable row
  *  needs, so a short drag released in place never navigates. */
 function useDragSource(id: string, payload: DragPayload) {
-  const editing = useFolderEditing()
+  const editing = useEditing()
   const draggable = useDraggable({
     id,
     data: payload,

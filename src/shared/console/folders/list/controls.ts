@@ -1,5 +1,6 @@
 import { Folder, type LucideIcon } from "lucide-react"
 import { useRef } from "react"
+import { useEditing } from "../../edit/state"
 import {
   facetEntries,
   type ListConfig,
@@ -13,7 +14,6 @@ import {
   type FolderDragItem,
   type ResourceDragItem,
 } from "../drag/plan"
-import { useFolderEditing } from "../edit/state"
 import {
   type FolderResource,
   type ListedFolder,
@@ -97,10 +97,10 @@ export function useFolderListing(listed: {
   const controls = useListControls(config)
   // apply only filters and reorders, so the rows keep their type.
   const folders = controls.apply(listed.folders) as ListedFolder[]
-  const editing = useFolderEditing()
+  const editing = useEditing()
   const editId =
-    editing?.edit?.surface === "contents"
-      ? editing.edit.folder.folderId
+    editing?.edit?.surface === "contents" && editing.edit.item.kind === "folder"
+      ? editing.edit.item.id
       : undefined
   const pinned = useRef<{ id: string; index: number } | undefined>(undefined)
   const editingFolder = listed.folders.find(

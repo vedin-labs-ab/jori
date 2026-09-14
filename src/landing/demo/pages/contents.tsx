@@ -1,5 +1,6 @@
-import { type ComponentProps, type ReactNode, useMemo, useState } from "react"
+import { type ComponentProps, type ReactNode, useMemo } from "react"
 import { NewInFolderButton } from "@/shared/console/folders/create"
+import { useCreationRequests } from "@/shared/console/folders/creation"
 import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { type FolderContents } from "@/shared/console/folders/list/contents"
 import {
@@ -32,7 +33,9 @@ export function useDemoFolderContents(
 } {
   const { state } = useDemoWorkspace()
   const [dialog, setDialog] = useFolderRequests("contents")
-  const [creation, setCreation] = useState<FolderCreation>()
+  const [creation, requestCreation] = useCreationRequests("contents")
+  const setCreation = (creation: FolderCreation) =>
+    requestCreation({ creation, folderId: folder.folderId })
   const selection = useDemoFolderSelection()
   const contents = useMemo(
     () => folderContents(state, folder.folderId as FolderId),
@@ -63,12 +66,8 @@ export function useDemoFolderContents(
           onDeleted={onDeleted}
         />
         <DemoCreationDialogs
-          onClose={() => setCreation(undefined)}
-          request={
-            creation === undefined
-              ? undefined
-              : { creation, folderId: folder.folderId }
-          }
+          onClose={() => requestCreation(undefined)}
+          request={creation}
         />
         {selection.dialog}
       </>

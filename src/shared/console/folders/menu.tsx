@@ -11,9 +11,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import { useEditing, useEditMenuFocus } from "../edit/state"
 import { menuWidth, RowMenuTrigger } from "../menu"
 import { ConsoleLink } from "../shell/link"
-import { useFolderEditing, useFolderMenuFocus } from "./edit/state"
 import { type FolderDialogRequest, type ManagedFolder } from "./types"
 
 // The canonical menu for a folder, as items only: what it costs, what it
@@ -71,8 +71,8 @@ export function FolderTitleMenu({
   folder: ManagedFolder
   onDialog: (request: FolderDialogRequest) => void
 }) {
-  const editing = useFolderEditing()
-  const onCloseAutoFocus = useFolderMenuFocus()
+  const editing = useEditing()
+  const onCloseAutoFocus = useEditMenuFocus()
   return (
     <DropdownMenuContent
       align="start"
@@ -83,7 +83,15 @@ export function FolderTitleMenu({
         folder={folder}
         onDialog={(request) =>
           request.type === "rename"
-            ? editing?.begin(folder, "title")
+            ? editing?.begin(
+                {
+                  id: folder.folderId,
+                  kind: "folder",
+                  name: folder.name,
+                  parentId: folder.parentId,
+                },
+                "title"
+              )
             : onDialog(request)
         }
       />
@@ -99,7 +107,7 @@ export function FolderRowMenu({
   folder: ManagedFolder
   onDialog: (request: FolderDialogRequest) => void
 }) {
-  const onCloseAutoFocus = useFolderMenuFocus()
+  const onCloseAutoFocus = useEditMenuFocus()
   return (
     <DropdownMenu>
       <RowMenuTrigger name={folder.name} />

@@ -104,6 +104,7 @@ function ResourceLink({
 
   return (
     <ConsoleLink
+      data-edit-key={`${resource.type}:${resource.id}`}
       {...resourceDestination(resource)}
       className={nameLinkClassName}
       draggable={false}

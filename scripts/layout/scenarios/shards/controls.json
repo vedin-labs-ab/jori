@@ -3048,12 +3048,13 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Layout blank store"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       }
     ],
     "steps": [
@@ -3076,12 +3077,13 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Layout blank store"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       },
       {
         "action": "click",
@@ -3108,12 +3110,13 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Layout blank store"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       },
       {
         "action": "click",
@@ -7798,7 +7801,7 @@
   },
   {
     "id": "C090-toast-complete",
-    "title": "New blank store creation toast completes",
+    "title": "New blank store creation remains ready",
     "path": "/stores",
     "target": "fixture",
     "mutating": true,
@@ -7809,12 +7812,13 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Layout blank store"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       },
       {
         "action": "click",

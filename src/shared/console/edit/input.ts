@@ -1,5 +1,5 @@
 import { type RefObject, useEffect, useRef, useState } from "react"
-import { readErrorMessage, showErrorToast } from "../../error"
+import { readErrorMessage, showErrorToast } from "../error"
 
 export type NameInputProps = {
   initialName: string

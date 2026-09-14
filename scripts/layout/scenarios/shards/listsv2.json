@@ -22,9 +22,9 @@
   },
   {
     "id": "C040-open",
-    "title": "Create table dialog open",
+    "title": "Create table inline",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "steps": [
       {
         "action": "click",
@@ -34,9 +34,9 @@
   },
   {
     "id": "C040-close",
-    "title": "Create table dialog close",
+    "title": "Escape keeps created table",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
@@ -46,7 +46,7 @@
     "steps": [
       {
         "action": "press",
-        "selector": "body",
+        "selector": "input[aria-label=\"Table name\"]",
         "value": "Escape"
       }
     ]
@@ -55,19 +55,28 @@
     "id": "C046-picker-close",
     "title": "Choose people picker close",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -90,19 +99,28 @@
     "id": "C047-picker-open",
     "title": "Choose teams picker open",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -120,19 +138,28 @@
     "id": "C047-picker-close",
     "title": "Choose teams picker close",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",

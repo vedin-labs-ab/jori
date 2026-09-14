@@ -1,54 +1,60 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { type CreationRequest } from "@/shared/console/folders/types"
-import { CreationDialogs } from "./dialogs"
-
-vi.mock("convex/react", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("convex/react")>()),
-  useMutation: () => vi.fn(),
-  useQuery: () => ({
-    status: "ready",
-    folders: [{ folderId: "folder-1", name: "Finance", parentId: undefined }],
-  }),
-}))
+import { type Editing, EditingContext } from "@/shared/console/edit/state"
+import { useCreationRequests } from "@/shared/console/folders/creation"
+import { type FolderCreation } from "@/shared/console/folders/types"
 
 afterEach(cleanup)
-
-function renderDialogs(request: CreationRequest | undefined) {
+function setup(kind: FolderCreation, editing?: Editing) {
+  function Requests({ kind }: { kind: FolderCreation }) {
+    const [request, create] = useCreationRequests("contents")
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => create({ creation: kind, folderId: "finance" })}
+        >
+          New
+        </button>
+        <span role="status">{request?.creation}</span>
+      </>
+    )
+  }
   render(
-    <CreationDialogs
-      onClose={() => undefined}
-      organizationId="org-1"
-      request={request}
-    />
+    <EditingContext value={editing}>
+      <Requests kind={kind} />
+    </EditingContext>
   )
 }
 
-test("no request leaves every creation dialog closed", () => {
-  renderDialogs(undefined)
-
-  expect(screen.queryByRole("dialog")).toBeNull()
-})
-
-test("a table request opens the table dialog on the requested folder", () => {
-  renderDialogs({ creation: "table", folderId: "folder-1" })
-
-  expect(screen.getByRole("heading", { name: "Create table" })).toBeDefined()
-  fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
-  expect(screen.getByLabelText("Folder").textContent).toContain("Finance")
-})
-
-test("a store request opens only the store dialog", () => {
-  renderDialogs({ creation: "store", folderId: "folder-1" })
-
-  expect(screen.getByRole("heading", { name: "Create store" })).toBeDefined()
-  expect(screen.queryByRole("heading", { name: "Create table" })).toBeNull()
-})
-
-test("a request without a folder starts the dialog unfiled", () => {
-  renderDialogs({ creation: "table" })
-
-  fireEvent.click(screen.getByRole("button", { name: "Advanced settings" }))
-  expect(screen.getByLabelText("Folder").textContent).toContain("No folder")
-})
+test.each(["table", "store"] as const)(
+  "%s requests create inline instead of opening a dialog",
+  (kind) => {
+    const editing: Editing = {
+      edit: undefined,
+      create: vi.fn(),
+      begin: vi.fn(),
+      claim: vi.fn(),
+      close: vi.fn(),
+      register: vi.fn(),
+      save: vi.fn(),
+    }
+    setup(kind, editing)
+    fireEvent.click(screen.getByText("New"))
+    expect(editing.create).toHaveBeenCalledExactlyOnceWith(
+      kind,
+      "finance",
+      "contents"
+    )
+    expect(screen.getByRole("status").textContent).toBe("")
+  }
+)
+test.each(["file", "job"] as const)(
+  "%s keeps its existing setup request",
+  (kind) => {
+    setup(kind)
+    fireEvent.click(screen.getByText("New"))
+    expect(screen.getByRole("status").textContent).toBe(kind)
+  }
+)

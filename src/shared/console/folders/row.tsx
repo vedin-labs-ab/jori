@@ -12,6 +12,7 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
+import { useEditing, useEditMenuFocus } from "../edit/state"
 import { menuWidth } from "../menu"
 import { ConsoleLink } from "../shell/link"
 import { VisibilityMark } from "../visibility/badge"
@@ -19,11 +20,7 @@ import { NewInFolderSub } from "./create"
 import { type FolderRowDrag, useFolderRowDrag } from "./drag/state"
 import { FolderName } from "./edit/name"
 import { PendingFolderName } from "./edit/pending"
-import {
-  useFolderEditing,
-  useFolderMenuFocus,
-  usePendingFolder,
-} from "./edit/state"
+import { usePendingFolder } from "./edit/state"
 import { type FolderExpansion } from "./expansion"
 import { FolderMenuItems } from "./menu"
 import { activeFolderId, type FolderNode } from "./tree"
@@ -54,10 +51,10 @@ export function FolderTreeItem({
     folderId: node.folderId,
     name: node.name,
   })
-  const editing = useFolderEditing()
+  const editing = useEditing()
   const isEditing =
     editing?.edit?.surface === "sidebar" &&
-    editing.edit.folder.folderId === node.folderId
+    editing.edit.item.id === node.folderId
   const pending = usePendingFolder(node.folderId, "sidebar")
   const hasChildren = node.children.length > 0 || pending !== undefined
   const isExpanded = hasChildren && expansion.isExpanded(node.folderId)
@@ -259,7 +256,7 @@ function FolderTreeMenu({
   onCreate: (request: CreationRequest) => void
   onDialog: (request: FolderDialogRequest) => void
 }) {
-  const onCloseAutoFocus = useFolderMenuFocus()
+  const onCloseAutoFocus = useEditMenuFocus()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

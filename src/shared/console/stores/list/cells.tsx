@@ -17,6 +17,7 @@ export function StoreNameCell({ store }: { store: StoreSummary }) {
   return (
     <MaterialNameCell icon={Database}>
       <ConsoleLink
+        data-edit-key={`store:${store.storeId}`}
         className={materialNameLinkClassName}
         draggable={false}
         params={{ storeId: store.storeId }}

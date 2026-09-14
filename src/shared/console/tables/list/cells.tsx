@@ -17,6 +17,7 @@ export function TableNameCell({ table }: { table: TableSummary }) {
   return (
     <MaterialNameCell icon={Table2}>
       <ConsoleLink
+        data-edit-key={`table:${table.tableId}`}
         className={materialNameLinkClassName}
         draggable={false}
         params={{ tableId: table.tableId }}

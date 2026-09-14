@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEditing } from "@/shared/console/edit/state"
 import { moveTarget } from "@/shared/console/folders/types"
 import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
@@ -17,7 +17,6 @@ import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { useMaterialListPage } from "../shared/materials/list"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
-import { CreateStoreDialog } from "./create"
 import { EditStoreDialog } from "./edit"
 import { useStoreBulk, useStoreRemoval } from "./manage"
 
@@ -30,7 +29,6 @@ export function StoresPage() {
 }
 
 function useStoresPage(organizationId: string) {
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
   const page = useMaterialListPage({
     config: storeListConfig,
     identify: (store: StoreSummary) => store.storeId,
@@ -43,15 +41,14 @@ function useStoresPage(organizationId: string) {
   return {
     ...page,
     bulk: useStoreBulk(organizationId, page.selection),
-    isCreateOpen,
     removal: useStoreRemoval(organizationId),
-    setIsCreateOpen,
   }
 }
 
 function StoresView({ organizationId }: { organizationId: string }) {
   const page = useStoresPage(organizationId)
-  const openCreate = () => page.setIsCreateOpen(true)
+  const editing = useEditing()
+  const openCreate = () => editing?.create("store", undefined, "store")
 
   return (
     <ConsoleListLayout>
@@ -112,11 +109,7 @@ function StoresOverlays({
           storeDeleteDescription
         )}
       />
-      <CreateStoreDialog
-        isOpen={page.isCreateOpen}
-        onOpenChange={page.setIsCreateOpen}
-        organizationId={organizationId}
-      />
+
       <MoveResourcesDialog
         onClose={() => page.setMoving(undefined)}
         organizationId={organizationId}

@@ -165,13 +165,13 @@ export function subjectName(subject: MoveSubject) {
     : `${subjectSize(subject)} items`
 }
 
-/** What the folder surfaces can create in place, each through the same
- *  dialog its own list page uses. */
+/** What the folder surfaces can create in place, using the same
+ *  creation flow as its own list page. */
 export type FolderCreation = "table" | "store" | "file" | "job"
 
 export type CreationRequest = {
   creation: FolderCreation
-  /** Pre-selects the dialogs' Folder field; undefined starts at the root. */
+  /** The target folder; undefined creates at the root. */
   folderId?: string
 }
 

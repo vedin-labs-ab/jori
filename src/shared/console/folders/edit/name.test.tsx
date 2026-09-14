@@ -8,9 +8,9 @@ import {
 } from "@testing-library/react"
 import { useState } from "react"
 import { afterEach, expect, test, vi } from "vitest"
+import { EditingProvider } from "../../edit/provider"
+import { useEditing } from "../../edit/state"
 import { FolderName } from "./name"
-import { FolderEditingProvider } from "./provider"
-import { useFolderEditing } from "./state"
 
 const folder = { folderId: "one", name: "New folder" }
 afterEach(cleanup)
@@ -18,9 +18,13 @@ function start(save = vi.fn().mockResolvedValue(undefined)) {
   function Example({ save }: { save: (name: string) => Promise<unknown> }) {
     const [name, setName] = useState(folder.name)
     return (
-      <FolderEditingProvider
-        folders={[folder]}
-        onCreate={async () => folder}
+      <EditingProvider
+        name={() => folder.name}
+        onCreate={async () => ({
+          id: folder.folderId,
+          kind: "folder",
+          name: folder.name,
+        })}
         onRename={async (_, value) => {
           await save(value)
           setName(value)
@@ -28,16 +32,21 @@ function start(save = vi.fn().mockResolvedValue(undefined)) {
       >
         <Row name={name} />
         <button type="button">Elsewhere</button>
-      </FolderEditingProvider>
+      </EditingProvider>
     )
   }
   function Row({ name }: { name: string }) {
-    const editing = useFolderEditing()
+    const editing = useEditing()
     return (
       <>
         <button
           type="button"
-          onClick={() => editing?.begin({ ...folder, name }, "contents")}
+          onClick={() =>
+            editing?.begin(
+              { id: folder.folderId, kind: "folder", name },
+              "contents"
+            )
+          }
         >
           Rename
         </button>

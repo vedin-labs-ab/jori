@@ -28,8 +28,6 @@ export function tableListConfig(
 }
 
 /** What the create dialog says under its title. */
-export const tableCreateBlurb =
-  "Name it now. Columns come next, in the table itself."
 
 export const tableDeleteDescription =
   "This permanently deletes the table and every row in it. Anything that reads it loses access."

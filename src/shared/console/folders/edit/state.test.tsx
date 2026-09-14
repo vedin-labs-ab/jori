@@ -2,14 +2,14 @@
 import { cleanup, renderHook } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import {
-  type FolderEditing,
-  FolderEditingContext,
-  useFolderMenuFocus,
-} from "./state"
+  type Editing,
+  EditingContext,
+  useEditMenuFocus,
+} from "../../edit/state"
 
 afterEach(cleanup)
 test("menu dismissal yields focus to an inline edit, but restores it when idle", () => {
-  const value: FolderEditing = {
+  const value: Editing = {
     edit: undefined,
     begin: vi.fn(),
     create: vi.fn(),
@@ -18,16 +18,16 @@ test("menu dismissal yields focus to an inline edit, but restores it when idle",
     register: vi.fn(),
     claim: vi.fn(),
   }
-  const { result, rerender } = renderHook(useFolderMenuFocus, {
+  const { result, rerender } = renderHook(useEditMenuFocus, {
     wrapper: ({ children }) => (
-      <FolderEditingContext value={value}>{children}</FolderEditingContext>
+      <EditingContext value={value}>{children}</EditingContext>
     ),
   })
   const idle = new Event("closeAutoFocus", { cancelable: true })
   result.current(idle)
   expect(idle.defaultPrevented).toBe(false)
   value.edit = {
-    folder: { folderId: "new", name: "New folder" },
+    item: { id: "new", kind: "folder", name: "New folder" },
     surface: "sidebar",
   }
   rerender()

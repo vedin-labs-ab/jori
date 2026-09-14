@@ -2,8 +2,6 @@ import { lazy, Suspense } from "react"
 import { type CreationRequest } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { UploadFileDialog } from "../../files/upload"
-import { CreateStoreDialog } from "../../stores/create"
-import { CreateTableDialog } from "../../tables/create"
 
 // The job's flow is the shared editor, whose host carries the form's state
 // and reaches the brief's schema. These dialogs mount in the shell on every
@@ -25,8 +23,6 @@ export function CreationDialogs({
   organizationId: string
   request: CreationRequest | undefined
 }) {
-  const table = useRetained(request?.creation === "table" ? request : undefined)
-  const store = useRetained(request?.creation === "store" ? request : undefined)
   const file = useRetained(request?.creation === "file" ? request : undefined)
   const job = useRetained(request?.creation === "job" ? request : undefined)
 
@@ -34,20 +30,6 @@ export function CreationDialogs({
 
   return (
     <>
-      <CreateTableDialog
-        initialFolderId={table?.folderId}
-        isOpen={request?.creation === "table"}
-        key={`table:${table?.folderId}`}
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-      />
-      <CreateStoreDialog
-        initialFolderId={store?.folderId}
-        isOpen={request?.creation === "store"}
-        key={`store:${store?.folderId}`}
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-      />
       <UploadFileDialog
         initialFolderId={file?.folderId}
         isOpen={request?.creation === "file"}

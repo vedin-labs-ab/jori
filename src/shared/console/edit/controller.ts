@@ -1,4 +1,3 @@
-import { availableFolderName } from "@contracts/folders/name"
 import {
   type Dispatch,
   type RefObject,
@@ -8,24 +7,29 @@ import {
   useState,
 } from "react"
 import { toast } from "sonner"
-import { readErrorMessage } from "../../error"
-import { type FolderSummary } from "../tree"
-import { type FolderEdit, type FolderSurface } from "./state"
+import { readErrorMessage } from "../error"
+import {
+  type Edit,
+  type EditItem,
+  type EditKind,
+  type EditSurface,
+} from "./state"
 
-export type FolderPersistence = {
-  folders: readonly FolderSummary[]
-  onCreate: (parentId?: string) => Promise<FolderSummary>
-  onRename: (folderId: string, name: string) => Promise<unknown>
+export type EditPersistence = {
+  name: (kind: EditKind, parentId?: string) => string
+  onCreate: (kind: EditKind, parentId?: string) => Promise<EditItem>
+  onRename: (item: EditItem, name: string) => Promise<unknown>
+  onReveal?: (kind: EditKind, parentId?: string) => void
 }
 type Session = {
-  latest: RefObject<FolderPersistence>
+  latest: RefObject<EditPersistence>
   finish: RefObject<(() => Promise<boolean>) | undefined>
   busy: RefObject<boolean>
   alive: RefObject<boolean>
-  setEdit: Dispatch<SetStateAction<FolderEdit | undefined>>
+  setEdit: Dispatch<SetStateAction<Edit | undefined>>
 }
-export function useFolderController(persistence: FolderPersistence) {
-  const [edit, setEdit] = useState<FolderEdit>()
+export function useEditController(persistence: EditPersistence) {
+  const [edit, setEdit] = useState<Edit>()
   const latest = useRef(persistence)
   latest.current = persistence
   const finish = useRef<(() => Promise<boolean>) | undefined>(undefined)
@@ -53,15 +57,18 @@ function actionsFor(session: Session) {
         current && !current.target ? { ...current, target } : current
       ),
     close: () => setEdit(undefined),
-    save: (folderId: string, name: string) =>
-      latest.current.onRename(folderId, name),
-    begin: (folder: FolderSummary, surface: FolderSurface) => {
+    save: (item: EditItem, name: string) => latest.current.onRename(item, name),
+    begin: (item: EditItem, surface: EditSurface) => {
       void run(session, async () => {
-        setEdit({ folder, surface })
+        setEdit({ item, surface })
       })
     },
-    create: (parentId: string | undefined, surface: FolderSurface) => {
-      void run(session, () => create(session, parentId, surface))
+    create: (
+      kind: EditKind,
+      parentId: string | undefined,
+      surface: EditSurface
+    ) => {
+      void run(session, () => create(session, kind, parentId, surface))
     },
   }
 }
@@ -83,28 +90,30 @@ async function run(session: Session, action: () => Promise<void>) {
 }
 async function create(
   session: Session,
+  kind: EditKind,
   parentId: string | undefined,
-  surface: FolderSurface
+  surface: EditSurface
 ) {
   const { latest, setEdit, alive } = session
-  const names = latest.current.folders
-    .filter((f) => f.parentId === parentId)
-    .map((f) => f.name)
-  const name = availableFolderName(names)
+  const name = latest.current.name(kind, parentId)
+  if (surface === "sidebar" && kind !== "folder") {
+    latest.current.onReveal?.(kind, parentId)
+    surface = parentId === undefined ? kind : "contents"
+  }
   setEdit({
-    folder: { folderId: "pending", parentId, name },
+    item: { id: "pending", kind, parentId, name },
     surface,
     creating: true,
   })
   try {
-    const folder = await latest.current.onCreate(parentId)
+    const item = await latest.current.onCreate(kind, parentId)
     if (alive.current) {
-      setEdit({ folder, surface })
+      setEdit({ item, surface, created: true })
     }
   } catch (error) {
     if (alive.current) {
       setEdit(undefined)
     }
-    toast.error(readErrorMessage(error, "Could not create the folder."))
+    toast.error(readErrorMessage(error, `Could not create the ${kind}.`))
   }
 }

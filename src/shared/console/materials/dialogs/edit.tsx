@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { MaterialNameField } from "../fields"
 import { DialogForm } from "../form"
+import { MaterialNameField } from "./name"
 
 /** All an edit needs of a material; a summary and a detail both fit. */
 type EditableMaterial = { name: string }

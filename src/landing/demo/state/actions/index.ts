@@ -4,7 +4,6 @@ import { type Visibility } from "@contracts/visibility"
 import { type Dispatch } from "react"
 import { type FiledResourceType } from "@/shared/console/folders/types"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
-import { type CreateMaterialArgs } from "@/shared/console/materials/dialogs/create"
 import { type MaterialEdit } from "@/shared/console/materials/dialogs/edit"
 import { type MintedLink } from "@/shared/console/materials/links"
 import {
@@ -23,6 +22,12 @@ import {
 } from "../../fixtures/types"
 import { type DemoAction, type VisibilityTarget } from "../types"
 import { chatActions } from "./chat"
+
+type CreateMaterialArgs = {
+  name: string
+  folderId?: string
+  visibility: Visibility
+}
 
 export type DemoActions = ReturnType<typeof createActions>
 
@@ -86,11 +91,11 @@ function folderActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
 
 function materialActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
   return {
-    createMaterial: (kind: "table" | "store", args: CreateMaterialArgs) =>
-      dispatch({
-        type: "createMaterial",
-        material: newMaterial(kind, mint("collections"), args, Date.now()),
-      }),
+    createMaterial: (kind: "table" | "store", args: CreateMaterialArgs) => {
+      const material = newMaterial(kind, mint("collections"), args, Date.now())
+      dispatch({ type: "createMaterial", material })
+      return material
+    },
     updateMaterial: (id: string, values: MaterialEdit) =>
       dispatch({ type: "updateMaterial", at: Date.now(), id, ...values }),
     removeMaterial: (id: string) => dispatch({ type: "removeMaterial", id }),

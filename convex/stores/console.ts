@@ -4,6 +4,7 @@ import { type Id } from "../_generated/dataModel"
 import { mutation, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"
 import { findSingletonDocument } from "../collections/documents"
+import { newCollectionName } from "../collections/name"
 import { ensureCurrentPerson, resolveCurrentPerson } from "../persons/account"
 import { withOwnerDisplay, withOwnerDisplays } from "../persons/names"
 import { visibilityValidator } from "../visibility/schema"
@@ -90,16 +91,19 @@ export const get = query({
 export const create = mutation({
   args: {
     organizationId: v.string(),
-    name: v.string(),
+    name: v.optional(v.string()),
     visibility: v.optional(visibilityValidator),
     folderId: v.optional(v.id("folders")),
     schema: v.optional(v.any()),
   },
-  handler: async (ctx, args): Promise<unknown> => {
+  handler: async (ctx, args): Promise<ReturnType<typeof summarizeStore>> => {
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
 
     return await ctx.runMutation(internal.stores.records.create, {
       ...args,
+      name:
+        args.name ??
+        (await newCollectionName(ctx, { ...args, personId }, "store")),
       personId,
     })
   },

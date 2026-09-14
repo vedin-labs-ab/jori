@@ -47,6 +47,7 @@ export function TablesToolbar({
       />
       <ConsoleHeaderButton
         icon={<Plus />}
+        data-create-kind="table"
         label="New table"
         onClick={onCreate}
         type="button"
@@ -98,6 +99,7 @@ export function TableList({
     <MaterialList
       {...props}
       kind={{
+        creationKind: "table",
         action: (
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button onClick={onCreate} type="button">

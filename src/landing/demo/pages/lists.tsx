@@ -1,6 +1,7 @@
 import { Upload } from "lucide-react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
+import { useEditing } from "@/shared/console/edit/state"
 import { FileTable } from "@/shared/console/files/list"
 import {
   fileDeleteDescription,
@@ -8,7 +9,6 @@ import {
   fileNoun,
 } from "@/shared/console/files/list/config"
 import { type FileRow } from "@/shared/console/files/types"
-import { type CreationRequest } from "@/shared/console/folders/types"
 import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
@@ -36,7 +36,6 @@ import {
   storeSummaries,
   tableSummaries,
 } from "../derive/materials"
-import { DemoCreateMaterialDialog } from "../dialogs/creation"
 import { type MaterialRequest } from "../dialogs/materials"
 import { useDemoWorkspace } from "../workspace"
 import { useMaterialListing } from "./listing"
@@ -57,10 +56,10 @@ export function TablesPage() {
     rows: tables,
   })
   const [request, setRequest] = useState<MaterialRequest>()
-  const [creating, setCreating] = useState<CreationRequest>()
+  const editing = useEditing()
   const requestFor = (kind: MaterialRequest["kind"]) => (table: TableSummary) =>
     setRequest(withMaterial(kind, materialOf(state, table.tableId)))
-  const create = () => setCreating({ creation: "table" })
+  const create = () => editing?.create("table", undefined, "table")
 
   return (
     <ConsoleListLayout>
@@ -86,13 +85,7 @@ export function TablesPage() {
         unauthorizedMessage={undefined}
       />
       <MaterialListOverlays
-        create={
-          <DemoCreateMaterialDialog
-            kind="table"
-            onClose={() => setCreating(undefined)}
-            request={creating}
-          />
-        }
+        create={null}
         deleteDescription={tableDeleteDescription}
         identify={(table) => table.tableId}
         noun={tableNoun}
@@ -117,10 +110,10 @@ export function StoresPage() {
     rows: stores,
   })
   const [request, setRequest] = useState<MaterialRequest>()
-  const [creating, setCreating] = useState<CreationRequest>()
+  const editing = useEditing()
   const requestFor = (kind: MaterialRequest["kind"]) => (store: StoreSummary) =>
     setRequest(withMaterial(kind, materialOf(state, store.storeId)))
-  const create = () => setCreating({ creation: "store" })
+  const create = () => editing?.create("store", undefined, "store")
 
   return (
     <ConsoleListLayout>
@@ -144,13 +137,7 @@ export function StoresPage() {
         unauthorizedMessage={undefined}
       />
       <MaterialListOverlays
-        create={
-          <DemoCreateMaterialDialog
-            kind="store"
-            onClose={() => setCreating(undefined)}
-            request={creating}
-          />
-        }
+        create={null}
         deleteDescription={storeDeleteDescription}
         identify={(store) => store.storeId}
         noun={storeNoun}

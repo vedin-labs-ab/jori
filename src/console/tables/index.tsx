@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useEditing } from "@/shared/console/edit/state"
 import { moveTarget } from "@/shared/console/folders/types"
 import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
@@ -17,7 +18,6 @@ import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { useMaterialListPage } from "../shared/materials/list"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
-import { CreateTableDialog } from "./create"
 import { EditTableDialog } from "./edit"
 import { ImportTableDialog } from "./import/dialog"
 import { useTableBulk, useTableRemoval } from "./manage"
@@ -31,7 +31,7 @@ export function TablesPage() {
 }
 
 function useTablesPage(organizationId: string) {
-  const [dialog, setDialog] = useState<"create" | "import">()
+  const [dialog, setDialog] = useState<"import">()
   const page = useMaterialListPage({
     config: tableListConfig,
     identify: (table: TableSummary) => table.tableId,
@@ -52,7 +52,8 @@ function useTablesPage(organizationId: string) {
 
 function TablesView({ organizationId }: { organizationId: string }) {
   const page = useTablesPage(organizationId)
-  const openCreate = () => page.setDialog("create")
+  const editing = useEditing()
+  const openCreate = () => editing?.create("table", undefined, "table")
   const openImport = () => page.setDialog("import")
 
   return (
@@ -116,11 +117,7 @@ function TablesOverlays({
           tableDeleteDescription
         )}
       />
-      <CreateTableDialog
-        isOpen={page.dialog === "create"}
-        onOpenChange={(open) => page.setDialog(open ? "create" : undefined)}
-        organizationId={organizationId}
-      />
+
       <ImportTableDialog
         isOpen={page.dialog === "import"}
         onOpenChange={(open) => page.setDialog(open ? "import" : undefined)}

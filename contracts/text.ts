@@ -12,3 +12,14 @@ export function escapeHtml(value: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
 }
+
+/** Automatic labels avoid visible peers; explicit names may still repeat. */
+export function availableName(base: string, names: Iterable<string>) {
+  const used = new Set(Array.from(names, (name) => name.trim().toLowerCase()))
+  let name = base
+  let suffix = 0
+  while (used.has(name.toLowerCase())) {
+    name = `${base} ${++suffix}`
+  }
+  return name
+}

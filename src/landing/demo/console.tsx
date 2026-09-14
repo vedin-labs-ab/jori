@@ -4,7 +4,7 @@ import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { DemoVisibilityDirectory } from "./directory"
 import { DemoDragProvider } from "./drag"
-import { DemoFolderEditing } from "./edit"
+import { DemoEditing } from "./edit"
 import { type DemoNavigation } from "./navigation"
 import { DemoPage } from "./pages/router"
 import { DemoSidebar } from "./sidebar"
@@ -47,7 +47,7 @@ export function DemoConsole({
     <ConsoleNavigationContext.Provider value={navigation}>
       <div className={cn(frameClassName, className)} id={navigation.anchor}>
         <DemoVisibilityDirectory>
-          <DemoFolderEditing>
+          <DemoEditing>
             <DemoDragProvider>
               <ConsoleFrame
                 className="h-full min-h-0"
@@ -64,7 +64,7 @@ export function DemoConsole({
                 <DemoPage location={location} openRunId={openRunId} />
               </ConsoleFrame>
             </DemoDragProvider>
-          </DemoFolderEditing>
+          </DemoEditing>
         </DemoVisibilityDirectory>
       </div>
     </ConsoleNavigationContext.Provider>

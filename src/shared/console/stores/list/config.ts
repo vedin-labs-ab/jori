@@ -29,8 +29,6 @@ export function storeListConfig(
 }
 
 /** What the create dialog says under its title. */
-export const storeCreateBlurb =
-  "Name it now. A schema can come later, from the store itself."
 
 export const storeDeleteDescription =
   "This permanently deletes the store and its stored value. Anything that reads it loses access."

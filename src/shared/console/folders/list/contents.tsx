@@ -1,6 +1,8 @@
 import { Folder } from "lucide-react"
 import { type ReactNode } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { CreatedItemRow } from "../../edit/row"
+import { useCreatedItem } from "../../edit/state"
 import {
   ConsoleEmptyState,
   EmptyRow,
@@ -50,6 +52,7 @@ export function FolderContents({
   selectionActions: FolderSelectionActions
 }) {
   const pending = usePendingFolder(folderId, "contents")
+  const created = useCreatedItem("contents", folderId)
   if (contents === undefined) {
     return (
       <ConsoleListContent>
@@ -76,7 +79,8 @@ export function FolderContents({
   if (
     contents.folders.length === 0 &&
     contents.resources.length === 0 &&
-    !pending
+    !pending &&
+    !created
   ) {
     return (
       <ConsoleListContent>
@@ -167,9 +171,10 @@ function FolderContentRows({
   selection: RowSelection<FolderListEntry>
 }) {
   const pending = usePendingFolder(folderId, "contents")
+  const created = useCreatedItem("contents", folderId)
   const selected = selectionPayload(selection.selected, folderId)
 
-  if (folders.length === 0 && resources.length === 0 && !pending) {
+  if (folders.length === 0 && resources.length === 0 && !pending && !created) {
     return (
       <EmptyRow colSpan={folderTableColumns}>
         <FilterableEmptyState
@@ -184,6 +189,9 @@ function FolderContentRows({
 
   return (
     <>
+      {created ? (
+        <CreatedItemRow edit={created} colSpan={folderTableColumns} />
+      ) : null}
       {pending ? (
         <PendingFolderRow name={pending.name} colSpan={folderTableColumns} />
       ) : null}
@@ -196,16 +204,18 @@ function FolderContentRows({
           selection={selection}
         />
       ))}
-      {resources.map((resource) => (
-        <ResourceListRow
-          folderId={folderId}
-          key={resource.id}
-          menu={resourceMenu(resource)}
-          resource={resource}
-          selected={selected}
-          selection={selection}
-        />
-      ))}
+      {resources
+        .filter((resource) => resource.id !== created?.item.id)
+        .map((resource) => (
+          <ResourceListRow
+            folderId={folderId}
+            key={resource.id}
+            menu={resourceMenu(resource)}
+            resource={resource}
+            selected={selected}
+            selection={selection}
+          />
+        ))}
     </>
   )
 }

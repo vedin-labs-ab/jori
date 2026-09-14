@@ -38,6 +38,7 @@ export function StoresToolbar({
       />
       <ConsoleHeaderButton
         icon={<Plus />}
+        data-create-kind="store"
         label="New store"
         onClick={onCreate}
         type="button"
@@ -87,6 +88,7 @@ export function StoreList({
     <MaterialList
       {...props}
       kind={{
+        creationKind: "store",
         action: (
           <Button onClick={onCreate} type="button">
             <Plus />

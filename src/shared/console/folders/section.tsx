@@ -13,12 +13,13 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
+import { useEditing } from "../edit/state"
 import { groupLabelButton } from "../shell/group"
 import { ConsoleLink } from "../shell/link"
 import { NewInFolderMenu } from "./create"
 import { useExpandHoverHandler, useRootDrop } from "./drag/state"
 import { PendingFolderName } from "./edit/pending"
-import { useFolderEditing, usePendingFolder } from "./edit/state"
+import { usePendingFolder } from "./edit/state"
 import { type FolderExpansion } from "./expansion"
 import { FolderTreeItem } from "./row"
 import { ancestorFolderIds, buildFolderTree } from "./tree"
@@ -47,15 +48,17 @@ export function FolderTree({
   onNewFolder: () => void
   pathname: string
 }) {
-  const editing = useFolderEditing()
+  const editing = useEditing()
   const reveal =
-    editing?.edit?.surface === "sidebar" ? editing.edit.folder : undefined
+    editing?.edit?.surface === "sidebar" && editing.edit.item.kind === "folder"
+      ? editing.edit.item
+      : undefined
   useEffect(() => {
     if (!reveal) {
       return
     }
     const ids = [
-      ...ancestorFolderIds(folders ?? [], reveal.folderId),
+      ...ancestorFolderIds(folders ?? [], reveal.id),
       reveal.parentId,
     ]
     for (const id of ids) {
@@ -78,7 +81,7 @@ export function FolderTree({
       <SidebarGroup className="min-h-28 flex-1 group-data-[collapsible=icon]:hidden">
         <FoldersLabel />
         {/* The "+" creates at the top level: a root folder, or a resource
-            whose dialog starts unfiled with the Folder field free to set. */}
+            created unfiled in its own list. */}
         <NewInFolderMenu
           onCreate={(creation) => onCreate({ creation })}
           onNewFolder={onNewFolder}

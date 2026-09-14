@@ -17,7 +17,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useFolderMenuFocus } from "./edit/state"
+import { useEditMenuFocus } from "../edit/state"
 import { type FolderCreation } from "./types"
 
 // The console's "New" entries — a folder plus every resource that can be
@@ -25,7 +25,7 @@ import { type FolderCreation } from "./types"
 // the sidebar group's "+" action, and each tree row's menu.
 
 type NewMenuHandlers = {
-  /** Ran with the resource type to create; the owner opens its dialog. */
+  /** Ran with the resource type to create; the owner creates inline or opens its setup flow. */
   onCreate: (creation: FolderCreation) => void
   /** Ran for the folder entry; the owner creates and starts renaming inline. */
   onNewFolder: () => void
@@ -71,7 +71,7 @@ export function NewInFolderMenu({
   children,
   ...handlers
 }: NewMenuHandlers & { children: ReactNode }) {
-  const onCloseAutoFocus = useFolderMenuFocus()
+  const onCloseAutoFocus = useEditMenuFocus()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>

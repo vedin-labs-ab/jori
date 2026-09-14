@@ -7,8 +7,8 @@ import {
 } from "@/shared/console/shell/navigation"
 import { mainContentId, SkipToContent } from "@/shared/skip"
 import { useSidebarChats } from "../chat/recent"
+import { ConsoleEditing } from "../edit"
 import { ConsoleFolderDrag } from "../folders/drag/context"
-import { ConsoleFolderEditing } from "../folders/edit"
 import { SidebarFolders } from "../folders/section"
 import { OrganizationVisibilityDirectory } from "../shared/visibility/directory"
 import { SidebarUserButton } from "./account"
@@ -31,7 +31,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
     // One drag context above both panes, so folder-page rows can drop
     // onto the sidebar tree and vice versa. Renders no DOM of its own.
     <OrganizationVisibilityDirectory>
-      <ConsoleFolderEditing>
+      <ConsoleEditing>
         <ConsoleFolderDrag>
           <SkipToContent />
           <ConsoleFrame
@@ -56,7 +56,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
             </ConsolePageBoundary>
           </ConsoleFrame>
         </ConsoleFolderDrag>
-      </ConsoleFolderEditing>
+      </ConsoleEditing>
     </OrganizationVisibilityDirectory>
   )
 }

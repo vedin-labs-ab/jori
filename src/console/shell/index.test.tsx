@@ -55,8 +55,8 @@ vi.mock("../shared/visibility/directory", () => ({
     children: React.ReactNode
   }) => children,
 }))
-vi.mock("../folders/edit", () => ({
-  ConsoleFolderEditing: ({ children }: { children: React.ReactNode }) => (
+vi.mock("../edit", () => ({
+  ConsoleEditing: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
   ),
 }))

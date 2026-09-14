@@ -1743,9 +1743,9 @@
   },
   {
     "id": "C040-open",
-    "title": "Create table dialog open",
+    "title": "Create table inline",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "steps": [
       {
         "action": "click",
@@ -1755,9 +1755,9 @@
   },
   {
     "id": "C040-close",
-    "title": "Create table dialog close",
+    "title": "Escape keeps created table",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
@@ -1767,7 +1767,7 @@
     "steps": [
       {
         "action": "press",
-        "selector": "body",
+        "selector": "input[aria-label=\"Table name\"]",
         "value": "Escape"
       }
     ]
@@ -1776,17 +1776,23 @@
     "id": "C042-table-error",
     "title": "table empty submit validation",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": ""
       }
     ],
     "steps": [
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create table\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Enter"
       }
     ]
   },
@@ -1794,62 +1800,87 @@
     "id": "C042-table-clear",
     "title": "table clear name validation",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create table\")"
+        "action": "fill",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": ""
+      },
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Enter"
       }
     ],
     "steps": [
       {
         "action": "fill",
-        "selector": "#table-create-name",
+        "selector": "input[aria-label=\"Table name\"]",
         "value": "A long account record with several departments and follow-up notes"
       }
     ]
   },
   {
     "id": "C043-table-open",
-    "title": "Advanced settings table open",
+    "title": "Created table audience open",
     "path": "/tables",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"New table\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
-      }
-    ]
-  },
-  {
-    "id": "C043-table-close",
-    "title": "Advanced settings table close",
-    "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
+      },
+      {
         "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "selector": "[aria-label=\"Open actions for New table\"]"
       }
     ],
     "steps": [
       {
         "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C043-table-close",
+    "title": "Created table audience close",
+    "path": "/tables",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New table\"]"
+      },
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
       }
     ]
   },
@@ -1865,22 +1896,23 @@
       },
       {
         "action": "fill",
-        "selector": "#table-create-name",
+        "selector": "input[aria-label=\"Table name\"]",
         "value": "A long account record with several departments and follow-up notes"
       }
     ],
     "steps": [
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create table\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Enter"
       }
     ]
   },
   {
     "id": "C041-open",
-    "title": "Create store dialog open",
+    "title": "Create store inline",
     "path": "/stores",
-    "mutating": false,
+    "mutating": true,
     "steps": [
       {
         "action": "click",
@@ -1890,9 +1922,9 @@
   },
   {
     "id": "C041-close",
-    "title": "Create store dialog close",
+    "title": "Escape keeps created store",
     "path": "/stores",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
@@ -1902,7 +1934,7 @@
     "steps": [
       {
         "action": "press",
-        "selector": "body",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Escape"
       }
     ]
@@ -1911,17 +1943,23 @@
     "id": "C042-store-error",
     "title": "store empty submit validation",
     "path": "/stores",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New store\"]"
+      },
+      {
+        "action": "fill",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": ""
       }
     ],
     "steps": [
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       }
     ]
   },
@@ -1929,62 +1967,87 @@
     "id": "C042-store-clear",
     "title": "store clear name validation",
     "path": "/stores",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New store\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "fill",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": ""
+      },
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       }
     ],
     "steps": [
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "A long account record with several departments and follow-up notes"
       }
     ]
   },
   {
     "id": "C043-store-open",
-    "title": "Advanced settings store open",
+    "title": "Created store audience open",
     "path": "/stores",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"New store\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
-      }
-    ]
-  },
-  {
-    "id": "C043-store-close",
-    "title": "Advanced settings store close",
-    "path": "/stores",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New store\"]"
       },
       {
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Escape"
+      },
+      {
         "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "selector": "[aria-label=\"Open actions for New store\"]"
       }
     ],
     "steps": [
       {
         "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      }
+    ]
+  },
+  {
+    "id": "C043-store-close",
+    "title": "Created store audience close",
+    "path": "/stores",
+    "mutating": true,
+    "setup": [
+      {
+        "action": "click",
+        "selector": "[aria-label=\"New store\"]"
+      },
+      {
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Escape"
+      },
+      {
+        "action": "click",
+        "selector": "[aria-label=\"Open actions for New store\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      }
+    ],
+    "steps": [
+      {
+        "action": "press",
+        "selector": "body",
+        "value": "Escape"
       }
     ]
   },
@@ -2000,56 +2063,67 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "A long account record with several departments and follow-up notes"
       }
     ],
     "steps": [
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       }
     ]
   },
   {
     "id": "C044-folder-open",
-    "title": "Create material Folder picker open",
+    "title": "Created table move destination open",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
+      },
+      {
         "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "selector": "[aria-label=\"Open actions for New table\"]"
       }
     ],
     "steps": [
       {
         "action": "click",
-        "selector": "#table-create-folder"
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
       }
     ]
   },
   {
     "id": "C044-folder-close",
-    "title": "Create material Folder picker close",
+    "title": "Created table move destination close",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-folder"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
       }
     ],
     "steps": [
@@ -2062,27 +2136,32 @@
   },
   {
     "id": "C044-select",
-    "title": "Select nested folder",
+    "title": "Created table move destination select",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-folder"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Move to folder\u2026\")"
       }
     ],
     "steps": [
       {
         "action": "click",
-        "selector": "[data-slot=\"popover-content\"] button:has-text(\"Renewals\")"
+        "selector": "[role=\"dialog\"] button:has-text(\"Renewals\")"
       }
     ]
   },
@@ -2090,21 +2169,30 @@
     "id": "C045-mode-open",
     "title": "Visibility mode select open",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
+      },
+      {
         "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
       }
     ],
     "steps": [
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "#table-visibility"
       }
     ]
   },
@@ -2112,19 +2200,28 @@
     "id": "C045-mode-close",
     "title": "Visibility mode select close",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       }
     ],
     "steps": [
@@ -2139,19 +2236,28 @@
     "id": "C045-people",
     "title": "Visibility Specific people",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       }
     ],
     "steps": [
@@ -2165,19 +2271,28 @@
     "id": "C045-people-return",
     "title": "Visibility Specific people to organization",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2185,7 +2300,7 @@
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "#table-visibility"
       }
     ],
     "steps": [
@@ -2199,19 +2314,28 @@
     "id": "C045-teams",
     "title": "Visibility Specific teams",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       }
     ],
     "steps": [
@@ -2225,19 +2349,28 @@
     "id": "C045-teams-return",
     "title": "Visibility Specific teams to organization",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2245,7 +2378,7 @@
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "#table-visibility"
       }
     ],
     "steps": [
@@ -2259,19 +2392,28 @@
     "id": "C045-private",
     "title": "Visibility Only me",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       }
     ],
     "steps": [
@@ -2285,19 +2427,28 @@
     "id": "C045-private-return",
     "title": "Visibility Only me to organization",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2305,7 +2456,7 @@
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "#table-visibility"
       }
     ],
     "steps": [
@@ -2319,19 +2470,28 @@
     "id": "C046-picker-open",
     "title": "Choose people picker open",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2349,19 +2509,28 @@
     "id": "C046-picker-close",
     "title": "Choose people picker close",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2384,19 +2553,28 @@
     "id": "C046-empty",
     "title": "Choose people no search matches",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2419,19 +2597,28 @@
     "id": "C046-select",
     "title": "Choose people select first option",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2453,19 +2640,28 @@
     "id": "C046-deselect",
     "title": "Choose people deselect first option",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2491,19 +2687,28 @@
     "id": "C047-picker-open",
     "title": "Choose teams picker open",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2521,19 +2726,28 @@
     "id": "C047-picker-close",
     "title": "Choose teams picker close",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2556,19 +2770,28 @@
     "id": "C047-empty",
     "title": "Choose teams no search matches",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2591,19 +2814,28 @@
     "id": "C047-select",
     "title": "Choose teams select first option",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2625,19 +2857,28 @@
     "id": "C047-deselect",
     "title": "Choose teams deselect first option",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
       },
       {
         "action": "click",
-        "selector": "#table-create-visibility"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
+      },
+      {
+        "action": "click",
+        "selector": "#table-visibility"
       },
       {
         "action": "click",
@@ -2663,15 +2904,24 @@
     "id": "C048-help-show",
     "title": "Audience help tooltip open",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
+      },
+      {
         "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
       }
     ],
     "steps": [
@@ -2685,15 +2935,24 @@
     "id": "C048-help-hide",
     "title": "Audience help tooltip close",
     "path": "/tables",
-    "mutating": false,
+    "mutating": true,
     "setup": [
       {
         "action": "click",
         "selector": "[aria-label=\"New table\"]"
       },
       {
+        "action": "press",
+        "selector": "input[aria-label=\"Table name\"]",
+        "value": "Escape"
+      },
+      {
         "action": "click",
-        "selector": "button:text-is(\"Advanced settings\")"
+        "selector": "[aria-label=\"Open actions for New table\"]"
+      },
+      {
+        "action": "click",
+        "selector": "[role=\"menuitem\"]:text-is(\"Audience\u2026\")"
       },
       {
         "action": "hover",
@@ -7554,12 +7813,13 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Layout blank store"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       }
     ],
     "steps": [
@@ -7582,12 +7842,13 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Layout blank store"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       },
       {
         "action": "click",
@@ -7614,12 +7875,13 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Layout blank store"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       },
       {
         "action": "click",
@@ -12304,7 +12566,7 @@
   },
   {
     "id": "C090-toast-complete",
-    "title": "New blank store creation toast completes",
+    "title": "New blank store creation remains ready",
     "path": "/stores",
     "target": "fixture",
     "mutating": true,
@@ -12315,12 +12577,13 @@
       },
       {
         "action": "fill",
-        "selector": "#store-create-name",
+        "selector": "input[aria-label=\"Store name\"]",
         "value": "Layout blank store"
       },
       {
-        "action": "click",
-        "selector": "button:text-is(\"Create store\")"
+        "action": "press",
+        "selector": "input[aria-label=\"Store name\"]",
+        "value": "Enter"
       },
       {
         "action": "click",

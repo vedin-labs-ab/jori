@@ -1,35 +1,50 @@
-import { useRef, useState } from "react"
-import { grantOptions } from "@/landing/demo/fixtures/people"
-import { useDemoFolders, useDemoWorkspace } from "@/landing/demo/workspace"
-import { FolderPickerField } from "@/shared/console/folders/field"
-import { CreateMaterialDialog } from "@/shared/console/materials/dialogs/create"
-import { tableCreateBlurb } from "@/shared/console/tables/list/config"
+import { useRef } from "react"
+import { Button } from "@/components/ui/button"
+import { Table, TableBody } from "@/components/ui/table"
+import { useDemoWorkspace } from "@/landing/demo/workspace"
+import { EditingProvider } from "@/shared/console/edit/provider"
+import { CreatedItemRow } from "@/shared/console/edit/row"
+import { useCreatedItem, useEditing } from "@/shared/console/edit/state"
 
-/** Real create form and local workspace write, with a delayed service result. */
+/** The real immediate creation session, with a delayed local service result. */
 export function CreationState({ state }: { state: string }) {
-  const [open, setOpen] = useState(true)
   const attempts = useRef(0)
-  const folders = useDemoFolders()
   const { actions } = useDemoWorkspace()
-
   return (
-    <CreateMaterialDialog
-      blurb={tableCreateBlurb}
-      create={async (values) => {
+    <EditingProvider
+      name={() => "New table"}
+      onCreate={async () => {
         const attempt = attempts.current++
         await new Promise((resolve) => setTimeout(resolve, 1100))
         if (state === "create-error" && attempt === 0) {
           throw new Error("Layout fixture simulated creation failure")
         }
-        actions.createMaterial("table", values)
+        const material = actions.createMaterial("table", {
+          name: "New table",
+          visibility: { mode: "organization" },
+        })
+        return { id: material.id, name: material.name, kind: "table" }
       }}
-      folderField={(field) => (
-        <FolderPickerField {...field} folders={folders} />
-      )}
-      grantOptions={grantOptions}
-      isOpen={open}
-      noun="table"
-      onOpenChange={setOpen}
-    />
+      onRename={async (item, name) => actions.updateMaterial(item.id, { name })}
+    >
+      <CreationControls />
+    </EditingProvider>
+  )
+}
+
+function CreationControls() {
+  const editing = useEditing()
+  const created = useCreatedItem("table")
+  return (
+    <div className="grid gap-4 p-6">
+      <Button onClick={() => editing?.create("table", undefined, "table")}>
+        New table
+      </Button>
+      <Table>
+        <TableBody>
+          {created ? <CreatedItemRow edit={created} colSpan={2} /> : null}
+        </TableBody>
+      </Table>
+    </div>
   )
 }

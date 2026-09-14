@@ -907,67 +907,50 @@
   },
   {
     "id": "C057-create-success",
-    "title": "Actual CreateMaterialDialog pending creation success with delayed local service outcome. Original C051 separately covers insertion into the list.",
+    "title": "Immediate inline creation success with delayed local service outcome.",
     "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=create-success",
     "target": "app",
     "anonymous": true,
     "mutating": true,
-    "setup": [
-      {
-        "action": "fill",
-        "selector": "input#table-create-name",
-        "value": "Long customer renewal table for the regional operations team"
-      }
-    ],
+    "setup": [],
     "steps": [
       {
         "action": "click",
-        "selector": "[role=\"dialog\"] button:has-text(\"Create table\")"
+        "selector": "button:text-is(\"New table\")"
       }
     ],
     "setupReady": [
       {
-        "selector": "input#table-create-name",
+        "selector": "button:text-is(\"New table\")",
         "state": "visible",
         "timeout": 20000
       }
     ],
     "ready": [
       {
-        "selector": "[data-sonner-toast]:has-text(\"Created Long customer renewal table\")",
+        "selector": "input[aria-label=\"Table name\"]",
         "state": "visible",
-        "timeout": 20000
-      },
-      {
-        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
-        "state": "attached",
         "timeout": 20000
       }
     ]
   },
   {
     "id": "C057-create-error",
-    "title": "Actual CreateMaterialDialog pending creation error with delayed local service outcome. Original C051 separately covers insertion into the list.",
+    "title": "Immediate inline creation error with delayed local service outcome.",
     "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=create-error",
     "target": "app",
     "anonymous": true,
     "mutating": true,
-    "setup": [
-      {
-        "action": "fill",
-        "selector": "input#table-create-name",
-        "value": "Long customer renewal table for the regional operations team"
-      }
-    ],
+    "setup": [],
     "steps": [
       {
         "action": "click",
-        "selector": "[role=\"dialog\"] button:has-text(\"Create table\")"
+        "selector": "button:text-is(\"New table\")"
       }
     ],
     "setupReady": [
       {
-        "selector": "input#table-create-name",
+        "selector": "button:text-is(\"New table\")",
         "state": "visible",
         "timeout": 20000
       }
@@ -975,11 +958,6 @@
     "ready": [
       {
         "selector": "[data-sonner-toast]:has-text(\"Layout fixture simulated creation failure\")",
-        "state": "visible",
-        "timeout": 20000
-      },
-      {
-        "selector": "[role=\"dialog\"] button:text-is(\"Create table\"):enabled",
         "state": "visible",
         "timeout": 20000
       }
@@ -987,30 +965,21 @@
   },
   {
     "id": "C057-create-retry",
-    "title": "Actual CreateMaterialDialog pending creation retry with delayed local service outcome. Original C051 separately covers insertion into the list.",
+    "title": "Immediate inline creation retry with delayed local service outcome.",
     "path": "http://127.0.0.1:5192/scripts/layout/states/page.html?case=create-error",
     "target": "app",
     "anonymous": true,
     "mutating": true,
     "setup": [
       {
-        "action": "fill",
-        "selector": "input#table-create-name",
-        "value": "Long customer renewal table for the regional operations team"
-      },
-      {
         "action": "click",
-        "selector": "[role=\"dialog\"] button:has-text(\"Create table\")"
-      },
-      {
-        "action": "hover",
-        "selector": "[role=\"dialog\"] button:text-is(\"Create table\"):enabled"
+        "selector": "button:text-is(\"New table\")"
       }
     ],
     "steps": [
       {
         "action": "click",
-        "selector": "[role=\"dialog\"] button:has-text(\"Create table\")"
+        "selector": "button:text-is(\"New table\")"
       }
     ],
     "setupReady": [
@@ -1018,22 +987,12 @@
         "selector": "[data-sonner-toast]:has-text(\"Layout fixture simulated creation failure\")",
         "state": "visible",
         "timeout": 20000
-      },
-      {
-        "selector": "[role=\"dialog\"] button:text-is(\"Create table\"):enabled",
-        "state": "visible",
-        "timeout": 20000
       }
     ],
     "ready": [
       {
-        "selector": "[data-sonner-toast]:has-text(\"Created Long customer renewal table\")",
+        "selector": "input[aria-label=\"Table name\"]",
         "state": "visible",
-        "timeout": 20000
-      },
-      {
-        "selector": "body:not(:has([role=\"dialog\"], [role=\"alertdialog\"]))",
-        "state": "attached",
         "timeout": 20000
       }
     ]

@@ -2,7 +2,7 @@ import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-/** Name input shared by material create and edit dialogs. The error, when
+/** Name input shared by material import and edit dialogs. The error, when
  *  given, renders inline; callers surface it on submit attempts and clear
  *  it as soon as new input arrives. */
 export function MaterialNameField({
