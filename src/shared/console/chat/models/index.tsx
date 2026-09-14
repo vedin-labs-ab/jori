@@ -1,3 +1,4 @@
+import { modelAvailabilityReason } from "@contracts/models/availability"
 import {
   catalogModel,
   type ModelSlug,
@@ -70,11 +71,6 @@ export function ModelPicker({
 }) {
   const tier = selectionTier(selection)
   const Icon = tier === null ? null : tierIcons[tier]
-  const choose = (next: ModelSelection) => {
-    if (availableModels?.includes(next.model)) {
-      onSelect(next)
-    }
-  }
 
   return (
     <DropdownMenu>
@@ -82,9 +78,6 @@ export function ModelPicker({
         <InputGroupButton
           aria-label={`Model: ${modelLabel(selection.model)}, ${effortLabels[selection.effort]} reasoning`}
           className="min-w-28 gap-1.5 text-muted-foreground"
-          disabled={
-            availableModels === undefined || availableModels.length === 0
-          }
           size="sm"
           variant="ghost"
         >
@@ -97,75 +90,107 @@ export function ModelPicker({
           <ChevronDown aria-hidden="true" className="size-3.5" />
         </InputGroupButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>Recommendations</DropdownMenuLabel>
-          <DropdownMenuRadioGroup
-            onValueChange={(next) => choose(tiers[next as ModelTier])}
-            value={tier ?? ""}
-          >
-            {tierOrder
-              .filter((candidate) =>
-                availableModels?.includes(tiers[candidate].model)
-              )
-              .map((candidate) => (
-                <TierItem key={candidate} tier={candidate} />
-              ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>More models</DropdownMenuLabel>
-          {vendorOrder
-            .filter((vendor) =>
-              vendorModels(vendor).some((model) =>
-                availableModels?.includes(model.slug)
-              )
-            )
-            .map((vendor) => (
-              <DropdownMenuSub key={vendor}>
-                <DropdownMenuSubTrigger>
-                  <VendorLogo vendor={vendor} />
-                  {modelVendors[vendor]}
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="w-56">
-                  <VendorModels
-                    availableModels={availableModels ?? []}
-                    onSelect={choose}
-                    selection={selection}
-                    vendor={vendor}
-                  />
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            ))}
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          {/* The level takes the row's free space so it sits against the
-              chevron, which otherwise shares that space with it. */}
-          <DropdownMenuSubTrigger className="[&>svg]:ml-0">
-            Reasoning
-            <span className="ml-auto w-16 text-right text-muted-foreground">
-              {effortLabels[selection.effort]}
-            </span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-40">
-            <DropdownMenuRadioGroup
-              onValueChange={(effort) =>
-                choose(withEffort(selection, effort as ReasoningEffort))
-              }
-              value={selection.effort}
-            >
-              {reasoningEfforts.map((effort) => (
-                <DropdownMenuRadioItem key={effort} value={effort}>
-                  {effortLabels[effort]}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-      </DropdownMenuContent>
+      <ModelOptions
+        availableModels={availableModels}
+        onSelect={onSelect}
+        selection={selection}
+      />
     </DropdownMenu>
+  )
+}
+
+/** Catalog guidance appears only after the person opens the picker. */
+function ModelOptions({
+  availableModels,
+  onSelect,
+  selection,
+}: Parameters<typeof ModelPicker>[0]) {
+  const tier = selectionTier(selection)
+  const reason = modelAvailabilityReason(availableModels, selection)
+  const choose = (next: ModelSelection) => {
+    if (availableModels?.includes(next.model)) {
+      onSelect(next)
+    }
+  }
+
+  return (
+    <DropdownMenuContent align="end" className="w-64">
+      {reason === undefined ? null : (
+        <p className="px-2 py-1.5 text-muted-foreground text-xs" role="status">
+          {reason}
+        </p>
+      )}
+      {availableModels === undefined || availableModels.length === 0 ? null : (
+        <>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Recommendations</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              onValueChange={(next) => choose(tiers[next as ModelTier])}
+              value={tier ?? ""}
+            >
+              {tierOrder
+                .filter((candidate) =>
+                  availableModels.includes(tiers[candidate].model)
+                )
+                .map((candidate) => (
+                  <TierItem key={candidate} tier={candidate} />
+                ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>More models</DropdownMenuLabel>
+            {vendorOrder
+              .filter((vendor) =>
+                vendorModels(vendor).some((model) =>
+                  availableModels.includes(model.slug)
+                )
+              )
+              .map((vendor) => (
+                <DropdownMenuSub key={vendor}>
+                  <DropdownMenuSubTrigger>
+                    <VendorLogo vendor={vendor} />
+                    {modelVendors[vendor]}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="w-56">
+                    <VendorModels
+                      availableModels={availableModels}
+                      onSelect={choose}
+                      selection={selection}
+                      vendor={vendor}
+                    />
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              ))}
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuSub>
+            {/* The level takes the row's free space so it sits against the
+              chevron, which otherwise shares that space with it. */}
+            <DropdownMenuSubTrigger className="[&>svg]:ml-0">
+              Reasoning
+              <span className="ml-auto w-16 text-right text-muted-foreground">
+                {effortLabels[selection.effort]}
+              </span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-40">
+              <DropdownMenuRadioGroup
+                onValueChange={(effort) =>
+                  choose(withEffort(selection, effort as ReasoningEffort))
+                }
+                value={selection.effort}
+              >
+                {reasoningEfforts.map((effort) => (
+                  <DropdownMenuRadioItem key={effort} value={effort}>
+                    {effortLabels[effort]}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </>
+      )}
+    </DropdownMenuContent>
   )
 }
 

@@ -1,4 +1,3 @@
-import { modelAvailabilityReason } from "@contracts/models/availability"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useCallback } from "react"
@@ -95,7 +94,6 @@ function ConversationThread({
 }) {
   const thread = useConversation(organizationId, conversationId, live)
   const availableModels = useAvailableModels()
-  const unavailable = modelAvailabilityReason(availableModels, live.model)
   const { openTarget, page, resolveReference } = thread
   const handlers = useThreadHandlers(organizationId, conversationId, thread)
 
@@ -110,7 +108,6 @@ function ConversationThread({
         <ChatComposer
           autoFocus
           availableModels={availableModels}
-          disabled={unavailable !== undefined}
           isLive={isLiveRun(live.run)}
           metadata={
             <ConversationFiling
@@ -126,7 +123,6 @@ function ConversationThread({
           onStop={thread.stop}
           onUnmention={thread.releaseTarget}
           resolve={resolveReference}
-          reason={unavailable}
           selection={live.model}
           usage={live.context}
         />

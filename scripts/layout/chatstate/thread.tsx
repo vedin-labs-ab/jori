@@ -36,7 +36,7 @@ function ThreadState({
     return (
       <PaneState
         state={state}
-        composer={<Composer resolve={thread.resolveReference} />}
+        composer={<Composer resolve={thread.resolveReference} state={state} />}
       >
         <ChatThread {...thread} />
       </PaneState>
@@ -48,7 +48,7 @@ function ThreadState({
         <ChatThread {...thread} />
       </div>
       <div className="pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <Composer resolve={thread.resolveReference} />
+        <Composer resolve={thread.resolveReference} state={state} />
       </div>
     </>
   )
@@ -56,14 +56,22 @@ function ThreadState({
 
 function Composer({
   resolve,
+  state,
 }: {
   resolve: ReturnType<typeof useThread>["resolveReference"]
+  state: string
 }) {
   const [selection, setSelection] = useState(chatSelection)
   const send = useSendMessage("layout-chat-fixture")
   return (
     <ChatComposer
-      availableModels={modelSlugs}
+      availableModels={
+        state === "models-loading"
+          ? undefined
+          : state === "models-empty"
+            ? []
+            : modelSlugs
+      }
       onSelect={setSelection}
       onSend={(text, references) =>
         send({

@@ -1,4 +1,3 @@
-import { modelAvailabilityReason } from "@contracts/models/availability"
 import {
   defaultSelection,
   type ModelSelection,
@@ -55,8 +54,6 @@ function ChatHomeContent({
   const mentions = useMentionSources(organizationId)
   const [selection, setSelection] = useState<ModelSelection>(defaultSelection)
   const availableModels = useAvailableModels()
-  const unavailable =
-    location.reason ?? modelAvailabilityReason(availableModels, selection)
   const { placeholder, suggestions } = useHomeSuggestions()
   // A blocked budget still opens the conversation with the message in it,
   // so the console moves there either way; a failure rejects, and the
@@ -79,7 +76,7 @@ function ChatHomeContent({
         <ChatComposer
           autoFocus
           availableModels={availableModels}
-          disabled={unavailable !== undefined}
+          disabled={location.reason !== undefined}
           initialReference={location.initialReference}
           metadata={
             <ChatLocation
@@ -93,7 +90,7 @@ function ChatHomeContent({
           onSend={start}
           onStop={() => {}}
           placeholder={placeholder}
-          reason={unavailable}
+          reason={location.reason}
           selection={selection}
         />
       }

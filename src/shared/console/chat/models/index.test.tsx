@@ -27,16 +27,42 @@ test("the regional catalog removes unavailable recommendations and model choices
   ).toBeNull()
 })
 
-test("the picker cannot offer models before regional eligibility is known", () => {
-  render(
-    <ModelPicker
-      availableModels={undefined}
-      onSelect={() => undefined}
-      selection={tiers.standard}
-    />
-  )
-  expect(screen.getByRole("button").hasAttribute("disabled")).toBe(true)
-})
+test.each([
+  { availableModels: undefined, message: "Loading model choices…" },
+  {
+    availableModels: [],
+    message: "No model choices available. Try again shortly.",
+  },
+])(
+  "missing choices stay quiet until the picker opens: $message",
+  ({ availableModels, message }) => {
+    const onSelect = vi.fn()
+    const { rerender } = render(
+      <ModelPicker
+        availableModels={availableModels}
+        onSelect={onSelect}
+        selection={tiers.standard}
+      />
+    )
+    expect(screen.getByRole("button").hasAttribute("disabled")).toBe(false)
+    expect(screen.queryByText(message)).toBeNull()
+    openPicker("Model: GPT-5.6 Sol, Medium reasoning")
+    expect(screen.getByRole("status").textContent).toBe(message)
+    expect(screen.queryByRole("menuitemradio")).toBeNull()
+    expect(onSelect).not.toHaveBeenCalled()
+
+    rerender(
+      <ModelPicker
+        availableModels={[tiers.standard.model]}
+        onSelect={onSelect}
+        selection={tiers.standard}
+      />
+    )
+    expect(screen.queryByRole("status")).toBeNull()
+    fireEvent.click(screen.getByRole("menuitemradio", { name: /Standard/ }))
+    expect(onSelect).toHaveBeenCalledWith(tiers.standard)
+  }
+)
 
 function openPicker(name: string) {
   fireEvent.pointerDown(screen.getByRole("button", { name }), {
