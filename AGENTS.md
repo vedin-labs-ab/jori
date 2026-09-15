@@ -63,6 +63,8 @@ per concept everywhere. A synonym is a rename, not a choice.
   single words except where a framework decides; nest when one word is not
   enough. A file that outgrows itself becomes a folder with `index.ts` and
   focused siblings, not `thing_helpers.ts`.
+- Leave what you touch cleaner than you found it; unrelated cleanup is its
+  own change.
 - Formatting, dependency direction, and folder limits are enforced by
   `biome.jsonc`, `scripts/dependencies/rules.ts`, and `scripts/structure/`.
 - Before adding a test, name the behavior or failure it protects and check
