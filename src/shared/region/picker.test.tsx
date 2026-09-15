@@ -1,7 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react"
-import { afterEach, expect, test } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { RegionPicker } from "./picker"
+
+// Exercise the US-only rollout regardless of the local preview's region.
+vi.mock("./config", async (original) => {
+  const module = await original<typeof import("./config")>()
+  return { ...module, regionConfig: module.createRegionConfig({}, true) }
+})
 
 afterEach(cleanup)
 

@@ -60,6 +60,10 @@ vi.mock("../edit", () => ({
     <>{children}</>
   ),
 }))
+vi.mock("../discovery", () => ({
+  ConsoleSearch: ({ children }: { children: React.ReactNode }) => children,
+  SidebarSearch: () => null,
+}))
 vi.mock("../folders/section", () => ({ SidebarFolders: () => null }))
 vi.mock("../chat/recent", () => ({ useSidebarChats: () => [] }))
 vi.mock("./account", () => ({ SidebarUserButton: () => null }))
