@@ -11,12 +11,12 @@ of its own.
 Same word, same meaning, wherever you write:
 
 - **you** means the coding agent reading this and making changes to Jori.
-- **the developer**, **the owner**, **I**, and **me** mean Albin, who's
-  building Jori as Vedin Labs and is talking to you now.
+- **the developer**, **I**, and **me** mean Albin, who's building Jori as
+  Vedin Labs and is talking to you now.
 - **we** and **us** mean you and me.
 - **Jori** means the product, and the agent inside it that users talk to.
   Jori's they, never it.
-- **user** means a person using Jori.
+- **user** and **customer** mean a person using Jori.
 - **agent** means Jori's agent, the one the prompts and runs describe. In
   this codebase's tooling it means a coding agent, which may be you.
 
@@ -63,7 +63,6 @@ per concept everywhere. A synonym is a rename, not a choice.
   single words except where a framework decides; nest when one word is not
   enough. A file that outgrows itself becomes a folder with `index.ts` and
   focused siblings, not `thing_helpers.ts`.
-- Keep cleanup local to the change.
 - Formatting, dependency direction, and folder limits are enforced by
   `biome.jsonc`, `scripts/dependencies/rules.ts`, and `scripts/structure/`.
 - Before adding a test, name the behavior or failure it protects and check
@@ -80,13 +79,12 @@ per concept everywhere. A synonym is a rename, not a choice.
 - Ask before loosening a check or deleting a test to get past a failure.
 - Dev is yours to deploy, seed, and truncate. Ship production, run functions
   against it, or change its data only when asked.
-- Never read `.env.prod-*.local` or print a deployment's environment. The
+- Never read `.env.prod-*.local` or print a deployment's environment; the
   tooling loads what it needs.
 - Keep EU and US data apart. When a provider cannot deliver per region, state
   the limitation instead of widening geography or permissions.
 - Ask before changing legal pages.
-- Prefer no documentation. When a page would clearly earn its place, ask
-  before adding it.
+- Ask before adding documentation. Most changes need none.
 
 ## Guides
 
