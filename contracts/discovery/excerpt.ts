@@ -1,7 +1,7 @@
-import { collapseWhitespace } from "../../../contracts/text"
+import { collapseWhitespace } from "../text"
 
 type Match = { start: number; end: number }
-const budget = 120
+const budget = 80
 
 /** Display windows are independent of source offsets. Never rewrite the text
  * used by locators, revision checks, or the search index. */

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest"
-import { excerpt } from "./excerpt"
+import { excerpt } from "../../../contracts/discovery/excerpt"
 import { chunks } from "./text"
 
 test("long fields remain searchable and every chunk offset points to the original Unicode text", () => {

@@ -13,7 +13,7 @@ test("long passages keep whole words around the match within a compact window", 
   const text =
     "Before this point we explain the process in detail and provide a lengthy introduction to the policy for customer retention and storage across the company with many more explanatory words following it"
   const result = excerpt(text, "customer")
-  expect(result.snippet.length).toBeLessThanOrEqual(122)
+  expect(result.snippet.length).toBeLessThanOrEqual(82)
   expect(result.snippet).toContain("for customer retention")
   expect(result.snippet).not.toMatch(/^…\S*Before/)
 })

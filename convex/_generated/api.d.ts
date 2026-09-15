@@ -170,7 +170,6 @@ import type * as discovery_provider_spelling from "../discovery/provider/spellin
 import type * as discovery_rank from "../discovery/rank.js";
 import type * as discovery_region from "../discovery/region.js";
 import type * as discovery_retrieval from "../discovery/retrieval.js";
-import type * as discovery_source_excerpt from "../discovery/source/excerpt.js";
 import type * as discovery_source_history from "../discovery/source/history.js";
 import type * as discovery_source_index from "../discovery/source/index.js";
 import type * as discovery_source_materials from "../discovery/source/materials.js";
@@ -909,7 +908,6 @@ declare const fullApi: ApiFromModules<{
   "discovery/rank": typeof discovery_rank;
   "discovery/region": typeof discovery_region;
   "discovery/retrieval": typeof discovery_retrieval;
-  "discovery/source/excerpt": typeof discovery_source_excerpt;
   "discovery/source/history": typeof discovery_source_history;
   "discovery/source/index": typeof discovery_source_index;
   "discovery/source/materials": typeof discovery_source_materials;

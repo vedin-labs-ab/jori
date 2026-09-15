@@ -1,5 +1,5 @@
 import { type Hit } from "@contracts/discovery"
-import { collapseWhitespace } from "@contracts/text"
+import { excerpt } from "@contracts/discovery/excerpt"
 import { type DemoState } from "../state/types"
 
 /** A small, local preview over the demo's existing records. No indexing,
@@ -31,10 +31,10 @@ export function demoResults(state: DemoState, query: string): Hit[] {
   return records
     .filter((hit) => `${hit.title} ${hit.snippet}`.toLowerCase().includes(text))
     .slice(0, 8)
-    .map((hit) => ({
-      ...hit,
-      snippet: excerpt(hit.snippet, text),
-    }))
+    .map((hit) => {
+      const { snippet, focus } = excerpt(hit.snippet, text)
+      return { ...hit, snippet: focus ? snippet : "" }
+    })
 }
 
 function result(kind: Hit["kind"], id: string, title: string, text = ""): Hit {
@@ -47,11 +47,4 @@ function result(kind: Hit["kind"], id: string, title: string, text = ""): Hit {
     snippet: text,
     location: { kind: "resource", id, field: text ? "content" : "name" },
   }
-}
-
-function excerpt(text: string, query: string) {
-  const sentence = text
-    .split(/\n+|(?<=[.!?])\s+/)
-    .find((part) => part.toLowerCase().includes(query))
-  return sentence ? collapseWhitespace(sentence) : ""
 }

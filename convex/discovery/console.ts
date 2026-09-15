@@ -5,6 +5,7 @@ import {
   type Hit,
   type SearchResponse,
 } from "../../contracts/discovery"
+import { excerpt } from "../../contracts/discovery/excerpt"
 import { candidate } from "../../contracts/discovery/validators"
 import { components, internal } from "../_generated/api"
 import {
@@ -21,7 +22,6 @@ import { loadPersonTeamIds } from "../visibility/viewer"
 import { type Viewer } from "./provider/query"
 import { collect } from "./retrieval"
 import { project } from "./source"
-import { excerpt } from "./source/excerpt"
 import { chunks } from "./source/text"
 import { findSource } from "./sync/intent"
 

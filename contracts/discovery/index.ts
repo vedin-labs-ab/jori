@@ -32,6 +32,7 @@ export type Hit = {
   resourceId: string
   title: string
   resourceName: string
+  /** A compact display window from `excerpt`; source offsets stay in location. */
   snippet: string
   location: MatchLocation
   coverage?: string
