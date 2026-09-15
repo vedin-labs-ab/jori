@@ -1,4 +1,5 @@
 import { type ConsoleDestination } from "../shell/location"
+import { type ConsoleSurface } from "../shell/routes"
 import { pages } from "./results"
 
 export const searchKeys = { key: "k", mod: true } as const
@@ -10,9 +11,10 @@ export const resultKeys = (index: number) => ({
 
 export function pageBindings(
   navigate: (destination: ConsoleDestination) => void,
-  allowInInput = false
+  allowInInput = false,
+  available: readonly ConsoleSurface[] = pages
 ) {
-  return pages.flatMap((page) =>
+  return available.flatMap((page) =>
     page.shortcut
       ? [
           {

@@ -1,8 +1,10 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { cn } from "@/lib/utils"
+import { ConsoleHeaderActions } from "@/shared/console/layout"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { DemoVisibilityDirectory } from "./directory"
+import { DemoSearch } from "./discovery"
 import { DemoDragProvider } from "./drag"
 import { DemoEditing } from "./edit"
 import { type DemoNavigation } from "./navigation"
@@ -41,32 +43,49 @@ export function DemoConsole({
   /** Left out, the header opens on the title and the pages fill the box. */
   sidebar?: boolean
 }) {
+  const scope = useRef<HTMLDivElement>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
     <ConsoleNavigationContext.Provider value={navigation}>
-      <div className={cn(frameClassName, className)} id={navigation.anchor}>
-        <DemoVisibilityDirectory>
-          <DemoEditing>
-            <DemoDragProvider>
-              <ConsoleFrame
-                className="h-full min-h-0"
-                heading="h3"
-                onSidebarOpenChange={setSidebarOpen}
-                pathname={location.pathname}
-                sidebar={
-                  sidebar ? (
-                    <DemoSidebar pathname={location.pathname} />
-                  ) : undefined
-                }
-                sidebarOpen={sidebarOpen}
-              >
-                <DemoPage location={location} openRunId={openRunId} />
-              </ConsoleFrame>
-            </DemoDragProvider>
-          </DemoEditing>
-        </DemoVisibilityDirectory>
-      </div>
+      <DemoSearch scope={scope}>
+        {(search) => (
+          <div
+            className={cn(frameClassName, className)}
+            id={navigation.anchor}
+            ref={scope}
+          >
+            <DemoVisibilityDirectory>
+              <DemoEditing>
+                <DemoDragProvider>
+                  <ConsoleFrame
+                    className="h-full min-h-0"
+                    heading="h3"
+                    onSidebarOpenChange={setSidebarOpen}
+                    pathname={location.pathname}
+                    sidebar={
+                      sidebar ? (
+                        <DemoSidebar
+                          pathname={location.pathname}
+                          search={search}
+                        />
+                      ) : undefined
+                    }
+                    sidebarOpen={sidebarOpen}
+                  >
+                    <ConsoleHeaderActions>
+                      <span className={sidebar ? "md:hidden" : undefined}>
+                        {search}
+                      </span>
+                    </ConsoleHeaderActions>
+                    <DemoPage location={location} openRunId={openRunId} />
+                  </ConsoleFrame>
+                </DemoDragProvider>
+              </DemoEditing>
+            </DemoVisibilityDirectory>
+          </div>
+        )}
+      </DemoSearch>
     </ConsoleNavigationContext.Provider>
   )
 }

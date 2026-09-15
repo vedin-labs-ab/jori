@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card"
 import { Kbd } from "@/components/ui/kbd"
 import { useHeldModifiers } from "@/shared/shortcuts/hold"
 import { shortcutLabel } from "@/shared/shortcuts/keys"
+import { type ConsoleSurface } from "../shell/routes"
 import { pageKeys } from "./bindings"
 import { pages } from "./results"
 
@@ -18,11 +19,17 @@ export function ShortcutGuide() {
     : null
 }
 
-export function PageShortcuts({ held = true }: { held?: boolean }) {
+export function PageShortcuts({
+  held = true,
+  available = pages,
+}: {
+  held?: boolean
+  available?: readonly ConsoleSurface[]
+}) {
   return (
     <section aria-label="Page shortcuts" className="@container text-xs/relaxed">
       <dl className="grid grid-cols-1 gap-x-5 gap-y-1 @xs:grid-cols-2">
-        {pages.map((page) =>
+        {available.map((page) =>
           page.shortcut ? (
             <div
               className="flex items-center justify-between gap-3"

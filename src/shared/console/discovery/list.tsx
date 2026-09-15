@@ -15,7 +15,7 @@ import { SearchStatus } from "./status"
 import { type PaletteProps } from "./types"
 
 export function Results(props: PaletteProps) {
-  const pages = matchingPages(props.query)
+  const pages = matchingPages(props.query, props.pages)
   const recent = !props.query.trim() && props.chats.length > 0
   const { hits, status } = props.state
   const showStatus =

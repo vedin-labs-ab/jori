@@ -1,3 +1,4 @@
+import { type ReactNode } from "react"
 import { useCreationRequests } from "@/shared/console/folders/creation"
 import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { FolderTree } from "@/shared/console/folders/section"
@@ -15,7 +16,13 @@ import { useDemoFolders, useDemoWorkspace } from "./workspace"
  *  navigation, and the folder tree with the dialogs its rows raise. No
  *  platform group: the demo has nothing to set up there, and the folders
  *  are what the box has room to show. */
-export function DemoSidebar({ pathname }: { pathname: string }) {
+export function DemoSidebar({
+  pathname,
+  search,
+}: {
+  pathname: string
+  search?: ReactNode
+}) {
   const folders = useDemoFolders()
   const { state } = useDemoWorkspace()
   const expansion = useDemoExpansion(activeFolderId(pathname), folders)
@@ -40,6 +47,7 @@ export function DemoSidebar({ pathname }: { pathname: string }) {
         organization={<SidebarOrganization organization={organization} />}
         pathname={pathname}
         platform={null}
+        search={search}
       />
       <DemoFolderDialogs dialog={dialog} onClose={() => setDialog(undefined)} />
       <DemoCreationDialogs

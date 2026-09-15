@@ -1,6 +1,7 @@
 import { type Hit } from "@contracts/discovery"
 import { type ChatConversation } from "../chat/types"
 import { type ConsoleDestination } from "../shell/location"
+import { type ConsoleSurface } from "../shell/routes"
 
 export type SearchState = {
   status: "idle" | "loading" | "ready" | "unavailable"
@@ -8,6 +9,7 @@ export type SearchState = {
   partial: boolean
 }
 export type PaletteProps = {
+  pages?: readonly ConsoleSurface[]
   chats: ChatConversation[]
   open: boolean
   query: string

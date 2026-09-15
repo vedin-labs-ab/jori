@@ -64,7 +64,7 @@ export function SearchPalette(props: PaletteProps) {
         <CommandList className="h-80 max-h-[50dvh] [&_[cmdk-list-sizer]]:flex [&_[cmdk-list-sizer]]:min-h-full [&_[cmdk-list-sizer]]:flex-col">
           {guide ? (
             <div className="p-3">
-              <PageShortcuts held={!pinnedGuide} />
+              <PageShortcuts held={!pinnedGuide} available={props.pages} />
             </div>
           ) : (
             <Results {...props} />
@@ -95,7 +95,7 @@ function usePaletteShortcuts(
         allowInInput: true,
         run: () => props.onOpenChange(false),
       },
-      ...pageBindings(props.onNavigate, true),
+      ...pageBindings(props.onNavigate, true, props.pages),
       ...(guide ? [] : props.state.hits).slice(0, 5).map((hit, index) => ({
         shortcut: resultKeys(index),
         allowInInput: true,

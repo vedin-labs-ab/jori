@@ -1,6 +1,7 @@
 import { type Hit } from "@contracts/discovery"
 import { referenceDestination } from "../references/presentation"
 import {
+  type ConsoleSurface,
   consoleNavigation,
   consolePlatformNavigation,
   folderSurface,
@@ -15,12 +16,15 @@ export const pages = [
   ...consolePlatformNavigation,
   folderSurface,
 ]
-export function matchingPages(text: string) {
+export function matchingPages(
+  text: string,
+  available: readonly ConsoleSurface[] = pages
+) {
   const words = text.toLowerCase().trim().split(/\s+/)
   if (!text.trim()) {
     return []
   }
-  return pages.filter((page) =>
+  return available.filter((page) =>
     words.every((word) =>
       page.label
         .toLowerCase()
