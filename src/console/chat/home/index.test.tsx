@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { tiers } from "@contracts/models/selection"
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -48,6 +49,7 @@ vi.mock("@/shared/console/chat/composer/placeholder", () => ({
 afterEach(() => {
   cleanup()
   vi.clearAllMocks()
+  send.mockReset()
   query.mockReset()
 })
 
@@ -97,7 +99,9 @@ test.each([
       screen.queryByText(/model choices|available in this region/i)
     ).toBeNull()
     typeInto(field, "Chase the invoices")
-    fireEvent.click(screen.getByRole("button", { name: "Send message" }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Send message" }))
+    })
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Send message" })).toBeDefined()
     )
@@ -108,7 +112,9 @@ test.each([
     ).toBeDefined()
     expect(navigate).not.toHaveBeenCalled()
 
-    fireEvent.keyDown(field, { key: "Enter" })
+    await act(async () => {
+      fireEvent.keyDown(field, { key: "Enter" })
+    })
     await waitFor(() => expect(navigate).toHaveBeenCalledTimes(1))
     expect(send).toHaveBeenCalledTimes(2)
     expect(send).toHaveBeenLastCalledWith({
@@ -148,7 +154,9 @@ test.each([
     expect(screen.queryByText(message)).toBeNull()
     expect(toast.error).not.toHaveBeenCalled()
     typeInto(field, "Keep this prompt")
-    fireEvent.keyDown(field, { key: "Enter" })
+    await act(async () => {
+      fireEvent.keyDown(field, { key: "Enter" })
+    })
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledExactlyOnceWith(message)
     )
@@ -176,7 +184,9 @@ test.each([
       </TooltipProvider>
     )
     expect(screen.getByRole("textbox", { name: "Message" })).toBe(field)
-    fireEvent.click(screen.getByRole("button", { name: "Send message" }))
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Send message" }))
+    })
     await waitFor(() => expect(navigate).toHaveBeenCalledTimes(1))
     expect(send).toHaveBeenCalledExactlyOnceWith({
       organizationId: "organization",
