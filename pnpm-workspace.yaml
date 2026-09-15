@@ -1,6 +1,8 @@
 packages: []
 
-minimumReleaseAge: 0
+# A version has to be a day old before it can be installed, so a compromised
+# release is caught before it lands here. Delays legitimate bumps by a day.
+minimumReleaseAge: 1440
 
 overrides:
   # The Convex adapter requires Better Auth <1.7; keep its UI peers aligned.
