@@ -45,7 +45,7 @@ export function SearchPalette(props: PaletteProps) {
     >
       {/* Keep Ctrl+K available for toggling search on Windows and Linux. */}
       <Command
-        className="[&_[cmdk-item]>svg:first-child]:text-muted-foreground [&_[cmdk-item]:is(:hover,[data-selected=true])>svg:first-child]:text-foreground"
+        className="[&_[cmdk-item]>svg:first-child]:text-muted-foreground [&_[cmdk-item]:not([data-disabled=true]):is(:hover,[data-selected=true])>svg:first-child]:text-foreground"
         shouldFilter={false}
         vimBindings={false}
       >
