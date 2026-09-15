@@ -132,8 +132,9 @@ export function DataSection() {
           Independent security audits are planned. We'll publish the results
           when they're done.
         </Definition>
-        <Definition icon={Code2} term="Source-available">
-          Review Jori's application code, prompts, and skills on{" "}
+        <Definition icon={Code2} term="Open source">
+          Jori is free software under the AGPL. Review the application code,
+          prompts, and skills on{" "}
           <a
             className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
             href="https://github.com/vedin-labs-ab/jori"
@@ -142,8 +143,7 @@ export function DataSection() {
           >
             GitHub
           </a>
-          , including how permissions and execution are implemented. Commercial
-          restrictions apply.
+          , including how permissions and execution are implemented.
         </Definition>
       </FactList>
     </Section>

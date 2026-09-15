@@ -1,7 +1,7 @@
 {
   "name": "jori",
   "private": true,
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "AGPL-3.0-or-later",
   "version": "0.0.1",
   "type": "module",
   "packageManager": "pnpm@12.4.1",

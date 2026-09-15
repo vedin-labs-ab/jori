@@ -11,8 +11,9 @@ import path from "node:path"
  */
 const rootDocuments = new Set([
   "AGENTS.md",
+  "CLA.md",
   "CLAUDE.md",
-  "LICENSE.md",
+  "CONTRIBUTING.md",
   "NOTICE.md",
   "README.md",
   "SECURITY.md",
