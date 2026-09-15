@@ -11,6 +11,17 @@
   `inverted` flips a surface to the opposite scheme. A mark loaded from a
   file goes through `LogoImage` in `src/shared/logo`, flagged `ink` when
   it is drawn in one dark ink, so it flips too.
+- Icon sizes follow their role: `size-4` (16px) for sidebar navigation and
+  resource rows; `size-3.5` (14px) for standard buttons, inputs, menus, and
+  disclosure controls; `size-3` (12px) for compact controls and inline
+  metadata. Let shared controls size their icons, including loading states,
+  instead of repeating a size at each call site. Sidebar defaults must allow
+  smaller supporting icons. A chevron naturally draws less ink than a search
+  icon in the same box; do not enlarge it to compensate.
+- Larger icon tiles and previews use 20px or 24px; illustrations, brand marks,
+  and avatars have their own scale. Tiny badge indicators may use 10px.
+  Icon dimensions and button hit areas are separate: never shrink a hit area
+  just to make its icon smaller.
 - People, organizations, and Jori share one avatar shape, `rounded-avatar`,
   the brand mark's corner at any size.
 - Desktop-first, responsive, no gradients. Check both schemes at phone,

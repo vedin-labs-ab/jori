@@ -210,7 +210,7 @@ function ToolGroup({
               }
               title={entry.title}
             />
-            <ChevronDown className="size-4 shrink-0 text-current transition-transform group-data-[state=open]/activity-task:rotate-180" />
+            <ChevronDown className="size-3.5 shrink-0 text-current transition-transform group-data-[state=open]/activity-task:rotate-180" />
           </button>
         </TaskTrigger>
         <TaskContent className="data-[state=closed]:hidden data-[state=closed]:animate-none data-[state=open]:animate-none [&>div]:mt-2 [&>div]:space-y-1.5">

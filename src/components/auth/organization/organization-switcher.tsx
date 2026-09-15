@@ -138,7 +138,7 @@ export function OrganizationSwitcher({
               />
             )}
 
-            <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
+            <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
           </DropdownMenuTrigger>
         )}
 

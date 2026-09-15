@@ -36,7 +36,7 @@ export function SidebarOrganization({
       ) : (
         <OrganizationRow organization={organization} />
       )}
-      <ChevronDown className="ml-auto opacity-50 group-data-[collapsible=icon]:hidden" />
+      <ChevronDown className="ml-auto size-3.5 group-data-[collapsible=icon]:hidden" />
     </SidebarMenuButton>
   )
 }

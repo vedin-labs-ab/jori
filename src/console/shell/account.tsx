@@ -50,7 +50,7 @@ export function SidebarUserButton() {
               size="lg"
             >
               <UserView className="flex-1" user={user} />
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-3.5" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

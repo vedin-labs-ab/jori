@@ -34,7 +34,7 @@ export function UserInvitationRow({ invitation }: UserInvitationRowProps) {
   return (
     <div className="flex items-center gap-3">
       <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
-        <Clock className="size-4.5" />
+        <Clock className="size-5" />
       </div>
 
       <div className="flex flex-col">

@@ -74,9 +74,9 @@ export function ActiveSession({ activeSession }: ActiveSessionProps) {
     <div className="flex items-center gap-3 p-4">
       <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
         {isMobile ? (
-          <Smartphone className="size-4.5" />
+          <Smartphone className="size-5" />
         ) : (
-          <Monitor className="size-4.5" />
+          <Monitor className="size-5" />
         )}
       </div>
 

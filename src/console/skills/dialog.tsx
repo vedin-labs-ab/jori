@@ -136,7 +136,7 @@ export function SkillDialog({
 
           <DialogFooter>
             <Button type="button" onClick={onSave} disabled={isSaving}>
-              {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+              {isSaving ? <Loader2 className="animate-spin" /> : null}
               Save skill
             </Button>
           </DialogFooter>

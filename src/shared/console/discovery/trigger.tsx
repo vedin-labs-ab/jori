@@ -25,10 +25,10 @@ export function SearchTrigger({
           aria-keyshortcuts={shortcutAria(searchKeys)}
           aria-label="Search workspace"
           className={cn(
-            "shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden",
+            "size-8 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden",
             className
           )}
-          size="icon-lg"
+          size="icon"
           variant="ghost"
           {...props}
         >

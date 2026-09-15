@@ -29,7 +29,7 @@ export function RunRequestPager({
           type="button"
           variant="outline"
         >
-          <ChevronLeft className="size-3" />
+          <ChevronLeft />
         </Button>
         <Button
           aria-label={`Next ${navigation.itemLabel}`}
@@ -39,7 +39,7 @@ export function RunRequestPager({
           type="button"
           variant="outline"
         >
-          <ChevronRight className="size-3" />
+          <ChevronRight />
         </Button>
       </ButtonGroup>
       <span className="sr-only" role="status">

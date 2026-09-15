@@ -108,7 +108,7 @@ function DomainTask({ now, task }: { now: number; task: DiscoveryTask }) {
           <ElapsedTime>
             {showTaskElapsed ? elapsedLabel(task, now) : null}
           </ElapsedTime>
-          <ChevronDown className="size-4 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
+          <ChevronDown className="size-3.5 shrink-0 transition-transform group-data-[state=open]:rotate-180" />
         </button>
       </TaskTrigger>
       <TaskContent className="mt-2 data-[state=closed]:hidden data-[state=closed]:animate-none data-[state=open]:animate-none">

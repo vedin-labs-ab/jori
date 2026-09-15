@@ -85,7 +85,7 @@ export function WebsiteDiscoveryStep({
           {skipLabel}
         </Button>
         <Button disabled={!canSubmit} type="submit">
-          {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : null}
+          {isSubmitting ? <Loader2 className="animate-spin" /> : null}
           {continueLabel}
         </Button>
       </DialogFooter>
@@ -138,7 +138,7 @@ export function DiscoveryWorkingStep({
           disabled={running}
           onClick={reviewable ? onReviewProfile : onClose}
         >
-          {running ? <Loader2 className="size-4 animate-spin" /> : null}
+          {running ? <Loader2 className="animate-spin" /> : null}
           {workingActionLabel({ failed, ready, reviewable })}
         </Button>
       </DialogFooter>

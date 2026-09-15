@@ -24,10 +24,10 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
-test("choosing a card in the menu checks it, applies the theme, and remembers it", () => {
+test("theme choices apply immediately without closing the menu; Escape still closes it", () => {
   render(
     <ThemeProvider storageKey="theme">
-      <DropdownMenu open>
+      <DropdownMenu defaultOpen>
         <DropdownMenuContent>
           <ThemeMenu />
         </DropdownMenuContent>
@@ -42,4 +42,17 @@ test("choosing a card in the menu checks it, applies the theme, and remembers it
 
   expect(document.documentElement.classList.contains("dark")).toBe(true)
   expect(window.localStorage.getItem("theme")).toBe("dark")
+  expect(item("Dark").getAttribute("aria-checked")).toBe("true")
+
+  fireEvent.keyDown(item("Light"), { key: "Enter" })
+  expect(document.documentElement.classList.contains("dark")).toBe(false)
+  expect(window.localStorage.getItem("theme")).toBe("light")
+  expect(item("Light").getAttribute("aria-checked")).toBe("true")
+
+  fireEvent.keyDown(item("System"), { key: " " })
+  expect(window.localStorage.getItem("theme")).toBe("system")
+  expect(item("System").getAttribute("aria-checked")).toBe("true")
+
+  fireEvent.keyDown(item("System"), { key: "Escape" })
+  expect(screen.queryByRole("menu")).toBeNull()
 })

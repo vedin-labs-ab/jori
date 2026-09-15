@@ -69,7 +69,7 @@ export function VisibilityField({
         <SelectContent>
           {visibilityModes.map((mode) => (
             <SelectItem key={mode} value={mode}>
-              <VisibilityIcon className="size-4" mode={mode} />
+              <VisibilityIcon mode={mode} />
               {visibilityModeLabels[mode]}
             </SelectItem>
           ))}

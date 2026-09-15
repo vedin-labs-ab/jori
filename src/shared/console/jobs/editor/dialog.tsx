@@ -64,7 +64,7 @@ export function JobEditorDialog({
 
           <DialogFooter>
             <Button type="button" onClick={onSave} disabled={isSaving}>
-              {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+              {isSaving ? <Loader2 className="animate-spin" /> : null}
               {job === undefined ? "Create job" : "Save changes"}
             </Button>
           </DialogFooter>

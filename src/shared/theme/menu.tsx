@@ -19,6 +19,7 @@ export function ThemeMenu() {
         <DropdownMenuPrimitive.RadioItem
           className="group flex cursor-default flex-col gap-1 rounded-md p-1 pb-1.5 text-xs outline-hidden select-none focus:bg-accent focus:text-accent-foreground"
           key={value}
+          onSelect={(event) => event.preventDefault()}
           value={value}
         >
           <span

@@ -38,7 +38,7 @@ export function PlaceCard({
             place={place}
           />
         </div>
-        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+        <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
       </button>
     </Card>
   )

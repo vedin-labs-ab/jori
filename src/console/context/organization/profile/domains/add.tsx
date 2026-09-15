@@ -63,7 +63,7 @@ export function AddDomainControl({
   if (!open) {
     return (
       <Button onClick={() => setOpen(true)} type="button" variant="outline">
-        <Plus className="size-3.5" /> Add
+        <Plus /> Add
       </Button>
     )
   }
@@ -135,7 +135,7 @@ function AddDomainForm({
           type="submit"
           variant="outline"
         >
-          <Plus className="size-3.5" /> Add
+          <Plus /> Add
         </Button>
       </ButtonGroup>
       {error === null ? null : (

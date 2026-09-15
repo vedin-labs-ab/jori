@@ -36,13 +36,13 @@ export function FolderPickerField({
           {selected === undefined ? (
             <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
               {value === null ? (
-                <FolderRoot aria-hidden className="size-4 shrink-0" />
+                <FolderRoot aria-hidden className="shrink-0" />
               ) : null}
               <span>No folder</span>
             </span>
           ) : (
             <span className="flex min-w-0 items-center gap-2">
-              <Folder className="size-4 shrink-0 text-muted-foreground" />
+              <Folder className="shrink-0 text-muted-foreground" />
               <span className="truncate">{selected.name}</span>
             </span>
           )}
