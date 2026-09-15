@@ -3,14 +3,17 @@ import { CommandItem, CommandShortcut } from "@/components/ui/command"
 import { shortcutAria, shortcutLabel } from "@/shared/shortcuts/keys"
 import { referencePresentation } from "../references/presentation"
 import { resultKeys } from "./bindings"
+import { Matches } from "./matches"
 
 export function Result({
   hit,
   index,
+  query,
   onOpen,
 }: {
   hit: Hit
   index: number
+  query: string
   onOpen: (hit: Hit) => void
 }) {
   const { icon: Icon } = referencePresentation(hit.kind, hit.resourceName)
@@ -29,16 +32,18 @@ export function Result({
           className="flex min-w-0 items-baseline gap-1.5"
           title={[hit.title, parent].filter(Boolean).join(" · ")}
         >
-          <span className="truncate">{hit.title || "Untitled"}</span>
+          <span className="truncate">
+            <Matches text={hit.title || "Untitled"} query={query} />
+          </span>
           {parent ? (
             <span className="min-w-0 max-w-[45%] truncate text-muted-foreground">
-              · {parent}
+              · <Matches text={parent} query={query} />
             </span>
           ) : null}
         </span>
         {detail ? (
           <span className="truncate text-muted-foreground" title={detail}>
-            {detail}
+            <Matches text={detail} query={query} />
           </span>
         ) : null}
       </span>

@@ -37,13 +37,10 @@ function dispatch(event: KeyboardEvent) {
         Number(b.element !== undefined) - Number(a.element !== undefined)
     )
   for (const scope of ordered) {
-    if (!containsTarget(scope, target)) {
-      continue
-    }
     const binding = scope.bindings.find(
       (item) =>
         matchesShortcut(event, item.shortcut) &&
-        (item.allowInInput || !target.closest(editing))
+        isShortcutTarget(target, scope.element, item.allowInInput)
     )
     if (binding) {
       event.preventDefault()
@@ -53,7 +50,7 @@ function dispatch(event: KeyboardEvent) {
   }
 }
 
-function containsTarget(scope: Scope, target: Element) {
+function containsTarget(scope: Pick<Scope, "element">, target: Element) {
   if (scope.element === undefined) {
     return !target.closest(dialog)
   }
@@ -74,4 +71,16 @@ export function registerShortcuts(read: () => Scope) {
       window.removeEventListener("keydown", dispatch)
     }
   }
+}
+
+export function isShortcutTarget(
+  target: EventTarget | null,
+  element: HTMLElement | null | undefined,
+  allowInInput = false
+) {
+  return (
+    target instanceof Element &&
+    containsTarget({ element }, target) &&
+    (allowInInput || !target.closest(editing))
+  )
 }

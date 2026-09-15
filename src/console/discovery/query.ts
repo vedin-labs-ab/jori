@@ -7,6 +7,7 @@ import { useAction, useQueries } from "convex/react"
 import { useEffect, useMemo, useState } from "react"
 import { type SearchState } from "@/shared/console/discovery/types"
 import { api } from "../../../convex/_generated/api"
+import { candidateCache } from "./cache"
 
 export function useSearch(
   organizationId: string | undefined,
@@ -52,46 +53,53 @@ export function useCandidates(
   retry: number
 ) {
   const search = useAction(api.discovery.console.search)
+  const [cache] = useState(candidateCache)
+  const request = useMemo(
+    () => ({
+      organizationId,
+      text,
+      retry,
+      key: JSON.stringify([organizationId, text, retry]),
+    }),
+    [organizationId, text, retry]
+  )
   const [settled, setSettled] = useState<{
-    organizationId: string
-    text: string
+    request: typeof request
     response: SearchResponse
-    retry: number
   }>()
   useEffect(() => {
-    if (!organizationId || !text) {
+    if (!request.organizationId || !request.text) {
       return
     }
     let current = true
-    const timer = window.setTimeout(() => {
-      void search({ organizationId, text })
-        .then((response: SearchResponse) => {
-          if (current) {
-            setSettled({ organizationId, text, retry, response })
-          }
-        })
-        .catch(() => {
-          if (current) {
-            setSettled({
-              organizationId,
-              text,
-              retry,
-              response: { candidates: [], partial: true, unavailable: true },
+    const args = { organizationId: request.organizationId, text: request.text }
+    const timer = window.setTimeout(
+      () => {
+        void cache
+          .load(request.key, () => search(args))
+          .catch(
+            (): SearchResponse => ({
+              candidates: [],
+              partial: true,
+              unavailable: true,
             })
-          }
-        })
-    }, 150)
+          )
+          .then((response) => {
+            if (current) {
+              setSettled({ request, response })
+            }
+          })
+      },
+      cache.read(request.key) ? 0 : 150
+    )
     return () => {
       current = false
       window.clearTimeout(timer)
     }
-  }, [organizationId, text, retry, search])
-  return settled !== undefined &&
-    settled.organizationId === organizationId &&
-    settled.text === text &&
-    settled.retry === retry
+  }, [cache, request, search])
+  return settled?.request === request
     ? settled.response
-    : undefined
+    : cache.read(request.key)
 }
 
 function visibleQueries(

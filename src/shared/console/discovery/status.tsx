@@ -42,7 +42,7 @@ export function SearchStatus({
 }) {
   const notice = notices[status]
   return (
-    <Empty className="min-h-64 gap-3" role="status">
+    <Empty className="gap-3" role="status">
       <EmptyHeader>
         <EmptyMedia aria-hidden="true" variant="icon">
           <notice.icon />

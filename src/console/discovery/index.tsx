@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useContext, useState } from "react"
 import { type ChatConversation } from "@/shared/console/chat/types"
 import { pageBindings, searchKeys } from "@/shared/console/discovery/bindings"
+import { ShortcutGuide } from "@/shared/console/discovery/guide"
 import { SearchPalette } from "@/shared/console/discovery/palette"
 import { SearchTrigger } from "@/shared/console/discovery/trigger"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
@@ -68,6 +69,7 @@ function WorkspaceSearch({
   return (
     <SearchContext value={changeOpen}>
       {children}
+      <ShortcutGuide />
       <SearchPalette
         chats={chats}
         onOpenChange={changeOpen}

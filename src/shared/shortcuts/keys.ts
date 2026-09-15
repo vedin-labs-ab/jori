@@ -14,7 +14,9 @@ export function shortcutLabel(shortcut: Shortcut) {
     shortcut.alt && (apple ? "⌥" : "Alt"),
     shortcut.shift && (apple ? "⇧" : "Shift"),
   ].filter(Boolean)
-  return [...modifiers, shortcut.key.toUpperCase()].join(apple ? "" : "+")
+  return [...modifiers, shortcut.key.toUpperCase()]
+    .filter(Boolean)
+    .join(apple ? "" : "+")
 }
 
 export function shortcutAria(shortcut: Shortcut) {
@@ -34,6 +36,15 @@ export function matchesShortcut(event: KeyboardEvent, shortcut: Shortcut) {
   const key = event.code.replace(/^(Key|Digit)/, "").toLowerCase()
   return (
     (key || event.key.toLowerCase()) === shortcut.key.toLowerCase() &&
+    matchesModifiers(event, shortcut)
+  )
+}
+
+export function matchesModifiers(
+  event: KeyboardEvent,
+  shortcut: Omit<Shortcut, "key">
+) {
+  return (
     event.altKey === Boolean(shortcut.alt) &&
     event.shiftKey === Boolean(shortcut.shift) &&
     (apple ? event.metaKey : event.ctrlKey) === Boolean(shortcut.mod) &&

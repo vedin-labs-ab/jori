@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { type Hit } from "@contracts/discovery"
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -9,10 +10,14 @@ import {
 } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { pageBindings } from "./bindings"
+import { ShortcutGuide } from "./guide"
 import { SearchPalette } from "./palette"
 import { type PaletteProps } from "./types"
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
 const hits: Hit[] = Array.from({ length: 6 }, (_, index) => ({
   candidate: {
     key: `files:${index}`,
@@ -151,6 +156,62 @@ test("partial file coverage remains visible alongside a matching excerpt", () =>
     />
   )
   expect(
-    screen.getByText("Partial text · Page 2 · Jobs mentioned in report 0")
+    screen.getByTitle("Partial text · Page 2 · Jobs mentioned in report 0")
   ).toBeTruthy()
+})
+
+test("the Results group stays visible while loading, including alongside a matching page", () => {
+  render(
+    <SearchPalette
+      {...props()}
+      state={{ status: "loading", hits: [], partial: false }}
+    />
+  )
+  const results = screen.getByRole("group", { name: "Results" })
+  expect(within(results).getByText("Searching…")).toBeTruthy()
+  expect(screen.getByRole("group", { name: "Pages" })).toBeTruthy()
+})
+
+test("holding the prefix previews shortcuts without stealing focus or changing the query", () => {
+  vi.useFakeTimers()
+  render(<SearchPalette {...props()} />)
+  const input = screen.getByRole("combobox")
+  fireEvent.keyDown(input, { key: "Shift", altKey: true, shiftKey: true })
+  act(() => {
+    vi.advanceTimersByTime(500)
+  })
+  expect(screen.getByRole("region", { name: "Page shortcuts" })).toBeTruthy()
+  expect(document.activeElement).toBe(input)
+  expect((input as HTMLInputElement).value).toBe("jobs")
+  fireEvent.keyUp(input, { key: "Shift" })
+  expect(screen.queryByRole("region", { name: "Page shortcuts" })).toBeNull()
+  expect(screen.getByRole("group", { name: "Results" })).toBeTruthy()
+})
+
+test("shortcut help can also be clicked, and typing returns to search", () => {
+  const initial = props()
+  render(<SearchPalette {...initial} />)
+  fireEvent.click(screen.getByRole("button", { name: /Shortcuts/ }))
+  expect(screen.getByRole("region", { name: "Page shortcuts" })).toBeTruthy()
+  expect(screen.getByRole("button", { name: /Back to results/ })).toBeTruthy()
+  fireEvent.change(screen.getByRole("combobox"), {
+    target: { value: "invoice" },
+  })
+  expect(screen.queryByRole("region", { name: "Page shortcuts" })).toBeNull()
+  expect(initial.onQueryChange).toHaveBeenCalledWith("invoice")
+})
+
+test("the global shortcut guide appears on hold and disappears on release", () => {
+  vi.useFakeTimers()
+  render(<ShortcutGuide />)
+  fireEvent.keyDown(document.body, { key: "Alt", shiftKey: true, altKey: true })
+  act(() => {
+    vi.advanceTimersByTime(500)
+  })
+  const guide = screen.getByRole("region", { name: "Page shortcuts" })
+  expect(within(guide).getByText("Files")).toBeTruthy()
+  expect(within(guide).getByText("Folders")).toBeTruthy()
+  expect(document.activeElement).toBe(document.body)
+  fireEvent.keyUp(document.body, { key: "Alt" })
+  expect(screen.queryByRole("region", { name: "Page shortcuts" })).toBeNull()
 })

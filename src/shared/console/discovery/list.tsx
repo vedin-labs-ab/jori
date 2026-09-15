@@ -10,6 +10,7 @@ import { shortcutAria, shortcutLabel } from "@/shared/shortcuts/keys"
 import { conversationDestination } from "../shell/routes"
 import { pageKeys } from "./bindings"
 import { Result } from "./item"
+import { Matches } from "./matches"
 import { matchingPages } from "./results"
 import { SearchStatus } from "./status"
 import { type PaletteProps } from "./types"
@@ -23,7 +24,7 @@ export function Results(props: PaletteProps) {
     status === "unavailable" ||
     (!hits.length && !pages.length && !recent)
   return (
-    <CommandList className="h-80 max-h-[50dvh]">
+    <CommandList className="h-80 max-h-[50dvh] [&_[cmdk-list-sizer]]:flex [&_[cmdk-list-sizer]]:min-h-full [&_[cmdk-list-sizer]]:flex-col">
       {recent ? <Recent {...props} /> : null}
       {pages.length ? (
         <CommandGroup heading="Pages">
@@ -37,7 +38,9 @@ export function Results(props: PaletteProps) {
               value={`page:${page.to}`}
             >
               <page.icon />
-              <span>{page.label}</span>
+              <span>
+                <Matches text={page.label} query={props.query} />
+              </span>
               <CommandShortcut className="tracking-normal">
                 {page.shortcut && shortcutLabel(pageKeys(page.shortcut))}
               </CommandShortcut>
@@ -46,19 +49,26 @@ export function Results(props: PaletteProps) {
         </CommandGroup>
       ) : null}
       {pages.length && hits.length ? <CommandSeparator /> : null}
-      {hits.length ? (
-        <CommandGroup heading="Results">
+      {hits.length || (showStatus && props.query.trim()) ? (
+        <CommandGroup
+          className="flex flex-1 flex-col [&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-1 [&_[cmdk-group-items]]:flex-col"
+          heading="Results"
+        >
           {hits.map((hit, index) => (
             <Result
               hit={hit}
+              query={props.query}
               index={index}
               key={`${hit.candidate.key}:${hit.candidate.part}`}
               onOpen={props.onOpenHit}
             />
           ))}
+          {showStatus ? (
+            <SearchStatus onRetry={props.onRetry} status={status} />
+          ) : null}
         </CommandGroup>
       ) : null}
-      {showStatus ? (
+      {showStatus && !props.query.trim() ? (
         <SearchStatus onRetry={props.onRetry} status={status} />
       ) : null}
     </CommandList>

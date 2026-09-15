@@ -93,3 +93,61 @@ test("reactive authorization removes a revoked hit without another search", asyn
   expect(hook.result.current.hits).toEqual([])
   expect(mocks.search).toHaveBeenCalledOnce()
 })
+
+test("revisiting a cached query still hydrates current permissions", async () => {
+  mocks.search.mockResolvedValue(response)
+  const hook = renderHook(({ text }) => useSearch("workspace", text), {
+    initialProps: { text: "invoice" },
+  })
+  await tick()
+  hook.rerender({ text: "" })
+  mocks.visible.mockReturnValue({ "0": [] })
+  hook.rerender({ text: "invoice" })
+  await tick()
+  expect(mocks.search).toHaveBeenCalledOnce()
+  expect(hook.result.current.hits).toEqual([])
+  expect(mocks.visible).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      "0": expect.objectContaining({
+        args: expect.objectContaining({ candidates: [candidate] }),
+      }),
+    })
+  )
+})
+
+test("reopening an expired query never restores an old settled response", async () => {
+  mocks.search.mockResolvedValue(response)
+  const hook = renderHook(({ text }) => useCandidates("workspace", text, 0), {
+    initialProps: { text: "invoice" },
+  })
+  await tick()
+  hook.rerender({ text: "" })
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(15_001)
+  })
+  hook.rerender({ text: "invoice" })
+  expect(hook.result.current).toBeUndefined()
+  await tick()
+  expect(mocks.search).toHaveBeenCalledTimes(2)
+})
+
+test("returning to a query reuses its outstanding request", async () => {
+  let resolve: (value: SearchResponse) => void = () => undefined
+  mocks.search.mockReturnValue(
+    new Promise((done) => {
+      resolve = done
+    })
+  )
+  const hook = renderHook(({ text }) => useCandidates("workspace", text, 0), {
+    initialProps: { text: "invoice" },
+  })
+  await tick()
+  hook.rerender({ text: "" })
+  hook.rerender({ text: "invoice" })
+  await tick()
+  await act(async () => {
+    resolve(response)
+  })
+  expect(mocks.search).toHaveBeenCalledOnce()
+  expect(hook.result.current).toBe(response)
+})
