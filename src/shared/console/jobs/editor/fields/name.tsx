@@ -22,9 +22,7 @@ export function JobNameField({
         onChange={(event) => onValueChange(event.target.value)}
         placeholder="Weekly release summary"
       />
-      <FieldError reserve id="job-name-error">
-        {error}
-      </FieldError>
+      <FieldError id="job-name-error">{error}</FieldError>
     </div>
   )
 }
