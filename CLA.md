@@ -1,6 +1,6 @@
 # Contributor license agreement
 
-This agreement records the rights you give Vedin Labs AB, organisation
+This agreement records the rights you give Vedin Labs AB, organization
 number 556512-5449 ("Vedin Labs"), in your contributions to Jori, and what
 Vedin Labs promises in return. You sign it once, through the bot on your
 first pull request, and it covers every contribution you make after that.
@@ -43,7 +43,7 @@ agreement for that Contribution ends the day the litigation is filed.
 ## 4. What you confirm
 
 - You are legally entitled to grant these licenses.
-- If your employer has rights in what you create, it has authorised your
+- If your employer has rights in what you create, it has authorized your
   Contributions or waived its rights in them.
 - Each Contribution is your own original creation, except third-party
   material you identify, with its license, when you submit it.
@@ -67,3 +67,5 @@ kind.
 ## 7. Governing law
 
 Swedish law governs this agreement.
+
+Version 1.0, September 15, 2026.

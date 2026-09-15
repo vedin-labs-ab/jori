@@ -20,7 +20,7 @@ export function PurchaseAgreement({
       />
       <label htmlFor={id}>
         I'm buying for business use, including freelance or sole-trader work,
-        and I'm authorised to accept Jori's{" "}
+        and I'm authorized to accept Jori's{" "}
         <a
           className="underline underline-offset-4"
           href={marketingUrl("/terms")}

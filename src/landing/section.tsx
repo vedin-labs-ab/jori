@@ -170,7 +170,7 @@ const sigils = {
 }
 
 /** One of the three marks the instructions editor answers to, drawn the
- *  way the editor draws them: a chip, each in its own colour and set at
+ *  way the editor draws them: a chip, each in its own color and set at
  *  its own slight angle so the three read as three keys. */
 export function Sigil({ kind }: { kind: keyof typeof sigils }) {
   const sigil = sigils[kind]

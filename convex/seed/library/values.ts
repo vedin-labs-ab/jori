@@ -100,7 +100,7 @@ export const stores: SeedStore[] = [
         "Superlatives we cannot support",
         "The word seamless",
         "Exclamation marks in anything a customer reads",
-        "Apologising twice in the same message",
+        "Apologizing twice in the same message",
       ],
       preferences: [
         "Name the customer's problem in their words before ours",

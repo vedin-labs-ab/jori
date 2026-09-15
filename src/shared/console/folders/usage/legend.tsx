@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils"
 import { type UsageSegment, usageSegmentColor } from "./types"
 
 // The one vocabulary the charts and the folder table share: a segment's
-// colour. The swatch is the same mark in both, so a reader who learns a
-// colour in the legend finds it again in the table without looking twice.
+// color. The swatch is the same mark in both, so a reader who learns a
+// color in the legend finds it again in the table without looking twice.
 
 export function SegmentSwatch({
   className,

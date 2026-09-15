@@ -203,7 +203,7 @@ export function UsageContributors({
   )
 }
 
-/** Where the money sits one level down, in the charts' own colours: each
+/** Where the money sits one level down, in the charts' own colors: each
  *  folder row a whole subtree and a way further in — the same view, scoped
  *  to that folder — beside the scope's own rows and the unnamed rest. */
 export function UsageFolders({

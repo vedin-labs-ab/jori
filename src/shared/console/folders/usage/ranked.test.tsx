@@ -140,7 +140,7 @@ test("the scope's own bucket ranks as a row like any other, with no way in", () 
   expect(screen.queryByRole("link", { name: "Unfiled" })).toBeNull()
 })
 
-test("a folder row is a way further in, reads like a source row, and wears its colour", () => {
+test("a folder row is a way further in, reads like a source row, and wears its color", () => {
   render(<UsageFolders days={30} segments={segments(1)} total={4_000_000} />)
 
   const [row] = rows()

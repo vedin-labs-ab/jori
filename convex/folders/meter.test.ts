@@ -95,7 +95,7 @@ test("the ranking stops well short of the row cap", async () => {
   expect(ranking.at(-1)?.micros).toBe(2)
 })
 
-test("the division names as many folders as the palette has colours", async () => {
+test("the division names as many folders as the palette has colors", async () => {
   const { database, ctx } = databaseContext()
 
   for (let rank = 0; rank < 10; rank += 1) {

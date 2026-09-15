@@ -7,8 +7,8 @@ import { LogoImage } from "@/shared/logo/image"
  * A mark drawn in one dark ink is flagged so it flips on a dark ground;
  * PostHog's holds its colors around a black hog, so it swaps to the
  * white-hog file there instead.
- * Purposes only: regions per provider and the full register are the DPA's,
- * and the list links there.
+ * The same providers the DPA's table lists, purposes only; the region per
+ * provider lives there.
  */
 type Subprocessor = {
   /** The file for a dark ground, when the mark keeps colors around a black ink. */
@@ -86,46 +86,40 @@ const subprocessors: readonly Subprocessor[] = [
     url: "https://stripe.com/privacy",
     purpose: "Handles billing and payments.",
   },
+  {
+    logo: "/logos/subprocessors/zoho.svg",
+    name: "Zoho",
+    url: "https://www.zoho.com/privacy.html",
+    purpose: "Hosts the support mailbox.",
+  },
 ]
 
 export function Subprocessors() {
   return (
-    <>
-      <ul className="mt-0.5 grid gap-2.5">
-        {subprocessors.map(({ dark, ink, logo, name, purpose, url }) => (
-          // Each row is one line, so the mark centres against it rather than
-          // hanging from a hand-tuned offset that only holds at one text size.
-          <li className="flex items-center gap-2.5" key={name}>
-            <LogoImage
-              className="size-4 object-contain"
-              dark={dark}
-              ink={ink}
-              src={logo}
-            />
-            <p>
-              <a
-                className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
-                href={url}
-                rel="noreferrer"
-                target="_blank"
-              >
-                {name}
-              </a>{" "}
-              {purpose}
-            </p>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-3">
-        Full list, with regions per provider, in the{" "}
-        <a
-          className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
-          href="/dpa#providers"
-        >
-          DPA
-        </a>
-        .
-      </p>
-    </>
+    <ul className="mt-0.5 grid gap-2.5">
+      {subprocessors.map(({ dark, ink, logo, name, purpose, url }) => (
+        // Each row is one line, so the mark centers against it rather than
+        // hanging from a hand-tuned offset that only holds at one text size.
+        <li className="flex items-center gap-2.5" key={name}>
+          <LogoImage
+            className="size-4 object-contain"
+            dark={dark}
+            ink={ink}
+            src={logo}
+          />
+          <p>
+            <a
+              className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+              href={url}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {name}
+            </a>{" "}
+            {purpose}
+          </p>
+        </li>
+      ))}
+    </ul>
   )
 }

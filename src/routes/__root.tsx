@@ -209,7 +209,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
         {/* One per scheme, so the browser chrome matches the page ground
-            rather than falling back to its own grey. They sit outside the
+            rather than falling back to its own gray. They sit outside the
             route head because it keeps one meta per name. */}
         <meta
           content="#ffffff"

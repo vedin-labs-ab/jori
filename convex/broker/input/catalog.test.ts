@@ -16,7 +16,7 @@ const nativeTools = [
   ...activeSurfaceTools("linear"),
 ]
 
-test("every catalogued tool has an input and output contract", () => {
+test("every cataloged tool has an input and output contract", () => {
   for (const permission of toolPermissions) {
     const input =
       permission.route === "broker"

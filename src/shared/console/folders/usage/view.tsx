@@ -106,7 +106,7 @@ function UsageBody({
 }) {
   const scoped = folderId !== undefined
   // A scope with nothing below it divides into itself alone, which is no
-  // division; the charts still draw, in one colour.
+  // division; the charts still draw, in one color.
   const hasFolders = usage.folders.some(
     (segment) => segment.folderId !== undefined
   )

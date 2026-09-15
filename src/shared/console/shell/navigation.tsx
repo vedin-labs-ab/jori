@@ -36,7 +36,7 @@ import {
  *  the account in its footer. The parts that know who is signed in, and
  *  the platform group, which only the real console has pages for, arrive
  *  as slots; the chats arrive as rows, since the sidebar draws them the
- *  way it draws its own items. A labelled group closes from its label,
+ *  way it draws its own items. A labeled group closes from its label,
  *  for the room. */
 export function ConsoleSidebar({
   account,

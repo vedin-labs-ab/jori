@@ -91,10 +91,10 @@ export function usageCostPerRun(micros: number, ended: number) {
 }
 
 /** The rest that the charts cannot name, which the backend always ranks
- *  last and the console draws in no colour of its own. */
+ *  last and the console draws in no color of its own. */
 const otherSegment = "other"
 
-/** A segment's colour is its rank: the palette is handed out in the order
+/** A segment's color is its rank: the palette is handed out in the order
  *  the backend ranks the segments, so the table, the legend and the stacks
  *  agree without any of them holding a map. */
 export function usageSegmentColor(segment: UsageSegment, rank: number) {

@@ -45,7 +45,7 @@ test("cost per run averages over the runs that ended", () => {
   expect(usageCostPerRun(900, 0)).toBeUndefined()
 })
 
-test("a segment wears the colour of its rank, and the rest wears none", () => {
+test("a segment wears the color of its rank, and the rest wears none", () => {
   expect(usageSegmentColor(segment("folders:1"), 0)).toBe("var(--chart-1)")
   expect(usageSegmentColor(segment("direct"), 7)).toBe("var(--chart-8)")
   expect(usageSegmentColor(segment("other"), 8)).toBe("var(--muted-foreground)")

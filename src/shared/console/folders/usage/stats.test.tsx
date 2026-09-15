@@ -36,7 +36,7 @@ test("the band leads with the window's spend and how it changed", () => {
   expect(screen.getByText("35%")).toBeDefined()
   expect(screen.getByText("5%")).toBeDefined()
   // Spend, runs, and the cost of a run all rose, and the arrow says so in
-  // the colour the console uses for things going well.
+  // the color the console uses for things going well.
   const arrows = container.querySelectorAll("svg.lucide-arrow-up")
 
   expect(arrows).toHaveLength(3)
@@ -73,7 +73,7 @@ test("a window with nothing before it has no change to report", () => {
   expect(container.querySelector("svg")).toBeNull()
 })
 
-test("failures are read as a share of the runs, and coloured once there are any", () => {
+test("failures are read as a share of the runs, and colored once there are any", () => {
   renderStats(overview({ micros: 1000, ended: 4, failed: 0 }))
 
   expect(screen.getByText("0").className).toContain("text-muted-foreground")

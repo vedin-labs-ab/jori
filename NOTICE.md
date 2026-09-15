@@ -2,7 +2,7 @@
 
 Third-party material retains its own license terms. Jori includes MIT-licensed
 material from [shadcn/ui](https://github.com/shadcn-ui/ui),
-[Better Auth UI](https://github.com/better-auth-ui/better-auth-ui) and
+[Better Auth UI](https://github.com/better-auth-ui/better-auth-ui), and
 [SVGL](https://github.com/pheralb/svgl). Their copyright notices and license follow.
 
 ```text

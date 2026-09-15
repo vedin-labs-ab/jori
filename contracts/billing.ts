@@ -15,7 +15,7 @@ export const microsPerDollar = 1_000_000
  *  and file storage included. */
 export const plan = {
   label: "Cloud",
-  monthlyPriceUsd: 49,
+  monthlyPriceUsd: 59,
   monthlyAllowanceMicros: 20 * microsPerDollar,
   storageGb: 25,
 } as const
@@ -144,4 +144,4 @@ export type ProviderUsage = {
 }
 
 /** Bump when changing the terms customers accept at purchase. */
-export const termsVersion = "2026-09-13"
+export const termsVersion = "2026-09-15"

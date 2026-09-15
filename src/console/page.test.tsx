@@ -125,7 +125,7 @@ test("a nested page reuses the console chrome and gate queries", async () => {
     </ConsolePage>
   )
 
-  // One shell, not two: the inner page recognises the frame around it, so a
+  // One shell, not two: the inner page recognizes the frame around it, so a
   // material page nested in a section frame does not rebuild the console.
   expect(await screen.findByText("organization")).toBeDefined()
   expect(screen.getAllByTestId("shell")).toHaveLength(1)

@@ -51,7 +51,7 @@ export const folderTableColumns = 8
  *  column leads, then identity — what a row is, and whose it is — the
  *  measures follow, and the last column carries every row's own menu.
  *  Cells hold a fixed height so the menu button cannot make one row
- *  taller than its neighbours. Each column names the width it is worth,
+ *  taller than its neighbors. Each column names the width it is worth,
  *  head and cells alike: a narrow box keeps the name and when it last
  *  changed, and the rest return as the list widens. Kind goes first —
  *  the row's own icon already says what it is. */

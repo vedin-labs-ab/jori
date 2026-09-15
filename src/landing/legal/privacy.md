@@ -1,8 +1,9 @@
 ## Who we are
 
-Jori is provided by Vedin Labs AB, organisation number 556512-5449,
+Jori is provided by Vedin Labs AB, organization number 556512-5449,
 Braxenvägen 12, 181 30 Lidingö, Sweden. Contact support@usejori.com about
-privacy or your personal data.
+privacy or your personal data. This policy covers the Jori service we host;
+a self-hosted Jori is run by whoever hosts it.
 
 We are responsible for personal data we use to run our website, manage accounts
 and billing, provide support and protect Jori. When a customer directs how we
@@ -14,8 +15,8 @@ contact them about their use of your data. We will help them respond.
 
 | Information | Why we use it | Legal basis when we are responsible for the processing |
 | --- | --- | --- |
-| Name, email, sign-in identifiers, workspace membership and settings | Create accounts, sign you in and provide Jori | Our contract with you; our legitimate interest in administering a customer's workspace where your organisation is the customer |
-| Waitlist email, team size and the work you describe | Manage your request for access and contact you about it | Steps you request before a contract; our legitimate interest in managing business enquiries |
+| Name, email, sign-in identifiers, workspace membership and settings | Create accounts, sign you in and provide Jori | Our contract with you; our legitimate interest in administering a customer's workspace where your organization is the customer |
+| Waitlist email, team size and the work you describe | Manage your request for access and contact you about it | Steps you request before a contract; our legitimate interest in managing business inquiries |
 | Billing contact, purchases, usage charges and payment status | Collect payment, manage subscriptions and keep accounting records | Contract and legal obligations |
 | Support messages | Answer requests and resolve problems | Contract or our legitimate interest in providing support |
 | Security and operational records, such as request times, errors and IP addresses | Keep Jori available, prevent abuse and investigate problems | Our legitimate interest in protecting the service and its users; legal obligations where applicable |
@@ -105,7 +106,7 @@ your content through support. Deleting a workspace does not delete your account
 or content in other workspaces.
 
 We keep account details while needed to provide your account. We keep support
-and access enquiries while handling them and for as long as reasonably needed
+and access inquiries while handling them and for as long as reasonably needed
 to resolve follow-up issues or disputes. Security records are kept as needed to
 investigate incidents and protect the service. We restrict any information
 retained for a specific legal obligation or claim to that purpose.

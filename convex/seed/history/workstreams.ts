@@ -132,7 +132,7 @@ export const workstreams: SeedWorkstream[] = [
     ],
   },
   {
-    name: "Rate limiting and retry behaviour",
+    name: "Rate limiting and retry behavior",
     brief:
       "Making the sync path respect Retry-After instead of treating 429s like server errors. Shipped; p99 on the sync endpoint fell from 4.1s to 820ms.",
     aliases: ["Retry backoff", "429 handling"],

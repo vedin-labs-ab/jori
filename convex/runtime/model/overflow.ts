@@ -5,7 +5,7 @@ const overflowPattern =
  * Whether a provider error says the prompt itself no longer fits, as
  * distinct from a failure a retry might get past. Read off the error's
  * shape rather than its class: the SDK's error classes pull the whole
- * model catalogue in with them, which the loop's steps cannot afford.
+ * model catalog in with them, which the loop's steps cannot afford.
  */
 export function isContextOverflow(error: unknown) {
   if (typeof error !== "object" || error === null) {

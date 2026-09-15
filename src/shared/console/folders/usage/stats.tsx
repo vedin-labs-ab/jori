@@ -118,7 +118,7 @@ function deltaDetail(delta: UsageDelta | undefined): ReactNode {
     return "No change"
   }
 
-  // The arrow alone takes a colour: which way a figure went is the glance,
+  // The arrow alone takes a color: which way a figure went is the glance,
   // and the number beside it stays as quiet as the rest of the line.
   return (
     <>

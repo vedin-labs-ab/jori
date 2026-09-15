@@ -7,7 +7,7 @@ import { tables } from "./generated"
  * `generated.ts` is the CLI's output and is overwritten whole on every
  * regeneration, so nothing may be added there. This file is the seam the
  * library documents for exactly that: import the generated tables, extend
- * them here, and the customisation survives the next `auth generate`.
+ * them here, and the customization survives the next `auth generate`.
  *
  * The organization plugin looks a membership up by organization and user
  * together, and a team membership up by team and user together. Better Auth

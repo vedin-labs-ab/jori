@@ -13,7 +13,7 @@ import { BrandLink } from "@/shared/brand/link"
  * A whole-page state: not found, or an error the app could not recover from.
  *
  * It is the console's own empty state one size up. Same icon chip, same
- * centred rhythm, so a dead end reads as part of Jori rather than as a
+ * centered rhythm, so a dead end reads as part of Jori rather than as a
  * different application's error screen. The mark stays top-left to say which
  * app you are still in.
  */
@@ -39,8 +39,8 @@ export function RootStateFrame({
             the router cannot recover from an error. */}
         <BrandLink />
       </header>
-      {/* Optically centred: the bottom padding lifts the block off the true
-          middle, which is what reads as centred to the eye. */}
+      {/* Optically centered: the bottom padding lifts the block off the true
+          middle, which is what reads as centered to the eye. */}
       <Empty className="flex-1 pb-20">
         <EmptyHeader className="max-w-md gap-2">
           <EmptyMedia variant="icon">{icon}</EmptyMedia>

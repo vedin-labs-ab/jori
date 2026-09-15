@@ -4,11 +4,11 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-// Every variant names its own border colour — never the base — so the class
-// list carries one border-colour utility and stays correct without a
+// Every variant names its own border color — never the base — so the class
+// list carries one border-color utility and stays correct without a
 // tailwind-merge pass, which callers of `buttonVariants` are free to skip.
 //
-// Filled variants keep that border transparent. A border in the fill colour is
+// Filled variants keep that border transparent. A border in the fill color is
 // a second antialiased shape meeting the background along the radius, and two
 // partial coverages only sum to full coverage on whole pixels, so the corners
 // show a lighter hairline. `outline` is the one variant that clips its fill to

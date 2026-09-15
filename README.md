@@ -1,9 +1,24 @@
 # Jori
 
-[Jori](https://usejori.com) helps teams get work done across their connected tools.
-Pull requests aren't open yet; see [CONTRIBUTING.md](CONTRIBUTING.md).
+The shared drive your AI works out of. Folders hold jobs beside the tables,
+stores, and files they use. A person describes a job in plain language, says
+when it runs, and it runs. Hosted at [usejori.com](https://usejori.com), or
+run your own.
 
-[Third-party notices](NOTICE.md) · [Report a vulnerability](SECURITY.md)
+## Map
+
+- [AGENTS.md](AGENTS.md): how the repository is worked on, and the rules the
+  checks enforce.
+- [guides/](guides): deployment, UI, and integrations.
+- [CONTRIBUTING.md](CONTRIBUTING.md): pull requests aren't open yet, and how
+  contributing will work when they are.
+- [CLA.md](CLA.md): the contributor license agreement.
+- [SECURITY.md](SECURITY.md): how to report a vulnerability.
+- [NOTICE.md](NOTICE.md): third-party notices.
+- [LICENSE](LICENSE): the GNU Affero General Public License, version 3.
+- [Trust](https://usejori.com/trust), [terms](https://usejori.com/terms),
+  [privacy](https://usejori.com/privacy), and the
+  [DPA](https://usejori.com/dpa) for the hosted service.
 
 ## License
 

@@ -39,7 +39,7 @@ export const jobReferenceToneClassNames = {
 
 /** An integration pill wears its access as a hue, built the way the
  *  mention pills are, so it holds on either ground: violet for full
- *  access, blue for read, green for write, the page's own greys until
+ *  access, blue for read, green for write, the page's own grays until
  *  one is chosen. */
 const jobSurfaceToneClassNames = {
   "": {

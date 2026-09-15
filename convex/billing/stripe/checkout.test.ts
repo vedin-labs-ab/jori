@@ -15,7 +15,7 @@ vi.mock("./client", async (original) => ({
 
 const common = {
   businessPurchase: true,
-  termsVersion: "2026-09-13",
+  termsVersion: "2026-09-15",
   organizationId: "organization-1",
   returnUrl: "https://eu.usejori.com/settings?tab=billing",
 }

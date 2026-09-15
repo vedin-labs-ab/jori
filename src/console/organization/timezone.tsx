@@ -77,7 +77,7 @@ export function TimezonePicker({
   )
 }
 
-/** The picker as a labelled form field, for the forms that ask for a zone
+/** The picker as a labeled form field, for the forms that ask for a zone
  *  rather than the surfaces that already name one. */
 export function TimezoneField({
   description,

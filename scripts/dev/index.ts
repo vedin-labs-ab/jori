@@ -193,7 +193,7 @@ async function start() {
 
 /** Vite leaves the process group its ancestors share, so the group alone
  *  would orphan it on the port. The whole tree is listed before anything
- *  is signalled, then signalled leaf first. */
+ *  is signaled, then signaled leaf first. */
 async function stop() {
   const record = readRecord()
 

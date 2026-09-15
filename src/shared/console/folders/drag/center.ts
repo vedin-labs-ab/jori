@@ -1,6 +1,6 @@
 // Keeps the drag ghost centered under the pointer. The overlay is pinned
 // to the viewport's origin (see the provider), so its place is the
-// pointer's own: where the drag started plus how far it has travelled,
+// pointer's own: where the drag started plus how far it has traveled,
 // less half the ghost so its middle, not its corner, rides the cursor.
 
 import { type Modifier } from "@dnd-kit/core"

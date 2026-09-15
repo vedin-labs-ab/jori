@@ -4,7 +4,7 @@ import { afterEach, expect, test, vi } from "vitest"
 import { ConsoleShell } from "./index"
 
 vi.mock("@tanstack/react-router", async () => ({
-  // The real boundary, not a stub: containment is the one shell behaviour
+  // The real boundary, not a stub: containment is the one shell behavior
   // here that a passthrough would quietly report as working.
   CatchBoundary: (
     await vi.importActual<typeof import("@tanstack/react-router")>(

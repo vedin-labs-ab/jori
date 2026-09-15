@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 
 const stripeHeight = 16 / 13
 
-/** A five-pointed star, one unit from centre to tip, pointing up. */
+/** A five-pointed star, one unit from center to tip, pointing up. */
 const starPath = `M${Array.from({ length: 10 }, (_, index) => {
   const angle = ((index * 36 - 90) * Math.PI) / 180
   const reach = index % 2 === 0 ? 1 : 0.382
@@ -11,7 +11,7 @@ const starPath = `M${Array.from({ length: 10 }, (_, index) => {
   return `${round(reach * Math.cos(angle))} ${round(reach * Math.sin(angle))}`
 }).join("L")}Z`
 
-/** The twelve stars of the European flag around a centre. Coordinates are
+/** The twelve stars of the European flag around a center. Coordinates are
  *  rounded because Node and the browser disagree on the last bit of a sine,
  *  and the difference showed up as a hydration mismatch on every flag. */
 export function StarRing({
@@ -112,7 +112,7 @@ export function RegionFlag({
             ))}
           </>
         )}
-        {/* Two pixels wide, centred on the edge: the clip keeps the inner
+        {/* Two pixels wide, centered on the edge: the clip keeps the inner
             pixel and drops the rest. */}
         <rect
           fill="none"

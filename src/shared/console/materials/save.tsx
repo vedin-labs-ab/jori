@@ -5,7 +5,7 @@ import { Spinner } from "@/components/ui/spinner"
  *  the view is read-only and carries no save affordance at all. */
 export type SaveState = "idle" | "saving" | "saved" | "error"
 
-/** One glyph per state, in the console's semantic colours: a check for a
+/** One glyph per state, in the console's semantic colors: a check for a
  *  save that landed, a warning for one that didn't, and the spinner for
  *  every moment in between. The shell shows it in place of the chevron on
  *  the material's name while a save is in motion. */

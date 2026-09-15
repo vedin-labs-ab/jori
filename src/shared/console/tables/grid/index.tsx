@@ -158,7 +158,7 @@ function GridFoot({
 
   return (
     <button
-      // Inset ring rather than the bare colour shift this had: a
+      // Inset ring rather than the bare color shift this had: a
       // muted-to-foreground change on 12px text is not a focus indicator, and
       // it was indistinguishable from the hover state beside it.
       className="flex h-9 w-fit items-center gap-1.5 whitespace-nowrap border-r border-b px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
@@ -198,7 +198,7 @@ function HeadRow({
 }) {
   // The row declares the height once and the cells stretch into it, the
   // way the data rows do. A cell that sizes itself instead lands its
-  // hairline a border-width off from its neighbours'.
+  // hairline a border-width off from its neighbors'.
   return (
     <div className="sticky top-0 z-10 flex h-10">
       <div className="flex w-12 shrink-0 items-center justify-center border-r border-b bg-background">

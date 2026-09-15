@@ -24,8 +24,8 @@ test("discloses image processing and workspace search alongside the core provide
   expect(search.closest("li")?.querySelector("img")?.getAttribute("src")).toBe(
     "/logos/subprocessors/turbopuffer.svg"
   )
-  expect(within(screen.getByRole("list")).getAllByRole("link")).toHaveLength(10)
-  expect(screen.getByRole("link", { name: "DPA" }).getAttribute("href")).toBe(
-    "/dpa#providers"
-  )
+  expect(
+    screen.getByRole("link", { name: "Zoho" }).closest("li")?.textContent
+  ).toBe("Zoho Hosts the support mailbox.")
+  expect(within(screen.getByRole("list")).getAllByRole("link")).toHaveLength(11)
 })

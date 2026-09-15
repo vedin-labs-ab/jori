@@ -9,9 +9,9 @@ import { BrandLink } from "@/shared/brand/link"
  * organization, or held at the launch gate.
  *
  * Each of those is one decision on an otherwise empty page, so the block is
- * centred rather than pinned to the top-left of a wide frame, and the page
+ * centered rather than pinned to the top-left of a wide frame, and the page
  * margin matches sign-in and the not-found view. Its contents stay
- * left-aligned, because centred labels and inputs read as a poster.
+ * left-aligned, because centered labels and inputs read as a poster.
  */
 export function PublicConsoleFrame({
   children,

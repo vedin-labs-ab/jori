@@ -121,7 +121,7 @@ const directSegment = "direct"
 export const otherSegment = "other"
 
 /** How many segments the console can tell apart: its chart palette has
- *  this many colours, and a ninth would wear one of the first eight. */
+ *  this many colors, and a ninth would wear one of the first eight. */
 const segmentLimit = 8
 
 export type UsageSegment = UsageFigures & {
@@ -141,7 +141,7 @@ type Segmentation = {
  * The scope's rows divided one level down, biggest first: each named
  * child's whole subtree, the scope's own rows, and one unnamed rest. The
  * same division serves the folder table and the charts' stacks, so a
- * row's colour means the same thing in both. Segments that cost nothing
+ * row's color means the same thing in both. Segments that cost nothing
  * stay out: the list exists to point somewhere.
  */
 export function segmentFolders(

@@ -1,6 +1,6 @@
 ## Your agreement with Jori
 
-Jori is provided by Vedin Labs AB, organisation number 556512-5449,
+Jori is provided by Vedin Labs AB, organization number 556512-5449,
 Braxenvägen 12, 181 30 Lidingö, Sweden. Contact support@usejori.com.
 
 Jori is offered for business use only, including use by freelancers and sole
@@ -9,6 +9,10 @@ You must be at least 18 and have authority to accept these terms for the busines
 you represent. For a sole trader, that business is you.
 These terms apply when you create an account or purchase Jori. A separate signed
 agreement takes priority where it expressly changes these terms.
+
+These terms cover the Jori service we host. Jori's code is open source under
+the GNU Affero General Public License; running your own copy is governed by
+that license, not by these terms.
 
 ## Using Jori
 
@@ -49,8 +53,8 @@ you any rights we may have in it. This does not guarantee that output has
 copyright protection or is free of third-party rights.
 
 We do not use your workspace content to train general-purpose AI models. Our [Privacy Policy](/privacy) explains personal-data handling.
-Our [Data Processing Agreement](/dpa) applies where we process personal data on your behalf. Jori's software and
-branding remain ours or our licensors'.
+Our [Data Processing Agreement](/dpa) applies where we process personal data on your behalf. The Jori name and
+branding remain ours.
 
 ## Plans, usage and payment
 

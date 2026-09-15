@@ -62,7 +62,7 @@ const covers: Record<Tone, string> = {
  * the body by one pixel, and a strip of the tab's own ground, four pixels
  * tall, is drawn from two pixels above that edge to one pixel below it
  * inside the body. Layout can put the edge on a fraction of a pixel (a
- * dialog is centred with a transform), which antialiases the line across
+ * dialog is centered with a transform), which antialiases the line across
  * two device rows; the strip overdraws both, so no hairline survives.
  */
 export function FolderTab({

@@ -1,13 +1,14 @@
 ## Scope and instructions
 
 This Data Processing Agreement forms part of Jori's [Terms of service](/terms)
-between the customer and Vedin Labs AB, organisation number 556512-5449,
+between the customer and Vedin Labs AB, organization number 556512-5449,
 Braxenvägen 12, 181 30 Lidingö, Sweden. Contact support@usejori.com.
-It applies where we process personal data on your behalf under the GDPR.
-You are the controller, or a processor authorised by your controller. We are
+It applies where we process personal data on your behalf under the GDPR, and
+covers the Jori service we host, not copies others run from Jori's open source code.
+You are the controller, or a processor authorized by your controller. We are
 your processor or subprocessor. This agreement takes priority for that processing.
 
-Your use of Jori, settings and authorised requests are your documented
+Your use of Jori, settings and authorized requests are your documented
 instructions. We process personal data only on those instructions, including
 for transfers, unless applicable EU or member-state law requires otherwise.
 We will inform you of such a requirement before processing unless the law
@@ -21,8 +22,8 @@ data for our own advertising or general-purpose model training.
 ## Processing details
 
 - **Purpose and subject matter:** providing Jori's AI workspace and carrying out
-  your tasks, including authorised actions in connected services.
-- **Operations:** collecting, storing, organising, indexing, retrieving, analysing,
+  your tasks, including authorized actions in connected services.
+- **Operations:** collecting, storing, organizing, indexing, retrieving, analyzing,
   generating, transmitting and deleting content as instructed.
 - **People:** workspace users and people mentioned in customer content,
   such as staff, customers, suppliers and correspondents.
@@ -31,7 +32,7 @@ data for our own advertising or general-purpose model training.
   Actual categories depend on what you provide and connect.
 - **Duration:** the service term and the return or deletion period below.
   Intentional sensitive-data repositories require our prior written agreement
-  under the Terms; this agreement does not authorise unsupported regulated uses.
+  under the Terms; this agreement does not authorize unsupported regulated uses.
 
 ## Security and confidentiality
 
@@ -42,7 +43,7 @@ configuration, isolated sandbox execution and limited operational access.
 We maintain incident handling, recovery and security review procedures and
 test relevant changes. Measures may evolve without reducing overall protection.
 
-People authorised to process customer data must be bound by confidentiality
+People authorized to process customer data must be bound by confidentiality
 obligations and access only what they need for their work. Google API data
 also remains subject to Google's Limited Use requirements described in our
 [Privacy Policy](/privacy).
@@ -63,7 +64,7 @@ with your response. You remain responsible for your own regulatory notifications
 
 ## Subprocessors and transfers
 
-You give general written authorisation for subprocessors used to provide Jori.
+You give general written authorization for subprocessors used to provide Jori.
 The providers below describe the current service chain. We require subprocessors
 to undertake data protection obligations equivalent to those in this agreement
 for their processing and remain responsible for their performance.
