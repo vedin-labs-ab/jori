@@ -70,7 +70,6 @@ describe("raw Markdown trigger instructions", () => {
       organization: null,
       requester: null,
       timezone: null,
-      workstreams: null,
     }
 
     expect(

@@ -252,31 +252,6 @@
     ]
   },
   {
-    "id": "shell-protected-05-enter",
-    "title": "Navigate into /context/workstreams",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false
-  },
-  {
-    "id": "shell-protected-05-back",
-    "title": "Return from /context/workstreams to prior console route",
-    "path": "/chat",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "navigate",
-        "value": "http://localhost:5178/context/workstreams"
-      }
-    ],
-    "steps": [
-      {
-        "action": "back"
-      }
-    ]
-  },
-  {
     "id": "shell-protected-06-enter",
     "title": "Navigate into /files/$fileId",
     "path": "/files/r170smqxya0f76g8z9xq4zyf718e53tk",

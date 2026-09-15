@@ -18,7 +18,6 @@ export type SeedTable = {
 }[keyof DataModel]
 
 export const dayMs = 24 * 60 * 60 * 1000
-export const hourMs = 60 * 60 * 1000
 
 /** The organization's declared zone, mirrored from the profile the seed
  *  writes so usage dates bucket the way the console reads them. */

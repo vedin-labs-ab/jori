@@ -1,7 +1,7 @@
 // The Slack traffic behind everything else the seed writes: the escalation
 // the support table has a row for, the incident the postmortem file
-// describes, the pricing argument the workstream cites. Every line is
-// backdated, so the deduction sweep sees a window it has already reviewed.
+// describes, the pricing argument the channel summaries recount. Every line
+// is backdated, so it reads as history rather than as fresh traffic.
 
 type SeedMessage = {
   channel: string

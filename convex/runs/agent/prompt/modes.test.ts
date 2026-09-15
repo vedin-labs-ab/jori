@@ -27,7 +27,6 @@ describe("trigger modes", () => {
       organization: null,
       requester: null,
       timezone: null,
-      workstreams: null,
     }
     const context = assemblePrompt(
       input as unknown as Parameters<typeof assemblePrompt>[0]
@@ -61,7 +60,6 @@ describe("job operating contract", () => {
       organization: null,
       requester: null,
       timezone: null,
-      workstreams: null,
     } as unknown as Parameters<typeof assemblePrompt>[0]).instructions
 
     expect(instruction).not.toContain("# Job")

@@ -47,7 +47,7 @@ export function isLinearIssueCommentEvent(event: string) {
   )
 }
 
-// Lifecycle events feed deduction; providers keep their native verbs.
+// Lifecycle events share one vocabulary; providers keep their native verbs.
 
 export const issueLifecycleEvent = {
   opened: "issue.opened",

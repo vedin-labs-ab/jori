@@ -5,9 +5,8 @@ import { relativeTime, shortDate } from "@/shared/console/time"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { type Place } from "./types"
 
-// Same three-row anatomy as workstream cards: name, one-line preview, meta.
-// Places are single-integration, so the meta row wears one logo and the
-// place kind instead of a source chip rollup.
+// Three-row anatomy: name, one-line preview, meta. Places are
+// single-integration, so the meta row wears one logo and the place kind.
 export function PlaceCard({
   place,
   now,

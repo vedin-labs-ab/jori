@@ -43,18 +43,6 @@ export const domainRules = [
     to: { path: "^convex/integrations/" },
   },
   {
-    name: "deduction-does-not-import-workstream-projection",
-    severity: "error",
-    comment:
-      "The product-facing workstream projection may read deduction internals, not the reverse.",
-    from: {
-      path: "^convex/deduction/",
-    },
-    to: {
-      path: "^convex/workstreams/",
-    },
-  },
-  {
     name: "message-core-does-not-import-adapters",
     severity: "error",
     comment:

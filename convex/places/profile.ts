@@ -42,8 +42,8 @@ export const run = internalAction({
 async function requestReview(pending: PendingProfile) {
   return await requestStructured({
     model: defaultSelection.model,
-    // Calibrated judgment against explicit bars, closer to the deduction
-    // judge (high) than to the conversation summarizer (low).
+    // Calibrated judgment against explicit bars: more deliberate than the
+    // conversation summarizer (low), short of the most expensive setting.
     reasoning: "medium",
     schemaName: "place_profile_review",
     schema: profileReviewSchema,

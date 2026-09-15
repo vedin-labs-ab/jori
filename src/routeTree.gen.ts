@@ -32,7 +32,6 @@ import { Route as WorkspaceTablesRouteImport } from './routes/_workspace/tables'
 import { Route as WorkspaceChatIndexRouteImport } from './routes/_workspace/chat/index'
 import { Route as WorkspaceContextIndexRouteImport } from './routes/_workspace/context/index'
 import { Route as WorkspaceContextPlacesRouteImport } from './routes/_workspace/context/places'
-import { Route as WorkspaceContextWorkstreamsRouteImport } from './routes/_workspace/context/workstreams'
 import { Route as WorkspaceFilesIndexRouteImport } from './routes/_workspace/files/index'
 import { Route as WorkspaceFoldersIndexRouteImport } from './routes/_workspace/folders/index'
 import { Route as WorkspaceFoldersUsageRouteImport } from './routes/_workspace/folders/usage'
@@ -166,12 +165,6 @@ const WorkspaceContextPlacesRoute = WorkspaceContextPlacesRouteImport.update({
   path: '/places',
   getParentRoute: () => WorkspaceContextRoute,
 } as any)
-const WorkspaceContextWorkstreamsRoute =
-  WorkspaceContextWorkstreamsRouteImport.update({
-    id: '/workstreams',
-    path: '/workstreams',
-    getParentRoute: () => WorkspaceContextRoute,
-  } as any)
 const WorkspaceFilesIndexRoute = WorkspaceFilesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -292,7 +285,6 @@ export interface FileRoutesByFullPath {
   '/stores': typeof WorkspaceStoresRouteWithChildren
   '/tables': typeof WorkspaceTablesRouteWithChildren
   '/context/places': typeof WorkspaceContextPlacesRoute
-  '/context/workstreams': typeof WorkspaceContextWorkstreamsRoute
   '/folders/usage': typeof WorkspaceFoldersUsageRoute
   '/integrations/personal': typeof WorkspaceIntegrationsPersonalRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -328,7 +320,6 @@ export interface FileRoutesByTo {
   '/runs': typeof WorkspaceRunsRoute
   '/skills': typeof WorkspaceSkillsRoute
   '/context/places': typeof WorkspaceContextPlacesRoute
-  '/context/workstreams': typeof WorkspaceContextWorkstreamsRoute
   '/folders/usage': typeof WorkspaceFoldersUsageRoute
   '/integrations/personal': typeof WorkspaceIntegrationsPersonalRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -373,7 +364,6 @@ export interface FileRoutesById {
   '/_workspace/stores': typeof WorkspaceStoresRouteWithChildren
   '/_workspace/tables': typeof WorkspaceTablesRouteWithChildren
   '/_workspace/context/places': typeof WorkspaceContextPlacesRoute
-  '/_workspace/context/workstreams': typeof WorkspaceContextWorkstreamsRoute
   '/_workspace/folders/usage': typeof WorkspaceFoldersUsageRoute
   '/_workspace/integrations/personal': typeof WorkspaceIntegrationsPersonalRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -418,7 +408,6 @@ export interface FileRouteTypes {
     | '/stores'
     | '/tables'
     | '/context/places'
-    | '/context/workstreams'
     | '/folders/usage'
     | '/integrations/personal'
     | '/api/auth/$'
@@ -454,7 +443,6 @@ export interface FileRouteTypes {
     | '/runs'
     | '/skills'
     | '/context/places'
-    | '/context/workstreams'
     | '/folders/usage'
     | '/integrations/personal'
     | '/api/auth/$'
@@ -498,7 +486,6 @@ export interface FileRouteTypes {
     | '/_workspace/stores'
     | '/_workspace/tables'
     | '/_workspace/context/places'
-    | '/_workspace/context/workstreams'
     | '/_workspace/folders/usage'
     | '/_workspace/integrations/personal'
     | '/api/auth/$'
@@ -701,13 +688,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceContextPlacesRouteImport
       parentRoute: typeof WorkspaceContextRoute
     }
-    '/_workspace/context/workstreams': {
-      id: '/_workspace/context/workstreams'
-      path: '/workstreams'
-      fullPath: '/context/workstreams'
-      preLoaderRoute: typeof WorkspaceContextWorkstreamsRouteImport
-      parentRoute: typeof WorkspaceContextRoute
-    }
     '/_workspace/files/': {
       id: '/_workspace/files/'
       path: '/'
@@ -853,13 +833,11 @@ const WorkspaceChatRouteWithChildren = WorkspaceChatRoute._addFileChildren(
 
 interface WorkspaceContextRouteChildren {
   WorkspaceContextPlacesRoute: typeof WorkspaceContextPlacesRoute
-  WorkspaceContextWorkstreamsRoute: typeof WorkspaceContextWorkstreamsRoute
   WorkspaceContextIndexRoute: typeof WorkspaceContextIndexRoute
 }
 
 const WorkspaceContextRouteChildren: WorkspaceContextRouteChildren = {
   WorkspaceContextPlacesRoute: WorkspaceContextPlacesRoute,
-  WorkspaceContextWorkstreamsRoute: WorkspaceContextWorkstreamsRoute,
   WorkspaceContextIndexRoute: WorkspaceContextIndexRoute,
 }
 

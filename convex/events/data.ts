@@ -40,22 +40,6 @@ export async function recordEvent(
   }
 }
 
-// Historical imports feed deduction, never jobs: replaying a month of
-// activity through event triggers would fire every job retroactively.
-// observedAt is required because backfilled rows are the one case where the
-// ingestion-time fallback would date all of history as today.
-export async function recordBackfillEvent(
-  ctx: MutationCtx,
-  args: EventInput & { observedAt: number }
-): Promise<
-  | { status: "duplicate"; eventId: Id<"events"> }
-  | { status: "recorded"; eventId: Id<"events"> }
-> {
-  const { event: _event, ...result } = await insertUniqueEvent(ctx, args)
-
-  return result
-}
-
 async function insertUniqueEvent(
   ctx: MutationCtx,
   args: EventInput

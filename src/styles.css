@@ -111,8 +111,8 @@
      it is the same yellow. */
   --warning: oklch(0.565 0.122 81.8);
   --warning-foreground: oklch(0.985 0 0);
-  /* Graphic only: the workstream activity ramp. Nothing sets it as text, so
-     it answers to 3:1 rather than 4.5:1. */
+  /* Graphic only: billing top-up bars and editor selection. Nothing sets it
+     as text, so it answers to 3:1 rather than 4.5:1. */
   --informational: oklch(0.61 0.036 236);
   --informational-foreground: oklch(0.145 0 0);
   --border: oklch(0.922 0 0);

@@ -7,8 +7,7 @@ import { threads } from "./threads"
 
 // The observed side of the workspace: one conversation per channel and the
 // messages that landed in it. Both are written with backdated timestamps, so
-// the deduction sweep reads them as history it has already reviewed rather
-// than as a window that needs judging.
+// they read as a month of history rather than as fresh traffic.
 
 const summaries: Record<string, string> = {
   engineering:

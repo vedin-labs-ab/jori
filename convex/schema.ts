@@ -1,14 +1,12 @@
 import { defineSchema } from "convex/server"
 import { allowlist } from "./access/schema"
 import { approvals } from "./approvals/schema"
-import { backfills } from "./backfill/schema"
 import { billingRefunds } from "./billing/refunds/schema"
 import { accounts, transactions } from "./billing/schema"
 import { billingCancellations } from "./billing/stripe/schema"
 import { usageReceipts } from "./billing/usage/schema"
 import { collections, documents, shares } from "./collections/schema"
 import { conversations } from "./conversations/schema"
-import { beliefs, efforts, evidence, journal, passes } from "./deduction/schema"
 import { discoverySandboxes } from "./discovery/extraction/records"
 import {
   discoveryPassages,
@@ -86,14 +84,8 @@ export default defineSchema({
   jobs,
   subscriptions,
   events,
-  backfills,
   runs,
   conversations,
-  beliefs,
-  efforts,
-  evidence,
-  journal,
-  passes,
   sessions,
   approvals,
   transitions,

@@ -76,7 +76,6 @@ function context(): ApprovalBrokerContext {
       organization: null,
       requester: null,
       timezone: null,
-      workstreams: null,
     },
   }
 }

@@ -1,6 +1,5 @@
 import { type Doc } from "../../../_generated/dataModel"
 import { type RecentConversation } from "../../../conversations/history/index"
-import { type WorkstreamContext } from "../../../deduction/roster"
 import { type OrganizationFacts } from "../../../organization/facts"
 import { type RequesterContext } from "../../../persons/profile/context"
 import { type PlaceContext } from "../../../places/context"
@@ -15,7 +14,6 @@ type RuntimeInputContext = {
   requester: RequesterContext | null
   /** The requester's IANA zone, when known; drives the prompt's local time. */
   timezone: string | null
-  workstreams: WorkstreamContext[] | null
 }
 
 type MessageRuntimeInput = RuntimeInputContext & {

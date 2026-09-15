@@ -6,7 +6,6 @@ import { ConsolePage } from "../page"
 
 const contextTabs = [
   { label: "Organization", to: "/context", value: "organization" },
-  { label: "Workstreams", to: "/context/workstreams", value: "workstreams" },
   { label: "Places", to: "/context/places", value: "places" },
 ] as const
 

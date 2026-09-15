@@ -25,7 +25,6 @@ import { type JoriToolRequest, readRecord } from "../shared/input"
 import { callJoriSkillTool, isJoriSkillTool } from "../skills/mcp"
 import { callJoriStoreTool, isJoriStoreTool } from "../stores/mcp"
 import { callJoriTableTool, isJoriTableTool } from "../tables/mcp"
-import { callWorkstreamTool, isWorkstreamTool } from "../workstreams/mcp"
 import { type ApprovalBrokerContext } from "./approval"
 import { callWebTool } from "./tools/web"
 
@@ -71,10 +70,6 @@ export async function callJoriTool(
 
   if (isRunIntrospectionTool(request.tool)) {
     return await callRunIntrospectionTool(ctx, run, request)
-  }
-
-  if (isWorkstreamTool(request.tool)) {
-    return await callWorkstreamTool(ctx, run, request)
   }
 
   return await callJoriJobTool(

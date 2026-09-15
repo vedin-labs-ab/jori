@@ -39,6 +39,5 @@ function consoleInput(): AgentRuntimeInput {
     requester: null,
     place: null,
     timezone: null,
-    workstreams: null,
   }
 }

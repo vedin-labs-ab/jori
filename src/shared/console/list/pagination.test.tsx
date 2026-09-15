@@ -10,7 +10,7 @@ test("keeps an empty list on a single disabled page", () => {
     useClientPagination({
       hasFilters: false,
       isReady: true,
-      itemLabel: { singular: "workstream", plural: "workstreams" },
+      itemLabel: { singular: "place", plural: "places" },
       items: [],
     })
   )
@@ -27,7 +27,7 @@ test("paginates fifty items through a short final page", () => {
     useClientPagination({
       hasFilters: false,
       isReady: true,
-      itemLabel: { singular: "workstream", plural: "workstreams" },
+      itemLabel: { singular: "place", plural: "places" },
       items,
     })
   )
@@ -39,7 +39,7 @@ test("paginates fifty items through a short final page", () => {
   }
 
   expect(result.current.visibleRows).toEqual(items.slice(48))
-  expect(result.current.footerLabel).toBe("Showing 49–50 of 50 workstreams")
+  expect(result.current.footerLabel).toBe("Showing 49–50 of 50 places")
   expect(result.current.canGoNext).toBe(false)
 
   act(result.current.reset)

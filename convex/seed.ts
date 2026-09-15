@@ -1,7 +1,6 @@
 import { v } from "convex/values"
 import { internalMutation } from "./_generated/server"
 import { seedContext } from "./seed/context"
-import { seedDeduction } from "./seed/history/beliefs"
 import { seedRuns } from "./seed/history/runs"
 import { seedTraces } from "./seed/history/traces"
 import { seedUsage } from "./seed/history/usage"
@@ -98,8 +97,8 @@ export const work = internalMutation({
   },
 })
 
-/** Sixty days of runs, the traces of the recent ones, the usage rollup over
- *  all of them, and what Jori deduced the company was working on. */
+/** Sixty days of runs, the traces of the recent ones, and the usage rollup
+ *  over all of them. */
 export const history = internalMutation({
   args: organization,
   handler: async (ctx, args) => {
@@ -110,7 +109,6 @@ export const history = internalMutation({
       runs: runs.length,
       traces: await seedTraces(ctx, seed, runs),
       usage: await seedUsage(ctx, seed, runs),
-      deduction: await seedDeduction(ctx, seed),
     }
   },
 })

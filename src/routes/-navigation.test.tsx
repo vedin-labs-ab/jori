@@ -23,7 +23,6 @@ const paths = [
   "/files/file",
   "/context",
   "/context/places",
-  "/context/workstreams",
   "/skills",
   "/integrations",
   "/integrations/personal",

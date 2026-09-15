@@ -72,7 +72,6 @@ function instructionInput(overrides: Partial<InstructionRuntimeInput>) {
     organization: null,
     requester: null,
     timezone: null,
-    workstreams: null,
     ...overrides,
   }
 }

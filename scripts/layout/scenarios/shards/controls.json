@@ -1115,7 +1115,7 @@
       {
         "action": "fill",
         "selector": "#folder-name",
-        "value": "New long folder name with several nested workstreams"
+        "value": "New long folder name with several nested projects"
       }
     ]
   },
@@ -1132,7 +1132,7 @@
       {
         "action": "fill",
         "selector": "#folder-name",
-        "value": "New long folder name with several nested workstreams"
+        "value": "New long folder name with several nested projects"
       }
     ],
     "steps": [
@@ -1547,14 +1547,6 @@
     "target": "app",
     "mutating": false,
     "blocked": "Current profile is approved and has no proposed update to review; approval/discard requires isolated proposal."
-  },
-  {
-    "id": "C172",
-    "title": "Workstream confirm/reject/archive/reopen/restore \u2192 pending \u2192 status/action/card changes. Isolated dev workspace needed.",
-    "path": "/",
-    "target": "app",
-    "mutating": true,
-    "blocked": "Workstream actions require suitable isolated live workstream and backend mutation authorization."
   },
   {
     "id": "C134-account-open",
@@ -2825,32 +2817,6 @@
     "mutating": false
   },
   {
-    "id": "C163-workstreams",
-    "title": "Context Organization to workstreams",
-    "path": "/context",
-    "target": "app",
-    "mutating": false,
-    "steps": [
-      {
-        "action": "click",
-        "selector": "main a[href=\"/context/workstreams\"]"
-      }
-    ]
-  },
-  {
-    "id": "C163-workstreams-return",
-    "title": "Context workstreams to Organization",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "steps": [
-      {
-        "action": "click",
-        "selector": "main a[href=\"/context\"]"
-      }
-    ]
-  },
-  {
     "id": "C163-places",
     "title": "Context Organization to places",
     "path": "/context",
@@ -3020,13 +2986,6 @@
         "value": "NoSuchTimezone"
       }
     ]
-  },
-  {
-    "id": "C170-load",
-    "title": "Workstreams populated or empty list load",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false
   },
   {
     "id": "C169-load",
@@ -3467,82 +3426,6 @@
       }
     ],
     "widths": [1440]
-  },
-  {
-    "id": "C171-open",
-    "title": "Workstream detail sheet query resolves",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      }
-    ]
-  },
-  {
-    "id": "C171-close",
-    "title": "Workstream detail sheet close",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      }
-    ],
-    "steps": [
-      {
-        "action": "press",
-        "selector": "body",
-        "value": "Escape"
-      }
-    ]
-  },
-  {
-    "id": "C171-timeline-open",
-    "title": "Workstream timeline entry expands and receipts resolve",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[role=\"dialog\"] [data-slot=\"collapsible-trigger\"] >> nth=0"
-      }
-    ]
-  },
-  {
-    "id": "C171-timeline-close",
-    "title": "Workstream timeline entry collapses",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"dialog\"] [data-slot=\"collapsible-trigger\"] >> nth=0"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[role=\"dialog\"] [data-slot=\"collapsible-trigger\"] >> nth=0"
-      }
-    ]
   },
   {
     "id": "C169-open",
@@ -7475,311 +7358,6 @@
     ]
   },
   {
-    "id": "C170-filters-open",
-    "title": "Workstreams filter panel opens",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      }
-    ]
-  },
-  {
-    "id": "C170-filters-close",
-    "title": "Workstreams desktop filter panel closes",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      }
-    ],
-    "widths": [1440]
-  },
-  {
-    "id": "C170-filters-close-mobile",
-    "title": "Workstreams mobile filter sheet closes",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "press",
-        "selector": "body",
-        "value": "Escape"
-      }
-    ],
-    "widths": [375]
-  },
-  {
-    "id": "C170-filter-all",
-    "title": "Workstreams Status All",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[role=\"radio\"]:text-is(\"All\")"
-      }
-    ]
-  },
-  {
-    "id": "C170-filter-all-return",
-    "title": "Workstreams Status All resets",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"radio\"]:text-is(\"All\")"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "button:text-is(\"Reset\")"
-      }
-    ]
-  },
-  {
-    "id": "C170-filter-archived",
-    "title": "Workstreams Status Archived",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[role=\"radio\"]:text-is(\"Archived\")"
-      }
-    ]
-  },
-  {
-    "id": "C170-filter-archived-return",
-    "title": "Workstreams Status Archived resets",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"radio\"]:text-is(\"Archived\")"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "button:text-is(\"Reset\")"
-      }
-    ]
-  },
-  {
-    "id": "C170-filter-rejected",
-    "title": "Workstreams Status Not workstreams",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[role=\"radio\"]:text-is(\"Not workstreams\")"
-      }
-    ]
-  },
-  {
-    "id": "C170-filter-rejected-return",
-    "title": "Workstreams Status Not workstreams resets",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"filters-trigger\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"radio\"]:text-is(\"Not workstreams\")"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "button:text-is(\"Reset\")"
-      }
-    ]
-  },
-  {
-    "id": "C170-range-open",
-    "title": "Workstreams Activity range menu opens",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"Activity range\"]"
-      }
-    ]
-  },
-  {
-    "id": "C170-range-close",
-    "title": "Workstreams Activity range menu closes",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"Activity range\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "press",
-        "selector": "body",
-        "value": "Escape"
-      }
-    ]
-  },
-  {
-    "id": "C170-range-30",
-    "title": "Workstreams Activity 14 to 30 days",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"Activity range\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"option\"]:has(:text-is(\"Last 30 days\"))"
-      }
-    ]
-  },
-  {
-    "id": "C170-range-30-return",
-    "title": "Workstreams Activity 30 to14 days",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"Activity range\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"option\"]:has(:text-is(\"Last 30 days\"))"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"Activity range\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"option\"]:has(:text-is(\"Last 14 days\"))"
-      }
-    ]
-  },
-  {
-    "id": "C170-range-60",
-    "title": "Workstreams Activity 14 to 60 days",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"Activity range\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"option\"]:has(:text-is(\"Last 60 days\"))"
-      }
-    ]
-  },
-  {
-    "id": "C170-range-60-return",
-    "title": "Workstreams Activity 60 to14 days",
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"Activity range\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"option\"]:has(:text-is(\"Last 60 days\"))"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[aria-label=\"Activity range\"]"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"option\"]:has(:text-is(\"Last 14 days\"))"
-      }
-    ]
-  },
-  {
     "id": "C166-timezone-filter",
     "title": "Open timezone options filter to no matches",
     "path": "/context",
@@ -7970,102 +7548,6 @@
     "widths": [375]
   },
   {
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "id": "C171-aliases-open",
-    "title": "Workstream title aliases tooltip opens",
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      }
-    ],
-    "steps": [
-      {
-        "action": "hover",
-        "selector": "[data-slot=\"sheet-title\"] [data-slot=\"tooltip-trigger\"]"
-      }
-    ]
-  },
-  {
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "id": "C171-aliases-close",
-    "title": "Workstream title aliases tooltip closes",
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      },
-      {
-        "action": "hover",
-        "selector": "[data-slot=\"sheet-title\"] [data-slot=\"tooltip-trigger\"]"
-      }
-    ],
-    "steps": [
-      {
-        "action": "hover",
-        "selector": "[data-slot=\"sheet-close\"]"
-      },
-      {
-        "action": "hover",
-        "selector": "[data-slot=\"sheet-description\"]"
-      }
-    ]
-  },
-  {
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "id": "C171-receipt-more",
-    "title": "Workstream receipt explanation expands",
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"dialog\"] [data-slot=\"collapsible-trigger\"] >> nth=0"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"expandable-text-trigger\"]:has-text(\"show more\")"
-      }
-    ]
-  },
-  {
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "id": "C171-receipt-less",
-    "title": "Workstream receipt explanation collapses",
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"dialog\"] [data-slot=\"collapsible-trigger\"] >> nth=0"
-      },
-      {
-        "action": "click",
-        "selector": "[data-slot=\"expandable-text-trigger\"]:has-text(\"show more\")"
-      }
-    ],
-    "steps": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"expandable-text-trigger\"]:text-is(\"Show less\")"
-      }
-    ]
-  },
-  {
     "path": "/context/places",
     "target": "app",
     "mutating": false,
@@ -8144,44 +7626,6 @@
         "selector": "[aria-label=\"Copy Purpose\"]"
       }
     ]
-  },
-  {
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "id": "C171-receipt-link-hover",
-    "title": "Workstream receipt external source link hover",
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"dialog\"] [data-slot=\"collapsible-trigger\"] >> nth=0"
-      }
-    ],
-    "steps": [],
-    "blocked": "The populated live timeline receipt has no URL, so Receipt renders a div instead of the optional source anchor. A source receipt with URL is required to exercise its flush-row hover padding."
-  },
-  {
-    "path": "/context/workstreams",
-    "target": "app",
-    "mutating": false,
-    "id": "C171-receipt-link-leave",
-    "title": "Workstream receipt external source link leave",
-    "setup": [
-      {
-        "action": "click",
-        "selector": "[data-slot=\"card\"] button:has(p):has-text(\"Enterprise pipeline\")"
-      },
-      {
-        "action": "click",
-        "selector": "[role=\"dialog\"] [data-slot=\"collapsible-trigger\"] >> nth=0"
-      }
-    ],
-    "steps": [],
-    "blocked": "The populated live timeline receipt has no URL, so Receipt renders a div instead of the optional source anchor. A source receipt with URL is required to exercise its flush-row hover padding."
   },
   {
     "id": "C143-leave-open",

@@ -55,6 +55,5 @@ function consoleInput(): Extract<AgentRuntimeInput, { type: "message" }> {
     requester: null,
     place: null,
     timezone: null,
-    workstreams: null,
   }
 }

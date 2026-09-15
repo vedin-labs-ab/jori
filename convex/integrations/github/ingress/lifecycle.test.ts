@@ -99,7 +99,7 @@ test("reads default-branch pushes with subjects and touched areas", () => {
       commits: [
         {
           message: "Add pass loop\n\nDetails here.",
-          added: ["convex/deduction/pass.ts"],
+          added: ["convex/places/window.ts"],
           modified: ["convex/crons.ts"],
         },
         { message: "Fix sweep registry", modified: ["prompts/charter.md"] },
