@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -34,7 +35,7 @@ test("search previews fixture content and opens a result inside its demo", async
   ).toBeTruthy()
 })
 
-test("search shortcuts stay in their demo and omit unavailable platform pages", async () => {
+test("unavailable demo pages explain their state and cannot navigate by click or shortcut", async () => {
   render(<DemoConsoleAt path="/folders" />)
   fireEvent.keyDown(document.body, { key: "k", code: "KeyK", ctrlKey: true })
   expect(screen.queryByRole("dialog")).toBeNull()
@@ -44,8 +45,33 @@ test("search shortcuts stay in their demo and omit unavailable platform pages", 
     ctrlKey: true,
   })
   const input = await screen.findByRole("combobox")
-  fireEvent.change(input, { target: { value: "integrations" } })
-  expect(screen.queryByRole("group", { name: "Pages" })).toBeNull()
+  fireEvent.change(input, { target: { value: "Int" } })
+  const integration = within(
+    screen.getByRole("group", { name: "Pages" })
+  ).getByRole("option", { name: /Integrations/ })
+  expect(integration.getAttribute("aria-disabled")).toBe("true")
+  act(() => integration.focus())
+  expect(await screen.findByRole("tooltip")).toHaveProperty(
+    "textContent",
+    "Available in the full console."
+  )
+  fireEvent.click(integration)
+  expect(
+    screen.queryByRole("dialog"),
+    "disabled click keeps search open"
+  ).toBeTruthy()
+  fireEvent.keyDown(integration, { key: "Enter" })
+  expect(
+    screen.queryByRole("dialog"),
+    "Enter skips disabled result"
+  ).toBeTruthy()
+  fireEvent.keyDown(input, {
+    key: "I",
+    code: "KeyI",
+    altKey: true,
+    shiftKey: true,
+  })
+  expect(screen.getByRole("dialog")).toBeTruthy()
   fireEvent.click(screen.getByRole("button", { name: /Shortcuts/ }))
   const guide = screen.getByRole("region", { name: "Page shortcuts" })
   expect(within(guide).queryByText("Integrations")).toBeNull()

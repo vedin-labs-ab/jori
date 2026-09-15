@@ -1,12 +1,15 @@
 import { lazy, type ReactNode, type RefObject, Suspense, useState } from "react"
 import { pageBindings, searchKeys } from "@/shared/console/discovery/bindings"
-import { hitDestination } from "@/shared/console/discovery/results"
+import {
+  pages as consolePages,
+  hitDestination,
+} from "@/shared/console/discovery/results"
 import { SearchTrigger } from "@/shared/console/discovery/trigger"
 import {
   type ConsoleDestination,
   useConsoleNavigate,
 } from "@/shared/console/shell/location"
-import { consoleNavigation, folderSurface } from "@/shared/console/shell/routes"
+import { consolePlatformNavigation } from "@/shared/console/shell/routes"
 import { useShortcuts } from "@/shared/shortcuts"
 import { chatViews } from "../derive/chat"
 import { organization } from "../fixtures/organization"
@@ -17,10 +20,13 @@ import { demoResults } from "./results"
 const SearchPalette = lazy(async () => ({
   default: (await import("@/shared/console/discovery/palette")).SearchPalette,
 }))
-const pages = [
-  ...consoleNavigation.flatMap((group) => group.items),
-  folderSurface,
-]
+const platformPaths = new Set(consolePlatformNavigation.map((page) => page.to))
+const pages = consolePages.map((page) => ({
+  ...page,
+  disabledReason: platformPaths.has(page.to)
+    ? "Available in the full console."
+    : undefined,
+}))
 const example = "renewal"
 
 export function DemoSearch({

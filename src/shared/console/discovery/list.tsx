@@ -1,15 +1,12 @@
-import { MessageSquare } from "lucide-react"
 import {
   CommandGroup,
   CommandItem,
   CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command"
-import { shortcutAria, shortcutLabel } from "@/shared/shortcuts/keys"
+import { referencePresentation } from "../references/presentation"
 import { conversationDestination } from "../shell/routes"
-import { pageKeys } from "./bindings"
 import { Result } from "./item"
-import { Matches } from "./matches"
+import { PageResult } from "./page"
 import { matchingPages } from "./results"
 import { SearchStatus } from "./status"
 import { type PaletteProps } from "./types"
@@ -28,22 +25,12 @@ export function Results(props: PaletteProps) {
       {pages.length ? (
         <CommandGroup heading="Pages">
           {pages.map((page) => (
-            <CommandItem
-              aria-keyshortcuts={
-                page.shortcut && shortcutAria(pageKeys(page.shortcut))
-              }
+            <PageResult
               key={page.to}
-              onSelect={() => props.onNavigate({ to: page.to })}
-              value={`page:${page.to}`}
-            >
-              <page.icon />
-              <span>
-                <Matches text={page.label} query={props.query} />
-              </span>
-              <CommandShortcut className="tracking-normal">
-                {page.shortcut && shortcutLabel(pageKeys(page.shortcut))}
-              </CommandShortcut>
-            </CommandItem>
+              page={page}
+              query={props.query}
+              onNavigate={props.onNavigate}
+            />
           ))}
         </CommandGroup>
       ) : null}
@@ -75,6 +62,7 @@ export function Results(props: PaletteProps) {
 }
 
 function Recent(props: PaletteProps) {
+  const { icon: ChatIcon } = referencePresentation("chat", "")
   return (
     <CommandGroup heading="Recent">
       {props.chats.slice(0, 5).map((chat) => (
@@ -83,7 +71,7 @@ function Recent(props: PaletteProps) {
           onSelect={() => props.onNavigate(conversationDestination(chat.id))}
           value={`chat:${chat.id}`}
         >
-          <MessageSquare />
+          <ChatIcon />
           <span className="truncate">{chat.title}</span>
         </CommandItem>
       ))}

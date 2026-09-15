@@ -3,13 +3,16 @@ import { type ChatConversation } from "../chat/types"
 import { type ConsoleDestination } from "../shell/location"
 import { type ConsoleSurface } from "../shell/routes"
 
+/** A page can remain discoverable when its host cannot open it. */
+export type SearchPage = ConsoleSurface & { disabledReason?: string }
+
 export type SearchState = {
   status: "idle" | "loading" | "ready" | "unavailable"
   hits: Hit[]
   partial: boolean
 }
 export type PaletteProps = {
-  pages?: readonly ConsoleSurface[]
+  pages?: readonly SearchPage[]
   chats: ChatConversation[]
   open: boolean
   query: string
