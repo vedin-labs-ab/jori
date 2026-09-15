@@ -21,7 +21,8 @@ import { loadPersonTeamIds } from "../visibility/viewer"
 import { type Viewer } from "./provider/query"
 import { collect } from "./retrieval"
 import { project } from "./source"
-import { chunks, excerpt } from "./source/text"
+import { excerpt } from "./source/excerpt"
+import { chunks } from "./source/text"
 import { findSource } from "./sync/intent"
 
 const limiter = new RateLimiter(components.rateLimiter, {

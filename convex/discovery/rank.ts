@@ -2,7 +2,7 @@ import { type Hit } from "../../contracts/discovery"
 import { lexicalBoost } from "./provider/spelling"
 
 export function rank(hits: Hit[], text: string) {
-  const counts = new Map<string, number>()
+  const seen = new Set<string>()
   return hits
     .sort(
       (a, b) =>
@@ -11,9 +11,13 @@ export function rank(hits: Hit[], text: string) {
         (a.candidate.score + lexicalBoost(text, a.title, a.snippet))
     )
     .filter((hit) => {
-      const count = counts.get(hit.resourceId) ?? 0
-      counts.set(hit.resourceId, count + 1)
-      return count < 2
+      const record = hit.location.kind === "row" ? `:${hit.location.id}` : ""
+      const key = `${hit.kind}:${hit.resourceId}${record}`
+      if (seen.has(key)) {
+        return false
+      }
+      seen.add(key)
+      return true
     })
     .slice(0, 20)
     .map((hit) => hit.candidate)

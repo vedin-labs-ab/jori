@@ -156,7 +156,7 @@ test("partial file coverage remains visible alongside a matching excerpt", () =>
     />
   )
   expect(
-    screen.getByTitle("Partial text · Page 2 · Jobs mentioned in report 0")
+    screen.getByTitle("Partial text, Page 2 · Jobs mentioned in report 0")
   ).toBeTruthy()
 })
 

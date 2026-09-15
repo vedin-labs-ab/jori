@@ -1,5 +1,6 @@
 import { expect, test } from "vitest"
-import { chunks, excerpt } from "./text"
+import { excerpt } from "./excerpt"
+import { chunks } from "./text"
 
 test("long fields remain searchable and every chunk offset points to the original Unicode text", () => {
   const text = "Linnéa 🐈 invoice details. ".repeat(1500)

@@ -51,20 +51,3 @@ export function readable(value: unknown): string {
   }
   return ""
 }
-export function excerpt(text: string, query: string) {
-  const escaped = query.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-  const exact = escaped ? new RegExp(escaped, "iu").exec(text) : null
-  const match =
-    exact ??
-    (query.match(/[\p{L}\p{N}]+/gu) ?? []).flatMap((term) => {
-      const m = new RegExp(term, "iu").exec(text)
-      return m ? [m] : []
-    })[0]
-  const start = Math.max(0, (match?.index ?? 0) - 70)
-  return {
-    snippet: `${start ? "…" : ""}${text.slice(start, start + 260).replace(/\s+/g, " ")}${start + 260 < text.length ? "…" : ""}`,
-    focus: match
-      ? { start: match.index, end: match.index + match[0].length }
-      : undefined,
-  }
-}
