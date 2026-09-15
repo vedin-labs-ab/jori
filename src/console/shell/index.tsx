@@ -7,7 +7,7 @@ import {
 } from "@/shared/console/shell/navigation"
 import { mainContentId, SkipToContent } from "@/shared/skip"
 import { useSidebarChats } from "../chat/recent"
-import { SidebarSearch } from "../discovery"
+import { ConsoleSearch, SidebarSearch } from "../discovery"
 import { ConsoleEditing } from "../edit"
 import { ConsoleFolderDrag } from "../folders/drag/context"
 import { SidebarFolders } from "../folders/section"
@@ -34,29 +34,31 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
     <OrganizationVisibilityDirectory>
       <ConsoleEditing>
         <ConsoleFolderDrag>
-          <SkipToContent />
-          <ConsoleFrame
-            contentId={mainContentId}
-            filterStorageKey="console.filters"
-            pathname={pathname}
-            sidebar={
-              <ConsoleSidebar
-                account={<SidebarUserButton />}
-                chats={chats}
-                folders={<SidebarFolders pathname={pathname} />}
-                organization={<SidebarOrganizationSwitcher />}
-                pathname={pathname}
-                search={<SidebarSearch chats={chats} />}
-                platform={<PlatformNavigation pathname={pathname} />}
-              />
-            }
-          >
-            {/* Below the chrome, so a page that throws leaves the sidebar and
+          <ConsoleSearch chats={chats}>
+            <SkipToContent />
+            <ConsoleFrame
+              contentId={mainContentId}
+              filterStorageKey="console.filters"
+              pathname={pathname}
+              sidebar={
+                <ConsoleSidebar
+                  account={<SidebarUserButton />}
+                  chats={chats}
+                  folders={<SidebarFolders pathname={pathname} />}
+                  organization={<SidebarOrganizationSwitcher />}
+                  pathname={pathname}
+                  search={<SidebarSearch />}
+                  platform={<PlatformNavigation pathname={pathname} />}
+                />
+              }
+            >
+              {/* Below the chrome, so a page that throws leaves the sidebar and
             header standing to navigate away with. */}
-            <ConsolePageBoundary resetKey={match}>
-              {children}
-            </ConsolePageBoundary>
-          </ConsoleFrame>
+              <ConsolePageBoundary resetKey={match}>
+                {children}
+              </ConsolePageBoundary>
+            </ConsoleFrame>
+          </ConsoleSearch>
         </ConsoleFolderDrag>
       </ConsoleEditing>
     </OrganizationVisibilityDirectory>

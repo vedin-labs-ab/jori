@@ -58,7 +58,10 @@ vi.mock("@/console/shared/visibility/directory", () => ({
 vi.mock("@/console/folders/section", () => ({ SidebarFolders: () => null }))
 vi.mock("@/console/chat/recent", () => ({ useSidebarChats: () => [] }))
 // Search has its own Convex binding tests; navigation exercises the persistent shell.
-vi.mock("@/console/discovery", () => ({ SidebarSearch: () => null }))
+vi.mock("@/console/discovery", () => ({
+  SidebarSearch: () => null,
+  ConsoleSearch: ({ children }: { children: React.ReactNode }) => children,
+}))
 vi.mock("@/console/shell/account", () => ({ SidebarUserButton: () => null }))
 vi.mock("@/console/shell/organization", () => ({
   SidebarOrganizationSwitcher: () => null,

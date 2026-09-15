@@ -5,7 +5,7 @@ import {
 } from "@contracts/discovery"
 import { useAction, useQueries } from "convex/react"
 import { useEffect, useMemo, useState } from "react"
-import { type SearchState } from "@/shared/console/discovery/palette"
+import { type SearchState } from "@/shared/console/discovery/types"
 import { api } from "../../../convex/_generated/api"
 
 export function useSearch(

@@ -1,18 +1,27 @@
-import { type Hit } from "@contracts/discovery"
-import { useConvex } from "convex/react"
-import { useCallback, useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
+import { type ReactNode, useCallback, useContext, useState } from "react"
 import { type ChatConversation } from "@/shared/console/chat/types"
+import { pageBindings, searchKeys } from "@/shared/console/discovery/bindings"
 import { SearchPalette } from "@/shared/console/discovery/palette"
-import { hitDestination } from "@/shared/console/discovery/results"
-import { useSearchShortcut } from "@/shared/console/discovery/shortcut"
 import { SearchTrigger } from "@/shared/console/discovery/trigger"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { useActiveOrganization } from "@/shared/session/auth"
-import { api } from "../../../convex/_generated/api"
+import { useShortcuts } from "@/shared/shortcuts"
+import { SearchContext } from "./context"
+import { useOpenHit } from "./open"
 import { useSearch } from "./query"
 
-export function SidebarSearch({ chats }: { chats: ChatConversation[] }) {
+export function SidebarSearch() {
+  const changeOpen = useContext(SearchContext)
+  return <SearchTrigger onClick={() => changeOpen?.(true)} />
+}
+
+export function ConsoleSearch({
+  chats,
+  children,
+}: {
+  chats: ChatConversation[]
+  children: ReactNode
+}) {
   const active = useActiveOrganization().data
   return (
     <WorkspaceSearch
@@ -20,16 +29,20 @@ export function SidebarSearch({ chats }: { chats: ChatConversation[] }) {
       key={active?.id}
       organizationId={active?.id}
       organizationName={active?.name}
-    />
+    >
+      {children}
+    </WorkspaceSearch>
   )
 }
 
 function WorkspaceSearch({
   chats,
+  children,
   organizationId,
   organizationName,
 }: {
   chats: ChatConversation[]
+  children: ReactNode
   organizationId?: string
   organizationName?: string
 }) {
@@ -44,17 +57,17 @@ function WorkspaceSearch({
       setText("")
     }
   }, [])
-  useSearchShortcut(
-    useCallback(() => {
-      setOpen((value) => !value)
-      setText("")
-    }, [])
+  useShortcuts([
+    { shortcut: searchKeys, allowInInput: true, run: () => changeOpen(true) },
+    ...pageBindings(navigate),
+  ])
+  const openHit = useOpenHit(organizationId, text, open, () =>
+    changeOpen(false)
   )
-  const openHit = useOpenHit(organizationId, text, () => changeOpen(false))
 
   return (
-    <>
-      <SearchTrigger onClick={() => changeOpen(true)} />
+    <SearchContext value={changeOpen}>
+      {children}
       <SearchPalette
         chats={chats}
         onOpenChange={changeOpen}
@@ -70,46 +83,6 @@ function WorkspaceSearch({
         query={text}
         state={state}
       />
-    </>
+    </SearchContext>
   )
-}
-
-function useOpenHit(
-  organizationId: string | undefined,
-  text: string,
-  onClose: () => void
-) {
-  const navigate = useConsoleNavigate()
-  const convex = useConvex()
-  const session = useRef(0)
-  useEffect(
-    () => () => {
-      session.current++
-    },
-    []
-  )
-  return async (hit: Hit) => {
-    if (!organizationId) {
-      return
-    }
-    const token = session.current
-    try {
-      const current = await convex.query(api.discovery.console.visible, {
-        organizationId,
-        text,
-        candidates: [hit.candidate],
-      })
-      if (token !== session.current) {
-        return
-      }
-      if (!current.length) {
-        toast.error("This result is no longer available.")
-        return
-      }
-      onClose()
-      navigate(hitDestination(current[0]))
-    } catch {
-      toast.error("Could not open this result. Try again.")
-    }
-  }
 }

@@ -2,6 +2,7 @@ import {
   Cable,
   Database,
   Files,
+  Folder,
   Layers,
   Library,
   type LucideIcon,
@@ -17,6 +18,7 @@ export type ConsoleSurface = {
   to: string
   /** Active on the path itself alone, not on the pages under it. */
   exact?: boolean
+  shortcut?: string
 }
 
 type ConsoleGroup = {
@@ -36,32 +38,85 @@ type ConsoleGroup = {
 export const consoleNavigation: readonly ConsoleGroup[] = [
   {
     items: [
-      { icon: Plus, label: "New chat", to: "/chat", exact: true },
-      { icon: Timeline, label: "Activity", to: "/runs" },
+      {
+        icon: Plus,
+        label: "New chat",
+        to: "/chat",
+        shortcut: "n",
+        exact: true,
+      },
+      {
+        icon: Timeline,
+        label: "Activity",
+        to: "/runs",
+        shortcut: "a",
+      },
     ],
   },
   {
     label: "Resources",
     items: [
-      { icon: Workflow, label: "Jobs", to: "/jobs" },
-      { icon: Table2, label: "Tables", to: "/tables" },
-      { icon: Database, label: "Stores", to: "/stores" },
-      { icon: Files, label: "Files", to: "/files" },
+      {
+        icon: Workflow,
+        label: "Jobs",
+        to: "/jobs",
+        shortcut: "j",
+      },
+      {
+        icon: Table2,
+        label: "Tables",
+        to: "/tables",
+        shortcut: "t",
+      },
+      {
+        icon: Database,
+        label: "Stores",
+        to: "/stores",
+        shortcut: "s",
+      },
+      {
+        icon: Files,
+        label: "Files",
+        to: "/files",
+        shortcut: "f",
+      },
     ],
   },
 ]
 
 export const consolePlatformNavigation: readonly ConsoleSurface[] = [
-  { icon: Cable, label: "Integrations", to: "/integrations" },
-  { icon: Library, label: "Skills", to: "/skills" },
-  { icon: Layers, label: "Context", to: "/context" },
+  {
+    icon: Cable,
+    label: "Integrations",
+    to: "/integrations",
+    shortcut: "i",
+  },
+  {
+    icon: Library,
+    label: "Skills",
+    to: "/skills",
+    shortcut: "k",
+  },
+  {
+    icon: Layers,
+    label: "Context",
+    to: "/context",
+    shortcut: "c",
+  },
 ]
 
 // Surfaces reached from within the sidebar's groups rather than its main
 // navigation still need a page title and a document title.
+export const folderSurface: ConsoleSurface = {
+  icon: Folder,
+  label: "Folders",
+  to: "/folders",
+  shortcut: "o",
+}
+
 const secondarySurfaces = [
   { label: "Chat", to: "/chat" },
-  { label: "Folders", to: "/folders" },
+  folderSurface,
 ] as const
 
 const consoleSurfaces = [

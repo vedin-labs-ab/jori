@@ -9,10 +9,8 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-import { searchShortcut } from "./shortcut"
-
-// The way into search: the icon beside the organization at the head of
-// the sidebar; the shortcut lives in ./shortcut.
+import { shortcutAria, shortcutLabel } from "@/shared/shortcuts/keys"
+import { searchKeys } from "./bindings"
 
 /** An icon button that opens search; hidden in the rail, where the
  *  organization's own square is all the header has room for. */
@@ -24,7 +22,7 @@ export function SearchTrigger({
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          aria-keyshortcuts="Control+K Meta+K"
+          aria-keyshortcuts={shortcutAria(searchKeys)}
           aria-label="Search workspace"
           className={cn(
             "shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden",
@@ -39,7 +37,7 @@ export function SearchTrigger({
       </TooltipTrigger>
       <TooltipContent className="flex items-center gap-1.5" side="right">
         Search
-        <Kbd>{searchShortcut}</Kbd>
+        <Kbd>{shortcutLabel(searchKeys)}</Kbd>
       </TooltipContent>
     </Tooltip>
   )

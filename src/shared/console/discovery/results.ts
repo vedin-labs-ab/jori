@@ -1,14 +1,19 @@
 import { type Hit } from "@contracts/discovery"
 import { referenceDestination } from "../references/presentation"
-import { consoleNavigation, consolePlatformNavigation } from "../shell/routes"
+import {
+  consoleNavigation,
+  consolePlatformNavigation,
+  folderSurface,
+} from "../shell/routes"
 
 export function hitDestination(hit: Hit) {
   return referenceDestination({ kind: hit.kind, id: hit.resourceId })
 }
 
-const pages = [
+export const pages = [
   ...consoleNavigation.flatMap((group) => group.items),
   ...consolePlatformNavigation,
+  folderSurface,
 ]
 export function matchingPages(text: string) {
   const words = text.toLowerCase().trim().split(/\s+/)
