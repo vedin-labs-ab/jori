@@ -172,28 +172,36 @@ test("the Results group stays visible while loading, including alongside a match
   expect(screen.getByRole("group", { name: "Pages" })).toBeTruthy()
 })
 
-test("holding the prefix previews shortcuts without stealing focus or changing the query", () => {
-  vi.useFakeTimers()
-  render(<SearchPalette {...props()} />)
-  const input = screen.getByRole("combobox")
-  fireEvent.keyDown(input, { key: "Shift", altKey: true, shiftKey: true })
-  act(() => {
-    vi.advanceTimersByTime(500)
-  })
-  expect(screen.getByRole("region", { name: "Page shortcuts" })).toBeTruthy()
-  expect(document.activeElement).toBe(input)
-  expect((input as HTMLInputElement).value).toBe("jobs")
-  fireEvent.keyUp(input, { key: "Shift" })
-  expect(screen.queryByRole("region", { name: "Page shortcuts" })).toBeNull()
-  expect(screen.getByRole("group", { name: "Results" })).toBeTruthy()
-})
+test.each(["input", "dialog", "listbox"])(
+  "holding the prefix from %s preserves focus and query",
+  (target) => {
+    vi.useFakeTimers()
+    render(<SearchPalette {...props()} />)
+    const input = screen.getByRole("combobox")
+    const focused = target === "input" ? input : screen.getByRole(target)
+    act(() => focused.focus())
+    fireEvent.keyDown(focused, { key: "Shift", altKey: true, shiftKey: true })
+    act(() => {
+      vi.advanceTimersByTime(500)
+    })
+    expect(screen.getByRole("region", { name: "Page shortcuts" })).toBeTruthy()
+    expect(document.activeElement).toBe(focused)
+    expect(screen.getByText("Release keys to return")).toBeTruthy()
+    expect(screen.queryByText("Close")).toBeNull()
+    expect((input as HTMLInputElement).value).toBe("jobs")
+    fireEvent.keyUp(focused, { key: "Shift" })
+    expect(screen.queryByRole("region", { name: "Page shortcuts" })).toBeNull()
+    expect(screen.getByRole("group", { name: "Results" })).toBeTruthy()
+  }
+)
 
 test("shortcut help can also be clicked, and typing returns to search", () => {
   const initial = props()
   render(<SearchPalette {...initial} />)
   fireEvent.click(screen.getByRole("button", { name: /Shortcuts/ }))
   expect(screen.getByRole("region", { name: "Page shortcuts" })).toBeTruthy()
-  expect(screen.getByRole("button", { name: /Back to results/ })).toBeTruthy()
+  expect(screen.getByText("Type to search")).toBeTruthy()
+  expect(screen.queryByRole("button", { name: /Back to results/ })).toBeNull()
   fireEvent.change(screen.getByRole("combobox"), {
     target: { value: "invoice" },
   })
@@ -214,4 +222,18 @@ test("the global shortcut guide appears on hold and disappears on release", () =
   expect(document.activeElement).toBe(document.body)
   fireEvent.keyUp(document.body, { key: "Alt" })
   expect(screen.queryByRole("region", { name: "Page shortcuts" })).toBeNull()
+})
+
+test("page shortcuts work when the search dialog itself has focus", () => {
+  const initial = props()
+  render(<SearchPalette {...initial} />)
+  const dialog = screen.getByRole("dialog")
+  act(() => dialog.focus())
+  fireEvent.keyDown(dialog, {
+    key: "F",
+    code: "KeyF",
+    altKey: true,
+    shiftKey: true,
+  })
+  expect(initial.onNavigate).toHaveBeenCalledWith({ to: "/files" })
 })

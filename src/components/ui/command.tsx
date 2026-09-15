@@ -37,16 +37,19 @@ function CommandDialog({
   children,
   className,
   showCloseButton = false,
+  contentRef,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
   title?: string
   description?: string
   className?: string
   showCloseButton?: boolean
+  contentRef?: React.Ref<HTMLDivElement>
 }) {
   return (
     <Dialog {...props}>
       <DialogContent
+        ref={contentRef}
         className={className}
         desktopClassName="top-1/3 translate-y-0 rounded-xl!"
         bodyClassName="p-0"

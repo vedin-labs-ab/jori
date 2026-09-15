@@ -33,6 +33,7 @@ export function SearchPalette(props: PaletteProps) {
   return (
     <CommandDialog
       className="sm:max-w-xl"
+      contentRef={scope}
       description="Search by name or content. Use the arrow keys to choose a result and Enter to open it."
       onOpenChange={props.onOpenChange}
       open={props.open}
@@ -43,11 +44,16 @@ export function SearchPalette(props: PaletteProps) {
       }
     >
       {/* Keep Ctrl+K available for toggling search on Windows and Linux. */}
-      <Command ref={scope} shouldFilter={false} vimBindings={false}>
+      <Command
+        className="[&_[cmdk-item]>svg:first-child]:text-muted-foreground [&_[cmdk-item]:is(:hover,[data-selected=true])>svg:first-child]:text-foreground"
+        shouldFilter={false}
+        vimBindings={false}
+      >
         <CommandInput
           aria-busy={props.state.status === "loading"}
           aria-label="Search workspace"
           maxLength={200}
+          onPointerDown={() => setPinnedGuide(false)}
           onValueChange={(value) => {
             setPinnedGuide(false)
             props.onQueryChange(value)
@@ -55,16 +61,18 @@ export function SearchPalette(props: PaletteProps) {
           placeholder="Search by name or content…"
           value={props.query}
         />
-        {guide ? (
-          <CommandList className="h-80 max-h-[50dvh] p-3">
-            <PageShortcuts held={!pinnedGuide} />
-          </CommandList>
-        ) : (
-          <Results {...props} />
-        )}
+        <CommandList className="h-80 max-h-[50dvh] [&_[cmdk-list-sizer]]:flex [&_[cmdk-list-sizer]]:min-h-full [&_[cmdk-list-sizer]]:flex-col">
+          {guide ? (
+            <div className="p-3">
+              <PageShortcuts held={!pinnedGuide} />
+            </div>
+          ) : (
+            <Results {...props} />
+          )}
+        </CommandList>
         <Footer
           partial={props.state.partial}
-          guide={guide}
+          guide={guide ? (heldGuide ? "held" : "pinned") : undefined}
           onGuide={() => {
             setPinnedGuide((value) => !value)
             scope.current?.querySelector("input")?.focus()
@@ -104,50 +112,49 @@ function Footer({
   onGuide,
 }: {
   partial: boolean
-  guide: boolean
+  guide: "held" | "pinned" | undefined
   onGuide: () => void
 }) {
   return (
     <div className="-mx-1 -mb-1 mt-1 flex min-h-9 items-center gap-3 border-t px-3 text-[0.625rem] text-muted-foreground">
-      {!guide ? (
+      {guide ? (
+        <span className="ml-auto">
+          {guide === "held" ? "Release keys to return" : "Type to search"}
+        </span>
+      ) : (
         <>
           <span className="hidden shrink-0 sm:inline">
-            <Kbd>↑</Kbd> <Kbd>↓</Kbd> choose
+            <Kbd>↑</Kbd> <Kbd>↓</Kbd> Choose
           </span>
           <span className="hidden shrink-0 sm:inline">
-            <Kbd>↵</Kbd> open
+            <Kbd>↵</Kbd> Open
           </span>
+          <span className="hidden shrink-0 sm:inline">
+            <Kbd>esc</Kbd> Close
+          </span>
+          <span
+            aria-live="polite"
+            className="ml-auto"
+            title={
+              partial
+                ? "Some results may be missing. Try searching again."
+                : undefined
+            }
+          >
+            {partial ? "Incomplete results" : ""}
+          </span>
+          <Button
+            aria-expanded={false}
+            className="h-auto shrink-0 p-0 text-[0.625rem] text-muted-foreground"
+            onClick={onGuide}
+            size="sm"
+            title="Hold Option/Alt and Shift to preview page shortcuts"
+            variant="ghost"
+          >
+            <Kbd>{shortcutLabel(pageKeys(""))}</Kbd> Shortcuts
+          </Button>
         </>
-      ) : null}
-      <span className="hidden shrink-0 sm:inline">
-        <Kbd>esc</Kbd> close
-      </span>
-      <span
-        aria-live="polite"
-        className="ml-auto"
-        title={
-          partial
-            ? "Some results may be missing. Try searching again."
-            : undefined
-        }
-      >
-        {partial && !guide ? "Incomplete results" : ""}
-      </span>
-      <Button
-        aria-expanded={guide}
-        className="h-auto shrink-0 p-0 text-[0.625rem] text-muted-foreground"
-        onClick={onGuide}
-        size="sm"
-        title={
-          guide
-            ? "Return to search results"
-            : "Hold Option/Alt and Shift to preview page shortcuts"
-        }
-        variant="ghost"
-      >
-        {guide ? "Back to results" : "Shortcuts"}
-        {!guide ? <Kbd>{shortcutLabel(pageKeys(""))}</Kbd> : null}
-      </Button>
+      )}
     </div>
   )
 }

@@ -2,7 +2,6 @@ import { MessageSquare } from "lucide-react"
 import {
   CommandGroup,
   CommandItem,
-  CommandList,
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command"
@@ -24,7 +23,7 @@ export function Results(props: PaletteProps) {
     status === "unavailable" ||
     (!hits.length && !pages.length && !recent)
   return (
-    <CommandList className="h-80 max-h-[50dvh] [&_[cmdk-list-sizer]]:flex [&_[cmdk-list-sizer]]:min-h-full [&_[cmdk-list-sizer]]:flex-col">
+    <>
       {recent ? <Recent {...props} /> : null}
       {pages.length ? (
         <CommandGroup heading="Pages">
@@ -71,7 +70,7 @@ export function Results(props: PaletteProps) {
       {showStatus && !props.query.trim() ? (
         <SearchStatus onRetry={props.onRetry} status={status} />
       ) : null}
-    </CommandList>
+    </>
   )
 }
 
