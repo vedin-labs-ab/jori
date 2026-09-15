@@ -186,7 +186,10 @@ test.each(["input", "dialog", "listbox"])(
     })
     expect(screen.getByRole("region", { name: "Page shortcuts" })).toBeTruthy()
     expect(document.activeElement).toBe(focused)
-    expect(screen.getByText("Release keys to return")).toBeTruthy()
+    expect(
+      screen.getByText("Alt+Shift", { selector: "kbd" }).parentElement
+        ?.textContent
+    ).toBe("Release Alt+Shift to return")
     expect(screen.queryByText("Close")).toBeNull()
     expect((input as HTMLInputElement).value).toBe("jobs")
     fireEvent.keyUp(focused, { key: "Shift" })

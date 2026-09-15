@@ -119,7 +119,13 @@ function Footer({
     <div className="-mx-1 -mb-1 mt-1 flex min-h-9 items-center gap-3 border-t px-3 text-[0.625rem] text-muted-foreground">
       {guide ? (
         <span className="ml-auto">
-          {guide === "held" ? "Release keys to return" : "Type to search"}
+          {guide === "held" ? (
+            <>
+              Release <Kbd>{shortcutLabel(pageKeys(""))}</Kbd> to return
+            </>
+          ) : (
+            "Type to search"
+          )}
         </span>
       ) : (
         <>
