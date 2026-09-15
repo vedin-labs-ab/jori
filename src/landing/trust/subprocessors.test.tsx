@@ -19,7 +19,7 @@ test("discloses image processing and workspace search alongside the core provide
     "https://turbopuffer.com/docs/security"
   )
   expect(search.closest("li")?.textContent).toBe(
-    "turbopuffer Indexes workspace content for search."
+    "turbopuffer Indexes content for search."
   )
   expect(search.closest("li")?.querySelector("img")?.getAttribute("src")).toBe(
     "/logos/subprocessors/turbopuffer.svg"

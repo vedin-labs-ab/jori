@@ -26,13 +26,13 @@ const subprocessors: readonly Subprocessor[] = [
     logo: "/logos/subprocessors/convex.svg",
     name: "Convex",
     url: "https://convex.dev",
-    purpose: "Stores workspace data and sign-in sessions.",
+    purpose: "Stores workspace data and sessions.",
   },
   {
     logo: "/logos/subprocessors/turbopuffer.svg",
     name: "turbopuffer",
     url: "https://turbopuffer.com/docs/security",
-    purpose: "Indexes workspace content for search.",
+    purpose: "Indexes content for search.",
   },
   {
     ink: true,
@@ -65,7 +65,7 @@ const subprocessors: readonly Subprocessor[] = [
     logo: "/logos/subprocessors/openrouter.svg",
     name: "OpenRouter",
     url: "https://openrouter.ai",
-    purpose: "Routes model calls to the model host.",
+    purpose: "Routes model calls to providers.",
   },
   {
     logo: "/logos/subprocessors/google.png",
@@ -78,7 +78,7 @@ const subprocessors: readonly Subprocessor[] = [
     logo: "/logos/subprocessors/posthog.svg",
     name: "PostHog",
     url: "https://posthog.com",
-    purpose: "Measures usage, if you accept analytics.",
+    purpose: "Measures usage, if you opt in.",
   },
   {
     logo: "/logos/subprocessors/stripe.svg",
