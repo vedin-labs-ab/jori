@@ -116,8 +116,8 @@ function SuggestionOption({
 }) {
   const ref = useRef<HTMLButtonElement>(null)
   useEffect(() => {
-    if (active) {
-      ref.current?.scrollIntoView({ block: "nearest" })
+    if (active && ref.current !== null) {
+      reveal(ref.current)
     }
   }, [active])
 
@@ -153,6 +153,44 @@ function SuggestionOption({
       )}
     </button>
   )
+}
+
+/** Scrolls the option's own list until the option shows, and nothing
+ *  else. `scrollIntoView` walks every scrolling ancestor, so a row of a
+ *  popover that is not placed yet, or that overhangs an edge for a frame,
+ *  drags the page under it along, and the caret the popover is anchored
+ *  to leaves the viewport with it. */
+function reveal(option: HTMLElement) {
+  const list = scrollContainer(option)
+
+  if (list === null) {
+    return
+  }
+
+  const row = option.getBoundingClientRect()
+  const view = list.getBoundingClientRect()
+
+  if (row.top < view.top) {
+    list.scrollTop -= view.top - row.top
+  } else if (row.bottom > view.bottom) {
+    list.scrollTop += row.bottom - view.bottom
+  }
+}
+
+function scrollContainer(node: HTMLElement) {
+  for (
+    let parent = node.parentElement;
+    parent !== null;
+    parent = parent.parentElement
+  ) {
+    const { overflowY } = getComputedStyle(parent)
+
+    if (overflowY === "auto" || overflowY === "scroll") {
+      return parent
+    }
+  }
+
+  return null
 }
 
 /** The mark a suggestion wears: a resource's kind, the rest their own. */

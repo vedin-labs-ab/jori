@@ -69,6 +69,9 @@ per concept everywhere. A synonym is a rename, not a choice.
 - Before adding a test, name the behavior or failure it protects and check
   whether an existing test already does; extend that one when clear. Avoid
   tests that mirror the implementation.
+- A flaky test is a bug in the test or the code. Find what makes it
+  nondeterministic and fix that; reruns, wider timeouts, and skips are not
+  fixes.
 - Pre-launch: replace obsolete behavior outright, with no compatibility
   layers or staged migrations.
 

@@ -84,7 +84,6 @@ for (const embedded of [false, true]) {
           )
           await selectEachKind(page)
           await field.fill("+")
-          await field.press("End")
           await expectPopup(page)
           await page.setViewportSize({ width: 320, height: 280 })
           await expectPopup(page)
@@ -99,36 +98,53 @@ for (const embedded of [false, true]) {
   }
 }
 
+/** The popover has come to rest where it can be used: inside the viewport
+ *  by the collision padding, its corner on top of the stack (a box in the
+ *  viewport can still sit under the frame header), and in the same place
+ *  on two frames running. Radix places a popover in passes, and a caret
+ *  reveal scrolls in eased steps, so a single reading can land mid-move. */
 async function expectPopup(page: Page) {
-  await page.getByRole("listbox").waitFor()
-  await page.waitForFunction(() => {
-    const popup = document.querySelector('[data-slot="popover-content"]')
-    if (!popup) {
-      return false
+  const listbox = page.getByRole("listbox")
+  await listbox.waitFor()
+  const problem = await listbox.evaluate((list) => {
+    const popup = list.closest<HTMLElement>('[data-slot="popover-content"]')
+    const read = () => {
+      const box = popup?.getBoundingClientRect()
+      const clear =
+        popup !== null &&
+        box !== undefined &&
+        box.width > 0 &&
+        box.height > 0 &&
+        box.left >= 7 &&
+        box.top >= 7 &&
+        box.right <= window.innerWidth - 7 &&
+        box.bottom <= window.innerHeight - 7 &&
+        popup.contains(document.elementFromPoint(box.left + 8, box.top + 8))
+      const place = box
+        ? [box.left, box.top, box.right, box.bottom].map(Math.round).join()
+        : "no box"
+      return { clear, place }
     }
-    const box = popup.getBoundingClientRect()
-    return (
-      box.width > 0 &&
-      box.height > 0 &&
-      box.left >= 7 &&
-      box.top >= 7 &&
-      box.right <= window.innerWidth - 7 &&
-      box.bottom <= window.innerHeight - 7
-    )
-  })
-  // A box can be in the viewport and still be covered by the frame header.
-  expect(
-    await page.getByRole("listbox").evaluate((list) => {
-      const popup = list.closest('[data-slot="popover-content"]')
-      if (!popup) {
-        return false
+    return new Promise<string | null>((resolve) => {
+      const deadline = performance.now() + 5000
+      let last = ""
+      const frame = () => {
+        const { clear, place } = read()
+        if (clear && place === last) {
+          resolve(null)
+        } else if (performance.now() > deadline) {
+          resolve(
+            `${place} in ${window.innerWidth}x${window.innerHeight}, page scrolled ${window.scrollY}`
+          )
+        } else {
+          last = clear ? place : ""
+          requestAnimationFrame(frame)
+        }
       }
-      const box = popup.getBoundingClientRect()
-      return popup.contains(
-        document.elementFromPoint(box.left + 8, box.top + 8)
-      )
+      requestAnimationFrame(frame)
     })
-  ).toBe(true)
+  })
+  expect(problem).toBeNull()
 }
 
 test("an open picker follows scrolling and dismisses without taking editor focus", async () => {
@@ -138,7 +154,6 @@ test("an open picker follows scrolling and dismisses without taking editor focus
     await page.goto(`${url}?path=/chat`)
     const field = page.getByRole("textbox", { name: "Message" })
     await field.fill("+")
-    await field.press("End")
     await expectPopup(page)
     await field.evaluate((node) => {
       let parent = node.parentElement
@@ -171,7 +186,6 @@ test("an open picker follows scrolling and dismisses without taking editor focus
     await page.getByRole("listbox").waitFor({ state: "hidden" })
     expect(await field.locator("[data-mention-kind]").count()).toBe(1)
     await field.fill("+")
-    await field.press("End")
     await expectPopup(page)
     await page.getByRole("heading", { name: "New chat" }).click()
     await page.getByRole("listbox").waitFor({ state: "hidden" })
@@ -188,9 +202,11 @@ test("an open picker follows scrolling and dismisses without taking editor focus
 
 async function selectEachKind(page: Page) {
   const field = page.getByRole("textbox", { name: "Message" })
+  // Filling leaves the caret after the sigil. No End after it: on macOS End
+  // scrolls the nearest scroller to its end instead of moving the caret,
+  // which took the caret, and the picker anchored to it, off the screen.
   for (const sigil of ["+", "@", "#", "/"]) {
     await field.fill(sigil)
-    await field.press("End")
     await expectPopup(page)
     expect(
       await field.evaluate((node) => node === document.activeElement)
@@ -198,7 +214,9 @@ async function selectEachKind(page: Page) {
     const options = page.getByRole("option")
     const count = await options.count()
     expect(count).toBeGreaterThan(0)
-    // Up wraps to the last row, which must scroll into view.
+    // Up wraps to the last row, which must scroll into view: the list's
+    // own view, and never the page under it.
+    const before = await scrollPositions(page)
     await field.press("ArrowUp")
     await page.waitForFunction(() => {
       const selected = document.querySelector(
@@ -218,6 +236,7 @@ async function selectEachKind(page: Page) {
       )
     })
     await expectPopup(page)
+    expect(await scrollPositions(page)).toEqual(before)
     await field.press("Tab")
     await page.getByRole("listbox").waitFor({ state: "hidden" })
     expect(await field.locator("[data-mention-kind]").count()).toBe(1)
@@ -225,4 +244,19 @@ async function selectEachKind(page: Page) {
       await field.evaluate((node) => node === document.activeElement)
     ).toBe(true)
   }
+}
+
+/** The page's and the field's scroller's positions: a step through the
+ *  list must move neither. */
+function scrollPositions(page: Page) {
+  return page.getByRole("textbox", { name: "Message" }).evaluate((field) => {
+    let scroller = field.parentElement
+    while (
+      scroller !== null &&
+      getComputedStyle(scroller).overflowY !== "auto"
+    ) {
+      scroller = scroller.parentElement
+    }
+    return [window.scrollX, window.scrollY, scroller?.scrollTop ?? 0]
+  })
 }
