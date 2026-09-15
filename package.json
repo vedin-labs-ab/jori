@@ -2,6 +2,8 @@
   "name": "jori",
   "private": true,
   "license": "AGPL-3.0-or-later",
+  "repository": "github:vedin-labs-ab/jori",
+  "homepage": "https://usejori.com",
   "version": "0.0.1",
   "type": "module",
   "packageManager": "pnpm@12.4.1",
