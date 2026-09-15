@@ -11,8 +11,8 @@ test("job and file previews keep a compact, balanced window around the query", (
     throw new Error("Demo file fixture is missing")
   }
   file.text = text
-  const results = demoResults(state, "into").filter((hit) =>
-    [state.jobs[0].id, file.id].includes(hit.resourceId)
+  const results = demoResults(state, "into").filter(
+    (hit) => hit.resourceId === state.jobs[0].id || hit.resourceId === file.id
   )
   expect(results).toHaveLength(2)
   for (const hit of results) {
