@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react"
 import { expect, test } from "vitest"
 import { Subprocessors } from "./subprocessors"
 
-test("discloses Google Cloud image processing alongside the core providers", () => {
+test("discloses image processing and workspace search alongside the core providers", () => {
   render(<Subprocessors />)
   const link = screen.getByRole("link", { name: "Google Cloud" })
   expect(link.getAttribute("href")).toBe(
@@ -16,5 +16,15 @@ test("discloses Google Cloud image processing alongside the core providers", () 
   expect(row?.querySelector("img")?.getAttribute("src")).toBe(
     "/logos/subprocessors/google.png"
   )
-  expect(within(screen.getByRole("list")).getAllByRole("link")).toHaveLength(9)
+  const search = screen.getByRole("link", { name: "turbopuffer" })
+  expect(search.getAttribute("href")).toBe(
+    "https://turbopuffer.com/docs/security"
+  )
+  expect(search.closest("li")?.textContent).toBe(
+    "turbopuffer Indexes workspace content and powers search in your region."
+  )
+  expect(search.closest("li")?.querySelector("img")?.getAttribute("src")).toBe(
+    "/logos/subprocessors/turbopuffer.svg"
+  )
+  expect(within(screen.getByRole("list")).getAllByRole("link")).toHaveLength(10)
 })

@@ -28,6 +28,12 @@ const subprocessors: readonly Subprocessor[] = [
     purpose: "Stores the data, including sign-in sessions.",
   },
   {
+    logo: "/logos/subprocessors/turbopuffer.svg",
+    name: "turbopuffer",
+    url: "https://turbopuffer.com/docs/security",
+    purpose: "Indexes workspace content and powers search in your region.",
+  },
+  {
     ink: true,
     logo: "/logos/subprocessors/vercel.svg",
     name: "Vercel",

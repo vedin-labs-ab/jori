@@ -7,7 +7,9 @@ import terms from "./legal/terms.md?raw"
 import { MarketingShell } from "./shell"
 
 export function PrivacyPage() {
-  return <LegalDocument title="Privacy policy" text={privacy} />
+  return (
+    <LegalDocument title="Privacy policy" text={privacy} updated="2026-09-15" />
+  )
 }
 
 export function TermsPage() {
@@ -15,10 +17,24 @@ export function TermsPage() {
 }
 
 export function DpaPage() {
-  return <LegalDocument title="Data processing agreement" text={dpa} />
+  return (
+    <LegalDocument
+      title="Data processing agreement"
+      text={dpa}
+      updated="2026-09-15"
+    />
+  )
 }
 
-function LegalDocument({ title, text }: { title: string; text: string }) {
+function LegalDocument({
+  title,
+  text,
+  updated = termsVersion,
+}: {
+  title: string
+  text: string
+  updated?: string
+}) {
   const sections = text
     .trim()
     .split(/^## /m)
@@ -41,7 +57,15 @@ function LegalDocument({ title, text }: { title: string; text: string }) {
             {title}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Last updated <time dateTime={termsVersion}>13 September 2026</time>
+            Last updated{" "}
+            <time dateTime={updated}>
+              {new Intl.DateTimeFormat("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                timeZone: "UTC",
+              }).format(new Date(updated))}
+            </time>
           </p>
           <nav
             aria-label="Legal documents"

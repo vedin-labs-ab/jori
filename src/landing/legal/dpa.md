@@ -22,7 +22,7 @@ data for our own advertising or general-purpose model training.
 
 - **Purpose and subject matter:** providing Jori's AI workspace and carrying out
   your tasks, including authorised actions in connected services.
-- **Operations:** collecting, storing, organising, retrieving, analysing,
+- **Operations:** collecting, storing, organising, indexing, retrieving, analysing,
   generating, transmitting and deleting content as instructed.
 - **People:** workspace users and people mentioned in customer content,
   such as staff, customers, suppliers and correspondents.
@@ -104,6 +104,7 @@ applications and chosen recipients also process data under their own terms.
 | Provider | What it receives and does | Configuration |
 | --- | --- | --- |
 | [Convex](https://www.convex.dev/legal/privacy) | Workspace records, files and credentials; database, storage and backend | Separate EU and US deployments |
+| [turbopuffer](https://turbopuffer.com/docs/security) | Search queries, resource titles, extracted text and resource/access metadata; search index storage and embedding inference | Indexes in Ireland for EU workspaces and North Virginia for US workspaces; embedding inference in the EU or US respectively |
 | [Vercel](https://vercel.com/legal/privacy-policy) | Web requests and related operational data; website and application hosting | Regional application configuration; global edge and platform operations |
 | [Blaxel](https://blaxel.ai/company/security) | Task files, commands and outputs; isolated code execution | Frankfurt for EU, North Virginia for US |
 | [OpenRouter](https://openrouter.ai/privacy/) and its model hosts | Relevant prompts, task context and outputs; AI inference | Regional endpoints with no-training and zero-retention routing requirements |
@@ -113,6 +114,12 @@ applications and chosen recipients also process data under their own terms.
 | [PostHog](https://posthog.com/privacy) | Consented page analytics and browser identifiers | Regional projects; no chat or file content |
 | [Stripe](https://stripe.com/privacy) | Billing identity, payment and transaction details | Global processing; also acts as an independent controller for some purposes |
 | [Zoho](https://www.zoho.com/privacy.html) | Support correspondence sent to Jori | EU mail account; send only content needed for support |
+
+turbopuffer provides native embedding inference using Cohere Embed v4 through
+its [embedding providers](https://turbopuffer.com/docs/security/subprocessors).
+Those providers process embedding inputs without training on them or retaining
+them beyond the request. This does not remove the stored text and embeddings
+from Jori's search index, which follows the return and deletion terms above.
 
 OpenRouter's downstream hosts depend on the selected model and route. Contact
 support for the current applicable host list and transfer information. Analytics,

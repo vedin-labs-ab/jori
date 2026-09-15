@@ -30,6 +30,20 @@ Required account and payment information is needed to provide the relevant
 service. Connecting other services and providing task content is your choice,
 but some features need that access to work.
 
+## Workspace search
+
+We use turbopuffer to make workspace content searchable by name and meaning.
+It receives search queries and stores an index of resource titles, extracted
+text and metadata identifying resources and who can access them. It also
+creates and stores numerical representations of text, called embeddings,
+to find related content. Jori checks your current access before returning results.
+
+Search indexes are stored in your workspace's EU or US region. Embedding
+inference is configured for the same EU or US geography. turbopuffer's
+embedding providers do not train on these inputs or retain them beyond the
+request; the stored search index remains subject to our workspace retention
+and deletion rules. See the [provider list](/dpa#providers) for details.
+
 ## Connected services and AI
 
 You choose which services to connect and approve their access permissions.
@@ -131,4 +145,3 @@ has provided personal data so we can investigate and remove it where appropriate
 
 We will date updates to this policy and notify you of material changes where
 required. A change to this policy does not replace consent where consent is needed.
-
