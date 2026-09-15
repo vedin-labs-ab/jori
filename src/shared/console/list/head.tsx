@@ -24,6 +24,7 @@ import {
 import { TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
+import { flushButtonClassName } from "../flush"
 import {
   type FacetEntry,
   facetSelection,
@@ -32,13 +33,20 @@ import {
   toggledFacet,
 } from "./controls"
 
-// Keep the label on the column's text grid, with room for the hover
-// background already reserved so a dismissed menu cannot resize columns.
-const headButtonClassName = "-ml-2 px-2 font-medium"
+// Header-embedded list controls: each header cell houses a small stock
+// ghost button, flush with the column's text grid at rest; the cell itself
+// is not the control. Columns are sized by their content, so the padding
+// the button grows on hover is borrowed from a margin reserved at rest and
+// the column never changes width: the surface runs from the label to the
+// column's own edge.
+const headButtonClassName = cn(
+  flushButtonClassName,
+  "mr-2 font-medium hover:-mr-2 focus-visible:-mr-2 aria-expanded:-mr-2"
+)
 
-// An active sort or filter keeps the ghost hover background, so what is
+// An active sort or filter keeps the grown, ghost-hover state, so what is
 // shaping the list stays marked after the pointer leaves.
-const activeClassName = "bg-muted px-2 text-foreground dark:bg-muted/50"
+const activeClassName = "-mr-2 bg-muted px-2 text-foreground dark:bg-muted/50"
 
 function isFiltering(controls: ListControls, facets: FacetEntry[]) {
   return facets.some((facet) => controls.isFacetActive(facet.key))
@@ -63,7 +71,7 @@ export function SortHead({
 
   return (
     <TableHead aria-sort={ariaSort(direction)} className={className}>
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center">
         <Button
           className={cn(
             headButtonClassName,

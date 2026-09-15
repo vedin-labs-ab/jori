@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { flushButtonClassName } from "../../flush"
 import { ConsoleLink } from "../../shell/link"
 import { SegmentSwatch } from "./legend"
 import {
@@ -69,12 +70,11 @@ function RankedTable({ noun, rows }: { noun: string; rows: ReactNode[] }) {
           {expanded ? rows : rows.slice(0, rankedCutoff)}
           {rows.length <= rankedCutoff ? null : (
             // The way to the rest is the table's last line, inside its
-            // frame: flush with the names at rest, and hovering grows the
-            // padding back, the same move the list headers make.
+            // frame, flush with the names at rest like the list headers.
             <TableRow className="hover:bg-transparent">
               <TableCell colSpan={6}>
                 <Button
-                  className="px-0 hover:px-2 focus-visible:px-2"
+                  className={flushButtonClassName}
                   onClick={() => setExpanded(!expanded)}
                   size="sm"
                   type="button"
