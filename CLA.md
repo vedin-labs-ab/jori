@@ -53,9 +53,9 @@ agreement for that Contribution ends the day the litigation is filed.
 ## 5. What Vedin Labs promises
 
 Vedin Labs will keep releasing Jori under a license approved by the Open
-Source Initiative. This agreement lets Vedin Labs also offer your
-Contributions under other terms, for example alongside components sold
-commercially, but not withdraw Jori from open source.
+Source Initiative. This agreement lets Vedin Labs also license your
+Contributions under other terms, including commercial terms, but not withdraw
+Jori from open source.
 
 ## 6. No obligations, no warranty
 

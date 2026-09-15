@@ -7,7 +7,8 @@ import { LogoImage } from "@/shared/logo/image"
  * A mark drawn in one dark ink is flagged so it flips on a dark ground;
  * PostHog's holds its colors around a black hog, so it swaps to the
  * white-hog file there instead.
- * This is a platform-provider summary, not a substitute for the DPA register.
+ * Purposes only: regions per provider and the full register are the DPA's,
+ * and the list links there.
  */
 type Subprocessor = {
   /** The file for a dark ground, when the mark keeps colors around a black ink. */
@@ -25,95 +26,106 @@ const subprocessors: readonly Subprocessor[] = [
     logo: "/logos/subprocessors/convex.svg",
     name: "Convex",
     url: "https://convex.dev",
-    purpose: "Stores the data, including sign-in sessions.",
+    purpose: "Stores workspace data and sign-in sessions.",
   },
   {
     logo: "/logos/subprocessors/turbopuffer.svg",
     name: "turbopuffer",
     url: "https://turbopuffer.com/docs/security",
-    purpose: "Indexes workspace content and powers search in your region.",
+    purpose: "Indexes workspace content for search.",
   },
   {
     ink: true,
     logo: "/logos/subprocessors/vercel.svg",
     name: "Vercel",
     url: "https://vercel.com/legal/dpa",
-    purpose: "Hosts the application and serves requests through its CDN.",
+    purpose: "Hosts and serves the application.",
   },
   {
     logo: "/logos/subprocessors/blaxel.svg",
     name: "Blaxel",
     url: "https://blaxel.ai",
-    purpose: "Runs sandboxed code in your workspace's region.",
+    purpose: "Runs sandboxed code.",
   },
   {
     ink: true,
     logo: "/logos/subprocessors/bird.svg",
     name: "Bird",
     url: "https://bird.com",
-    purpose: "Delivers Jori's email.",
+    purpose: "Sends Jori's email.",
   },
   {
     logo: "/logos/subprocessors/parallel.svg",
     name: "Parallel",
     url: "https://trust.parallel.ai",
-    purpose: "Processes web-search queries and fetches requested pages.",
+    purpose: "Runs web searches and fetches pages.",
   },
   {
     ink: true,
     logo: "/logos/subprocessors/openrouter.svg",
     name: "OpenRouter",
     url: "https://openrouter.ai",
-    purpose: "Routes model calls to the provider.",
+    purpose: "Routes model calls to the model host.",
   },
   {
     logo: "/logos/subprocessors/google.png",
     name: "Google Cloud",
     url: "https://cloud.google.com/terms/data-processing-addendum",
-    purpose: "Processes image-generation prompts and creates images.",
+    purpose: "Generates images from prompts.",
   },
   {
     dark: "/logos/subprocessors/posthog-dark.svg",
     logo: "/logos/subprocessors/posthog.svg",
     name: "PostHog",
     url: "https://posthog.com",
-    purpose: "Measures website and product usage.",
+    purpose: "Measures usage, if you accept analytics.",
   },
   {
     logo: "/logos/subprocessors/stripe.svg",
     name: "Stripe",
     url: "https://stripe.com/privacy",
-    purpose:
-      "Handles billing and payments, including its own legal obligations.",
+    purpose: "Handles billing and payments.",
   },
 ]
 
 export function Subprocessors() {
   return (
-    <ul className="mt-0.5 grid gap-2.5">
-      {subprocessors.map(({ dark, ink, logo, name, purpose, url }) => (
-        // Each row is one line, so the mark centres against it rather than
-        // hanging from a hand-tuned offset that only holds at one text size.
-        <li className="flex items-center gap-2.5" key={name}>
-          <LogoImage
-            className="size-4 object-contain"
-            dark={dark}
-            ink={ink}
-            src={logo}
-          />
-          <p>
-            <a
-              className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
-              href={url}
-              rel="noreferrer"
-              target="_blank"
-            >
-              {name}
-            </a>{" "}
-            {purpose}
-          </p>
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul className="mt-0.5 grid gap-2.5">
+        {subprocessors.map(({ dark, ink, logo, name, purpose, url }) => (
+          // Each row is one line, so the mark centres against it rather than
+          // hanging from a hand-tuned offset that only holds at one text size.
+          <li className="flex items-center gap-2.5" key={name}>
+            <LogoImage
+              className="size-4 object-contain"
+              dark={dark}
+              ink={ink}
+              src={logo}
+            />
+            <p>
+              <a
+                className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+                href={url}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {name}
+              </a>{" "}
+              {purpose}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-3">
+        Full list, with regions per provider, in the{" "}
+        <a
+          className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+          href="/dpa#providers"
+        >
+          DPA
+        </a>
+        .
+      </p>
+    </>
   )
 }

@@ -5,4 +5,4 @@ issues, and security reports go through [SECURITY.md](SECURITY.md).
 
 When pull requests open, each contributor signs the
 [contributor license agreement](CLA.md) once, on their first pull request,
-through a bot. Pull requests sent before then are closed unmerged.
+through a bot. Until then, pull requests are closed.

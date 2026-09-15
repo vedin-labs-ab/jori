@@ -7,7 +7,7 @@ import { TrustPage } from "@/landing/trust"
  *  is sent to. */
 const title = "AI access controls, approvals, and data regions · Jori"
 const description =
-  "Control what Jori can access, approve actions, and inspect every run. Choose EU or US workspace storage and see which services process data outside your region."
+  "Control what Jori can access, approve actions, and inspect every run. EU or US data residency, GDPR, and open source code you can read."
 
 export const Route = createFileRoute("/trust")({
   component: TrustPage,

@@ -50,7 +50,7 @@ const tiers: readonly Tier[] = [
     label: "Self-hosted",
     title: ["The workspace is yours.", "So is the upkeep."],
     price: "Free",
-    priceNote: "for any use",
+    priceNote: "open source",
     facts: [
       {
         icon: Users,

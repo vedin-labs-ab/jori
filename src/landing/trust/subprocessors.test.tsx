@@ -10,9 +10,7 @@ test("discloses image processing and workspace search alongside the core provide
     "https://cloud.google.com/terms/data-processing-addendum"
   )
   const row = link.closest("li")
-  expect(row?.textContent).toBe(
-    "Google Cloud Processes image-generation prompts and creates images."
-  )
+  expect(row?.textContent).toBe("Google Cloud Generates images from prompts.")
   expect(row?.querySelector("img")?.getAttribute("src")).toBe(
     "/logos/subprocessors/google.png"
   )
@@ -21,10 +19,13 @@ test("discloses image processing and workspace search alongside the core provide
     "https://turbopuffer.com/docs/security"
   )
   expect(search.closest("li")?.textContent).toBe(
-    "turbopuffer Indexes workspace content and powers search in your region."
+    "turbopuffer Indexes workspace content for search."
   )
   expect(search.closest("li")?.querySelector("img")?.getAttribute("src")).toBe(
     "/logos/subprocessors/turbopuffer.svg"
   )
   expect(within(screen.getByRole("list")).getAllByRole("link")).toHaveLength(10)
+  expect(screen.getByRole("link", { name: "DPA" }).getAttribute("href")).toBe(
+    "/dpa#providers"
+  )
 })
