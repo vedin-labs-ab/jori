@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { stopRun } from "../../runs/tree"
 import { moveConversationUsage } from "./move"
 
@@ -19,6 +20,7 @@ export async function purgeConversation(
   }
 
   await ctx.db.delete(conversation._id)
+  await mark(ctx, conversation.organizationId, conversation._id)
   // The folder sweep budgets one row per chat; its contents run separately.
   await ctx.scheduler.runAfter(0, internal.conversations.filing.delete.sweep, {
     conversationId: conversation._id,

@@ -1,9 +1,11 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import { tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
 import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
 import { type Id } from "../_generated/dataModel"
 import { fileResource } from "./filing"
+
+vi.mock("../discovery/sync/intent")
 
 const other = "persons:other" as Id<"persons">
 

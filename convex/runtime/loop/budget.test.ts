@@ -1,4 +1,4 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import { databaseContext } from "../../../test/convex/database"
 import { type Doc } from "../../_generated/dataModel"
 import { budgetError, budgetSequence, checkTurnBudget } from "./budget"
@@ -91,3 +91,5 @@ async function liveRun(
     createdAt: 0,
   })
 }
+
+vi.mock("../../discovery/sync/intent", () => ({ mark: vi.fn() }))

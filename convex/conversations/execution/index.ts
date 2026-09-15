@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { checkRunBudget } from "../../billing/guard"
+import { mark } from "../../discovery/sync/intent"
 import { conversationScope } from "../../integrations/messages/audience"
 import { messageReplyTargetIdentifier } from "../../integrations/messages/identifiers"
 import { resolveMessageOwner } from "../../messages/data"
@@ -176,8 +177,7 @@ async function insertRun(
     args.message
   )
   const folderId = args.conversation.folderId
-
-  return await ctx.db.insert("runs", {
+  const runId = await ctx.db.insert("runs", {
     organizationId: args.message.organizationId,
     cause: {
       type: "message",
@@ -204,6 +204,10 @@ async function insertRun(
     createdBy: args.createdBy,
     createdAt: args.now,
   })
+
+  await mark(ctx, args.message.organizationId, runId)
+
+  return runId
 }
 
 async function stopStaleRun(ctx: MutationCtx, runId: Id<"runs">) {

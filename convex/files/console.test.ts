@@ -10,10 +10,14 @@ import {
   swapFileBlob,
 } from "./records"
 
+vi.mock("../discovery/sync/intent")
+
 const owner = "person-owner" as Id<"persons">
 const other = "person-other" as Id<"persons">
 const storageId = "storage-id" as Id<"_storage">
 const fileId = "file-id" as Id<"files">
+const folderId = "folder-id" as Id<"folders">
+const nextStorageId = "storage-next" as Id<"_storage">
 
 function uploadedBlob() {
   return { get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })) }
@@ -47,7 +51,6 @@ test("records console uploads with storage metadata and defaults", async () => {
 })
 
 test("uploads stamp the folder when creation names one", async () => {
-  const folderId = "folder-id" as Id<"folders">
   const insert = vi.fn(async () => fileId)
   const ctx = fileContext({
     insert,
@@ -72,7 +75,6 @@ test("uploads stamp the folder when creation names one", async () => {
 })
 
 test("uploads reject a folder from another organization", async () => {
-  const folderId = "folder-id" as Id<"folders">
   const ctx = fileContext({
     insert: vi.fn(),
     get: vi.fn(async () => ({ _id: folderId, organizationId: "elsewhere" })),
@@ -112,7 +114,6 @@ test("deleting a file takes its blob and share links with the row", async () => 
 })
 
 test("replacing content swaps the blob and updates the row", async () => {
-  const nextStorageId = "storage-next" as Id<"_storage">
   const storageDelete = vi.fn(async () => undefined)
   const patch = vi.fn(async () => undefined)
   const ctx = fileContext(
@@ -139,7 +140,6 @@ test("replacing content swaps the blob and updates the row", async () => {
 })
 
 test("replacing content rejects a missing upload and hidden files", async () => {
-  const nextStorageId = "storage-next" as Id<"_storage">
   const ctx = fileContext(
     {
       get: vi.fn(async () => personalFile()),

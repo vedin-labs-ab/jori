@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 import {
   type StoreOverrides,
   storeDoc,
@@ -10,6 +10,8 @@ import { storeSpec } from "../stores/spec"
 import { tableSpec } from "../tables/spec"
 import { deleteDocument, insertDocuments, writeDocument } from "./documents"
 import { type CollectionDoc } from "./spec"
+
+vi.mock("../discovery/sync/intent")
 
 async function createStore(
   database: TestDatabase,

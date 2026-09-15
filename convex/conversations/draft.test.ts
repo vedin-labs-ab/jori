@@ -61,3 +61,5 @@ test("a thread with no session yet has no draft", async () => {
     )
   ).toBeNull()
 })
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

@@ -5,6 +5,8 @@ import { tableSpec } from "../tables/spec"
 import { insertDocuments, pageDocuments } from "./documents"
 import { type CollectionDoc } from "./spec"
 
+vi.mock("../discovery/sync/intent")
+
 async function createTable(database: TestDatabase) {
   const tableId = await database.insert("collections", tableDoc())
 

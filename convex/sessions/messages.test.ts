@@ -95,3 +95,5 @@ test("follow-up context resolves against current access rather than stored resou
   expect(formatted.context).not.toContain("Private renewal strategy")
   expect(formatted.context).toContain("no longer available")
 })
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

@@ -53,3 +53,5 @@ test("chat sharing uses the common owner-only visibility mutation", async () => 
     changeVisibility(ctx, { ...args, visibility: { mode: "private" } })
   ).rejects.toThrow("Only the owner")
 })
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

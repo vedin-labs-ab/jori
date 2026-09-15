@@ -1,5 +1,6 @@
 import { v } from "convex/values"
 import { internalMutation, internalQuery } from "../_generated/server"
+import { mark } from "../discovery/sync/intent"
 import { readRunInput } from "./agent/input/read"
 import { isRunExecutable } from "./execution/guard"
 
@@ -33,6 +34,7 @@ export const finish = internalMutation({
     }
 
     await ctx.db.patch(args.runId, { result: args.result })
+    await mark(ctx, run.organizationId, run._id)
 
     return null
   },

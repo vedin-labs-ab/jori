@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import {
   executesAsOrganization,
   executionPrincipalForVisibility,
@@ -50,6 +51,7 @@ export async function updateJob(ctx: MutationCtx, args: UpdateJobArgs) {
   }
 
   await ctx.db.patch(args.jobId, patch)
+  await mark(ctx, args.organizationId, args.jobId)
   if (
     args.trigger !== undefined &&
     existing.type === "event" &&

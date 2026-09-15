@@ -7,6 +7,8 @@ import { pauseJob, removeJob } from "./control"
 import { getOrganizationJob, getRequiredJob } from "./read"
 import { cancelTrigger } from "./trigger"
 
+vi.mock("../../discovery/sync/intent")
+
 vi.mock("../subscriptions/data", () => ({ releaseSubscription: vi.fn() }))
 vi.mock("./children", () => ({ deleteOwnedJobs: vi.fn() }))
 vi.mock("./read", () => ({

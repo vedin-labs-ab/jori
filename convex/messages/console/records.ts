@@ -2,6 +2,7 @@ import { type ReplyPart } from "../../../contracts/replies/parts"
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { insertRow } from "../../retention/write"
 import { clearRunDraft } from "../../runs/execution/drafts/data"
 import { findSession } from "../../sessions/read"
@@ -82,6 +83,7 @@ export async function insertConsoleMessage(
   })
 
   await ctx.db.patch(input.conversation._id, { updatedAt: input.now })
+  await mark(ctx, input.conversation.organizationId, message._id)
 
   return message
 }

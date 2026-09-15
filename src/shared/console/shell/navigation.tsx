@@ -45,6 +45,7 @@ export function ConsoleSidebar({
   organization,
   pathname,
   platform,
+  search,
 }: {
   account: ReactNode
   /** The person's conversations, most recent first. */
@@ -54,6 +55,7 @@ export function ConsoleSidebar({
   pathname: string
   /** The `PlatformNavigation`, or nothing, which gives the folder tree the room. */
   platform: ReactNode
+  search?: ReactNode
 }) {
   const { setOpenMobile } = useSidebar()
   const previousPath = useRef(pathname)
@@ -76,7 +78,12 @@ export function ConsoleSidebar({
       // The input owns Escape while renaming inside the mobile sheet.
       onEscapeKeyDown={onCloseAutoFocus}
     >
-      <SidebarHeader>{organization}</SidebarHeader>
+      <SidebarHeader>
+        <div className="flex items-center gap-1">
+          <div className="min-w-0 flex-1">{organization}</div>
+          {search}
+        </div>
+      </SidebarHeader>
       <SidebarContent>
         {consoleNavigation.map((group, index) => (
           <Fragment key={group.label ?? index}>

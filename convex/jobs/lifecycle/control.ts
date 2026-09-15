@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { releaseSubscription } from "../subscriptions/data"
 import { deleteOwnedJobs } from "./children"
 import { getOrganizationJob, getRequiredJob } from "./read"
@@ -33,6 +34,7 @@ export async function pauseJob(
     status: "paused",
     updatedAt: Date.now(),
   })
+  await mark(ctx, job.organizationId, job._id)
   await deleteOwnedJobs(ctx, job._id)
 
   return await getRequiredJob(ctx, job._id)
@@ -70,6 +72,7 @@ export async function resumeJob(
     status: "active",
     updatedAt: now,
   })
+  await mark(ctx, job.organizationId, job._id)
 
   return await getRequiredJob(ctx, job._id)
 }
@@ -85,6 +88,7 @@ export async function removeJob(
 
   await stopJob(ctx, job)
   await ctx.db.delete(job._id)
+  await mark(ctx, job.organizationId, job._id)
   await deleteOwnedJobs(ctx, job._id)
 
   return { deleted: true, jobId: job._id }

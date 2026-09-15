@@ -6,6 +6,7 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { conversationMessages } from "../../messages/read"
 import { getActorDisplayName, getActorKind } from "../../shared/actor"
 import { type MessageSurface } from "../../shared/integrations"
@@ -74,6 +75,10 @@ export const commit = internalMutation({
       summarizedAt: args.summarizedAt,
       summary: summary === "" ? undefined : summary,
     })
+
+    if (conversation.surface === "console") {
+      await mark(ctx, conversation.organizationId, conversation._id)
+    }
   },
 })
 

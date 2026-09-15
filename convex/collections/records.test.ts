@@ -11,6 +11,8 @@ import {
   updateCollection,
 } from "./records"
 
+vi.mock("../discovery/sync/intent")
+
 function purgeContext() {
   const runAfter = vi.fn(async () => {})
   const { database, ctx } = databaseContext({ scheduler: { runAfter } })

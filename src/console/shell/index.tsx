@@ -7,6 +7,7 @@ import {
 } from "@/shared/console/shell/navigation"
 import { mainContentId, SkipToContent } from "@/shared/skip"
 import { useSidebarChats } from "../chat/recent"
+import { SidebarSearch } from "../discovery"
 import { ConsoleEditing } from "../edit"
 import { ConsoleFolderDrag } from "../folders/drag/context"
 import { SidebarFolders } from "../folders/section"
@@ -45,6 +46,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
                 folders={<SidebarFolders pathname={pathname} />}
                 organization={<SidebarOrganizationSwitcher />}
                 pathname={pathname}
+                search={<SidebarSearch chats={chats} />}
                 platform={<PlatformNavigation pathname={pathname} />}
               />
             }

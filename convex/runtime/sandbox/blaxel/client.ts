@@ -37,16 +37,18 @@ function configure() {
   return connection
 }
 
-export async function createSandbox() {
+export async function createSandbox(image?: string, idleTTL = "1h") {
   const connection = configure()
   // Opaque names keep workspace and customer identifiers out of control-plane metadata.
   const sandbox = await SandboxInstance.create({
     name: `${connection.prefix}${crypto.randomUUID()}`,
-    image: sandboxImage(),
+    image: image ?? sandboxImage(),
     region: connection.region,
     memory: 4096,
     lifecycle: {
-      expirationPolicies: [{ type: "ttl-idle", value: "1h", action: "delete" }],
+      expirationPolicies: [
+        { type: "ttl-idle", value: idleTTL, action: "delete" },
+      ],
       terminatedRetention: "5m",
     },
   })

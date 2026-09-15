@@ -2,6 +2,7 @@ import { type Infer } from "convex/values"
 import { type MessageContext } from "../../../contracts/replies/answers"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { resolveCreationFolder } from "../../folders/tree"
 import { type modelSelectionValidator } from "../../model/selection"
 import { loadReference, referenceTable } from "../../references/lookup"
@@ -44,6 +45,7 @@ export async function createConsoleConversation(
   })
 
   await ctx.db.patch(conversation._id, { externalId: conversation._id })
+  await mark(ctx, args.organizationId, conversation._id)
 
   return { ...conversation, externalId: conversation._id }
 }

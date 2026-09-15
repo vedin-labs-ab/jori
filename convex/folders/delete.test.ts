@@ -6,6 +6,8 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { recordUsageEnded } from "../usage/record"
 import { removeFolder } from "./records"
 
+vi.mock("../discovery/sync/intent")
+
 // Deleting a folder deletes its whole subtree. Everything filed anywhere
 // inside either follows the deleted folder's parent or dies with the
 // folders, depending on what the deleting person asked for.

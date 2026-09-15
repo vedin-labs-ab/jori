@@ -15,6 +15,7 @@ export const workspaceRetention = defineTable({
   noticeRetryAt: v.optional(v.number()),
   startedAt: v.optional(v.number()),
   completedAt: v.optional(v.number()),
+  discoveryErasedAt: v.optional(v.number()),
   blocked: v.optional(v.string()),
   stage: v.optional(v.number()),
   cursor: v.optional(v.string()),

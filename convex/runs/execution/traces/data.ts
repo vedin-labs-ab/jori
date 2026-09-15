@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { meterModelUsage } from "../../../billing/meter"
 import { continuePendingConversationRun } from "../../../conversations/continuation"
+import { mark } from "../../../discovery/sync/intent"
 import { recordUsageEnded } from "../../../usage/record"
 import { stopRunChildren } from "../../tree"
 import { clearRunDraft } from "../drafts/data"
@@ -145,7 +146,11 @@ async function patchRunStatus(
       endedAt: Date.now(),
     })
     await recordUsageEnded(ctx, { run, failed: true })
+  } else {
+    return
   }
+
+  await mark(ctx, run.organizationId, run._id)
 }
 
 // The outcome itself is written by `finish_run`, not read back off the trace.

@@ -14,6 +14,8 @@ import { listConsoleConversations, sendConsoleMessage } from "./console"
 import { readLiveState } from "./live"
 import { findVisibleConsoleConversation } from "./resolve"
 
+vi.mock("../discovery/sync/intent")
+
 // Starting a run hands it to the workflow component, which needs a real
 // backend; these tests are about the rows a console message writes.
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))

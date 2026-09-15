@@ -7,6 +7,8 @@ import { pauseJob, resumeJob } from "./control"
 import { createJob } from "./create"
 import { updateJob } from "./write"
 
+vi.mock("../../discovery/sync/intent")
+
 test.each([undefined, 1])(
   "rejects owned work from stale parent configuration %s",
   async (version) => {

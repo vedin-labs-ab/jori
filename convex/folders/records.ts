@@ -3,6 +3,7 @@ import { availableFolderName } from "../../contracts/folders/name"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { mark } from "../discovery/sync/intent"
 import { createSight } from "../visibility/sight"
 import { filedTables, purgeRow, refileRow } from "./filing"
 import { reparentSpend } from "./spend"
@@ -56,6 +57,8 @@ export async function createFolder(
     updatedAt: now,
   })
 
+  await mark(ctx, args.organizationId, folderId)
+
   return await requireOrganizationFolder(ctx, args.organizationId, folderId)
 }
 
@@ -73,6 +76,7 @@ export async function renameFolder(
     name: normalizeFolderName(args.name),
     updatedAt: Date.now(),
   })
+  await mark(ctx, folder.organizationId, folder._id)
 
   return await requireOrganizationFolder(ctx, args.organizationId, folder._id)
 }
@@ -115,6 +119,7 @@ export async function moveFolder(
     parentId: args.parentId,
     updatedAt: Date.now(),
   })
+  await mark(ctx, folder.organizationId, folder._id)
 
   return await requireOrganizationFolder(ctx, args.organizationId, folder._id)
 }
@@ -144,6 +149,7 @@ export async function removeFolder(
   // The folder leaves every listing at once; its descendants still name its
   // id, which is exactly what the sweep walks down from.
   await ctx.db.delete(folder._id)
+  await mark(ctx, folder.organizationId, folder._id)
   await sweepSubtree(ctx, {
     organizationId: args.organizationId,
     folderId: folder._id,
@@ -207,6 +213,7 @@ async function sweepSubtree(ctx: MutationCtx, args: SweepArgs) {
     // each one only once its own contents are settled.
     if (folderId !== args.folderId) {
       await ctx.db.delete(folderId)
+      await mark(ctx, args.organizationId, folderId)
     }
   }
 }

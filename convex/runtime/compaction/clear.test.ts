@@ -1,4 +1,4 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import { liveRun, traces, transcript } from "../../../test/convex/console"
 import { databaseContext } from "../../../test/convex/database"
 import {
@@ -112,3 +112,5 @@ test("a finished run is left alone", async () => {
 
   expect((await database.get(runId))?.compaction).toBeUndefined()
 })
+
+vi.mock("../../discovery/sync/intent", () => ({ mark: vi.fn() }))

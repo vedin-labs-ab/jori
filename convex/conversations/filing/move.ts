@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { moveUsageBucket } from "../../usage/record"
 import { audienceKey } from "../../visibility/execution"
 import { conversationGate, conversationVisibility } from "../access"
@@ -18,6 +19,7 @@ export async function fileConversation(
 ) {
   await resetChangedAudience(ctx, conversation, folderId, actorId)
   await ctx.db.patch(conversation._id, { folderId })
+  await mark(ctx, conversation.organizationId, conversation._id)
   const args = { conversationId: conversation._id, folderId }
 
   if (defer) {

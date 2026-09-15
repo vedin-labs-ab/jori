@@ -1,4 +1,4 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import { runDoc } from "../../test/convex/console"
 import {
   consoleContext,
@@ -184,3 +184,5 @@ test("provider conversations cannot become console sharing targets", async () =>
   }) as Doc<"runs">
   expect(await canSeeRun(ctx, run, undefined)).toBe(true)
 })
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

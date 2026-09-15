@@ -1,6 +1,7 @@
 import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { mark } from "../discovery/sync/intent"
 import { type Actor } from "../shared/actor"
 import { recordUsageEnded } from "../usage/record"
 import { clearRunDraft } from "./execution/drafts/data"
@@ -62,6 +63,7 @@ export async function stopRun(
     ...(stoppedBy === undefined ? {} : { stoppedBy }),
     endedAt: now,
   })
+  await mark(ctx, run.organizationId, run._id)
   // Only live runs reach here, so the count rides the one patch that ends
   // this run. A stop is an ending, not a failure.
   await recordUsageEnded(ctx, { run, failed: false })

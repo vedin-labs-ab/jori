@@ -5,6 +5,7 @@ import { purgeCollection } from "../collections/records"
 import { conversationGate } from "../conversations/access"
 import { purgeConversation } from "../conversations/filing/delete"
 import { fileConversation } from "../conversations/filing/move"
+import { mark } from "../discovery/sync/intent"
 import { purgeFile } from "../files/records"
 import { jobGate } from "../jobs/access"
 import { removeJob } from "../jobs/lifecycle"
@@ -150,6 +151,7 @@ export async function refileRow(
   folderId: Id<"folders"> | undefined
 ) {
   await registry[table].setFolder(ctx, row, folderId, true)
+  await mark(ctx, row.organizationId, row._id)
 }
 
 /** Permanently delete one filed row and everything only it owns — the
@@ -192,6 +194,7 @@ export async function fileResource(
   // Refiling is organization, not content: updatedAt stays untouched so
   // recency-ordered lists keep meaning "content changed".
   await entry.setFolder(ctx, row, folderId, false, args.personId)
+  await mark(ctx, row.organizationId, row._id)
 }
 
 async function loadRow(

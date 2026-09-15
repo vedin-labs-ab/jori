@@ -7,6 +7,8 @@ import { type MutationCtx } from "../_generated/server"
 import { createFolder, moveFolder, renameFolder } from "./records"
 import { maxTreeDepth } from "./tree"
 
+vi.mock("../discovery/sync/intent")
+
 const base = { organizationId: "org", personId: testOwner }
 
 async function createChain(ctx: MutationCtx, length: number) {

@@ -100,6 +100,7 @@ test("the staged deletion completes and retains only a permanent tombstone", asy
   vi.setSystemTime(Date.now() + 36 * 60_000)
   for (let batch = 0; batch < 100; batch++) {
     await t.mutation(internal.retention.deletion.step, { id })
+    await t.action(internal.discovery.sync.erasure.run, { id })
     const row = await t.run(async (ctx) => await ctx.db.get(id))
     if (row?.state === "deleted") {
       break

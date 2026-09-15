@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 import {
   type StoreOverrides,
   storeDoc,
@@ -134,3 +134,5 @@ describe("writing without a schema", () => {
     ).rejects.toThrow("must be object")
   })
 })
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

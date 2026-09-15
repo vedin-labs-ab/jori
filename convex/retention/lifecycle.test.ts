@@ -109,6 +109,7 @@ test("every app table is explicitly deleted, retained for billing, or platform s
     "allowlist",
     "waitlist",
     "models",
+    "discoveryScans",
   ]
   expect(Object.keys(schema.tables).sort()).toEqual(
     [...contentTables, ...excluded].sort()

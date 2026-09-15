@@ -88,3 +88,5 @@ test("choosing a model changes what the conversation's next run starts on", asyn
     (await readLiveState(ctx, await conversationOf(database, sent))).model
   ).toEqual(basic)
 })
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

@@ -73,3 +73,5 @@ test("creation rejects an inaccessible destination and send cannot move an exist
   ).rejects.toThrow("Move an existing chat using its folder controls.")
   expect((await database.get(sent.conversationId))?.folderId).toBeUndefined()
 })
+
+vi.mock("../../discovery/sync/intent", () => ({ mark: vi.fn() }))

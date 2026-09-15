@@ -1,6 +1,7 @@
 import { type Infer } from "convex/values"
 import { type Doc } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
+import { mark } from "../../../discovery/sync/intent"
 import { isWorkspaceDeleting } from "../../../retention/access"
 import { type traceData } from "./schema"
 
@@ -38,7 +39,8 @@ export async function recordTrace(
     return false
   }
 
-  await ctx.db.insert("traces", traceInsert(args))
+  const id = await ctx.db.insert("traces", traceInsert(args))
+  await mark(ctx, args.run.organizationId, id)
 
   return true
 }

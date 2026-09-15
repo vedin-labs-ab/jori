@@ -119,6 +119,12 @@ async function advance(ctx: MutationCtx, row: Doc<"workspaceRetention">) {
     })
     return drainRemaining
   }
+  if (!row.discoveryErasedAt) {
+    await ctx.scheduler.runAfter(0, internal.discovery.sync.erasure.run, {
+      id: row._id,
+    })
+    return 60_000
+  }
   if (stage < 6 + contentTables.length) {
     await purgeContent(ctx, row)
     return 0

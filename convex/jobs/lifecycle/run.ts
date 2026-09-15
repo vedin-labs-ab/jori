@@ -1,5 +1,6 @@
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { assertWorkspaceAvailable } from "../../retention/access"
 import { resolveRunAudience } from "../../runs/audience"
 import { startRun } from "../../runs/execution/workflow"
@@ -42,6 +43,7 @@ export async function createJobRun(
     createdAt: args.now,
   })
 
+  await mark(ctx, args.job.organizationId, runId)
   await ctx.db.patch(args.job._id, {
     firedAt: args.now,
     updatedAt: args.now,

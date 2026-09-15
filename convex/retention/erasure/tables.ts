@@ -2,6 +2,10 @@ import { type TableNames } from "../../_generated/dataModel"
 
 // Children precede parents so ownership stays provable during every batch.
 export const contentTables = [
+  "discoverySandboxes",
+  "discoveryPassages",
+  "discoverySources",
+  "discoveryQueues",
   "emailSubmissions",
   "documents",
   "sessions",

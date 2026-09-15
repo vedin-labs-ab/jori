@@ -189,3 +189,5 @@ test("a stale history batch cannot undo a newer move", async () => {
     )
   ).toBe(true)
 })
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

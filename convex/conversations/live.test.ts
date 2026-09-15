@@ -163,3 +163,5 @@ test("live reads hide session context as soon as the execution audience changes"
   const live = await readLiveState(ctx, await conversationOf(database, sent))
   expect(live).toEqual({ run: null, context: null, model: defaultSelection })
 })
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

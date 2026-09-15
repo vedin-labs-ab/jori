@@ -1,5 +1,6 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { stopRunTree } from "../../runs/tree"
 import { findSession } from "../../sessions/read"
 import { createPersonActor } from "../../shared/actor"
@@ -26,6 +27,7 @@ export async function transitionConversationVisibility(
     visibility,
     scope: visibility.mode === "private" ? "person" : "conversation",
   })
+  await mark(ctx, conversation.organizationId, conversation._id)
 }
 
 export async function resetConversationExecution(

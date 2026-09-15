@@ -5,6 +5,7 @@ import {
   internalQuery,
   type QueryCtx,
 } from "../_generated/server"
+import { mark } from "../discovery/sync/intent"
 import { assertWorkspaceAvailable } from "../retention/access"
 import { boundedNumber, optionalString } from "../shared/input"
 import {
@@ -28,8 +29,7 @@ export const record = internalMutation({
     await assertWorkspaceAvailable(ctx, args.organizationId)
     await requireUnusedUpload(ctx, args.storageId)
     const now = Date.now()
-
-    return await ctx.db.insert("files", {
+    const fileId = await ctx.db.insert("files", {
       ...args,
       ...(args.runId === undefined
         ? {}
@@ -40,6 +40,10 @@ export const record = internalMutation({
       createdAt: now,
       updatedAt: now,
     })
+
+    await mark(ctx, args.organizationId, fileId)
+
+    return fileId
   },
 })
 

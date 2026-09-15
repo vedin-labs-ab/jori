@@ -226,3 +226,5 @@ async function seedPrivateChats(
     })
   }
 }
+
+vi.mock("../discovery/sync/intent", () => ({ mark: vi.fn() }))

@@ -7,6 +7,7 @@ import { assertJsonSerializable } from "../../contracts/json/stable"
 import { assertJsonSchemaValue } from "../../contracts/schema/validate"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
+import { mark } from "../discovery/sync/intent"
 import { insertRow } from "../retention/write"
 import { type QueryLikeCtx } from "../shared/context"
 import { assertExpectedVersion } from "./input"
@@ -101,6 +102,8 @@ export async function writeDocument<K extends CollectionKind>(
   if (document === null) {
     const created = await createDocument(ctx, collection._id, resolved.value)
 
+    await mark(ctx, collection.organizationId, created._id)
+
     return { status: "written", document: created, created: true }
   }
 
@@ -108,6 +111,7 @@ export async function writeDocument<K extends CollectionKind>(
   const updated = { version: version + 1, value: resolved.value, updatedAt }
 
   await ctx.db.patch(document._id, updated)
+  await mark(ctx, collection.organizationId, document._id)
 
   return {
     status: "written",
@@ -155,9 +159,15 @@ export async function insertDocuments<K extends CollectionKind>(
   const inserted: Doc<"documents">[] = []
 
   for (const [index, value] of values.entries()) {
-    inserted.push(
-      await createDocument(ctx, collection._id, value, orders[index])
+    const document = await createDocument(
+      ctx,
+      collection._id,
+      value,
+      orders[index]
     )
+
+    await mark(ctx, collection.organizationId, document._id)
+    inserted.push(document)
   }
 
   return inserted
@@ -184,6 +194,7 @@ export async function deleteDocument<K extends CollectionKind>(
     spec.documentLabel(collection)
   )
   await ctx.db.delete(document._id)
+  await mark(ctx, collection.organizationId, document._id)
   await adjustDocumentCount(ctx, collection._id, -1)
 
   return document

@@ -129,3 +129,5 @@ test("the summarizer sees who spoke, what was called, and the fixed sections it 
   }
   expect(prompt).toContain("Stay under 1,500 tokens.")
 })
+
+vi.mock("../../discovery/sync/intent", () => ({ mark: vi.fn() }))

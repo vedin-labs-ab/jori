@@ -3,6 +3,7 @@ import { stableHash } from "../../contracts/json/stable"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { mark } from "../discovery/sync/intent"
 import { type ResourceViewer, resourceCreation } from "../visibility/resources"
 import { type StoredVisibility } from "../visibility/schema"
 import { getAccessibleCollection } from "./access"
@@ -45,6 +46,8 @@ export async function createCollection<K extends CollectionKind>(
     throw new Error(`${spec.label} creation failed.`)
   }
 
+  await mark(ctx, collection.organizationId, collection._id)
+
   return collection
 }
 
@@ -80,6 +83,7 @@ export async function updateCollection<K extends CollectionKind>(
       : authoringFields(spec, spec.evolve(collection, args.authoring))),
     updatedAt: Date.now(),
   })
+  await mark(ctx, collection.organizationId, collection._id)
 
   const updated = await ctx.db.get(collection._id)
 
@@ -103,6 +107,7 @@ export async function removeCollection<K extends CollectionKind>(
     const now = Date.now()
 
     await ctx.db.patch(collection._id, { archivedAt: now, updatedAt: now })
+    await mark(ctx, collection.organizationId, collection._id)
 
     return { collectionId: collection._id, archived: true as const }
   }
@@ -121,6 +126,7 @@ export async function purgeCollection(
   collection: CollectionDoc
 ) {
   await ctx.db.delete(collection._id)
+  await mark(ctx, collection.organizationId, collection._id)
   await purgeBatch(ctx, {
     collectionId: collection._id,
     kind: collection.kind,
@@ -140,6 +146,7 @@ export async function restoreCollection<K extends CollectionKind>(
     archivedAt: undefined,
     updatedAt: Date.now(),
   })
+  await mark(ctx, collection.organizationId, collection._id)
 
   return { collectionId: collection._id, restored: true as const }
 }

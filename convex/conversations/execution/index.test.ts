@@ -10,6 +10,8 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { startRun } from "../../runs/execution/workflow"
 import { startMessageRun } from "./index"
 
+vi.mock("../../discovery/sync/intent")
+
 // Starting a run hands it to the workflow component, which needs a real
 // backend; these tests are about the rows the start writes.
 vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))

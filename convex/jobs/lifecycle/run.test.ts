@@ -6,6 +6,8 @@ import { resolveRunAudience } from "../../runs/audience"
 import { startRun } from "../../runs/execution/workflow"
 import { createJobRun } from "./run"
 
+vi.mock("../../discovery/sync/intent")
+
 vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 vi.mock("../../runs/audience", () => ({ resolveRunAudience: vi.fn() }))
 

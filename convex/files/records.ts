@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { deleteTargetShares } from "../collections/shares"
+import { mark } from "../discovery/sync/intent"
 import { resolveCreationFolder } from "../folders/tree"
 import { type QueryLikeCtx } from "../shared/context"
 import { requiredString } from "../shared/input"
@@ -38,8 +39,7 @@ export async function insertUploadedFile(
   const metadata = await requireUnusedUpload(ctx, args.storageId)
 
   const now = Date.now()
-
-  return await ctx.db.insert("files", {
+  const fileId = await ctx.db.insert("files", {
     organizationId: viewer.organizationId,
     visibility,
     ownerId: viewer.personId,
@@ -55,6 +55,10 @@ export async function insertUploadedFile(
     createdAt: now,
     updatedAt: now,
   })
+
+  await mark(ctx, viewer.organizationId, fileId)
+
+  return fileId
 }
 
 export async function patchFileDetails(
@@ -70,6 +74,7 @@ export async function patchFileDetails(
       : { name: normalizeFileName(requiredString(args.name, "name")) }),
     updatedAt: Date.now(),
   })
+  await mark(ctx, file.organizationId, file._id)
 }
 
 /** Swaps the file's content for a freshly uploaded blob: the row keeps its
@@ -88,6 +93,7 @@ export async function swapFileBlob(
     size: metadata.size,
     updatedAt: Date.now(),
   })
+  await mark(ctx, file.organizationId, file._id)
   await deleteUnusedBlob(ctx, file.storageId)
 }
 
@@ -103,6 +109,7 @@ export async function removeFileWithBlob(
  * Reached through console, folder, and workspace deletion. */
 export async function purgeFile(ctx: MutationCtx, file: Doc<"files">) {
   await ctx.db.delete(file._id)
+  await mark(ctx, file.organizationId, file._id)
   await deleteTargetShares(ctx, { kind: "file", id: file._id })
   await deleteUnusedBlob(ctx, file.storageId)
 }

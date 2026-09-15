@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { checkRunBudget } from "../../billing/guard"
+import { mark } from "../../discovery/sync/intent"
 import { getTimeTriggerAt } from "../timing"
 import { hasInactiveParent } from "./children"
 import { createJobRun } from "./run"
@@ -50,18 +51,7 @@ export async function fireJob(
         })
       : null
 
-    if (job.parent === undefined) {
-      await ctx.db.patch(job._id, {
-        status: "completed",
-        trigger: {
-          ...job.trigger,
-          functionId: undefined,
-        },
-        updatedAt: now,
-      })
-    } else {
-      await ctx.db.delete(job._id)
-    }
+    await settleOnceJob(ctx, job, now)
 
     return runId === null ? null : { runId }
   }
@@ -84,6 +74,25 @@ export async function fireJob(
   })
 
   return runId === null ? null : { runId }
+}
+
+/** A fired one-shot job has done its work: a person's job stays as a
+ *  completed record, while one owned by another job goes with its firing. */
+async function settleOnceJob(ctx: MutationCtx, job: Doc<"jobs">, now: number) {
+  if (job.parent === undefined) {
+    await ctx.db.patch(job._id, {
+      status: "completed",
+      trigger: {
+        ...job.trigger,
+        functionId: undefined,
+      },
+      updatedAt: now,
+    })
+    await mark(ctx, job.organizationId, job._id)
+  } else {
+    await ctx.db.delete(job._id)
+    await mark(ctx, job.organizationId, job._id)
+  }
 }
 
 export async function startEventJobs(

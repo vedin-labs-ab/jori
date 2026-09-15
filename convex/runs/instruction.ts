@@ -1,6 +1,7 @@
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { requireRunBudget } from "../billing/guard"
+import { mark } from "../discovery/sync/intent"
 import { assertWorkspaceAvailable } from "../retention/access"
 import { type Access } from "../shared/integrations"
 import { resolveRunAudience } from "./audience"
@@ -73,6 +74,7 @@ export async function createInstructionRun(
     createdAt: Date.now(),
   })
 
+  await mark(ctx, args.organizationId, runId)
   await startRun(ctx, runId)
 
   return runId

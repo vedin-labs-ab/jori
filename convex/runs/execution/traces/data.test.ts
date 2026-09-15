@@ -1,9 +1,11 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import { databaseContext } from "../../../../test/convex/database"
 import { type Doc } from "../../../_generated/dataModel"
 import { stopRunTree } from "../../tree"
 import { readRunDraft, writeRunDraft } from "../drafts/data"
 import { recordWorkerTrace } from "./data"
+
+vi.mock("../../../discovery/sync/intent")
 
 test.each([
   ["completes", { type: "run.completed" as const }],

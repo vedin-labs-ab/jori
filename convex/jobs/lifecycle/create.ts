@@ -1,6 +1,7 @@
 import { defaultVisibilityForIntegrations } from "../../../contracts/visibility"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { mark } from "../../discovery/sync/intent"
 import { resolveCreationFolder } from "../../folders/tree"
 import { executionPrincipalForVisibility } from "../../runs/principal"
 import {
@@ -66,6 +67,8 @@ export async function createJob(
   if (trigger !== prepared.trigger) {
     await ctx.db.patch(jobId, { trigger })
   }
+
+  await mark(ctx, args.organizationId, jobId)
 
   return { ...(await getRequiredJob(ctx, jobId)), created: true }
 }

@@ -9,6 +9,13 @@ import { usageReceipts } from "./billing/usage/schema"
 import { collections, documents, shares } from "./collections/schema"
 import { conversations } from "./conversations/schema"
 import { beliefs, efforts, evidence, journal, passes } from "./deduction/schema"
+import { discoverySandboxes } from "./discovery/extraction/records"
+import {
+  discoveryPassages,
+  discoveryQueues,
+  discoveryScans,
+  discoverySources,
+} from "./discovery/schema"
 import { emailSubmissions } from "./email/schema"
 import { events } from "./events/schema"
 import { files } from "./files/schema"
@@ -46,6 +53,11 @@ import { usage } from "./usage/schema"
 import { waitlist } from "./waitlist/schema"
 
 export default defineSchema({
+  discoverySources,
+  discoveryQueues,
+  discoveryPassages,
+  discoveryScans,
+  discoverySandboxes,
   workspaceRetention,
   githubRecoveries,
   notionWebhookSetups,

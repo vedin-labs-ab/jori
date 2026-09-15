@@ -90,4 +90,11 @@ crons.interval(
   {}
 )
 
+crons.interval(
+  "discovery recovery",
+  { minutes: 1 },
+  internal.discovery.sync.sweep.run,
+  {}
+)
+
 export default crons

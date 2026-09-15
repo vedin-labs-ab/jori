@@ -5,6 +5,8 @@ import { checkRunBudget } from "../../billing/guard"
 import { fireJob } from "./fire"
 import { createJobRun } from "./run"
 
+vi.mock("../../discovery/sync/intent")
+
 vi.mock("../../billing/guard", () => ({ checkRunBudget: vi.fn() }))
 vi.mock("./run", () => ({ createJobRun: vi.fn() }))
 

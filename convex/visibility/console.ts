@@ -2,6 +2,7 @@ import { type Infer, v } from "convex/values"
 import { type MutationCtx, mutation, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { transitionConversationVisibility } from "../conversations/execution/sharing"
+import { mark } from "../discovery/sync/intent"
 import { filedResourceType, loadFiledGate } from "../folders/filing"
 import {
   ensureCurrentPerson,
@@ -222,6 +223,8 @@ export const set = mutation({
     } else {
       await ctx.db.patch(target.id, { visibility })
     }
+
+    await mark(ctx, args.organizationId, args.target.id)
 
     return null
   },

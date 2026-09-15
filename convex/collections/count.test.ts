@@ -1,9 +1,11 @@
-import { expect, test } from "vitest"
+import { expect, test, vi } from "vitest"
 import { tableDoc } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { tableSpec } from "../tables/spec"
 import { deleteDocument, insertDocuments } from "./documents"
 import { type CollectionDoc } from "./spec"
+
+vi.mock("../discovery/sync/intent")
 
 // The denormalized documentCount only ever moves inside the document write
 // chokepoint; these tests pin it to every way cardinality can change.
