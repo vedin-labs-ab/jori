@@ -17,6 +17,15 @@ const pages = [
   { icon: File, label: "File", path: `/files/${notesFileId}` },
 ]
 
+/** The tab for wherever the console is: stepping from the notes to the
+ *  next file, or up to the Files list, stays on File. Off the three
+ *  sections entirely, no tab is lit. */
+function activePath(pathname: string) {
+  const section = pathname.split("/")[1]
+
+  return pages.find((page) => page.path.split("/")[1] === section)?.path ?? ""
+}
+
 /** The materials pillar: the console's own page for a table, a store, and
  *  a file, one at a time, under the crumb that says where each lives. */
 export function Materials() {
@@ -53,7 +62,7 @@ export function Materials() {
       <Tabs
         className="mt-12"
         onValueChange={(path) => console.navigation.navigate(path)}
-        value={console.location.pathname}
+        value={activePath(console.location.pathname)}
       >
         <TabsList>
           {pages.map((page) => (
