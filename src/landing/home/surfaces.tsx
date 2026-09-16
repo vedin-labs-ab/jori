@@ -13,8 +13,8 @@ export function Surfaces() {
       lede={
         <>
           Mention <Jori tilt="right" /> in Slack, GitHub, or Linear and they
-          answer in the thread. When the answer is a table, a store, or a file,
-          it lands in the folder and the thread gets the link.
+          answer in the thread. Tables and files they create stay in your Jori
+          workspace, with links in the reply.
         </>
       }
       support
@@ -31,14 +31,12 @@ export function Surfaces() {
   )
 }
 
-/** The tools Jori reaches, as a quality claim rather than a count: these are
- *  modeled, not merely connected. Naming that is what stops a short list
- *  reading as a short list. */
+/** The accounts people can connect to Jori. */
 function Integrations() {
   return (
     <div>
       <p className="text-muted-foreground text-sm">
-        Each one modeled in depth, with its own tools and modes.
+        Connect the tools your team uses and choose what Jori can do in each.
       </p>
       <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
         {integrations.map((integration) => (
@@ -51,10 +49,6 @@ function Integrations() {
             {integrationLabels[integration]}
           </Chip>
         ))}
-        {/* Dashed, the way this system already marks something that is not
-            there yet. Depth first is the bet, but the list does grow, and a
-            row that reads as closed says otherwise. */}
-        <Chip className="border-dashed">+ more</Chip>
       </div>
     </div>
   )

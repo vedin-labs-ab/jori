@@ -8,10 +8,9 @@ export function ModesSection() {
     <Section
       lede={
         <>
-          Every tool is <ModeChip mode="allowed" /> outright,{" "}
-          <ModeChip mode="blocked" /> outright, or <ModeChip mode="prompted" />{" "}
-          every time. You set which for <Jori tilt="right" />, per action, per
-          account.
+          Choose what <Jori tilt="right" /> can do in each connected account.
+          Set tools to <ModeChip mode="allowed" />, <ModeChip mode="blocked" />,
+          or <ModeChip mode="prompted" />.
         </>
       }
       title="Every tool has a mode"
@@ -19,9 +18,9 @@ export function ModesSection() {
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
         <div className="space-y-5 text-muted-foreground text-sm leading-relaxed">
           <p className="max-w-xl">
-            Some tools read, some act. Reading is how Jori stays useful. Acting
-            is where you set the terms. Modes live in the console, and a change
-            takes effect on the next run.
+            You can allow Jori to read emails and draft replies while requiring
+            approval to send them. Change tool permissions in the console.
+            Changes take effect on the next run.
           </p>
           <p className="max-w-xl">
             Replying in the thread that asked stays on, so Jori can always

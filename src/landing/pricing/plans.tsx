@@ -42,7 +42,7 @@ const tiers: readonly Tier[] = [
     price: `$${plan.monthlyPriceUsd}`,
     priceNote: planPriceNote,
     facts: planFacts,
-    footer: "Pilots are set up by us, a few teams at a time.",
+    footer: "Hosted access is by invitation. We help set up each paid pilot.",
     action: <GetStarted prominent />,
   },
   {
@@ -77,7 +77,8 @@ const tiers: readonly Tier[] = [
         note: "Deployment, maintenance, and updates",
       },
     ],
-    footer: "Infrastructure and AI costs are yours.",
+    footer:
+      "You pay for infrastructure and AI usage. An independent setup guide is not yet available.",
     action: (
       <Button asChild size="xl" variant="outline">
         <a href={repositoryUrl} rel="noreferrer" target="_blank">

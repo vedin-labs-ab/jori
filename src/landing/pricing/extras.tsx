@@ -9,9 +9,9 @@ export function Extras() {
   return (
     <Section
       beside
-      lede="Cloud includes room to start. Add more when there's a reason to."
+      lede="Add AI credit or file storage when you need more than the plan includes."
       support
-      title="Grow the work. Keep the plan."
+      title="Need more usage or storage?"
     >
       <dl className="divide-y border-y">
         <Row

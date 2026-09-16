@@ -5,7 +5,7 @@ import { marketingUrl } from "@/shared/region/paths"
 
 const title = "Jori · The shared drive your AI works out of"
 const description =
-  "Automate recurring work with AI jobs, tables, and files in shared folders. Ask Jori from Slack, GitHub, or Linear, with access and spend set by folder."
+  "Describe recurring work in plain language. Jori runs jobs beside the tables and files they use. Share folders with your team and track AI spending."
 const url = marketingUrl()
 const organizationId = new URL("#organization", url).toString()
 

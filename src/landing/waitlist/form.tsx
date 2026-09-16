@@ -372,8 +372,8 @@ function Joined() {
             subdomain with no mailbox behind it. Offering one here would be the
             same dead end one screen earlier. */}
         <p className="mt-1 text-muted-foreground text-sm leading-relaxed">
-          Check your inbox for a confirmation. We set each team up ourselves, so
-          you'll hear from us directly when yours is next.
+          Check your inbox for a confirmation. We'll review the job you
+          described and contact you if it's a fit for a paid pilot.
         </p>
       </div>
     </div>

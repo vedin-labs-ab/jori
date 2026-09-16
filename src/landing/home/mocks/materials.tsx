@@ -35,25 +35,24 @@ export function Materials() {
     <Section
       lede={
         <>
-          A job doesn't answer in a chat window. It writes rows to a table, a
-          value to a store, a file to a folder. You and <Jori tilt="steep" />{" "}
-          edit the same materials, so anything they keep current is something
-          you can check and correct.
+          <Jori tilt="steep" /> can update tables, save files, and keep track of
+          work between runs. You can open and edit the same materials to check
+          or correct the results.
         </>
       }
       title="Work lands where you can find it"
     >
       <dl className="grid gap-x-12 gap-y-8 md:grid-cols-3">
         <Definition term="Tables">
-          Typed columns, a grid people edit by hand, CSV in and out.
+          Edit rows, choose column types, and import or export CSV files.
         </Definition>
         <Definition term="Stores">
-          One JSON document under a schema you define. The state a job carries
-          between runs.
+          Keep data a job needs between runs, such as what it checked last. Each
+          store holds a JSON document with a structure you define.
         </Definition>
         <Definition term="Files">
-          Anything, viewed in place: a PDF, an image, a page of notes. Jori
-          saves what they make and marks it as their own.
+          Open PDFs, images, and notes in the workspace. Files Jori creates are
+          marked so you can see who made them.
         </Definition>
       </dl>
       {/* The pages keep the product's widths, so the frame takes the full

@@ -11,13 +11,12 @@ import { ModesSection } from "./modes"
 
 export function TrustPage() {
   return (
-    <MarketingShell closing="Set the modes, watch the receipts, expand from there. Tell us what you'd hand over first.">
+    <MarketingShell closing="Tell us which job you'd like Jori to take on. If it's a fit for a paid pilot, we'll help you set it up and choose the access it needs.">
       <PageIntro
         lede={
           <>
-            Handing work to <Jori tilt="left" /> means handing them your
-            repositories, your issues, your threads, and your inbox. That access
-            comes with controls you can see and receipts you can audit.
+            Choose which accounts <Jori tilt="left" /> can use and what they can
+            do. Review their actions and costs in each run's record.
           </>
         }
         title="Built to be checked."

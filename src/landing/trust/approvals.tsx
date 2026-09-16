@@ -12,8 +12,8 @@ export function ApprovalsSection() {
     <Section
       lede={
         <>
-          Set a tool to ask first and <Jori tilt="slight" /> requests before
-          acting. Nothing runs until you approve it.
+          Set a tool to ask first and <Jori tilt="slight" /> waits for your
+          approval before using it.
         </>
       }
       title="Ask first means ask you"
@@ -25,10 +25,9 @@ export function ApprovalsSection() {
             as padding on the one page that cannot afford it. */}
         <div className="text-muted-foreground text-sm leading-relaxed">
           <p className="max-w-xl">
-            Every request carries a code. Approve it from the console, or reply
-            with the code in the thread where the work is, and the action runs.
-            Deny it, or let it expire, and it never does. Jori doesn't retry on
-            their own.
+            Approve a request in the console, or reply with its code in the
+            thread. If you deny the request or let it expire, Jori does not
+            carry out the action or retry it on their own.
           </p>
         </div>
         <ReleaseApprovalCard />
@@ -42,24 +41,20 @@ export function ReceiptsSection() {
     <Section
       lede={
         <>
-          What <Jori tilt="steep" /> read, what they did, what they asked:
-          timestamped, on every run.
+          See what <Jori tilt="steep" /> read, did, and asked for approval to
+          do, with timestamps for each step.
         </>
       }
-      title="Every run keeps receipts"
+      title="Review the record of each run"
     >
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
         <div className="space-y-5 text-muted-foreground text-sm leading-relaxed">
           <p className="max-w-xl">
-            Every run lives in the console with what triggered it, the tools it
-            used, what it produced, and the folder it was counted in. When Jori
-            splits work into subtasks, each one links back to the run that
-            started it.
+            Each record shows what triggered the run, the tools it used, what it
+            produced, and which folder its spending belongs to. If Jori splits
+            work into subtasks, each links back to the original run.
           </p>
-          <p className="max-w-xl">
-            A receipt is the record of what ran, not a summary written
-            afterwards.
-          </p>
+          <p className="max-w-xl">Jori records each step as the run happens.</p>
         </div>
         {/* The record itself rather than a drawing of one: the console's
             Activity page over the demo workspace, with one run open. */}

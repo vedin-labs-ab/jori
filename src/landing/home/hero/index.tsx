@@ -45,9 +45,8 @@ export function Hero() {
           {brandHeadline}
         </h1>
         <p className="mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-          Put the jobs nobody wants next to the tables and files they keep
-          current, in folders shaped like your teams and projects. Who can see a
-          folder, and what it costs to run, come with it.
+          Describe a recurring job and choose when it runs. Jori keeps the job
+          beside the tables and files it uses, in folders your team shares.
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <GetStarted prominent />
@@ -64,7 +63,11 @@ export function Hero() {
           product. The thread hangs off its lower right corner, and the
           wrapper keeps room under the console for the part that hangs
           below it. Narrow, the thread docks under the console instead. */}
-      <div className="relative mt-14 min-w-0 md:mt-16 md:pb-16">
+      <div className="relative mt-14 min-w-0 md:mt-16 md:pb-16" id="demo">
+        <p className="mb-3 text-muted-foreground text-sm">
+          Explore a sample workspace. The demo uses example data and scripted AI
+          replies.
+        </p>
         <DemoConsole className={consoleClassName} navigation={console} />
         <RenewalsThread
           className="mt-4 md:absolute md:right-6 md:bottom-0 md:mt-0 md:w-[22rem]"

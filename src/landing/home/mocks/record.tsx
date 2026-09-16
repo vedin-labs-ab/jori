@@ -14,11 +14,8 @@ export function Record() {
     <Section
       lede={
         <>
-          Most AI works in private. <Jori tilt="right" /> works in the open.
-          Activity is the first page in the console, and every run, from a job
-          or a mention, shows what triggered it, what they read, what they did,
-          what they asked, and what it cost. Stop any run from wherever you can
-          see it.
+          Every run records what triggered it, what <Jori tilt="right" /> did,
+          and what it cost. Open Activity to review the work or stop a run.
         </>
       }
       title="Everything on the record"
@@ -32,17 +29,16 @@ export function Record() {
         />
         <div>
           <dl className="space-y-8">
-            <Definition term="Receipts, with the bill">
-              Each run lists the model turns, the tokens, the tools, the
-              seconds, and the dollars, at the rate the ledger charged.
+            <Definition term="See what happened">
+              Each run shows the tools used, model calls, token usage, duration,
+              and cost.
             </Definition>
             <Definition term="Ask first means ask you">
-              Set a tool to ask first and Jori requests before acting, with a
-              code you can approve from the thread. Unattended runs can't touch
-              an ask-first tool at all.
+              Set a tool to ask first and Jori asks for approval before using
+              it. Scheduled and event-triggered runs cannot use these tools.
             </Definition>
-            <Definition term="Stop means stop">
-              Stop any run at any moment, and the record says who did.
+            <Definition term="Stop a run">
+              Stop a run from Activity. Its record shows who stopped it.
             </Definition>
           </dl>
           <Link

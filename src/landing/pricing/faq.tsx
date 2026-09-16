@@ -13,27 +13,26 @@ const questions: readonly { answer: ReactNode; question: string }[] = [
     question: "What happens when the included AI usage runs out?",
     answer: (
       <>
-        Scheduled runs pause. Interactive work carries{" "}
-        {formatUsd(interactiveGraceMicros)} of grace below zero, so Jori never
-        goes silent halfway through an answer. Add credit, or wait for the
-        monthly reset.
+        Scheduled runs pause. Work in a conversation can use up to{" "}
+        {formatUsd(interactiveGraceMicros)} beyond your balance. Add credit or
+        wait for the monthly reset to continue.
       </>
     ),
   },
   {
     question: "Does inviting someone change the price?",
     answer:
-      "No. Everyone joins, including the people who only ever open a page someone handed them.",
+      "No. The monthly plan covers everyone in your organization, with no per-seat fees.",
   },
   {
     question: "How is AI usage priced?",
     answer:
-      "In dollars, at the provider's published rates for the model that answered. What we make on it is what good caching saves, never a multiplier on your bill.",
+      "In dollars, at the model provider's published rates. We don't add a markup. Each run shows its cost.",
   },
   {
     question: "What happens if we cancel?",
     answer:
-      "Jobs pause and nothing is deleted. Your data, integrations, and history stay put, and everything resumes when you come back.",
+      "Jobs pause. Your data, integrations, and run history stay in your workspace so you can resume when you resubscribe.",
   },
 ]
 
@@ -50,7 +49,7 @@ export function Faq() {
           >
             the trust page
           </Link>{" "}
-          goes deeper.
+          explains how Jori handles permissions and where data is processed.
         </>
       }
       title="Good to know before you start."

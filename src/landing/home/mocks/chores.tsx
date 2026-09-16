@@ -12,10 +12,10 @@ export function Chores() {
       id="work"
       lede={
         <>
-          Every company runs on chores: the weekly summary, the invoice chase,
-          the ticket triage, the changelog. Write each one down once.{" "}
-          <Jori tilt="left" /> runs it on a schedule or when something happens,
-          and files what they made where the team can find it.
+          Weekly summaries, invoice reminders, ticket triage. Describe the work
+          and give <Jori tilt="left" /> the access they need. They run the job
+          on a schedule or when an event triggers it, and save the results in
+          your workspace.
         </>
       }
       support

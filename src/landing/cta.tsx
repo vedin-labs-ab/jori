@@ -13,7 +13,7 @@ export function Closing({ lede }: { lede: string }) {
     <section className="scroll-mt-10" id={waitlistAnchor}>
       <div className="mx-auto w-full max-w-6xl px-6 pt-14 pb-24 md:pt-18 md:pb-32">
         <h2 className="font-medium text-4xl tracking-tight sm:text-5xl">
-          Opening to a few teams at a time.
+          Start with one recurring job.
         </h2>
         <p className="mt-4 max-w-xl text-lg text-muted-foreground leading-relaxed">
           {lede}

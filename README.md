@@ -1,9 +1,23 @@
 # Jori
 
-The shared drive your AI works out of. Folders hold jobs beside the tables,
-stores, and files they use. A person describes a job in plain language, says
-when it runs, and it runs. Hosted at [usejori.com](https://usejori.com), or
-run your own.
+The shared drive your AI works out of. Describe a recurring job and choose
+when it runs. Jori keeps the job beside the tables and files it uses, in
+folders your team shares. Review each run and see AI spending by folder.
+
+[Explore the demo](https://usejori.com/#demo) ·
+[Pricing](https://usejori.com/pricing) ·
+[Join the waitlist](https://usejori.com/#waitlist)
+
+![Jori's sample workspace with a renewals table, jobs, and a Slack conversation](public/brand/social/og-light.png)
+
+## Status
+
+Jori is early. We're looking for our first paid pilot teams and will help
+set up one recurring job with each team. Hosted access is by invitation.
+The demo uses example data and scripted AI replies.
+
+Self-hosting is not yet documented for independent setup. The
+[deployment guide](guides/deployment.md) covers our own environments.
 
 ## Map
 

@@ -7,10 +7,10 @@ import { Plans } from "./plans"
 
 export function PricingPage() {
   return (
-    <MarketingShell closing="Tell us what your team does by hand every week. We'll set the pilot up with you.">
+    <MarketingShell closing="Paid pilots include personal setup. Tell us which recurring job you'd like to start with, and we'll contact you if it's a fit.">
       <PageIntro
-        lede="Bring the people and the work. Choose who takes care of the rest."
-        title="Your whole company. One price."
+        lede="The hosted plan includes everyone on your team, AI usage, and file storage."
+        title="One plan for your organization."
       />
       <Plans />
       <Extras />

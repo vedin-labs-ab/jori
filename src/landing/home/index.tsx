@@ -16,7 +16,7 @@ import { Surfaces } from "./surfaces"
  *  of it, so a job created in one section shows up in the next. */
 export function Landing() {
   return (
-    <MarketingShell closing="Paid pilots, set up by us. Tell us what your team does by hand every week, and we'll be in touch if it's a fit.">
+    <MarketingShell closing="Tell us what your team does by hand every week. If Jori is a fit, we'll invite you to a paid pilot and help you set up the first job.">
       <DemoWorkspaceProvider>
         <Hero />
         <Chores />

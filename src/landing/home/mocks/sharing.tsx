@@ -16,23 +16,23 @@ import { Definition, Prop, Section } from "../../section"
 export function Sharing() {
   return (
     <Section
-      lede="Only me, specific people, specific teams, or everyone in the organization. Set it on an item, or set it on the folder and everything inside answers to it. For people outside, send a link that expires."
+      lede="Keep work private, share it with people or teams, or open it to your organization. Set access on folders and individual items. Share read-only links with people outside the organization."
       support
       title="Share it like a drive"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
         <dl className="space-y-8">
-          <Definition term="The folder is the ceiling">
-            Nothing inside a folder reaches further than the folder does,
-            whatever it's set to. The tree is a true map of who sees what.
+          <Definition term="Folders limit access">
+            An item can be shared with fewer people than its folder, but never
+            more.
           </Definition>
-          <Definition term="Teams are an audience">
-            Group the people who work together once. Then a folder, a table, or
-            a job is shared with the team, not a list of names.
+          <Definition term="Share with a team">
+            Group people into teams, then share folders and items with the whole
+            team.
           </Definition>
-          <Definition term="Links with a clock">
-            A share link opens a read-only page without signing in, and expires
-            on a clock you choose. Revoke it any time.
+          <Definition term="Choose when links expire">
+            A share link opens a read-only page without signing in. Set an
+            expiry time or revoke the link whenever you need to.
           </Definition>
         </dl>
         <RenewalsSharing />

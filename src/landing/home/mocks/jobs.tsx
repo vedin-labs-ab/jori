@@ -47,27 +47,26 @@ export function Jobs() {
     <Section
       lede={
         <>
-          Describe the job the way you'd brief a person. Type{" "}
-          <Sigil kind="access" /> to give it access, <Sigil kind="skill" /> to
-          load a skill, <Sigil kind="tool" /> to name a tool. Pick when it runs:
-          a schedule, a date, or an event in Slack, GitHub, Linear, or Notion.
-          It runs in the cloud whether or not your laptop is open.
+          Describe the job the way you'd brief a person. Choose a schedule, a
+          date, or an event in a connected app. Jori runs the job in the cloud,
+          even when your laptop is closed.
         </>
       }
       title="Jobs are just instructions"
     >
       <div className="grid items-start gap-10 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
         <dl className="space-y-8">
-          <Definition term="Plain text, not pipelines">
-            No node graphs, nothing to wire. If you can write the brief, you've
-            written the job.
+          <Definition term="Write the instructions">
+            Type <Sigil kind="access" /> to add access, <Sigil kind="skill" />{" "}
+            to add a skill, or <Sigil kind="tool" /> to choose a tool.
           </Definition>
-          <Definition term="Only the access you gave it">
-            Grants are per job. Web search is off until you turn it on.
+          <Definition term="Choose what the job can use">
+            Give each job access to the accounts and tools it needs. Web search
+            is off until you turn it on.
           </Definition>
-          <Definition term="Filed like anything else">
-            A job lives in a folder. Move it, and the new folder decides who
-            sees it and where its runs are counted.
+          <Definition term="Keep it in a folder">
+            The folder limits who can see the job and groups its AI spending
+            with the other work inside.
           </Definition>
         </dl>
         <NearViewport className="min-w-0" fallback={<EditorPlaceholder />}>
