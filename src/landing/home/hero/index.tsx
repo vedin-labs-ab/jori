@@ -10,7 +10,7 @@ import { folderId } from "../../demo/fixtures/folders"
 import { jobId } from "../../demo/fixtures/jobs"
 import { renewalsTableId } from "../../demo/fixtures/materials/tables"
 import { useDemoNavigation } from "../../demo/navigation"
-import { Mention } from "../../section"
+import { Jori, Mention } from "../../section"
 import { RenewalsThread } from "./thread"
 
 /** The console opens on the folder the thread files into, and the row the
@@ -45,9 +45,9 @@ export function Hero() {
           {brandHeadline}
         </h1>
         <p className="mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-          Tell Jori what needs doing and when. They run the job in the
-          background and keep the results in shared folders, alongside the
-          tables and files your team uses.
+          Tell <Jori tilt="slight" /> what needs doing and when. They run the
+          job in the background and keep the results in shared folders,
+          alongside the tables and files your team uses.
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
           <GetStarted prominent />

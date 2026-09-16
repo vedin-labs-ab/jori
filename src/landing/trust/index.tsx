@@ -11,7 +11,15 @@ import { ModesSection } from "./modes"
 
 export function TrustPage() {
   return (
-    <MarketingShell closing="Tell us which job you'd like Jori to take on. If it's a fit for a paid pilot, we'll help you set it up and choose the access it needs.">
+    <MarketingShell
+      closing={
+        <>
+          Tell us which job you'd like <Jori tilt="right" /> to take on. If it's
+          a fit for a paid pilot, we'll help you set it up and choose the access
+          it needs.
+        </>
+      }
+    >
       <PageIntro
         lede={
           <>

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
+import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { WaitlistForm } from "./waitlist/form"
 
@@ -8,7 +9,7 @@ import { WaitlistForm } from "./waitlist/form"
 const waitlistAnchor = "waitlist"
 
 // Every marketing page ends on the same handshake.
-export function Closing({ lede }: { lede: string }) {
+export function Closing({ lede }: { lede: ReactNode }) {
   return (
     <section className="scroll-mt-10" id={waitlistAnchor}>
       <div className="mx-auto w-full max-w-6xl px-6 pt-14 pb-24 md:pt-18 md:pb-32">

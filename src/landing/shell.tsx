@@ -13,7 +13,7 @@ export function MarketingShell({
   closing,
 }: {
   children: ReactNode
-  closing?: string
+  closing?: ReactNode
 }) {
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">

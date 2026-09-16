@@ -1,4 +1,5 @@
 import { DemoWorkspaceProvider } from "../demo/provider"
+import { Jori } from "../section"
 import { MarketingShell } from "../shell"
 import { Hero } from "./hero"
 import { Infrastructure } from "./infrastructure"
@@ -16,7 +17,15 @@ import { Surfaces } from "./surfaces"
  *  of it, so a job created in one section shows up in the next. */
 export function Landing() {
   return (
-    <MarketingShell closing="Tell us what your team does by hand every week. If Jori is a fit, we'll invite you to a paid pilot and help you set up the first job.">
+    <MarketingShell
+      closing={
+        <>
+          Tell us what your team does by hand every week. If{" "}
+          <Jori tilt="right" /> is a fit, we'll invite you to a paid pilot and
+          help you set up the first job.
+        </>
+      }
+    >
       <DemoWorkspaceProvider>
         <Hero />
         <Chores />

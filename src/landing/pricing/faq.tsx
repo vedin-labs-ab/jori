@@ -1,7 +1,7 @@
 import { formatUsd, interactiveGraceMicros } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
 import { type ReactNode } from "react"
-import { Section } from "../section"
+import { Jori, Section } from "../section"
 
 /**
  * Four questions, and only the four: the ones that would stop someone
@@ -49,7 +49,8 @@ export function Faq() {
           >
             the trust page
           </Link>{" "}
-          explains how Jori handles permissions and where data is processed.
+          explains how <Jori tilt="left" /> handles permissions and where data
+          is processed.
         </>
       }
       title="Good to know before you start."
