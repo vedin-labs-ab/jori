@@ -95,8 +95,8 @@ function archiveText(bytes: Uint8Array, extension: string): Section[] {
 
 export function markupText(text: string) {
   return text
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, " ")
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, " ")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\b[^>]*>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\b[^>]*>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/&#(x[0-9a-f]+|\d+);/gi, (_, code: string) => {
       const point = code.toLowerCase().startsWith("x")

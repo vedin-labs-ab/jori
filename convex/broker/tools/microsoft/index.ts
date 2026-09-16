@@ -135,7 +135,8 @@ async function searchMessages(token: string, args: Record<string, unknown>) {
   if (search === undefined) {
     query.$orderby = "receivedDateTime desc"
   } else {
-    query.$search = `"${search.replace(/"/g, '\\"')}"`
+    // A KQL phrase; a bare backslash would escape the closing quote.
+    query.$search = `"${search.replace(/[\\"]/g, "\\$&")}"`
   }
 
   const page = readRecord(await microsoftGraphJson(token, path, { query }))

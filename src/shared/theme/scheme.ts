@@ -31,5 +31,15 @@ export function resolveTheme(theme: Theme, prefersDark: boolean) {
  *  It repeats `resolveTheme` in browser JavaScript because it cannot import
  *  anything. */
 export function themeScript(storageKey: string) {
-  return `(function(key){var theme;try{theme=localStorage.getItem(key)}catch(error){}var dark=theme==="dark"||(theme!=="light"&&matchMedia(${JSON.stringify(darkQuery)}).matches);document.documentElement.classList.toggle("dark",dark)})(${JSON.stringify(storageKey)})`
+  return `(function(key){var theme;try{theme=localStorage.getItem(key)}catch(error){}var dark=theme==="dark"||(theme!=="light"&&matchMedia(${literal(darkQuery)}).matches);document.documentElement.classList.toggle("dark",dark)})(${literal(storageKey)})`
+}
+
+/** A JavaScript string literal safe inside an inline script: JSON leaves
+ *  `<` alone, so `</script>` would end the tag early, and the line
+ *  separators U+2028 and U+2029 are JSON but were not JavaScript. */
+function literal(value: string) {
+  return JSON.stringify(value).replace(
+    /[<>\u2028\u2029]/g,
+    (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`
+  )
 }

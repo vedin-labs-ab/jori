@@ -30,7 +30,7 @@ const outgoing = {
 const cases = [
   {
     tool: "microsoft_email_search_messages",
-    args: { folderId: "folder/1", q: "fixture", top: 5 },
+    args: { folderId: "folder/1", q: 'fixture "quoted" \\', top: 5 },
     invalid: { top: 26 },
     path: "/me/mailFolders/folder%2F1/messages",
     response: { value: [message] },
@@ -158,6 +158,11 @@ describe.each(cases)("$tool mocked Graph contract", (fixture) => {
         entityKey: expect.stringMatching(/^[0-9a-f]{32}$/),
         contentHash: expect.stringMatching(/^[0-9a-f]{32}$/),
       })
+    }
+    if (fixture.tool === "microsoft_email_search_messages") {
+      expect(new URL(url).searchParams.get("$search")).toBe(
+        '"fixture \\"quoted\\" \\\\"'
+      )
     }
     if (fixture.tool === "microsoft_email_send_message") {
       expect(JSON.parse(init.body)).toMatchObject({ saveToSentItems: false })

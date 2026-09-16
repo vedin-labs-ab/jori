@@ -16,7 +16,9 @@ test("decoded UTF16 keeps whitespace and offsets usable for later highlighting",
 
 test("office extraction retains notes and cells without arbitrary embedded files", () => {
   const doc = zipSync({
-    "word/document.xml": strToU8("<w:p>Customer &amp; supplier</w:p>"),
+    "word/document.xml": strToU8(
+      "<w:p>Customer &amp; supplier<script>hidden()</script\n data-x>\n<style>p{}</style >\n</w:p>"
+    ),
     "word/footnotes.xml": strToU8("<w:p>Exception INV-98</w:p>"),
     "word/embeddings/secret.txt": strToU8("Never extracted"),
   })

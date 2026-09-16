@@ -53,6 +53,15 @@ test("the first paint follows a stored choice, then the device", () => {
   expect(runScript("theme")).toBe(true)
 })
 
+test("the first-paint script survives a key that would close the tag", () => {
+  const key = "</script>\u2028"
+  expect(themeScript(key)).not.toContain("</script>")
+  expect(themeScript(key)).not.toContain("\u2028")
+  prefersDark = false
+  window.localStorage.setItem(key, "dark")
+  expect(runScript(key)).toBe(true)
+})
+
 test("resolving a theme only consults the device for system", () => {
   expect(resolveTheme("system", true)).toBe("dark")
   expect(resolveTheme("system", false)).toBe("light")
