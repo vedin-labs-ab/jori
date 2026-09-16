@@ -1,13 +1,5 @@
 import type { LucideIcon } from "lucide-react"
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  Filter,
-  MoreHorizontal,
-  Search,
-  X
-} from "lucide-react"
+import { Filter, MoreHorizontal, Search, X } from "lucide-react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -33,9 +25,11 @@ import {
 } from "@/components/ui/input-group"
 import { Spinner } from "@/components/ui/spinner"
 import { TableCell, TableHead, TableRow } from "@/components/ui/table"
-import { cn } from "@/lib/utils"
+import { HeadButton, SortIcon } from "@/shared/console/list/head"
 
 export type OrganizationTableSortDirection = "ascending" | "descending"
+
+const sortDirections = { ascending: "asc", descending: "desc" } as const
 
 export type OrganizationTableFilterOption = {
   label: string
@@ -104,18 +98,15 @@ export function OrganizationSearchableTableHead({
           </InputGroupAddon>
         </InputGroup>
       ) : (
-        <Button
+        <HeadButton
           aria-label={`Search ${label.toLowerCase()}`}
-          className="-ml-2"
           disabled={disabled}
           onClick={() => setOpen(true)}
           ref={triggerRef}
-          size="sm"
-          variant="ghost"
         >
           {label}
           <Search />
-        </Button>
+        </HeadButton>
       )}
     </TableHead>
   )
@@ -132,24 +123,12 @@ export function OrganizationSortableTableHead({
 }) {
   return (
     <TableHead aria-sort={sortDirection ?? "none"}>
-      <Button
-        className={cn(
-          "-ml-2",
-          sortDirection && "bg-muted text-foreground dark:bg-muted/50"
-        )}
-        onClick={onClick}
-        size="sm"
-        variant="ghost"
-      >
+      <HeadButton active={sortDirection !== undefined} onClick={onClick}>
         {children}
-        {sortDirection === "ascending" ? (
-          <ArrowUp className="text-foreground" />
-        ) : sortDirection === "descending" ? (
-          <ArrowDown className="text-foreground" />
-        ) : (
-          <ArrowUpDown />
-        )}
-      </Button>
+        <SortIcon
+          direction={sortDirection && sortDirections[sortDirection]}
+        />
+      </HeadButton>
     </TableHead>
   )
 }
@@ -176,19 +155,14 @@ export function OrganizationFilterTableHead({
     <TableHead>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
+          <HeadButton
+            active={isActive}
             aria-label={`${label}: ${selectedOption?.label ?? allLabel}`}
-            className={cn(
-              "-ml-2",
-              isActive && "bg-muted text-foreground dark:bg-muted/50"
-            )}
             disabled={disabled}
-            size="sm"
-            variant="ghost"
           >
             <Filter className={isActive ? "text-foreground" : undefined} />
             {selectedOption?.label ?? label}
-          </Button>
+          </HeadButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start">
           <DropdownMenuRadioGroup value={value} onValueChange={onValueChange}>

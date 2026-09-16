@@ -80,14 +80,14 @@ test("a send that fails leaves the draft where it was", async () => {
   typeInto(field, "Chase +[job:jobs_digest] now")
   fireEvent.keyDown(field, { key: "Enter" })
 
-  await waitFor(() =>
-    expect(screen.getByRole("button", { name: "Send message" })).toBeDefined()
-  )
+  // The field is unlocked an effect after the send control comes back,
+  // so it is the field that says the failure has landed.
+  await waitFor(() => expect(field.getAttribute("aria-disabled")).toBeNull())
+  expect(screen.getByRole("button", { name: "Send message" })).toBeDefined()
   expect(field.textContent).toContain("Chase")
   expect(
     screen.getByRole("button", { name: "Remove Renewals digest" })
   ).toBeDefined()
-  expect(field.getAttribute("aria-disabled")).toBeNull()
   expect(field.getAttribute("contenteditable")).toBe("true")
   expect(
     screen.getByRole("button", { name: "Mention a resource" })

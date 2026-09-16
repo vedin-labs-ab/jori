@@ -44,7 +44,8 @@ export function UsageHintButton({
   return (
     <Button
       asChild
-      className="group min-w-0 gap-1 px-0 font-normal text-muted-foreground text-xs hover:px-1.5 hover:text-foreground focus-visible:px-1.5 focus-visible:text-foreground"
+      className="group min-w-0 gap-1 font-normal text-muted-foreground text-xs hover:text-foreground focus-visible:text-foreground"
+      flush
       variant="ghost"
     >
       {folderId === undefined ? (

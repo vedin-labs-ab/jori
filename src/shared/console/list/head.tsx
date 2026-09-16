@@ -6,7 +6,7 @@ import {
   ListChecks,
   ListX,
 } from "lucide-react"
-import { type ReactNode } from "react"
+import { type ComponentProps, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -24,7 +24,6 @@ import {
 import { TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
-import { flushButtonClassName } from "../flush"
 import {
   type FacetEntry,
   facetSelection,
@@ -33,20 +32,49 @@ import {
   toggledFacet,
 } from "./controls"
 
-// Header-embedded list controls: each header cell houses a small stock
-// ghost button, flush with the column's text grid at rest; the cell itself
-// is not the control. Columns are sized by their content, so the padding
-// the button grows on hover is borrowed from a margin reserved at rest and
-// the column never changes width: the surface runs from the label to the
-// column's own edge.
-const headButtonClassName = cn(
-  flushButtonClassName,
-  "mr-2 font-medium hover:-mr-2 focus-visible:-mr-2 aria-expanded:-mr-2"
-)
+// Columns are sized by their content, so the padding a flush header button
+// grows is borrowed from a margin reserved at rest on the side away from
+// its label, and the column never changes width: the surface runs from
+// the label to the column's own edge.
+const marginClassName = {
+  start:
+    "mr-2 hover:-mr-2 focus-visible:-mr-2 aria-expanded:-mr-2 data-active:-mr-2",
+  end: "ml-2 hover:-ml-2 focus-visible:-ml-2 aria-expanded:-ml-2 data-active:-ml-2",
+}
 
 // An active sort or filter keeps the grown, ghost-hover state, so what is
 // shaping the list stays marked after the pointer leaves.
-const activeClassName = "-mr-2 bg-muted px-2 text-foreground dark:bg-muted/50"
+const activeClassName =
+  "data-active:bg-muted data-active:px-2 data-active:text-foreground dark:data-active:bg-muted/50"
+
+/** The stock ghost button a header cell houses, flush with the column's
+ *  text grid; the cell itself is not the control. `align` names the edge
+ *  the label sits on, `active` that it is shaping the list right now. */
+export function HeadButton({
+  active = false,
+  align = "start",
+  className,
+  ...props
+}: ComponentProps<typeof Button> & {
+  active?: boolean
+  align?: "start" | "end"
+}) {
+  return (
+    <Button
+      className={cn(
+        "font-medium",
+        marginClassName[align],
+        activeClassName,
+        className
+      )}
+      data-active={active ? true : undefined}
+      flush
+      type="button"
+      variant="ghost"
+      {...props}
+    />
+  )
+}
 
 function isFiltering(controls: ListControls, facets: FacetEntry[]) {
   return facets.some((facet) => controls.isFacetActive(facet.key))
@@ -72,18 +100,13 @@ export function SortHead({
   return (
     <TableHead aria-sort={ariaSort(direction)} className={className}>
       <div className="flex items-center">
-        <Button
-          className={cn(
-            headButtonClassName,
-            direction !== undefined && activeClassName
-          )}
+        <HeadButton
+          active={direction !== undefined}
           onClick={() => controls.toggleSort(sortKey)}
-          type="button"
-          variant="ghost"
         >
           {label}
           <SortIcon direction={direction} />
-        </Button>
+        </HeadButton>
       </div>
     </TableHead>
   )
@@ -105,24 +128,23 @@ export function FilterHead({
     <TableHead className={className}>
       <div className="flex items-center">
         <FacetMenu controls={controls} facets={facets}>
-          <Button
-            className={cn(
-              headButtonClassName,
-              isFiltering(controls, facets) && activeClassName
-            )}
-            type="button"
-            variant="ghost"
-          >
+          <HeadButton active={isFiltering(controls, facets)}>
             {label}
             <FilterMark controls={controls} facets={facets} />
-          </Button>
+          </HeadButton>
         </FacetMenu>
       </div>
     </TableHead>
   )
 }
 
-function SortIcon({ direction }: { direction: SortDirection | undefined }) {
+/** The sort's glyph: both ways while the column is idle, the way it goes
+ *  once it sorts. */
+export function SortIcon({
+  direction,
+}: {
+  direction: SortDirection | undefined
+}) {
   const Icon =
     direction === undefined
       ? ArrowUpDown

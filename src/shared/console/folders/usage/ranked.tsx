@@ -12,7 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { flushButtonClassName } from "../../flush"
 import { ConsoleLink } from "../../shell/link"
 import { SegmentSwatch } from "./legend"
 import {
@@ -74,7 +73,7 @@ function RankedTable({ noun, rows }: { noun: string; rows: ReactNode[] }) {
             <TableRow className="hover:bg-transparent">
               <TableCell colSpan={6}>
                 <Button
-                  className={flushButtonClassName}
+                  flush
                   onClick={() => setExpanded(!expanded)}
                   size="sm"
                   type="button"

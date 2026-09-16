@@ -43,10 +43,31 @@ const buttonVariants = cva(
         "icon-sm": "size-6 [&_svg:not([class*='size-'])]:size-3",
         "icon-lg": "size-8 [&_svg:not([class*='size-'])]:size-4",
       },
+      // Flush with the text grid at rest: no horizontal padding, so the
+      // label lines up with static siblings, and hovering, focusing, or
+      // opening grows the size's padding back, with transition-all easing
+      // the shift so the ghost surface starts where the label stood.
+      flush: {
+        true: "px-0 hover:px-2 focus-visible:px-2 aria-expanded:px-2",
+        false: "",
+      },
     },
+    compoundVariants: [
+      {
+        size: "lg",
+        flush: true,
+        class: "hover:px-2.5 focus-visible:px-2.5 aria-expanded:px-2.5",
+      },
+      {
+        size: "xl",
+        flush: true,
+        class: "hover:px-4 focus-visible:px-4 aria-expanded:px-4",
+      },
+    ],
     defaultVariants: {
       variant: "default",
       size: "default",
+      flush: false,
     },
   }
 )
@@ -55,6 +76,7 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  flush = false,
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
@@ -68,7 +90,7 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, flush, className }))}
       {...props}
     />
   )

@@ -15,9 +15,8 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table"
-import { ArrowDown, ArrowUp, ArrowUpDown, Filter } from "lucide-react"
+import { Filter } from "lucide-react"
 import { type ReactNode, useMemo, useState } from "react"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +36,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { RevealArrow } from "@/shared/console/dot"
+import { HeadButton, SortIcon } from "@/shared/console/list/head"
 import { absoluteTime } from "@/shared/console/time"
 import { StableLabel } from "@/shared/label"
 import { type BillingOverview } from "./actions"
@@ -142,41 +142,27 @@ function ActivityTable({ table }: { table: ActivityTableInstance }) {
   )
 }
 
-/** Persist the ghost hover treatment while the control is active. */
-function headerButtonClass(active: boolean) {
-  return cn("-ml-2", active && "bg-muted text-foreground dark:bg-muted/50")
-}
-
 function SortHeader({
   column,
   children,
-  align = "left",
+  align = "start",
 }: {
   column: Column<typeof features, ActivityRow>
   children: ReactNode
-  align?: "left" | "right"
+  align?: "start" | "end"
 }) {
   const sorted = column.getIsSorted()
+  const direction = sorted === false ? undefined : sorted
 
   return (
-    <Button
-      className={cn(
-        headerButtonClass(sorted !== false),
-        align === "right" && "-mr-2 ml-0 float-right"
-      )}
+    <HeadButton
+      active={direction !== undefined}
+      align={align}
       onClick={() => column.toggleSorting(sorted === "asc")}
-      size="sm"
-      variant="ghost"
     >
       {children}
-      {sorted === "asc" ? (
-        <ArrowUp className="text-foreground" />
-      ) : sorted === "desc" ? (
-        <ArrowDown className="text-foreground" />
-      ) : (
-        <ArrowUpDown />
-      )}
-    </Button>
+      <SortIcon direction={direction} />
+    </HeadButton>
   )
 }
 
@@ -194,16 +180,12 @@ function KindHeader({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          className={headerButtonClass(value !== "")}
-          size="sm"
-          variant="ghost"
-        >
+        <HeadButton active={value !== ""}>
           <Filter className={value === "" ? "" : "text-foreground"} />
           <StableLabel alternatives={Object.values(kindLabels)}>
             {value === "" ? "What" : kindLabels[value]}
           </StableLabel>
-        </Button>
+        </HeadButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuRadioGroup
@@ -274,9 +256,11 @@ const columns: ColumnDef<typeof features, ActivityRow>[] = [
     accessorKey: "signedMicros",
     sortFn: "basic",
     header: ({ column }) => (
-      <SortHeader align="right" column={column}>
-        Amount
-      </SortHeader>
+      <div className="text-right">
+        <SortHeader align="end" column={column}>
+          Amount
+        </SortHeader>
+      </div>
     ),
     cell: ({ row }) => (
       <div
