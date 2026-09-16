@@ -11,7 +11,7 @@ export function Usage() {
     <Section
       lede={
         <>
-          Open Usage on a folder to see the AI spending for the work inside.
+          Check a folder's usage to see the AI spending for the work inside.
           Choose a time period, compare jobs and subfolders, or open a run to
           see its cost.
         </>

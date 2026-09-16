@@ -29,9 +29,7 @@ test("the thread links a condensed run in Activity and omits the notice otherwis
     "Jori condensed earlier context to keep going"
   )
   expect(
-    screen
-      .getByRole("link", { name: /See the run in Activity/ })
-      .getAttribute("href")
+    screen.getByRole("link", { name: /View run details/ }).getAttribute("href")
   ).toContain("runs_1")
   rerender(thread({ ...usage, condensed: false }))
 

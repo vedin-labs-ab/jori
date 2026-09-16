@@ -15,7 +15,8 @@ export function Record() {
       lede={
         <>
           Every run records what triggered it, what <Jori tilt="right" /> did,
-          and what it cost. Open Activity to review the work or stop a run.
+          and what it cost. Open the activity log to review the work or stop a
+          run.
         </>
       }
       title="Everything on the record"
@@ -38,7 +39,7 @@ export function Record() {
               it. Scheduled and event-triggered runs cannot use these tools.
             </Definition>
             <Definition term="Stop a run">
-              Stop a run from Activity. Its record shows who stopped it.
+              Stop a run from the activity log. Its record shows who stopped it.
             </Definition>
           </dl>
           <Link

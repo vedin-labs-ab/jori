@@ -14,7 +14,7 @@ import { jobId } from "../../demo/fixtures/jobs"
 import { grantOptions } from "../../demo/fixtures/people"
 import { demoPermissions, demoSkills } from "../../demo/fixtures/permissions"
 import { useDemoFolders, useDemoWorkspace } from "../../demo/workspace"
-import { Definition, Section, Sigil } from "../../section"
+import { Definition, Jori, Section, Sigil } from "../../section"
 import { NearViewport } from "../../viewport"
 
 // The editor's fields pull in TipTap, which dwarfs the page, and TipTap
@@ -48,8 +48,8 @@ export function Jobs() {
       lede={
         <>
           Describe the job the way you'd brief a person. Choose a schedule, a
-          date, or an event in a connected app. Jori runs the job in the cloud,
-          even when your laptop is closed.
+          date, or an event in a connected app. <Jori tilt="slight" /> runs the
+          job in the cloud, even when your laptop is closed.
         </>
       }
       title="Jobs are just instructions"

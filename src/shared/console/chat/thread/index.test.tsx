@@ -139,9 +139,7 @@ test("a run that failed or was stopped says so under the last turn, with the way
   expect(notice.textContent).toContain("Sandbox timed out")
   expect(notice.textContent).not.toContain("at step 3")
   expect(
-    screen
-      .getByRole("link", { name: /See the run in Activity/ })
-      .getAttribute("href")
+    screen.getByRole("link", { name: /View run details/ }).getAttribute("href")
   ).toBe("/runs?run=runs_1")
   expect(screen.queryByText("Working on it")).toBeNull()
 
@@ -152,7 +150,7 @@ test("a run that failed or was stopped says so under the last turn, with the way
   })
 
   expect(screen.getByRole("status").textContent).toBe(
-    "Jori stopped before finishingSee the run in Activity"
+    "Jori stopped before finishingView run details"
   )
 
   // A reply that landed after the end is the answer; nothing to say.

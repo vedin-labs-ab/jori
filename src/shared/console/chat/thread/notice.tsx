@@ -51,7 +51,7 @@ function Notice({ children, runId }: { children: ReactNode; runId: string }) {
         className="inline-flex w-fit items-center gap-1 rounded-sm underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring"
         {...referenceDestination({ kind: "run", id: runId })}
       >
-        See the run in Activity
+        View run details
         <ArrowUpRight aria-hidden className="size-3" />
       </ConsoleLink>
     </div>
