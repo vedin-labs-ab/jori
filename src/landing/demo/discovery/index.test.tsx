@@ -19,7 +19,9 @@ afterEach(cleanup)
 
 test("search previews fixture content and opens a result inside its demo", async () => {
   render(<DemoConsoleAt path="/folders" sidebar />)
-  fireEvent.click(screen.getByRole("button", { name: "Search workspace" }))
+  fireEvent.click(
+    screen.getAllByRole("button", { name: "Search workspace" })[0]!
+  )
   const input = await screen.findByRole("combobox")
   expect((input as HTMLInputElement).value).toBe("renewal")
   const results = screen.getByRole("group", { name: "Results" })
@@ -36,14 +38,17 @@ test("search previews fixture content and opens a result inside its demo", async
 })
 
 test("unavailable demo pages explain their state and cannot navigate by click or shortcut", async () => {
-  render(<DemoConsoleAt path="/folders" />)
+  render(<DemoConsoleAt path="/folders" sidebar />)
   fireEvent.keyDown(document.body, { key: "k", code: "KeyK", ctrlKey: true })
   expect(screen.queryByRole("dialog")).toBeNull()
-  fireEvent.keyDown(screen.getByRole("button", { name: "Search workspace" }), {
-    key: "k",
-    code: "KeyK",
-    ctrlKey: true,
-  })
+  fireEvent.keyDown(
+    screen.getAllByRole("button", { name: "Search workspace" })[0]!,
+    {
+      key: "k",
+      code: "KeyK",
+      ctrlKey: true,
+    }
+  )
   const input = await screen.findByRole("combobox")
   fireEvent.change(input, { target: { value: "Int" } })
   const integration = within(
