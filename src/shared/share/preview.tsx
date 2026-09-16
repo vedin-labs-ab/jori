@@ -1,13 +1,15 @@
 import { FileIcon, type LucideIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
+import { SheetView } from "@/shared/console/files/viewer/sheet"
 import { scrollFade } from "@/shared/fade"
 import { fileKind, previewKind } from "@/shared/files/kind"
 
-// The share view's inline preview: images, PDFs, video, audio, and
-// text-like files render in place as boxed blocks; everything else keeps
-// the quiet download prompt. The console file page has its own richer
-// viewer under src/shared/console/files/viewer.
+// The share view's inline preview: images, PDFs, video, audio, workbooks,
+// and text-like files render in place as boxed blocks; everything else
+// keeps the quiet download prompt. The console file page has its own
+// richer viewer under src/shared/console/files/viewer; the sheet is the
+// one view boxed here as is.
 
 /** Characters of text shown inline before the preview cuts off. */
 const textPreviewLimit = 100_000
@@ -45,11 +47,13 @@ function MediaPreview({
   name,
   url,
 }: {
-  kind: "audio" | "image" | "pdf" | "video"
+  kind: "audio" | "image" | "pdf" | "sheet" | "video"
   name: string
   url: string
 }) {
   switch (kind) {
+    case "sheet":
+      return <SheetPreview name={name} url={url} />
     case "image":
       return (
         <img
@@ -79,6 +83,34 @@ function MediaPreview({
       // biome-ignore lint/a11y/useMediaCaption: uploaded files carry no caption tracks.
       return <audio className="w-full" controls src={url} />
   }
+}
+
+/** The console's sheet view in a boxed block, with the same quiet
+ *  loading and error states the text preview has. */
+function SheetPreview({ name, url }: { name: string; url: string }) {
+  const [status, setStatus] = useState<"error" | "loading" | "ready">("loading")
+
+  if (status === "error") {
+    return (
+      <PreviewFallback icon={FileIcon} message="Could not load the sheet." />
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex h-[70svh] flex-col overflow-hidden rounded-md border",
+        status === "loading" && "animate-pulse bg-muted/30"
+      )}
+    >
+      <SheetView
+        name={name}
+        onError={() => setStatus("error")}
+        onReady={() => setStatus("ready")}
+        url={url}
+      />
+    </div>
+  )
 }
 
 function PreviewFallback({

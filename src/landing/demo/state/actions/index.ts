@@ -22,6 +22,7 @@ import {
 } from "../../fixtures/types"
 import { type DemoAction, type VisibilityTarget } from "../types"
 import { chatActions } from "./chat"
+import { fileActions } from "./files"
 
 type CreateMaterialArgs = {
   name: string
@@ -45,6 +46,7 @@ export function createActions(dispatch: Dispatch<DemoAction>) {
   return {
     ...folderActions(dispatch, mint),
     ...materialActions(dispatch, mint),
+    ...fileActions(dispatch, mint),
     ...jobActions(dispatch, mint),
     ...runActions(dispatch),
     ...tableActions(dispatch, mint),

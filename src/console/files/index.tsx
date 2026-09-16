@@ -30,8 +30,8 @@ import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
+import { UploadFileDialog } from "./dialogs"
 import { useFileActions, useFileBulk } from "./manage"
-import { UploadFileDialog } from "./upload"
 
 export function FilesPage() {
   return (

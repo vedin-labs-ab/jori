@@ -61,7 +61,8 @@ export type DemoFile = MaterialBase & {
   source: "run" | "upload"
   /** A text file's content, held in memory so the editor's saves land. */
   text?: string
-  /** A binary file's path under /demo, served as a static asset. */
+  /** Where a binary file's bytes are: a path under /demo for a fixture,
+   *  an object URL for a file uploaded on the page. */
   asset?: string
 }
 

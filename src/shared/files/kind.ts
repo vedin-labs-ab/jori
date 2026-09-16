@@ -56,12 +56,38 @@ export function isHtmlFile(mimeType: string, name: string) {
   return fileKind(mimeType, name) === kinds.html
 }
 
-export type PreviewKind = "audio" | "image" | "none" | "pdf" | "text" | "video"
+/** Office Open XML workbooks, the one spreadsheet format the inline sheet
+ *  view reads. Legacy binary .xls stays a download. */
+const workbookMimes = new Set([
+  "application/vnd.ms-excel.sheet.macroenabled.12",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+])
+const workbookExtensions = new Set(["xlsm", "xlsx"])
+
+/** True when the file is a workbook the sheet view can open: by mime type,
+ *  or by extension when the mime type is generic. */
+export function isWorkbookFile(mimeType: string, name: string) {
+  const mime = normalizeMime(mimeType)
+
+  return (
+    workbookMimes.has(mime) ||
+    (genericMimes.has(mime) && workbookExtensions.has(fileExtension(name)))
+  )
+}
+
+export type PreviewKind =
+  | "audio"
+  | "image"
+  | "none"
+  | "pdf"
+  | "sheet"
+  | "text"
+  | "video"
 
 /** How a browser can present the file inline. Browsers render media by the
- *  served mime type, so those stay mime-only; text is fetched by hand, so
- *  the registry's read of the file — extension rescue included — decides
- *  what counts as text. */
+ *  served mime type, so those stay mime-only; text and workbooks are
+ *  fetched by hand, so the registry's read of the file — extension rescue
+ *  included — decides what counts. */
 export function previewKind(mimeType: string, name: string): PreviewKind {
   const mime = normalizeMime(mimeType)
 
@@ -79,6 +105,10 @@ export function previewKind(mimeType: string, name: string): PreviewKind {
 
   if (mime.startsWith("audio/")) {
     return "audio"
+  }
+
+  if (isWorkbookFile(mimeType, name)) {
+    return "sheet"
   }
 
   return isTextualKind(mimeType, name) ? "text" : "none"

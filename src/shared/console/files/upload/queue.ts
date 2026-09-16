@@ -1,12 +1,7 @@
 import { type Visibility } from "@contracts/visibility"
-import { useMutation } from "convex/react"
-import { type FunctionArgs } from "convex/server"
-import { type GenericId } from "convex/values"
 import { useState } from "react"
 import { toast } from "sonner"
 import { countNoun } from "@/shared/console/count"
-import { api } from "../../../../convex/_generated/api"
-import { uploadToStorage } from "../storage"
 
 export type UploadStatus = "done" | "error" | "pending" | "uploading"
 
@@ -15,6 +10,17 @@ export type QueuedUpload = {
   key: string
   status: UploadStatus
 }
+
+/** The Folder and Audience fields shared by the whole batch. */
+export type UploadValues = {
+  folderId: string | null
+  visibility: Visibility
+}
+
+/** How the host lands one file: whatever storing it takes, resolving once
+ *  the file is a row. A rejection marks the row failed and keeps it queued
+ *  for a retry. */
+export type UploadAction = (file: File, values: UploadValues) => Promise<void>
 
 const fileNoun = { plural: "files", singular: "file" }
 
@@ -51,15 +57,14 @@ export function useUploadQueue() {
 }
 
 /** Everything the upload dialog needs: the queue, the shared batch fields,
- *  and a sequential submit that uploads every queued file. */
+ *  and a sequential submit that hands every queued file to the host. */
 export function useFileUpload(
-  organizationId: string,
+  upload: UploadAction,
   initialFolderId: string | null,
   onUploaded: () => void
 ) {
   const queue = useUploadQueue()
   const fields = useUploadFields(initialFolderId)
-  const uploadFile = useUploadAction(organizationId)
   const [isUploading, setIsUploading] = useState(false)
 
   async function submit() {
@@ -74,7 +79,7 @@ export function useFileUpload(
     try {
       const failed = await runUploads(
         pending,
-        (file) => uploadFile(file, fields.values),
+        (file) => upload(file, fields.values),
         queue.setStatus
       )
 
@@ -101,11 +106,6 @@ export function useFileUpload(
 
 export type FileUpload = ReturnType<typeof useFileUpload>
 
-type UploadValues = {
-  folderId: string | null
-  visibility: Visibility
-}
-
 /** The Access and Folder fields shared by the whole batch. */
 function useUploadFields(initialFolderId: string | null) {
   const [visibility, setVisibility] = useState<Visibility>({
@@ -124,32 +124,6 @@ function useUploadFields(initialFolderId: string | null) {
     setVisibility,
     values: { folderId, visibility } satisfies UploadValues,
     visibility,
-  }
-}
-
-/** Uploads one file's blob to storage and records it as a file row. */
-function useUploadAction(organizationId: string) {
-  const generateUploadUrl = useMutation(api.files.console.uploadUrl)
-  const createFile = useMutation(api.files.console.create)
-
-  return async (file: File, values: UploadValues) => {
-    const storageId = await uploadToStorage(
-      await generateUploadUrl({ organizationId }),
-      file
-    )
-
-    await createFile({
-      organizationId,
-      storageId,
-      name: file.name,
-      visibility: values.visibility as FunctionArgs<
-        typeof api.files.console.create
-      >["visibility"],
-      folderId:
-        values.folderId === null
-          ? undefined
-          : (values.folderId as GenericId<"folders">),
-    })
   }
 }
 

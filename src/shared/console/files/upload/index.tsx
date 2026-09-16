@@ -9,35 +9,52 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { AdvancedSettings, DialogForm } from "@/shared/console/materials/form"
-import { FolderField } from "../../folders/field"
-import { OrganizationVisibilityField } from "../../shared/visibility/field"
+import { FolderPickerField } from "../../folders/field"
+import { type FolderRow } from "../../folders/types"
+import { type GrantOptions, VisibilityField } from "../../visibility/field"
 import { FileDropzone } from "./dropzone"
 import { UploadList } from "./list"
-import { type FileUpload, pendingUploads, useFileUpload } from "./queue"
+import {
+  type FileUpload,
+  pendingUploads,
+  type UploadAction,
+  useFileUpload,
+} from "./queue"
 
+export type { UploadAction, UploadValues } from "./queue"
+
+/** The upload dialog: pick or drop files, set the folder and audience the
+ *  batch shares, and hand each file to the host's upload one at a time.
+ *  The host supplies the folder rows and grant options the fields offer,
+ *  and what landing a file means. */
 export function UploadFileDialog({
+  folders,
+  grantOptions,
   initialFolderId,
   isOpen,
   onOpenChange,
-  organizationId,
+  upload,
 }: {
+  /** Undefined while the rows are still on their way. */
+  folders: FolderRow[] | undefined
+  grantOptions: GrantOptions
   /** Pre-selects the Folder field, e.g. on a folder page's "New" menu. */
   initialFolderId?: string
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
-  organizationId: string
+  upload: UploadAction
 }) {
-  const upload = useFileUpload(organizationId, initialFolderId ?? null, () =>
+  const state = useFileUpload(upload, initialFolderId ?? null, () =>
     onOpenChange(false)
   )
-  const pending = pendingUploads(upload.items).length
-  const isDisabled = pending === 0 || upload.isUploading
+  const pending = pendingUploads(state.items).length
+  const isDisabled = pending === 0 || state.isUploading
 
   return (
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        if (!upload.isUploading) {
+        if (!state.isUploading) {
           onOpenChange(open)
         }
       }}
@@ -49,11 +66,15 @@ export function UploadFileDialog({
             Add files to the workspace so Jori and your team can use them.
           </DialogDescription>
         </DialogHeader>
-        <DialogForm disabled={isDisabled} onSubmit={() => void upload.submit()}>
-          <UploadFields organizationId={organizationId} upload={upload} />
+        <DialogForm disabled={isDisabled} onSubmit={() => void state.submit()}>
+          <UploadFields
+            folders={folders}
+            grantOptions={grantOptions}
+            upload={state}
+          />
           <DialogFooter>
             <Button disabled={isDisabled} type="submit">
-              {upload.isUploading ? <Loader2 className="animate-spin" /> : null}
+              {state.isUploading ? <Loader2 className="animate-spin" /> : null}
               {pending > 1 ? `Upload ${pending} files` : "Upload"}
             </Button>
           </DialogFooter>
@@ -64,10 +85,12 @@ export function UploadFileDialog({
 }
 
 function UploadFields({
-  organizationId,
+  folders,
+  grantOptions,
   upload,
 }: {
-  organizationId: string
+  folders: FolderRow[] | undefined
+  grantOptions: GrantOptions
   upload: FileUpload
 }) {
   return (
@@ -84,17 +107,17 @@ function UploadFields({
         />
       </div>
       <AdvancedSettings>
-        <FolderField
+        <FolderPickerField
+          folders={folders}
           id="file-upload-folder"
           onChange={upload.setFolderId}
-          organizationId={organizationId}
           value={upload.folderId}
         />
-        <OrganizationVisibilityField
+        <VisibilityField
           id="file-upload-visibility"
           noun="file"
           onChange={upload.setVisibility}
-          organizationId={organizationId}
+          options={grantOptions}
           value={upload.visibility}
         />
       </AdvancedSettings>

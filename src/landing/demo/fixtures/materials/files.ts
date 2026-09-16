@@ -6,8 +6,7 @@ import { type DemoFile } from "../types"
 
 /** The files filed across Copperline's folders. The notes are text the
  *  editor holds in memory; the rest are real documents under /demo, so
- *  every one of them opens in the viewer the console has for its kind —
- *  the spreadsheet as the download-only page the console gives one. */
+ *  every one of them opens in the viewer the console has for its kind. */
 export const notesFileId = demoId("files", "notes")
 
 export function demoFiles(now: number): DemoFile[] {

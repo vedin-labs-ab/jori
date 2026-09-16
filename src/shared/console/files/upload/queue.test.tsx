@@ -6,41 +6,12 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react"
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest"
+import { afterEach, describe, expect, test, vi } from "vitest"
 import { FileDropzone } from "./dropzone"
 import { UploadList } from "./list"
-import { useFileUpload, useUploadQueue } from "./queue"
-
-const uploads = vi.hoisted(() => ({
-  createFile: vi.fn(),
-  generateUploadUrl: vi.fn(),
-  uploadToStorage: vi.fn(),
-}))
-
-vi.mock("convex/react", async (importOriginal) => {
-  const original = await importOriginal<typeof import("convex/react")>()
-  const { getFunctionName } = await import("convex/server")
-
-  return {
-    ...original,
-    useMutation: (reference: Parameters<typeof original.useMutation>[0]) =>
-      getFunctionName(reference).endsWith(":create")
-        ? uploads.createFile
-        : uploads.generateUploadUrl,
-  }
-})
-
-vi.mock("../storage", () => ({
-  uploadToStorage: uploads.uploadToStorage,
-}))
+import { type UploadAction, useFileUpload, useUploadQueue } from "./queue"
 
 afterEach(cleanup)
-
-beforeEach(() => {
-  uploads.createFile.mockReset().mockResolvedValue(null)
-  uploads.generateUploadUrl.mockReset().mockResolvedValue("https://upload.test")
-  uploads.uploadToStorage.mockReset().mockResolvedValue("storage-1")
-})
 
 /** Renders the dropzone and list wired to the queue hook, as in the dialog. */
 function renderHarness() {
@@ -65,20 +36,22 @@ function renderHarness() {
 
 /** Renders the full upload flow wired to useFileUpload, with a plain
  *  submit button standing in for the dialog's footer. */
-function renderUploadHarness() {
+function renderUploadHarness(upload: UploadAction) {
+  const onUploaded = vi.fn()
+
   function Harness() {
-    const upload = useFileUpload("org-1", null, () => undefined)
+    const state = useFileUpload(upload, null, onUploaded)
 
     return (
       <>
-        <FileDropzone disabled={upload.isUploading} onFiles={upload.addFiles} />
+        <FileDropzone disabled={state.isUploading} onFiles={state.addFiles} />
         <UploadList
-          disabled={upload.isUploading}
-          items={upload.items}
-          onClear={upload.clear}
-          onRemove={upload.removeFile}
+          disabled={state.isUploading}
+          items={state.items}
+          onClear={state.clear}
+          onRemove={state.removeFile}
         />
-        <button onClick={() => void upload.submit()} type="button">
+        <button onClick={() => void state.submit()} type="button">
           Upload
         </button>
       </>
@@ -86,6 +59,8 @@ function renderUploadHarness() {
   }
 
   render(<Harness />)
+
+  return onUploaded
 }
 
 function pickFiles(files: File[]) {
@@ -138,22 +113,49 @@ describe("upload queue", () => {
 })
 
 describe("upload submission", () => {
-  test("each file lands as its own create call", async () => {
+  test("each file goes to the host's upload in order, then the queue clears", async () => {
     const { notes, photo } = makeFiles()
+    const upload = vi.fn<UploadAction>(() => Promise.resolve())
 
-    renderUploadHarness()
+    const onUploaded = renderUploadHarness(upload)
     pickFiles([notes, photo])
-    expect(screen.getByText("notes.txt")).toBeDefined()
-    expect(screen.getByText("photo.png")).toBeDefined()
     fireEvent.click(screen.getByText("Upload"))
 
-    await waitFor(() => expect(uploads.createFile).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(onUploaded).toHaveBeenCalled())
 
-    const payloads = uploads.createFile.mock.calls.map(([args]) => args)
-
-    expect(payloads.map((payload) => payload.name)).toEqual([
+    expect(upload.mock.calls.map(([file]) => file.name)).toEqual([
       "notes.txt",
       "photo.png",
     ])
+    expect(upload.mock.calls[0]?.[1]).toEqual({
+      folderId: null,
+      visibility: { mode: "organization" },
+    })
+    expect(screen.queryByText("notes.txt")).toBeNull()
+  })
+
+  test("a failed file stays queued as failed and the rest still land", async () => {
+    const { notes, photo } = makeFiles()
+    const upload = vi.fn<UploadAction>((file) =>
+      file.name === "notes.txt"
+        ? Promise.reject(new Error("storage down"))
+        : Promise.resolve()
+    )
+
+    const onUploaded = renderUploadHarness(upload)
+    pickFiles([notes, photo])
+    fireEvent.click(screen.getByText("Upload"))
+
+    await waitFor(() => expect(screen.getByText("Upload failed")).toBeDefined())
+
+    expect(onUploaded).not.toHaveBeenCalled()
+    expect(screen.getByText("photo.png")).toBeDefined()
+
+    // A retry re-runs only what failed.
+    fireEvent.click(screen.getByText("Upload"))
+
+    await waitFor(() => expect(upload).toHaveBeenCalledTimes(3))
+
+    expect(upload.mock.calls[2]?.[0].name).toBe("notes.txt")
   })
 })

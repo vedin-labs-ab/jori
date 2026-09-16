@@ -188,3 +188,14 @@ test("preview kinds leave the rest to the download prompt", () => {
   expect(previewKind("application/zip", "bundle.zip")).toBe("none")
   expect(previewKind("application/msword", "letter.doc")).toBe("none")
 })
+
+test("OOXML workbooks preview as a sheet; legacy .xls stays a download", () => {
+  const xlsx =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+  expect(previewKind(xlsx, "forecast")).toBe("sheet")
+  expect(previewKind("application/octet-stream", "forecast.xlsx")).toBe("sheet")
+  expect(previewKind("", "macros.xlsm")).toBe("sheet")
+  expect(previewKind("application/vnd.ms-excel", "legacy.xls")).toBe("none")
+  expect(previewKind("application/octet-stream", "legacy.xls")).toBe("none")
+})

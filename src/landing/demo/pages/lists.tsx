@@ -37,6 +37,7 @@ import {
   tableSummaries,
 } from "../derive/materials"
 import { type MaterialRequest } from "../dialogs/materials"
+import { DemoUploadDialog } from "../dialogs/upload"
 import { useDemoWorkspace } from "../workspace"
 import { useMaterialListing } from "./listing"
 import { MaterialListOverlays } from "./overlays"
@@ -162,9 +163,10 @@ export function FilesPage() {
     rows: files,
   })
   const [request, setRequest] = useState<MaterialRequest>()
+  const [isUploadOpen, setIsUploadOpen] = useState(false)
   const requestFor = (kind: MaterialRequest["kind"]) => (file: FileRow) =>
     setRequest(withMaterial(kind, materialOf(state, file.fileId)))
-  const upload = () => toast("Files upload from the console.")
+  const upload = () => setIsUploadOpen(true)
 
   return (
     <ConsoleListLayout>
@@ -203,6 +205,7 @@ export function FilesPage() {
         selection={listing.selection}
         toMaterial={(file) => materialOf(state, file.fileId)}
       />
+      <DemoUploadDialog isOpen={isUploadOpen} onOpenChange={setIsUploadOpen} />
     </ConsoleListLayout>
   )
 }

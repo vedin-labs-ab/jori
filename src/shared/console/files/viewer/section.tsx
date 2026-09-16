@@ -8,12 +8,16 @@ import { type FileDetail } from "../types"
 import { ViewerFrame } from "./frame"
 import { ZoomableImage, ZoomTools } from "./image"
 import { useMediaKeys } from "./keys"
+import { SheetView } from "./sheet"
 import { useViewerStatus, type ViewerStatus } from "./status"
 import { useZoom, type Zoom } from "./zoom"
 
 /** The kinds the inline viewer can render; text goes to the editor and
  *  everything else to the download fallback. */
 type ViewerKind = Exclude<PreviewKind, "none" | "text">
+
+/** Documents fill the frame edge to edge; media floats over the dot grid. */
+const documentKinds = new Set<ViewerKind>(["pdf", "sheet"])
 
 /** Inline viewer for media files: one frame that every kind renders into,
  *  with the dock floating over it. The frame holds the media hidden until
@@ -59,7 +63,7 @@ export function FileViewer({
 
   return (
     <>
-      <ViewerFrame dotted={kind !== "pdf"} status={status}>
+      <ViewerFrame dotted={!documentKinds.has(kind)} status={status}>
         {url === null ? null : (
           <ViewerContent
             kind={kind}
@@ -163,6 +167,10 @@ function ViewerContent({
     case "pdf":
       return (
         <iframe className="size-full" onLoad={onReady} src={url} title={name} />
+      )
+    case "sheet":
+      return (
+        <SheetView name={name} onError={onError} onReady={onReady} url={url} />
       )
   }
 }

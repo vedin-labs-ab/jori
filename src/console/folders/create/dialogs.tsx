@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react"
 import { type CreationRequest } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
-import { UploadFileDialog } from "../../files/upload"
+import { UploadFileDialog } from "../../files/dialogs"
 
 // The job's flow is the shared editor, whose host carries the form's state
 // and reaches the brief's schema. These dialogs mount in the shell on every
