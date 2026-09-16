@@ -18,7 +18,7 @@ vi.mock("@tanstack/react-router", async () => ({
 afterEach(cleanup)
 
 test("search previews fixture content and opens a result inside its demo", async () => {
-  render(<DemoConsoleAt path="/folders" />)
+  render(<DemoConsoleAt path="/folders" sidebar />)
   fireEvent.click(screen.getByRole("button", { name: "Search workspace" }))
   const input = await screen.findByRole("combobox")
   expect((input as HTMLInputElement).value).toBe("renewal")

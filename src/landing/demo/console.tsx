@@ -73,11 +73,15 @@ export function DemoConsole({
                     }
                     sidebarOpen={sidebarOpen}
                   >
-                    <ConsoleHeaderActions>
-                      <span className={sidebar ? "md:hidden" : undefined}>
-                        {search}
-                      </span>
-                    </ConsoleHeaderActions>
+                    {/* Search lives in the sidebar; the header carries it
+                        only where the sidebar has folded away. A mock
+                        without a sidebar is a single page to look at, so
+                        the palette stays behind its shortcut there. */}
+                    {sidebar ? (
+                      <ConsoleHeaderActions>
+                        <span className="md:hidden">{search}</span>
+                      </ConsoleHeaderActions>
+                    ) : null}
                     <DemoPage location={location} openRunId={openRunId} />
                   </ConsoleFrame>
                 </DemoDragProvider>
