@@ -17,3 +17,15 @@ test("the chat's context arrives as kind:id and reads as a message context", () 
   expect(validate({ context: 7 })).toEqual({})
   expect(validate({})).toEqual({})
 })
+
+test("billing search accepts known returns and drops malformed values", () => {
+  expect(
+    validate({ billing: "storage", context: "table:collections_1" })
+  ).toEqual({
+    billing: "storage",
+    context: { kind: "table", id: "collections_1" },
+  })
+  for (const billing of ["invalid", "constructor", ["portal"], 7, null]) {
+    expect(validate({ billing })).toEqual({})
+  }
+})

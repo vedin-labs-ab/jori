@@ -1,5 +1,6 @@
 import { type MessageContext } from "@contracts/replies/answers"
 import { createFileRoute, type SearchSchemaInput } from "@tanstack/react-router"
+import { billingSearch } from "@/console/billing/return"
 import { ChatHomePage } from "@/console/chat/home"
 import { parseContextSearch } from "@/shared/console/chat/pane/context"
 import { consoleDocumentTitle } from "@/shared/console/shell/routes"
@@ -9,11 +10,14 @@ import { consoleDocumentTitle } from "@/shared/console/shell/routes"
 // `MessageContext`. Anything else drops out of the search.
 export const Route = createFileRoute("/_workspace/chat/")({
   validateSearch: (
-    search: { context?: string } & SearchSchemaInput
-  ): { context?: MessageContext } => {
+    search: { context?: string; billing?: string } & SearchSchemaInput
+  ): { context?: MessageContext } & ReturnType<typeof billingSearch> => {
     const context = parseContextSearch(search.context)
 
-    return context === undefined ? {} : { context }
+    return {
+      ...billingSearch(search),
+      ...(context === undefined ? {} : { context }),
+    }
   },
   component: ChatHomeRoute,
   head: () => ({ meta: [{ title: consoleDocumentTitle("/chat") }] }),

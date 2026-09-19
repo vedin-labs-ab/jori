@@ -1,4 +1,12 @@
 // @vitest-environment jsdom
+
+import {
+  createBrowserHistory,
+  createRootRoute,
+  createRoute,
+  createRouter,
+  RouterProvider,
+} from "@tanstack/react-router"
 import {
   cleanup,
   fireEvent,
@@ -7,6 +15,9 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { type Route as RootRoute } from "@/routes/__root"
+import { Route as ChatRoute } from "@/routes/_workspace/chat/index"
+import { Route as ConsoleRoute } from "@/routes/console"
 import { SidebarOrganizationSwitcher } from "./organization"
 
 const { auth, toast } = vi.hoisted(() => ({
@@ -44,12 +55,17 @@ vi.mock("@/console/organization/create", () => ({
   CreateOrganizationDialog: () => null,
 }))
 
-vi.mock("@/components/ui/sidebar", () => ({
+vi.mock("@/components/ui/sidebar", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/components/ui/sidebar")>()),
   SidebarMenuButton: ({
     children,
     size: _size,
+    isActive: _isActive,
     ...props
-  }: React.ComponentProps<"button"> & { size?: string }) => (
+  }: React.ComponentProps<"button"> & {
+    size?: string
+    isActive?: boolean
+  }) => (
     <button type="button" {...props}>
       {children}
     </button>
@@ -57,7 +73,9 @@ vi.mock("@/components/ui/sidebar", () => ({
   useSidebar: () => ({ isMobile: false }),
 }))
 
-vi.mock("./settings", () => ({ OrganizationDialog: () => null }))
+vi.mock("@/console/billing", () => ({
+  BillingSettings: () => <p>Workspace billing</p>,
+}))
 vi.mock("sonner", () => ({ toast }))
 
 beforeEach(() => {
@@ -65,7 +83,10 @@ beforeEach(() => {
   toast.error.mockReset()
 })
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  window.history.replaceState(null, "", "/")
+})
 
 test("keeps the switcher open with a stable pending organization row", async () => {
   auth.activateOrganization.mockImplementation(
@@ -131,3 +152,51 @@ test("restores the switcher after a failed organization change", async () => {
       .disabled
   ).toBe(false)
 })
+
+test.each(["portal", "storage", "subscribed", "topped-up", "canceled"])(
+  "a %s return survives the console redirect and opens Billing",
+  async (status) => {
+    window.history.replaceState(
+      null,
+      "",
+      `/console?billing=${status}&ignored=value`
+    )
+    const root = createRootRoute({
+      beforeLoad: (
+        _context: Parameters<
+          NonNullable<typeof RootRoute.options.beforeLoad>
+        >[0]
+      ): void => undefined,
+    })
+    const consoleRoute = createRoute({
+      validateSearch: ConsoleRoute.options.validateSearch,
+      beforeLoad: ConsoleRoute.options.beforeLoad,
+      getParentRoute: () => root,
+      path: "/console",
+    })
+    const chatRoute = createRoute({
+      getParentRoute: () => root,
+      path: "/chat",
+      validateSearch: ChatRoute.options.validateSearch,
+      component: SidebarOrganizationSwitcher,
+    })
+    const history = createBrowserHistory()
+    const router = createRouter({
+      routeTree: root.addChildren([consoleRoute, chatRoute]),
+      history,
+    })
+    try {
+      render(<RouterProvider router={router} />)
+      expect(
+        await screen.findByRole("heading", { name: "Billing" })
+      ).toBeDefined()
+      expect(await screen.findByText("Workspace billing")).toBeDefined()
+      expect(router.state.location.pathname).toBe("/chat")
+      expect(router.state.location.search).toEqual({ billing: status })
+      expect(window.location.search).toBe(`?billing=${status}`)
+    } finally {
+      cleanup()
+      history.destroy()
+    }
+  }
+)

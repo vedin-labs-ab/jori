@@ -9,6 +9,7 @@ import { api } from "../../../convex/_generated/api"
 import { type BillingAccount } from "./actions"
 import { Activity } from "./activity"
 import { AutoTopUpRow } from "./autotopup"
+import { billingReturnToasts, billingSearch } from "./return"
 import { StorageSettings } from "./storage"
 import { SummaryBand } from "./summary"
 
@@ -76,24 +77,21 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
   return null
 }
 
-const billingReturnToasts: Record<string, string> = {
-  storage: "Checkout submitted. Storage increases once payment is confirmed.",
-  subscribed:
-    "Checkout submitted. Your plan updates once payment is confirmed.",
-  "topped-up":
-    "Top-up submitted. Your balance updates once payment is confirmed.",
-}
-
 function useBillingReturnToasts() {
   useEffect(() => {
     const url = new URL(window.location.href)
-    const status = url.searchParams.get("billing")
+    const { billing: status } = billingSearch({
+      billing: url.searchParams.get("billing"),
+    })
 
-    if (status === null) {
+    if (status === undefined) {
       return
     }
 
-    const message = billingReturnToasts[status]
+    const message =
+      status === "portal" || status === "canceled"
+        ? undefined
+        : billingReturnToasts[status]
 
     if (message !== undefined) {
       toast.info(message, { id: `billing-${status}` })

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
+import { billingSearch } from "@/console/billing/return"
 import { CreateOrganizationDialog } from "@/console/organization/create"
 import { SidebarOrganization } from "@/shared/console/shell/organization"
 import {
@@ -24,7 +25,11 @@ import {
 import { OrganizationDialog } from "./settings"
 
 function billingSettingsRequested() {
-  return new URL(window.location.href).searchParams.has("billing")
+  return (
+    billingSearch({
+      billing: new URL(window.location.href).searchParams.get("billing"),
+    }).billing !== undefined
+  )
 }
 
 export function SidebarOrganizationSwitcher() {
