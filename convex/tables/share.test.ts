@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest"
+import { describe, expect, test, vi } from "vitest"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import {
   type ShareKind,
@@ -63,15 +63,6 @@ describe("opening a table share", () => {
     expect(await openTableShare(ctx, { tableId, secret })).toBeNull()
   })
 
-  test("returns null on an expired link", async () => {
-    const { database, ctx } = databaseContext()
-    const tableId = await createTable(database)
-
-    await createShare(database, tableId, { expiresAt: Date.now() - 1 })
-
-    expect(await openTableShare(ctx, { tableId, secret: "s3cret" })).toBeNull()
-  })
-
   test("returns null on an archived table", async () => {
     const { database, ctx } = databaseContext()
     const tableId = await createTable(database, { archivedAt: 5 })
@@ -123,6 +114,23 @@ describe("opening a table share", () => {
       })
     ).toBeNull()
   })
+})
+
+test("a link expires exactly at its deadline", async () => {
+  const clock = vi.spyOn(Date, "now").mockReturnValue(1000)
+  try {
+    const { database, ctx } = databaseContext()
+    const tableId = await createTable(database)
+    await createShare(database, tableId, { expiresAt: 1001 })
+    const args = { tableId, secret: "s3cret" }
+    expect(await openTableShare(ctx, args)).not.toBeNull()
+    clock.mockReturnValue(1001)
+    expect(await openTableShare(ctx, args)).toBeNull()
+    clock.mockReturnValue(1002)
+    expect(await openTableShare(ctx, args)).toBeNull()
+  } finally {
+    clock.mockRestore()
+  }
 })
 
 describe("the folder chain over a link", () => {

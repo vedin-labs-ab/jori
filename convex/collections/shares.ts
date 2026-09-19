@@ -186,13 +186,11 @@ export async function openShare(
 
   if (
     share === null ||
-    !canOpenShare({
-      share,
-      material: args.material,
-      creatorCanShare: await shareCreatorCanShare(ctx, share, args.material),
-      secret,
-      now: Date.now(),
-    })
+    share.secret !== secret ||
+    !(share.expiresAt > Date.now()) ||
+    share.organizationId !== args.material.organizationId ||
+    args.material.archivedAt !== undefined ||
+    !(await shareCreatorCanShare(ctx, share, args.material))
   ) {
     return null
   }
@@ -240,23 +238,6 @@ async function shareCreatorCanShare(
 
 export function randomShareSecret() {
   return bytesToHex(crypto.getRandomValues(new Uint8Array(32)))
-}
-
-/** The one gate every anonymous share read passes through. */
-export function canOpenShare(args: {
-  share: { secret: string; expiresAt: number; organizationId: string }
-  material: { organizationId: string; archivedAt?: number }
-  creatorCanShare: boolean
-  secret: string
-  now: number
-}) {
-  return (
-    args.share.secret === args.secret &&
-    args.share.expiresAt > args.now &&
-    args.share.organizationId === args.material.organizationId &&
-    args.material.archivedAt === undefined &&
-    args.creatorCanShare
-  )
 }
 
 /** When the active set is at capacity, the oldest links make room for the one
