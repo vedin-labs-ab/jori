@@ -4,6 +4,7 @@ import { verifyGate } from "../gate/verify.ts"
 import { git, isClean, requirePrimaryCheckout } from "../git.ts"
 import { installCommand, packageCommand, runCommand } from "../process.ts"
 import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
+import { rebaseTask } from "./rebase.ts"
 
 /**
  * Usage: pnpm land <name> [--no-verify]
@@ -42,7 +43,7 @@ if (!isClean(directory)) {
 const release = await acquireLock()
 
 try {
-  if (rebase()) {
+  if (rebaseTask(branch, directory)) {
     await runCommand(installCommand(directory))
   }
   await verifyGate(directory, skipGate)
@@ -55,30 +56,6 @@ try {
 process.stdout.write(
   `${branch} landed on main at ${git(["rev-parse", "--short", "main"])}.\n`
 )
-
-/** Rebases when main moved; tells whether that brought a lockfile change,
- *  which the worktree has to install before it is gated. */
-function rebase() {
-  // Preserve merged branches when the task already includes main.
-  if (git(["merge-base", "main", branch]) === git(["rev-parse", "main"])) {
-    return false
-  }
-
-  const lockfile = git(["rev-parse", "HEAD:pnpm-lock.yaml"], directory)
-
-  try {
-    git(["rebase", "main"], directory)
-  } catch (error) {
-    git(["rebase", "--abort"], directory)
-
-    throw new Error(
-      `${branch} does not rebase cleanly on main. Rebase it in ${directory}, resolve the conflicts, and land again.`,
-      { cause: error }
-    )
-  }
-
-  return git(["rev-parse", "HEAD:pnpm-lock.yaml"], directory) !== lockfile
-}
 
 function fastForward() {
   if (git(["merge-base", "main", branch]) !== git(["rev-parse", "main"])) {
