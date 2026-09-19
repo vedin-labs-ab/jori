@@ -58,6 +58,11 @@ complete a new OAuth installation, and verify it before retiring the old one.
 
 - Verify the provider's signature before trusting any routing identifier.
   Resolve the active local connection and enforce its tenant permissions.
+- Anyone can write in a public repository or a shared channel. Pass every
+  writer through `screenWriter` before storing what they wrote or acting on
+  it, and mark the actor `external` when the provider places them outside
+  the installed workspace. An outsider gets no run, no reply, and no stored
+  text.
 - Accept and deduplicate events durably in the region before acknowledging,
   then process asynchronously. Answer synchronous interactions within their
   deadlines.
