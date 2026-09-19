@@ -1,5 +1,5 @@
 import { beforeEach, expect, test, vi } from "vitest"
-import { jobDoc } from "../../../test/convex/folders"
+import { jobDoc } from "../../../test/convex/materials/folders"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { resolveRunAudience } from "../../runs/audience"

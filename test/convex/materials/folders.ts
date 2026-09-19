@@ -11,7 +11,7 @@ import { testOwner } from "./collections"
 // value-position import statement would survive transpilation and fail to
 // resolve at test runtime.
 type Doc<TableName extends "jobs" | "files" | "folders"> =
-  import("../../convex/_generated/dataModel").Doc<TableName>
+  import("../../../convex/_generated/dataModel").Doc<TableName>
 type Overrides<TableName extends "jobs" | "files" | "folders"> = Partial<
   WithoutSystemFields<Doc<TableName>>
 >

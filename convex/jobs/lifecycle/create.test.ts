@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
 import { databaseContext } from "../../../test/convex/database"
-import { folderDoc } from "../../../test/convex/folders"
+import { folderDoc } from "../../../test/convex/materials/folders"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { type JobAccessInput } from "../access"

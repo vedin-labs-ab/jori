@@ -5,7 +5,7 @@ import {
   organizationId,
   person,
 } from "../../test/convex/conversations"
-import { folderDoc } from "../../test/convex/folders"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { type Doc } from "../_generated/dataModel"
 import { folderResources } from "../folders/resources"
 import { runMatchesVisibilityFilter } from "../runs/console/filters"

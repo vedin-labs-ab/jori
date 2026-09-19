@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest"
-import { tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
-import { folderDoc } from "../../test/convex/folders"
+import { tableDoc, testOwner } from "../../test/convex/materials/collections"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { type Id } from "../_generated/dataModel"
 import { tableSpec } from "../tables/spec"
 import {

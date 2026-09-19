@@ -9,10 +9,10 @@ import { type WithoutSystemFields } from "convex/server"
 // dataModel only ships types, so it is referenced through import types: a
 // value-position import statement would survive transpilation and fail to
 // resolve at test runtime.
-type DataModel = import("../../convex/_generated/dataModel").DataModel
+type DataModel = import("../../../convex/_generated/dataModel").DataModel
 type Doc<TableName extends keyof DataModel> =
-  import("../../convex/_generated/dataModel").Doc<TableName>
-type PersonId = import("../../convex/_generated/dataModel").Id<"persons">
+  import("../../../convex/_generated/dataModel").Doc<TableName>
+type PersonId = import("../../../convex/_generated/dataModel").Id<"persons">
 
 type CollectionOverrides<TKind extends Doc<"collections">["kind"]> = Partial<
   WithoutSystemFields<Extract<Doc<"collections">, { kind: TKind }>>

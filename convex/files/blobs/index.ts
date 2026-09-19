@@ -1,5 +1,5 @@
 import { R2 } from "@convex-dev/r2"
-import { urlWindowMs } from "../../../contracts/files"
+import { urlWindowMs } from "../../../contracts/runtime/files"
 import { components } from "../../_generated/api"
 import { type ActionCtx, type MutationCtx } from "../../_generated/server"
 import { requireEnvironmentVariable } from "../../shared/environment"

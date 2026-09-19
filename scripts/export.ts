@@ -4,7 +4,7 @@ import { mkdir, open, stat, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { Readable } from "node:stream"
 import { pipeline } from "node:stream/promises"
-import { urlEpoch } from "../contracts/files.ts"
+import { urlEpoch } from "../contracts/runtime/files.ts"
 import { isTarget } from "./env/names.ts"
 import { loadTarget } from "./env/target.ts"
 

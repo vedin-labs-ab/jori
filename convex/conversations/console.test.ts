@@ -1,6 +1,5 @@
 import { expect, test, vi } from "vitest"
 import { defaultSelection } from "../../contracts/models/selection"
-import { tableDoc } from "../../test/convex/collections"
 import {
   consoleContext,
   conversationOf,
@@ -9,6 +8,7 @@ import {
   person,
   rows,
 } from "../../test/convex/conversations"
+import { tableDoc } from "../../test/convex/materials/collections"
 import { type Doc } from "../_generated/dataModel"
 import { listConsoleConversations, sendConsoleMessage } from "./console"
 import { readLiveState } from "./live"

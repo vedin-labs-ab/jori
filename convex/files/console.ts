@@ -94,11 +94,14 @@ const createArgs = {
  *  only an action can do; the caller's identity carries into the mutation. */
 export const create = action({
   args: createArgs,
-  handler: async (ctx, args): Promise<Id<"files">> =>
-    await ctx.runMutation(internal.files.console.insert, {
+  handler: async (ctx, args): Promise<Id<"files">> => {
+    await requireOrganizationAccess(ctx, args.organizationId)
+
+    return await ctx.runMutation(internal.files.console.insert, {
       ...args,
       size: await syncBlob(ctx, args.key),
-    }),
+    })
+  },
 })
 
 export const insert = internalMutation({
@@ -135,11 +138,14 @@ const replaceArgs = {
 
 export const replace = action({
   args: replaceArgs,
-  handler: async (ctx, args): Promise<null> =>
-    await ctx.runMutation(internal.files.console.swap, {
+  handler: async (ctx, args): Promise<null> => {
+    await requireOrganizationAccess(ctx, args.organizationId)
+
+    return await ctx.runMutation(internal.files.console.swap, {
       ...args,
       size: await syncBlob(ctx, args.key),
-    }),
+    })
+  },
 })
 
 export const swap = internalMutation({

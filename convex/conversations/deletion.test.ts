@@ -6,7 +6,7 @@ import {
   person,
   rows,
 } from "../../test/convex/conversations"
-import { folderDoc } from "../../test/convex/folders"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { type Doc } from "../_generated/dataModel"
 import { removeFolder } from "../folders/records"
 import { createInstructionRun } from "../runs/instruction"

@@ -1,11 +1,11 @@
 import { expect, test, vi } from "vitest"
-import { tableDoc } from "../../test/convex/collections"
 import {
   consoleContext,
   organizationId,
   person,
 } from "../../test/convex/conversations"
-import { folderDoc } from "../../test/convex/folders"
+import { tableDoc } from "../../test/convex/materials/collections"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { sendConsoleMessage } from "../conversations/console/send"
 import { fileResource } from "../folders/filing"
 import { formatSessionMessage } from "../runtime/loop/transcript"

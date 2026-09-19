@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from "vitest"
+import { databaseContext, id } from "../../test/convex/database"
 import {
   type TableOverrides,
   tableDoc,
   testOwner,
-} from "../../test/convex/collections"
-import { databaseContext, id } from "../../test/convex/database"
+} from "../../test/convex/materials/collections"
 import { type CollectionDoc } from "../collections/spec"
 import { withOwnerDisplay, withOwnerDisplays } from "../persons/names"
 import { summarizeTable } from "./access"

@@ -1,11 +1,11 @@
 import { describe, expect, test, vi } from "vitest"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import {
   type StoreOverrides,
   storeDoc,
   type TableOverrides,
   tableDoc,
-} from "../../test/convex/collections"
-import { databaseContext, type TestDatabase } from "../../test/convex/database"
+} from "../../test/convex/materials/collections"
 import { storeSpec } from "../stores/spec"
 import { tableSpec } from "../tables/spec"
 import { deleteDocument, insertDocuments, writeDocument } from "./documents"

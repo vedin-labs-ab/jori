@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest"
 import { type TableColumn } from "../../contracts/tables/columns"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import {
   type TableOverrides,
   tableDoc,
   testOwner,
-} from "../../test/convex/collections"
-import { databaseContext, type TestDatabase } from "../../test/convex/database"
+} from "../../test/convex/materials/collections"
 import { type Id } from "../_generated/dataModel"
 import { planColumnChange, scrubBatch } from "./records"
 

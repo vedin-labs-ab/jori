@@ -1,6 +1,6 @@
 import { expect, test, vi } from "vitest"
-import { tableDoc } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
+import { tableDoc } from "../../test/convex/materials/collections"
 import { tableSpec } from "../tables/spec"
 import { deleteDocument, insertDocuments } from "./documents"
 import { type CollectionDoc } from "./spec"

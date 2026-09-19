@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { runDoc } from "../../test/convex/console"
 import { databaseContext, id } from "../../test/convex/database"
-import { folderDoc, jobDoc } from "../../test/convex/folders"
+import { folderDoc, jobDoc } from "../../test/convex/materials/folders"
 import { canSeeRun } from "./visibility"
 
 test("job run history and delegated runs follow the resource's folder access", async () => {

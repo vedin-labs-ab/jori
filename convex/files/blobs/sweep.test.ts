@@ -2,7 +2,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
 import { expect, test } from "vitest"
-import { registerBlobs } from "../../../test/convex/blobs"
+import { registerBlobs } from "../../../test/convex/materials/blobs"
 import { internal } from "../../_generated/api"
 import schema from "../../schema"
 import { blobExists, seedBlob } from "./fixtures"

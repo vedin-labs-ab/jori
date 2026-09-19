@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { storeToolResponseSchemas } from "../../contracts/tools/responses/jori/stores"
-import { storeDoc } from "../../test/convex/collections"
 import { id } from "../../test/convex/database"
+import { storeDoc } from "../../test/convex/materials/collections"
 import { schemaViolations } from "../../test/convex/schema"
 import { summarizeStore } from "./access"
 

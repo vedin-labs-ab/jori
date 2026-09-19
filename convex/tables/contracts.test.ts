@@ -1,8 +1,8 @@
 import { expect, test } from "vitest"
 import { tableToolResponseSchemas } from "../../contracts/tools/responses/jori/tables"
 import { type Visibility } from "../../contracts/visibility"
-import { tableDoc } from "../../test/convex/collections"
 import { id } from "../../test/convex/database"
+import { tableDoc } from "../../test/convex/materials/collections"
 import { schemaViolations } from "../../test/convex/schema"
 import { agentTableSummary, summarizeTable } from "./access"
 

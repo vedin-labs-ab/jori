@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import {
   type TableOverrides,
   tableDoc,
   testOwner,
-} from "../../test/convex/collections"
-import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { folderDoc } from "../../test/convex/folders"
+} from "../../test/convex/materials/collections"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   compareAudiences,

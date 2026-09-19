@@ -1,6 +1,6 @@
 import { convexTest } from "convex-test"
 import { expect, test, vi } from "vitest"
-import { registerBlobs } from "../../test/convex/blobs"
+import { registerBlobs } from "../../test/convex/materials/blobs"
 import { internal } from "../_generated/api"
 import { type MutationCtx } from "../_generated/server"
 import { purgeContent } from "../retention/erasure/purge"

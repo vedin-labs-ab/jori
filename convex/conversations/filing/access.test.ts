@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest"
 import { transactionalConsoleContext } from "../../../test/convex/conversations"
-import { folderDoc } from "../../../test/convex/folders"
+import { folderDoc } from "../../../test/convex/materials/folders"
 import { fileResource } from "../../folders/filing"
 import { findSession } from "../../sessions/read"
 import { listOrganizationViewerIds } from "../../visibility/audience"

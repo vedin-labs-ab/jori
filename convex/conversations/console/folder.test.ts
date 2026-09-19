@@ -1,12 +1,12 @@
 import { expect, test, vi } from "vitest"
-import { tableDoc } from "../../../test/convex/collections"
 import {
   consoleContext,
   organizationId,
   person,
   rows,
 } from "../../../test/convex/conversations"
-import { folderDoc } from "../../../test/convex/folders"
+import { tableDoc } from "../../../test/convex/materials/collections"
+import { folderDoc } from "../../../test/convex/materials/folders"
 import { sendConsoleMessage } from "./send"
 
 vi.mock("../../runs/execution/workflow", () => ({ startRun: vi.fn() }))

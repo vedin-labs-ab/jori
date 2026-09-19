@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
-import { type ShareOverrides } from "../../test/convex/collections"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { type FileOverrides } from "../../test/convex/folders"
+import { type ShareOverrides } from "../../test/convex/materials/collections"
+import { type FileOverrides } from "../../test/convex/materials/folders"
 import { type Id } from "../_generated/dataModel"
 import { mintFileShare, openFileShare } from "./share"
 

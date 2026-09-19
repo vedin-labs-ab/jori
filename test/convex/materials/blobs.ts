@@ -3,7 +3,7 @@ import r2 from "@convex-dev/r2/test"
 import { type GenericSchema, type SchemaDefinition } from "convex/server"
 import { type TestConvex } from "convex-test"
 import { vi } from "vitest"
-import { bucket } from "../../convex/files/blobs/fixtures"
+import { bucket } from "../../../convex/files/blobs/fixtures"
 
 /** Registers the R2 component and the settings files/blobs reads. Seed and
  *  inspect blobs with convex/files/blobs/fixtures. */

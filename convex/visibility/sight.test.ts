@@ -1,10 +1,10 @@
 import { describe, expect, test } from "vitest"
+import { databaseContext } from "../../test/convex/database"
 import {
   type TableOverrides,
   tableDoc,
   testOwner,
-} from "../../test/convex/collections"
-import { databaseContext } from "../../test/convex/database"
+} from "../../test/convex/materials/collections"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { createSight, type SightArgs } from "./sight"
 

@@ -1,7 +1,11 @@
 import { expect, test } from "vitest"
 import { runDoc } from "../../../test/convex/console"
 import { databaseContext, id } from "../../../test/convex/database"
-import { fileDoc, folderDoc, jobDoc } from "../../../test/convex/folders"
+import {
+  fileDoc,
+  folderDoc,
+  jobDoc,
+} from "../../../test/convex/materials/folders"
 import { createSight } from "../../visibility/sight"
 import { project } from "./index"
 

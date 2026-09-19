@@ -1,7 +1,11 @@
 import { expect, test } from "vitest"
-import { storeDoc, tableDoc, testOwner } from "../../test/convex/collections"
 import { databaseContext } from "../../test/convex/database"
-import { folderDoc } from "../../test/convex/folders"
+import {
+  storeDoc,
+  tableDoc,
+  testOwner,
+} from "../../test/convex/materials/collections"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { type Id } from "../_generated/dataModel"
 import { newCollectionName } from "./name"
 

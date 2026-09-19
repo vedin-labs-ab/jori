@@ -1,5 +1,4 @@
 import { expect, test, vi } from "vitest"
-import { tableDoc } from "../../test/convex/collections"
 import {
   consoleContext,
   finishRun,
@@ -8,7 +7,8 @@ import {
   rows,
 } from "../../test/convex/conversations"
 import { type TestDatabase } from "../../test/convex/database"
-import { folderDoc } from "../../test/convex/folders"
+import { tableDoc } from "../../test/convex/materials/collections"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { folderChildren } from "../folders/contents"
 import { fileResource } from "../folders/filing"

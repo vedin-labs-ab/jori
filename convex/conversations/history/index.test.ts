@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest"
-import { tableDoc, testOwner } from "../../../test/convex/collections"
 import {
   databaseContext,
   type TestDatabase,
 } from "../../../test/convex/database"
+import { tableDoc, testOwner } from "../../../test/convex/materials/collections"
 import { type Doc } from "../../_generated/dataModel"
 import {
   type ConversationEntry,

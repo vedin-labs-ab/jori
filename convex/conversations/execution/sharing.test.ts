@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest"
-import { registerBlobs } from "../../../test/convex/blobs"
 import { transactionalConsoleContext } from "../../../test/convex/conversations"
+import { registerBlobs } from "../../../test/convex/materials/blobs"
 import { internal } from "../../_generated/api"
 import { seedBlob } from "../../files/blobs/fixtures"
 import { insertConsoleReply } from "../../messages/console/records"

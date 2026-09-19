@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { folderDoc, jobDoc } from "../../test/convex/folders"
+import { folderDoc, jobDoc } from "../../test/convex/materials/folders"
 import { seedUsage } from "../../test/convex/usage"
 import { type Id } from "../_generated/dataModel"
 import { readFolderSpend, readFolderUsage } from "./usage"

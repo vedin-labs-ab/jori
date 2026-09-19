@@ -1,6 +1,6 @@
 import { expect, test } from "vitest"
 import { databaseContext } from "../../test/convex/database"
-import { folderDoc } from "../../test/convex/folders"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   ancestorPath,

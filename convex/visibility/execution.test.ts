@@ -1,6 +1,6 @@
 import { beforeEach, expect, test, vi } from "vitest"
 import { databaseContext, id } from "../../test/convex/database"
-import { folderDoc } from "../../test/convex/folders"
+import { folderDoc } from "../../test/convex/materials/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { listOrganizationViewerIds } from "./audience"
 import { audienceKey, createAudienceSight } from "./execution"

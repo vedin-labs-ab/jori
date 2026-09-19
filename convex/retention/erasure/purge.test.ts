@@ -2,7 +2,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
 import { expect, test, vi } from "vitest"
-import { registerBlobs } from "../../../test/convex/blobs"
+import { registerBlobs } from "../../../test/convex/materials/blobs"
 import { api, internal } from "../../_generated/api"
 import { authComponent, createAdapterOptions } from "../../auth"
 import authSchema from "../../betterauth/schema"

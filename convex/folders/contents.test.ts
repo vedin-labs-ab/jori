@@ -1,12 +1,12 @@
 import { expect, test } from "vitest"
+import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import {
   ownerIdentityDoc,
   storeDoc,
   tableDoc,
   testOwner,
-} from "../../test/convex/collections"
-import { databaseContext, type TestDatabase } from "../../test/convex/database"
-import { fileDoc, folderDoc, jobDoc } from "../../test/convex/folders"
+} from "../../test/convex/materials/collections"
+import { fileDoc, folderDoc, jobDoc } from "../../test/convex/materials/folders"
 import { type Id } from "../_generated/dataModel"
 import { folderChildren } from "./contents"
 import { folderResources } from "./resources"
