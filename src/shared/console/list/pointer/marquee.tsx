@@ -34,7 +34,9 @@ type Sweep = {
   /** The last selection handed over, so a still pointer asks for nothing. */
   key: string
   pointer: Point
-  /** Where the press landed, in the list's scrolled content. */
+  /** Where the press landed: on screen, for telling a drag from a click. */
+  press: Point
+  /** The same point in the list's scrolled content, where the box starts. */
   start: Point
 }
 
@@ -107,7 +109,7 @@ function createMarquee<Row>(read: Read<Row>) {
     sweep.pointer = { x: event.clientX, y: event.clientY }
 
     if (!sweep.isActive) {
-      if (distance(sweep.pointer, toViewport(list, sweep.start)) < threshold) {
+      if (distance(sweep.pointer, sweep.press) < threshold) {
         return
       }
 
@@ -196,6 +198,7 @@ function pressed<Row>(
     isActive: false,
     key: "unswept",
     pointer,
+    press: pointer,
     start: toContent(list, pointer),
   }
 }
@@ -271,15 +274,6 @@ function toContent(list: HTMLElement, point: Point): Point {
   return {
     x: point.x - bounds.left + list.scrollLeft,
     y: point.y - bounds.top + list.scrollTop,
-  }
-}
-
-function toViewport(list: HTMLElement, point: Point): Point {
-  const bounds = list.getBoundingClientRect()
-
-  return {
-    x: point.x + bounds.left - list.scrollLeft,
-    y: point.y + bounds.top - list.scrollTop,
   }
 }
 

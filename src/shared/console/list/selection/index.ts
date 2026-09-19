@@ -37,35 +37,32 @@ export function useRowSelection<Row>({
   const selected = rows.filter((row) => ids.has(identify(row)))
   const allSelected = rows.length > 0 && selected.length === rows.length
 
+  const pick: RowSelection<Row>["pick"] = (row, how = "alone") => {
+    if (disabled?.(row)) {
+      return
+    }
+
+    const id = identify(row)
+
+    if (how === "range") {
+      setIds(new Set(runBetween(rows.map(identify), anchor.current, id)))
+      return
+    }
+
+    anchor.current = id
+    setIds(how === "toggle" ? withToggled(ids, id) : new Set([id]))
+  }
+
   return {
     allSelected,
     clear: () => setIds(new Set()),
     count: selected.length,
     identify,
     isSelected: (row) => !disabled?.(row) && ids.has(identify(row)),
-    pick: (row, how = "alone") => {
-      if (disabled?.(row)) {
-        return
-      }
-
-      const id = identify(row)
-
-      if (how === "range") {
-        setIds(new Set(runBetween(rows.map(identify), anchor.current, id)))
-        return
-      }
-
-      anchor.current = id
-      setIds(how === "toggle" ? withToggled(ids, id) : new Set([id]))
-    },
+    pick,
     replace: (next) => setIds(new Set(next)),
     selected,
-    toggle: (row) => {
-      if (!disabled?.(row)) {
-        anchor.current = identify(row)
-        setIds(withToggled(ids, identify(row)))
-      }
-    },
+    toggle: (row) => pick(row, "toggle"),
     toggleAll: () =>
       setIds(allSelected ? new Set() : new Set(rows.map(identify))),
   }
