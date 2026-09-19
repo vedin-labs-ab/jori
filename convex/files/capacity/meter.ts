@@ -51,18 +51,8 @@ export async function changeUsage(
   }
   await updateBucket(ctx, args, "total", total)
   await updateBucket(ctx, args, args.folderId ?? "unfiled")
-  if (
-    total !== null &&
-    bytes <= limit &&
-    (total.overCapacityAt !== undefined ||
-      total.overCapacityNoticeId !== undefined ||
-      total.overCapacityRetryAt !== undefined)
-  ) {
-    await ctx.db.patch(total._id, {
-      overCapacityAt: undefined,
-      overCapacityNoticeId: undefined,
-      overCapacityRetryAt: undefined,
-    })
+  if (total !== null && bytes <= limit) {
+    await clearCapacityNotice(ctx, total)
   }
 }
 
@@ -130,4 +120,21 @@ export async function moveFile(
     folderId ?? "unfiled"
   )
   await ctx.db.patch(file._id, { folderId })
+}
+
+export async function clearCapacityNotice(
+  ctx: MutationCtx,
+  row: Doc<"fileUsage">
+) {
+  if (
+    row.overCapacityAt !== undefined ||
+    row.overCapacityNoticeId !== undefined ||
+    row.overCapacityRetryAt !== undefined
+  ) {
+    await ctx.db.patch(row._id, {
+      overCapacityAt: undefined,
+      overCapacityNoticeId: undefined,
+      overCapacityRetryAt: undefined,
+    })
+  }
 }

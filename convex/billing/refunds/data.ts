@@ -4,6 +4,7 @@ import { internal } from "../../_generated/api"
 import { internalMutation, internalQuery } from "../../_generated/server"
 import { getAccount } from "../account"
 import { requireCreditedPurchase } from "./purchase"
+import { refundCase } from "./records"
 import { reservation } from "./schema"
 import { heldAccount, requireSettled, validateReservation } from "./validation"
 
@@ -66,11 +67,7 @@ export const inspect = internalQuery({
 
 export const read = internalQuery({
   args: { caseId: v.string() },
-  handler: async (ctx, args) =>
-    await ctx.db
-      .query("billingRefunds")
-      .withIndex("by_caseId", (q) => q.eq("caseId", args.caseId))
-      .unique(),
+  handler: async (ctx, args) => await refundCase(ctx, args.caseId),
 })
 
 export const reserve = internalMutation({
@@ -81,10 +78,7 @@ export const reserve = internalMutation({
   },
   handler: async (ctx, args) => {
     validateReservation(args)
-    const existing = await ctx.db
-      .query("billingRefunds")
-      .withIndex("by_caseId", (q) => q.eq("caseId", args.caseId))
-      .unique()
+    const existing = await refundCase(ctx, args.caseId)
     if (existing !== null) {
       if (existing.status === "released") {
         throw new Error("A released case cannot be reused. Start a new case.")
@@ -123,10 +117,7 @@ export const reserve = internalMutation({
 export const settle = internalMutation({
   args: { caseId: v.string(), refundId: v.string() },
   handler: async (ctx, args) => {
-    const entry = await ctx.db
-      .query("billingRefunds")
-      .withIndex("by_caseId", (q) => q.eq("caseId", args.caseId))
-      .unique()
+    const entry = await refundCase(ctx, args.caseId)
     if (entry === null || entry.status === "released") {
       throw new Error("No reserved refund for this case.")
     }
@@ -163,10 +154,7 @@ export const release = internalMutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const account = await heldAccount(ctx, args.organizationId, args.caseId)
-    const entry = await ctx.db
-      .query("billingRefunds")
-      .withIndex("by_caseId", (q) => q.eq("caseId", args.caseId))
-      .unique()
+    const entry = await refundCase(ctx, args.caseId)
     if (entry?.status === "reserved") {
       const allowance = account.micros.allowance + entry.allowanceMicros
       const wallet = account.micros.wallet + entry.walletMicros

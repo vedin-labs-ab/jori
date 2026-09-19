@@ -1,4 +1,5 @@
 import { type MutationCtx } from "../../_generated/server"
+import { orderCases } from "./records"
 
 /** Wallet credits can only be reserved against the top-up order that bought
  *  them, and never more of them than that order credited. */
@@ -23,13 +24,7 @@ export async function requireCreditedPurchase(
       "The order must be a top-up credited to this workspace. Wait for its webhook."
     )
   }
-  const refunds = await ctx.db
-    .query("billingRefunds")
-    .withIndex("by_orderId", (q) => q.eq("orderId", args.orderId))
-    .take(1001)
-  if (refunds.length > 1000) {
-    throw new Error("Too many refunds to verify this purchase.")
-  }
+  const refunds = await orderCases(ctx, args.orderId)
   const reserved = refunds.reduce(
     (sum, refund) =>
       sum + (refund.status === "released" ? 0 : refund.walletMicros),

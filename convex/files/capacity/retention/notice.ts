@@ -56,17 +56,3 @@ export async function ensureNotice(ctx: MutationCtx, row: Doc<"fileUsage">) {
   })
   return null
 }
-
-export async function clearNotice(ctx: MutationCtx, row: Doc<"fileUsage">) {
-  if (
-    row.overCapacityAt !== undefined ||
-    row.overCapacityNoticeId !== undefined ||
-    row.overCapacityRetryAt !== undefined
-  ) {
-    await ctx.db.patch(row._id, {
-      overCapacityAt: undefined,
-      overCapacityNoticeId: undefined,
-      overCapacityRetryAt: undefined,
-    })
-  }
-}

@@ -6,8 +6,8 @@ import { internalMutation, type MutationCtx } from "../../../_generated/server"
 import { getAccount } from "../../../billing/account"
 import { isWorkspaceDeleting } from "../../../retention/access"
 import { purgeFile } from "../../records"
-import { capacityBytes, usageBucket } from "../meter"
-import { clearNotice, ensureNotice } from "./notice"
+import { capacityBytes, clearCapacityNotice, usageBucket } from "../meter"
+import { ensureNotice } from "./notice"
 
 export const run = internalMutation({
   args: { cursor: v.optional(v.string()) },
@@ -72,7 +72,7 @@ export const workspace = internalMutation({
       row.bytes <= limit ||
       (await isWorkspaceDeleting(ctx, args.organizationId))
     ) {
-      await clearNotice(ctx, row)
+      await clearCapacityNotice(ctx, row)
       return null
     }
     const noticeAt = await ensureNotice(ctx, row)
@@ -122,7 +122,7 @@ async function deleteBatch(
     bytes -= file.size
   }
   if (bytes <= limit) {
-    await clearNotice(ctx, row)
+    await clearCapacityNotice(ctx, row)
   } else if (!page.isDone) {
     await ctx.scheduler.runAfter(
       0,

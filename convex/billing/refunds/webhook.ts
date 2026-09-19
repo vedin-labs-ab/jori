@@ -2,6 +2,7 @@ import { microsPerDollar } from "../../../contracts/billing"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { readNumber, readString } from "../../shared/input"
+import { orderCases } from "./records"
 
 /** Reconcile Polar's cumulative, pre-tax refund against this order's ledger.
  * Support removes its reviewed credits when reserving, so wait for the case
@@ -25,13 +26,7 @@ export async function applyTopUpRefund(
   ) {
     throw new Error("Polar returned an invalid refunded amount.")
   }
-  const cases = await ctx.db
-    .query("billingRefunds")
-    .withIndex("by_orderId", (q) => q.eq("orderId", orderId))
-    .take(1001)
-  if (cases.length > 1000) {
-    throw new Error("Too many refunds to verify this purchase.")
-  }
+  const cases = await orderCases(ctx, orderId)
   if (cases.some((entry) => entry.status === "reserved")) {
     return
   }

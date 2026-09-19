@@ -118,7 +118,6 @@ test("storage checkout sells monthly units to the same regional customer without
 })
 
 test.each([
-  0,
   storage.minimumExtraGb - 1,
   4.5,
   -4,
@@ -141,13 +140,28 @@ test("missing storage configuration does not disable the base plan or initiate a
 })
 
 test.each([
-  { state: { kind: "paused" } },
-  { refundHold: "support-case" },
-  { storage: { subscriptionId: "existing", extraGb: 4 } },
-])(
+  [
+    { state: { kind: "paused" } },
+    "An active plan is required to fund the wallet.",
+  ],
+  [
+    { state: { kind: "unsubscribed" } },
+    "An active plan is required to fund the wallet.",
+  ],
+  [
+    { refundHold: "support-case" },
+    "Billing is paused while support settles a refund.",
+  ],
+  [
+    { storage: { subscriptionId: "existing", extraGb: 4 } },
+    "This workspace already has extra storage.",
+  ],
+] as const)(
   "ineligible accounts cannot buy duplicate or unavailable storage: %j",
-  async (overrides) => {
-    await expect(invoke(checkout, context(false, overrides))).rejects.toThrow()
+  async (overrides, message) => {
+    await expect(invoke(checkout, context(false, overrides))).rejects.toThrow(
+      message
+    )
     expect(polarRequest).not.toHaveBeenCalled()
   }
 )

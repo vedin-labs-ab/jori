@@ -1,13 +1,10 @@
-import { type Infer, v } from "convex/values"
+import { type ObjectType } from "convex/values"
 import { type Doc } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { getAccount } from "../account"
-import { reservation } from "./schema"
+import { type reservation } from "./schema"
 
-export type Reservation = Infer<ReturnType<typeof requestValidator>>
-function requestValidator() {
-  return v.object(reservation)
-}
+type Reservation = ObjectType<typeof reservation>
 
 export function validateReservation(args: Reservation) {
   for (const value of [
