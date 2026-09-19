@@ -144,9 +144,9 @@ function ConsentPanel({
         )}
       </div>
       <p className="mt-2.5 text-muted-foreground text-sm/relaxed">
-        May we count which pages get opened? It shows us what to improve. The
-        count runs through PostHog and never sees your chats, files, or name.
-        Either way, Jori works the same.
+        May we record which pages you open and which features you use? It shows
+        us what to improve. The record goes to PostHog and never includes your
+        chats, files, or name. Either way, Jori works the same.
       </p>
       <p className="mt-2 text-muted-foreground/80 text-xs/relaxed">
         Change your answer any time under Privacy choices. Details in the{" "}

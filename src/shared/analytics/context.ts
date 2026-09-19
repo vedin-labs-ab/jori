@@ -1,6 +1,7 @@
 import { type Region } from "@contracts/region"
 import { createContext, useContext, useEffect, useRef, useState } from "react"
 import { type AnalyticsChoice, readConsent, saveConsent } from "./consent"
+import { type AnalyticsEvent, type EventProperties } from "./events"
 
 type PrivacyContextValue = {
   choice: AnalyticsChoice | undefined
@@ -13,6 +14,22 @@ export const PrivacyContext = createContext<PrivacyContextValue | undefined>(
 
 export function usePrivacyChoices() {
   return useContext(PrivacyContext)
+}
+
+export type Capture = <E extends AnalyticsEvent>(
+  event: E,
+  properties: EventProperties<E>
+) => void
+
+export const CaptureContext = createContext<Capture>(() => {
+  /* Outside the provider nothing is configured, so nothing is sent. */
+})
+
+/** Record one event from the contract. It is sent only when the visitor
+ *  accepted analytics and this deployment configures it, so callers never
+ *  check either. */
+export function useCapture() {
+  return useContext(CaptureContext)
 }
 
 /** The choice for one region; without a region there is nothing to ask.

@@ -19,6 +19,7 @@ contact them about their use of your data. We will help them respond.
 | Waitlist email, team size and the work you describe | Manage your request for access and contact you about it | Steps you request before a contract; our legitimate interest in managing business inquiries |
 | Billing contact, purchases, usage charges and payment status | Collect payment, manage subscriptions and keep accounting records | Contract and legal obligations |
 | Support messages | Answer requests and resolve problems | Contract or our legitimate interest in providing support |
+| Pages you open and features you use, under pseudonymous identifiers | Understand how Jori gets used and improve it | Your consent, which you can withdraw at any time under Privacy choices |
 | Security and operational records, such as request times, errors and IP addresses | Keep Jori available, prevent abuse and investigate problems | Our legitimate interest in protecting the service and its users; legal obligations where applicable |
 
 We also process the chats, files, instructions and connected-service content
@@ -121,8 +122,9 @@ particular provider or data category.
 ## Your choices and rights
 
 Essential browser storage keeps sign-in and basic settings working. Optional
-PostHog analytics starts only if you accept it. It measures page categories with
-browser identifiers, without collecting chat or file content. Your choice is
+PostHog analytics starts only if you accept it. It records which pages you open
+and which features you use, under pseudonymous identifiers. It never records
+names, chats, files, instructions or anything else you write. Your choice is
 remembered for each data region for 180 days, on usejori.com and that
 region's site alike. Use Privacy choices in the website footer,
 sign-in page or account menu to change it. Declining does not limit Jori.

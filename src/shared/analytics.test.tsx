@@ -212,3 +212,36 @@ test("withdrawing while the SDK loads prevents initialization and capture", asyn
   expect(state.init).not.toHaveBeenCalled()
   expect(state.capture).not.toHaveBeenCalled()
 })
+
+test("a captured event waits for acceptance and never loads the SDK before it", async () => {
+  state.routeId = "/unknown/"
+  const { Analytics } = await import("./analytics")
+  const { useCapture } = await import("./analytics/context")
+  function Feature() {
+    const capture = useCapture()
+    return (
+      <button
+        onClick={() => capture("$pageview", { page: "jobs" })}
+        type="button"
+      >
+        Use feature
+      </button>
+    )
+  }
+  render(
+    <Analytics>
+      <Feature />
+    </Analytics>
+  )
+  await screen.findByRole("button", { name: "Accept" })
+  fireEvent.click(screen.getByRole("button", { name: "Use feature" }))
+  await act(async () => {})
+  expect(state.init).not.toHaveBeenCalled()
+  expect(state.capture).not.toHaveBeenCalled()
+
+  fireEvent.click(screen.getByRole("button", { name: "Accept" }))
+  fireEvent.click(screen.getByRole("button", { name: "Use feature" }))
+  await waitFor(() => expect(state.capture).toHaveBeenCalledTimes(1))
+  expect(state.init).toHaveBeenCalledTimes(1)
+  expect(state.capture).toHaveBeenLastCalledWith("$pageview", { page: "jobs" })
+})

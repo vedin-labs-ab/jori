@@ -1,9 +1,20 @@
 import { type Region } from "@contracts/region"
 import { useRouterState } from "@tanstack/react-router"
-import { type ReactNode, useEffect, useRef } from "react"
+import {
+  type ReactNode,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react"
 import { type AnalyticsInstance, analyticsConfig } from "./analytics/config"
 import { clearAnalyticsStorage } from "./analytics/consent"
-import { usePrivacyChoices } from "./analytics/context"
+import {
+  type Capture,
+  CaptureContext,
+  usePrivacyChoices,
+} from "./analytics/context"
+import { type AnalyticsEvent, type EventProperties } from "./analytics/events"
 import { PrivacyProvider } from "./analytics/preferences"
 import { analyticsPage } from "./analytics/privacy"
 import { useRegionChoice } from "./region/choice"
@@ -41,19 +52,56 @@ function analyticsRegion(choice: Region | undefined): Region | undefined {
   return origin === regionConfig.publicOrigin ? choice : undefined
 }
 
-/** Explicit page usage only, on a production origin. Router definitions
- * supply categories, never customer content or browser URLs. */
+/** Pages opened and features used, on a production origin. Events carry
+ * router categories and contract properties, never customer content or
+ * browser URLs. */
 export function Analytics({ children }: { children: ReactNode }) {
   const region = analyticsRegion(useRegionChoice())
   const instance = region === undefined ? undefined : configuration?.[region]
   return (
     <PrivacyProvider region={instance === undefined ? undefined : region}>
-      <PageAnalytics instance={instance}>{children}</PageAnalytics>
+      <EventAnalytics instance={instance}>{children}</EventAnalytics>
     </PrivacyProvider>
   )
 }
 
-function PageAnalytics({
+type Current = {
+  instance: AnalyticsInstance | undefined
+  privacy: ReturnType<typeof usePrivacyChoices>
+}
+
+/** Consent and the instance are read once the SDK has loaded, so a choice
+ *  withdrawn in the meantime still holds. Says whether the event left. */
+async function send<E extends AnalyticsEvent>(
+  current: RefObject<Current>,
+  event: E,
+  properties: EventProperties<E>
+) {
+  try {
+    const posthog = await analyticsClient()
+    const { instance, privacy } = current.current
+    if (
+      instance === undefined ||
+      privacy?.allowsAnalytics() !== true ||
+      (initialized !== undefined && initialized.key !== instance.key)
+    ) {
+      return false
+    }
+    if (initialized === undefined) {
+      posthog.init(instance.key, instance.options)
+      initialized = { key: instance.key, posthog }
+    }
+    posthog.opt_in_capturing({ captureEventName: false })
+    posthog.capture(event, properties)
+    return true
+  } catch {
+    // A blocked analytics script must not break the application.
+    client = undefined
+    return false
+  }
+}
+
+function EventAnalytics({
   children,
   instance,
 }: {
@@ -61,6 +109,25 @@ function PageAnalytics({
   instance: AnalyticsInstance | undefined
 }) {
   const privacy = usePrivacyChoices()
+  // Read when an event fires, so the capture callers hold stays the same
+  // function across renders.
+  const current = useRef<Current>({ instance, privacy })
+  current.current = { instance, privacy }
+  usePageviews(current)
+
+  const capture = useCallback<Capture>((event, properties) => {
+    const { instance, privacy } = current.current
+    // Without consent the SDK is never even loaded.
+    if (instance !== undefined && privacy?.choice === "accepted") {
+      void send(current, event, properties)
+    }
+  }, [])
+
+  return <CaptureContext value={capture}>{children}</CaptureContext>
+}
+
+function usePageviews(current: RefObject<Current>) {
+  const { instance, privacy } = current.current
   const routeId = useRouterState({
     select: (state) => state.matches.at(-1)?.routeId,
   })
@@ -70,10 +137,8 @@ function PageAnalytics({
     if (instance === undefined || privacy === undefined) {
       return
     }
-    const page = analyticsPage(routeId)
     if (
       privacy.choice !== "accepted" ||
-      page === undefined ||
       (initialized !== undefined && initialized.key !== instance.key)
     ) {
       lastRoute.current = undefined
@@ -83,33 +148,21 @@ function PageAnalytics({
       }
       return
     }
-
-    let cancelled = false
-    void analyticsClient()
-      .then((posthog) => {
-        if (
-          cancelled ||
-          !privacy.allowsAnalytics() ||
-          lastRoute.current === routeId
-        ) {
-          return
-        }
-        if (initialized === undefined) {
-          posthog.init(instance.key, instance.options)
-          initialized = { key: instance.key, posthog }
-        }
-        posthog.opt_in_capturing({ captureEventName: false })
-        lastRoute.current = routeId
-        posthog.capture("$pageview", { page })
-      })
-      .catch(() => {
-        // A blocked analytics script must not break the application.
-        client = undefined
-      })
-    return () => {
-      cancelled = true
+    const page = analyticsPage(routeId)
+    if (page === undefined) {
+      lastRoute.current = undefined
+      return
     }
-  }, [routeId, privacy, instance])
-
-  return children
+    if (lastRoute.current === routeId) {
+      return
+    }
+    // Claimed before the SDK loads, so strict mode's second pass and later
+    // renders of the same route do not count the page twice.
+    lastRoute.current = routeId
+    void send(current, "$pageview", { page }).then((sent) => {
+      if (!sent && lastRoute.current === routeId) {
+        lastRoute.current = undefined
+      }
+    })
+  }, [routeId, privacy, instance, current])
 }

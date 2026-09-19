@@ -1,50 +1,31 @@
-type BeforeSend = import("posthog-js").BeforeSendFn
+import { contractProperties, pages } from "./events"
 
-const pages = new Set([
-  "home",
-  "pricing",
-  "privacy",
-  "terms",
-  "trust",
-  "sign-in",
-  "sign-out",
-  "console",
-  "chat",
-  "context",
-  "files",
-  "folders",
-  "integrations",
-  "jobs",
-  "runs",
-  "settings",
-  "skills",
-  "stores",
-  "tables",
-  "usage",
-  "waitlist",
-])
+type BeforeSend = import("posthog-js").BeforeSendFn
 
 /** Takes a router definition, never a browser pathname. Dynamic parameters
  * are discarded along with deeper routes, including invitation tokens. */
 export function analyticsPage(routeId: string | undefined) {
   const page = routeId === "/" ? "home" : routeId?.split("/")[1]
-  return page !== undefined && pages.has(page) ? page : undefined
+  return pages.find((known) => known === page)
 }
 
-/** A strict output schema also drops properties added by future SDK defaults,
- * integrations or accidental capture calls. Anonymous IDs stay host-local. */
+/** A strict output schema: only events in the contract leave, carrying only
+ * the contract's properties. That also drops whatever future SDK defaults,
+ * integrations or accidental capture calls add. Anonymous IDs stay host-local. */
 export const minimizeEvent: BeforeSend = (event) => {
-  if (event === null || event.event !== "$pageview") {
+  if (event === null) {
     return null
   }
-  const page = event.properties.page
-  if (typeof page !== "string" || !pages.has(page)) {
+  const contract = contractProperties(event.event, event.properties)
+  if (contract === undefined) {
     return null
   }
-  const properties: Record<string, string | boolean> = {
-    page,
-    $pathname: page === "home" ? "/" : `/${page}`,
+  const properties: Record<string, string | number | boolean> = {
+    ...contract,
     $process_person_profile: false,
+  }
+  if (event.event === "$pageview") {
+    properties.$pathname = contract.page === "home" ? "/" : `/${contract.page}`
   }
   for (const name of [
     "token",
@@ -61,7 +42,7 @@ export const minimizeEvent: BeforeSend = (event) => {
   }
   return {
     uuid: event.uuid,
-    event: "$pageview",
+    event: event.event,
     timestamp: event.timestamp,
     properties,
   }
