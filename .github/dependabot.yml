@@ -17,6 +17,9 @@ updates:
       # Better Auth 1.6 supports Vitest through v4.
       - dependency-name: vitest
         versions: [">=5.0.0"]
+      # Focus regression closes menus: https://github.com/jsdom/jsdom/issues/4347
+      - dependency-name: jsdom
+        versions: ["30.1.0"]
     groups:
       authentication:
         patterns: ["better-auth", "@better-auth/*", "@better-auth-ui/*", "@convex-dev/better-auth"]
