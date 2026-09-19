@@ -35,6 +35,9 @@ function publicAccount(account: Doc<"accounts">) {
     renewsAt: account.renewsAt,
     topUp: account.topUp,
     hasCustomer: account.polar !== undefined,
+    canSubscribe:
+      account.polar?.subscriptionId === undefined &&
+      account.refundHold === undefined,
     canFundWallet:
       account.state.kind === "active" && account.refundHold === undefined,
   }

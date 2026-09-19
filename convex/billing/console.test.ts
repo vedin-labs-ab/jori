@@ -82,3 +82,57 @@ test("billing readiness never bypasses organization authorization", async () => 
     t.query(api.billing.console.overview, { organizationId })
   ).rejects.toThrow("Sign in")
 })
+
+test.each([
+  {
+    kind: "paused",
+    subscriptionId: undefined,
+    refundHold: undefined,
+    expected: true,
+  },
+  {
+    kind: "active",
+    subscriptionId: "subscription",
+    refundHold: undefined,
+    expected: false,
+  },
+  {
+    kind: "paused",
+    subscriptionId: "subscription",
+    refundHold: undefined,
+    expected: false,
+  },
+  {
+    kind: "paused",
+    subscriptionId: undefined,
+    refundHold: "support-case",
+    expected: false,
+  },
+  {
+    kind: "unsubscribed",
+    subscriptionId: undefined,
+    refundHold: undefined,
+    expected: true,
+  },
+] as const)(
+  "checkout eligibility follows the current subscription and support hold: $kind/$subscriptionId/$refundHold",
+  async ({ kind, subscriptionId, refundHold, expected }) => {
+    const t = convexTest(schema, modules)
+    await t.run(async (ctx) => {
+      await ctx.db.insert("accounts", {
+        organizationId,
+        state: { kind },
+        micros: { allowance: 0, wallet: 15_000_000 },
+        topUp: { charged: { micros: 0 } },
+        polar: { customerId: "customer", subscriptionId },
+        refundHold,
+        updatedAt: 1,
+      })
+    })
+    const overview = await t
+      .withIdentity({ org: organizationId })
+      .query(api.billing.console.overview, { organizationId })
+    expect(overview.account?.canSubscribe).toBe(expected)
+    expect(overview.account?.hasCustomer).toBe(true)
+  }
+)

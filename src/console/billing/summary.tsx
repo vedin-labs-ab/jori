@@ -40,7 +40,7 @@ function PlanCell({
   organizationId: string
 }) {
   const checkout = useBillingCheckout(organizationId)
-  const subscribed = account !== null && account.state.kind !== "unsubscribed"
+  const canSubscribe = account === null || account.canSubscribe
 
   return (
     <CardContent className="min-w-0 py-4">
@@ -56,8 +56,8 @@ function PlanCell({
       <p className="mt-1.5 text-xs/relaxed text-muted-foreground">
         {planDetail(account)}
       </p>
-      <div className="mt-5 flex gap-2">
-        {subscribed ? null : <PlanPicker organizationId={organizationId} />}
+      <div className="mt-5 flex flex-wrap gap-2">
+        {canSubscribe ? <PlanPicker organizationId={organizationId} /> : null}
         {account?.hasCustomer ? (
           <Button
             disabled={checkout.pending !== null}
