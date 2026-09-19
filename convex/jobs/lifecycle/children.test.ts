@@ -199,7 +199,7 @@ function job(
       kind: "person",
       personId: "person" as Id<"persons">,
     },
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     version: input.version ?? 1,
     type: input.type ?? "cron",
     trigger: input.trigger ?? {

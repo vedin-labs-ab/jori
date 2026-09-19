@@ -33,7 +33,7 @@ function job(
     organizationId: "organization",
     name: "Job",
     instructions: "Do work.",
-    access: { integrations: [], web: true },
+    access: { integrations: [], jori: [] },
     type: "event",
     trigger: {
       integrationId: "integration",

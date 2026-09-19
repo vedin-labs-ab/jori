@@ -8,7 +8,6 @@ import {
   useTeamOptions,
 } from "../../shared/visibility/options"
 import { useSkillNames } from "../skills"
-import { writeJobWebSearchPreference } from "./preferences"
 import { ToolReferenceProvider } from "./references"
 
 // The Event tab reaches the organization's connections and option sources;
@@ -71,10 +70,7 @@ export function JobDialog({
         job={job}
         onOpenChange={onOpenChange}
         onSave={onSave}
-        onValuesChange={(next) => {
-          rememberWebSearch(values, next)
-          onValuesChange(next)
-        }}
+        onValuesChange={onValuesChange}
         permissions={permissions}
         policyKey={policyKey}
         skills={skills}
@@ -82,12 +78,4 @@ export function JobDialog({
       />
     </ToolReferenceProvider>
   )
-}
-
-/** The web-search choice is remembered for the next new job, whichever
- *  control changed it. */
-function rememberWebSearch(previous: JobFormValues, next: JobFormValues) {
-  if (next.webSearch !== previous.webSearch) {
-    writeJobWebSearchPreference(next.webSearch)
-  }
 }

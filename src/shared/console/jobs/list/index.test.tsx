@@ -42,7 +42,6 @@ function job(overrides: Partial<Job> = {}): Job {
     folderId: "folder-1",
     trigger: { expression: "0 9 * * *", timezone: "UTC", nextAt: now + day },
     access: {
-      webSearch: true,
       surfaces: [{ integration: "slack", access: "write", tools: ["post"] }],
     },
     createdAt: now - 3 * day,

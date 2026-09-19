@@ -52,7 +52,12 @@ export const create = internalMutation({
     })
     return await createJob(
       ctx,
-      { ...input, ...defaults, createdBy: defaults.ownerId },
+      {
+        ...input,
+        ...defaults,
+        ceiling: await runCeiling(ctx, runId),
+        createdBy: defaults.ownerId,
+      },
       await createResourceSight(ctx, viewer)
     )
   },
@@ -123,7 +128,11 @@ export const update = internalMutation({
   handler: async (ctx, args) => {
     await requireRecordAccess(ctx, args)
 
-    return await updateJob(ctx, { ...args, updatedBy: args.personId })
+    return await updateJob(ctx, {
+      ...args,
+      ceiling: await runCeiling(ctx, args.runId),
+      updatedBy: args.personId,
+    })
   },
 })
 
@@ -151,6 +160,12 @@ export const cleanupOwned = internalMutation({
   args: { parentId: v.id("jobs") },
   handler: async (ctx, args) => await deleteOwnedJobs(ctx, args.parentId),
 })
+
+/** The contract of the run managing a job, which bounds what the job may
+ *  hold. A run without one, a person's own conversation, is unbounded. */
+async function runCeiling(ctx: QueryLikeCtx, runId?: Doc<"runs">["_id"]) {
+  return runId === undefined ? undefined : (await ctx.db.get(runId))?.access
+}
 
 async function requireRecordAccess(
   ctx: QueryLikeCtx,

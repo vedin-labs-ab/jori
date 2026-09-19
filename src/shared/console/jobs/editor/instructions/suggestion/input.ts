@@ -27,33 +27,31 @@ import {
 import { isReferenceInputAllowed } from "./context"
 import { type InstructionSuggestionState } from "./suggest"
 
-type WebAccessChange = (enabled: boolean) => void
-
 export function insertMentionSuggestion({
   editor,
-  onWebAccessChange,
   permissions,
   suggestion,
   setSuggestion,
   state,
+  surfaces,
 }: {
   editor: Editor | null
-  onWebAccessChange: WebAccessChange
   permissions: JobPolicyPermissions
   suggestion: JobMentionSuggestion
   setSuggestion: Dispatch<SetStateAction<InstructionSuggestionState | null>>
   state: InstructionSuggestionState | null
+  /** Everything the job holds, including access saved beside the text. */
+  surfaces?: JobMentionSources["surfaces"]
 }) {
   if (editor === null || state === null || suggestion.disabled) {
     return
   }
 
-  const content = mentionContent(suggestion, permissions, editor.getJSON())
+  const content = mentionContent(suggestion, permissions, {
+    document: editor.getJSON(),
+    surfaces,
+  })
   const access = suggestion.access
-
-  if (access?.kind === "web") {
-    onWebAccessChange(true)
-  }
 
   insertMentionContent(
     editor,
@@ -72,7 +70,6 @@ export function insertMentionSuggestion({
 export function replaceCompletedMention({
   catalog,
   from,
-  onWebAccessChange,
   permissions,
   sources,
   text,
@@ -81,7 +78,6 @@ export function replaceCompletedMention({
 }: {
   catalog: JobMentionCatalog
   from: number
-  onWebAccessChange: WebAccessChange
   permissions: JobPolicyPermissions
   sources: JobMentionSources
   text: string
@@ -109,7 +105,10 @@ export function replaceCompletedMention({
   }
 
   const transaction = replaceTypedMention({
-    content: mentionContent(suggestion, permissions, view.state.doc.toJSON()),
+    content: mentionContent(suggestion, permissions, {
+      document: view.state.doc.toJSON(),
+      surfaces: sources.surfaces,
+    }),
     from,
     start: from - (before.length - match.start),
     text,
@@ -125,10 +124,6 @@ export function replaceCompletedMention({
   }
 
   view.dispatch(transaction.scrollIntoView())
-
-  if (suggestion.access?.kind === "web") {
-    onWebAccessChange(true)
-  }
 
   return true
 }
@@ -164,33 +159,45 @@ function completedSuggestion(
   }
 }
 
+/** What the job holds as the mention goes in: the pills in the text, and the
+ *  surfaces saved beside it. */
+type HeldAccess = {
+  document: JSONContent
+  surfaces: JobMentionSources["surfaces"]
+}
+
 /** The nodes a suggestion inserts: the mention itself, and before a tool
  *  whose integration the job does not yet name, that integration's pill. */
 function mentionContent(
   suggestion: JobMentionSuggestion,
   permissions: JobPolicyPermissions,
-  document: JSONContent
+  held: HeldAccess
 ) {
   const content: JSONContent[] = []
   const access = suggestion.access
 
   if (
     access?.kind === "integration" &&
-    readJobSurfaceToolsForIntegration(document, access.integration) ===
+    readJobSurfaceToolsForIntegration(held.document, access.integration) ===
       undefined
   ) {
-    content.push(surfaceNode(access.integration, [suggestion.id]))
+    content.push(
+      surfaceNode(access.integration, [
+        ...(heldSurfaceTools(held, access.integration) ?? []),
+        suggestion.id,
+      ])
+    )
     content.push({ text: " ", type: "text" })
   }
 
-  content.push(mentionNode(suggestion, permissions, document))
+  content.push(mentionNode(suggestion, permissions, held))
   return content
 }
 
 function mentionNode(
   mention: Pick<JobMention, "id" | "kind">,
   permissions: JobPolicyPermissions,
-  document: JSONContent
+  held: HeldAccess
 ): JSONContent {
   if (mention.kind !== "integration") {
     return mentionNodeContent(mention, undefined)
@@ -198,10 +205,22 @@ function mentionNode(
 
   const integration = mention.id as JobSurfaceIntegration
   const tools =
-    readJobSurfaceToolsForIntegration(document, integration) ??
+    heldSurfaceTools(held, integration) ??
     getDefaultJobSurfaceTools(integration, permissions)
 
   return surfaceNode(integration, tools)
+}
+
+/** A new pill starts from what the job already holds for its surface, so
+ *  naming a surface in the text never drops access saved beside it. */
+function heldSurfaceTools(
+  held: HeldAccess,
+  integration: JobSurfaceIntegration
+) {
+  return (
+    readJobSurfaceToolsForIntegration(held.document, integration) ??
+    held.surfaces?.find((surface) => surface.integration === integration)?.tools
+  )
 }
 
 function surfaceNode(

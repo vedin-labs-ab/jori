@@ -95,7 +95,7 @@ function ChaseEditor() {
     const chase = state.jobs.find((job) => job.id === jobId("chase"))
 
     return {
-      ...jobFormValues(chase, { webSearch: false }),
+      ...jobFormValues(chase),
       folderId: chase?.folderId ?? null,
     }
   })

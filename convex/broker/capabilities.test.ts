@@ -8,6 +8,7 @@ import { type Doc } from "../_generated/dataModel"
 import { type AgentRuntimeInput } from "../runs/agent/input"
 import { type ApprovalBrokerContext } from "./approval"
 import { listCapabilities } from "./capabilities"
+import { authorizeTool } from "./mcp"
 
 test("separates run tools from connected and available capabilities", () => {
   const capabilities = listCapabilities(
@@ -111,28 +112,42 @@ test("hides interactive tools from job runs", () => {
   expect(joriTools(message)).toContain("offer_integration")
 })
 
-test("hides web tools from job runs without web access", () => {
+test("a job run sees and can call only the Jori tools it was granted", () => {
   const github = integration("github")
-  const blocked = listCapabilities(
-    context({
-      connectedIntegrations: [github],
-      input: jobInput(github, ["github_get_issue"], false),
-      toolModes: new Map(),
-    })
+  const granted = context({
+    connectedIntegrations: [github],
+    input: jobInput(
+      github,
+      ["github_get_issue"],
+      ["read_table", "web_search", "web_fetch"]
+    ),
+    toolModes: new Map(),
+  })
+  const ungranted = context({
+    connectedIntegrations: [github],
+    input: jobInput(github, ["github_get_issue"]),
+    toolModes: new Map(),
+  })
+  const call = (tool: string) => ({ surface: "jori" as const, tool })
+
+  expect(joriTools(listCapabilities(granted))).toEqual(
+    expect.arrayContaining(["read_table", "web_search", "web_fetch"])
   )
-  const allowed = listCapabilities(
-    context({
-      connectedIntegrations: [github],
-      input: jobInput(github, ["github_get_issue"], true),
-      toolModes: new Map(),
-    })
+  expect(joriTools(listCapabilities(granted))).not.toContain("insert_table_row")
+  expect(authorizeTool(granted, call("read_table"))).toBe("allowed")
+  expect(() => authorizeTool(granted, call("insert_table_row"))).toThrow(
+    "Tool is not allowed by run access: insert_table_row"
   )
 
-  expect(joriTools(blocked)).not.toContain("web_search")
-  expect(joriTools(blocked)).not.toContain("web_fetch")
-  expect(joriTools(allowed)).toEqual(
-    expect.arrayContaining(["web_search", "web_fetch"])
+  expect(joriTools(listCapabilities(ungranted))).not.toContain("web_search")
+  expect(joriTools(listCapabilities(ungranted))).not.toContain("read_table")
+  expect(() => authorizeTool(ungranted, call("web_search"))).toThrow(
+    "Tool is not allowed by run access: web_search"
   )
+  // Finding out what it can do is a core tool, held with no grant.
+  expect(() =>
+    authorizeTool(ungranted, call("list_capabilities"))
+  ).not.toThrow()
 })
 
 function context(args: {
@@ -169,13 +184,13 @@ function messageInput(integrations: Doc<"integrations">[]): AgentRuntimeInput {
 function jobInput(
   integration: Doc<"integrations">,
   tools: string[],
-  web = false
+  jori: string[] = []
 ): AgentRuntimeInput {
   return {
     type: "job",
     access: {
       integrations: [{ id: integration._id, tools }],
-      web,
+      jori,
     },
     instructions: "Test",
     run: runDoc(),

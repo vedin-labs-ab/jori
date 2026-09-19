@@ -12,7 +12,7 @@ export const accessInput = v.object({
       tools: v.array(v.string()),
     })
   ),
-  web: v.boolean(),
+  jori: v.array(v.string()),
 })
 
 export const access = accessValidator

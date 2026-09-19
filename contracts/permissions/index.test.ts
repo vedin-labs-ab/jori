@@ -2,7 +2,9 @@ import { describe, expect, test } from "vitest"
 import { codingToolNames } from "../coding"
 import { integrations, toolSurfaces } from "../integrations"
 import {
+  getGrantableToolPermissions,
   internalRequiredToolNames,
+  isCoreTool,
   isUserVisibleToolPermission,
   toolPermissions,
 } from "."
@@ -90,6 +92,35 @@ describe("permission catalog shape", () => {
 
     expect(isUserVisibleToolPermission("git")).toBe(true)
     expect(isUserVisibleToolPermission("start_agent")).toBe(true)
+  })
+})
+
+describe("core tools", () => {
+  test("core tools are required and never granted", () => {
+    const core = toolPermissions.filter((permission) =>
+      isCoreTool(permission.tool)
+    )
+    const grantable = getGrantableToolPermissions("jori").map(
+      (permission) => permission.tool
+    )
+
+    expect(core.map((permission) => permission.tool)).toEqual(
+      expect.arrayContaining(["finish_run", "list_capabilities", "load_skill"])
+    )
+
+    // A run cannot work without these, so an organization cannot block them
+    // and a job never has to ask for them.
+    for (const permission of core) {
+      expect(permission).toMatchObject({
+        defaultMode: "required",
+        surface: "jori",
+      })
+      expect(grantable).not.toContain(permission.tool)
+    }
+
+    expect(grantable).toEqual(
+      expect.arrayContaining(["read_table", "web_search", "bash"])
+    )
   })
 })
 

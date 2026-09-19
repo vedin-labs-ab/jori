@@ -66,7 +66,6 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
       <JobInstructionsSection
         additionalSurfaces={additionalSurfaces}
         error={instructionsError}
-        onWebSearchChange={actions.updateWebSearch}
         onValueChange={actions.updateInstructions}
         permissions={props.permissions}
         policyKey={props.policyKey}
@@ -77,10 +76,8 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
         additionalSurfaces={additionalSurfaces}
         onAdditionalSurfaceChange={actions.updateAdditionalSurface}
         onAdditionalSurfaceRemove={actions.removeAdditionalSurface}
-        onWebSearchChange={actions.updateWebSearch}
         permissions={props.permissions}
         scope={values.scope}
-        webSearch={values.webSearch}
       />
       <JobTiming
         eventFields={props.eventFields}
@@ -172,6 +169,5 @@ function createFieldActions(
     updateName: (name: string) => updateValues({ name }),
     updateVisibility: (visibility: JobFormValues["visibility"]) =>
       updateValues({ visibility, scope: derivedScope(visibility) }),
-    updateWebSearch: (webSearch: boolean) => updateValues({ webSearch }),
   }
 }

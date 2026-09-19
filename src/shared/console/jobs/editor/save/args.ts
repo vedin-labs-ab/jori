@@ -31,13 +31,7 @@ type JobArgs = {
   name: string
   instructions: string
   visibility: JobVisibilityArg
-  access: {
-    integrations: Array<{
-      integration: JobFormValues["surfaces"][number]["integration"]
-      tools: string[]
-    }>
-    web: boolean
-  }
+  access: FunctionArgs<typeof api.jobs.console.create>["access"]
 }
 
 type ArgsResult<Args> = { args: Args } | { error: string }
@@ -171,13 +165,20 @@ function buildBaseArgs(
       name,
       instructions,
       visibility: values.visibility as JobVisibilityArg,
-      access: {
-        integrations: surfaces.map((surface) => ({
-          integration: surface.integration,
-          tools: surface.tools,
-        })),
-        web: values.webSearch,
-      },
+      access: accessArgs(surfaces),
     },
+  }
+}
+
+/** Jori's own grant travels beside the integrations', not among them. */
+function accessArgs(surfaces: JobFormValues["surfaces"]): JobArgs["access"] {
+  return {
+    integrations: surfaces.flatMap((surface) =>
+      surface.integration === "jori"
+        ? []
+        : [{ integration: surface.integration, tools: surface.tools }]
+    ),
+    jori:
+      surfaces.find((surface) => surface.integration === "jori")?.tools ?? [],
   }
 }

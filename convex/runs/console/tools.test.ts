@@ -26,7 +26,6 @@ test("omits empty access counts from tool labels", () => {
           tools: [writeTool],
         },
       ],
-      webSearch: true,
     })
   ).toContainEqual({
     type: "tools",
@@ -71,7 +70,6 @@ test("combines native Jori groups in tool labels", () => {
         { surface: "slack", label: "Slack", tools: [slackTool] },
         { surface: "jori", label: "Workspace", tools: [workspaceTool] },
       ],
-      webSearch: true,
     })
   ).toContainEqual({
     type: "tools",
@@ -110,7 +108,6 @@ test("replaces persisted agent-facing tool descriptions", () => {
       groups: [
         { surface: "jori", label: "Workspace", tools: [globTool, gitTool] },
       ],
-      webSearch: true,
     })
   ).toContainEqual({
     type: "tools",

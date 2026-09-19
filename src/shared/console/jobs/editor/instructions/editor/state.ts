@@ -71,13 +71,13 @@ export function useJobInstructionsEditor(props: JobInstructionsFieldProps) {
     (item: JobMentionSuggestion) =>
       insertMentionSuggestion({
         editor,
-        onWebAccessChange: refs.onWebSearchChange.current,
         permissions: refs.permissions.current,
         suggestion: item,
         setSuggestion,
         state: suggestion,
+        surfaces: refs.sources.current.surfaces,
       }),
-    [editor, refs.onWebSearchChange, refs.permissions, suggestion]
+    [editor, refs.permissions, refs.sources, suggestion]
   )
 
   return {
@@ -131,15 +131,8 @@ function useMentionSources(props: JobInstructionsFieldProps) {
       permissions,
       skills: props.skills,
       surfaces: props.surfaces,
-      webSearch: props.webSearch,
     }),
-    [
-      availableIntegrations,
-      permissions,
-      props.skills,
-      props.surfaces,
-      props.webSearch,
-    ]
+    [availableIntegrations, permissions, props.skills, props.surfaces]
   )
   return { catalog, sources }
 }
@@ -160,10 +153,8 @@ function useScopeMentionSources(props: JobInstructionsFieldProps) {
     () =>
       !Array.isArray(props.permissions) || props.scope === "personal"
         ? props.permissions
-        : props.permissions.filter(
-            (permission) =>
-              permission.surface === "jori" ||
-              isJobSurfaceAllowedForScope(props.scope, permission.surface)
+        : props.permissions.filter((permission) =>
+            isJobSurfaceAllowedForScope(props.scope, permission.surface)
           ),
     [props.permissions, props.scope]
   )
@@ -180,7 +171,6 @@ function useInstructionRefs(
     catalog: { current: catalog },
     editor: { current: null },
     emittedValueKey: { current: undefined },
-    onWebSearchChange: { current: props.onWebSearchChange },
     onValueChange: { current: props.onValueChange },
     permissions: { current: props.permissions },
     scope: { current: props.scope },

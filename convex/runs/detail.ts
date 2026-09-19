@@ -25,7 +25,6 @@ export type ExecutionDetailType =
   | "subject"
   | "table"
   | "tools"
-  | "web_search"
 
 export type ExecutionDetailGroup = {
   type: string

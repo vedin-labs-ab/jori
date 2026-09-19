@@ -3,6 +3,7 @@ import { databaseContext } from "../../../test/convex/database"
 import { folderDoc } from "../../../test/convex/folders"
 import { type Doc, type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type JobAccessInput } from "../access"
 import { pauseJob, resumeJob } from "./control"
 import { createJob } from "./create"
 import { updateJob } from "./write"
@@ -24,7 +25,7 @@ test.each([undefined, 1])(
         name: "Meeting Briefing delivery",
         instructions: "Deliver the briefing.",
         visibility: { mode: "private" },
-        access: { integrations: [], web: false },
+        access: { integrations: [], jori: [] },
         type: "once",
         trigger: { at: "2030-01-01T08:00:00Z" },
         createdBy: "person" as Id<"persons">,
@@ -50,22 +51,29 @@ function creationContext() {
   return { database, ctx }
 }
 
-function creationArgs(folderId?: Id<"folders">) {
+function creationArgs(
+  folderId?: Id<"folders">,
+  access: JobAccessInput = {
+    integrations: [
+      { integration: "slack", tools: ["conversations_add_message"] },
+    ],
+    jori: [],
+  }
+) {
   return {
     organizationId: "org",
     name: "Digest",
     instructions: "Send the digest to @Slack.",
     folderId,
-    access: {
-      integrations: [
-        { integration: "slack" as const, tools: ["conversations_add_message"] },
-      ],
-      web: false,
-    },
+    access,
     type: "cron" as const,
     trigger: { expression: "0 9 * * *", timezone: "UTC" },
     createdBy: "persons:owner" as Id<"persons">,
   }
+}
+
+function joriAccess(jori: string[]): JobAccessInput {
+  return { integrations: [], jori }
 }
 
 async function insertSlackIntegration(
@@ -108,6 +116,75 @@ test("creation rejects a folder from another organization", async () => {
   await expect(createJob(ctx, creationArgs(foreignFolder))).rejects.toThrow(
     "Folder was not found."
   )
+})
+
+test("a job with only Jori tools saves when one of them writes", async () => {
+  const { ctx } = creationContext()
+  const created = await createJob(
+    ctx,
+    creationArgs(undefined, joriAccess(["read_table", "insert_table_row"]))
+  )
+
+  expect(created.access).toEqual({
+    integrations: [],
+    jori: ["read_table", "insert_table_row"],
+  })
+})
+
+test("a job whose tools only read is rejected, since its work would reach nobody", async () => {
+  const { ctx } = creationContext()
+
+  await expect(
+    createJob(
+      ctx,
+      creationArgs(undefined, joriAccess(["read_table", "web_search"]))
+    )
+  ).rejects.toThrow("Give the job at least one write tool.")
+})
+
+test.each([
+  ["a core tool", "finish_run"],
+  ["another surface's tool", "conversations_add_message"],
+  ["an unknown name", "launch_rocket"],
+])("granting %s as a Jori tool is rejected", async (_case, tool) => {
+  const { ctx } = creationContext()
+
+  await expect(
+    createJob(
+      ctx,
+      creationArgs(undefined, joriAccess(["insert_table_row", tool]))
+    )
+  ).rejects.toThrow(`Unknown Jori tool: ${tool}`)
+})
+
+test("a run cannot create or edit a job that holds tools the run lacks", async () => {
+  const { database, ctx } = creationContext()
+  const ceiling = { integrations: [], jori: ["read_table", "insert_table_row"] }
+  const within = joriAccess(["insert_table_row"])
+  const above = joriAccess(["insert_table_row", "web_search"])
+
+  await expect(
+    createJob(ctx, { ...creationArgs(undefined, above), ceiling })
+  ).rejects.toThrow("A job cannot hold tools the run managing it lacks.")
+
+  const created = await createJob(ctx, {
+    ...creationArgs(undefined, within),
+    ceiling,
+  })
+  const args = { organizationId: "org", jobId: created._id, ceiling }
+
+  await expect(updateJob(ctx, { ...args, access: above })).rejects.toThrow(
+    "A job cannot hold tools the run managing it lacks."
+  )
+
+  // A job a person gave more reach: rewriting its instructions would borrow
+  // that reach, so the run may not edit it at all.
+  await database.patch(created._id, {
+    access: { integrations: [], jori: ["insert_table_row", "web_search"] },
+  })
+  await expect(
+    updateJob(ctx, { ...args, instructions: "Search the web instead." })
+  ).rejects.toThrow("A job cannot hold tools the run managing it lacks.")
 })
 
 test("event subscriptions follow creation, paused edits, resume, and active edits", async () => {
@@ -192,7 +269,7 @@ function job(input: { version: number }): Doc<"jobs"> {
       kind: "person",
       personId: "person" as Id<"persons">,
     },
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     type: "cron",
     trigger: {
       expression: "0 7 * * *",

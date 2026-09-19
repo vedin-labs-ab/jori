@@ -13,6 +13,7 @@ import {
 import { ProviderLogo } from "@/shared/logo/provider"
 import { type JobSurfaceFormValue } from "../../../access"
 import { type JobPolicyPermissions } from "../../../access/policy"
+import { getJobSurfacePermissions } from "../../../access/tools"
 import { JobSurfaceToolGroups } from "./sections"
 
 type JobSurfaceToolsDialogProps = {
@@ -86,9 +87,7 @@ function JobSurfaceToolsContent({
     )
   }
 
-  const providerPermissions = permissions.filter(
-    (permission) => permission.surface === integration
-  )
+  const providerPermissions = getJobSurfacePermissions(integration, permissions)
 
   if (providerPermissions.length === 0) {
     return (

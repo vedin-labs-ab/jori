@@ -51,10 +51,7 @@ export function InstructionSuggestions({
 }
 
 function selectionAddsAccess(suggestion: JobMentionSuggestion) {
-  return (
-    suggestion.access?.kind === "integration" ||
-    suggestion.access?.kind === "web"
-  )
+  return suggestion.access?.kind === "integration"
 }
 
 function emptySuggestionMessage(state: InstructionSuggestionState) {

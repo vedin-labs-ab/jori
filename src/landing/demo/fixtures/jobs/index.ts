@@ -1,46 +1,21 @@
-import { getNextCronRunAt } from "@contracts/jobs/schedule/cron"
-import { getToolPermission } from "@contracts/permissions"
 import { type Job } from "@/shared/console/jobs/types"
-import { day, hour, minute } from "./clock"
-import { folderId } from "./folders"
-import { demoId } from "./ids"
-import { ownerFields, personId, teamIds } from "./people"
-import { jobAudience, type StoredVisibility } from "./types"
+import { day, hour, minute } from "../clock"
+import { teamIds } from "../people"
+import { cronJob, eventJob, jobSurface } from "./build"
 
-type JobSurface = Job["access"]["surfaces"][number]
-
-/** Where Copperline's jobs run, so their schedules read in local time. */
-export const demoTimezone = "Europe/Stockholm"
-
-export function jobId(name: string) {
-  return demoId("jobs", name)
-}
+export { demoTimezone, jobId, jobSurface } from "./build"
 
 /** The brief the editor section opens on, and the job the expanded run
  *  in the record section came from. */
 export const chaseInstructions =
   "Every Monday, read the Customer renewals table. For each row past its renewal date where Paid is No, post one reminder in @Slack #finance naming the owner and the amount, following /reminders. Then set Reminded to Yes on that row and finish with a one-line summary."
 
-/** One integration's share of a job's access, its level read off the
- *  catalog the way the console projects it. */
-export function jobSurface(
-  integration: JobSurface["integration"],
-  tools: string[]
-): JobSurface {
-  const accesses = new Set(
-    tools.map((tool) => getToolPermission(tool)?.access ?? "read")
-  )
-  const access =
-    accesses.has("read") && accesses.has("write")
-      ? "both"
-      : accesses.has("write")
-        ? "write"
-        : "read"
-
-  return { integration, access, tools }
-}
-
 const slackPosting = jobSurface("slack", ["conversations_add_message"])
+const tableKeeping = jobSurface("jori", [
+  "read_table",
+  "list_table_rows",
+  "update_table_row",
+])
 const linearReading = jobSurface("linear", [
   "linear_search_issues",
   "linear_get_issue",
@@ -91,6 +66,7 @@ function flakyTestTriage(now: number) {
     instructions:
       "When a CI issue is opened in @GitHub, rerun the failing test, find the last commit it passed on, and comment with what changed and the fix.",
     surfaces: [
+      jobSurface("jori", ["read", "grep", "git", "bash"]),
       jobSurface("github", [
         "github_get_issue",
         "github_get_file",
@@ -134,8 +110,16 @@ function competitorWatch(now: number) {
     expression: "0 7 * * *",
     instructions:
       "Every morning, check the companies in the Competitor moves table for pricing or packaging changes on their sites. Add a row for each change with its source, and post the day's changes to @Slack in the marketing channel.",
-    surfaces: [slackPosting],
-    webSearch: true,
+    surfaces: [
+      jobSurface("jori", [
+        "read_table",
+        "list_table_rows",
+        "insert_table_row",
+        "web_search",
+        "web_fetch",
+      ]),
+      slackPosting,
+    ],
     firedAt: now - 5 * hour,
     createdAt: now - 35 * day,
   })
@@ -151,6 +135,7 @@ function changelog(now: number) {
     instructions:
       "Every Thursday, turn the week's merged pull requests in @GitHub into a customer-facing changelog, following /release-notes. Save it as a file in Marketing and post the link to @Slack in the marketing channel.",
     surfaces: [
+      jobSurface("jori", ["apply_patch", "save_file"]),
       jobSurface("github", [
         "github_search_issues",
         "github_get_pull_request",
@@ -172,7 +157,7 @@ function renewalsWatch(now: number) {
     expression: "0 7 * * *",
     instructions:
       "Every morning, read the Customer renewals table. Mark a row At risk when its renewal is inside 30 days and Paid is No, On track once the invoice is paid, and post a one-line status to @Slack in the finance channel only when something changed.",
-    surfaces: [slackPosting],
+    surfaces: [tableKeeping, slackPosting],
     firedAt: now - 5 * hour - 12 * minute,
     createdAt: now - 30 * day,
   })
@@ -186,7 +171,7 @@ function chaseOverdueInvoices(now: number) {
     folder: "renewals",
     expression: "0 8 * * 1",
     instructions: chaseInstructions,
-    surfaces: [slackPosting],
+    surfaces: [tableKeeping, slackPosting],
     visibility: { mode: "teams", teamIds: [teamIds.finance] },
     firedAt: now - 2 * hour - 10 * minute,
     createdAt: now - 21 * day,
@@ -202,69 +187,13 @@ function designReviewDigest(now: number) {
     expression: "0 9 * * 1-5",
     instructions:
       "Every weekday morning, collect the design comments from @Linear and the new files in Design, and post a digest to @Slack in the design channel with what needs a decision today.",
-    surfaces: [linearReading, slackPosting],
+    surfaces: [
+      jobSurface("jori", ["search_files", "read_file"]),
+      linearReading,
+      slackPosting,
+    ],
     status: "paused",
     firedAt: now - 2 * day,
     createdAt: now - 18 * day,
   })
-}
-
-type JobSpec = {
-  key: string
-  owner: string
-  name: string
-  folder: string
-  instructions: string
-  surfaces: JobSurface[]
-  visibility?: StoredVisibility
-  webSearch?: boolean
-  status?: Job["status"]
-  firedAt: number
-  createdAt: number
-}
-
-function cronJob(now: number, spec: JobSpec & { expression: string }): Job {
-  return {
-    ...baseJob(spec),
-    type: "cron",
-    trigger: {
-      expression: spec.expression,
-      timezone: demoTimezone,
-      nextAt: getNextCronRunAt(spec.expression, now, demoTimezone),
-    },
-  }
-}
-
-function eventJob(spec: JobSpec & { integration: "github" | "linear" }): Job {
-  return {
-    ...baseJob(spec),
-    type: "event",
-    trigger: {
-      integration: spec.integration,
-      event: "issue.comment.created",
-      match: undefined,
-    },
-  }
-}
-
-function baseJob(spec: JobSpec) {
-  const visibility = spec.visibility ?? { mode: "organization" as const }
-
-  const ownerId = personId(spec.owner)
-
-  return {
-    id: jobId(spec.key),
-    ...ownerFields(ownerId),
-    key: undefined,
-    name: spec.name,
-    instructions: spec.instructions,
-    audience: jobAudience(visibility),
-    visibility,
-    status: spec.status ?? ("active" as const),
-    folderId: folderId(spec.folder),
-    access: { webSearch: spec.webSearch ?? false, surfaces: spec.surfaces },
-    createdAt: spec.createdAt,
-    updatedAt: spec.firedAt,
-    firedAt: spec.firedAt,
-  }
 }

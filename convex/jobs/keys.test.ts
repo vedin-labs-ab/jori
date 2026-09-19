@@ -23,6 +23,7 @@ test("idempotency compares semantic definitions", () => {
     ...definition,
     access: {
       ...definition.access,
+      jori: [...definition.access.jori].reverse(),
       integrations: definition.access.integrations.map((entry) => ({
         ...entry,
         tools: [...entry.tools].reverse(),
@@ -55,7 +56,7 @@ function job() {
           tools: ["read", "search"],
         },
       ],
-      web: true,
+      jori: ["web_search", "web_fetch"],
     },
     instructions: "Prepare the meeting.",
     name: "Prep",

@@ -29,7 +29,6 @@ export type JobSurfaceNodeOptions = {
 export type JobReferenceNodeOptions = {
   getPermissions: () => JobPolicyPermissions
   getScope: () => JobScope
-  getWebSearch: () => boolean
 }
 
 export const JobSurfaceNode = Node.create<JobSurfaceNodeOptions>({
@@ -105,7 +104,6 @@ export const JobReferenceNode = MentionNode.extend<JobReferenceNodeOptions>({
     return {
       getPermissions: () => undefined,
       getScope: () => "personal",
-      getWebSearch: () => false,
     }
   },
 })

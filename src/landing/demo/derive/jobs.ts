@@ -159,10 +159,12 @@ function projectTrigger(trigger: SavedTrigger, at: number): Job["trigger"] {
 
 function projectAccess(access: SavedArgs["args"]["access"]): Job["access"] {
   return {
-    webSearch: access.web,
-    surfaces: access.integrations.map((entry) =>
-      jobSurface(entry.integration, entry.tools)
-    ),
+    surfaces: [
+      ...(access.jori.length === 0 ? [] : [jobSurface("jori", access.jori)]),
+      ...access.integrations.map((entry) =>
+        jobSurface(entry.integration, entry.tools)
+      ),
+    ],
   }
 }
 

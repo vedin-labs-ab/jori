@@ -18,7 +18,6 @@ test("shows three integration logos when exactly three surfaces are connected", 
     null
   )
   expect(screen.getByText("3 tools")).toBeDefined()
-  expect(screen.getByText("Web access allowed")).toBeDefined()
 })
 
 test("collapses additional integrations into a tooltip count", async () => {
@@ -45,37 +44,47 @@ test("collapses additional integrations into a tooltip count", async () => {
   ).not.toHaveLength(0)
 })
 
-test("says nothing about the web on a job that cannot reach it", () => {
-  renderToolSummary(["slack"], false)
+test("marks the web only on a job whose Jori grant reaches it", () => {
+  renderToolSummary(["slack"], ["read_table"])
 
-  // Blocked is the default every job starts at, so only the exception is
-  // marked: one line, one statement, no alarm on a job behaving itself.
-  expect(screen.getByText("1 tool")).toBeDefined()
+  // Off is where every job starts, so only the exception is marked: one
+  // line, one statement, no alarm on a job behaving itself.
+  expect(screen.getByText("2 tools")).toBeDefined()
   expect(screen.queryByText(/Web access/)).toBeNull()
+
+  cleanup()
+  renderToolSummary(["slack"], ["read_table", "web_search"])
+
+  expect(screen.getByText("3 tools")).toBeDefined()
+  expect(screen.getByText("Web access allowed")).toBeDefined()
 })
 
 function renderToolSummary(
-  surfaces: JobSurfaceIntegration[],
-  webSearch = true
+  surfaces: Exclude<JobSurfaceIntegration, "jori">[],
+  joriTools: string[] = []
 ) {
   return render(
     <TooltipProvider>
-      <JobToolSummary job={jobWithSurfaces(surfaces, webSearch)} />
+      <JobToolSummary job={jobWithSurfaces(surfaces, joriTools)} />
     </TooltipProvider>
   )
 }
 
 function jobWithSurfaces(
-  surfaces: JobSurfaceIntegration[],
-  webSearch: boolean
+  surfaces: Exclude<JobSurfaceIntegration, "jori">[],
+  joriTools: string[]
 ): Job {
   return {
     access: {
-      webSearch,
-      surfaces: surfaces.map((integration) => ({
-        integration,
-        tools: [`${integration}_tool`],
-      })),
+      surfaces: [
+        ...surfaces.map((integration) => ({
+          integration,
+          tools: [`${integration}_tool`],
+        })),
+        ...(joriTools.length === 0
+          ? []
+          : [{ integration: "jori" as const, tools: joriTools }]),
+      ],
     },
   } as Job
 }

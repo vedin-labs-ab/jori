@@ -1,7 +1,6 @@
 import { X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { ProviderLogo } from "@/shared/logo/provider"
@@ -14,56 +13,46 @@ import {
 import { type JobPolicyPermissions } from "../../access/policy"
 import { JobSurfaceToolsDialog } from "../instructions/access/tools"
 
+/** Access a job holds that its instructions do not name with an `@`. */
 export function AccessFields({
   additionalSurfaces,
   onAdditionalSurfaceChange,
   onAdditionalSurfaceRemove,
-  onWebSearchChange,
   permissions,
   scope,
-  webSearch,
 }: {
   additionalSurfaces: JobSurfaceFormValue[]
   onAdditionalSurfaceChange: (surface: JobSurfaceFormValue) => void
   onAdditionalSurfaceRemove: (
     integration: JobSurfaceFormValue["integration"]
   ) => void
-  onWebSearchChange: (webSearch: boolean) => void
   permissions: JobPolicyPermissions
   scope: JobScope
-  webSearch: boolean
 }) {
+  if (additionalSurfaces.length === 0) {
+    return null
+  }
+
   return (
-    <div className="grid gap-3">
-      <AccessCheckbox
-        checked={webSearch}
-        description="For current public information."
-        id="job-web-search"
-        label="Let Jori search the web"
-        onCheckedChange={onWebSearchChange}
-      />
-      {additionalSurfaces.length === 0 ? null : (
-        <div className="grid gap-1.5">
-          <div>
-            <Label className="font-normal text-xs">Additional access</Label>
-            <p className="text-muted-foreground text-xs">
-              Access saved outside the instruction references.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {additionalSurfaces.map((surface) => (
-              <AdditionalSurface
-                key={surface.integration}
-                onChange={onAdditionalSurfaceChange}
-                onRemove={onAdditionalSurfaceRemove}
-                permissions={permissions}
-                scope={scope}
-                surface={surface}
-              />
-            ))}
-          </div>
-        </div>
-      )}
+    <div className="grid gap-1.5">
+      <div>
+        <Label className="font-normal text-xs">Additional access</Label>
+        <p className="text-muted-foreground text-xs">
+          Access saved outside the instruction references.
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {additionalSurfaces.map((surface) => (
+          <AdditionalSurface
+            key={surface.integration}
+            onChange={onAdditionalSurfaceChange}
+            onRemove={onAdditionalSurfaceRemove}
+            permissions={permissions}
+            scope={scope}
+            surface={surface}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -138,36 +127,6 @@ function AdditionalSurface({
         tools={surface.tools}
         toolSurfaceLabel={label}
       />
-    </div>
-  )
-}
-
-function AccessCheckbox({
-  checked,
-  description,
-  id,
-  label,
-  onCheckedChange,
-}: {
-  checked: boolean
-  description: string
-  id: string
-  label: string
-  onCheckedChange: (checked: boolean) => void
-}) {
-  return (
-    <div className="flex items-start gap-2">
-      <Checkbox
-        checked={checked}
-        id={id}
-        onCheckedChange={(next) => onCheckedChange(next === true)}
-      />
-      <div className="grid gap-0.5">
-        <Label htmlFor={id} className="font-normal text-xs">
-          {label}
-        </Label>
-        <p className="text-muted-foreground text-xs">{description}</p>
-      </div>
     </div>
   )
 }

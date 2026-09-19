@@ -1,9 +1,8 @@
-import { canUseJobTool } from "@contracts/permissions"
+import { canUseJobTool, isCoreTool } from "@contracts/permissions"
 import { isWebTool } from "@contracts/permissions/web"
 import { type ToolPermission } from "@/shared/console/tools/model"
 import {
   getJobSurfaceLabel,
-  isJobSurfaceIntegration,
   type JobSurfaceFormValue,
   type JobSurfaceIntegration,
 } from "./catalog"
@@ -11,10 +10,26 @@ import { type JobPolicyPermissions } from "./policy"
 import { getJobSurfaceScopeIssue, type JobScope } from "./scope"
 
 export type JobToolAccess =
-  | { kind: "ready" | "builtIn" | "web" }
+  | { kind: "ready" | "core" }
   | { integration: JobSurfaceIntegration; kind: "integration" }
   | { kind: "unavailable"; reason: string }
 
+/** The tools of a surface a job can be granted. Core tools need no grant,
+ *  so they are never offered as one. */
+export function getJobSurfacePermissions(
+  integration: JobSurfaceIntegration,
+  permissions: ToolPermission[]
+) {
+  return permissions.filter(
+    (permission) =>
+      permission.surface === integration && !isCoreTool(permission.tool)
+  )
+}
+
+/** What naming a surface grants before anyone opens its tools. An
+ *  integration starts with everything a job may use. Jori starts with reading
+ *  the organization's own tables, stores, files, jobs, and runs: writing, the
+ *  web, the sandbox, and agents reach further, so a person turns those on. */
 export function getDefaultJobSurfaceTools(
   integration: JobSurfaceIntegration,
   permissions: JobPolicyPermissions
@@ -23,12 +38,21 @@ export function getDefaultJobSurfaceTools(
     return []
   }
 
-  return permissions
+  return getJobSurfacePermissions(integration, permissions)
     .filter(
       (permission) =>
-        permission.surface === integration && canUseJobTool(permission)
+        canUseJobTool(permission) &&
+        (integration !== "jori" || readsOwnMaterials(permission))
     )
     .map((permission) => permission.tool)
+}
+
+function readsOwnMaterials(permission: ToolPermission) {
+  return (
+    permission.access === "read" &&
+    permission.route === "broker" &&
+    !isWebTool(permission.tool)
+  )
 }
 
 export function jobToolModeDescription(permission: ToolPermission) {
@@ -55,11 +79,9 @@ export function jobToolModeDescription(permission: ToolPermission) {
 export function resolveJobToolAccess({
   permission,
   surfaces,
-  webSearch,
 }: {
   permission: ToolPermission
   surfaces?: readonly JobSurfaceFormValue[]
-  webSearch?: boolean
 }): JobToolAccess {
   if (!canUseJobTool(permission)) {
     return {
@@ -68,12 +90,8 @@ export function resolveJobToolAccess({
     }
   }
 
-  if (isWebTool(permission.tool)) {
-    return { kind: webSearch ? "ready" : "web" }
-  }
-
-  if (!isJobSurfaceIntegration(permission.surface)) {
-    return { kind: "builtIn" }
+  if (isCoreTool(permission.tool)) {
+    return { kind: "core" }
   }
 
   const surface = surfaces?.find(
@@ -90,13 +108,11 @@ export function jobToolReferenceIssue({
   scope,
   surfaces,
   tool,
-  webSearch,
 }: {
   permissions: JobPolicyPermissions
   scope: JobScope
   surfaces: readonly JobSurfaceFormValue[]
   tool: string
-  webSearch: boolean
 }) {
   if (!Array.isArray(permissions)) {
     return undefined
@@ -114,17 +130,10 @@ export function jobToolReferenceIssue({
     return scopeIssue
   }
 
-  const access = resolveJobToolAccess({
-    permission,
-    surfaces,
-    webSearch,
-  })
+  const access = resolveJobToolAccess({ permission, surfaces })
 
   if (access.kind === "integration") {
     return `Give @${getJobSurfaceLabel(access.integration)} access to use #${tool}.`
-  }
-  if (access.kind === "web") {
-    return `Enable web access to use #${tool}.`
   }
   if (access.kind === "unavailable") {
     return `#${tool} is not available in jobs.`
@@ -154,7 +163,5 @@ export function jobToolScopeIssue({
 }
 
 function jobPermissionScopeIssue(permission: ToolPermission, scope: JobScope) {
-  return isJobSurfaceIntegration(permission.surface)
-    ? getJobSurfaceScopeIssue(scope, permission.surface)
-    : undefined
+  return getJobSurfaceScopeIssue(scope, permission.surface)
 }

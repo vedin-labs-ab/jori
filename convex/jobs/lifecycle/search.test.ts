@@ -92,7 +92,7 @@ function job(input: {
   return {
     _id: input.id as Id<"jobs">,
     _creationTime: 0,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     createdAt: 0,
     instructions: "Prepare the meeting.",
     name: input.id,

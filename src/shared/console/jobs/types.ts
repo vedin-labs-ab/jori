@@ -58,7 +58,6 @@ export type JobFormValues = {
   /** Creation-only: where the new job is filed; null is the root.
    *  Edits move jobs through the folder surfaces instead. */
   folderId: string | null
-  webSearch: boolean
   surfaces: JobSurfaceFormValue[]
 }
 
@@ -81,6 +80,5 @@ export const emptyJobForm: JobFormValues = {
   visibility: { mode: "private" },
   scope: "personal",
   folderId: null,
-  webSearch: true,
   surfaces: [],
 }

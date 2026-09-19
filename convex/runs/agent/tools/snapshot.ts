@@ -11,7 +11,6 @@ export function createRunToolSnapshot(input: {
   capabilities: RuntimeToolCapability[]
   lifecycleTools?: RunToolSnapshotTool[]
   sandboxTools?: RunToolSnapshotTool[]
-  webSearch: boolean
 }): RunToolSnapshot {
   return {
     groups: consolidateJoriToolGroups([
@@ -24,7 +23,6 @@ export function createRunToolSnapshot(input: {
       })),
       ...joriGroups("Workspace", input.sandboxTools),
     ]),
-    webSearch: input.webSearch,
   }
 }
 

@@ -2,7 +2,7 @@ import { type ToolPermission } from "../../contracts/permissions"
 import { type RuntimeIntegration } from "../../convex/runs/agent/input"
 import { type assemblePrompt } from "../../convex/runs/agent/prompt"
 
-export function jobRuntimeInput(webSearch = true) {
+export function jobRuntimeInput() {
   const github = promptIntegration("github")
   const slack = promptIntegration("slack")
 
@@ -14,7 +14,7 @@ export function jobRuntimeInput(webSearch = true) {
         { id: github._id, tools: ["github_get_issue"] },
         { id: slack._id, tools: ["conversations_add_message"] },
       ],
-      web: webSearch,
+      jori: ["web_search", "web_fetch"],
     },
     run: {
       _id: "run",
@@ -46,7 +46,7 @@ export function linearJobRuntimeInput() {
     instructions: "Reply with a short quip.",
     access: {
       integrations: [{ id: linear._id, tools: ["linear_add_comment"] }],
-      web: true,
+      jori: ["web_search", "web_fetch"],
     },
     run: {
       _id: "run",
@@ -99,7 +99,7 @@ export function notionJobRuntimeInput() {
           tools: ["notion_search", "notion_create_page"],
         },
       ],
-      web: false,
+      jori: [],
     },
     run: {
       _id: "run",

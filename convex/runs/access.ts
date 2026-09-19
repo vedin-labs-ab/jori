@@ -1,18 +1,47 @@
 import {
-  getToolPermissionsBySurface,
+  getGrantableToolPermissions,
+  isCoreTool,
+  type ToolPermission,
   type ToolSurface,
 } from "../../contracts/permissions"
-import { isWebTool } from "../../contracts/permissions/web"
 import { type Doc } from "../_generated/dataModel"
 import { listActiveIntegrationsForPrincipal } from "../integrations/data"
 import { type QueryLikeCtx } from "../shared/context"
-import { type Access } from "../shared/integrations"
+import { type Access, getIntegrationTools } from "../shared/integrations"
+import { type AgentRuntimeInput, inputAccess } from "./agent/input"
+
+/**
+ * Whether a run holds a tool. Every run holds the core tools, and a run
+ * without a contract holds the full surface; any other tool has to be in the
+ * contract. The tool list a run is shown and the broker that executes its
+ * calls both ask here, so what a run sees is what it can do.
+ */
+export function holdsTool(
+  input: AgentRuntimeInput,
+  permission: Pick<ToolPermission, "surface" | "tool">
+) {
+  const access = inputAccess(input)
+
+  if (access === undefined || isCoreTool(permission.tool)) {
+    return true
+  }
+
+  if (permission.surface === "jori") {
+    return access.jori.includes(permission.tool)
+  }
+
+  return input.integrations.some(
+    (integration) =>
+      integration.integration === permission.surface &&
+      getIntegrationTools(access, integration._id).includes(permission.tool)
+  )
+}
 
 /**
  * The tool contract a spawned agent run inherits: the parent's own access,
  * optionally narrowed to the requested tool names. A subtask can never hold
  * access its parent lacks — requested names outside the parent's contract
- * are dropped, and web tools stay off unless the parent has them.
+ * are dropped.
  */
 export async function resolveSubtaskAccess(
   ctx: QueryLikeCtx,
@@ -21,49 +50,48 @@ export async function resolveSubtaskAccess(
     tools?: readonly string[]
   }
 ): Promise<Access | undefined> {
-  const parentAccess = args.parent.access
-
   if (args.tools === undefined) {
-    return parentAccess
+    return args.parent.access
   }
 
   const requested = new Set(args.tools)
-  const grantable = await grantableIntegrations(ctx, args.parent, parentAccess)
+  const grantable = args.parent.access ?? (await fullAccess(ctx, args.parent))
 
   return {
-    integrations: grantable
+    integrations: grantable.integrations
       .map((entry) => ({
         id: entry.id,
         tools: entry.tools.filter((tool) => requested.has(tool)),
       }))
       .filter((entry) => entry.tools.length > 0),
-    web: (parentAccess?.web ?? true) && args.tools.some(isWebTool),
+    jori: grantable.jori.filter((tool) => requested.has(tool)),
   }
 }
 
 /**
- * The integration tools the parent may pass on. A parent without a contract
- * of its own holds the full tool surface, so it may pass on every catalog
- * tool of its active integrations.
+ * What a parent without a contract may pass on: it holds the full tool
+ * surface, so every grantable tool of Jori's and of its active integrations.
  */
-async function grantableIntegrations(
+async function fullAccess(
   ctx: QueryLikeCtx,
-  parent: Doc<"runs">,
-  parentAccess: Access | undefined
-): Promise<Access["integrations"]> {
-  if (parentAccess !== undefined) {
-    return parentAccess.integrations
-  }
-
+  parent: Doc<"runs">
+): Promise<Access> {
   const integrations = await listActiveIntegrationsForPrincipal(ctx, {
     principal: parent.principal,
     organizationId: parent.organizationId,
   })
 
-  return integrations.map((integration) => ({
-    id: integration._id,
-    tools: getToolPermissionsBySurface(integration.integration as ToolSurface, {
-      routes: ["broker"],
-    }).map((permission) => permission.tool),
-  }))
+  return {
+    integrations: integrations.map((integration) => ({
+      id: integration._id,
+      tools: grantableTools(integration.integration),
+    })),
+    jori: grantableTools("jori"),
+  }
+}
+
+function grantableTools(surface: ToolSurface) {
+  return getGrantableToolPermissions(surface).map(
+    (permission) => permission.tool
+  )
 }

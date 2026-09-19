@@ -8,7 +8,6 @@ import { JobInstructionsField } from "../instructions/field"
 export function JobInstructionsSection({
   additionalSurfaces,
   error,
-  onWebSearchChange,
   onValueChange,
   permissions,
   policyKey,
@@ -17,7 +16,6 @@ export function JobInstructionsSection({
 }: {
   additionalSurfaces: JobFormValues["surfaces"]
   error: string | undefined
-  onWebSearchChange: (enabled: boolean) => void
   onValueChange: (
     instructions: string,
     surfaces: JobFormValues["surfaces"]
@@ -38,7 +36,6 @@ export function JobInstructionsSection({
         error={error}
         id="job-description"
         value={values.instructions}
-        onWebSearchChange={onWebSearchChange}
         onValueChange={(next) => onValueChange(next.description, next.surfaces)}
         permissions={permissions}
         placeholder="Summarize @GitHub changes and post them to @Slack."
@@ -47,7 +44,6 @@ export function JobInstructionsSection({
         scope={values.scope}
         skills={skills}
         surfaces={values.surfaces}
-        webSearch={values.webSearch}
       />
     </div>
   )

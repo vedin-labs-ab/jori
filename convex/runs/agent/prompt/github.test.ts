@@ -27,7 +27,7 @@ function githubJobRuntimeInput() {
     instructions: "Reply with a short quip.",
     access: {
       integrations: [{ id: github._id, tools: ["github_add_issue_comment"] }],
-      web: true,
+      jori: ["web_search", "web_fetch"],
     },
     run: {
       _id: "run",

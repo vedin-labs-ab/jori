@@ -1,5 +1,6 @@
 import { integrations as integrationEnum } from "../../integrations"
 import { jobEventCatalog } from "../../jobs/events"
+import { getGrantableToolPermissions } from "../../permissions"
 import {
   numberProperty,
   objectProperty,
@@ -8,7 +9,11 @@ import {
 } from "../fragments/common"
 
 const jobInstructionsDescription =
-  "Canonical Markdown instructions for each run. Use @Integration for every integration whose access is granted, /skill for skills, and #tool for tools. Use txt fences for plain-text examples that should keep Jori references active; language-tagged code fences are literal. Keep the explicit access payload aligned with every referenced integration tool."
+  "Canonical Markdown instructions for each run. Use @Integration for every integration whose access is granted, /skill for skills, and #tool for tools. Use txt fences for plain-text examples that should keep Jori references active; language-tagged code fences are literal. Keep the explicit access payload aligned with every referenced tool."
+
+const grantableJoriTools = getGrantableToolPermissions("jori").map(
+  (permission) => permission.tool
+)
 
 const eventIntegrationEnum = jobEventCatalog.map(
   (definition) => definition.integration
@@ -23,7 +28,7 @@ const eventEnum = [
 
 const accessSchema = () => ({
   ...objectSchema({
-    required: ["integrations", "web"],
+    required: ["integrations", "jori"],
     properties: {
       integrations: {
         type: "array",
@@ -46,13 +51,16 @@ const accessSchema = () => ({
           },
         }),
       },
-      web: {
-        type: "boolean",
-        description: "Whether this job may use hosted web search.",
+      jori: {
+        type: "array",
+        description:
+          "Jori's own tools this job may use: tables, stores, files, web, the sandbox, agents, and jobs. Grant the smallest set the instructions need, and leave out web, sandbox, and job tools unless the work calls for them. Grant start_agent together with wait_for_agents and stop_agent. Replying, finishing, and loading skills need no grant.",
+        items: { type: "string", enum: grantableJoriTools },
       },
     },
   }),
-  description: "Integration and web access for each job run.",
+  description:
+    "The tools each job run may use. A run can use nothing outside it, and a job cannot hold a tool the run creating it lacks.",
 })
 
 const visibilityProperty = {

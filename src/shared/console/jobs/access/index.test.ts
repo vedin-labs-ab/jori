@@ -1,10 +1,13 @@
 import { toolSurfaces } from "@contracts/integrations"
+import { toolPermissions } from "@contracts/permissions"
 import { describe, expect, test } from "vitest"
 import { type ToolPermission } from "@/shared/console/tools/model"
 import {
   createJobMentionCatalog,
   findCompletedJobMention,
+  getDefaultJobSurfaceTools,
   getJobMentionSuggestions,
+  getJobSurfacePermissions,
   readJobMentions,
 } from "."
 
@@ -18,10 +21,26 @@ const expectedToolAccessSuggestions = [
     id: "github_get_issue",
     surface: "github",
   },
-  { access: { kind: "builtIn" }, id: "save_file", surface: "jori" },
-  { access: { kind: "builtIn" }, id: "start_agent", surface: "jori" },
-  { access: { kind: "web" }, id: "web_search", surface: "jori" },
+  { access: { kind: "core" }, id: "load_skill", surface: "jori" },
+  { access: { kind: "ready" }, id: "save_file", surface: "jori" },
+  {
+    access: { integration: "jori", kind: "integration" },
+    id: "start_agent",
+    surface: "jori",
+  },
+  {
+    access: { integration: "jori", kind: "integration" },
+    id: "web_search",
+    surface: "jori",
+  },
 ]
+const catalogPermissions: ToolPermission[] = toolPermissions.map(
+  (permission) => ({
+    ...permission,
+    mode: permission.defaultMode,
+    overrideMode: null,
+  })
+)
 
 describe("explicit mention scanning", () => {
   test("recognizes sigil tokens for all three kinds", () => {
@@ -116,6 +135,7 @@ describe("mention suggestions", () => {
     const permissions = [
       toolPermission("github", "github_get_issue", "read", "allowed"),
       toolPermission("jori", "web_search", "read", "allowed"),
+      toolPermission("jori", "load_skill", "read", "required"),
       toolPermission("jori", "save_file", "write", "allowed"),
       {
         ...toolPermission("jori", "start_agent", "write", "required"),
@@ -124,12 +144,36 @@ describe("mention suggestions", () => {
     ]
     const suggestions = getJobMentionSuggestions(
       { kind: "tool", query: "" },
-      { permissions, skills: [], surfaces: [], webSearch: false }
+      {
+        permissions,
+        skills: [],
+        surfaces: [{ integration: "jori", tools: ["save_file"] }],
+      }
     )
 
     expect(
       suggestions.map(({ access, id, surface }) => ({ access, id, surface }))
     ).toEqual(expectedToolAccessSuggestions)
+  })
+})
+
+describe("surface grants", () => {
+  test("naming Jori grants reads of the organization's own materials only", () => {
+    const tools = getDefaultJobSurfaceTools("jori", catalogPermissions)
+
+    expect(tools).toContain("read_table")
+    expect(tools).not.toContain("insert_table_row")
+    expect(tools).not.toContain("web_search")
+    expect(tools).not.toContain("bash")
+  })
+
+  test("never offers a core tool as a grant", () => {
+    const tools = getJobSurfacePermissions("jori", catalogPermissions).map(
+      (permission) => permission.tool
+    )
+
+    expect(tools).toContain("read_table")
+    expect(tools).not.toContain("load_skill")
   })
 })
 

@@ -6,14 +6,8 @@ import {
   type ToolPermission,
   type ToolSurface,
 } from "../../contracts/permissions"
-import { isWebTool } from "../../contracts/permissions/web"
-import { type AgentRuntimeInput, inputAccess } from "../runs/agent/input"
+import { permissionGroups } from "../runs/agent/tools/resolve"
 import {
-  canUseToolPermission,
-  toolExecutionType,
-} from "../runs/agent/tools/policy"
-import {
-  getIntegrationTools,
   integrations as integrationCatalog,
   toolSurfaceLabel,
 } from "../shared/integrations"
@@ -50,15 +44,14 @@ export function listCapabilities(context: ApprovalBrokerContext) {
 }
 
 function runCapabilityGroups(context: ApprovalBrokerContext) {
-  const surfaces = runSurfaces(context.input)
-
-  return surfaces.flatMap((surface) => {
-    const tools = getBrokerPermissions(surface)
-      .filter((permission) => isRunPermission(context, permission))
-      .map((permission) => capabilityTool(permission, context.toolModes))
-
-    return tools.length === 0 ? [] : [capabilityGroup(surface, tools)]
-  })
+  return permissionGroups(context.input, context.toolModes).map((group) =>
+    capabilityGroup(
+      group.surface,
+      group.permissions.map((permission) =>
+        capabilityTool(permission, context.toolModes)
+      )
+    )
+  )
 }
 
 function connectedCapabilityGroups(context: ApprovalBrokerContext) {
@@ -123,58 +116,6 @@ function capabilityTool(
     mode: resolveToolMode(toolModes, permission.tool),
     tool: permission.tool,
   }
-}
-
-function isRunPermission(
-  context: ApprovalBrokerContext,
-  permission: ToolPermission
-) {
-  return (
-    isSelectedForRun(context.input, permission) &&
-    canUseToolPermission({
-      executionType: toolExecutionType(context.input.type),
-      permission,
-      toolModes: context.toolModes,
-    })
-  )
-}
-
-function isSelectedForRun(
-  input: AgentRuntimeInput,
-  permission: ToolPermission
-) {
-  const access = inputAccess(input)
-
-  if (access === undefined) {
-    return true
-  }
-
-  if (permission.surface === "jori") {
-    return !isWebTool(permission.tool) || access.web
-  }
-
-  const integration = input.integrations.find(
-    (candidate) => candidate.integration === permission.surface
-  )
-
-  return (
-    integration !== undefined &&
-    getIntegrationTools(access, integration._id).includes(permission.tool)
-  )
-}
-
-function runSurfaces(input: AgentRuntimeInput) {
-  const surfaces: ToolSurface[] = ["jori"]
-  const seen = new Set<ToolSurface>(surfaces)
-
-  for (const integration of input.integrations) {
-    if (!seen.has(integration.integration)) {
-      seen.add(integration.integration)
-      surfaces.push(integration.integration)
-    }
-  }
-
-  return surfaces
 }
 
 function getBrokerPermissions(surface: ToolSurface) {

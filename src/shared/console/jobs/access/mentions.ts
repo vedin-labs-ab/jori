@@ -46,7 +46,6 @@ export type JobMentionSources = {
   permissions: ToolPermission[] | null | undefined
   skills: readonly string[]
   surfaces?: readonly JobSurfaceFormValue[]
-  webSearch?: boolean
 }
 
 export function getJobMentionSuggestions(
@@ -120,7 +119,6 @@ function toolSuggestion(
   const access = resolveJobToolAccess({
     permission,
     surfaces: sources.surfaces,
-    webSearch: sources.webSearch,
   })
 
   return {

@@ -14,7 +14,6 @@ export type JobInstructionsFieldProps = {
   additionalSurfaces: JobSurfaceFormValue[]
   error?: string
   id: string
-  onWebSearchChange: (enabled: boolean) => void
   onValueChange: (value: JobInstructionsValue) => void
   placeholder: string
   permissions?: JobPolicyPermissions
@@ -25,7 +24,6 @@ export type JobInstructionsFieldProps = {
   skills: readonly string[]
   surfaces: JobSurfaceFormValue[]
   value: string
-  webSearch: boolean
 }
 
 export type InstructionRefs = {
@@ -33,9 +31,6 @@ export type InstructionRefs = {
   catalog: MutableRefObject<JobMentionCatalog>
   editor: MutableRefObject<Editor | null>
   emittedValueKey: MutableRefObject<string | undefined>
-  onWebSearchChange: MutableRefObject<
-    JobInstructionsFieldProps["onWebSearchChange"]
-  >
   onValueChange: MutableRefObject<JobInstructionsFieldProps["onValueChange"]>
   permissions: MutableRefObject<JobPolicyPermissions>
   scope: MutableRefObject<JobInstructionsFieldProps["scope"]>

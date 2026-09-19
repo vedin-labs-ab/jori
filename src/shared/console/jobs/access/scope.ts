@@ -19,7 +19,11 @@ export function isJobSurfaceAllowedForScope(
   scope: JobScope,
   integration: JobSurfaceIntegration
 ) {
-  return scope === "personal" || !isUserScopedIntegration(integration)
+  return (
+    scope === "personal" ||
+    integration === "jori" ||
+    !isUserScopedIntegration(integration)
+  )
 }
 
 export function getJobScopeConflict(

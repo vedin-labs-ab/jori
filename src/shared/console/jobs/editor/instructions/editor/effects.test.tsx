@@ -68,7 +68,6 @@ function instructionProps(): JobInstructionsFieldProps {
     additionalSurfaces: [],
     id: "instructions",
     onValueChange: vi.fn(),
-    onWebSearchChange: vi.fn(),
     permissions: [toolPermission("github", "github_get_issue", "Read", "read")],
     placeholder: "Instructions",
     policyKey: "allowed",
@@ -76,6 +75,5 @@ function instructionProps(): JobInstructionsFieldProps {
     skills: [],
     surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
     value: "Read @GitHub.",
-    webSearch: false,
   }
 }

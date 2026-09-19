@@ -115,7 +115,7 @@ test("keeps a tool reference visible and unresolved after access is removed", as
   })
 })
 
-test("resolves web tool references through the web access control", async () => {
+test("resolves a Jori tool reference through the Jori grant", async () => {
   const permissions = [
     {
       access: "read" as const,
@@ -128,31 +128,35 @@ test("resolves web tool references through the web access control", async () => 
       tool: "web_search",
     },
   ]
-  const disabled = renderInstructionsField({
+  const ungranted = renderInstructionsField({
     description: "Use #web_search.",
     permissions,
     surfaces: [],
-    webSearch: false,
   })
 
   expect(await screen.findByRole("textbox")).toBeDefined()
-  expect(
-    disabled.container
-      .querySelector('[data-job-reference-kind="tool"]')
-      ?.getAttribute("data-job-reference-access")
-  ).toBe("unresolved")
+
+  const unresolved = ungranted.container.querySelector(
+    '[data-job-reference-kind="tool"]'
+  )
+
+  expect(unresolved?.getAttribute("data-job-reference-access")).toBe(
+    "unresolved"
+  )
+  expect(unresolved?.getAttribute("title")).toBe(
+    "Give @Jori access to use #web_search."
+  )
 
   cleanup()
-  const enabled = renderInstructionsField({
-    description: "Use #web_search.",
+  const granted = renderInstructionsField({
+    description: "Ask @Jori to use #web_search.",
     permissions,
-    surfaces: [],
-    webSearch: true,
+    surfaces: [{ integration: "jori", tools: ["web_search"] }],
   })
 
   expect(await screen.findByRole("textbox")).toBeDefined()
   expect(
-    enabled.container
+    granted.container
       .querySelector('[data-job-reference-kind="tool"]')
       ?.getAttribute("data-job-reference-access")
   ).toBe("ready")

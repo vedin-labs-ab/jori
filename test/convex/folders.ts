@@ -55,7 +55,7 @@ export function jobDoc(overrides: JobOverrides = {}) {
     visibility: { mode: "organization" },
     principal: { kind: "organization" },
     type: "cron",
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     trigger: { expression: "0 9 * * *", timezone: "UTC", nextAt: 1 },
     status: "active",
     createdBy: testOwner,

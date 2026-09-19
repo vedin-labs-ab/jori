@@ -7,7 +7,6 @@ import { isJobFieldError } from "@/shared/console/jobs/editor/errors"
 import { jobFormValues } from "@/shared/console/jobs/editor/save"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
 import { api } from "../../../../convex/_generated/api"
-import { readJobPreferences } from "./preferences"
 
 /** The mutation-args builders reach the markdown codec, which ships with the
  *  editor dialog. Loading them at save time keeps that weight off the pages
@@ -50,14 +49,14 @@ function useJobForm(
   const savers = useJobSavers()
   const [formJob, setFormJob] = useState<Job>()
   const [formValues, setFormValues] = useState<JobFormValues>(() =>
-    jobFormValues(undefined, readJobPreferences())
+    jobFormValues(undefined)
   )
   const [formError, setFormError] = useState<string>()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
   function openForm(job: Job | undefined, initialFolderId?: string) {
-    const values = jobFormValues(job, readJobPreferences())
+    const values = jobFormValues(job)
 
     setFormJob(job)
     setFormValues(

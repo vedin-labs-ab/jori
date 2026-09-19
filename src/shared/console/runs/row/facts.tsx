@@ -6,7 +6,6 @@ import {
   File,
   Folder,
   GitPullRequestArrow,
-  Globe,
   Hash,
   Info,
   Mail,
@@ -61,7 +60,6 @@ const detailMeta = {
   subject: { icon: Mail, label: "Subject" },
   table: { icon: Table2, label: "Table" },
   tools: { icon: Wrench, label: "Tools" },
-  web_search: { icon: Globe, label: "Web search" },
 } satisfies Record<
   ExecutionDetailType,
   {
@@ -90,7 +88,6 @@ const compactFieldTypes = new Set<ExecutionDetailType>([
   "subject",
   "table",
   "tools",
-  "web_search",
 ])
 
 export function ExecutionFacts({ details }: { details: ExecutionDetail[] }) {

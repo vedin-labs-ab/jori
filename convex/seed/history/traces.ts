@@ -129,9 +129,10 @@ function modelData(item: WorkItem) {
 /** The tools this run was actually granted, or a plain read set for the
  *  interactive work that carries no access snapshot. */
 function runTools(run: Doc<"runs">) {
-  const granted = run.access?.integrations.flatMap(
-    (integration) => integration.tools
-  )
+  const granted = run.access && [
+    ...run.access.jori,
+    ...run.access.integrations.flatMap((integration) => integration.tools),
+  ]
 
   return (
     granted === undefined || granted.length === 0 ? defaultTools : granted
@@ -176,6 +177,5 @@ function toolSnapshot(tools: string[]) {
         })),
       },
     ],
-    webSearch: false,
   }
 }

@@ -14,17 +14,19 @@ describe("job instructions document", () => {
   test("converts parsed integration mentions into inline badge nodes", () => {
     const document = createJobInstructionDocument({
       catalog: emptyJobMentionCatalog,
-      description: "Review @github and post to @slack.",
+      description: "Review @github with @jori and post to @slack.",
       surfaces: [
         { integration: "github", tools: ["github_get_issue"] },
+        { integration: "jori", tools: ["read_table"] },
         { integration: "slack", tools: ["conversations_add_message"] },
       ],
     })
 
     expect(serializeJobInstructionDocument(document)).toEqual({
-      description: "Review @GitHub and post to @Slack.",
+      description: "Review @GitHub with @Jori and post to @Slack.",
       surfaces: [
         { integration: "github", tools: ["github_get_issue"] },
+        { integration: "jori", tools: ["read_table"] },
         { integration: "slack", tools: ["conversations_add_message"] },
       ],
     })

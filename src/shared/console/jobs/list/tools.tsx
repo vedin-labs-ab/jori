@@ -1,3 +1,4 @@
+import { isWebTool } from "@contracts/permissions/web"
 import { ToolAccessSummary } from "@/shared/console/tools/summary"
 import { type Job } from "../types"
 
@@ -6,7 +7,9 @@ export function JobToolSummary({ job }: { job: Job }) {
     <ToolAccessSummary
       surfaces={job.access.surfaces.map((surface) => surface.integration)}
       toolCount={countTools(job)}
-      webSearch={job.access.webSearch}
+      webSearch={job.access.surfaces.some((surface) =>
+        surface.tools.some(isWebTool)
+      )}
     />
   )
 }

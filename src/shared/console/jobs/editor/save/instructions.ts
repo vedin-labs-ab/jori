@@ -9,10 +9,7 @@ import { readInstructionReferences } from "@/shared/console/jobs/editor/instruct
 import { type JobFormValues } from "@/shared/console/jobs/types"
 
 export function prepareJobInstructions(
-  values: Pick<
-    JobFormValues,
-    "instructions" | "scope" | "surfaces" | "webSearch"
-  >,
+  values: Pick<JobFormValues, "instructions" | "scope" | "surfaces">,
   permissions: JobPolicyPermissions
 ) {
   const catalog = createJobMentionCatalog({
@@ -36,7 +33,6 @@ export function prepareJobInstructions(
         scope: values.scope,
         surfaces: values.surfaces,
         tool: reference.id,
-        webSearch: values.webSearch,
       }) !== undefined
   )
 
@@ -49,7 +45,6 @@ export function prepareJobInstructions(
             scope: values.scope,
             surfaces: values.surfaces,
             tool: issue.id,
-            webSearch: values.webSearch,
           })
         : undefined,
   }

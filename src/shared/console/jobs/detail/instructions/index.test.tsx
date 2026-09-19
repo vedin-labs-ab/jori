@@ -24,7 +24,6 @@ function job(instructions: string): Job {
   return {
     instructions,
     access: {
-      webSearch: false,
       surfaces: [
         {
           integration: "slack",

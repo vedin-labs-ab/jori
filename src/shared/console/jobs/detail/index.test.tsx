@@ -30,7 +30,6 @@ function job(overrides: Partial<Job> = {}): Job {
     folderId: "folder-1",
     trigger: { expression: "0 9 * * *", timezone: "UTC", nextAt: now + day },
     access: {
-      webSearch: false,
       surfaces: [
         {
           integration: "slack",
@@ -70,7 +69,6 @@ test("reads like a run's opened detail: brief, trigger, access, filing", () => {
   expect(screen.getByText("Next in 1d")).toBeDefined()
   expect(screen.getByText("Tool")).toBeDefined()
   expect(screen.getByRole("button", { name: "Open Slack tools" })).toBeDefined()
-  expect(screen.getByText("Blocked")).toBeDefined()
   expect(screen.getByRole("link", { name: "Renewals" })).toBeDefined()
   expect(screen.getByText("1 team")).toBeDefined()
   expect(screen.getByText("Ada Lovelace")).toBeDefined()
@@ -84,10 +82,7 @@ test("a paused job says so where its next run would be", () => {
       <JobDetail
         folders={folders}
         instructions={null}
-        job={job({
-          status: "paused",
-          access: { webSearch: true, surfaces: [] },
-        })}
+        job={job({ status: "paused", access: { surfaces: [] } })}
         now={now}
         runs={null}
       />
@@ -97,5 +92,4 @@ test("a paused job says so where its next run would be", () => {
   expect(screen.getByText("Paused")).toBeDefined()
   expect(screen.queryByText(/^Next /)).toBeNull()
   expect(screen.getByText("No tools")).toBeDefined()
-  expect(screen.getByText("Allowed")).toBeDefined()
 })

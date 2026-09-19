@@ -17,7 +17,6 @@ test("inserts duplicate suggestions with existing integration tools", () => {
 
   insertMentionSuggestion({
     editor,
-    onWebAccessChange: vi.fn(),
     permissions: [],
     suggestion: {
       id: "github",
@@ -47,7 +46,6 @@ test("inserts skill and tool suggestions as reference nodes", () => {
 
   insertMentionSuggestion({
     editor,
-    onWebAccessChange: vi.fn(),
     permissions: [],
     suggestion: { id: "meeting-prep", kind: "skill", label: "meeting-prep" },
     setSuggestion: vi.fn(),
@@ -63,40 +61,61 @@ test("inserts skill and tool suggestions as reference nodes", () => {
   ])
 })
 
-test("adds exact integration access beside a newly selected tool", () => {
-  const { editor, readInserted } = fakeEditor("", [])
+test.each([
+  { integration: "github", tool: "github_add_issue_comment" },
+  { integration: "jori", tool: "web_search" },
+] as const)(
+  "adds exact $integration access beside a newly selected tool",
+  ({ integration, tool }) => {
+    const { editor, readInserted } = fakeEditor("", [])
+
+    insertMentionSuggestion({
+      editor,
+      permissions: [],
+      suggestion: {
+        access: { integration, kind: "integration" },
+        disabled: false,
+        id: tool,
+        kind: "tool",
+        label: tool,
+        surface: integration,
+      },
+      setSuggestion: vi.fn(),
+      state: suggestionState(),
+    })
+
+    expect(readInserted()).toEqual([
+      { attrs: { integration, tools: [tool] }, type: jobSurfaceNodeName },
+      { text: " ", type: "text" },
+      { attrs: { id: tool, kind: "tool" }, type: jobReferenceNodeName },
+      { text: " ", type: "text" },
+    ])
+  }
+)
+
+test("a new pill keeps the access the job holds beside the text", () => {
+  const { editor, readInserted } = fakeEditor("Read the table.", [])
 
   insertMentionSuggestion({
     editor,
-    onWebAccessChange: vi.fn(),
     permissions: [],
     suggestion: {
-      access: { integration: "github", kind: "integration" },
+      access: { integration: "jori", kind: "integration" },
       disabled: false,
-      id: "github_add_issue_comment",
+      id: "web_fetch",
       kind: "tool",
-      label: "github_add_issue_comment",
-      surface: "github",
+      label: "web_fetch",
+      surface: "jori",
     },
     setSuggestion: vi.fn(),
     state: suggestionState(),
+    surfaces: [{ integration: "jori", tools: ["read_table"] }],
   })
 
-  expect(readInserted()).toEqual([
-    {
-      attrs: {
-        integration: "github",
-        tools: ["github_add_issue_comment"],
-      },
-      type: jobSurfaceNodeName,
-    },
-    { text: " ", type: "text" },
-    {
-      attrs: { id: "github_add_issue_comment", kind: "tool" },
-      type: jobReferenceNodeName,
-    },
-    { text: " ", type: "text" },
-  ])
+  expect(readInserted()?.[0]).toEqual({
+    attrs: { integration: "jori", tools: ["read_table", "web_fetch"] },
+    type: jobSurfaceNodeName,
+  })
 })
 
 test("adds a selected tool to every existing integration reference", () => {
@@ -106,7 +125,6 @@ test("adds a selected tool to every existing integration reference", () => {
 
   insertMentionSuggestion({
     editor,
-    onWebAccessChange: vi.fn(),
     permissions: [],
     suggestion: {
       access: { integration: "github", kind: "integration" },
@@ -130,29 +148,6 @@ test("adds a selected tool to every existing integration reference", () => {
       tools: ["github_get_issue", "github_add_issue_comment"],
     },
   ])
-})
-
-test("enables web access with a selected web tool", () => {
-  const onWebAccessChange = vi.fn()
-  const { editor } = fakeEditor("", [])
-
-  insertMentionSuggestion({
-    editor,
-    onWebAccessChange,
-    permissions: [],
-    suggestion: {
-      access: { kind: "web" },
-      disabled: false,
-      id: "web_search",
-      kind: "tool",
-      label: "web_search",
-      surface: "jori",
-    },
-    setSuggestion: vi.fn(),
-    state: suggestionState(),
-  })
-
-  expect(onWebAccessChange).toHaveBeenCalledWith(true)
 })
 
 function suggestionState(): InstructionSuggestionState {

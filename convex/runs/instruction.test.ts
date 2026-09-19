@@ -49,7 +49,7 @@ function jobRun(): Doc<"runs"> {
   return {
     _id: "parent-run" as Id<"runs">,
     _creationTime: 0,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     job: {
       id: "child-job" as Id<"jobs">,
       parentId: "owner-job" as Id<"jobs">,

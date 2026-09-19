@@ -1,6 +1,7 @@
 import { type Infer } from "convex/values"
 import {
   getToolPermission,
+  isCoreTool,
   isUnattendedToolMode,
   type PermissionMode,
   resolveToolMode,
@@ -12,9 +13,11 @@ import { listPermissionOverrides } from "../permissions/read"
 import { type ExecutionPrincipal } from "../runs/principal"
 import { type QueryLikeCtx } from "../shared/context"
 import {
-  getIntegrationTools,
+  type Access,
   type Integration,
-  integrationLabels,
+  isAccessWithin,
+  type ToolSurface,
+  toolSurfaceLabel,
 } from "../shared/integrations"
 import { createSight, type Gate, type Sight } from "../visibility/sight"
 import { getOrganizationJob } from "./lifecycle/read"
@@ -78,18 +81,21 @@ export async function resolveAccessInput(
   ctx: QueryLikeCtx,
   args: {
     access: JobAccessInput
+    /** The contract of the run asking, which the job may not exceed. */
+    ceiling?: Access
     principal: ExecutionPrincipal
     organizationId: string
   }
 ): Promise<JobAccess> {
   const integrations = normalizeAccessIntegrations(args.access.integrations)
+  const jori = uniqueTools(args.access.jori)
 
   await requireJobAccessPolicy(ctx, {
-    integrations,
+    surfaces: [...integrations, { integration: "jori", tools: jori }],
     organizationId: args.organizationId,
   })
 
-  return {
+  const access = {
     integrations: await Promise.all(
       integrations.map(async (integration) => ({
         id: (
@@ -102,59 +108,65 @@ export async function resolveAccessInput(
         tools: integration.tools,
       }))
     ),
-    web: args.access.web,
+    jori,
+  }
+
+  requireAccessWithin(access, args.ceiling)
+
+  return access
+}
+
+/** A run passes on what it holds and no more, so a job it creates or edits
+ *  cannot reach past the run's own contract. */
+export function requireAccessWithin(access: Access, ceiling?: Access) {
+  if (ceiling !== undefined && !isAccessWithin(access, ceiling)) {
+    throw new Error("A job cannot hold tools the run managing it lacks.")
   }
 }
 
 async function requireJobAccessPolicy(
   ctx: QueryLikeCtx,
   args: {
-    integrations: Array<{
-      integration: Integration
+    surfaces: Array<{
+      integration: ToolSurface
       tools: string[]
     }>
     organizationId: string
   }
 ) {
-  if (args.integrations.length === 0) {
-    throw new Error("Select at least one integration tool.")
-  }
-
   const toolModes = resolveToolModes(
     await listPermissionOverrides(ctx, args.organizationId)
   )
   let hasWriteTool = false
 
-  for (const integration of args.integrations) {
-    for (const tool of integration.tools) {
-      if (requireJobTool(toolModes, integration, tool)) {
+  for (const surface of args.surfaces) {
+    for (const tool of surface.tools) {
+      if (requireJobTool(toolModes, surface.integration, tool)) {
         hasWriteTool = true
       }
     }
   }
 
+  // A job has no conversation to answer in, so without a write tool its
+  // work would reach nobody.
   if (!hasWriteTool) {
-    throw new Error("Give at least one integration write tool.")
+    throw new Error("Give the job at least one write tool.")
   }
 }
 
 function requireJobTool(
   toolModes: ReadonlyMap<string, PermissionMode>,
-  integration: {
-    integration: Integration
-    tools: string[]
-  },
+  surface: ToolSurface,
   tool: string
 ) {
   const permission = getToolPermission(tool)
 
   if (
     permission === undefined ||
-    permission.surface !== integration.integration
+    permission.surface !== surface ||
+    isCoreTool(tool)
   ) {
-    throw new Error(
-      `Unknown ${integrationLabels[integration.integration]} tool: ${tool}`
-    )
+    throw new Error(`Unknown ${toolSurfaceLabel(surface)} tool: ${tool}`)
   }
 
   const mode = resolveToolMode(toolModes, tool)
@@ -166,14 +178,6 @@ function requireJobTool(
   }
 
   return permission.access === "write"
-}
-
-export function canUseJobTool(
-  access: JobAccess,
-  integrationId: Id<"integrations">,
-  tool: string
-) {
-  return getIntegrationTools(access, integrationId).includes(tool)
 }
 
 function normalizeAccessIntegrations(

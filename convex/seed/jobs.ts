@@ -1,4 +1,5 @@
 import { getNextCronRunAt } from "../../contracts/jobs/schedule/cron"
+import { getToolPermission } from "../../contracts/permissions"
 import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { type Access } from "../shared/integrations"
@@ -28,8 +29,8 @@ type SeedJob = {
   /** A cron expression, or the Slack channel an event trigger listens to. */
   cron?: string
   channel?: string
+  /** Granted tools, Jori's own and Slack's together; toAccess files them. */
   tools: string[]
-  web?: boolean
   created: number
   fired?: number
 }
@@ -103,8 +104,13 @@ const jobs: SeedJob[] = [
     folder: "Pipeline",
     status: "paused",
     cron: "0 9 * * 3",
-    tools: ["conversations_search_messages", "read_table", "list_table_rows"],
-    web: true,
+    tools: [
+      "conversations_search_messages",
+      "read_table",
+      "list_table_rows",
+      "web_search",
+      "web_fetch",
+    ],
     created: 68,
     fired: 32,
   },
@@ -165,10 +171,17 @@ export async function seedJobs(ctx: MutationCtx, seed: SeedContext) {
 }
 
 function toAccess(job: SeedJob, integrationId: Id<"integrations">): Access {
+  const jori = job.tools.filter(isJoriTool)
+  const tools = job.tools.filter((tool) => !isJoriTool(tool))
+
   return {
-    integrations: [{ id: integrationId, tools: job.tools }],
-    web: job.web ?? false,
+    integrations: tools.length === 0 ? [] : [{ id: integrationId, tools }],
+    jori,
   }
+}
+
+function isJoriTool(tool: string) {
+  return getToolPermission(tool)?.surface === "jori"
 }
 
 /** No functionId anywhere: the console reads the schedule from the trigger,

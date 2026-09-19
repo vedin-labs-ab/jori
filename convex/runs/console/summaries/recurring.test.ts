@@ -57,7 +57,6 @@ test("includes recurring job details", async () => {
         },
       ],
     },
-    { type: "web_search", label: "Allowed" },
   ])
 })
 
@@ -134,7 +133,7 @@ function recurringJob({
           tools: ["conversations_add_message", "conversations_history"],
         },
       ],
-      web: true,
+      jori: ["web_search", "web_fetch"],
     },
     status,
     createdBy: "person" as Id<"persons">,

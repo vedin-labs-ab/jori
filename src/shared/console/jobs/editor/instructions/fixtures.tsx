@@ -27,7 +27,6 @@ export function renderInstructionsField({
   scope = "personal",
   skills = ["meeting-prep"],
   surfaces,
-  webSearch = false,
 }: {
   description: string
   error?: Parameters<typeof JobInstructionsField>[0]["error"]
@@ -39,10 +38,8 @@ export function renderInstructionsField({
   scope?: Parameters<typeof JobInstructionsField>[0]["scope"]
   skills?: Parameters<typeof JobInstructionsField>[0]["skills"]
   surfaces: Parameters<typeof JobInstructionsField>[0]["surfaces"]
-  webSearch?: boolean
 }) {
   const onValueChange = vi.fn()
-  const onWebSearchChange = vi.fn()
   const field = (nextScope = scope) => (
     <JobInstructionsField
       additionalSurfaces={readAdditionalJobSurfaces({
@@ -51,7 +48,6 @@ export function renderInstructionsField({
       })}
       error={error}
       id="instructions"
-      onWebSearchChange={onWebSearchChange}
       onValueChange={onValueChange}
       placeholder="Instructions"
       permissions={permissions}
@@ -61,7 +57,6 @@ export function renderInstructionsField({
       skills={skills}
       surfaces={surfaces}
       value={description}
-      webSearch={webSearch}
     />
   )
   const view = render(field())
@@ -69,7 +64,6 @@ export function renderInstructionsField({
   return {
     container: view.container,
     onValueChange,
-    onWebSearchChange,
     rerenderScope: (nextScope: typeof scope) => view.rerender(field(nextScope)),
   }
 }

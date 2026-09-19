@@ -16,7 +16,6 @@ export function createInstructionExtensions(refs: InstructionRefs) {
     JobReferenceExtension.configure({
       getPermissions: () => refs.permissions.current,
       getScope: () => refs.scope.current,
-      getWebSearch: () => refs.sources.current.webSearch ?? false,
     }),
     JobSurfaceExtension.configure({
       getPermissions: () => refs.permissions.current,

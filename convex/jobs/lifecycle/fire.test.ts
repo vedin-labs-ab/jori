@@ -103,7 +103,7 @@ function job(
   return {
     _id: (input.id ?? "child") as Id<"jobs">,
     _creationTime: 0,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     createdAt: 0,
     version: input.version ?? 1,
     instructions: "Do the work.",

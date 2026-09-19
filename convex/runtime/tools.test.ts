@@ -4,6 +4,9 @@ import {
   optionalFieldGuidance,
   schemaHasOptionalFields,
 } from "../../contracts/tools"
+import { type Doc } from "../_generated/dataModel"
+import { type AgentRuntimeInput } from "../runs/agent/input"
+import { runtimeTools } from "./context/response"
 import { runLifecycleTools, sandboxTools } from "./native"
 import { visibleNativeToolSnapshots } from "./permissions/native"
 import { activeSurfaceTools } from "./surface/tools"
@@ -99,6 +102,23 @@ test("native runtime tools use catalog usage for agents and descriptions for use
   )
 })
 
+test("a run gets only the sandbox and agent tools its contract grants", () => {
+  const sandboxNames = new Set<string>(sandboxTools.map((tool) => tool.name))
+  const held = (jori: string[]) =>
+    runtimeTools(
+      jobInput(jori),
+      [],
+      { state: null, tools: [] },
+      { all: [], capabilities: [], toolModes: new Map(), tools: [] }
+    )
+      .map((tool) => tool.name)
+      .filter((name) => sandboxNames.has(name))
+
+  expect(held([])).toEqual([])
+  expect(held(["bash"])).toEqual(["bash"])
+  expect(held(["bash", "start_agent"])).toEqual(["bash", "start_agent"])
+})
+
 test("native snapshots validate visible tool routes after hiding internal tools", () => {
   expect(
     visibleNativeToolSnapshots([
@@ -118,6 +138,21 @@ test("native snapshots validate visible tool routes after hiding internal tools"
     ])
   ).toThrow("Missing sandbox tool permission: unknown_tool")
 })
+
+function jobInput(jori: string[]): AgentRuntimeInput {
+  return {
+    type: "job",
+    access: { integrations: [], jori },
+    instructions: "Test",
+    run: {} as Doc<"runs">,
+    event: null,
+    integration: null,
+    integrations: [],
+    organization: null,
+    requester: null,
+    timezone: null,
+  }
+}
 
 function schemaDescription(schema: Record<string, unknown>) {
   return typeof schema.description === "string" ? schema.description : ""

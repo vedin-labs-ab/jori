@@ -3,12 +3,7 @@ import { defaultVisibilityForIntegrations } from "../../contracts/visibility"
 import { databaseContext } from "../../test/convex/database"
 import { type Id } from "../_generated/dataModel"
 import { createSight } from "../visibility/sight"
-import {
-  canSeeJob,
-  canUseJobTool,
-  type JobAccess,
-  resolveToolAccessLevel,
-} from "./access"
+import { canSeeJob, type JobAccess, resolveToolAccessLevel } from "./access"
 
 describe("job tool access", () => {
   test("derives integration access from selected tools", () => {
@@ -21,8 +16,6 @@ describe("job tool access", () => {
     expect(resolveToolAccessLevel(access.integrations[0]?.tools ?? [])).toBe(
       "both"
     )
-    expect(canUseJobTool(access, githubId, "github_get_issue")).toBe(true)
-    expect(canUseJobTool(access, githubId, "github_create_issue")).toBe(false)
   })
 
   test("returns no access without selected tools for the integration", () => {
@@ -36,7 +29,7 @@ function jobAccess(
 ): JobAccess {
   return {
     integrations: tools.length === 0 ? [] : [{ id: integrationId, tools }],
-    web: true,
+    jori: [],
   }
 }
 

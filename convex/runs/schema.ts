@@ -103,7 +103,6 @@ export const toolSnapshot = v.object({
       ),
     })
   ),
-  webSearch: v.boolean(),
 })
 
 /** The turn's token counts as the console breaks them down. */

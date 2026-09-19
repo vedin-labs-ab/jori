@@ -12,23 +12,17 @@ import {
 } from "../../../../test/convex/tools"
 import { summarizeRun } from "../summaries"
 
-test.each([true, false])(
-  "shows stored event job tools with web search allowed: %s",
-  async (webSearch) => {
-    const run = testRun(eventRun(), {
-      preparedTools: slackToolSnapshot(webSearch),
-    })
-    const summary = await summarizeRun(
-      fakeQueryCtx({ run }, { traces: preparedTraceRows(run) }),
-      run
-    )
+test("shows stored event job tools", async () => {
+  const run = testRun(eventRun(), {
+    preparedTools: slackToolSnapshot(),
+  })
+  const summary = await summarizeRun(
+    fakeQueryCtx({ run }, { traces: preparedTraceRows(run) }),
+    run
+  )
 
-    expect(summary.details).toContainEqual(slackToolsDetail())
-    expect(summary.details).toContainEqual(
-      webSearchDetail(webSearch ? "Allowed" : "Blocked")
-    )
-  }
-)
+  expect(summary.details).toContainEqual(slackToolsDetail())
+})
 
 test("shows stored tools for mention and reply runs", async () => {
   for (const kind of ["mention", "reply"] as const) {
@@ -41,14 +35,13 @@ test("shows stored tools for mention and reply runs", async () => {
     )
 
     expect(summary.details).toContainEqual(slackToolsDetail())
-    expect(summary.details).toContainEqual(webSearchDetail("Allowed"))
   }
 })
 
 test("marks approval-required access counts in mention and reply runs", async () => {
   for (const kind of ["mention", "reply"] as const) {
     const run = testRun(messageRun(kind), {
-      preparedTools: slackToolSnapshot(true, "read"),
+      preparedTools: slackToolSnapshot("read"),
     })
     const summary = await summarizeRun(
       fakeQueryCtx({ run }, { traces: preparedTraceRows(run) }),
@@ -95,12 +88,5 @@ function slackToolsDetail(approvalAccess?: "read" | "write") {
         tools: slackDisplayTools(approvalAccess),
       },
     ],
-  }
-}
-
-function webSearchDetail(label: "Allowed" | "Blocked") {
-  return {
-    type: "web_search",
-    label,
   }
 }

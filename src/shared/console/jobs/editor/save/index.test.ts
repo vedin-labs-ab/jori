@@ -1,22 +1,9 @@
 import { describe, expect, test } from "vitest"
 import { jobInstructionMarkerErrors } from "@/shared/console/jobs/editor/errors"
 import { emptyJobForm } from "@/shared/console/jobs/types"
-import { jobFormValues } from "."
 import { createJobArgs } from "./args"
 
 describe("job payload", () => {
-  test("defaults new jobs to web search", () => {
-    expect(jobFormValues(undefined)).toMatchObject({
-      webSearch: true,
-    })
-  })
-
-  test("starts a new job from the web-search choice it is handed", () => {
-    expect(jobFormValues(undefined, { webSearch: false })).toMatchObject({
-      webSearch: false,
-    })
-  })
-
   test("requires every marker to have at least one selected tool", () => {
     expect(
       createJobArgs({
@@ -30,7 +17,7 @@ describe("job payload", () => {
     })
   })
 
-  test("requires at least one write tool", () => {
+  test("requires at least one write tool, an integration's or Jori's", () => {
     expect(
       createJobArgs(
         {
@@ -44,6 +31,17 @@ describe("job payload", () => {
     ).toEqual({
       error: "Give at least one mentioned integration a write tool.",
     })
+    expect(
+      createJobArgs(
+        {
+          ...emptyJobForm,
+          name: "Log the weekly total",
+          instructions: "Ask @Jori to add a row.",
+          surfaces: [{ integration: "jori", tools: ["insert_table_row"] }],
+        },
+        { permissions: jobPermissions() }
+      )
+    ).toHaveProperty("args")
   })
 
   test("rejects personal integrations for organization jobs", () => {
@@ -69,9 +67,10 @@ test("creates job args with access and source bindings", () => {
       {
         ...emptyJobForm,
         name: "Weekly release summary",
-        instructions: "Summarize @GitHub and post to @Slack.",
+        instructions: "Summarize @GitHub with @Jori and post to @Slack.",
         surfaces: [
           { integration: "github", tools: ["github_get_issue"] },
+          { integration: "jori", tools: ["read_table", "web_search"] },
           { integration: "slack", tools: ["conversations_add_message"] },
         ],
       },
@@ -80,14 +79,14 @@ test("creates job args with access and source bindings", () => {
   ).toEqual({
     args: {
       name: "Weekly release summary",
-      instructions: "Summarize @GitHub and post to @Slack.",
+      instructions: "Summarize @GitHub with @Jori and post to @Slack.",
       visibility: { mode: "private" },
       access: {
         integrations: [
           { integration: "github", tools: ["github_get_issue"] },
           { integration: "slack", tools: ["conversations_add_message"] },
         ],
-        web: true,
+        jori: ["read_table", "web_search"],
       },
       type: "cron",
       trigger: { expression: "0 9 * * *", timezone: "UTC" },
@@ -162,7 +161,7 @@ test("rejects a tool reference without its integration access", () => {
   })
 })
 
-test("rejects a web tool reference while web access is off", () => {
+test("rejects a Jori tool reference without the Jori grant", () => {
   expect(
     createJobArgs(
       {
@@ -175,21 +174,10 @@ test("rejects a web tool reference while web access is off", () => {
             tools: ["conversations_add_message"],
           },
         ],
-        webSearch: false,
       },
-      {
-        permissions: [
-          ...jobPermissions(),
-          toolPermission({
-            access: "read",
-            mode: "allowed",
-            surface: "jori",
-            tool: "web_search",
-          }),
-        ],
-      }
+      { permissions: jobPermissions() }
     )
-  ).toEqual({ error: "Enable web access to use #web_search." })
+  ).toEqual({ error: "Give @Jori access to use #web_search." })
 })
 
 test("ignores illustrative tool names in programming fences", () => {
@@ -233,6 +221,13 @@ function jobPermissions() {
       access: "write",
       surface: "slack",
       tool: "conversations_add_message",
+    }),
+    toolPermission({ access: "read", surface: "jori", tool: "read_table" }),
+    toolPermission({ access: "read", surface: "jori", tool: "web_search" }),
+    toolPermission({
+      access: "write",
+      surface: "jori",
+      tool: "insert_table_row",
     }),
   ]
 }

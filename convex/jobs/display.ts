@@ -42,6 +42,7 @@ async function projectAccess(ctx: QueryLikeCtx, access: JobAccess) {
     access: "both" | "read" | "write"
     tools: string[]
   }> = []
+  const joriLevel = resolveToolAccessLevel(access.jori)
 
   for (const entry of access.integrations) {
     const integration = await ctx.db.get(entry.id)
@@ -61,13 +62,26 @@ async function projectAccess(ctx: QueryLikeCtx, access: JobAccess) {
     }
   }
 
+  surfaces.sort((left, right) =>
+    integrationLabels[left.integration].localeCompare(
+      integrationLabels[right.integration]
+    )
+  )
+
+  // Jori's own tools lead, the way they lead a run's receipt.
   return {
-    webSearch: access.web,
-    surfaces: surfaces.sort((left, right) =>
-      integrationLabels[left.integration].localeCompare(
-        integrationLabels[right.integration]
-      )
-    ),
+    surfaces: [
+      ...(joriLevel === "none"
+        ? []
+        : [
+            {
+              integration: "jori" as const,
+              access: joriLevel,
+              tools: access.jori,
+            },
+          ]),
+      ...surfaces,
+    ],
   }
 }
 

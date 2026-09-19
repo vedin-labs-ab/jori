@@ -78,7 +78,7 @@ function definitionKey(definition: JobDefinition) {
           tools: [...entry.tools].sort(),
         }))
         .sort((left, right) => String(left.id).localeCompare(String(right.id))),
-      web: definition.access.web,
+      jori: [...definition.access.jori].sort(),
     },
     instructions: definition.instructions,
     name: definition.name,

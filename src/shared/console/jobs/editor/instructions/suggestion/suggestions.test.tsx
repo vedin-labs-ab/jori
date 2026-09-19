@@ -24,11 +24,11 @@ test("describes only suggestions that add access with the shared hint", () => {
         side: "bottom",
         suggestions: [
           {
-            access: { kind: "builtIn" },
+            access: { kind: "core" },
             disabled: false,
-            id: "save_file",
+            id: "load_skill",
             kind: "tool",
-            label: "save_file",
+            label: "load_skill",
             surface: "jori",
           },
           {
@@ -48,13 +48,13 @@ test("describes only suggestions that add access with the shared hint", () => {
   const footer = screen.getByText(
     "Selecting a tool can add the access it needs."
   )
-  const builtIn = screen.getByRole("option", { name: "save_file" })
+  const core = screen.getByRole("option", { name: "load_skill" })
   const needsAccess = screen.getByRole("option", {
     name: "conversations_add_message",
   })
 
   expect(listbox.contains(footer)).toBe(false)
-  expect(builtIn.getAttribute("aria-describedby")).toBeNull()
+  expect(core.getAttribute("aria-describedby")).toBeNull()
   expect(needsAccess.getAttribute("aria-describedby")).toBe(footer.id)
   expect(screen.queryByText("Built in")).toBeNull()
   expect(screen.queryByText("+ Slack access")).toBeNull()

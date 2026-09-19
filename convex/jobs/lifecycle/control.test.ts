@@ -85,7 +85,7 @@ function parentJob(): Doc<"jobs"> {
       kind: "person",
       personId: "person" as Id<"persons">,
     },
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     type: "cron",
     trigger: {
       expression: "0 7 * * *",
@@ -102,7 +102,7 @@ function eventJob(): Doc<"jobs"> {
   return {
     _id: "event" as Id<"jobs">,
     _creationTime: 0,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     createdAt: 0,
     instructions: "Handle the event.",
     name: "Event job",

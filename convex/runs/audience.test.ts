@@ -59,7 +59,7 @@ function job(
   return {
     _creationTime: 0,
     _id: id<"jobs">("job"),
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     createdAt: 0,
     instructions: "Do it",
     name: "Job",

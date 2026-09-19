@@ -114,10 +114,7 @@ export function slackDisplayTools(approvalAccess?: ToolAccess) {
   ]
 }
 
-export function slackToolSnapshot(
-  webSearch = true,
-  approvalAccess?: ToolAccess
-) {
+export function slackToolSnapshot(approvalAccess?: ToolAccess) {
   return {
     groups: [
       {
@@ -126,6 +123,5 @@ export function slackToolSnapshot(
         tools: slackSnapshotTools(approvalAccess),
       },
     ],
-    webSearch,
   }
 }

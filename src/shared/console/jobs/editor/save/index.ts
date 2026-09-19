@@ -9,22 +9,13 @@ import { localTimezone } from "@/shared/console/time"
 import { triggerFormValues } from "./trigger"
 
 /** The form's read direction. Deliberately free of the markdown codec, so
- *  pages can open the editor host without loading the editor itself. A
- *  new job starts from the web-search choice its host remembers. */
-export function jobFormValues(
-  job: Job | undefined,
-  defaults: Pick<JobFormValues, "webSearch"> = emptyJobForm
-): JobFormValues {
+ *  pages can open the editor host without loading the editor itself. */
+export function jobFormValues(job: Job | undefined): JobFormValues {
   if (job === undefined) {
-    const values = {
-      ...emptyJobForm,
-      timezone: localTimezone(),
-      webSearch: defaults.webSearch,
-    }
+    const values = { ...emptyJobForm, timezone: localTimezone() }
 
-    const visibility = defaultVisibilityForIntegrations(
-      values.surfaces.map((surface) => surface.integration)
-    )
+    // A new job names no integration yet.
+    const visibility = defaultVisibilityForIntegrations([])
 
     return { ...values, visibility, scope: derivedScope(visibility) }
   }
@@ -36,7 +27,6 @@ export function jobFormValues(
     visibility: job.visibility,
     scope: derivedScope(job.visibility),
     folderId: null,
-    webSearch: job.access.webSearch,
     surfaces: job.access.surfaces,
   }
 }

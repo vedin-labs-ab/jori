@@ -11,10 +11,8 @@ test("marks personal additional access invalid for organization sharing", () => 
       additionalSurfaces={[{ integration: "gmail", tools: ["gmail_search"] }]}
       onAdditionalSurfaceChange={vi.fn()}
       onAdditionalSurfaceRemove={vi.fn()}
-      onWebSearchChange={vi.fn()}
       permissions={undefined}
       scope="organization"
-      webSearch={false}
     />
   )
 

@@ -14,7 +14,7 @@ const job = {
   updatedAt: 2,
   version: 2,
   trigger: { at: 3, functionId: "synthetic-schedule" },
-  access: { integrations: [], web: false },
+  access: { integrations: [], jori: [] },
 }
 
 test.each(["once", "cron", "event"])(

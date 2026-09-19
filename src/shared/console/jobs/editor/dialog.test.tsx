@@ -130,27 +130,21 @@ describe("job dialog sharing validation", () => {
 })
 
 describe("job dialog access controls", () => {
-  test("shows web search directly after instructions without an access heading", () => {
+  test("shows no access section while the instructions name every grant", async () => {
     renderJobDialog({
       error: undefined,
       values: {
         ...emptyJobForm,
         name: "Release summary",
-        instructions: "Summarize GitHub changes.",
+        instructions: "Summarize @GitHub changes.",
+        surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
       },
     })
 
-    const instructionsFrame = document.body.querySelector(
-      "[data-job-instructions-frame]"
-    )
-    const webSearchLabel = screen.getByText("Let Jori search the web")
-
+    expect(await findInstructionsTextbox()).toBeDefined()
     expect(screen.queryByText("Access")).toBeNull()
-    expect(instructionsFrame).not.toBeNull()
-    expect(
-      instructionsFrame?.compareDocumentPosition(webSearchLabel) ??
-        Node.DOCUMENT_POSITION_PRECEDING
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(screen.queryByText("Additional access")).toBeNull()
+    expect(screen.queryByRole("checkbox")).toBeNull()
   })
 
   test("shows explicit access that has no matching instruction reference", async () => {

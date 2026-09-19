@@ -3,7 +3,8 @@ import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { createRuntimeToolCapability } from "../../runs/agent/tools/bundles"
-import { permissionGroups, toolDescriptor } from "./tools"
+import { permissionGroups } from "../../runs/agent/tools/resolve"
+import { toolDescriptor } from "./tools"
 
 export async function runtimePermissions(
   ctx: ActionCtx,

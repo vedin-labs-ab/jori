@@ -136,7 +136,7 @@ function job(
   return {
     _id: (input.id ?? "job") as Id<"jobs">,
     _creationTime: 0,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     createdAt: 0,
     instructions: "Do the work.",
     name: "Job",
@@ -175,7 +175,7 @@ function run(
   return {
     _id: (input.id ?? "run") as Id<"runs">,
     _creationTime: 0,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     job:
       jobId === undefined
         ? undefined

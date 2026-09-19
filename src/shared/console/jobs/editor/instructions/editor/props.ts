@@ -45,11 +45,11 @@ export function createEditorProps({
         onSelect: (suggestion) =>
           insertMentionSuggestion({
             editor: refs.editor.current,
-            onWebAccessChange: refs.onWebSearchChange.current,
             permissions: refs.permissions.current,
             setSuggestion,
             state: refs.suggestion.current,
             suggestion,
+            surfaces: refs.sources.current.surfaces,
           }),
         setSuggestion,
         state: refs.suggestion.current,
@@ -63,7 +63,6 @@ export function createEditorProps({
       replaceCompletedMention({
         catalog: refs.catalog.current,
         from,
-        onWebAccessChange: refs.onWebSearchChange.current,
         permissions: refs.permissions.current,
         sources: refs.sources.current,
         text,

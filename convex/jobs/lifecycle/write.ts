@@ -5,11 +5,16 @@ import {
   executesAsOrganization,
   executionPrincipalForVisibility,
 } from "../../runs/principal"
+import { type Access } from "../../shared/integrations"
 import {
   normalizeStoredVisibility,
   type StoredVisibility,
 } from "../../visibility/schema"
-import { type JobAccessInput, resolveAccessInput } from "../access"
+import {
+  type JobAccessInput,
+  requireAccessWithin,
+  resolveAccessInput,
+} from "../access"
 import { findJobByKey, jobKeyPartition } from "../keys"
 import { type JobTriggerInput, type JobType } from "../schema"
 import { releaseSubscription } from "../subscriptions/data"
@@ -29,6 +34,10 @@ type UpdateJobArgs = {
   instructions?: string
   visibility?: StoredVisibility
   access?: JobAccessInput
+  /** The contract of the run editing the job. The job may not exceed it,
+   *  before or after the edit: rewriting the instructions of a job that
+   *  holds more would borrow its reach. */
+  ceiling?: Access
   type?: JobType
   trigger?: JobTriggerInput
   updatedBy?: Id<"persons">
@@ -41,6 +50,7 @@ export async function updateJob(ctx: MutationCtx, args: UpdateJobArgs) {
     args.jobId
   )
   await requireValidOwnershipUpdate(ctx, args, existing)
+  requireAccessWithin(existing.access, args.ceiling)
   const now = Date.now()
   const patch = await buildJobPatch(ctx, args, existing, now)
   const invalidatesChildren =
@@ -117,6 +127,7 @@ async function buildJobPatch(
   if (args.access !== undefined) {
     patch.access = await resolveAccessInput(ctx, {
       access: args.access,
+      ceiling: args.ceiling,
       principal,
       organizationId: existing.organizationId,
     })

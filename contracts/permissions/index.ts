@@ -56,6 +56,19 @@ const interactiveToolNames = [
   "cancel_integration_offer",
 ] as const
 
+/**
+ * Tools every run holds, because it cannot work without them: finishing,
+ * replying where it was asked, and finding out what it can do. Every other
+ * tool is granted per job, Jori's own the same way as an integration's.
+ */
+const coreToolNames = [
+  ...internalRequiredToolNames,
+  ...interactiveToolNames,
+  "list_capabilities",
+  "load_skill",
+  "cancel_approval_request",
+] as const
+
 export const toolPermissions = toolPermissionRows.map(
   ([surface, tool, label, description, usage, access, defaultMode, route]) => ({
     surface,
@@ -74,9 +87,22 @@ const toolPermissionsByName = new Map(
 )
 const internalRequiredTools = new Set<string>(internalRequiredToolNames)
 const interactiveTools = new Set<string>(interactiveToolNames)
+const coreTools = new Set<string>(coreToolNames)
 
 export function getToolPermission(tool: string) {
   return toolPermissionsByName.get(tool)
+}
+
+export function isCoreTool(tool: string) {
+  return coreTools.has(tool)
+}
+
+/** The tools of a surface a job can be granted: all of them but the core. */
+export function getGrantableToolPermissions(surface: ToolSurface) {
+  return toolPermissions.filter(
+    (permission) =>
+      permission.surface === surface && !isCoreTool(permission.tool)
+  )
 }
 
 function isInteractiveTool(tool: string) {

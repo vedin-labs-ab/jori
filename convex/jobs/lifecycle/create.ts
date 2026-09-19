@@ -4,6 +4,7 @@ import { type MutationCtx } from "../../_generated/server"
 import { mark } from "../../discovery/sync/intent"
 import { resolveCreationFolder } from "../../folders/tree"
 import { executionPrincipalForVisibility } from "../../runs/principal"
+import { type Access } from "../../shared/integrations"
 import {
   normalizeStoredVisibility,
   type StoredVisibility,
@@ -33,6 +34,8 @@ type CreateJobArgs = {
   visibility?: StoredVisibility
   folderId?: Id<"folders">
   access: JobAccessInput
+  /** The contract of the run creating the job, which it may not exceed. */
+  ceiling?: Access
   type: JobType
   trigger: JobTriggerInput
   createdBy?: Id<"persons">
@@ -123,6 +126,7 @@ async function prepareJob(
     type: args.type,
     access: await resolveAccessInput(ctx, {
       access: args.access,
+      ceiling: args.ceiling,
       principal,
       organizationId: args.organizationId,
     }),

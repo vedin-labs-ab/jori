@@ -1,8 +1,11 @@
-import { type Integration, integrationLabel } from "@contracts/integrations"
+import { type ToolSurface, toolSurfaceLabel } from "@contracts/integrations"
 
 const jobSurfaceAccesses = ["read", "write", "both"] as const
 
+/** What a job can be granted: Jori's own tools first, then each integration's.
+ *  `@Jori` grants the same way `@Slack` does. */
 export const jobSurfaceIntegrations = [
+  integration("jori", ["jori"]),
   integration("slack", ["slack"]),
   integration("linear", ["linear"]),
   integration("github", ["github", "git hub"]),
@@ -49,9 +52,9 @@ export function getJobSurfaceLabel(integration: JobSurfaceIntegration) {
   return getJobSurfaceIntegration(integration)?.label ?? integration
 }
 
-function integration<const Name extends Integration>(
+function integration<const Name extends ToolSurface>(
   integration: Name,
   aliases: readonly string[]
 ) {
-  return { aliases, integration, label: integrationLabel(integration) }
+  return { aliases, integration, label: toolSurfaceLabel(integration) }
 }

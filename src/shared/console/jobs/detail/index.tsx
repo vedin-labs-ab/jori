@@ -1,4 +1,4 @@
-import { ClipboardList, Folder, Globe, UserRound, Wrench } from "lucide-react"
+import { ClipboardList, Folder, UserRound, Wrench } from "lucide-react"
 import { type ReactNode } from "react"
 import { SeparatorDot } from "../../dot"
 import { MaterialFolderCell } from "../../materials/cells/folder"
@@ -68,13 +68,6 @@ export function JobDetail({
                 groups={groups}
               />
             )}
-          </DetailLine>
-        </DetailRow>
-        <DetailRow icon={Globe} label="Web search">
-          <DetailLine>
-            <DetailValue>
-              {job.access.webSearch ? "Allowed" : "Blocked"}
-            </DetailValue>
           </DetailLine>
         </DetailRow>
         <DetailRow icon={Folder} label="Folder">

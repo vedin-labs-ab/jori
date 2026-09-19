@@ -206,7 +206,6 @@ function useReferenceAccess({
     selector: ({ editor: currentEditor }) => ({
       scope: options.getScope(),
       surfaces: readEditorInstructionSurfaces(currentEditor),
-      webSearch: options.getWebSearch(),
     }),
   })
 
@@ -220,7 +219,6 @@ function useReferenceAccess({
       scope: state.scope,
       surfaces: state.surfaces,
       tool: id,
-      webSearch: state.webSearch,
     }),
     scopeIssue: jobToolScopeIssue({
       permissions: options.getPermissions(),

@@ -19,7 +19,7 @@ test("stores job display data directly", () => {
       }),
     })
   ).toEqual({
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     instructions: "Summarize Slack and send the digest.",
     snapshot: {
       title: "Daily digest",
@@ -204,7 +204,7 @@ function job(
     _id: id<"jobs">("job"),
     _creationTime: 0,
     organizationId: "organization",
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     status: "active",
     principal: { kind: "person", personId: "person" as Id<"persons"> },
     createdBy: "person" as Id<"persons">,

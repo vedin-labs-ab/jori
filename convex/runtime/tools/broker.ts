@@ -150,7 +150,7 @@ export async function fetchRunCloneCredentials(
   ctx: ActionCtx,
   args: { owner: string; repo: string; runId: Id<"runs"> }
 ): Promise<GitHubCloneCredentials> {
-  const [context, { authorizeSurfaceTool, authorizeTool }, tools] =
+  const [context, { authorizeTool, requireSurfaceIntegration }, tools] =
     await Promise.all([
       loadBrokerContext(ctx, args.runId),
       broker(),
@@ -159,14 +159,8 @@ export async function fetchRunCloneCredentials(
 
   authorizeTool(context, cloneRequest)
 
-  const integration = await authorizeSurfaceTool(context, cloneRequest)
-
-  if (integration === null) {
-    throw new Error("No active github integration is available")
-  }
-
   return tools.createGitHubCloneCredentials({
-    integration,
+    integration: requireSurfaceIntegration(context, cloneRequest.surface),
     owner: args.owner,
     repo: args.repo,
   })

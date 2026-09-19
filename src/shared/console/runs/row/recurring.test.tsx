@@ -23,7 +23,6 @@ test("renders recurring job details", async () => {
         { type: "schedule", label: "Daily at 09:00 UTC" },
         { type: "next", label: "Next", timestamp: 1700125200000 },
         slackToolsDetail(),
-        { type: "web_search", label: "Allowed" },
       ],
     })
   )
@@ -44,6 +43,4 @@ test("renders recurring job details", async () => {
   expect(screen.getByRole("button", { name: "Open Slack tools" })).toBeDefined()
   expect(screen.getByText("Read 1")).toBeDefined()
   expect(screen.getByText("Write 1")).toBeDefined()
-  expect(screen.getByText("Web search")).toBeDefined()
-  expect(screen.getByText("Allowed")).toBeDefined()
 })

@@ -21,7 +21,7 @@ function jobRun(): Doc<"runs"> {
   return {
     _id: "run" as Id<"runs">,
     _creationTime: 0,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     job: { id: "job" as Id<"jobs">, version: 2 },
     cause: { type: "time", scheduledAt: 0 },
     createdAt: 0,

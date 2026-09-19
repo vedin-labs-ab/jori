@@ -21,7 +21,6 @@ export function toolDetails(snapshot: RunToolSnapshot | undefined) {
     tools === undefined
       ? undefined
       : detail("tools", tools.label, { groups: tools.groups }),
-    detail("web_search", snapshot.webSearch === true ? "Allowed" : "Blocked"),
   ])
 }
 

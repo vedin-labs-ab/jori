@@ -140,7 +140,7 @@ async function seedRequesterRun(ctx: MutationCtx, type: "job" | "instruction") {
   )
   const access = {
     integrations: [{ id: integrationIds[0], tools: ["github_get_me"] }],
-    web: false,
+    jori: [],
   }
   const principal = { kind: "person" as const, personId }
   const jobId = await ctx.db.insert("jobs", {

@@ -2,7 +2,8 @@ import {
   type RuntimeContext,
   type RuntimeTool,
 } from "../../../contracts/runtime/context"
-import { type AgentRuntimeInput, inputAccess } from "../../runs/agent/input"
+import { holdsTool } from "../../runs/access"
+import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { assemblePrompt } from "../../runs/agent/prompt"
 import {
   getPromptedTools,
@@ -49,8 +50,7 @@ export function runtimeToolSnapshot(
     activeSurfaceTools: visibleNativeToolSnapshots(activeSurface.tools),
     capabilities: permissions.capabilities,
     lifecycleTools: visibleNativeToolSnapshots(lifecycleTools),
-    sandboxTools: visibleNativeToolSnapshots(sandboxTools),
-    webSearch: inputAccess(input)?.web ?? true,
+    sandboxTools: visibleNativeToolSnapshots(heldSandboxTools(input)),
   })
 }
 
@@ -78,6 +78,7 @@ export function runtimeResponse(args: {
             id: args.session._id,
           },
     tools: runtimeTools(
+      args.input,
       args.lifecycleTools,
       args.activeSurface,
       args.permissions
@@ -86,6 +87,7 @@ export function runtimeResponse(args: {
 }
 
 export function runtimeTools(
+  input: AgentRuntimeInput,
   lifecycleTools: LifecycleTools,
   activeSurface: LoadedActiveSurface,
   permissions: RuntimePermissions
@@ -94,10 +96,18 @@ export function runtimeTools(
     ...lifecycleTools,
     ...activeSurface.tools,
     ...permissions.tools,
-    ...sandboxTools,
+    ...heldSandboxTools(input),
   ]
 
   // Schema builders are runtime-neutral JSON but use a deliberately looser
   // `unknown` index signature. Keep the wire object unchanged at this boundary.
   return tools as RuntimeTool[]
+}
+
+/** Sandbox and agent tools never reach the broker: a call is looked up in
+ *  this list, so leaving a tool out is what withholds it. */
+function heldSandboxTools(input: AgentRuntimeInput) {
+  return sandboxTools.filter((tool) =>
+    holdsTool(input, { surface: "jori", tool: tool.name })
+  )
 }

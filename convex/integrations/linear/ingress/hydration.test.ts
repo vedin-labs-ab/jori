@@ -99,7 +99,7 @@ function job(
   return {
     _creationTime: 0,
     _id: "job-id" as Id<"jobs">,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     createdAt: 0,
     instructions: "Test",
     name: "Test job",

@@ -1,4 +1,4 @@
-import { integrationLabel } from "@contracts/integrations"
+import { toolSurfaceLabel } from "@contracts/integrations"
 import { mergeAttributes, Node } from "@tiptap/core"
 import {
   type MentionKind,
@@ -86,7 +86,7 @@ export function readMentionAttributes(
 export function mentionText(kind: MentionKind, id: string) {
   switch (kind) {
     case "integration":
-      return `${mentionSigils.integration}${integrationLabel(id)}`
+      return `${mentionSigils.integration}${toolSurfaceLabel(id)}`
     case "resource":
       return `${mentionSigils.resource}[${id}]`
     case "skill":

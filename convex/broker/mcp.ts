@@ -6,12 +6,11 @@ import {
   resolveToolMode,
   type ToolSurface,
 } from "../../contracts/permissions"
-import { isWebTool } from "../../contracts/permissions/web"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { prepareIntegrationForRuntime } from "../integrations/runtime"
-import { canUseJobTool } from "../jobs/access"
-import { findRunIntegration, inputAccess } from "../runs/agent/input"
+import { holdsTool } from "../runs/access"
+import { findRunIntegration } from "../runs/agent/input"
 import { toolExecutionType } from "../runs/agent/tools/policy"
 import {
   type ApprovalBrokerContext,
@@ -52,10 +51,7 @@ export async function callBrokerTool(
   }
 
   const mode = authorizeTool(context, request)
-  const integration = await requireSurfaceIntegration(context, {
-    surface: request.surface,
-    tool: request.tool,
-  })
+  const integration = requireSurfaceIntegration(context, request.surface)
 
   if (mode === "prompted") {
     return await createPromptedToolApproval(ctx, context, request)
@@ -76,10 +72,7 @@ export async function executeApprovedTool(
   }
 
   authorizeTool(context, request)
-  const integration = await requireSurfaceIntegration(context, {
-    surface: request.surface,
-    tool: request.tool,
-  })
+  const integration = requireSurfaceIntegration(context, request.surface)
 
   return await runProviderTool(ctx, context, integration, request)
 }
@@ -110,22 +103,6 @@ async function runProviderTool(
     tool: request.tool,
     toolArgs,
   })
-}
-
-async function requireSurfaceIntegration(
-  context: BrokerContext,
-  request: {
-    surface: Exclude<ToolSurface, "jori">
-    tool: string
-  }
-) {
-  const integration = await authorizeSurfaceTool(context, request)
-
-  if (integration === null) {
-    throw new Error(`No active ${request.surface} integration is available`)
-  }
-
-  return integration
 }
 
 export function authorizeTool(
@@ -159,32 +136,23 @@ export function authorizeTool(
     throw new Error(`Tool is blocked: ${request.tool}`)
   }
 
-  const access = inputAccess(context.input)
-
-  if (access !== undefined && isWebTool(request.tool) && !access.web) {
-    throw new Error(`Tool is not allowed by run web access: ${request.tool}`)
+  // The run's tool list already leaves out what it does not hold. The broker
+  // checks again because it is the one that acts.
+  if (!holdsTool(context.input, permission)) {
+    throw new Error(`Tool is not allowed by run access: ${request.tool}`)
   }
 
   return mode
 }
 
-export async function authorizeSurfaceTool(
+export function requireSurfaceIntegration(
   context: BrokerContext,
-  request: {
-    surface: Exclude<ToolSurface, "jori">
-    tool: string
-  }
+  surface: Exclude<ToolSurface, "jori">
 ) {
-  const integration = findRunIntegration(context.input, request.surface)
+  const integration = findRunIntegration(context.input, surface)
 
-  const access = inputAccess(context.input)
-
-  if (integration !== null && access !== undefined) {
-    const isSelected = canUseJobTool(access, integration._id, request.tool)
-
-    if (!isSelected) {
-      throw new Error(`Tool is not allowed by run access: ${request.tool}`)
-    }
+  if (integration === null) {
+    throw new Error(`No active ${surface} integration is available`)
   }
 
   return integration

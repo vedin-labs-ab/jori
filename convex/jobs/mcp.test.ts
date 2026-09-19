@@ -128,6 +128,6 @@ function jobArgs(type: "once" | "cron") {
       type === "once"
         ? { at: "2030-01-01T08:00:00Z" }
         : { expression: "0 8 * * *", timezone: "UTC" },
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
   }
 }

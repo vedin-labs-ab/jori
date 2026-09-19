@@ -45,7 +45,6 @@ test("stores all native Jori tools in one group", () => {
       ],
       lifecycleTools: [finishRunTool],
       sandboxTools: [gitTool],
-      webSearch: true,
     })
   ).toEqual({
     groups: [
@@ -60,7 +59,6 @@ test("stores all native Jori tools in one group", () => {
         tools: slackTools(),
       },
     ],
-    webSearch: true,
   })
 })
 
@@ -88,7 +86,6 @@ test("stores workspace tools after provider capabilities", () => {
         },
       ],
       sandboxTools: [gitTool],
-      webSearch: false,
     })
   ).toEqual({
     groups: [
@@ -103,7 +100,6 @@ test("stores workspace tools after provider capabilities", () => {
         tools: [gitTool],
       },
     ],
-    webSearch: false,
   })
 })
 

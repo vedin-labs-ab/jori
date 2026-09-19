@@ -186,7 +186,6 @@ function toolTraces() {
               ],
             },
           ],
-          webSearch: false,
         },
       },
       timestamp: 1,

@@ -58,7 +58,7 @@ export const slackMessageDeliveryValidator = v.object({
 
 /**
  * A resolved tool contract: which tools a run may use per integration, and
- * whether web tools are available. Jobs always carry one; runs
+ * which of Jori's own. Core tools need no grant. Jobs always carry one; runs
  * without a job may carry their own, and omitting it grants the
  * full tool surface.
  */
@@ -69,7 +69,7 @@ export const accessValidator = v.object({
       tools: v.array(v.string()),
     })
   ),
-  web: v.boolean(),
+  jori: v.array(v.string()),
 })
 
 export type Access = Infer<typeof accessValidator>
@@ -81,6 +81,18 @@ export function getIntegrationTools(
   return (
     access.integrations.find((integration) => integration.id === integrationId)
       ?.tools ?? []
+  )
+}
+
+/** Whether a contract grants nothing its ceiling lacks. */
+export function isAccessWithin(access: Access, ceiling: Access) {
+  return (
+    access.jori.every((tool) => ceiling.jori.includes(tool)) &&
+    access.integrations.every((entry) => {
+      const held = getIntegrationTools(ceiling, entry.id)
+
+      return entry.tools.every((tool) => held.includes(tool))
+    })
   )
 }
 

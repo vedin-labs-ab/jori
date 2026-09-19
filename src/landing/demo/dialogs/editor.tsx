@@ -100,12 +100,12 @@ export function DemoEventFields() {
 function useEditorForm(actions: DemoActions) {
   const [job, setJob] = useState<Job>()
   const [values, setValuesState] = useState<JobFormValues>(() =>
-    jobFormValues(undefined, { webSearch: false })
+    jobFormValues(undefined)
   )
   const [error, setError] = useState<string>()
   const [isOpen, setIsOpen] = useState(false)
   const open = useCallback((target: Job | undefined, folderId?: string) => {
-    const seeded = jobFormValues(target, { webSearch: false })
+    const seeded = jobFormValues(target)
 
     setJob(target)
     setValuesState(folderId === undefined ? seeded : { ...seeded, folderId })

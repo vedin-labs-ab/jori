@@ -27,7 +27,6 @@ export function chaseRun(now: number) {
         ["jori", ["list_table_rows", "update_table_row"]],
         ["slack", ["conversations_add_message"]],
       ]),
-      detail("web_search", "Blocked"),
     ],
   })
 }
@@ -49,7 +48,6 @@ function watchRun(now: number) {
         ["jori", ["list_table_rows", "update_table_row"]],
         ["slack", ["conversations_add_message"]],
       ]),
-      detail("web_search", "Blocked"),
     ],
   })
 }
@@ -69,8 +67,13 @@ function competitorRun(now: number) {
     details: [
       schedule("Daily at 07:00"),
       detail("folder", "Marketing"),
-      tools([["slack", ["conversations_add_message"]]]),
-      detail("web_search", "Allowed"),
+      tools([
+        [
+          "jori",
+          ["list_table_rows", "insert_table_row", "web_search", "web_fetch"],
+        ],
+        ["slack", ["conversations_add_message"]],
+      ]),
     ],
   })
 }
@@ -121,7 +124,6 @@ function releaseRun(now: number) {
         ["linear", ["linear_search_issues"]],
         ["slack", ["conversations_add_message"]],
       ]),
-      detail("web_search", "Blocked"),
     ],
   })
 }

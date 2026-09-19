@@ -8,7 +8,7 @@ describe("owned job invalidation", () => {
   test.each([
     ["instructions", { instructions: "New destination." }],
     ["visibility", { visibility: { mode: "organization" as const } }],
-    ["access", { access: { integrations: [], web: true } }],
+    ["access", { access: { integrations: [], jori: ["web_search"] } }],
     ["type", { type: "once" as const }],
     [
       "trigger",
@@ -39,7 +39,7 @@ function job(): Doc<"jobs"> {
   return {
     _id: "parent" as Id<"jobs">,
     _creationTime: 0,
-    access: { integrations: [], web: false },
+    access: { integrations: [], jori: [] },
     createdAt: 0,
     instructions: "Deliver to Sam.",
     name: "Daily Digest",

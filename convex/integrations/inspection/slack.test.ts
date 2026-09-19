@@ -160,7 +160,7 @@ async function seedJob(
     type: "once",
     access: {
       integrations: [{ id: integrationId, tools: ["send_reply"] }],
-      web: false,
+      jori: [],
     },
     trigger: { at: Date.now() + 60_000 },
     status: "active",
