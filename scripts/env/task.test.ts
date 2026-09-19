@@ -25,7 +25,7 @@ test("binds a task to a target and forwards what follows", () => {
   })
 })
 
-test.each(["seed", "truncate"])(
+test.each(["onboarding", "seed", "truncate"])(
   "rejects production %s before loading any environment",
   (task) => {
     for (const target of ["prod-us", "prod-eu"]) {
@@ -101,6 +101,7 @@ test("package scripts take the target as their only argument", () => {
   for (const [name, task] of [
     ["sandbox", "sandbox"],
     ["skills", "skills"],
+    ["db:onboarding", "onboarding"],
     ["db:seed", "seed"],
     ["db:truncate", "truncate"],
   ]) {

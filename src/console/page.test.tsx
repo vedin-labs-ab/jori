@@ -14,6 +14,7 @@ const { loading, mutate, organization, session } = vi.hoisted(() => ({
   organization: {
     id: "organization",
     isResolved: false,
+    onboarded: true,
   },
   session: {
     isPending: false,
@@ -27,7 +28,13 @@ vi.mock("@/shared/session/auth", () => ({
     loading.activeOrganizationQueries += 1
 
     return organization.isResolved
-      ? { data: { id: organization.id }, isPending: false }
+      ? {
+          data: {
+            id: organization.id,
+            metadata: { onboarded: organization.onboarded },
+          },
+          isPending: false,
+        }
       : { data: undefined, isPending: true }
   },
   useConvexSession: () =>
@@ -58,8 +65,8 @@ vi.mock("@/shared/console/time", async (original) => ({
   ...(await original<typeof import("@/shared/console/time")>()),
   localTimezone: () => "Europe/Stockholm",
 }))
-vi.mock("./context/organization/onboarding/gate", () => ({
-  OnboardingGate: () => null,
+vi.mock("./onboarding", () => ({
+  Onboarding: () => <div>Onboarding</div>,
 }))
 vi.mock("./integrations/callback", () => ({
   IntegrationCallbackToasts: () => null,
@@ -78,6 +85,7 @@ beforeEach(() => {
   loading.organizationListQueries = 0
   organization.isResolved = false
   organization.id = "organization"
+  organization.onboarded = true
   session.isPending = false
   session.isSignedIn = true
   window.sessionStorage.clear()
@@ -114,6 +122,17 @@ test("hands the initialized organization to the page", async () => {
   render(<ConsolePage>{(id) => <div>{id}</div>}</ConsolePage>)
 
   expect(await screen.findByText("organization")).toBeDefined()
+})
+
+test("onboarding stands in for the console until the organization is through it", async () => {
+  organization.isResolved = true
+  organization.onboarded = false
+
+  render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+
+  expect(await screen.findByText("Onboarding")).toBeDefined()
+  expect(screen.queryByTestId("shell")).toBeNull()
+  expect(screen.queryByText("Console")).toBeNull()
 })
 
 test("a nested page reuses the console chrome and gate queries", async () => {

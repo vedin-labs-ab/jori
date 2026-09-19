@@ -221,7 +221,7 @@ function appendError(errors: string[], error: string | undefined) {
   return [...errors, error]
 }
 
-async function readDiscovery(ctx: QueryLikeCtx, organizationId: string) {
+export async function readDiscovery(ctx: QueryLikeCtx, organizationId: string) {
   return await ctx.db
     .query("organizationDiscovery")
     .withIndex("by_organization", (q) => q.eq("organizationId", organizationId))

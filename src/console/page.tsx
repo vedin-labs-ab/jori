@@ -14,8 +14,9 @@ import {
   useListOrganizations,
 } from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
-import { OnboardingGate } from "./context/organization/onboarding/gate"
 import { IntegrationCallbackToasts } from "./integrations/callback"
+import { Onboarding } from "./onboarding"
+import { readOnboarded } from "./onboarding/state"
 import { OrganizationContext, useOrganizationId } from "./organization/context"
 import { CreateOrganizationDialog } from "./organization/create"
 import { takeTimezone } from "./organization/pending"
@@ -121,16 +122,23 @@ function SignedInConsole({
         organizationId={organizationId}
       >
         {() => {
+          // Onboarding stands in for the console, chrome and page alike,
+          // until the organization has been through it.
+          const onboarding =
+            chrome === "shell" && !readOnboarded(active.data?.metadata)
           const content = (
             <OrganizationContext.Provider value={organizationId}>
               {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
               <DeclareTimezone organizationId={organizationId} />
-              <OnboardingGate />
-              {children(organizationId)}
+              {onboarding ? (
+                <Onboarding organizationId={organizationId} />
+              ) : (
+                children(organizationId)
+              )}
             </OrganizationContext.Provider>
           )
 
-          return chrome === "shell" ? (
+          return chrome === "shell" && !onboarding ? (
             <ConsoleShell>{content}</ConsoleShell>
           ) : (
             content

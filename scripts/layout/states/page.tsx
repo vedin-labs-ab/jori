@@ -18,11 +18,16 @@ import { GridStates } from "./grid"
 import { JobState } from "./jobs"
 import { ListStates } from "./lists"
 import { MoveState } from "./move"
+import { OnboardingState } from "./onboarding"
 import "@/styles.css"
 
 export function StatePage() {
   const state = new URLSearchParams(location.search).get("case") ?? "ready"
   const { navigation } = useDemoNavigation("/tables")
+
+  if (state.startsWith("onboarding-")) {
+    return <OnboardingState state={state} />
+  }
 
   return (
     <DemoWorkspaceProvider now={Date.UTC(2026, 8, 9, 9, 15)}>

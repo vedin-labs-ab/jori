@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react"
+import { type ComponentType, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DialogDescription,
@@ -15,12 +16,44 @@ import { type OrganizationDiscovery } from "../types"
 import { DiscoveryProgress } from "./progress"
 import { discoveryFailed, discoveryReadyForReview } from "./progress/tasks"
 
+/** Where a discovery step is drawn. The steps own their fields, copy, and
+ *  buttons; the layout places them, in a dialog on the context page and on
+ *  the page itself during onboarding. */
+export type DiscoveryStepLayout = ComponentType<{
+  title: string
+  description: string
+  children: ReactNode
+  primary: ReactNode
+  secondary?: ReactNode
+}>
+
+const DialogStep: DiscoveryStepLayout = ({
+  title,
+  description,
+  children,
+  primary,
+  secondary,
+}) => (
+  <>
+    <DialogHeader>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogDescription>{description}</DialogDescription>
+    </DialogHeader>
+    {children}
+    <DialogFooter>
+      {secondary}
+      {primary}
+    </DialogFooter>
+  </>
+)
+
 export function WebsiteDiscoveryStep({
   continueLabel = "Continue",
   description,
   error,
   inputId,
   isSubmitting,
+  layout: Layout = DialogStep,
   onContinue,
   onSkip,
   onWebsiteChange,
@@ -34,6 +67,7 @@ export function WebsiteDiscoveryStep({
   error: string | null
   inputId: string
   isSubmitting: boolean
+  layout?: DiscoveryStepLayout
   onContinue: () => void
   onSkip: () => void
   onWebsiteChange: (value: string) => void
@@ -58,47 +92,57 @@ export function WebsiteDiscoveryStep({
         }
       }}
     >
-      <DialogHeader>
-        <DialogTitle>{title}</DialogTitle>
-        <DialogDescription>{description}</DialogDescription>
-      </DialogHeader>
-      <div className="grid gap-2 py-1">
-        <Label htmlFor={inputId}>Website</Label>
-        <Input
-          aria-describedby={fieldError === null ? undefined : errorId}
-          aria-invalid={fieldError === null ? undefined : true}
-          id={inputId}
-          value={website}
-          onChange={(event) => onWebsiteChange(event.target.value)}
-          placeholder="yourcompany.com"
-          disabled={isSubmitting}
-        />
-        <FieldError id={errorId}>{fieldError}</FieldError>
-      </div>
-      <DialogFooter>
-        <Button
-          variant="ghost"
-          onClick={onSkip}
-          disabled={isSubmitting}
-          type="button"
-        >
-          {skipLabel}
-        </Button>
-        <Button disabled={!canSubmit} type="submit">
-          {isSubmitting ? <Loader2 className="animate-spin" /> : null}
-          {continueLabel}
-        </Button>
-      </DialogFooter>
+      <Layout
+        description={description}
+        primary={
+          <Button disabled={!canSubmit} type="submit">
+            {isSubmitting ? <Loader2 className="animate-spin" /> : null}
+            {continueLabel}
+          </Button>
+        }
+        secondary={
+          <Button
+            variant="ghost"
+            onClick={onSkip}
+            disabled={isSubmitting}
+            type="button"
+          >
+            {skipLabel}
+          </Button>
+        }
+        title={title}
+      >
+        <div className="grid gap-2 py-1">
+          <Label htmlFor={inputId}>Website</Label>
+          <Input
+            aria-describedby={fieldError === null ? undefined : errorId}
+            aria-invalid={fieldError === null ? undefined : true}
+            autoFocus
+            id={inputId}
+            value={website}
+            onChange={(event) => onWebsiteChange(event.target.value)}
+            placeholder="yourcompany.com"
+            disabled={isSubmitting}
+          />
+          <FieldError id={errorId}>{fieldError}</FieldError>
+        </div>
+      </Layout>
     </form>
   )
 }
 
 export function DiscoveryWorkingStep({
   discovery,
+  layout: Layout = DialogStep,
+  leaveLabel,
   onClose,
   onReviewProfile,
 }: {
   discovery: OrganizationDiscovery | undefined
+  layout?: DiscoveryStepLayout
+  /** How this host names leaving: offered while discovery runs, where no
+   *  dialog close does, and after it fails. */
+  leaveLabel?: string
   onClose: () => void
   onReviewProfile?: () => void
 }) {
@@ -116,11 +160,26 @@ export function DiscoveryWorkingStep({
       discovery.steps.length === 0)
 
   return (
-    <>
-      <DialogHeader>
-        <DialogTitle>{workingTitle({ failed, ready })}</DialogTitle>
-        <DialogDescription>{workingDescription(discovery)}</DialogDescription>
-      </DialogHeader>
+    <Layout
+      description={workingDescription(discovery)}
+      primary={
+        <Button
+          disabled={running}
+          onClick={reviewable ? onReviewProfile : onClose}
+        >
+          {running ? <Loader2 className="animate-spin" /> : null}
+          {workingActionLabel({ failed, leaveLabel, ready, reviewable })}
+        </Button>
+      }
+      secondary={
+        running && leaveLabel !== undefined ? (
+          <Button onClick={onClose} variant="ghost">
+            {leaveLabel}
+          </Button>
+        ) : undefined
+      }
+      title={workingTitle({ failed, ready })}
+    >
       <div
         className={cn(
           scrollFade,
@@ -133,16 +192,7 @@ export function DiscoveryWorkingStep({
           <DiscoveryProgress discovery={discovery} />
         )}
       </div>
-      <DialogFooter>
-        <Button
-          disabled={running}
-          onClick={reviewable ? onReviewProfile : onClose}
-        >
-          {running ? <Loader2 className="animate-spin" /> : null}
-          {workingActionLabel({ failed, ready, reviewable })}
-        </Button>
-      </DialogFooter>
-    </>
+    </Layout>
   )
 }
 
@@ -176,15 +226,17 @@ function workingDescription(discovery: OrganizationDiscovery | undefined) {
     return discovery?.errors[0] ?? "Discovery didn't finish."
   }
 
-  return "This usually takes under a minute. You can close this; it keeps going."
+  return "This usually takes under a minute, and it keeps going if you leave."
 }
 
 function workingActionLabel({
   failed,
+  leaveLabel = "Close",
   ready,
   reviewable,
 }: {
   failed: boolean
+  leaveLabel?: string
   ready: boolean
   reviewable: boolean
 }) {
@@ -193,7 +245,7 @@ function workingActionLabel({
   }
 
   if (failed) {
-    return "Close"
+    return leaveLabel
   }
 
   if (ready) {

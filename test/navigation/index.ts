@@ -26,7 +26,7 @@ vi.mock("@/shared/session/auth", () => ({
     isLoading: false,
   }),
   useActiveOrganization: () => ({
-    data: { id: viewer.organizationId },
+    data: { id: viewer.organizationId, metadata: { onboarded: true } },
     isPending: false,
   }),
   useListOrganizations: () => ({
@@ -37,9 +37,6 @@ vi.mock("@/shared/session/auth", () => ({
 vi.mock("convex/react", async (original) => ({
   ...(await original<typeof import("convex/react")>()),
   useMutation: () => sync,
-}))
-vi.mock("@/console/context/organization/onboarding/gate", () => ({
-  OnboardingGate: () => null,
 }))
 vi.mock("@/console/integrations/callback", () => ({
   IntegrationCallbackToasts: () => null,

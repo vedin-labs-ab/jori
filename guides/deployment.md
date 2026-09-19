@@ -11,6 +11,7 @@ Targets: `dev`, `prod-us`, `prod-eu`. Dev reads `.env.local`, production
 | `pnpm skills <target>` | Sync the skill catalog. |
 | `pnpm sandbox <target>` | Build the Blaxel sandbox image. |
 | `pnpm db:seed dev`, `pnpm db:truncate dev` | Seed or empty development data. |
+| `pnpm db:onboarding dev` | Put every organization back before its onboarding, to walk the flow again. |
 | `pnpm backend <name>` | A preview deployment for a task's worktree, with dev's settings. |
 
 - `pnpm dev` already pushes Convex to the dev deployment; a worktree that

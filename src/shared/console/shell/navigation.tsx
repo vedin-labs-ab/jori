@@ -1,4 +1,10 @@
-import { Fragment, type ReactNode, useEffect, useRef } from "react"
+import {
+  type ComponentProps,
+  Fragment,
+  type ReactNode,
+  useEffect,
+  useRef,
+} from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -71,46 +77,70 @@ export function ConsoleSidebar({
   }, [pathname, setOpenMobile, revealContents])
 
   return (
-    <Sidebar
-      collapsible="icon"
+    <ConsoleSidebarShell
+      account={account}
       onCloseAutoFocus={onCloseAutoFocus}
       // The input owns Escape while renaming inside the mobile sheet.
       onEscapeKeyDown={onCloseAutoFocus}
-      variant="inset"
+      organization={organization}
+      search={search}
     >
+      {consoleNavigation.map((group, index) => (
+        <Fragment key={group.label ?? index}>
+          {group.label === undefined ? (
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <NavigationMenu items={group.items} pathname={pathname} />
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ) : (
+            <CollapsibleGroup
+              label={group.label}
+              name={group.label.toLowerCase()}
+            >
+              <NavigationMenu items={group.items} pathname={pathname} />
+            </CollapsibleGroup>
+          )}
+          {/* The chats follow the first group: under New chat and
+              Activity, above the resources. */}
+          {index === 0 ? (
+            <ChatsGroup chats={chats} pathname={pathname} />
+          ) : null}
+        </Fragment>
+      ))}
+      {folders}
+      {platform}
+    </ConsoleSidebarShell>
+  )
+}
+
+/** The sidebar around its navigation: the organization at its head and the
+ *  account in its footer. An organization still in onboarding gets this
+ *  with nothing between them, so the one way out is another organization. */
+export function ConsoleSidebarShell({
+  account,
+  children,
+  organization,
+  search,
+  ...props
+}: Pick<
+  ComponentProps<typeof Sidebar>,
+  "onCloseAutoFocus" | "onEscapeKeyDown"
+> & {
+  account: ReactNode
+  children?: ReactNode
+  organization: ReactNode
+  search?: ReactNode
+}) {
+  return (
+    <Sidebar collapsible="icon" variant="inset" {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-1">
           <div className="min-w-0 flex-1">{organization}</div>
           {search}
         </div>
       </SidebarHeader>
-      <SidebarContent>
-        {consoleNavigation.map((group, index) => (
-          <Fragment key={group.label ?? index}>
-            {group.label === undefined ? (
-              <SidebarGroup>
-                <SidebarGroupContent>
-                  <NavigationMenu items={group.items} pathname={pathname} />
-                </SidebarGroupContent>
-              </SidebarGroup>
-            ) : (
-              <CollapsibleGroup
-                label={group.label}
-                name={group.label.toLowerCase()}
-              >
-                <NavigationMenu items={group.items} pathname={pathname} />
-              </CollapsibleGroup>
-            )}
-            {/* The chats follow the first group: under New chat and
-                Activity, above the resources. */}
-            {index === 0 ? (
-              <ChatsGroup chats={chats} pathname={pathname} />
-            ) : null}
-          </Fragment>
-        ))}
-        {folders}
-        {platform}
-      </SidebarContent>
+      <SidebarContent>{children}</SidebarContent>
       <SidebarFooter>{account}</SidebarFooter>
     </Sidebar>
   )

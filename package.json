@@ -39,6 +39,7 @@
     "ship": "node --experimental-strip-types scripts/deploy.ts",
     "skills": "node --experimental-strip-types scripts/env/task.ts skills",
     "sandbox": "node --experimental-strip-types scripts/env/task.ts sandbox",
+    "db:onboarding": "node --experimental-strip-types scripts/env/task.ts onboarding",
     "db:seed": "node --experimental-strip-types scripts/env/task.ts seed",
     "db:truncate": "node --experimental-strip-types scripts/env/task.ts truncate",
     "layout": "node --experimental-strip-types scripts/layout/index.ts",

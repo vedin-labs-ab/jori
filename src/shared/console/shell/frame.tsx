@@ -47,6 +47,7 @@ const consoleFrame = "w-full px-4 @3xl/inset:px-6"
  *  The filter panel's open state is held here too, so it carries across
  *  pages; given a storage key it is remembered between visits. */
 export function ConsoleFrame({
+  card = false,
   children,
   className,
   contentId,
@@ -56,7 +57,11 @@ export function ConsoleFrame({
   pathname,
   sidebar,
   sidebarOpen,
+  title,
 }: {
+  /** Draws the inset as the card it is beside a sidebar, when it stands
+   *  alone in the window. */
+  card?: boolean
   children: ReactNode
   className?: string
   /** The id the skip link lands on, set by the shell that renders one. */
@@ -70,6 +75,8 @@ export function ConsoleFrame({
   /** Left out, the header opens on the title: there is nothing to toggle. */
   sidebar?: ReactNode
   sidebarOpen?: boolean
+  /** Names the page when no route does. */
+  title?: string
 }) {
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null)
   const [published, setPublished] = useState<{
@@ -87,7 +94,7 @@ export function ConsoleFrame({
 
   return (
     <SidebarProvider
-      className={cn("h-svh overflow-hidden", className)}
+      className={cn("h-svh overflow-hidden", card && "bg-sidebar", className)}
       onOpenChange={onSidebarOpenChange}
       open={sidebarOpen}
     >
@@ -109,7 +116,10 @@ export function ConsoleFrame({
           phone-sized box on the landing page, so the header and the page
           gutters ask the inset how wide it is. */}
       <SidebarInset
-        className="@container/inset isolate min-h-0 min-w-0 overflow-hidden outline-none md:peer-data-[variant=inset]:border"
+        className={cn(
+          "@container/inset isolate min-h-0 min-w-0 overflow-hidden outline-none md:peer-data-[variant=inset]:border",
+          card && "md:m-2 md:rounded-xl md:border md:shadow-sm"
+        )}
         id={contentId}
         tabIndex={-1}
       >
@@ -135,6 +145,7 @@ export function ConsoleFrame({
             heading={heading}
             material={material}
             pathname={pathname}
+            title={title}
           />
           <div
             className="ml-auto flex shrink-0 items-center gap-2"
@@ -165,10 +176,12 @@ function ConsoleHeaderTitle({
   heading: Heading,
   material,
   pathname,
+  title,
 }: {
   heading: "h1" | "h3"
   material: MaterialBreadcrumb | undefined
   pathname: string
+  title: string | undefined
 }) {
   const shown =
     material === undefined
@@ -178,9 +191,9 @@ function ConsoleHeaderTitle({
   if (shown === undefined) {
     // A material page before anything published renders nothing — the
     // trail appears whole rather than assembling in front of the reader.
-    return isMaterialPage(pathname) ? null : (
+    return title === undefined && isMaterialPage(pathname) ? null : (
       <Heading className="min-w-0 truncate text-xs/relaxed">
-        {getPageTitle(pathname)}
+        {title ?? getPageTitle(pathname)}
       </Heading>
     )
   }
