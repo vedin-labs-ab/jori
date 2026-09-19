@@ -74,7 +74,9 @@ export const reconcile = internalAction({
     ) {
       throw new Error("Order no longer matches the prepared refund.")
     }
-    return await ctx.runMutation(internal.billing.refunds.data.settle, args)
+    const id = await ctx.runMutation(internal.billing.refunds.data.settle, args)
+    await ctx.runMutation(internal.billing.polar.events.apply, { order })
+    return id
   },
 })
 
@@ -89,17 +91,21 @@ export const release = internalAction({
     if (entry !== null && entry.organizationId !== args.organizationId) {
       throw new Error("Case belongs to another workspace.")
     }
-    if (entry?.status === "reserved") {
-      const order = await readOrder(entry.orderId)
+    const order = entry === null ? undefined : await readOrder(entry.orderId)
+    if (entry !== null && order !== undefined) {
       if (
-        order.refunded_amount !== entry.priorRefundedMinor ||
-        hasPendingRefund(await orderRefunds(entry.orderId))
+        entry.status === "reserved" &&
+        (order.refunded_amount !== entry.priorRefundedMinor ||
+          hasPendingRefund(await orderRefunds(entry.orderId)))
       ) {
         throw new Error(
           "Refund may have been paid or is pending. Reconcile it before releasing credits."
         )
       }
     }
-    return await ctx.runMutation(internal.billing.refunds.data.release, args)
+    return await ctx.runMutation(internal.billing.refunds.data.release, {
+      ...args,
+      order,
+    })
   },
 })

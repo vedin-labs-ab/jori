@@ -1,5 +1,6 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
+import { internal } from "../../_generated/api"
 import { internalMutation, internalQuery } from "../../_generated/server"
 import { getAccount } from "../account"
 import { requireCreditedPurchase } from "./purchase"
@@ -154,7 +155,12 @@ export const settle = internalMutation({
 
 /** Called only after the action checks Polar for completed or pending refunds. */
 export const release = internalMutation({
-  args: { organizationId: v.string(), caseId: v.string() },
+  args: {
+    organizationId: v.string(),
+    caseId: v.string(),
+    order: v.optional(v.any()),
+  },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const account = await heldAccount(ctx, args.organizationId, args.caseId)
     const entry = await ctx.db
@@ -178,6 +184,11 @@ export const release = internalMutation({
       refundHeldAt: undefined,
       updatedAt: Date.now(),
     })
+    if (args.order !== undefined) {
+      await ctx.runMutation(internal.billing.polar.events.apply, {
+        order: args.order,
+      })
+    }
     return null
   },
 })

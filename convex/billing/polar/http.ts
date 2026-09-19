@@ -39,7 +39,7 @@ export async function handlePolarEvents(ctx: ActionCtx, request: Request) {
   if (id !== undefined && belongsToRegion(data)) {
     const path = encodeURIComponent(id)
 
-    if (type === "order.paid") {
+    if (type === "order.paid" || type === "order.refunded") {
       await ctx.runMutation(internal.billing.polar.events.apply, {
         order: await polarRequest(`/v1/orders/${path}`),
       })

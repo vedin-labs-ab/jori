@@ -25,6 +25,7 @@ export function mockPolar(
     subscriptions?: unknown[]
     refunds?: unknown[]
     customer?: string
+    order?: Record<string, unknown>
   } = {}
 ) {
   vi.stubGlobal(
@@ -40,6 +41,7 @@ export function mockPolar(
           ...order,
           refunded_amount: options.refunded ?? 0,
           customer_id: options.customer ?? order.customer_id,
+          ...options.order,
         },
         "/v1/subscriptions/": list(options.subscriptions ?? []),
         "/v1/orders/": list([]),

@@ -37,6 +37,7 @@ export async function setup() {
     vi.stubEnv(name, "test_fixture")
   }
   vi.stubEnv("POLAR_SERVER", "sandbox")
+  vi.stubEnv("JORI_REGION", "eu")
   mockPolar()
   await t.run(
     async (ctx) =>

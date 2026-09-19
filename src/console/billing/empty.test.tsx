@@ -68,6 +68,27 @@ function labels() {
     .map((row) => within(row).getAllByRole("cell")[1]?.textContent)
 }
 
+test("provider refunds appear as money leaving the wallet", () => {
+  render(
+    <Activity
+      entries={[
+        {
+          _id: "refund" as BillingEntry["_id"],
+          _creationTime: 4,
+          organizationId: "organization",
+          timestamp: 4,
+          type: "refund",
+          orderId: "payment",
+          micros: { amount: 5_000_000, balance: 24_000_000 },
+        },
+      ]}
+    />
+  )
+  const row = within(screen.getByRole("row", { name: /Top-up refund/ }))
+  expect(row.getAllByRole("cell")[2]?.textContent).toBe("-$5.00")
+  expect(row.getAllByRole("cell")[3]?.textContent).toBe("$24.00")
+})
+
 test("activity starts newest first and sorts time and signed amounts both ways", () => {
   render(<Activity entries={entries} />)
   expect(labels()).toEqual(["Top-up", "Research", "Monthly allowance"])

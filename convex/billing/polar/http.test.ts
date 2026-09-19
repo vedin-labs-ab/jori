@@ -75,6 +75,7 @@ test("verifies the Standard Webhooks reference signature", async () => {
 
 test.each([
   ["order.paid", "/v1/orders/object_1", "order"],
+  ["order.refunded", "/v1/orders/object_1", "order"],
   ["subscription.updated", "/v1/subscriptions/object_1", "subscription"],
   ["subscription.revoked", "/v1/subscriptions/object_1", "subscription"],
 ])("%s applies the object as Polar holds it now", async (type, path, key) => {
@@ -95,6 +96,7 @@ test.each([
 
 test.each([
   event("order.paid", { region: "us" }),
+  event("order.refunded", { region: "us" }),
   event("order.created"),
   event("customer.updated"),
 ])(

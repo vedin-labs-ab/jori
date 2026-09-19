@@ -66,7 +66,9 @@ test("wallet refund waits until the exact original order is credited", async () 
   await t.run(async (ctx) => {
     const receipt = await ctx.db
       .query("transactions")
-      .withIndex("by_order", (q) => q.eq("orderId", "order_original"))
+      .withIndex("by_orderId_and_type", (q) =>
+        q.eq("orderId", "order_original").eq("type", "topup")
+      )
       .unique()
     if (receipt !== null) {
       await ctx.db.delete(receipt._id)

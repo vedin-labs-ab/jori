@@ -7,6 +7,7 @@ import { readNumber, readRecord, readString } from "../../shared/input"
 import { getAccount } from "../account"
 import { addMonths } from "../cycle"
 import { creditTopUp, resetAllowance } from "../ledger"
+import { applyTopUpRefund } from "../refunds/webhook"
 import { queueCancellation } from "./cancellation"
 import { belongsToRegion, sellsPlan, sellsTopUp } from "./config"
 
@@ -58,7 +59,8 @@ async function applyTopUp(
   if (
     orderId === undefined ||
     cents === undefined ||
-    !Number.isInteger(cents) ||
+    !Number.isSafeInteger(cents) ||
+    !Number.isSafeInteger(cents * (microsPerDollar / 100)) ||
     cents <= 0 ||
     order.currency !== "usd"
   ) {
@@ -86,6 +88,7 @@ async function applyTopUp(
       updatedAt: now,
     })
   }
+  await applyTopUpRefund(ctx, account._id, order)
 }
 
 async function applyPlan(

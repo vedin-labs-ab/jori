@@ -19,6 +19,7 @@ import { applyPaidOrder } from "./fulfillment"
  */
 export const apply = internalMutation({
   args: { order: v.optional(v.any()), subscription: v.optional(v.any()) },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const order = readRecord(args.order)
     const subscription = readRecord(args.subscription)

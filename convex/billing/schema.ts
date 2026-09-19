@@ -64,8 +64,8 @@ export const accounts = defineTable({
  * pot, attributing each run to its pot, and `micros.balance` is what remained
  * after the entry, so the feed reads as a statement.
  *
- * `orderId` on top-ups is the Polar order that paid and doubles as the
- * webhook idempotency key.
+ * `orderId` links a top-up and its cumulative provider refund. Each kind has
+ * one row per order, so repeated webhooks cannot change the balance twice.
  */
 export const transactions = defineTable(
   v.union(
@@ -105,10 +105,17 @@ export const transactions = defineTable(
       micros: v.object({ amount: v.number(), balance: v.number() }),
       orderId: v.string(),
       auto: v.boolean(),
+    }),
+    v.object({
+      organizationId: v.string(),
+      timestamp: v.number(),
+      type: v.literal("refund"),
+      micros: v.object({ amount: v.number(), balance: v.number() }),
+      orderId: v.string(),
     })
   )
 )
   .index("by_organization_and_timestamp", ["organizationId", "timestamp"])
   .index("by_run", ["runId"])
-  .index("by_order", ["orderId"])
+  .index("by_orderId_and_type", ["orderId", "type"])
   .index("by_idempotencyKey", ["idempotencyKey"])

@@ -76,7 +76,9 @@ export async function creditTopUp(
 ) {
   const existing = await ctx.db
     .query("transactions")
-    .withIndex("by_order", (query) => query.eq("orderId", args.orderId))
+    .withIndex("by_orderId_and_type", (query) =>
+      query.eq("orderId", args.orderId).eq("type", "topup")
+    )
     .unique()
 
   if (existing !== null) {

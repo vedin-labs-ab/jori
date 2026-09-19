@@ -11,7 +11,9 @@ export async function requireCreditedPurchase(
   }
   const source = await ctx.db
     .query("transactions")
-    .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
+    .withIndex("by_orderId_and_type", (q) =>
+      q.eq("orderId", args.orderId).eq("type", "topup")
+    )
     .unique()
   if (
     source?.type !== "topup" ||
@@ -33,7 +35,16 @@ export async function requireCreditedPurchase(
       sum + (refund.status === "released" ? 0 : refund.walletMicros),
     0
   )
-  if (args.walletMicros + reserved > source.micros.amount) {
+  const external = await ctx.db
+    .query("transactions")
+    .withIndex("by_orderId_and_type", (q) =>
+      q.eq("orderId", args.orderId).eq("type", "refund")
+    )
+    .unique()
+  if (
+    args.walletMicros + reserved + (external?.micros.amount ?? 0) >
+    source.micros.amount
+  ) {
     throw new Error("Credits exceed this purchase after prior refunds.")
   }
 }
