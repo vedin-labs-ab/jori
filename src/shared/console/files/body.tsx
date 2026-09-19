@@ -218,7 +218,9 @@ function FileFallback({
     <ConsoleListContent className="justify-center">
       <ConsoleEmptyState
         action={
-          file.url === null ? undefined : <FileDownloadButton url={file.url} />
+          file.url === null ? undefined : (
+            <FileDownloadButton name={file.name} url={file.url} />
+          )
         }
         description={description}
         icon={fileKind(file.mimeType, file.name).icon}

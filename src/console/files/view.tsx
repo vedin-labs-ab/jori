@@ -109,7 +109,11 @@ function FileReadyView({
 
   return (
     <ConsoleListLayout>
-      <FileHeaderActions onShare={() => setIsShareOpen(true)} url={file.url}>
+      <FileHeaderActions
+        name={file.name}
+        onShare={() => setIsShareOpen(true)}
+        url={file.url}
+      >
         <AskJoriAction target={{ kind: "file", id: file.fileId }} />
       </FileHeaderActions>
       <FileBody

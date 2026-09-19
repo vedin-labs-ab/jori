@@ -184,6 +184,6 @@ test("a file with no inline view offers the download under the dock", () => {
   renderBody({ mimeType: "application/zip", name: "bundle.zip" })
 
   expect(screen.getByText("No inline view")).toBeDefined()
-  expect(screen.getByRole("link", { name: "Download" })).toBeDefined()
+  expect(screen.getByRole("button", { name: "Download" })).toBeDefined()
   expect(screen.getByRole("button", { name: "Next file" })).toBeDefined()
 })

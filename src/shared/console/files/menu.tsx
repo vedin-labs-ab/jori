@@ -19,7 +19,9 @@ import {
   TitleMenuContent,
 } from "@/shared/console/menu"
 import { MenuProvenance } from "@/shared/console/menu/provenance"
+import { downloadUrl } from "@/shared/files/download"
 import { formatFileSize } from "@/shared/files/size"
+import { showErrorToast } from "../error"
 import { fileBlobCache } from "./cache/blob"
 import { DeleteFileDialog } from "./delete"
 import { type FileRow } from "./types"
@@ -209,11 +211,17 @@ function FileLinkItems({
           Open
         </a>
       </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <a download={file.name} href={file.url} rel="noreferrer">
-          <Download />
-          Download
-        </a>
+      <DropdownMenuItem
+        onSelect={() => {
+          if (file.url !== null) {
+            void downloadUrl(file.name, file.url).catch((error: unknown) =>
+              showErrorToast(error, "Could not download the file.")
+            )
+          }
+        }}
+      >
+        <Download />
+        Download
       </DropdownMenuItem>
       <DropdownMenuSeparator />
     </>

@@ -1,6 +1,5 @@
 import { useQuery } from "convex/react"
-import { Download } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { FileDownloadButton } from "@/shared/console/files/header"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { useAcrossEpochs, useUrlEpoch } from "@/shared/files/epoch"
 import { fileKind } from "@/shared/files/kind"
@@ -48,12 +47,7 @@ export function FileShareView({
       <FilePreview mimeType={file.mimeType} name={file.name} url={file.url} />
       {file.url === null ? null : (
         <div>
-          <Button asChild variant="outline">
-            <a href={file.url} rel="noreferrer" target="_blank">
-              <Download />
-              Download
-            </a>
-          </Button>
+          <FileDownloadButton name={file.name} url={file.url} />
         </div>
       )}
     </ShareShell>

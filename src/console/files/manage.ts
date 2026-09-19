@@ -69,7 +69,7 @@ export function useFileBulk(
         throw new Error("File has no download URL")
       }
 
-      downloadUrl(row.name, row.url)
+      await downloadUrl(row.name, row.url)
     },
     noun: fileNoun,
     remove: (row) => removeFile({ organizationId, fileId: row.fileId }),
