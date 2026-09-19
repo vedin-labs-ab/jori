@@ -12,6 +12,7 @@ import {
   Link2,
   MapPin,
   Share2,
+  UserCheck,
   Users,
 } from "lucide-react"
 import { Definition, Jori, Region, Section } from "../section"
@@ -37,6 +38,12 @@ export function ScopeSection() {
         <Definition icon={Users} term="Your context, or the organization's">
           Work you keep to yourself runs with your integrations. Work shared
           past you runs with the organization's, never your own.
+        </Definition>
+        <Definition icon={UserCheck} term="Members only, on every surface">
+          Only members of your organization can ask Jori for work, steer a run,
+          or approve an action, in Slack, GitHub, and Linear alike. A mention
+          from anyone else, in a shared channel or a public repository, starts
+          nothing and gets no reply.
         </Definition>
         <Definition icon={GitBranch} term="Subtasks inherit less, never more">
           Jori can split a job into subtasks. A subtask can never hold access
