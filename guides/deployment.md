@@ -11,9 +11,14 @@ Targets: `dev`, `prod-us`, `prod-eu`. Dev reads `.env.local`, production
 | `pnpm skills <target>` | Sync the skill catalog. |
 | `pnpm sandbox <target>` | Build the Blaxel sandbox image. |
 | `pnpm db:seed dev`, `pnpm db:truncate dev` | Seed or empty development data. |
+| `pnpm backend <name>` | A preview deployment for a task's worktree, with dev's settings. |
 
 - `pnpm dev` already pushes Convex to the dev deployment; a worktree that
-  needs a live backend uses a task-specific Convex preview.
+  needs a live backend gets one from `pnpm backend <name>`. It copies dev's
+  settings one at a time without printing them, and sets the region and
+  origins itself. Previews run in the EU and dev in the US, so a dev
+  variable named `PREVIEW_<NAME>` replaces `<NAME>` on previews. The EU
+  bucket's R2 key reaches them that way.
 - Production ships from pushed `main`, reusing the gate pass landing
   recorded; `--yes` replaces the typed confirmation without a terminal.
 - Vercel refuses a head commit authored by `noreply@anthropic.com`: author

@@ -45,6 +45,8 @@ Same word, same meaning, wherever you write:
 - `pnpm dev:up` serves `main` and keeps it current; `pnpm dev:check` says
   where. Landed work shows up there on its own, so preview a worktree only
   for what has not landed.
+- `pnpm backend <name>` gives a task's worktree its own Convex backend with
+  dev's settings. Run it from the primary checkout.
 - Land only pure documentation with `--no-verify`. Anything the build
   reads, including prompts, skills, and legal pages, is not documentation.
 
@@ -83,6 +85,10 @@ per concept everywhere. A synonym is a rename, not a choice.
   against it, or change its data only when asked.
 - Never read `.env.prod-*.local` or print a deployment's environment; the
   tooling loads what it needs.
+- List a deployment's variables with `convex env list --names-only`, and
+  check that one is set with `convex env get NAME | wc -c`. Never filter
+  the full listing: `convex env list | cut -d= -f1` printed three private
+  keys, because a key spans lines and only its first line has a name.
 - Keep EU and US data apart. When a provider cannot deliver per region, state
   the limitation instead of widening geography or permissions.
 - Ask before changing legal pages.

@@ -32,6 +32,7 @@
     "test": "node --experimental-strip-types scripts/test.ts",
     "task": "node --experimental-strip-types scripts/worktree/start.ts",
     "land": "node --experimental-strip-types scripts/worktree/land.ts",
+    "backend": "node --experimental-strip-types scripts/worktree/backend.ts",
     "ship": "node --experimental-strip-types scripts/deploy.ts",
     "skills": "node --experimental-strip-types scripts/env/task.ts skills",
     "sandbox": "node --experimental-strip-types scripts/env/task.ts sandbox",
