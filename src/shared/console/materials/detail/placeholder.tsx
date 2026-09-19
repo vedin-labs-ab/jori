@@ -1,7 +1,9 @@
 import { type ReactNode } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ConsolePageLayout } from "../../layout"
+import { ConsoleEmptyState, ConsoleListEmpty } from "../../list/empty"
+import { ConsoleListLayout } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
+import { referencePresentation } from "../../references/presentation"
 
 /** What a material page shows before there is a material to show: the
  *  spinner while its detail query settles, or the reason it never will. A
@@ -15,7 +17,7 @@ export function MaterialPlaceholder({
 }: {
   fallback?: ReactNode
   message?: string
-  noun: string
+  noun: "file" | "folder" | "store" | "table" | "job" | "conversation"
   status: "loading" | "not_found" | "unauthorized"
 }) {
   if (status === "loading") {
@@ -30,24 +32,29 @@ export function MaterialPlaceholder({
     return fallback
   }
 
+  const { icon } = referencePresentation(
+    noun === "conversation" ? "chat" : noun,
+    ""
+  )
+
   return (
-    <ConsolePageLayout>
-      {status === "unauthorized" ? (
-        <Alert variant="destructive">
-          <AlertTitle>Could not load {noun}</AlertTitle>
-          <AlertDescription>{message}</AlertDescription>
-        </Alert>
-      ) : (
-        <Alert>
-          <AlertTitle>
-            {noun[0].toUpperCase()}
-            {noun.slice(1)} not found
-          </AlertTitle>
-          <AlertDescription>
-            The {noun} may have been deleted or belongs to another organization.
-          </AlertDescription>
-        </Alert>
-      )}
-    </ConsolePageLayout>
+    <ConsoleListLayout>
+      <ConsoleListEmpty>
+        <ConsoleEmptyState
+          description={
+            status === "unauthorized"
+              ? (message ??
+                "Sign in again or switch organizations to try again.")
+              : `The ${noun} may have been deleted or belongs to another organization.`
+          }
+          icon={icon}
+          title={
+            status === "unauthorized"
+              ? `Could not load ${noun}`
+              : `${noun[0].toUpperCase()}${noun.slice(1)} not found`
+          }
+        />
+      </ConsoleListEmpty>
+    </ConsoleListLayout>
   )
 }

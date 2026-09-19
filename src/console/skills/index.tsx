@@ -1,8 +1,9 @@
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
+import { BookOpenText } from "lucide-react"
 import { lazy, Suspense, useMemo, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { ConsolePageLayout } from "@/shared/console/layout"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import {
   useClientPagination,
@@ -122,10 +123,11 @@ function SkillListBody({
 }) {
   if (skillList?.status === "unauthorized") {
     return (
-      <Alert variant="destructive">
-        <AlertTitle>Skill access unavailable</AlertTitle>
-        <AlertDescription>{skillList.message}</AlertDescription>
-      </Alert>
+      <ConsoleEmptyState
+        title="Skill access unavailable"
+        description={skillList.message}
+        icon={BookOpenText}
+      />
     )
   }
 

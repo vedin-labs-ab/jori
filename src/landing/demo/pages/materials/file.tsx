@@ -5,11 +5,12 @@ import { FileBody } from "@/shared/console/files/body"
 import { FileHeaderActions } from "@/shared/console/files/header"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { fileDetail, fileSiblingsOf, materialOf } from "../../derive/materials"
 import { DemoLinksDialog } from "../../dialogs/links"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import { useDemoWorkspace } from "../../workspace"
-import { FileMenu, MaterialMissing } from "./chrome"
+import { FileMenu } from "./chrome"
 
 /** One file's page over the workspace: the console's viewer or editor,
  *  with edits saved into memory, under the header actions and the crumb
@@ -24,7 +25,7 @@ export function FilePage({ fileId }: { fileId: string }) {
   const [request, setRequest] = useState<MaterialRequest>()
 
   if (file === undefined || material?.kind !== "file") {
-    return <MaterialMissing noun="file" />
+    return <MaterialPlaceholder noun="file" status="not_found" />
   }
 
   const titleMenu = (lead: ReactNode) => (

@@ -3,7 +3,10 @@ import { RefreshCw, TriangleAlert } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { readErrorMessage } from "@/shared/console/error"
-import { ConsoleEmptyState } from "@/shared/console/list/empty"
+import {
+  ConsoleEmptyState,
+  ConsoleListEmpty,
+} from "@/shared/console/list/empty"
 
 /**
  * Contains a page failure to the page.
@@ -38,7 +41,7 @@ function PageError({ error, reset }: ErrorComponentProps) {
   const state = readErrorState(error)
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col px-4 pt-3 pb-6 md:px-6">
+    <ConsoleListEmpty>
       <ConsoleEmptyState
         action={
           <>
@@ -62,7 +65,7 @@ function PageError({ error, reset }: ErrorComponentProps) {
         icon={state.stale ? RefreshCw : TriangleAlert}
         title={state.title}
       />
-    </div>
+    </ConsoleListEmpty>
   )
 }
 

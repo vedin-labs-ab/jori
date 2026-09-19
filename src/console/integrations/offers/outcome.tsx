@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { AlertTriangle, CheckCircle2, RotateCcw } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
+import { RootStateFrame } from "@/shared/state"
 
 type OfferOutcomeVariant = "connected" | "expired" | "failed" | "terminal"
 
@@ -47,22 +48,12 @@ export function IntegrationOfferOutcome({
   const content = offerOutcomeContent[variant]
 
   return (
-    <main className="grid min-h-svh place-items-center bg-background px-6 py-10">
-      <section className="grid w-full max-w-sm justify-items-center gap-5 text-center">
-        <div className="flex size-12 items-center justify-center rounded-lg border bg-muted text-muted-foreground *:size-5">
-          {content.icon}
-        </div>
-        <div className="grid gap-2">
-          <h1 className="text-2xl font-medium tracking-normal">
-            {content.title}
-          </h1>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            {content.description}
-          </p>
-        </div>
-        <OfferOutcomeActions onRetry={onRetry} variant={variant} />
-      </section>
-    </main>
+    <RootStateFrame
+      title={content.title}
+      description={content.description}
+      icon={content.icon}
+      action={<OfferOutcomeActions onRetry={onRetry} variant={variant} />}
+    />
   )
 }
 

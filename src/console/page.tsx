@@ -1,9 +1,10 @@
 import { useMutation, useQuery } from "convex/react"
+import { ShieldAlert } from "lucide-react"
 import { type ReactNode, useEffect, useState } from "react"
 import { UserInvitations } from "@/components/auth/organization/user-invitations"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { showErrorToast } from "@/shared/console/error"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
   activateOrganization,
@@ -171,12 +172,11 @@ function NoOrganization() {
 function ConvexSessionError() {
   return (
     <PublicConsoleFrame isSignedIn>
-      <Alert variant="destructive">
-        <AlertTitle>Couldn't verify your session</AlertTitle>
-        <AlertDescription>
-          Sign out and back in, then try again.
-        </AlertDescription>
-      </Alert>
+      <ConsoleEmptyState
+        title="Couldn't verify your session"
+        description="Sign out and back in, then try again."
+        icon={ShieldAlert}
+      />
     </PublicConsoleFrame>
   )
 }

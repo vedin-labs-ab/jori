@@ -1,8 +1,7 @@
 import { type ReactNode, useMemo, useState } from "react"
 import { fileKind, isHtmlFile, previewKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/files/size"
-import { ConsoleEmptyState } from "../list/empty"
-import { ConsoleListContent } from "../list/frame"
+import { ConsoleEmptyState, ConsoleListEmpty } from "../list/empty"
 import { useMaterialTrail } from "../materials/breadcrumb"
 import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
 import { FileDock } from "./dock"
@@ -215,7 +214,7 @@ function FileFallback({
   title: string
 }) {
   return (
-    <ConsoleListContent className="justify-center">
+    <ConsoleListEmpty>
       <ConsoleEmptyState
         action={
           file.url === null ? undefined : (
@@ -226,6 +225,6 @@ function FileFallback({
         icon={fileKind(file.mimeType, file.name).icon}
         title={title}
       />
-    </ConsoleListContent>
+    </ConsoleListEmpty>
   )
 }

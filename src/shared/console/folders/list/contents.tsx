@@ -1,9 +1,9 @@
 import { Folder } from "lucide-react"
 import { type ReactNode } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useCreatedItem } from "../../edit/state"
 import {
   ConsoleEmptyState,
+  ConsoleListEmpty,
   EmptyRow,
   FilterableEmptyState,
 } from "../../list/empty"
@@ -64,16 +64,17 @@ export function FolderContents({
 
   if (contents.status !== "ready") {
     return (
-      <ConsoleListContent>
-        <Alert variant="destructive">
-          <AlertTitle>Could not load the folder</AlertTitle>
-          <AlertDescription>
-            {contents.status === "unauthorized"
+      <ConsoleListEmpty>
+        <ConsoleEmptyState
+          title="Could not load the folder"
+          description={
+            contents.status === "unauthorized"
               ? contents.message
-              : "The folder may have been deleted."}
-          </AlertDescription>
-        </Alert>
-      </ConsoleListContent>
+              : "The folder may have been deleted."
+          }
+          icon={Folder}
+        />
+      </ConsoleListEmpty>
     )
   }
 
@@ -83,14 +84,14 @@ export function FolderContents({
     !created
   ) {
     return (
-      <ConsoleListContent>
+      <ConsoleListEmpty>
         <ConsoleEmptyState
           action={newMenu}
           description="File chats, tables, stores, files, and jobs here, or add a subfolder."
           icon={Folder}
           title="Empty folder"
         />
-      </ConsoleListContent>
+      </ConsoleListEmpty>
     )
   }
 

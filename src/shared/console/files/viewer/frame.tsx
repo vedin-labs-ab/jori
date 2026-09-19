@@ -1,6 +1,8 @@
+import { FileWarning } from "lucide-react"
 import { type ReactNode } from "react"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
+import { ConsoleEmptyState } from "../../list/empty"
 import { type ViewerStatus } from "./status"
 
 /** The viewport every file type renders into. It claims the full content
@@ -26,7 +28,12 @@ export function ViewerFrame({
       )}
     >
       {status === "error" ? (
-        <ViewerNotice>Could not load the preview.</ViewerNotice>
+        <ConsoleEmptyState
+          className="absolute inset-0 overflow-y-auto"
+          title="Preview unavailable"
+          description="Could not load the preview. Download the file to open it locally."
+          icon={FileWarning}
+        />
       ) : (
         <div
           className={cn(

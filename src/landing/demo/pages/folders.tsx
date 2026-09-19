@@ -1,6 +1,5 @@
 import { formatUsd } from "@contracts/billing"
 import { useContext, useMemo } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { folderBreadcrumb } from "@/shared/console/folders/breadcrumb"
 import { NewInFolderButton } from "@/shared/console/folders/create"
@@ -13,11 +12,9 @@ import {
   ConsoleHeaderActions,
   ConsoleHeaderAside,
 } from "@/shared/console/layout"
-import {
-  ConsoleListContent,
-  ConsoleListLayout,
-} from "@/shared/console/list/frame"
+import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
+import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { folderDetail } from "../derive/folders"
 import { usageSpend } from "../derive/usage"
@@ -65,19 +62,7 @@ export function FolderPage({ folderId }: { folderId: string }) {
   const folder = useMemo(() => folderDetail(state, folderId), [state, folderId])
 
   if (folder === undefined) {
-    return (
-      <ConsoleListLayout>
-        <ConsoleListContent>
-          <Alert>
-            <AlertTitle>Folder not found</AlertTitle>
-            <AlertDescription>
-              The folder may have been deleted or belongs to another
-              organization.
-            </AlertDescription>
-          </Alert>
-        </ConsoleListContent>
-      </ConsoleListLayout>
-    )
+    return <MaterialPlaceholder noun="folder" status="not_found" />
   }
 
   return <FolderContentsPage folder={folder} />

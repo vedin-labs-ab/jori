@@ -1,7 +1,5 @@
 import { type ReactNode, useContext, useMemo, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { FileTitleMenu } from "@/shared/console/files/menu"
-import { ConsolePageLayout } from "@/shared/console/layout"
 import { MaterialTitleMenu } from "@/shared/console/materials/actions/menu"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
@@ -17,31 +15,6 @@ import {
   type DemoTable,
 } from "../../fixtures/types"
 import { useDemoWorkspace } from "../../workspace"
-
-// What every material page shares with the console's: the crumb that says
-// where the material lives, the menu the console hangs off its name, and
-// the alert for a material the workspace no longer has.
-
-/** The console's alert for a material that is gone. */
-export function MaterialMissing({
-  noun,
-}: {
-  noun: "file" | "store" | "table"
-}) {
-  return (
-    <ConsolePageLayout>
-      <Alert>
-        <AlertTitle>
-          {noun === "file" ? "File" : noun === "store" ? "Store" : "Table"} not
-          found
-        </AlertTitle>
-        <AlertDescription>
-          The {noun} may have been deleted or belongs to another organization.
-        </AlertDescription>
-      </Alert>
-    </ConsolePageLayout>
-  )
-}
 
 /** A table's name in the breadcrumb, with the menu the console gives
  *  one — led by the table's provenance — and the dialogs the menu opens.

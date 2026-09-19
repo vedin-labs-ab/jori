@@ -5,7 +5,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
-import { ConsoleEmptyState } from "../../list/empty"
+import { ConsoleEmptyState, ConsoleListEmpty } from "../../list/empty"
 import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
@@ -207,7 +207,7 @@ function PaneEmpty({
   const presentation = referencePresentation(target.kind, reference?.name ?? "")
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto px-4 py-6">
+    <ConsoleListEmpty>
       {isUnavailable ? (
         <ConsoleEmptyState
           description="It was deleted, or is no longer yours to see."
@@ -221,6 +221,6 @@ function PaneEmpty({
           title={reference?.name ?? presentation.label}
         />
       )}
-    </div>
+    </ConsoleListEmpty>
   )
 }

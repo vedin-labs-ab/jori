@@ -2,6 +2,7 @@ import { FileIcon, type LucideIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { SheetView } from "@/shared/console/files/viewer/sheet"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { scrollFade } from "@/shared/fade"
 import { fileKind, previewKind } from "@/shared/files/kind"
 
@@ -114,17 +115,19 @@ function SheetPreview({ name, url }: { name: string; url: string }) {
 }
 
 function PreviewFallback({
-  icon: Icon,
+  icon,
   message = "No inline preview for this file type.",
 }: {
   icon: LucideIcon
   message?: string
 }) {
   return (
-    <div className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-md border bg-muted/30 text-muted-foreground">
-      <Icon className="size-6" />
-      <p className="text-sm">{message}</p>
-    </div>
+    <ConsoleEmptyState
+      className="min-h-40"
+      title="Preview unavailable"
+      description={message}
+      icon={icon}
+    />
   )
 }
 

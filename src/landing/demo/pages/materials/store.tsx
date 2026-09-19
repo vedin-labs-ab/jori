@@ -8,6 +8,7 @@ import { AskJoriAction } from "@/shared/console/chat/pane/ask"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { MaterialHeaderActions } from "@/shared/console/materials/detail/header"
+import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { exportStoreJson } from "@/shared/console/stores/export"
 import { type SchemaWrite } from "@/shared/console/stores/schema/dialog"
 import { type StoreDetail } from "@/shared/console/stores/types"
@@ -16,7 +17,7 @@ import { materialOf, storeDetail } from "../../derive/materials"
 import { DemoLinksDialog } from "../../dialogs/links"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import { useDemoWorkspace } from "../../workspace"
-import { CollectionMenu, MaterialMissing } from "./chrome"
+import { CollectionMenu } from "./chrome"
 
 /** One store's page over the workspace: the console's value editor,
  *  saving into memory, under the header actions and the crumb the
@@ -30,7 +31,7 @@ export function StorePage({ storeId }: { storeId: string }) {
   const [request, setRequest] = useState<MaterialRequest>()
 
   if (store === undefined || material?.kind !== "store") {
-    return <MaterialMissing noun="store" />
+    return <MaterialPlaceholder noun="store" status="not_found" />
   }
 
   const titleMenu = (lead: ReactNode) => (

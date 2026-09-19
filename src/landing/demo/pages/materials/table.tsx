@@ -1,7 +1,8 @@
 import { useMemo } from "react"
+import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { materialOf, tableDetail, tableRows } from "../../derive/materials"
 import { useDemoWorkspace } from "../../workspace"
-import { CollectionTitle, MaterialMissing } from "./chrome"
+import { CollectionTitle } from "./chrome"
 import { TableGrid } from "./grid"
 
 /** One table's page over the workspace: the grid, under the crumb and
@@ -13,7 +14,7 @@ export function TablePage({ tableId }: { tableId: string }) {
   const rows = useMemo(() => tableRows(state, tableId), [state, tableId])
 
   if (table === undefined || material?.kind !== "table") {
-    return <MaterialMissing noun="table" />
+    return <MaterialPlaceholder noun="table" status="not_found" />
   }
 
   return (

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { AlertTriangle } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
+import { RootStateFrame } from "@/shared/state"
 
 /** Frame around every material share view: who is sharing, what it is, and
  *  a door into the member experience for viewers with an account. */
@@ -34,19 +35,15 @@ export function ShareShell({
 
 export function ShareUnavailable({ openPath }: { openPath: string }) {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background px-6 text-center">
-      <AlertTriangle className="size-8 text-muted-foreground" />
-      <div className="space-y-1">
-        <h1 className="font-medium text-lg">
-          This link is no longer available
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          The share link may have expired or been revoked.
-        </p>
-      </div>
-      <Button asChild variant="outline">
-        <Link to={openPath}>Open in Jori</Link>
-      </Button>
-    </main>
+    <RootStateFrame
+      title="This link is no longer available"
+      description="The share link may have expired or been revoked."
+      icon={<AlertTriangle />}
+      action={
+        <Button asChild variant="outline">
+          <Link to={openPath}>Open in Jori</Link>
+        </Button>
+      }
+    />
   )
 }

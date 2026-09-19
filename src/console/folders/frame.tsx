@@ -1,19 +1,15 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useMemo } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { folderBreadcrumb } from "@/shared/console/folders/breadcrumb"
 import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import {
   type FolderDetail,
   type FolderDialogRequest,
 } from "@/shared/console/folders/types"
-import {
-  ConsoleListContent,
-  ConsoleListLayout,
-} from "@/shared/console/list/frame"
-import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
+import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { useLeaveDeletedFolder } from "./delete/leave"
@@ -117,9 +113,7 @@ function FolderResolver({
   return (
     <ConsoleListLayout>
       {folder === undefined ? (
-        <ConsoleListContent>
-          <FolderFallback detail={detail} />
-        </ConsoleListContent>
+        <FolderFallback detail={detail} />
       ) : (
         children({
           folder,
@@ -138,31 +132,22 @@ function FolderResolver({
   )
 }
 
-/** What stands in for the page before there is a folder to show it for. */
 function FolderFallback({
   detail,
 }: {
   detail: ReturnType<typeof useQuery<typeof api.folders.console.get>>
 }) {
-  if (detail === undefined) {
-    return <ConsoleListLoading />
-  }
-
-  if (detail.status === "unauthorized") {
-    return (
-      <Alert variant="destructive">
-        <AlertTitle>Could not load the folder</AlertTitle>
-        <AlertDescription>{detail.message}</AlertDescription>
-      </Alert>
-    )
-  }
-
   return (
-    <Alert>
-      <AlertTitle>Folder not found</AlertTitle>
-      <AlertDescription>
-        The folder may have been deleted or belongs to another organization.
-      </AlertDescription>
-    </Alert>
+    <MaterialPlaceholder
+      noun="folder"
+      status={
+        detail?.status === "unauthorized"
+          ? "unauthorized"
+          : detail === undefined
+            ? "loading"
+            : "not_found"
+      }
+      message={detail?.status === "unauthorized" ? detail.message : undefined}
+    />
   )
 }

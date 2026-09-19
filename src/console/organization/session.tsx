@@ -1,7 +1,8 @@
 import { useMutation } from "convex/react"
+import { Building2 } from "lucide-react"
 import { type ReactNode, useEffect, useState } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { localTimezone } from "@/shared/console/time"
 import { api } from "../../../convex/_generated/api"
 import { PublicConsoleFrame } from "../shell/public"
@@ -26,15 +27,16 @@ export function OrganizationSession({
   if (status === "failed") {
     return (
       <PublicConsoleFrame isSignedIn>
-        <Alert variant="destructive">
-          <AlertTitle>Couldn't prepare your workspace</AlertTitle>
-          <AlertDescription>
-            Your session is signed in, but workspace setup didn't finish.
+        <ConsoleEmptyState
+          title="Couldn't prepare your workspace"
+          description="You're signed in, but workspace setup didn't finish."
+          icon={Building2}
+          action={
             <Button onClick={retry} variant="outline">
               Try again
             </Button>
-          </AlertDescription>
-        </Alert>
+          }
+        />
       </PublicConsoleFrame>
     )
   }

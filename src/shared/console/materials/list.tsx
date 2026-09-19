@@ -1,6 +1,5 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   TableBody,
   TableCell,
@@ -24,8 +23,12 @@ import {
   type ListControls,
   nameColumnClassName,
 } from "../list/controls"
-import { ConsoleListEmpty, FilterableEmptyState } from "../list/empty"
-import { ConsoleListContent, ConsoleListTable } from "../list/frame"
+import {
+  ConsoleEmptyState,
+  ConsoleListEmpty,
+  FilterableEmptyState,
+} from "../list/empty"
+import { ConsoleListTable } from "../list/frame"
 import { FilterHead, SortHead } from "../list/head"
 import { type RowSelection } from "../list/selection"
 import { useNow } from "../time"
@@ -102,12 +105,13 @@ export function MaterialList<Row extends MaterialListRow>(
 
   if (props.unauthorizedMessage !== undefined) {
     return (
-      <ConsoleListContent>
-        <Alert variant="destructive">
-          <AlertTitle>Could not load {kind.noun.plural}</AlertTitle>
-          <AlertDescription>{props.unauthorizedMessage}</AlertDescription>
-        </Alert>
-      </ConsoleListContent>
+      <ConsoleListEmpty>
+        <ConsoleEmptyState
+          description={props.unauthorizedMessage}
+          icon={kind.icon}
+          title={`Could not load ${kind.noun.plural}`}
+        />
+      </ConsoleListEmpty>
     )
   }
 
