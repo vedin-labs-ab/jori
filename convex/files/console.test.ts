@@ -19,10 +19,7 @@ vi.mock("./blobs", () => ({
 }))
 
 beforeEach(() => {
-  vi.mocked(requireUnusedUpload).mockResolvedValue({
-    mimeType: "text/csv",
-    size: 42,
-  })
+  vi.mocked(requireUnusedUpload).mockResolvedValue({ mimeType: "text/csv" })
 })
 
 const owner = "person-owner" as Id<"persons">
@@ -39,7 +36,7 @@ test("records console uploads with storage metadata and defaults", async () => {
   await insertUploadedFile(
     ctx,
     { organizationId: "organization", personId: owner },
-    { key: blobKey, name: "exports/costs.csv" }
+    { key: blobKey, size: 42, name: "exports/costs.csv" }
   )
 
   expect(insert).toHaveBeenCalledWith("files", {
@@ -70,7 +67,7 @@ test("uploads stamp the folder when creation names one", async () => {
   await insertUploadedFile(
     ctx,
     { organizationId: "organization", personId: owner },
-    { key: blobKey, name: "costs.csv", folderId }
+    { key: blobKey, size: 42, name: "costs.csv", folderId }
   )
 
   expect(insert).toHaveBeenCalledWith(
@@ -89,7 +86,7 @@ test("uploads reject a folder from another organization", async () => {
     insertUploadedFile(
       ctx,
       { organizationId: "organization", personId: owner },
-      { key: blobKey, name: "costs.csv", folderId }
+      { key: blobKey, size: 42, name: "costs.csv", folderId }
     )
   ).rejects.toThrow("Folder was not found.")
 })
@@ -119,15 +116,11 @@ test("replacing content swaps the blob and updates the row", async () => {
     get: vi.fn(async () => organizationFile()),
     patch,
   })
-  vi.mocked(requireUnusedUpload).mockResolvedValue({
-    mimeType: "text/csv",
-    size: 99,
-  })
 
   await swapFileBlob(
     ctx,
     { organizationId: "organization", personId: owner },
-    { fileId, key: nextBlobKey }
+    { fileId, key: nextBlobKey, size: 99 }
   )
 
   expect(deleteBlob).toHaveBeenCalledWith(ctx, blobKey)
@@ -151,14 +144,14 @@ test("replacing content rejects a missing upload and hidden files", async () => 
     swapFileBlob(
       ctx,
       { organizationId: "organization", personId: other },
-      { fileId, key: nextBlobKey }
+      { fileId, key: nextBlobKey, size: 99 }
     )
   ).rejects.toThrow("File was not found")
   await expect(
     swapFileBlob(
       ctx,
       { organizationId: "organization", personId: owner },
-      { fileId, key: nextBlobKey }
+      { fileId, key: nextBlobKey, size: 99 }
     )
   ).rejects.toThrow("Uploaded file was not found in storage")
 })

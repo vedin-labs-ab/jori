@@ -16,13 +16,14 @@ import { normalizeFileName } from "./names"
 // File record writes shared by the console mutations: upload, details,
 // blob replacement, and removal. Every write starts from a viewable file.
 
-/** Records a console upload: size and type come from storage, the uploader owns
+/** Records a console upload: size and type were read from storage, the uploader owns
  *  the row, and visibility defaults to the whole organization. */
 export async function insertUploadedFile(
   ctx: MutationCtx,
   viewer: FileViewer,
   args: {
     key: string
+    size: number
     name: string
     visibility?: StoredVisibility
     folderId?: Id<"folders">
@@ -54,7 +55,7 @@ export async function insertUploadedFile(
     blobKey: args.key,
     name: normalizeFileName(args.name),
     mimeType: upload.mimeType,
-    size: upload.size,
+    size: args.size,
     createdAt: now,
     updatedAt: now,
   })
@@ -86,17 +87,17 @@ export async function patchFileDetails(
 export async function swapFileBlob(
   ctx: MutationCtx,
   viewer: FileViewer,
-  args: { fileId: Id<"files">; key: string }
+  args: { fileId: Id<"files">; key: string; size: number }
 ) {
   const file = await requireViewableFile(ctx, viewer, args.fileId)
-  const upload = await requireUnusedUpload(ctx, {
+  await requireUnusedUpload(ctx, {
     organizationId: file.organizationId,
     key: args.key,
   })
 
   await ctx.db.patch(file._id, {
     blobKey: args.key,
-    size: upload.size,
+    size: args.size,
     updatedAt: Date.now(),
   })
   await mark(ctx, file.organizationId, file._id)

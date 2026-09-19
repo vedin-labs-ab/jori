@@ -23,11 +23,12 @@ test("uploads cannot claim another organization's blob or one already in use", a
     await insertUploadedFile(
       ctx,
       { organizationId: "organization" },
-      { key: originalKey, name: "original.txt" }
+      { key: originalKey, size: 12, name: "original.txt" }
     )
     const ownKey = await seedBlob(ctx, viewer.organizationId)
     const ownFileId = await insertUploadedFile(ctx, viewer, {
       key: ownKey,
+      size: 12,
       name: "own.txt",
     })
     return { originalKey, ownKey, ownFileId }
@@ -36,6 +37,7 @@ test("uploads cannot claim another organization's blob or one already in use", a
     t.run((ctx) =>
       insertUploadedFile(ctx, viewer, {
         key: created.originalKey,
+        size: 12,
         name: "claimed.txt",
       })
     )
@@ -45,6 +47,7 @@ test("uploads cannot claim another organization's blob or one already in use", a
       swapFileBlob(ctx, viewer, {
         fileId: created.ownFileId,
         key: created.ownKey,
+        size: 12,
       })
     )
   ).rejects.toThrow("Uploaded file is already in use")
@@ -77,6 +80,7 @@ test("private uploads require a resolvable owner", async () => {
       { organizationId: "organization" },
       {
         key: "organization/blob",
+        size: 12,
         name: "note.txt",
         visibility: { mode: "private" },
       }
@@ -93,7 +97,7 @@ test.each(["remove", "replace", "retention"] as const)(
       const fileId = await insertUploadedFile(
         ctx,
         { organizationId: "organization" },
-        { key, name: "original.txt" }
+        { key, size: 12, name: "original.txt" }
       )
       const file = await ctx.db.get(fileId)
       if (!file) {
@@ -106,7 +110,7 @@ test.each(["remove", "replace", "retention"] as const)(
         await swapFileBlob(
           ctx,
           { organizationId: "organization" },
-          { fileId, key: replacement }
+          { fileId, key: replacement, size: 12 }
         )
         expect((await ctx.db.get(fileId))?.blobKey).toBe(replacement)
         expect(await blobExists(ctx, replacement)).toBe(true)

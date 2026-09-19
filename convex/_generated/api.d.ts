@@ -422,6 +422,7 @@ import type * as places_parse from "../places/parse.js";
 import type * as places_profile from "../places/profile.js";
 import type * as places_schedule from "../places/schedule.js";
 import type * as places_window from "../places/window.js";
+import type * as probe from "../probe.js";
 import type * as reactions_apply from "../reactions/apply.js";
 import type * as reactions_cursor from "../reactions/cursor.js";
 import type * as reactions_data from "../reactions/data.js";
@@ -1124,6 +1125,7 @@ declare const fullApi: ApiFromModules<{
   "places/profile": typeof places_profile;
   "places/schedule": typeof places_schedule;
   "places/window": typeof places_window;
+  probe: typeof probe;
   "reactions/apply": typeof reactions_apply;
   "reactions/cursor": typeof reactions_cursor;
   "reactions/data": typeof reactions_data;

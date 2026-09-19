@@ -94,15 +94,15 @@ const createArgs = {
  *  only an action can do; the caller's identity carries into the mutation. */
 export const create = action({
   args: createArgs,
-  handler: async (ctx, args): Promise<Id<"files">> => {
-    await syncBlob(ctx, args.key)
-
-    return await ctx.runMutation(internal.files.console.insert, args)
-  },
+  handler: async (ctx, args): Promise<Id<"files">> =>
+    await ctx.runMutation(internal.files.console.insert, {
+      ...args,
+      size: await syncBlob(ctx, args.key),
+    }),
 })
 
 export const insert = internalMutation({
-  args: createArgs,
+  args: { ...createArgs, size: v.number() },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const viewer = await resolveViewer(ctx, args.organizationId, identity)
@@ -135,15 +135,15 @@ const replaceArgs = {
 
 export const replace = action({
   args: replaceArgs,
-  handler: async (ctx, args): Promise<null> => {
-    await syncBlob(ctx, args.key)
-
-    return await ctx.runMutation(internal.files.console.swap, args)
-  },
+  handler: async (ctx, args): Promise<null> =>
+    await ctx.runMutation(internal.files.console.swap, {
+      ...args,
+      size: await syncBlob(ctx, args.key),
+    }),
 })
 
 export const swap = internalMutation({
-  args: replaceArgs,
+  args: { ...replaceArgs, size: v.number() },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const viewer = await resolveViewer(ctx, args.organizationId, identity)

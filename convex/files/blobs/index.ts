@@ -16,7 +16,7 @@ function bucket() {
 }
 
 /** Keys carry their organization, so a record can only claim its own
- *  upload, once. Size and type come from storage, never from the client. */
+ *  upload, once. The type comes from storage, never from the client. */
 export async function requireUnusedUpload(
   ctx: MutationCtx,
   args: { organizationId: string; key: string }
@@ -24,16 +24,13 @@ export async function requireUnusedUpload(
   const metadata = args.key.startsWith(`${args.organizationId}/`)
     ? await bucket().getMetadata(ctx, args.key)
     : null
-  if (metadata === null || metadata.size === undefined) {
+  if (metadata === null) {
     throw new Error("Uploaded file was not found in storage")
   }
   if ((await linkedFile(ctx, args.key)) !== null) {
     throw new Error("Uploaded file is already in use")
   }
-  return {
-    size: metadata.size,
-    mimeType: metadata.contentType ?? "application/octet-stream",
-  }
+  return { mimeType: metadata.contentType ?? "application/octet-stream" }
 }
 
 export async function linkedFile(ctx: MutationCtx, key: string) {
@@ -55,10 +52,21 @@ export async function blobUrl(key: string) {
   return await bucket().getUrl(key, { expiresIn: (2 * urlWindowMs) / 1000 })
 }
 
-/** Reads size and type from storage itself; nothing the client claims is
- *  recorded. */
+/** Reads type and size from storage itself; nothing the client claims is
+ *  recorded. The component's HEAD loses Content-Length in this runtime, so
+ *  the size comes from a one-byte ranged read. */
 export async function syncBlob(ctx: ActionCtx, key: string) {
   await bucket().syncMetadata(ctx, key)
+  const response = await fetch(await bucket().getUrl(key, { expiresIn: 60 }), {
+    headers: { Range: "bytes=0-0" },
+  })
+  const total = response.headers.get("content-range")?.split("/")[1]
+  // An empty object has no first byte to range over.
+  const size = response.status === 416 ? 0 : Number(total)
+  if (!Number.isInteger(size)) {
+    throw new Error("Uploaded file was not found in storage")
+  }
+  return size
 }
 
 export async function storeBlob(
