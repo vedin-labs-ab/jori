@@ -301,6 +301,7 @@ import type * as integrations_offers_updates from "../integrations/offers/update
 import type * as integrations_options_common from "../integrations/options/common.js";
 import type * as integrations_options_index from "../integrations/options/index.js";
 import type * as integrations_options_load from "../integrations/options/load.js";
+import type * as integrations_outsiders_screen from "../integrations/outsiders/screen.js";
 import type * as integrations_refresh from "../integrations/refresh.js";
 import type * as integrations_resolve from "../integrations/resolve.js";
 import type * as integrations_revoke_index from "../integrations/revoke/index.js";
@@ -405,6 +406,7 @@ import type * as persons_identity_links from "../persons/identity/links.js";
 import type * as persons_identity_matching from "../persons/identity/matching.js";
 import type * as persons_identity_rows from "../persons/identity/rows.js";
 import type * as persons_install from "../persons/install.js";
+import type * as persons_member from "../persons/member.js";
 import type * as persons_merge from "../persons/merge.js";
 import type * as persons_names from "../persons/names.js";
 import type * as persons_profile_context from "../persons/profile/context.js";
@@ -1000,6 +1002,7 @@ declare const fullApi: ApiFromModules<{
   "integrations/options/common": typeof integrations_options_common;
   "integrations/options/index": typeof integrations_options_index;
   "integrations/options/load": typeof integrations_options_load;
+  "integrations/outsiders/screen": typeof integrations_outsiders_screen;
   "integrations/refresh": typeof integrations_refresh;
   "integrations/resolve": typeof integrations_resolve;
   "integrations/revoke/index": typeof integrations_revoke_index;
@@ -1104,6 +1107,7 @@ declare const fullApi: ApiFromModules<{
   "persons/identity/matching": typeof persons_identity_matching;
   "persons/identity/rows": typeof persons_identity_rows;
   "persons/install": typeof persons_install;
+  "persons/member": typeof persons_member;
   "persons/merge": typeof persons_merge;
   "persons/names": typeof persons_names;
   "persons/profile/context": typeof persons_profile_context;

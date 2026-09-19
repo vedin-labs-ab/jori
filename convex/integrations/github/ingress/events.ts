@@ -228,9 +228,9 @@ function getSenderKind(payload: GitHubWebhookPayload) {
   return payload.sender?.type === "Bot" ? ("bot" as const) : ("person" as const)
 }
 
-// Anyone on the internet can comment in a public repository, so approval
-// authority requires GitHub to vouch for the commenter as part of the
-// repository's own working audience.
+// Anyone on the internet can comment in a public repository, so before the
+// member check an approval also needs GitHub to vouch for the commenter as
+// part of the repository's own working audience.
 const approvalDeciderAssociations = ["OWNER", "MEMBER", "COLLABORATOR"]
 
 function canDecideApprovals(comment: GitHubComment) {

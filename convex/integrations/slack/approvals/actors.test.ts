@@ -17,6 +17,7 @@ test("hydrates Slack approval actors with profile names", async () => {
       Response.json({
         ok: true,
         user: {
+          team_id: "T123",
           profile: {
             email: "albin@example.com",
             real_name: "ÅÄÖ 😊",
@@ -44,6 +45,67 @@ test("hydrates Slack approval actors with profile names", async () => {
     },
   })
   expect(token).toHaveBeenCalledOnce()
+})
+
+test.each([
+  ["another workspace", { team_id: "T999" }],
+  ["a stranger", { team_id: "T123", is_stranger: true }],
+  ["no workspace at all", {}],
+])(
+  "a Slack Connect writer from %s is external and their email is never read",
+  async (_case, user) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          ok: true,
+          user: {
+            ...user,
+            profile: { email: "albin@example.com", real_name: "Partner" },
+          },
+        })
+      )
+    )
+    const { ctx } = context(null)
+
+    const actor = await createSlackApprovalActor(ctx, {
+      accountId: "T123",
+      actorId: "U999",
+    })
+
+    expect(actor).toEqual({
+      kind: "person",
+      externalId: "U999",
+      name: "Partner",
+      external: true,
+    })
+    expect(ctx.runMutation).not.toHaveBeenCalled()
+  }
+)
+
+test("an Enterprise Grid member of the installed workspace is an insider", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      Response.json({
+        ok: true,
+        user: {
+          team_id: "E456",
+          enterprise_user: { enterprise_id: "E456", teams: ["T123", "T777"] },
+          profile: { email: "albin@example.com", real_name: "Albin" },
+        },
+      })
+    )
+  )
+  const { ctx } = context(null)
+
+  const actor = await createSlackApprovalActor(ctx, {
+    accountId: "T123",
+    actorId: "U123",
+  })
+
+  expect(actor).toMatchObject({ email: "albin@example.com" })
+  expect(actor).not.toHaveProperty("external")
 })
 
 test("hydrates Slack approval actors from cached identities first", async () => {

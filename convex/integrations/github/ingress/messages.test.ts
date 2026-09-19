@@ -2,6 +2,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
 import { expect, test } from "vitest"
+import { registerAuth, seedMember } from "../../../../test/members"
 import { internal } from "../../../_generated/api"
 import schema from "../../../schema"
 import { mentionsGitHubApp } from "./messages"
@@ -169,11 +170,11 @@ async function seedIntegration(
   t: ReturnType<typeof convexTest>,
   integration: "github" | "linear" = "github"
 ) {
+  registerAuth(t)
   return await t.run(async (ctx) => {
-    const createdBy = await ctx.db.insert("persons", {
+    const { personId: createdBy } = await seedMember(ctx, {
       organizationId: "test",
-      createdAt: 0,
-      updatedAt: 0,
+      email: "member@example.com",
     })
     await ctx.db.insert("integrations", {
       organizationId: "test",

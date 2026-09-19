@@ -1,5 +1,6 @@
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
+import { type QueryLikeCtx } from "../../shared/context"
 import { identifyingEmail } from "../email"
 import { mergeWinner } from "../merge"
 
@@ -15,10 +16,27 @@ export async function convergeEmail(
   organizationId: string,
   email: string | undefined
 ): Promise<Id<"persons"> | undefined> {
+  return await mergeWinner(
+    ctx,
+    organizationId,
+    (await emailIdentities(ctx, organizationId, email)).map((identity) => ({
+      personId: identity.personId,
+      method: identity.link.method,
+    }))
+  )
+}
+
+/** The identities sharing an identifying email; none when the email is
+ *  non-identifying or spans too many identities to be trusted. */
+export async function emailIdentities(
+  ctx: QueryLikeCtx,
+  organizationId: string,
+  email: string | undefined
+) {
   const normalized = identifyingEmail(email)
 
   if (normalized === undefined) {
-    return undefined
+    return []
   }
 
   const identities = await ctx.db
@@ -28,16 +46,5 @@ export async function convergeEmail(
     )
     .take(emailIdentityLimit + 1)
 
-  if (identities.length > emailIdentityLimit) {
-    return undefined
-  }
-
-  return await mergeWinner(
-    ctx,
-    organizationId,
-    identities.map((identity) => ({
-      personId: identity.personId,
-      method: identity.link.method,
-    }))
-  )
+  return identities.length > emailIdentityLimit ? [] : identities
 }

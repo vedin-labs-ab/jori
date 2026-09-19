@@ -1,9 +1,5 @@
-import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
-import { linkIdentityToPerson } from "../../persons/identity/links"
 import { requireOrigin } from "../../shared/origin"
-import { type IntegrationOfferSource } from "./schema"
-import { surfaceIdentityProvider } from "./source"
 import { hashIntegrationOfferToken } from "./tokens"
 
 export function integrationOfferLocation(token: string) {
@@ -26,32 +22,6 @@ export async function findIntegrationOfferByToken(
     .query("integrationOffers")
     .withIndex("by_token_hash", (query) => query.eq("tokenHash", tokenHash))
     .first()
-}
-
-export async function upsertIntegrationOfferSourceIdentity(
-  ctx: MutationCtx,
-  args: {
-    organizationId: string
-    personId: Id<"persons">
-    source: IntegrationOfferSource
-  }
-) {
-  const provider = surfaceIdentityProvider(args.source.surface)
-  const actor = args.source.actor
-
-  if (provider === undefined || actor === undefined) {
-    return
-  }
-
-  await linkIdentityToPerson(ctx, {
-    organizationId: args.organizationId,
-    personId: args.personId,
-    provider,
-    externalId: actor.externalId,
-    method: "observed",
-    email: actor.email,
-    name: actor.name,
-  })
 }
 
 export function normalizeIntegrationOfferReturnUrl(returnUrl: string) {

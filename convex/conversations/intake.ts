@@ -1,5 +1,5 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { findActiveIntegrationByExternalId } from "../integrations/data"
 import { normalizeSelfActor } from "../integrations/messages/actor"
@@ -9,6 +9,7 @@ import {
 } from "../integrations/messages/audience"
 import { recordJobEvent } from "../integrations/messages/events"
 import { messageDataReactionTargetKey } from "../integrations/messages/identifiers"
+import { screenWriter } from "../integrations/outsiders/screen"
 import {
   findMessageByExternalId,
   insertMessage,
@@ -16,7 +17,6 @@ import {
   type ObservedMessage,
   observedMessageArgs,
 } from "../messages/data"
-import { resolveActor } from "../persons/resolve"
 import {
   ensurePlace,
   type ObservedPlace,
@@ -65,74 +65,106 @@ export const record = internalMutation({
       }
     }
 
-    const { createdBy, message, observed, place } = await insertObservedMessage(
-      ctx,
-      args,
-      integration
-    )
+    const observed = observedMessage(args, integration)
     const now = Date.now()
     const mode = args.mode ?? "record_and_run"
+    const isPerson = isPersonActor(observed.actor)
+
+    // Jobs hear every person's event, as data; replayed history is not one.
+    if (isPerson && mode !== "record") {
+      await recordJobEvent(ctx, { integration, message: observed, now })
+    }
+
+    const createdBy = isPerson
+      ? await screenWriter(ctx, {
+          integration,
+          provider: args.integration,
+          actor: observed.actor,
+          attempt: mode === "record" ? undefined : "message",
+          conversationId: args.conversationId,
+        })
+      : undefined
+
+    // An outsider's words stop here: never stored, so they reach no run,
+    // summary, or place profile.
+    if (isPerson && createdBy === undefined) {
+      return { status: "outsider" as const }
+    }
+
+    const { message, place } = await insertObservedMessage(ctx, {
+      args,
+      createdBy,
+      integration,
+      observed,
+    })
 
     if (place !== null) {
       await schedulePlaceProfile(ctx, place, now)
     }
 
-    if (mode === "record") {
-      return { status: "recorded" as const, messageId: message._id }
-    }
-
-    if (isPersonActor(message.actor)) {
-      await recordJobEvent(ctx, { integration, message: observed, now })
-    }
-
-    const conversation = await messageRunConversation(ctx, {
-      integration,
-      message,
-    })
-
-    if (conversation === null) {
-      return { status: "recorded" as const, messageId: message._id }
-    }
-
-    const run = await startMessageRun(ctx, {
-      integration,
-      message,
-      createdBy,
-      externalId: message.conversationId,
-      now,
-      conversation,
-    })
-
-    if (run.status === "blocked") {
-      return { status: "recorded" as const, messageId: message._id }
-    }
-
-    await scheduleConversationSummary(ctx, conversation, now)
-
-    return {
-      status: "queued" as const,
-      messageId: message._id,
-      runId: run.runId,
-    }
+    return mode === "record"
+      ? { status: "recorded" as const, messageId: message._id }
+      : await runMessage(ctx, { createdBy, integration, message, now })
   },
 })
+
+async function runMessage(
+  ctx: MutationCtx,
+  args: {
+    createdBy: Id<"persons"> | undefined
+    integration: Doc<"integrations">
+    message: Doc<"messages">
+    now: number
+  }
+) {
+  const { integration, message, now } = args
+  const conversation = await messageRunConversation(ctx, {
+    integration,
+    message,
+  })
+
+  if (conversation === null) {
+    return { status: "recorded" as const, messageId: message._id }
+  }
+
+  const run = await startMessageRun(ctx, {
+    integration,
+    message,
+    createdBy: args.createdBy,
+    externalId: message.conversationId,
+    now,
+    conversation,
+  })
+
+  if (run.status === "blocked") {
+    return { status: "recorded" as const, messageId: message._id }
+  }
+
+  await scheduleConversationSummary(ctx, conversation, now)
+
+  return {
+    status: "queued" as const,
+    messageId: message._id,
+    runId: run.runId,
+  }
+}
 
 // Records the message with its provider-normalized place (when it landed in
 // one) resolved to a stamped row, so every downstream read is one index hop.
 async function insertObservedMessage(
   ctx: MutationCtx,
-  args: ObservedMessage & {
-    integration: MessageIntegration
-    place?: ObservedPlace
-  },
-  integration: Doc<"integrations">
+  {
+    args,
+    createdBy,
+    integration,
+    observed,
+  }: {
+    args: { integration: MessageIntegration; place?: ObservedPlace }
+    createdBy: Id<"persons"> | undefined
+    integration: Doc<"integrations">
+    observed: ObservedMessage
+  }
 ) {
-  const observed = observedMessage(args, integration)
-  const createdBy = await resolveActor(ctx, {
-    organizationId: integration.organizationId,
-    provider: args.integration,
-    actor: observed.actor,
-  })
   const place =
     args.place === undefined
       ? null
@@ -146,7 +178,7 @@ async function insertObservedMessage(
     targetKey: messageDataReactionTargetKey(args.integration, observed.data),
   })
 
-  return { createdBy, message, observed, place }
+  return { message, place }
 }
 
 function observedMessage(

@@ -2,8 +2,9 @@ import { v } from "convex/values"
 import { internal } from "../_generated/api"
 import { type Doc } from "../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../_generated/server"
+import { actorIdentityProvider } from "../persons/identity/schema"
 import { type Actor } from "../shared/actor"
-import { type Integration, integrationLabel } from "../shared/integrations"
+import { type Integration } from "../shared/integrations"
 import { type ApprovalDecisionResult, approvalDecisionMessage } from "./result"
 
 export type ApprovalDecision = "approved" | "denied"
@@ -161,20 +162,28 @@ export async function decideApprovalByAccount(
     }
   }
 
+  // Screened before anything is said back, so an outsider guessing at
+  // codes learns nothing and hears nothing.
+  const provider = actorIdentityProvider(args.integration)
+
+  if (
+    args.actor === undefined ||
+    provider === undefined ||
+    !(await ctx.runMutation(internal.integrations.outsiders.screen.screen, {
+      integrationId: target.integration._id,
+      provider,
+      actor: args.actor,
+      attempt: "approval",
+    }))
+  ) {
+    return { status: "missing", message: approvalDecisionMessage("missing") }
+  }
+
   if (target.approval === null) {
     return {
       status: "missing",
       integration: target.integration,
       message: approvalDecisionMessage("missing"),
-    }
-  }
-
-  if (args.actor === undefined) {
-    return {
-      status: "missing",
-      integration: target.integration,
-      approval: target.approval,
-      message: `Couldn't identify the ${integrationLabel(args.integration)} user, so the decision wasn't recorded.`,
     }
   }
 

@@ -1,6 +1,7 @@
 import { type TeamMember } from "better-auth/plugins/organization"
 import { type Id } from "../_generated/dataModel"
 import { authComponent, createAdapterOptions } from "../auth"
+import { loadAuthUserIds } from "../persons/member"
 import { type QueryLikeCtx } from "../shared/context"
 import { type StoredVisibility } from "./schema"
 
@@ -9,7 +10,6 @@ import { type StoredVisibility } from "./schema"
 // every resolution, so leaving a team revokes access immediately. The
 // person-to-user join is the `identities` table (provider "auth").
 
-const identityLimit = 25
 const membershipLimit = 100
 
 type TeamMembershipRow = Pick<TeamMember, "teamId">
@@ -39,25 +39,6 @@ export async function loadPersonTeamIds(
   )
 
   return teamIdsOf(memberships.flat())
-}
-
-/** The Better Auth user ids linked to a person in this organization. */
-export async function loadAuthUserIds(
-  ctx: QueryLikeCtx,
-  args: { organizationId: string; personId: Id<"persons"> }
-): Promise<string[]> {
-  const identities = await ctx.db
-    .query("identities")
-    .withIndex("by_person", (index) => index.eq("personId", args.personId))
-    .take(identityLimit)
-
-  return identities
-    .filter(
-      (identity) =>
-        identity.provider === "auth" &&
-        identity.organizationId === args.organizationId
-    )
-    .map((identity) => identity.externalId)
 }
 
 export function teamIdsOf(

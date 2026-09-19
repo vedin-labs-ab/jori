@@ -8,6 +8,8 @@ import { requireSlackCredentials } from "../credentials"
 export type SlackActorProfile = {
   email?: string
   name?: string
+  /** Writes from another workspace, through Slack Connect. */
+  external?: boolean
 }
 
 export type SlackDirectoryUser = {
@@ -17,6 +19,9 @@ export type SlackDirectoryUser = {
   deleted?: boolean
   is_bot?: boolean
   is_app_user?: boolean
+  is_stranger?: boolean
+  team_id?: string
+  enterprise_user?: { enterprise_id?: string; teams?: string[] }
   profile?: {
     display_name?: string
     display_name_normalized?: string
@@ -68,6 +73,7 @@ export async function getSlackActorProfile(
 
   return await resolveSlackUserProfile(ctx, {
     organizationId: target.organizationId,
+    teamId: args.accountId,
     token: async () =>
       (await ctx.runQuery(internal.integrations.slack.install.getUserToken, {
         accountId: args.accountId,
@@ -96,6 +102,7 @@ export async function resolveSlackUserNames(
     userIds.map(async (userId) => {
       const profile = await resolveSlackUserProfile(ctx, {
         organizationId: args.integration.organizationId,
+        teamId: args.integration.externalId,
         token: async () => token,
         userId,
       })
@@ -113,6 +120,7 @@ async function resolveSlackUserProfile(
   ctx: ActionCtx,
   args: {
     organizationId: string
+    teamId: string
     token: () => Promise<string | undefined>
     userId: string
   }
@@ -136,10 +144,16 @@ async function resolveSlackUserProfile(
     return cached ?? undefined
   }
 
-  const profile = await fetchSlackUserProfile(token, args.userId)
+  const profile = await fetchSlackUserProfile(token, args)
 
   if (profile === undefined) {
     return cached ?? undefined
+  }
+
+  // Only the installed workspace's own people are kept. A partner
+  // workspace controls its users' emails, so theirs are never read.
+  if (profile.external === true) {
+    return profile
   }
 
   try {
@@ -165,10 +179,10 @@ function slackUserToken(integration: Doc<"integrations">) {
 
 async function fetchSlackUserProfile(
   token: string,
-  userId: string
+  args: { teamId: string; userId: string }
 ): Promise<SlackActorProfile | undefined> {
   const slackUrl = new URL("https://slack.com/api/users.info")
-  slackUrl.searchParams.set("user", userId)
+  slackUrl.searchParams.set("user", args.userId)
 
   const response = await fetch(slackUrl, {
     headers: { authorization: `Bearer ${token}` },
@@ -181,9 +195,29 @@ async function fetchSlackUserProfile(
 
   const profile = readSlackProfile(body.user)
 
+  if (isExternalSlackUser(body.user, args.teamId)) {
+    return { name: profile.name, external: true }
+  }
+
   return profile.email === undefined && profile.name === undefined
     ? undefined
     : profile
+}
+
+/** Slack has no single flag for a Slack Connect partner: it is a stranger,
+ *  or a user whose workspaces do not include the installed one. An absent
+ *  team reads as external, so a payload Slack changes fails closed. */
+function isExternalSlackUser(
+  user: SlackDirectoryUser | undefined,
+  teamId: string
+) {
+  const teams = [
+    user?.team_id,
+    user?.enterprise_user?.enterprise_id,
+    ...(user?.enterprise_user?.teams ?? []),
+  ]
+
+  return user?.is_stranger === true || !teams.includes(teamId)
 }
 
 type SlackUserInfo =

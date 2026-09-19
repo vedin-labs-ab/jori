@@ -61,7 +61,6 @@ export type RuntimeMessage = {
   context?: string
   actor: string | null
   actorIds: string[]
-  authority: "authoritative" | "soft"
   createdAt: number
   id: RuntimeId<"messages">
   identifiers: string[]

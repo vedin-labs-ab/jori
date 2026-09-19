@@ -9,12 +9,7 @@ import {
   getActorExternalId,
 } from "../../shared/actor"
 import { optionalString } from "../../shared/input"
-import { type ToolSurface } from "../../shared/integrations"
 import { type IntegrationOfferSource } from "./schema"
-
-const surfaceIdentityProviders = ["github", "linear", "slack"] as const
-
-type SurfaceIdentityProvider = (typeof surfaceIdentityProviders)[number]
 
 export function integrationOfferSourceFromInput(
   input: AgentRuntimeInput
@@ -44,12 +39,6 @@ export function integrationOfferSourceFromInput(
   }
 }
 
-export function surfaceIdentityProvider(
-  surface: ToolSurface
-): SurfaceIdentityProvider | undefined {
-  return isSurfaceIdentityProvider(surface) ? surface : undefined
-}
-
 function sourceActorFields(actor: Actor | undefined) {
   const externalId = getActorExternalId(actor)
 
@@ -64,12 +53,6 @@ function sourceActorFields(actor: Actor | undefined) {
       ...optionalText("name", getActorDisplayName(actor)),
     },
   }
-}
-
-function isSurfaceIdentityProvider(
-  surface: ToolSurface
-): surface is SurfaceIdentityProvider {
-  return surfaceIdentityProviders.includes(surface as SurfaceIdentityProvider)
 }
 
 function optionalText<Key extends string>(key: Key, value: string | undefined) {

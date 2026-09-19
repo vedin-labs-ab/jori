@@ -98,7 +98,6 @@ function runtimeMessage(
   return {
     actor: "Jori",
     actorIds: ["slack:user:U0B96KZ7WJG"],
-    authority: "soft",
     createdAt: Date.parse("2026-06-22T09:34:35.000Z"),
     id: runtimeId<"messages">("message"),
     identifiers: [

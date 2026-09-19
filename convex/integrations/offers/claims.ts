@@ -9,7 +9,6 @@ import {
   createSignedInstallState,
   installPathForIntegration,
 } from "../connect/install"
-import { upsertIntegrationOfferSourceIdentity } from "./helpers"
 import { markIntegrationOfferExpired } from "./transition"
 
 export async function claimIntegrationOffer(
@@ -20,11 +19,6 @@ export async function claimIntegrationOffer(
   const now = Date.now()
 
   await requireClaimableOffer(ctx, args.offer, { now, personId })
-  await upsertIntegrationOfferSourceIdentity(ctx, {
-    organizationId: args.offer.organizationId,
-    personId,
-    source: args.offer.source,
-  })
 
   if (args.offer.status === "connected") {
     return connectedOfferResult(args.offer)

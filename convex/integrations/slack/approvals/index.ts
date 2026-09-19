@@ -10,15 +10,17 @@ import {
 import { actorValidator, createIntegrationActor } from "../../../shared/actor"
 import { getSlackChannelId, getSlackMessageTs, getSlackThreadTs } from "../data"
 import { postSlackMessage } from "../delivery/messages"
-import { getSlackActorProfile } from "../directory/users"
+import {
+  getSlackActorProfile,
+  type SlackActorProfile,
+} from "../directory/users"
 import { readFirstAction, readNestedString } from "../ingress/actions"
 import { type SlackApprovalInteraction } from "./blocks"
 
 type SlackApprovalDecisionInput = {
   accountId: string
   actorId?: string
-  actorEmail?: string
-  actorName?: string
+  actorProfile?: SlackActorProfile
   text?: string
   data: unknown
   expectedConnectionGeneration?: number
@@ -76,8 +78,7 @@ export async function handleSlackApprovalDecision(
       expectedConnectionGeneration: input.expectedConnectionGeneration,
       actor: createIntegrationActor({
         externalId: input.actorId,
-        email: input.actorEmail,
-        name: input.actorName,
+        ...input.actorProfile,
       }),
       channelId,
       threadTs: getSlackThreadTs(input.data) ?? getSlackMessageTs(input.data),
@@ -120,8 +121,6 @@ export async function createSlackApprovalActor(
   args: {
     accountId: string
     actorId: string | undefined
-    actorEmail?: string
-    actorName?: string
   }
 ) {
   const profile = await getSlackActorProfile(ctx, {
@@ -129,11 +128,7 @@ export async function createSlackApprovalActor(
     actorId: args.actorId,
   })
 
-  return createIntegrationActor({
-    externalId: args.actorId,
-    email: profile?.email ?? args.actorEmail,
-    name: profile?.name ?? args.actorName,
-  })
+  return createIntegrationActor({ externalId: args.actorId, ...profile })
 }
 
 export function parseSlackApprovalInteraction(payload: unknown) {

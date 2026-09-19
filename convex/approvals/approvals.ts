@@ -11,7 +11,7 @@ import {
   slackMessageDeliveryValidator,
   toolSurfaceValidator,
 } from "../shared/integrations"
-import { resolveApprovalActor } from "./actors"
+import { findApprovalDecider, resolveApprovalActor } from "./actors"
 import { resolveCancellationActor } from "./cancellation"
 import { approvalDecision, approvalDeliveryFailure } from "./schema"
 import {
@@ -132,13 +132,17 @@ export const decide = internalMutation({
     }
 
     const run = await ctx.db.get(approval.runId)
-    const personId = await resolveApprovalActor(ctx, {
+    const personId = await findApprovalDecider(ctx, {
       actor: args.decidedBy,
       surface: approval.surface,
       organizationId: approval.organizationId,
     })
 
-    if (run === null || !(await canSeeRun(ctx, run, personId))) {
+    if (
+      run === null ||
+      personId === undefined ||
+      !(await canSeeRun(ctx, run, personId))
+    ) {
       return { status: "missing" as const }
     }
 

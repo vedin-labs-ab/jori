@@ -5,6 +5,7 @@ import { belongsToWorkspace } from "../retention/ownership"
 
 export const tables = [
   "webhookDeliveries",
+  "outsiders",
   "integrationOffers",
   "emailSubmissions",
   "documents",

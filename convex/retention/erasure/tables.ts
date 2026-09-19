@@ -12,6 +12,7 @@ export const contentTables = [
   "drafts",
   "shares",
   "webhookDeliveries",
+  "outsiders",
   "integrationInstalls",
   "integrationOffers",
   "transitions",

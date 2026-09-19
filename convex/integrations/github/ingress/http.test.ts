@@ -98,7 +98,7 @@ test("records GitHub approval commands without starting a message run", async ()
     githubMessage({ body: "approve abc12345" })
   )
 
-  expect(ctx.runMutation).toHaveBeenCalledTimes(2)
+  expect(ctx.runMutation).toHaveBeenCalledTimes(3)
   expect(ctx.runMutation.mock.calls[0]?.[1]).toMatchObject({
     accountId: "123",
     mode: "record",
@@ -110,6 +110,11 @@ test("records GitHub approval commands without starting a message run", async ()
     integration: "github",
   })
   expect(ctx.runMutation.mock.calls[1]?.[1]).toMatchObject({
+    attempt: "approval",
+    provider: "github",
+    actor: { externalId: "49404620" },
+  })
+  expect(ctx.runMutation.mock.calls[2]?.[1]).toMatchObject({
     approvalId: approval._id,
     decidedBy: {
       externalId: "49404620",
@@ -216,6 +221,10 @@ function actionCtx(args: ActionCtxArgs = {}) {
     runMutation: vi.fn(async (_reference: unknown, input: MutationInput) => {
       if ("decision" in input) {
         return args.decisionResult ?? null
+      }
+
+      if ("attempt" in input) {
+        return true
       }
 
       return { status: "recorded" }

@@ -26,6 +26,9 @@ export const actorValidator = v.union(
     aliases: v.optional(v.array(actorAliasValidator)),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
+    /** The provider places this writer outside the installed workspace,
+     *  such as a Slack Connect partner. Never a member, whatever they claim. */
+    external: v.optional(v.boolean()),
   })
 )
 
@@ -90,6 +93,10 @@ export function isPersonActor(actor: Actor | undefined) {
   return actor?.kind === "person"
 }
 
+export function isExternalActor(actor: Actor | undefined) {
+  return actor !== undefined && "external" in actor && actor.external === true
+}
+
 export function getActorExternalId(actor: Actor | undefined) {
   return actor !== undefined && "externalId" in actor
     ? actor.externalId
@@ -113,11 +120,13 @@ export function createIntegrationActor(args: {
   kind?: ActorKind
   name?: string
   email?: string
+  external?: boolean
 }): Actor | undefined {
   if (args.externalId !== undefined && args.externalId !== "") {
     return {
       kind: args.kind ?? "person",
       externalId: args.externalId,
+      ...(args.external === true ? { external: true } : {}),
       ...nonEmptyAliases(args.aliases),
       ...nonEmptyActorFields({
         email: args.email,

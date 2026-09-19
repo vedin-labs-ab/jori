@@ -3,6 +3,7 @@
 import { convexTest } from "convex-test"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { subscribedAccount } from "../../../../test/convex/usage"
+import { registerAuth, seedMember } from "../../../../test/members"
 import { internal } from "../../../_generated/api"
 import schema from "../../../schema"
 import { mentionsLinearApp } from "./messages"
@@ -214,12 +215,12 @@ function message(text: string) {
 
 async function setup(region: string) {
   const t = convexTest(schema, modules)
+  registerAuth(t)
   const personId = await t.run(async (ctx) => {
     await ctx.db.insert("accounts", subscribedAccount("test"))
-    const createdBy = await ctx.db.insert("persons", {
+    const { personId: createdBy } = await seedMember(ctx, {
       organizationId: "test",
-      createdAt: 0,
-      updatedAt: 0,
+      email: "member@example.com",
     })
     await ctx.db.insert("integrations", {
       organizationId: "test",

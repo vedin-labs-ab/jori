@@ -1,9 +1,10 @@
 import { v } from "convex/values"
-import { internalMutation } from "../_generated/server"
+import { type Doc } from "../_generated/dataModel"
+import { internalMutation, type MutationCtx } from "../_generated/server"
 import { findActiveIntegrationByExternalId } from "../integrations/data"
 import { enrichReactionTarget } from "../integrations/messages/reactions"
-import { resolveActor } from "../persons/resolve"
-import { actorValidator } from "../shared/actor"
+import { screenWriter } from "../integrations/outsiders/screen"
+import { actorValidator, isPersonActor } from "../shared/actor"
 import {
   type MessageIntegration,
   messageIntegrationValidator,
@@ -38,12 +39,18 @@ export const record = internalMutation({
       return { status: "missing_integration" as const }
     }
 
-    await resolveReactionActors(ctx, {
-      actor: args.actor,
+    const [reaction] = await memberReactions(ctx, {
       integration,
       provider: args.integration,
+      reactions: [{ reaction: args.reaction, actor: args.actor }],
       target: args.target,
+      attempt: "reaction",
     })
+
+    if (reaction === undefined) {
+      return { status: "outsider" as const }
+    }
+
     const result = await recordReactionEvent(ctx, {
       action: args.action,
       actor: args.actor,
@@ -83,7 +90,7 @@ export const sync = internalMutation({
       return { status: "missing_integration" as const }
     }
 
-    await resolveReactionActors(ctx, {
+    const reactions = await memberReactions(ctx, {
       integration,
       provider: args.integration,
       reactions: args.reactions,
@@ -94,7 +101,7 @@ export const sync = internalMutation({
       status: "synced" as const,
       ...(await reconcileTargetReactions(ctx, {
         integration,
-        reactions: args.reactions,
+        reactions,
         target: await enrichReactionTarget(ctx, {
           integration,
           target: args.target,
@@ -104,29 +111,34 @@ export const sync = internalMutation({
   },
 })
 
-async function resolveReactionActors(
-  ctx: Parameters<typeof resolveActor>[0],
+// A person's reaction counts only when a member left it; bots pass through.
+// A snapshot replays what is already there, so it notes no attempt.
+async function memberReactions(
+  ctx: MutationCtx,
   args: {
-    actor?: ReactionSnapshotItem["actor"]
-    integration: NonNullable<
-      Awaited<ReturnType<typeof findActiveIntegrationByExternalId>>
-    >
+    integration: Doc<"integrations">
     provider: MessageIntegration
-    reactions?: ReactionSnapshotItem[]
+    reactions: ReactionSnapshotItem[]
     target: ReactionTarget
+    attempt?: "reaction"
   }
 ) {
-  const actors = [
-    args.actor,
-    args.target.actor,
-    ...(args.reactions ?? []).map((reaction) => reaction.actor),
-  ]
+  const kept: ReactionSnapshotItem[] = []
 
-  for (const actor of actors) {
-    await resolveActor(ctx, {
-      actor,
-      provider: args.provider,
-      organizationId: args.integration.organizationId,
-    })
+  for (const reaction of args.reactions) {
+    if (
+      !isPersonActor(reaction.actor) ||
+      (await screenWriter(ctx, {
+        integration: args.integration,
+        provider: args.provider,
+        actor: reaction.actor,
+        attempt: args.attempt,
+        conversationId: args.target.conversationId,
+      })) !== undefined
+    ) {
+      kept.push(reaction)
+    }
   }
+
+  return kept
 }

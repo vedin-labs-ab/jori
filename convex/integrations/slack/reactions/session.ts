@@ -182,10 +182,9 @@ function applySlackReactionProfile(
     ...reaction,
     actor: createIntegrationActor({
       aliases: actorAliases(reaction.actor),
-      email: profile.email,
       externalId,
       kind: actorKind(reaction.actor),
-      name: profile.name,
+      ...profile,
     }),
   }
 }

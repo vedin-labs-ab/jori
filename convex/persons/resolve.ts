@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
-import { type Actor, actorValidator } from "../shared/actor"
+import { type Actor, actorValidator, isExternalActor } from "../shared/actor"
 import { canonicalPersonId } from "./data"
 import { resolveIdentity } from "./identity/links"
 import { type IdentityProvider, identityProvider } from "./identity/schema"
@@ -28,7 +28,8 @@ export async function resolveActor(
       provider: args.provider,
       externalId: args.actor.externalId,
       method: "observed",
-      email: args.actor.email,
+      // An email merges people, so only a workspace insider's is believed.
+      email: isExternalActor(args.actor) ? undefined : args.actor.email,
       name: args.actor.name,
     })
   }

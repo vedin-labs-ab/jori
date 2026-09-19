@@ -14,7 +14,6 @@ export function formatRuntimeMessage(
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     actorIds: messageActorIds(message),
-    authority: message.actor?.kind === "person" ? "authoritative" : "soft",
     id: message._id,
     identifiers: messageIdentifiers(message),
     createdAt: message.createdAt,

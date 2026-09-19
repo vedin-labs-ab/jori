@@ -144,11 +144,7 @@ async function createSlackIntegrationOfferActor(
     actorId: interaction.actorId,
   })
 
-  return createIntegrationActor({
-    externalId: interaction.actorId,
-    email: profile?.email,
-    name: profile?.name,
-  })
+  return createIntegrationActor({ externalId: interaction.actorId, ...profile })
 }
 
 function readActionIds(payload: unknown) {

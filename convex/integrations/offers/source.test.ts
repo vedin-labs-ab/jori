@@ -1,9 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
-import {
-  integrationOfferSourceFromInput,
-  surfaceIdentityProvider,
-} from "./source"
+import { integrationOfferSourceFromInput } from "./source"
 
 describe("integration offer source", () => {
   test("captures the current message surface and actor identity", () => {
@@ -46,12 +43,5 @@ describe("integration offer source", () => {
       surface: "jori",
       runId: "run_1",
     })
-  })
-
-  test("maps intake surfaces to identity providers", () => {
-    expect(surfaceIdentityProvider("slack")).toBe("slack")
-    expect(surfaceIdentityProvider("github")).toBe("github")
-    expect(surfaceIdentityProvider("linear")).toBe("linear")
-    expect(surfaceIdentityProvider("jori")).toBeUndefined()
   })
 })

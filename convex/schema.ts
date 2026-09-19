@@ -21,6 +21,7 @@ import { folders } from "./folders/schema"
 import { githubRecoveries } from "./integrations/github/ingress/schema"
 import { notionWebhookSetups } from "./integrations/notion/setup/schema"
 import { integrationOffers } from "./integrations/offers/schema"
+import { outsiders } from "./integrations/outsiders/schema"
 import { integrationInstalls, integrations } from "./integrations/schema"
 import { webhookDeliveries } from "./integrations/webhooks/schema"
 import { jobs } from "./jobs/schema"
@@ -72,6 +73,7 @@ export default defineSchema({
   persons,
   identities,
   integrations,
+  outsiders,
   webhookDeliveries,
   integrationInstalls,
   integrationOffers,

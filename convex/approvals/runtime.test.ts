@@ -1,9 +1,14 @@
 import { describe, expect, test, vi } from "vitest"
 import { encodeJson } from "../../contracts/json"
+import { integrationDoc } from "../../test/convex/integrations"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { type Actor } from "../shared/actor"
-import { decideApproval, parseApprovalDecisionText } from "./runtime"
+import {
+  decideApproval,
+  decideApprovalByAccount,
+  parseApprovalDecisionText,
+} from "./runtime"
 
 describe("approval command parsing", () => {
   test.each([
@@ -53,6 +58,31 @@ describe("approval runtime decisions", () => {
       expect(ctx.runMutation).toHaveBeenCalledTimes(1)
     }
   )
+})
+
+test("an outsider's code is met with silence, whether or not it exists", async () => {
+  for (const approval of [approvalDoc(), null]) {
+    const ctx = {
+      runQuery: vi.fn().mockResolvedValue({
+        approval,
+        integration: integrationDoc({ integration: "slack" }),
+      }),
+      // The screen finds no member behind the actor.
+      runMutation: vi.fn().mockResolvedValue(false),
+    } as unknown as ActionCtx
+
+    const result = await decideApprovalByAccount(ctx, {
+      accountId: "T123",
+      actor: userActor(),
+      code: "abc12345",
+      decision: "approved",
+      integration: "slack",
+    })
+
+    // Surfaces reply through the returned integration, so none means none.
+    expect(result).toEqual({ status: "missing", message: expect.any(String) })
+    expect(ctx.runMutation).toHaveBeenCalledTimes(1)
+  }
 })
 
 function approvalDoc(): Doc<"approvals"> {
