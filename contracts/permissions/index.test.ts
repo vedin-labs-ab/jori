@@ -8,6 +8,7 @@ import {
   isUserVisibleToolPermission,
   toolPermissions,
 } from "."
+import { assessToolRisk, toolRisks } from "./risk"
 
 const permissionsByTool = new Map(
   toolPermissions.map((permission) => [permission.tool, permission])
@@ -43,6 +44,11 @@ const requiredNativeToolNames = [
 ] as const
 
 describe("permission catalog shape", () => {
+  test("requires an explicit risk classification for every catalog tool", () => {
+    expect(Object.keys(toolRisks).sort()).toEqual(
+      toolPermissions.map((permission) => permission.tool).sort()
+    )
+  })
   test("attaches permissions to tool surfaces, not broad providers", () => {
     const knownSurfaces = new Set<string>(toolSurfaces)
     const permissionSurfaces = new Set<string>(
@@ -92,6 +98,48 @@ describe("permission catalog shape", () => {
 
     expect(isUserVisibleToolPermission("git")).toBe(true)
     expect(isUserVisibleToolPermission("start_agent")).toBe(true)
+  })
+})
+
+describe("job tool combinations", () => {
+  test("warns when private data can leave through an untrusted web request", () => {
+    expect(assessToolRisk(["read_table", "web_fetch"])).toEqual({
+      warning: true,
+      groups: {
+        private: ["read_table"],
+        untrusted: ["web_fetch"],
+        outbound: ["web_fetch"],
+      },
+    })
+  })
+
+  test("recognizes inbound email plus sending as the complete combination", () => {
+    const risk = assessToolRisk([
+      "google_gmail_get_thread",
+      "google_gmail_send_message",
+      "google_gmail_get_thread",
+    ])
+    expect(risk.warning).toBe(true)
+    expect(risk.groups.private).toEqual(["google_gmail_get_thread"])
+    expect(risk.groups.untrusted).toEqual(["google_gmail_get_thread"])
+    expect(risk.groups.outbound).toEqual(["google_gmail_send_message"])
+  })
+
+  test.each([
+    ["web_fetch", "web_search"],
+    ["read_table", "conversations_add_message"],
+    ["read_file", "apply_patch", "save_file"],
+    ["google_gmail_get_thread", "google_gmail_create_draft"],
+  ])(
+    "does not warn when the selected grants lack a capability: %j",
+    (...tools) => {
+      expect(assessToolRisk(tools).warning).toBe(false)
+    }
+  )
+
+  test("accounts for networked commands and public sharing", () => {
+    expect(assessToolRisk(["read_file", "bash"]).warning).toBe(true)
+    expect(assessToolRisk(["read_store", "share_store"]).warning).toBe(true)
   })
 })
 

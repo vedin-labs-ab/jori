@@ -12,6 +12,7 @@ import { readAdditionalJobSurfaces } from "../instructions/document"
 import { AccessFields } from "./access"
 import { JobInstructionsSection } from "./instructions"
 import { JobNameField } from "./name"
+import { JobToolRisk } from "./risk"
 import { JobTiming } from "./timing"
 
 /** The Folder field's contract: the fields say where it sits and what it
@@ -79,6 +80,7 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
         permissions={props.permissions}
         scope={values.scope}
       />
+      <JobToolRisk surfaces={values.surfaces} permissions={props.permissions} />
       <JobTiming
         eventFields={props.eventFields}
         showRunPreview={props.showRunPreview}
