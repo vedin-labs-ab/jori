@@ -144,4 +144,4 @@ export type ProviderUsage = {
 }
 
 /** Bump when changing the terms customers accept at purchase. */
-export const termsVersion = "2026-09-15"
+export const termsVersion = "2026-09-19"

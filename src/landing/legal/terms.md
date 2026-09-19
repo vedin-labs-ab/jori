@@ -58,6 +58,11 @@ branding remain ours.
 
 ## Plans, usage and payment
 
+Purchases are made through Polar Software Inc. (Polar), our reseller and
+merchant of record. Polar takes your payment, charges any applicable taxes and
+issues your invoices, and Polar's checkout terms apply to the payment itself.
+These terms govern your use of Jori.
+
 The price, billing period, included usage and applicable taxes are shown before
 purchase. Subscriptions renew for the same billing period until cancelled.
 Usage can consume included credits and separately purchased credits. Included
@@ -91,7 +96,8 @@ refund. This does not limit your statutory rights.
 
 Request refunds through support@usejori.com. We verify the purchase, stop the
 refunded service and return the amount due to the original payment method.
-Refunded credits are removed from the workspace.
+Refunded credits are removed from the workspace. Polar may also refund a
+payment to resolve a payment dispute; the same applies to those credits.
 
 ## Ending access and keeping your data
 

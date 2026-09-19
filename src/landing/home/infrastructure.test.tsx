@@ -19,7 +19,7 @@ test("scopes the residency claim to Jori storage", () => {
     "Separate applications, databases and file storage in the EU and US."
   )
   expect(container.textContent).not.toContain("everything else stays")
-  expect(screen.queryByRole("link", { name: "Stripe" })).toBeNull()
+  expect(screen.queryByRole("link", { name: "Polar" })).toBeNull()
 })
 
 test("states the approved exception in the list, not behind a helper", () => {

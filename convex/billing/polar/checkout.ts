@@ -149,6 +149,7 @@ async function startCheckout(
                   amount_type: "fixed",
                   price_amount: args.amountUsd * 100,
                   price_currency: "usd",
+                  tax_behavior: "exclusive",
                 },
               ],
             },

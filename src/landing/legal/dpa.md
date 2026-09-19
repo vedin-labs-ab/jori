@@ -112,8 +112,8 @@ applications and chosen recipients also process data under their own terms.
 | [Google Cloud](https://cloud.google.com/terms/cloud-privacy-notice) | Image instructions, inputs and outputs; image generation | Regional endpoints; separate safety-monitoring rules |
 | [Parallel](https://parallel.ai/privacy-policy) | Search queries, page URLs and extracted content; search and fetching | EU search endpoint for EU workspaces; global page fetching |
 | [Bird](https://bird.com/legal/privacy) | Recipient addresses and service messages; email delivery | Regional account configuration; recipient mail systems are separate |
+| [Polar](https://polar.sh/legal/privacy-policy) | Billing identity, payment, tax and transaction details | Global processing; sells Jori as merchant of record and acts as an independent controller for that sale |
 | [PostHog](https://posthog.com/privacy) | Consented usage analytics: pages opened and features used, under pseudonymous identifiers | Regional projects; no names, chat or file content |
-| [Stripe](https://stripe.com/privacy) | Billing identity, payment and transaction details | Global processing; also acts as an independent controller for some purposes |
 | [Zoho](https://www.zoho.com/privacy.html) | Support correspondence sent to Jori | EU mail account; send only content needed for support |
 
 turbopuffer provides native embedding inference using Cohere Embed v4 through

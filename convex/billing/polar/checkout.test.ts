@@ -15,7 +15,7 @@ vi.mock("./client", async (original) => ({
 
 const common = {
   businessPurchase: true,
-  termsVersion: "2026-09-15",
+  termsVersion: "2026-09-19",
   organizationId: "organization-1",
   returnUrl: "https://eu.usejori.com/settings?tab=billing",
 }
@@ -95,7 +95,12 @@ test("top-up checkout prices the chosen amount for that checkout only", async ()
       products: ["product_top_up"],
       prices: {
         product_top_up: [
-          { amount_type: "fixed", price_amount: 2500, price_currency: "usd" },
+          {
+            amount_type: "fixed",
+            price_amount: 2500,
+            price_currency: "usd",
+            tax_behavior: "exclusive",
+          },
         ],
       },
       metadata: expect.objectContaining({ region: "eu", kind: "top-up" }),

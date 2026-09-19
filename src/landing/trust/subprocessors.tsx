@@ -74,17 +74,18 @@ const subprocessors: readonly Subprocessor[] = [
     purpose: "Generates images from prompts.",
   },
   {
+    ink: true,
+    logo: "/logos/subprocessors/polar.svg",
+    name: "Polar",
+    url: "https://polar.sh/legal/privacy-policy",
+    purpose: "Sells Jori and handles payments and tax.",
+  },
+  {
     dark: "/logos/subprocessors/posthog-dark.svg",
     logo: "/logos/subprocessors/posthog.svg",
     name: "PostHog",
     url: "https://posthog.com",
     purpose: "Measures usage, if you opt in.",
-  },
-  {
-    logo: "/logos/subprocessors/stripe.svg",
-    name: "Stripe",
-    url: "https://stripe.com/privacy",
-    purpose: "Handles billing and payments.",
   },
   {
     logo: "/logos/subprocessors/zoho.svg",
