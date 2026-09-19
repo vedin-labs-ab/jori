@@ -104,7 +104,8 @@ applications and chosen recipients also process data under their own terms.
 
 | Provider | What it receives and does | Configuration |
 | --- | --- | --- |
-| [Convex](https://www.convex.dev/legal/privacy) | Workspace records, files and credentials; database, storage and backend | Separate EU and US deployments |
+| [Convex](https://www.convex.dev/legal/privacy) | Workspace records and credentials; database and backend | Separate EU and US deployments |
+| [Cloudflare](https://www.cloudflare.com/privacypolicy/) | Uploaded and generated files; file storage | Stored in an EU-jurisdiction bucket for EU workspaces and a US-jurisdiction bucket for US workspaces; transfers pass through Cloudflare's network |
 | [turbopuffer](https://turbopuffer.com/docs/security) | Search queries, resource titles, extracted text and resource/access metadata; search index storage and embedding inference | Indexes in Ireland for EU workspaces and North Virginia for US workspaces; embedding inference in the EU or US respectively |
 | [Vercel](https://vercel.com/legal/privacy-policy) | Web requests and related operational data; website and application hosting | Regional application configuration; global edge and platform operations |
 | [Blaxel](https://blaxel.ai/company/security) | Task files, commands and outputs; isolated code execution | Frankfurt for EU, North Virginia for US |
@@ -116,7 +117,7 @@ applications and chosen recipients also process data under their own terms.
 | [PostHog](https://posthog.com/privacy) | Consented usage analytics: pages opened and features used, under pseudonymous identifiers | Regional projects; no names, chat or file content |
 | [Zoho](https://www.zoho.com/privacy.html) | Support correspondence sent to Jori | EU mail account; send only content needed for support |
 
-turbopuffer provides native embedding inference using Cohere Embed v4 through
+turbopuffer provides native embedding inference through
 its [embedding providers](https://turbopuffer.com/docs/security/subprocessors).
 Those providers process embedding inputs without training on them or retaining
 them beyond the request. This does not remove the stored text and embeddings

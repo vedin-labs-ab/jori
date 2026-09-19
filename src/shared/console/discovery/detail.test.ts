@@ -50,12 +50,9 @@ test("rows show their table and matched column, without repeating the row name",
   expect(resultDetail(row, "enterprise")).toBe(
     "Customer accounts · Plan: Enterprise"
   )
-  expect(
-    resultDetail(
-      { ...row, snippet: "Northwind" },
-      "northwind"
-    )
-  ).toBe("Customer accounts")
+  expect(resultDetail({ ...row, snippet: "Northwind" }, "northwind")).toBe(
+    "Customer accounts"
+  )
 })
 
 test("file locations and extraction limitations use compact, meaningful context", () => {

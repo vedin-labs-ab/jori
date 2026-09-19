@@ -20,8 +20,10 @@ export const plan = {
   storageGb: 25,
 } as const
 
-/** File storage past the plan's, billed for the time it is stored. */
-export const storageUsdPerGbMonth = 0.1
+/** File storage past the plan's, billed for the time it is stored. The
+ *  rate covers keeping a file searchable as well as keeping it: its search
+ *  index costs more than its bytes do. */
+export const storageUsdPerGbMonth = 0.25
 
 /**
  * Interactive work (console instructions, mentions) may dip slightly below a
