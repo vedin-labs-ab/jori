@@ -39,7 +39,7 @@ test("capacity reduction requires explicit purchase agreement and sends the recu
   }) as HTMLButtonElement
   expect(submit.disabled).toBe(true)
   expect(
-    screen.getByText("35 GB total for $10.00/month extra, before tax.")
+    screen.getByText("35 GB total for $5.00/month extra, before tax.")
   ).toBeDefined()
   fireEvent.click(screen.getByRole("checkbox"))
   fireEvent.click(submit)

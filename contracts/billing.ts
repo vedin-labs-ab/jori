@@ -23,7 +23,7 @@ export const plan = {
 
 /** Additional file capacity is purchased in whole GB each month. The rate
  * includes its search index; unused capacity does not fund the usage wallet. */
-export const storageUsdPerGbMonth = 1
+export const storageUsdPerGbMonth = 0.5
 
 /**
  * Interactive work (console instructions, mentions) may dip slightly below a
