@@ -94,7 +94,9 @@ export function ConsoleFrame({
       {sidebar}
       {/* isolate and overflow-hidden keep full-bleed content (sticky
           table headers, the selection bar) inside the inset: in its own
-          stacking context, and clipped to its rounded corners. */}
+          stacking context, and clipped to its rounded corners. The border
+          follows the sidebar's inset variant, so it is drawn only where
+          the inset is a card: beside a sidebar, from md up. */}
       {/* outline-none: the inset is the skip link's landing target, and
           the browser's focus ring around the whole content region reads
           as a broken border where the fixed sidebar overlaps it. */}
@@ -107,7 +109,7 @@ export function ConsoleFrame({
           phone-sized box on the landing page, so the header and the page
           gutters ask the inset how wide it is. */}
       <SidebarInset
-        className="@container/inset isolate min-h-0 min-w-0 overflow-hidden outline-none"
+        className="@container/inset isolate min-h-0 min-w-0 overflow-hidden outline-none md:peer-data-[variant=inset]:border"
         id={contentId}
         tabIndex={-1}
       >
