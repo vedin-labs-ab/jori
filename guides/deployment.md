@@ -20,6 +20,9 @@ Targets: `dev`, `prod-us`, `prod-eu`. Dev reads `.env.local`, production
   variable named `PREVIEW_<NAME>` replaces `<NAME>` on previews. The EU
   bucket's R2 key reaches them that way.
 - Production ships from pushed `main`, reusing the gate pass landing
-  recorded; `--yes` replaces the typed confirmation without a terminal.
+  recorded. Gitleaks 8.30.1 must be on `PATH` (or set `GITLEAKS_BIN`);
+  every production ship scans all available Git history again, including
+  refs, before reusing that pass. `--yes` replaces the typed confirmation
+  without a terminal.
 - Vercel refuses a head commit authored by `noreply@anthropic.com`: author
   `main` commits as the developer and credit yourself in the trailer.

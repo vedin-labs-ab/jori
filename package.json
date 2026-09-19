@@ -25,6 +25,7 @@
     "check:dependencies": "node --experimental-strip-types scripts/dependencies/index.ts",
     "check:entrypoints": "node --experimental-strip-types scripts/entrypoints.ts",
     "check:fix": "pnpm content:compile && biome check --write .",
+    "check:secrets": "node --experimental-strip-types scripts/gate/secrets.ts",
     "check:structure": "node --experimental-strip-types scripts/structure/index.ts",
     "check:typecheck": "node node_modules/@typescript/native/bin/tsc --noEmit",
     "check:versions": "node --experimental-strip-types scripts/versions.ts",

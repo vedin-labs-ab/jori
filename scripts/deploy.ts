@@ -4,9 +4,9 @@ import { type Region } from "../contracts/region.ts"
 import { verifyFrontend } from "./env/frontend.ts"
 import { deploymentNames, readTarget, targetRegion } from "./env/names.ts"
 import { loadTarget } from "./env/target.ts"
-import { isVerified } from "./gate/stamp.ts"
+import { verifyGate } from "./gate/verify.ts"
 import { git, isClean, requirePrimaryCheckout } from "./git.ts"
-import { packageCommand, runCommand, toolCommand } from "./process.ts"
+import { runCommand, toolCommand } from "./process.ts"
 
 /**
  * Usage: pnpm ship <dev|prod-eu|prod-us> [--yes]
@@ -48,7 +48,7 @@ async function deployProduction(region: Region) {
   const env = loadTarget(target)
 
   await requireConfirmation()
-  await requireGate()
+  await verifyGate()
 
   requireDeploymentVariables(env, region)
   verifyFrontend(env, region)
@@ -113,19 +113,6 @@ async function requireConfirmation() {
   if (answer.trim() !== target) {
     throw new Error("Deploy cancelled.")
   }
-}
-
-/** The gate runs once per tree. Landing on main records a pass, so shipping
- *  what just landed skips straight to deploying. */
-async function requireGate() {
-  if (isVerified()) {
-    write("The gate already passed on this tree.")
-
-    return
-  }
-
-  await runCommand(packageCommand("check"))
-  await runCommand(packageCommand("test"))
 }
 
 /**

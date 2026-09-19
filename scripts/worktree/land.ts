@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs"
 import { acquireLock } from "../gate/lock.ts"
-import { isVerified } from "../gate/stamp.ts"
+import { verifyGate } from "../gate/verify.ts"
 import { git, isClean, requirePrimaryCheckout } from "../git.ts"
 import { installCommand, packageCommand, runCommand } from "../process.ts"
 import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
@@ -14,8 +14,8 @@ import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
  * worktree merges the branch into itself and reports success. The gate lock
  * is held from rebase through the dev server refresh: one landing at a
  * time, each gating the tree it lands, and never two refreshes racing for
- * the port. `--no-verify` skips the gate without recording a verification
- * pass.
+ * the port. `--no-verify` skips code checks without recording a verification
+ * pass; Git history is always scanned for secrets.
  */
 requirePrimaryCheckout("Landing")
 
@@ -45,7 +45,7 @@ try {
   if (rebase()) {
     await runCommand(installCommand(directory))
   }
-  await gate()
+  await verifyGate(directory, skipGate)
   fastForward()
   await runCommand(packageCommand("dev:up"))
 } finally {
@@ -78,25 +78,6 @@ function rebase() {
   }
 
   return git(["rev-parse", "HEAD:pnpm-lock.yaml"], directory) !== lockfile
-}
-
-/** The gate runs in the worktree, on the rebased tree, and records its pass
- *  under the shared git directory, where the deploy that follows reads it. */
-async function gate() {
-  if (skipGate) {
-    process.stdout.write("Gate skipped; no verification recorded.\n")
-
-    return
-  }
-
-  if (isVerified(directory)) {
-    process.stdout.write("Gate already passed on this tree.\n")
-
-    return
-  }
-
-  await runCommand({ ...packageCommand("check"), cwd: directory })
-  await runCommand({ ...packageCommand("test"), cwd: directory })
 }
 
 function fastForward() {

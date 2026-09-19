@@ -34,7 +34,8 @@ jobs:
           curl --fail --silent --show-error --location "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}" --output "$RUNNER_TEMP/$archive"
           echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/$archive" | sha256sum --check
           tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
-          "$RUNNER_TEMP/gitleaks" git --log-opts="--all --full-history" --redact --no-banner --ignore-gitleaks-allow
+          echo "GITLEAKS_BIN=$RUNNER_TEMP/gitleaks" >> "$GITHUB_ENV"
+          GITLEAKS_BIN="$RUNNER_TEMP/gitleaks" node --experimental-strip-types scripts/gate/secrets.ts
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=moderate
       - name: Install Chromium for browser tests
