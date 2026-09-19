@@ -1,6 +1,5 @@
 import { useEditing } from "@/shared/console/edit/state"
 import { moveTarget } from "@/shared/console/folders/types"
-import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListBody } from "@/shared/console/list/pager"
 import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
@@ -72,50 +71,32 @@ function StoresView({ organizationId }: { organizationId: string }) {
           onMoveToFolder={(store) => page.setMoving([toMoveTarget(store)])}
           removal={page.removal}
           selection={page.selection}
+          selectionActions={{
+            isBusy: page.bulk.isBusy,
+            noun: storeNoun,
+            onDownload: page.bulk.downloadSelected,
+            onMove: () =>
+              page.setMoving(page.selection.selected.map(toMoveTarget)),
+            onRemove: page.bulk.removeSelected,
+            removal: bulkMaterialRemoval(
+              page.selection.selected,
+              storeNoun,
+              storeDeleteDescription
+            ),
+          }}
           stores={page.pagination.visibleRows}
           unauthorizedMessage={
             page.list?.status === "unauthorized" ? page.list.message : undefined
           }
         />
       </ConsoleListBody>
-      <StoresOverlays organizationId={organizationId} page={page} />
-      <StoreRowDialogs organizationId={organizationId} page={page} />
-    </ConsoleListLayout>
-  )
-}
-
-/** The selection bar and the page's dialogs — everything that floats over
- *  the list. */
-function StoresOverlays({
-  organizationId,
-  page,
-}: {
-  organizationId: string
-  page: ReturnType<typeof useStoresPage>
-}) {
-  return (
-    <>
-      <SelectionActionsBar
-        count={page.selection.count}
-        isBusy={page.bulk.isBusy}
-        noun={storeNoun}
-        onClear={page.selection.clear}
-        onDownload={page.bulk.downloadSelected}
-        onMove={() => page.setMoving(page.selection.selected.map(toMoveTarget))}
-        onRemove={page.bulk.removeSelected}
-        removal={bulkMaterialRemoval(
-          page.selection.selected,
-          storeNoun,
-          storeDeleteDescription
-        )}
-      />
-
       <MoveResourcesDialog
         onClose={() => page.setMoving(undefined)}
         organizationId={organizationId}
         resources={page.moving}
       />
-    </>
+      <StoreRowDialogs organizationId={organizationId} page={page} />
+    </ConsoleListLayout>
   )
 }
 

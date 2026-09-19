@@ -1,6 +1,6 @@
 import { Folder } from "lucide-react"
 import { type ReactNode } from "react"
-import { useCreatedItem } from "../../edit/state"
+import { useCreatedItem, useEditMenuFocus } from "../../edit/state"
 import {
   ConsoleEmptyState,
   ConsoleListEmpty,
@@ -10,13 +10,18 @@ import {
 import { ConsoleListContent } from "../../list/frame"
 import { ConsoleListLoading } from "../../list/loading"
 import { type RowSelection } from "../../list/selection"
+import { MenuSeparator } from "../../menu/items"
+import { MenuArea } from "../../menu/row"
+import { NewInFolderButton, NewInFolderSub } from "../create"
+import { FolderUsageItem } from "../menu"
 import {
   type FolderContentsResult,
+  type FolderCreation,
   type FolderDialogRequest,
   type FolderResource,
   type ListedFolder,
 } from "../types"
-import { FolderSelectionBar } from "./bar"
+import { useFolderSelectionActions } from "./bar"
 import {
   type FolderListEntry,
   selectionPayload,
@@ -34,25 +39,58 @@ import {
 /** A folder's listing: subfolders first, then the filed resources in one
  *  name-sorted run, in the shared full-bleed table, with the selection's
  *  dock over it. The states that replace the table sit in the padded
- *  content region instead. */
-export function FolderContents({
-  contents,
-  folderId,
-  newMenu,
-  onDialog,
-  resourceMenu,
-  selectionActions,
-}: {
+ *  content region instead. A right-click on the background offers what
+ *  the folder itself can be asked: something new in it, and its usage. */
+export function FolderContents(props: FolderContentsProps) {
+  const { folderId, onCreate, onNewFolder } = props
+  const onCloseAutoFocus = useEditMenuFocus()
+
+  return (
+    <MenuArea
+      disabled={props.contents?.status !== "ready"}
+      menu={
+        <>
+          <NewInFolderSub
+            isTopLevel={folderId === undefined}
+            onCreate={onCreate}
+            onNewFolder={onNewFolder}
+          />
+          <MenuSeparator />
+          <FolderUsageItem folderId={folderId} />
+        </>
+      }
+      onCloseAutoFocus={onCloseAutoFocus}
+    >
+      {/* Boxless, so the listing's regions still lay out in the page. */}
+      <div className="contents">
+        <FolderContentsRegions {...props} />
+      </div>
+    </MenuArea>
+  )
+}
+
+type FolderContentsProps = {
   contents: FolderContentsResult | undefined
   /** The folder being viewed — the one filed resources already sit in. */
   folderId: string | undefined
-  /** The header's "New" menu again, as the empty state's call to action. */
-  newMenu: ReactNode
+  /** The header's "New" menu again, for the empty state and a right-click. */
+  onCreate: (creation: FolderCreation) => void
+  onNewFolder: () => void
   onDialog: (request: FolderDialogRequest) => void
   /** A filed resource's own menu, trigger and all. */
   resourceMenu: (resource: FolderResource) => ReactNode
   selectionActions: FolderSelectionActions
-}) {
+}
+
+function FolderContentsRegions({
+  contents,
+  folderId,
+  onCreate,
+  onNewFolder,
+  onDialog,
+  resourceMenu,
+  selectionActions,
+}: FolderContentsProps) {
   const created = useCreatedItem("contents", folderId)
   if (contents === undefined) {
     return (
@@ -86,7 +124,9 @@ export function FolderContents({
     return (
       <ConsoleListEmpty>
         <ConsoleEmptyState
-          action={newMenu}
+          action={
+            <NewInFolderButton onCreate={onCreate} onNewFolder={onNewFolder} />
+          }
           description="File chats, tables, stores, files, and jobs here, or add a subfolder."
           icon={Folder}
           title="Empty folder"
@@ -127,6 +167,11 @@ function FolderListing({
   selectionActions: FolderSelectionActions
 }) {
   const list = useFolderListing({ folders, resources })
+  const selected = useFolderSelectionActions({
+    actions: selectionActions,
+    folderId,
+    selection: list.selection,
+  })
 
   return (
     <>
@@ -143,13 +188,10 @@ function FolderListing({
           resourceMenu={resourceMenu}
           resources={list.resources}
           selection={list.selection}
+          selectionMenu={selected.menu}
         />
       </FolderListTable>
-      <FolderSelectionBar
-        actions={selectionActions}
-        folderId={folderId}
-        selection={list.selection}
-      />
+      {selected.dock}
     </>
   )
 }
@@ -163,6 +205,7 @@ function FolderContentRows({
   resourceMenu,
   resources,
   selection,
+  selectionMenu,
 }: {
   folderId: string | undefined
   folders: ListedFolder[]
@@ -170,6 +213,7 @@ function FolderContentRows({
   resourceMenu: (resource: FolderResource) => ReactNode
   resources: FolderResource[]
   selection: RowSelection<FolderListEntry>
+  selectionMenu: ReactNode
 }) {
   const created = useCreatedItem("contents", folderId)
   const selected = selectionPayload(selection.selected, folderId)
@@ -211,6 +255,7 @@ function FolderContentRows({
             onDialog={onDialog}
             selected={selected}
             selection={selection}
+            selectionMenu={selectionMenu}
           />
         ))}
       {resources
@@ -223,6 +268,7 @@ function FolderContentRows({
             resource={resource}
             selected={selected}
             selection={selection}
+            selectionMenu={selectionMenu}
           />
         ))}
     </>

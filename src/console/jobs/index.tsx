@@ -7,7 +7,6 @@ import { JobList } from "@/shared/console/jobs/list"
 import { jobNoun } from "@/shared/console/jobs/list/config"
 import { JobFilters } from "@/shared/console/jobs/list/filters"
 import { type Job } from "@/shared/console/jobs/types"
-import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListBody } from "@/shared/console/list/pager"
 import { MoveResourcesDialog } from "../folders/move"
@@ -79,6 +78,14 @@ function JobListView({ organizationId }: { organizationId: string }) {
               void editor.setJobPaused(job, paused)
             }
             selection={page.selection}
+            selectionActions={{
+              isBusy: page.bulk.isBusy,
+              noun: jobNoun,
+              onMove: () =>
+                page.setMoving(page.selection.selected.map(toMoveTarget)),
+              onRemove: page.bulk.removeSelected,
+              removal: page.bulk.removal,
+            }}
             unauthorizedMessage={
               page.list?.status === "unauthorized"
                 ? page.list.message
@@ -92,8 +99,7 @@ function JobListView({ organizationId }: { organizationId: string }) {
   )
 }
 
-/** The selection bar and the page's dialogs — everything that floats over
- *  the list. */
+/** The page's dialogs. */
 function JobsOverlays({
   organizationId,
   page,
@@ -103,15 +109,6 @@ function JobsOverlays({
 }) {
   return (
     <>
-      <SelectionActionsBar
-        count={page.selection.count}
-        isBusy={page.bulk.isBusy}
-        noun={jobNoun}
-        onClear={page.selection.clear}
-        onMove={() => page.setMoving(page.selection.selected.map(toMoveTarget))}
-        onRemove={page.bulk.removeSelected}
-        removal={page.bulk.removal}
-      />
       <MoveResourcesDialog
         onClose={() => page.setMoving(undefined)}
         organizationId={organizationId}

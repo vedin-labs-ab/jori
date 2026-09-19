@@ -1,6 +1,5 @@
 import { useQuery } from "convex/react"
 import { type ComponentProps, type ReactNode } from "react"
-import { NewInFolderButton } from "@/shared/console/folders/create"
 import { useCreationRequests } from "@/shared/console/folders/creation"
 import { type FolderContents } from "@/shared/console/folders/list/contents"
 import {
@@ -16,7 +15,7 @@ import { useFolderSelectionActions } from "./select"
 
 /** A folder's listing bound to Convex, as its page and the chat's pane
  *  both mount it: the contents query, each filed resource's menu, the
- *  selection's actions, and the "New" menu the empty state offers — with
+ *  selection's actions, and what the "New" menu's entries start — with
  *  the dialogs those open, rendered once beside the list. */
 export function useFolderContents({
   folder,
@@ -58,10 +57,9 @@ export function useFolderContents({
     contents: {
       contents,
       folderId: folder?.folderId,
-      newMenu: (
-        <NewInFolderButton onCreate={setCreation} onNewFolder={onNewFolder} />
-      ),
+      onCreate: setCreation,
       onDialog,
+      onNewFolder,
       resourceMenu: (resource) => (
         <ResourceRowMenu actions={resources.actions} resource={resource} />
       ),

@@ -12,7 +12,6 @@ import {
 } from "@/shared/console/jobs/list/config"
 import { JobFilters } from "@/shared/console/jobs/list/filters"
 import { type Job } from "@/shared/console/jobs/types"
-import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { useListState } from "@/shared/console/list/controls"
 import {
   ConsoleListFooter,
@@ -103,28 +102,25 @@ export function JobsPage() {
           onMoveToFolder={(job) => setMoving([jobMoveTarget(job)])}
           onPausedChange={actions.setJobPaused}
           selection={listing.selection}
+          selectionActions={{
+            isBusy: false,
+            noun: jobNoun,
+            onMove: () =>
+              setMoving(listing.selection.selected.map(jobMoveTarget)),
+            onRemove: () => {
+              for (const job of listing.selection.selected) {
+                actions.deleteJob(job)
+              }
+
+              toast.success(`Deleted ${listing.selection.count} jobs.`)
+            },
+            removal: jobBulkRemoval,
+          }}
           unauthorizedMessage={undefined}
         />
         <ConsoleListFooter>
           <ConsoleListPager pagination={listing.pagination} />
         </ConsoleListFooter>
-        <SelectionActionsBar
-          count={listing.selection.count}
-          isBusy={false}
-          noun={jobNoun}
-          onClear={listing.selection.clear}
-          onMove={() =>
-            setMoving(listing.selection.selected.map(jobMoveTarget))
-          }
-          onRemove={() => {
-            for (const job of listing.selection.selected) {
-              actions.deleteJob(job)
-            }
-
-            toast.success(`Deleted ${listing.selection.count} jobs.`)
-          }}
-          removal={jobBulkRemoval}
-        />
         <DemoMoveDialog
           onOpenChange={closeOnDismiss(() => setMoving(undefined))}
           subject={

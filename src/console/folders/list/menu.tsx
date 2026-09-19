@@ -2,11 +2,6 @@ import { type GenericId } from "convex/values"
 import { FolderInput, FolderMinus } from "lucide-react"
 import { useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"
 import { useFile } from "@/console/files/query"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
@@ -14,7 +9,8 @@ import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
 import { MaterialFilingItems } from "@/shared/console/materials/actions"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
-import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
+import { MenuItem } from "@/shared/console/menu/items"
+import { RowMenu } from "@/shared/console/menu/row"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { type FolderResourceActions } from "./actions"
@@ -50,18 +46,15 @@ type ResourceMenu = {
 
 function ChatResourceMenu({ actions, resource }: ResourceMenu) {
   return (
-    <DropdownMenu>
-      <RowMenuTrigger name={resource.name} />
-      <DropdownMenuContent align="end" className={menuWidth}>
-        <MaterialFilingItems
-          onAccess={() => actions.onAccess(resource)}
-          onMoveToFolder={() => actions.onMove(resource)}
-          onUnfile={
-            actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
-          }
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <RowMenu name={resource.name}>
+      <MaterialFilingItems
+        onAccess={() => actions.onAccess(resource)}
+        onMoveToFolder={() => actions.onMove(resource)}
+        onUnfile={
+          actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
+        }
+      />
+    </RowMenu>
   )
 }
 
@@ -108,23 +101,20 @@ function FileResourceMenu({ actions, resource }: ResourceMenu) {
 
   return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
-      <DropdownMenu onOpenChange={setIsMenuOpen}>
-        <RowMenuTrigger name={resource.name} />
-        <DropdownMenuContent align="end" className={menuWidth}>
-          <FileMenuItems
-            file={{ name: resource.name, url }}
-            isPending={actions.files.pendingFileId === resource.id}
-            onAccess={() => actions.onAccess(resource)}
-            onEdit={() => actions.onEdit(resource)}
-            onMoveToFolder={() => actions.onMove(resource)}
-            onRemove={() => setIsDeleteOpen(true)}
-            onUnfile={
-              actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
-            }
-            withLinks
-          />
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowMenu name={resource.name} onOpenChange={setIsMenuOpen}>
+        <FileMenuItems
+          file={{ name: resource.name, url }}
+          isPending={actions.files.pendingFileId === resource.id}
+          onAccess={() => actions.onAccess(resource)}
+          onEdit={() => actions.onEdit(resource)}
+          onMoveToFolder={() => actions.onMove(resource)}
+          onRemove={() => setIsDeleteOpen(true)}
+          onUnfile={
+            actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
+          }
+          withLinks
+        />
+      </RowMenu>
       <DeleteFileDialog
         file={file}
         isPending={actions.files.pendingFileId === resource.id}
@@ -163,20 +153,17 @@ function JobResourceMenu({ actions, resource }: ResourceMenu) {
 
 function FilingOnlyMenu({ actions, resource }: ResourceMenu) {
   return (
-    <DropdownMenu>
-      <RowMenuTrigger name={resource.name} />
-      <DropdownMenuContent align="end" className={menuWidth}>
-        <DropdownMenuItem onSelect={() => actions.onMove(resource)}>
-          <FolderInput />
-          Move to folder…
-        </DropdownMenuItem>
-        {actions.onUnfile ? (
-          <DropdownMenuItem onSelect={() => actions.onUnfile?.(resource)}>
-            <FolderMinus />
-            Remove from folder
-          </DropdownMenuItem>
-        ) : null}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <RowMenu name={resource.name}>
+      <MenuItem onSelect={() => actions.onMove(resource)}>
+        <FolderInput />
+        Move to folder…
+      </MenuItem>
+      {actions.onUnfile ? (
+        <MenuItem onSelect={() => actions.onUnfile?.(resource)}>
+          <FolderMinus />
+          Remove from folder
+        </MenuItem>
+      ) : null}
+    </RowMenu>
   )
 }

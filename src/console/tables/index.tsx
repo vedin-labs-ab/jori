@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useEditing } from "@/shared/console/edit/state"
 import { moveTarget } from "@/shared/console/folders/types"
-import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListBody } from "@/shared/console/list/pager"
 import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
@@ -80,6 +79,19 @@ function TablesView({ organizationId }: { organizationId: string }) {
           onMoveToFolder={(table) => page.setMoving([toMoveTarget(table)])}
           removal={page.removal}
           selection={page.selection}
+          selectionActions={{
+            isBusy: page.bulk.isBusy,
+            noun: tableNoun,
+            onDownload: page.bulk.downloadSelected,
+            onMove: () =>
+              page.setMoving(page.selection.selected.map(toMoveTarget)),
+            onRemove: page.bulk.removeSelected,
+            removal: bulkMaterialRemoval(
+              page.selection.selected,
+              tableNoun,
+              tableDeleteDescription
+            ),
+          }}
           tables={page.pagination.visibleRows}
           unauthorizedMessage={
             page.list?.status === "unauthorized" ? page.list.message : undefined
@@ -92,8 +104,7 @@ function TablesView({ organizationId }: { organizationId: string }) {
   )
 }
 
-/** The selection bar and the page's dialogs — everything that floats over
- *  the list. */
+/** The page's dialogs. */
 function TablesOverlays({
   organizationId,
   page,
@@ -103,21 +114,6 @@ function TablesOverlays({
 }) {
   return (
     <>
-      <SelectionActionsBar
-        count={page.selection.count}
-        isBusy={page.bulk.isBusy}
-        noun={tableNoun}
-        onClear={page.selection.clear}
-        onDownload={page.bulk.downloadSelected}
-        onMove={() => page.setMoving(page.selection.selected.map(toMoveTarget))}
-        onRemove={page.bulk.removeSelected}
-        removal={bulkMaterialRemoval(
-          page.selection.selected,
-          tableNoun,
-          tableDeleteDescription
-        )}
-      />
-
       <ImportTableDialog
         isOpen={page.dialog === "import"}
         onOpenChange={(open) => page.setDialog(open ? "import" : undefined)}

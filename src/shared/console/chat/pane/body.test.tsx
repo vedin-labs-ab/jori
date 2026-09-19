@@ -217,7 +217,8 @@ test("a folder shows its listing, each row leading where it does on the page", a
             contents: {
               contents: folderContents,
               folderId: "folder-1",
-              newMenu: null,
+              onCreate: vi.fn(),
+              onNewFolder: vi.fn(),
               onDialog: vi.fn(),
               resourceMenu: (resource) => (
                 <button type="button">{resource.name} menu</button>

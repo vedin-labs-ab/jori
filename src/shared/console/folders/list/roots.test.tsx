@@ -51,7 +51,8 @@ function renderList(
       <DndContext>
         <FolderContents
           folderId={undefined}
-          newMenu={<button type="button">New</button>}
+          onCreate={() => undefined}
+          onNewFolder={() => undefined}
           resourceMenu={() => null}
           onDialog={onDialog}
           contents={roots}

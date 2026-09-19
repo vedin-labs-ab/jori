@@ -1,6 +1,5 @@
 import { Plus, Table2, Upload } from "lucide-react"
 import { type ComponentProps } from "react"
-import { Button } from "@/components/ui/button"
 import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
   ConsoleHeaderActions,
@@ -101,19 +100,11 @@ export function TableList({
       kind={{
         creationKind: "table",
         createdRow: (item) => item.table,
-        action: (
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <Button onClick={onCreate} type="button">
-              <Plus />
-              New table
-            </Button>
-            <Button onClick={onImport} type="button" variant="outline">
-              <Upload />
-              Import
-            </Button>
-          </div>
-        ),
         columns,
+        creates: [
+          { icon: Plus, label: "New table", onSelect: onCreate },
+          { icon: Upload, label: "Import", onSelect: onImport },
+        ],
         description:
           "Typed tables Jori and your team keep structured records in appear here.",
         drag,

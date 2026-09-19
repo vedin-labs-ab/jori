@@ -2,7 +2,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { type CountedNoun, countNoun } from "../count"
 import { showErrorToast } from "../error"
-import { type SelectionRemoval } from "../list/bar"
+import { type SelectionRemoval } from "../list/selection/bar"
 
 type RemovalTarget = { name: string; archivedAt?: number }
 

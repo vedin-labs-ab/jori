@@ -5,7 +5,10 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ListControls } from "@/shared/console/list/controls"
 import { type TableSummary } from "@/shared/console/tables/types"
 import { listControls } from "../../../../../test/list/controls"
-import { emptySelection } from "../../../../../test/list/selection"
+import {
+  emptySelection,
+  idleSelectionActions,
+} from "../../../../../test/list/selection"
 import { type MaterialRemoval } from "../../materials/removal"
 import { TableList } from "."
 import { tableListConfig } from "./config"
@@ -64,6 +67,7 @@ function renderList(
         onMoveToFolder={() => undefined}
         removal={removal}
         selection={emptySelection()}
+        selectionActions={idleSelectionActions}
         tables={tables}
         unauthorizedMessage={undefined}
       />

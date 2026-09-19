@@ -4,7 +4,10 @@ import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ListControls } from "@/shared/console/list/controls"
 import { listControls } from "../../../../../test/list/controls"
-import { emptySelection } from "../../../../../test/list/selection"
+import {
+  emptySelection,
+  idleSelectionActions,
+} from "../../../../../test/list/selection"
 import { type MaterialRemoval } from "../../materials/removal"
 import { type StoreSummary } from "../types"
 import { StoreList } from "."
@@ -62,6 +65,7 @@ function renderList(
         onMoveToFolder={() => undefined}
         removal={removal}
         selection={emptySelection()}
+        selectionActions={idleSelectionActions}
         stores={stores}
         unauthorizedMessage={undefined}
       />

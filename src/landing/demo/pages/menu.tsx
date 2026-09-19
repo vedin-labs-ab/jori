@@ -1,16 +1,12 @@
 import { useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-} from "@/components/ui/dropdown-menu"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { JobRowMenu } from "@/shared/console/jobs/list/actions"
 import { MaterialFilingItems } from "@/shared/console/materials/actions"
 import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
-import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
+import { RowMenu } from "@/shared/console/menu/row"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { jobMoveSubject } from "../derive/jobs"
@@ -63,12 +59,9 @@ function FiledChatMenu({ chat }: { chat: DemoConversation }) {
 
   return (
     <>
-      <DropdownMenu>
-        <RowMenuTrigger name={chat.title} />
-        <DropdownMenuContent align="end" className={menuWidth}>
-          <MaterialFilingItems {...items} />
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowMenu name={chat.title}>
+        <MaterialFilingItems {...items} />
+      </RowMenu>
       {dialogs}
     </>
   )
@@ -116,25 +109,22 @@ function FileResourceMenu({ material }: { material: DemoMaterial }) {
 
   return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
-      <DropdownMenu>
-        <RowMenuTrigger name={material.name} />
-        <DropdownMenuContent align="end" className={menuWidth}>
-          <FileMenuItems
-            file={{ name: material.name, url: null }}
-            isPending={false}
-            onAccess={() => setRequest({ kind: "access", material })}
-            onEdit={() => setRequest({ kind: "edit", material })}
-            onMoveToFolder={() => setRequest({ kind: "move", material })}
-            onRemove={() => setIsDeleteOpen(true)}
-            onUnfile={
-              material.folderId === undefined
-                ? undefined
-                : () => actions.fileResource("file", material.id, null)
-            }
-            withLinks
-          />
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowMenu name={material.name}>
+        <FileMenuItems
+          file={{ name: material.name, url: null }}
+          isPending={false}
+          onAccess={() => setRequest({ kind: "access", material })}
+          onEdit={() => setRequest({ kind: "edit", material })}
+          onMoveToFolder={() => setRequest({ kind: "move", material })}
+          onRemove={() => setIsDeleteOpen(true)}
+          onUnfile={
+            material.folderId === undefined
+              ? undefined
+              : () => actions.fileResource("file", material.id, null)
+          }
+          withLinks
+        />
+      </RowMenu>
       <DeleteFileDialog
         file={material}
         isPending={false}

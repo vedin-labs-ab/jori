@@ -6,7 +6,10 @@ import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { absoluteTime } from "@/shared/console/time"
 import { listControls } from "../../../../../test/list/controls"
-import { emptySelection } from "../../../../../test/list/selection"
+import {
+  emptySelection,
+  idleSelectionActions,
+} from "../../../../../test/list/selection"
 import { type FileRow } from "../types"
 import { FileTable } from "."
 import { fileListConfig } from "./config"
@@ -59,6 +62,7 @@ function renderTable(
         onUpload={() => undefined}
         pendingFileId={undefined}
         selection={emptySelection()}
+        selectionActions={idleSelectionActions}
         {...props}
       />
     </TooltipProvider>

@@ -1,15 +1,11 @@
 import { ChartNoAxesColumn, Pencil, Trash2 } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
 import { useEditing, useEditMenuFocus } from "../edit/state"
 import { MaterialFilingItems } from "../materials/actions"
 import { materialOwner } from "../materials/owners"
-import { menuWidth, RowMenuTrigger, TitleMenuContent } from "../menu"
+import { TitleMenuContent } from "../menu"
+import { MenuItem, MenuSeparator } from "../menu/items"
 import { MenuProvenance } from "../menu/provenance"
+import { RowMenu } from "../menu/row"
 import { ConsoleLink } from "../shell/link"
 import {
   type FolderDetail,
@@ -21,6 +17,26 @@ import {
 // is, and what removes it. The breadcrumb, the sidebar tree row, and a
 // folder listing's row all compose exactly this inside their own trigger.
 
+/** The way to what a folder has spent, or the whole tree with no folder
+ *  named. */
+export function FolderUsageItem({ folderId }: { folderId?: string }) {
+  return (
+    <MenuItem asChild>
+      {folderId === undefined ? (
+        <ConsoleLink to="/folders/usage">
+          <ChartNoAxesColumn />
+          Usage
+        </ConsoleLink>
+      ) : (
+        <ConsoleLink params={{ folderId }} to="/folders/$folderId/usage">
+          <ChartNoAxesColumn />
+          Usage
+        </ConsoleLink>
+      )}
+    </MenuItem>
+  )
+}
+
 export function FolderMenuItems({
   folder,
   onDialog,
@@ -30,32 +46,24 @@ export function FolderMenuItems({
 }) {
   return (
     <>
-      <DropdownMenuItem asChild>
-        <ConsoleLink
-          params={{ folderId: folder.folderId }}
-          to="/folders/$folderId/usage"
-        >
-          <ChartNoAxesColumn />
-          Usage
-        </ConsoleLink>
-      </DropdownMenuItem>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem onSelect={() => onDialog({ type: "rename", folder })}>
+      <FolderUsageItem folderId={folder.folderId} />
+      <MenuSeparator />
+      <MenuItem onSelect={() => onDialog({ type: "rename", folder })}>
         <Pencil />
         Rename
-      </DropdownMenuItem>
+      </MenuItem>
       <MaterialFilingItems
         onAccess={() => onDialog({ type: "access", folder })}
         onMoveToFolder={() => onDialog({ type: "move", folder })}
       />
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
+      <MenuSeparator />
+      <MenuItem
         onSelect={() => onDialog({ type: "delete", folder })}
         variant="destructive"
       >
         <Trash2 />
         Delete
-      </DropdownMenuItem>
+      </MenuItem>
     </>
   )
 }
@@ -110,16 +118,9 @@ export function FolderRowMenu({
 }) {
   const onCloseAutoFocus = useEditMenuFocus()
   return (
-    <DropdownMenu>
-      <RowMenuTrigger name={folder.name} />
-      <DropdownMenuContent
-        align="end"
-        className={menuWidth}
-        onCloseAutoFocus={onCloseAutoFocus}
-      >
-        <FolderMenuItems folder={folder} onDialog={onDialog} />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <RowMenu name={folder.name} onCloseAutoFocus={onCloseAutoFocus}>
+      <FolderMenuItems folder={folder} onDialog={onDialog} />
+    </RowMenu>
   )
 }
 
@@ -128,12 +129,7 @@ export function FolderRowMenu({
 export function FoldersTitleMenu() {
   return (
     <TitleMenuContent>
-      <DropdownMenuItem asChild>
-        <ConsoleLink to="/folders/usage">
-          <ChartNoAxesColumn />
-          Usage
-        </ConsoleLink>
-      </DropdownMenuItem>
+      <FolderUsageItem />
     </TitleMenuContent>
   )
 }

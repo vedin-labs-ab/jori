@@ -8,19 +8,11 @@ import {
   Trash2,
 } from "lucide-react"
 import { useState } from "react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
 import { materialOwner } from "@/shared/console/materials/owners"
-import {
-  menuWidth,
-  RowMenuTrigger,
-  TitleMenuContent,
-} from "@/shared/console/menu"
+import { TitleMenuContent } from "@/shared/console/menu"
+import { MenuItem, MenuSeparator } from "@/shared/console/menu/items"
 import { MenuProvenance } from "@/shared/console/menu/provenance"
+import { RowMenu } from "@/shared/console/menu/row"
 import { type Job, jobControlAction } from "../types"
 import { DeleteJobDialog } from "./delete"
 import { jobTriggerSummary } from "./trigger"
@@ -29,7 +21,8 @@ import { jobTriggerSummary } from "./trigger"
 // it — schedule, instructions, access, visibility — so the item is plain
 // "Edit" rather than the materials' "Rename…". Two triggers hold it:
 // the page hangs it off the job's name in the breadcrumb, a list row off
-// its "…" button. Both own the confirmation the delete passes through.
+// its "…" button and a right-click. Both own the confirmation the delete
+// passes through.
 
 export type JobMenuActions = {
   isControlling: boolean
@@ -55,34 +48,34 @@ function JobMenuItems({
 }: Omit<JobMenuActions, "onDelete"> & { onDeleteRequest: () => void }) {
   return (
     <>
-      <DropdownMenuItem onSelect={() => onEdit(job)}>
+      <MenuItem onSelect={() => onEdit(job)}>
         <Pencil />
         Edit
-      </DropdownMenuItem>
-      <DropdownMenuItem onSelect={() => onMoveToFolder(job)}>
+      </MenuItem>
+      <MenuItem onSelect={() => onMoveToFolder(job)}>
         <FolderInput />
         Move to folder…
-      </DropdownMenuItem>
+      </MenuItem>
       {onUnfile === undefined ? null : (
-        <DropdownMenuItem onSelect={() => onUnfile(job)}>
+        <MenuItem onSelect={() => onUnfile(job)}>
           <FolderMinus />
           Remove from folder
-        </DropdownMenuItem>
+        </MenuItem>
       )}
       <JobControlItem
         isControlling={isControlling}
         onPausedChange={onPausedChange}
         job={job}
       />
-      <DropdownMenuSeparator />
-      <DropdownMenuItem
+      <MenuSeparator />
+      <MenuItem
         disabled={isDeleting}
         onSelect={onDeleteRequest}
         variant="destructive"
       >
         {isDeleting ? <Loader2 className="animate-spin" /> : <Trash2 />}
         {isDeleting ? "Deleting" : "Delete"}
-      </DropdownMenuItem>
+      </MenuItem>
     </>
   )
 }
@@ -105,13 +98,13 @@ function JobControlItem({
   const ControlIcon = shouldPause ? Pause : Play
 
   return (
-    <DropdownMenuItem
+    <MenuItem
       disabled={isControlling}
       onSelect={() => onPausedChange(job, shouldPause)}
     >
       {isControlling ? <Loader2 className="animate-spin" /> : <ControlIcon />}
       {isControlling ? pendingLabel : shouldPause ? "Pause" : "Resume"}
-    </DropdownMenuItem>
+    </MenuItem>
   )
 }
 
@@ -149,12 +142,9 @@ export function JobRowMenu(props: JobMenuActions) {
 
   return (
     <>
-      <DropdownMenu>
-        <RowMenuTrigger name={props.job.name} />
-        <DropdownMenuContent align="end" className={menuWidth}>
-          <JobMenuItems {...props} onDeleteRequest={confirm.request} />
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowMenu name={props.job.name}>
+        <JobMenuItems {...props} onDeleteRequest={confirm.request} />
+      </RowMenu>
       {confirm.dialog}
     </>
   )

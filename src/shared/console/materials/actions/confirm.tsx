@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { MenuItem } from "../../menu/items"
 
 /** What the archive/restore/delete lifecycle needs to know about a
  *  material: what to call it, and whether it is already archived. */
@@ -36,14 +36,14 @@ export function RemoveMenuItem({
   const pendingLabel = isArchived ? "Deleting" : "Archiving"
 
   return (
-    <DropdownMenuItem
+    <MenuItem
       disabled={isPending}
       onSelect={onSelect}
       variant={isArchived ? "destructive" : undefined}
     >
       {isDeleting ? <Loader2 className="animate-spin" /> : <ActionIcon />}
       {isDeleting ? pendingLabel : label}
-    </DropdownMenuItem>
+    </MenuItem>
   )
 }
 

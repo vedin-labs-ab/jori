@@ -2,8 +2,6 @@ import { Copy, Download, ExternalLink, Trash2 } from "lucide-react"
 import { type ReactNode, useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
@@ -13,12 +11,10 @@ import {
 import { copyText } from "@/shared/console/copy/text"
 import { MaterialCoreItems } from "@/shared/console/materials/actions"
 import { fileOwner } from "@/shared/console/materials/owners"
-import {
-  menuWidth,
-  RowMenuTrigger,
-  TitleMenuContent,
-} from "@/shared/console/menu"
+import { TitleMenuContent } from "@/shared/console/menu"
+import { MenuItem, MenuSeparator } from "@/shared/console/menu/items"
 import { MenuProvenance } from "@/shared/console/menu/provenance"
+import { RowMenu } from "@/shared/console/menu/row"
 import { downloadUrl } from "@/shared/files/download"
 import { formatFileSize } from "@/shared/files/size"
 import { showErrorToast } from "../error"
@@ -139,14 +135,10 @@ export function FileMenuItems({
         onMoveToFolder={onMoveToFolder}
         onUnfile={onUnfile}
       />
-      <DropdownMenuItem
-        disabled={isPending}
-        onSelect={onRemove}
-        variant="destructive"
-      >
+      <MenuItem disabled={isPending} onSelect={onRemove} variant="destructive">
         <Trash2 />
         Delete
-      </DropdownMenuItem>
+      </MenuItem>
     </>
   )
 }
@@ -171,20 +163,17 @@ export function FileRowMenu({
 
   return (
     <AlertDialog onOpenChange={setIsDeleteOpen} open={isDeleteOpen}>
-      <DropdownMenu>
-        <RowMenuTrigger name={file.name} />
-        <DropdownMenuContent align="end" className={menuWidth}>
-          <FileMenuItems
-            file={file}
-            isPending={isPending}
-            onAccess={() => onAccess(file)}
-            onEdit={() => onEdit(file)}
-            onMoveToFolder={() => onMoveToFolder(file)}
-            onRemove={() => setIsDeleteOpen(true)}
-            withLinks
-          />
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowMenu name={file.name}>
+        <FileMenuItems
+          file={file}
+          isPending={isPending}
+          onAccess={() => onAccess(file)}
+          onEdit={() => onEdit(file)}
+          onMoveToFolder={() => onMoveToFolder(file)}
+          onRemove={() => setIsDeleteOpen(true)}
+          withLinks
+        />
+      </RowMenu>
       <DeleteFileDialog
         file={file}
         isPending={isPending}
@@ -205,13 +194,13 @@ function FileLinkItems({
 
   return (
     <>
-      <DropdownMenuItem asChild>
+      <MenuItem asChild>
         <a href={file.url} rel="noreferrer" target="_blank">
           <ExternalLink />
           Open
         </a>
-      </DropdownMenuItem>
-      <DropdownMenuItem
+      </MenuItem>
+      <MenuItem
         onSelect={() => {
           if (file.url !== null) {
             void downloadUrl(file.name, file.url).catch((error: unknown) =>
@@ -222,8 +211,8 @@ function FileLinkItems({
       >
         <Download />
         Download
-      </DropdownMenuItem>
-      <DropdownMenuSeparator />
+      </MenuItem>
+      <MenuSeparator />
     </>
   )
 }

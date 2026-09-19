@@ -1,6 +1,8 @@
 import { type ComponentProps } from "react"
 import { Table } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { useMarquee } from "./pointer/marquee"
+import { type RowSelection } from "./selection"
 
 // Full-bleed list surface: the table is the page content. Rows run
 // edge-to-edge under a sticky header, with the page's horizontal padding
@@ -45,23 +47,31 @@ export function ConsoleListContent({
 /** The full-bleed table itself: one scroll container for both axes, header
  *  cells pinned to its top. The sticky header draws its own hairline (a tr
  *  border would scroll away with the rows), and the shadcn table wrapper
- *  stops scrolling so this container stays the only scrollport. */
-export function ConsoleListTable({
+ *  stops scrolling so this container stays the only scrollport. Given the
+ *  list's selection, a drag across it sweeps a marquee over the rows. */
+export function ConsoleListTable<Row>({
   className,
   fill = true,
+  selection,
   ...props
 }: ComponentProps<typeof Table> & {
   /** Off, the table keeps to its rows so an empty region can take the
    *  rest of the page under its header. */
   fill?: boolean
+  selection?: RowSelection<Row>
 }) {
+  const marquee = useMarquee(selection)
+
   return (
     <div
       className={cn(
         "relative min-h-0 overflow-auto [&>[data-slot=table-container]]:overflow-visible",
         fill ? "flex-1" : "shrink-0"
       )}
+      onPointerDown={marquee.onPointerDown}
+      ref={marquee.ref}
     >
+      {marquee.box}
       <Table
         className={cn(
           "[&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-background",

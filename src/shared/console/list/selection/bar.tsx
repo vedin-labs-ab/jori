@@ -21,8 +21,9 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { TableCell, TableHead } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { Dock, DockDivider, DockGroup } from "../dock"
-import { type RowSelection, selectionHeadState } from "./selection"
+import { Dock, DockDivider, DockGroup } from "../../dock"
+import { MenuItem, MenuLabel, MenuSeparator } from "../../menu/items"
+import { type RowSelection, selectionHeadState } from "."
 
 /** Header checkbox: none, partial (a partly selected page shows the
  *  indeterminate minus), or all. Toggling from partial selects the rest. */
@@ -70,10 +71,68 @@ export type SelectionRemoval = {
   label: string
 }
 
+/** What a list's selection can be asked to do. Move and Download are
+ *  only offered by the pages that pass them. */
+export type SelectionActions = {
+  isBusy: boolean
+  noun: { plural: string; singular: string }
+  onDownload?: () => void
+  onMove?: () => void
+  onRemove?: () => void
+  removal: SelectionRemoval
+}
+
+/** The dock's actions as menu items, under a count that says the menu
+ *  speaks for the whole selection rather than the row under the pointer. */
+export function SelectionMenuItems({
+  count,
+  isBusy,
+  onDownload,
+  onMove,
+  onRemove,
+  onRemoveRequest,
+  removal,
+}: SelectionActions & { count: number; onRemoveRequest: () => void }) {
+  const RemoveIcon = removal.isDestructive ? Trash2 : Archive
+
+  return (
+    <>
+      <MenuLabel>{count} selected</MenuLabel>
+      {onMove === undefined ? null : (
+        <MenuItem disabled={isBusy} onSelect={onMove}>
+          <FolderInput />
+          Move to folder…
+        </MenuItem>
+      )}
+      {onDownload === undefined ? null : (
+        <MenuItem disabled={isBusy} onSelect={onDownload}>
+          <Download />
+          Download
+        </MenuItem>
+      )}
+      {onRemove === undefined ? null : (
+        <>
+          <MenuSeparator />
+          <MenuItem
+            disabled={isBusy}
+            onSelect={onRemoveRequest}
+            variant={removal.isDestructive ? "destructive" : undefined}
+          >
+            <RemoveIcon />
+            {removal.label}
+          </MenuItem>
+        </>
+      )}
+    </>
+  )
+}
+
+type Confirming = { isOpen: boolean; onOpenChange: (open: boolean) => void }
+
 /** The console's dock, for an active selection. Removing confirms first;
- *  moving hands off to the page's move dialog. Move and Download only
- *  render for pages that pass them. */
+ *  moving hands off to the page's move dialog. */
 export function SelectionActionsBar({
+  confirming,
   count,
   isBusy,
   noun,
@@ -82,15 +141,11 @@ export function SelectionActionsBar({
   onMove,
   onRemove,
   removal,
-}: {
+}: SelectionActions & {
+  /** The remove confirmation, when something besides the dock opens it. */
+  confirming?: Confirming
   count: number
-  isBusy: boolean
-  noun: { plural: string; singular: string }
   onClear: () => void
-  onDownload?: () => void
-  onMove?: () => void
-  onRemove?: () => void
-  removal: SelectionRemoval
 }) {
   if (count === 0) {
     return null
@@ -140,6 +195,7 @@ export function SelectionActionsBar({
         )}
         {onRemove === undefined ? null : (
           <SelectionRemoveButton
+            confirming={confirming}
             count={count}
             isBusy={isBusy}
             noun={noun}
@@ -153,19 +209,23 @@ export function SelectionActionsBar({
 }
 
 function SelectionRemoveButton({
+  confirming,
   count,
   isBusy,
   noun,
   onRemove,
   removal,
 }: {
+  confirming: Confirming | undefined
   count: number
   isBusy: boolean
   noun: { plural: string; singular: string }
   onRemove: () => void
   removal: SelectionRemoval
 }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const own = useState(false)
+  const isOpen = confirming?.isOpen ?? own[0]
+  const setIsOpen = confirming?.onOpenChange ?? own[1]
   const subject =
     count === 1 ? `this ${noun.singular}` : `${count} ${noun.plural}`
   const RemoveIcon = removal.isDestructive ? Trash2 : Archive

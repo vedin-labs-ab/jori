@@ -40,7 +40,7 @@ import { type MaterialRequest } from "../dialogs/materials"
 import { DemoUploadDialog } from "../dialogs/upload"
 import { useDemoWorkspace } from "../workspace"
 import { useMaterialListing } from "./listing"
-import { MaterialListOverlays } from "./overlays"
+import { useMaterialListOverlays } from "./overlays"
 
 // The three material lists over the workspace, each the console's own
 // list view inside the console's own list layout, with the row menus'
@@ -61,6 +61,17 @@ export function TablesPage() {
   const requestFor = (kind: MaterialRequest["kind"]) => (table: TableSummary) =>
     setRequest(withMaterial(kind, materialOf(state, table.tableId)))
   const create = () => editing?.create("table", undefined, "table")
+  const list = useMaterialListOverlays({
+    create: null,
+    deleteDescription: tableDeleteDescription,
+    identify: (table) => table.tableId,
+    noun: tableNoun,
+    onCloseRequest: () => setRequest(undefined),
+    pagination: listing.pagination,
+    request,
+    selection: listing.selection,
+    toMaterial: (table) => materialOf(state, table.tableId),
+  })
 
   return (
     <ConsoleListLayout>
@@ -82,20 +93,11 @@ export function TablesPage() {
         onMoveToFolder={requestFor("move")}
         removal={removal(actions.removeMaterial, (table) => table.tableId)}
         selection={listing.selection}
+        selectionActions={list.selectionActions}
         tables={listing.pagination.visibleRows}
         unauthorizedMessage={undefined}
       />
-      <MaterialListOverlays
-        create={null}
-        deleteDescription={tableDeleteDescription}
-        identify={(table) => table.tableId}
-        noun={tableNoun}
-        onCloseRequest={() => setRequest(undefined)}
-        pagination={listing.pagination}
-        request={request}
-        selection={listing.selection}
-        toMaterial={(table) => materialOf(state, table.tableId)}
-      />
+      {list.overlays}
     </ConsoleListLayout>
   )
 }
@@ -115,6 +117,17 @@ export function StoresPage() {
   const requestFor = (kind: MaterialRequest["kind"]) => (store: StoreSummary) =>
     setRequest(withMaterial(kind, materialOf(state, store.storeId)))
   const create = () => editing?.create("store", undefined, "store")
+  const list = useMaterialListOverlays({
+    create: null,
+    deleteDescription: storeDeleteDescription,
+    identify: (store) => store.storeId,
+    noun: storeNoun,
+    onCloseRequest: () => setRequest(undefined),
+    pagination: listing.pagination,
+    request,
+    selection: listing.selection,
+    toMaterial: (store) => materialOf(state, store.storeId),
+  })
 
   return (
     <ConsoleListLayout>
@@ -134,20 +147,11 @@ export function StoresPage() {
         onMoveToFolder={requestFor("move")}
         removal={removal(actions.removeMaterial, (store) => store.storeId)}
         selection={listing.selection}
+        selectionActions={list.selectionActions}
         stores={listing.pagination.visibleRows}
         unauthorizedMessage={undefined}
       />
-      <MaterialListOverlays
-        create={null}
-        deleteDescription={storeDeleteDescription}
-        identify={(store) => store.storeId}
-        noun={storeNoun}
-        onCloseRequest={() => setRequest(undefined)}
-        pagination={listing.pagination}
-        request={request}
-        selection={listing.selection}
-        toMaterial={(store) => materialOf(state, store.storeId)}
-      />
+      {list.overlays}
     </ConsoleListLayout>
   )
 }
@@ -167,6 +171,17 @@ export function FilesPage() {
   const requestFor = (kind: MaterialRequest["kind"]) => (file: FileRow) =>
     setRequest(withMaterial(kind, materialOf(state, file.fileId)))
   const upload = () => setIsUploadOpen(true)
+  const list = useMaterialListOverlays({
+    create: null,
+    deleteDescription: fileDeleteDescription,
+    identify: (file) => file.fileId,
+    noun: fileNoun,
+    onCloseRequest: () => setRequest(undefined),
+    pagination: listing.pagination,
+    request,
+    selection: listing.selection,
+    toMaterial: (file) => materialOf(state, file.fileId),
+  })
 
   return (
     <ConsoleListLayout>
@@ -193,18 +208,9 @@ export function FilesPage() {
         onUpload={upload}
         pendingFileId={undefined}
         selection={listing.selection}
+        selectionActions={list.selectionActions}
       />
-      <MaterialListOverlays
-        create={null}
-        deleteDescription={fileDeleteDescription}
-        identify={(file) => file.fileId}
-        noun={fileNoun}
-        onCloseRequest={() => setRequest(undefined)}
-        pagination={listing.pagination}
-        request={request}
-        selection={listing.selection}
-        toMaterial={(file) => materialOf(state, file.fileId)}
-      />
+      {list.overlays}
       <DemoUploadDialog isOpen={isUploadOpen} onOpenChange={setIsUploadOpen} />
     </ConsoleListLayout>
   )

@@ -1,9 +1,9 @@
 import { type ComponentProps, useState } from "react"
-import { SelectionActionsBar } from "@/shared/console/list/bar"
 import {
   type RowSelection,
   useRowSelection,
 } from "@/shared/console/list/selection"
+import { SelectionActionsBar } from "@/shared/console/list/selection/bar"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { AddRowDialog } from "@/shared/console/tables/add"
 import { rowNoun, useRowAdding } from "@/shared/console/tables/adding"

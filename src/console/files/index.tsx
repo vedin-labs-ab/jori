@@ -17,7 +17,6 @@ import {
   ConsoleHeaderActions,
   ConsoleHeaderButton,
 } from "@/shared/console/layout"
-import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { useListState } from "@/shared/console/list/controls"
 import {
   ConsoleListFooter,
@@ -111,6 +110,19 @@ function FilesView({ organizationId }: { organizationId: string }) {
         onUpload={() => page.setIsUploadOpen(true)}
         pendingFileId={page.actions.pendingFileId}
         selection={page.selection}
+        selectionActions={{
+          isBusy: page.bulk.isBusy,
+          noun: fileNoun,
+          onDownload: page.bulk.downloadSelected,
+          onMove: () =>
+            page.setMoving(page.selection.selected.map(toMoveTarget)),
+          onRemove: page.bulk.removeSelected,
+          removal: {
+            description: fileDeleteDescription,
+            isDestructive: true,
+            label: "Delete",
+          },
+        }}
       />
       {page.isLoading ? null : (
         <ConsoleListFooter>
@@ -122,8 +134,7 @@ function FilesView({ organizationId }: { organizationId: string }) {
   )
 }
 
-/** The selection bar and the page's dialogs — everything that floats over
- *  the list. */
+/** The page's dialogs. */
 function FilesOverlays({
   organizationId,
   page,
@@ -133,20 +144,6 @@ function FilesOverlays({
 }) {
   return (
     <>
-      <SelectionActionsBar
-        count={page.selection.count}
-        isBusy={page.bulk.isBusy}
-        noun={fileNoun}
-        onClear={page.selection.clear}
-        onDownload={page.bulk.downloadSelected}
-        onMove={() => page.setMoving(page.selection.selected.map(toMoveTarget))}
-        onRemove={page.bulk.removeSelected}
-        removal={{
-          description: fileDeleteDescription,
-          isDestructive: true,
-          label: "Delete",
-        }}
-      />
       <UploadFileDialog
         isOpen={page.isUploadOpen}
         onOpenChange={page.setIsUploadOpen}

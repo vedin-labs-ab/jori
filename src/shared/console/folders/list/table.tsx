@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils"
 import { countLabel } from "../../count"
 import { CreatedItemRow } from "../../edit/row"
 import { type Edit } from "../../edit/state"
-import { SelectionHeadCell, SelectionRowCell } from "../../list/bar"
 import {
   columnTier,
   type FacetEntry,
@@ -20,7 +19,9 @@ import {
 } from "../../list/controls"
 import { ConsoleListTable } from "../../list/frame"
 import { FilterHead, SortHead } from "../../list/head"
+import { ListRow } from "../../list/pointer/row"
 import { type RowSelection } from "../../list/selection"
+import { SelectionHeadCell, SelectionRowCell } from "../../list/selection/bar"
 import { MaterialMeasureCell } from "../../materials/cells/measure"
 import {
   MaterialOwnerCell,
@@ -35,7 +36,6 @@ import {
   VisibilityNameMark,
 } from "../../visibility/table"
 import { type DragPayload } from "../drag/plan"
-import { DraggableTableRow } from "../drag/row"
 import { useFolderRowDrag } from "../drag/state"
 import { FolderName } from "../edit/name"
 import { FolderRowMenu } from "../menu"
@@ -69,7 +69,7 @@ export function FolderListTable({
   selection: RowSelection<FolderListEntry>
 }) {
   return (
-    <ConsoleListTable className="[&_td]:h-10">
+    <ConsoleListTable className="[&_td]:h-10" selection={selection}>
       <TableHeader>
         <TableRow>
           <SelectionHeadCell selection={selection} />
@@ -107,21 +107,23 @@ export function FolderListTable({
   )
 }
 
-/** One folder row, wherever folders list: it links to the folder's page
- *  and drags like a sidebar row, and a selected row takes the rest of the
- *  selection with it. Folder icons are independent of contents, and the
+/** One folder row, wherever folders list: it opens the folder's page
+ *  and drags by its name like a sidebar row, and a selected row takes the
+ *  rest of the selection with it. Folder icons are independent of contents, and the
  *  Owner cell shows whoever made it. */
 export function FolderListRow({
   folder,
   onDialog,
   selected,
   selection,
+  selectionMenu,
 }: {
   folder: ListedFolder
   onDialog: (request: FolderDialogRequest) => void
   /** The selection, as a drag would carry it. */
   selected: DragPayload
   selection: RowSelection<FolderListEntry>
+  selectionMenu: ReactNode
 }) {
   const drag = useFolderRowDrag(
     "contents",
@@ -130,9 +132,11 @@ export function FolderListRow({
   )
 
   return (
-    <DraggableTableRow
-      data-state={selection.isSelected(folder) ? "selected" : undefined}
+    <ListRow<FolderListEntry>
       drag={drag}
+      row={folder}
+      selection={selection}
+      selectionMenu={selectionMenu}
     >
       <SelectionRowCell
         label={`Select ${folder.name}`}
@@ -162,7 +166,7 @@ export function FolderListRow({
       <TableCell className="text-right">
         <FolderRowMenu folder={folder} onDialog={onDialog} />
       </TableCell>
-    </DraggableTableRow>
+    </ListRow>
   )
 }
 

@@ -231,7 +231,8 @@ function renderRows(
             } as unknown as FolderContentsResult
           }
           folderId="folder-0"
-          newMenu={<button type="button">New</button>}
+          onCreate={() => undefined}
+          onNewFolder={() => undefined}
           onDialog={onDialog}
           resourceMenu={(resource) => (
             <ResourceRowMenu actions={actions} resource={resource} />

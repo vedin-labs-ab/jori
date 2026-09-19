@@ -5,11 +5,11 @@ import {
   type MoveResourceTarget,
   resourceSubject,
 } from "@/shared/console/folders/types"
-import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { ConsoleListFooter } from "@/shared/console/list/frame"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { type useClientPagination } from "@/shared/console/list/pagination"
 import { type RowSelection } from "@/shared/console/list/selection"
+import { type SelectionActions } from "@/shared/console/list/selection/bar"
 import {
   bulkMaterialRemoval,
   bulkMaterialRemovalSuccess,
@@ -21,10 +21,10 @@ import { DemoMoveDialog } from "../dialogs/move"
 import { type DemoMaterial } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
 
-/** Everything below and over a material list: the pager, the selection
- *  bar's move and remove, the row menus' dialogs, and the create dialog
- *  the page brings. */
-export function MaterialListOverlays<
+/** Everything below and over a material list: the pager, the row menus'
+ *  dialogs, and the create dialog the page brings, beside the selection's
+ *  move and remove for the list to offer. */
+export function useMaterialListOverlays<
   Row extends { archivedAt?: number; name: string },
 >({
   create,
@@ -46,44 +46,39 @@ export function MaterialListOverlays<
   request: MaterialRequest | undefined
   selection: RowSelection<Row>
   toMaterial: (row: Row) => DemoMaterial | undefined
-}) {
+}): { overlays: ReactNode; selectionActions: SelectionActions } {
   const { actions } = useDemoWorkspace()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
 
-  return (
+  const selectionActions: SelectionActions = {
+    isBusy: false,
+    noun,
+    onMove: () =>
+      setMoving(
+        selection.selected.flatMap((row) => {
+          const material = toMaterial(row)
+
+          return material === undefined ? [] : [materialMoveTarget(material)]
+        })
+      ),
+    onRemove: () => {
+      for (const row of selection.selected) {
+        actions.removeMaterial(identify(row))
+      }
+
+      toast.success(bulkMaterialRemovalSuccess(selection.selected, noun))
+    },
+    removal: bulkMaterialRemoval(
+      selection.selected.map(() => ({})),
+      noun,
+      deleteDescription
+    ),
+  }
+  const overlays = (
     <>
       <ConsoleListFooter>
         <ConsoleListPager pagination={pagination} />
       </ConsoleListFooter>
-      <SelectionActionsBar
-        count={selection.count}
-        isBusy={false}
-        noun={noun}
-        onClear={selection.clear}
-        onMove={() =>
-          setMoving(
-            selection.selected.flatMap((row) => {
-              const material = toMaterial(row)
-
-              return material === undefined
-                ? []
-                : [materialMoveTarget(material)]
-            })
-          )
-        }
-        onRemove={() => {
-          for (const row of selection.selected) {
-            actions.removeMaterial(identify(row))
-          }
-
-          toast.success(bulkMaterialRemovalSuccess(selection.selected, noun))
-        }}
-        removal={bulkMaterialRemoval(
-          selection.selected.map(() => ({})),
-          noun,
-          deleteDescription
-        )}
-      />
       <DemoMoveDialog
         onOpenChange={closeOnDismiss(() => setMoving(undefined))}
         subject={
@@ -96,4 +91,6 @@ export function MaterialListOverlays<
       {create}
     </>
   )
+
+  return { overlays, selectionActions }
 }

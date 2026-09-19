@@ -1,10 +1,5 @@
 import { ChevronRight, Folder, FolderOpen, MoreHorizontal } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
   SidebarMenuAction,
   SidebarMenuButton,
@@ -13,7 +8,8 @@ import {
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { useEditing, useEditMenuFocus } from "../edit/state"
-import { menuWidth } from "../menu"
+import { MenuSeparator } from "../menu/items"
+import { RowMenu, RowMenuArea } from "../menu/row"
 import { ConsoleLink } from "../shell/link"
 import { VisibilityMark } from "../visibility/badge"
 import { NewInFolderSub } from "./create"
@@ -32,8 +28,8 @@ import {
 
 /** One sidebar tree row: the button navigates to the folder's page, the
  *  chevron expands its children into an indented sub-list, the hover menu
- *  raises the lifecycle dialogs, and the row drags onto other rows (or the
- *  group header) to move the folder. */
+ *  and a right-click raise the lifecycle dialogs, and the row drags onto
+ *  other rows (or the group header) to move the folder. */
 export function FolderTreeItem({
   expansion,
   node,
@@ -65,36 +61,38 @@ export function FolderTreeItem({
           row would reveal every ancestor's menu. This wrapper is the row's
           hover boundary: actions inside reveal only when THIS row is
           hovered, and position against it, not the subtree. */}
-      <div className="group/row relative">
-        <FolderName folder={node} surface="sidebar">
-          <FolderRowLink
-            folder={node}
-            drag={drag}
-            folderId={node.folderId}
-            hasChildren={hasChildren}
-            isActive={activeFolderId(pathname) === node.folderId}
-            isExpanded={isExpanded}
-            name={node.name}
-            onNavigate={() => expansion.expand(node.folderId)}
-          />
-        </FolderName>
-        {hasChildren && !isEditing ? (
-          <RowChevron
-            isDragActive={drag.isDragActive}
-            isExpanded={isExpanded}
-            name={node.name}
-            onToggle={() => expansion.toggle(node.folderId)}
-          />
-        ) : null}
-        {!isEditing ? (
-          <FolderTreeMenu
-            folder={node}
-            isDragActive={drag.isDragActive}
-            onCreate={onCreate}
-            onDialog={onDialog}
-          />
-        ) : null}
-      </div>
+      <RowMenuArea disabled={isEditing}>
+        <div className="group/row relative">
+          <FolderName folder={node} surface="sidebar">
+            <FolderRowLink
+              folder={node}
+              drag={drag}
+              folderId={node.folderId}
+              hasChildren={hasChildren}
+              isActive={activeFolderId(pathname) === node.folderId}
+              isExpanded={isExpanded}
+              name={node.name}
+              onNavigate={() => expansion.expand(node.folderId)}
+            />
+          </FolderName>
+          {hasChildren && !isEditing ? (
+            <RowChevron
+              isDragActive={drag.isDragActive}
+              isExpanded={isExpanded}
+              name={node.name}
+              onToggle={() => expansion.toggle(node.folderId)}
+            />
+          ) : null}
+          {!isEditing ? (
+            <FolderTreeMenu
+              folder={node}
+              isDragActive={drag.isDragActive}
+              onCreate={onCreate}
+              onDialog={onDialog}
+            />
+          ) : null}
+        </div>
+      </RowMenuArea>
       {isExpanded ? (
         // The default sub-list insets both edges, so at the backend's
         // depth-8 nesting cap rows would shrink from the right and lose
@@ -258,41 +256,41 @@ function FolderTreeMenu({
 }) {
   const onCloseAutoFocus = useEditMenuFocus()
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {/* Not showOnHover: that keys off the item-wide group (see the row
-            wrapper's comment); this reveal is scoped to the row's own
-            group. Keyboard reveal keys off focus-visible, not focus-within,
-            so a mouse click leaves no lingering "…"; while a drag passes
-            over rows the menu stays hidden entirely. */}
-        <SidebarMenuAction
-          aria-label={`Open actions for ${folder.name}`}
-          className={cn(
-            "aria-expanded:opacity-100 pointer-fine:opacity-0",
-            !isDragActive &&
-              "group-has-[:focus-visible]/row:opacity-100 group-hover/row:opacity-100"
-          )}
-        >
-          <MoreHorizontal />
-        </SidebarMenuAction>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="start"
-        className={menuWidth}
-        side="right"
-        onCloseAutoFocus={onCloseAutoFocus}
-      >
-        <NewInFolderSub
-          onCreate={(creation) =>
-            onCreate({ creation, folderId: folder.folderId })
-          }
-          onNewFolder={() =>
-            onDialog({ type: "create", parentId: folder.folderId })
-          }
-        />
-        <DropdownMenuSeparator />
-        <FolderMenuItems folder={folder} onDialog={onDialog} />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <RowMenu
+      align="start"
+      name={folder.name}
+      onCloseAutoFocus={onCloseAutoFocus}
+      side="right"
+      trigger={
+        <DropdownMenuTrigger asChild>
+          {/* Not showOnHover: that keys off the item-wide group (see the
+              row wrapper's comment); this reveal is scoped to the row's own
+              group. Keyboard reveal keys off focus-visible, not
+              focus-within, so a mouse click leaves no lingering "…"; while
+              a drag passes over rows the menu stays hidden entirely. */}
+          <SidebarMenuAction
+            aria-label={`Open actions for ${folder.name}`}
+            className={cn(
+              "aria-expanded:opacity-100 pointer-fine:opacity-0",
+              !isDragActive &&
+                "group-has-[:focus-visible]/row:opacity-100 group-hover/row:opacity-100"
+            )}
+          >
+            <MoreHorizontal />
+          </SidebarMenuAction>
+        </DropdownMenuTrigger>
+      }
+    >
+      <NewInFolderSub
+        onCreate={(creation) =>
+          onCreate({ creation, folderId: folder.folderId })
+        }
+        onNewFolder={() =>
+          onDialog({ type: "create", parentId: folder.folderId })
+        }
+      />
+      <MenuSeparator />
+      <FolderMenuItems folder={folder} onDialog={onDialog} />
+    </RowMenu>
   )
 }

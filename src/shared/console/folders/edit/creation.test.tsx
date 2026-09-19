@@ -74,7 +74,8 @@ function example(create: () => Promise<EditItem>, refreshed = false) {
                 : [folder],
             }}
             folderId="parent"
-            newMenu={null}
+            onCreate={() => undefined}
+            onNewFolder={() => undefined}
             onDialog={() => undefined}
             resourceMenu={() => null}
             selectionActions={{

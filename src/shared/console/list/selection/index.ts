@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 /** Row selection over the currently visible rows of a list page. Ids are
  *  matched against the rows on every render, so rows that disappear —
@@ -7,7 +7,14 @@ import { useState } from "react"
 export type RowSelection<Row> = {
   clear: () => void
   count: number
+  /** The id a row answers to, here and on its element's `data-row-id`. */
+  identify: (row: Row) => string
   isSelected: (row: Row) => boolean
+  /** A pointer's pick, as a file manager reads it: the row alone, toggled
+   *  into the selection, or the run from the last pick through this row. */
+  pick: (row: Row, how?: "alone" | "toggle" | "range") => void
+  /** Swaps the whole selection, as a marquee does while it sweeps. */
+  replace: (ids: Iterable<string>) => void
   selected: Row[]
   toggle: (row: Row) => void
   toggleAll: () => void
@@ -24,6 +31,8 @@ export function useRowSelection<Row>({
   disabled?: (row: Row) => boolean
 }): RowSelection<Row> {
   const [ids, setIds] = useState<ReadonlySet<string>>(new Set())
+  // Where a Shift-pick's run starts: the last row picked without Shift.
+  const anchor = useRef<string | undefined>(undefined)
   rows = rows.filter((row) => !disabled?.(row))
   const selected = rows.filter((row) => ids.has(identify(row)))
   const allSelected = rows.length > 0 && selected.length === rows.length
@@ -32,16 +41,45 @@ export function useRowSelection<Row>({
     allSelected,
     clear: () => setIds(new Set()),
     count: selected.length,
+    identify,
     isSelected: (row) => !disabled?.(row) && ids.has(identify(row)),
+    pick: (row, how = "alone") => {
+      if (disabled?.(row)) {
+        return
+      }
+
+      const id = identify(row)
+
+      if (how === "range") {
+        setIds(new Set(runBetween(rows.map(identify), anchor.current, id)))
+        return
+      }
+
+      anchor.current = id
+      setIds(how === "toggle" ? withToggled(ids, id) : new Set([id]))
+    },
+    replace: (next) => setIds(new Set(next)),
     selected,
     toggle: (row) => {
       if (!disabled?.(row)) {
+        anchor.current = identify(row)
         setIds(withToggled(ids, identify(row)))
       }
     },
     toggleAll: () =>
       setIds(allSelected ? new Set() : new Set(rows.map(identify))),
   }
+}
+
+/** The ids from the anchor through the target, in list order; the target
+ *  alone when the anchor is gone from the list. */
+function runBetween(ids: string[], anchor: string | undefined, target: string) {
+  const from = anchor === undefined ? -1 : ids.indexOf(anchor)
+  const to = ids.indexOf(target)
+
+  return from === -1
+    ? [target]
+    : ids.slice(Math.min(from, to), Math.max(from, to) + 1)
 }
 
 function withToggled(ids: ReadonlySet<string>, id: string) {

@@ -6,10 +6,7 @@ import {
   Pencil,
   RotateCcw,
 } from "lucide-react"
-import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
+import { MenuItem, MenuSeparator } from "../../menu/items"
 import { type MaterialActionTarget, RemoveMenuItem } from "./confirm"
 
 // The canonical menu for a table or a store, as items only. Every surface
@@ -54,10 +51,10 @@ export function MaterialMenuItems({
         onUnfile={onUnfile}
       />
       {isArchived ? (
-        <DropdownMenuItem disabled={isPending} onSelect={onRestore}>
+        <MenuItem disabled={isPending} onSelect={onRestore}>
           {isRestoring ? <Loader2 className="animate-spin" /> : <RotateCcw />}
           {isRestoring ? "Restoring" : "Restore"}
-        </DropdownMenuItem>
+        </MenuItem>
       ) : null}
       <RemoveMenuItem
         isArchived={isArchived}
@@ -86,17 +83,17 @@ export function MaterialCoreItems({
 }) {
   return (
     <>
-      <DropdownMenuItem disabled={isPending} onSelect={onEdit}>
+      <MenuItem disabled={isPending} onSelect={onEdit}>
         <Pencil />
         Rename…
-      </DropdownMenuItem>
+      </MenuItem>
       <MaterialFilingItems
         isPending={isPending}
         onAccess={onAccess}
         onMoveToFolder={onMoveToFolder}
         onUnfile={onUnfile}
       />
-      <DropdownMenuSeparator />
+      <MenuSeparator />
     </>
   )
 }
@@ -115,19 +112,19 @@ export function MaterialFilingItems({
 }) {
   return (
     <>
-      <DropdownMenuItem disabled={isPending} onSelect={onAccess}>
+      <MenuItem disabled={isPending} onSelect={onAccess}>
         <LockKeyhole />
         Audience…
-      </DropdownMenuItem>
-      <DropdownMenuItem disabled={isPending} onSelect={onMoveToFolder}>
+      </MenuItem>
+      <MenuItem disabled={isPending} onSelect={onMoveToFolder}>
         <FolderInput />
         Move to folder…
-      </DropdownMenuItem>
+      </MenuItem>
       {onUnfile === undefined ? null : (
-        <DropdownMenuItem disabled={isPending} onSelect={onUnfile}>
+        <MenuItem disabled={isPending} onSelect={onUnfile}>
           <FolderMinus />
           Remove from folder
-        </DropdownMenuItem>
+        </MenuItem>
       )}
     </>
   )

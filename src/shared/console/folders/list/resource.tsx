@@ -5,9 +5,10 @@ import { SeparatorDot } from "../../dot"
 import { CreatedItemRow } from "../../edit/row"
 import { type Edit } from "../../edit/state"
 import { JobStatus } from "../../jobs/status"
-import { SelectionRowCell } from "../../list/bar"
 import { columnTier, nameColumnClassName } from "../../list/controls"
+import { ListRow } from "../../list/pointer/row"
 import { type RowSelection } from "../../list/selection"
+import { SelectionRowCell } from "../../list/selection/bar"
 import {
   MaterialOwnerCell,
   ownerColumnClassName,
@@ -17,7 +18,6 @@ import { ConsoleLink } from "../../shell/link"
 import { absoluteTime, relativeTime, useNow } from "../../time"
 import { VisibilityCell, VisibilityNameMark } from "../../visibility/table"
 import { type DragPayload } from "../drag/plan"
-import { DraggableTableRow } from "../drag/row"
 import { useResourceRowDrag } from "../drag/state"
 import {
   type FolderResource,
@@ -27,8 +27,8 @@ import {
 import { type FolderListEntry, resourceDragItem } from "./controls"
 import { nameLinkClassName } from "./style"
 
-/** One filed resource in a folder's listing, linking to its own surface.
- *  The row drags: resources file onto any folder row or unfile onto the
+/** One filed resource in a folder's listing, opening its own surface.
+ *  The row drags by its name: resources file onto any folder row or unfile onto the
  *  sidebar's group header, and a selected row takes the rest of the
  *  selected resources with it. Its menu, trigger and all, is handed in:
  *  what a filed resource can be asked to do is its own kind's business. */
@@ -38,6 +38,7 @@ export function ResourceListRow({
   resource,
   selected,
   selection,
+  selectionMenu,
 }: {
   /** The folder being viewed — the one the resource already sits in. */
   folderId: string | undefined
@@ -46,6 +47,7 @@ export function ResourceListRow({
   /** The selection, as a drag would carry it. */
   selected: DragPayload
   selection: RowSelection<FolderListEntry>
+  selectionMenu: ReactNode
 }) {
   const drag = useResourceRowDrag(
     resourceDragItem(resource, folderId),
@@ -53,9 +55,11 @@ export function ResourceListRow({
   )
 
   return (
-    <DraggableTableRow
-      data-state={selection.isSelected(resource) ? "selected" : undefined}
+    <ListRow<FolderListEntry>
       drag={drag}
+      row={resource}
+      selection={selection}
+      selectionMenu={selectionMenu}
     >
       <SelectionRowCell
         label={`Select ${resource.name}`}
@@ -67,7 +71,7 @@ export function ResourceListRow({
       </TableCell>
       <ResourceCells resource={resource} folderId={folderId} />
       <TableCell className="text-right">{menu}</TableCell>
-    </DraggableTableRow>
+    </ListRow>
   )
 }
 

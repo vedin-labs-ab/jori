@@ -4,7 +4,6 @@ import { tableSummaries } from "@/landing/demo/derive/materials"
 import { demoId } from "@/landing/demo/fixtures/ids"
 import { useMaterialListing } from "@/landing/demo/pages/listing"
 import { useDemoWorkspace } from "@/landing/demo/workspace"
-import { SelectionActionsBar } from "@/shared/console/list/bar"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { ConsoleListBody } from "@/shared/console/list/pager"
 import { bulkMaterialRemoval } from "@/shared/console/materials/removal"
@@ -109,24 +108,22 @@ export function ListStates({ state }: { state: string }) {
           onMoveToFolder={ignore}
           removal={removal}
           selection={listing.selection}
+          selectionActions={{
+            isBusy: false,
+            noun: tableNoun,
+            onRemove: ignore,
+            removal: bulkMaterialRemoval(
+              listing.selection.selected,
+              tableNoun,
+              tableDeleteDescription
+            ),
+          }}
           tables={listing.pagination.visibleRows}
           unauthorizedMessage={
             unauthorized ? "You do not have access to these tables." : undefined
           }
         />
       </ConsoleListBody>
-      <SelectionActionsBar
-        count={listing.selection.count}
-        isBusy={false}
-        noun={tableNoun}
-        onClear={listing.selection.clear}
-        onRemove={ignore}
-        removal={bulkMaterialRemoval(
-          listing.selection.selected,
-          tableNoun,
-          tableDeleteDescription
-        )}
-      />
     </ConsoleListLayout>
   )
 }

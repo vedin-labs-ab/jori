@@ -1,5 +1,5 @@
-import { type SelectionRemoval } from "../../list/bar"
 import { type ListConfig } from "../../list/controls"
+import { type SelectionRemoval } from "../../list/selection/bar"
 import { type FolderNames, folderFacet } from "../../materials/folders"
 import { ownerFacet } from "../../materials/owners"
 import { type Job } from "../types"

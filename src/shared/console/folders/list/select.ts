@@ -1,5 +1,5 @@
 import { countNoun } from "../../count"
-import { type SelectionRemoval } from "../../list/bar"
+import { type SelectionRemoval } from "../../list/selection/bar"
 import {
   type FolderResource,
   type ListedFolder,

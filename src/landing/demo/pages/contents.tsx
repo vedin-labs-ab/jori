@@ -1,5 +1,4 @@
 import { type ComponentProps, type ReactNode, useMemo } from "react"
-import { NewInFolderButton } from "@/shared/console/folders/create"
 import { useCreationRequests } from "@/shared/console/folders/creation"
 import { useFolderRequests } from "@/shared/console/folders/edit/state"
 import { type FolderContents } from "@/shared/console/folders/list/contents"
@@ -51,10 +50,9 @@ export function useDemoFolderContents(
     contents: {
       contents,
       folderId: folder?.folderId,
-      newMenu: (
-        <NewInFolderButton onCreate={setCreation} onNewFolder={onNewFolder} />
-      ),
+      onCreate: setCreation,
       onDialog: setDialog,
+      onNewFolder,
       resourceMenu: (resource) => <DemoResourceMenu resource={resource} />,
       selectionActions: selection.actions,
     },

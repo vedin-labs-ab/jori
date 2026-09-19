@@ -9,9 +9,9 @@ export type RowDrag = DragSource & {
   isSettling?: boolean
 }
 
-/** The row and its primary link share the grab cursor. Separate links and
- *  controls keep their own cursors; the drag provider switches to grabbing
- *  once movement activates a drag. */
+/** The name is the row's drag handle, so it alone offers the open hand;
+ *  the rest of the row selects. Other links keep the pointer, and the
+ *  drag provider switches to grabbing once movement activates a drag. */
 export function rowDragClasses(drag: {
   isDragActive: boolean
   isDragSource: boolean
@@ -19,7 +19,7 @@ export function rowDragClasses(drag: {
   isSettling?: boolean
 }) {
   return cn(
-    "cursor-grab [&_a]:cursor-pointer [&_[data-row-link]_a]:cursor-grab [&_button]:cursor-default",
+    "[&_a]:cursor-pointer [&_[data-row-link]_a]:cursor-grab",
     drag.isDragActive && !drag.isDropTarget && "hover:bg-transparent",
     drag.isDragSource && "opacity-50",
     drag.isDropTarget && "bg-accent",

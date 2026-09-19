@@ -1,5 +1,4 @@
 import { Files, Upload } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
   type ListConfig,
@@ -7,6 +6,7 @@ import {
 } from "@/shared/console/list/controls"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
 import { type RowSelection } from "@/shared/console/list/selection"
+import { type SelectionActions } from "@/shared/console/list/selection/bar"
 import {
   accessColumns,
   ownerColumn,
@@ -72,6 +72,7 @@ export function FileTable({
   onUpload,
   pendingFileId,
   selection,
+  selectionActions,
 }: {
   config: ListConfig<FileRow>
   controls: ListControls
@@ -86,6 +87,7 @@ export function FileTable({
   onUpload: () => void
   pendingFileId: FileRow["fileId"] | undefined
   selection: RowSelection<FileRow>
+  selectionActions: SelectionActions
 }) {
   if (isLoading) {
     return <ConsoleListLoading />
@@ -98,13 +100,8 @@ export function FileTable({
       folders={folders}
       hasFilters={hasFilters}
       kind={{
-        action: (
-          <Button onClick={onUpload} type="button">
-            <Upload />
-            Upload file
-          </Button>
-        ),
         columns,
+        creates: [{ icon: Upload, label: "Upload file", onSelect: onUpload }],
         description:
           "Files Jori saves during runs and uploads from your team appear here.",
         drag: fileDragItem,
@@ -125,6 +122,7 @@ export function FileTable({
       }}
       rows={files}
       selection={selection}
+      selectionActions={selectionActions}
       unauthorizedMessage={undefined}
     />
   )

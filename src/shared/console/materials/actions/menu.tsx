@@ -1,15 +1,12 @@
 import { type ReactNode, useState } from "react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-} from "@/components/ui/dropdown-menu"
-import { menuWidth, RowMenuTrigger, TitleMenuContent } from "../../menu"
+import { TitleMenuContent } from "../../menu"
+import { RowMenu } from "../../menu/row"
 import { type MaterialMenuActions, MaterialMenuItems } from "."
 import { ConfirmRemoveDialog } from "./confirm"
 
 // Two triggers over one menu: the detail page hangs it off the material's
-// name in the breadcrumb, a list row off its "…" button. Both own the
-// confirmation the archive and delete steps pass through.
+// name in the breadcrumb, a list row off its "…" button and a right-click.
+// Both own the confirmation the archive and delete steps pass through.
 
 type MaterialMenuProps = MaterialMenuActions & {
   /** What a permanent delete takes with it, shown in the confirm dialog. */
@@ -44,12 +41,9 @@ export function MaterialRowMenu(props: MaterialMenuProps) {
 
   return (
     <>
-      <DropdownMenu>
-        <RowMenuTrigger name={props.material.name} />
-        <DropdownMenuContent align="end" className={menuWidth}>
-          <MaterialMenuItems {...props} onRemove={confirm.request} />
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <RowMenu name={props.material.name}>
+        <MaterialMenuItems {...props} onRemove={confirm.request} />
+      </RowMenu>
       {confirm.dialog}
     </>
   )

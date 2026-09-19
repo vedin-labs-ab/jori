@@ -1,6 +1,5 @@
 import { Database, Plus } from "lucide-react"
 import { type ComponentProps } from "react"
-import { Button } from "@/components/ui/button"
 import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
   ConsoleHeaderActions,
@@ -90,13 +89,8 @@ export function StoreList({
       kind={{
         creationKind: "store",
         createdRow: (item) => item.store,
-        action: (
-          <Button onClick={onCreate} type="button">
-            <Plus />
-            New store
-          </Button>
-        ),
         columns,
+        creates: [{ icon: Plus, label: "New store", onSelect: onCreate }],
         description:
           "JSON documents Jori and your team keep state in appear here.",
         drag,

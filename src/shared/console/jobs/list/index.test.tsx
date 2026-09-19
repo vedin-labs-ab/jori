@@ -10,7 +10,10 @@ import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { type ListControls } from "@/shared/console/list/controls"
 import { listControls } from "../../../../../test/list/controls"
-import { emptySelection } from "../../../../../test/list/selection"
+import {
+  emptySelection,
+  idleSelectionActions,
+} from "../../../../../test/list/selection"
 import { VisibilityDirectoryContext } from "../../visibility/directory"
 import { type Job } from "../types"
 import { JobList } from "."
@@ -95,6 +98,7 @@ function renderList(
           onMoveToFolder={() => undefined}
           onPausedChange={onPausedChange}
           selection={emptySelection()}
+          selectionActions={idleSelectionActions}
           unauthorizedMessage={undefined}
         />
       </VisibilityDirectoryContext.Provider>

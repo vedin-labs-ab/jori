@@ -1,6 +1,5 @@
 import { Plus, Workflow } from "lucide-react"
 import { type ComponentProps } from "react"
-import { Button } from "@/components/ui/button"
 import { type ResourceDragItem } from "@/shared/console/folders/drag/plan"
 import {
   accessColumns,
@@ -69,13 +68,8 @@ export function JobList({
     <MaterialList
       {...props}
       kind={{
-        action: (
-          <Button onClick={onCreate} type="button">
-            <Plus />
-            New job
-          </Button>
-        ),
         columns,
+        creates: [{ icon: Plus, label: "New job", onSelect: onCreate }],
         description:
           "Create a job for recurring, one-time, or event-triggered work.",
         drag,

@@ -11,18 +11,21 @@ import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useEditMenuFocus } from "../edit/state"
+import {
+  MenuItem,
+  MenuSub,
+  MenuSubContent,
+  MenuSubTrigger,
+} from "../menu/items"
 import { type FolderCreation } from "./types"
 
 // The console's "New" entries — a folder plus every resource that can be
 // created in place — shared by the folder page's header and empty state,
-// the sidebar group's "+" action, and each tree row's menu.
+// the sidebar group's "+" action, each tree row's menu, and a right-click
+// on a folder listing's background.
 
 type NewMenuHandlers = {
   /** Ran with the resource type to create; the owner creates inline or opens its setup flow. */
@@ -39,18 +42,23 @@ const resourceEntries = [
   { creation: "job", icon: Workflow, label: "Job" },
 ] as const
 
-/** "New" as a submenu, the first entry of the folder "…" menus. */
-export function NewInFolderSub(handlers: NewMenuHandlers) {
+/** "New" as a submenu, the first entry of the folder "…" menus and of a
+ *  listing's right-click. At the top level the folder entry is no one's
+ *  subfolder. */
+export function NewInFolderSub({
+  isTopLevel = false,
+  ...handlers
+}: NewMenuHandlers & { isTopLevel?: boolean }) {
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>
+    <MenuSub>
+      <MenuSubTrigger>
         <Plus className="text-muted-foreground" />
         New
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent>
-        <NewResourceItems labels="bare" {...handlers} />
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+      </MenuSubTrigger>
+      <MenuSubContent>
+        <NewResourceItems labels={isTopLevel ? "top" : "bare"} {...handlers} />
+      </MenuSubContent>
+    </MenuSub>
   )
 }
 
@@ -86,27 +94,35 @@ export function NewInFolderMenu({
   )
 }
 
+const folderLabel = {
+  bare: "Subfolder",
+  prefixed: "New folder",
+  top: "Folder",
+}
+
 /** Bare labels sit under a "New" submenu trigger that already says so;
  *  standalone menus spell out "New …" per entry. */
 function NewResourceItems({
   labels,
   onCreate,
   onNewFolder,
-}: NewMenuHandlers & { labels: "bare" | "prefixed" }) {
+}: NewMenuHandlers & { labels: "bare" | "prefixed" | "top" }) {
   return (
     <>
-      <DropdownMenuItem onSelect={onNewFolder}>
+      <MenuItem onSelect={onNewFolder}>
         <FolderPlus className="text-muted-foreground" />
-        {labels === "bare" ? "Subfolder" : "New folder"}
-      </DropdownMenuItem>
+        {folderLabel[labels]}
+      </MenuItem>
       {resourceEntries.map((entry) => (
-        <DropdownMenuItem
+        <MenuItem
           key={entry.creation}
           onSelect={() => onCreate(entry.creation)}
         >
           <entry.icon className="text-muted-foreground" />
-          {labels === "bare" ? entry.label : `New ${entry.label.toLowerCase()}`}
-        </DropdownMenuItem>
+          {labels === "prefixed"
+            ? `New ${entry.label.toLowerCase()}`
+            : entry.label}
+        </MenuItem>
       ))}
     </>
   )

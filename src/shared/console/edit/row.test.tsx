@@ -10,7 +10,10 @@ import { Table2 } from "lucide-react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { listControls } from "../../../../test/list/controls"
-import { emptySelection } from "../../../../test/list/selection"
+import {
+  emptySelection,
+  idleSelectionActions,
+} from "../../../../test/list/selection"
 import { MaterialList } from "../materials/list"
 import { EditingProvider } from "./provider"
 import { useEditing } from "./state"
@@ -56,10 +59,10 @@ function example({
           folders={undefined}
           hasFilters={filtered}
           selection={emptySelection<typeof row>()}
+          selectionActions={idleSelectionActions}
           unauthorizedMessage={undefined}
           kind={{
             creationKind: "table",
-            action: null,
             createdRow: () => row,
             columns: [
               {
@@ -68,6 +71,7 @@ function example({
                 cell: () => <button type="button">Ada</button>,
               },
             ],
+            creates: [],
             description: "Tables",
             drag: (r) => ({ type: "table", id: r.id, name: r.name }),
             icon: Table2,
