@@ -3,7 +3,7 @@ import { type Doc, type Id } from "../../_generated/dataModel"
 import { type QueryCtx } from "../../_generated/server"
 import { optionalString } from "../../shared/input"
 import { createSight, type Sight } from "../../visibility/sight"
-import { activityMaterialId } from "./metadata/materials"
+import { activityFileIds, activityMaterialId } from "./metadata/materials"
 import { type ActivityData } from "./types"
 
 const traceLimit = 500
@@ -28,13 +28,17 @@ export async function loadActivityData(
       loadFiles(ctx, run._id, sight),
     ]
   )
-  const collections = await loadCollections(ctx, traces, sight)
+  const [collections, touched] = await Promise.all([
+    loadCollections(ctx, traces, sight),
+    loadTouchedFiles(ctx, traces, sight),
+  ])
 
   return {
     agents,
     approvals,
     collections,
     files,
+    touched,
     offers,
     run,
     traces,
@@ -49,40 +53,80 @@ async function loadCollections(
   traces: Doc<"traces">[],
   sight: Sight
 ) {
-  const ids = new Set<Id<"collections">>()
-  const toolTraces = traces.filter(
-    (trace) => trace.type === "tool.started" || trace.type === "tool.failed"
+  const references = toolCalls(traces).map(({ tool, input }) =>
+    activityMaterialId(tool, input)
   )
 
-  for (const trace of toolTraces) {
-    const reference = activityMaterialId(
-      optionalString(trace.data.tool.name),
-      isRecord(trace.data.input) ? trace.data.input : undefined
-    )
-    const id =
-      reference === undefined
-        ? null
-        : ctx.db.normalizeId("collections", reference)
+  const ids = referencedIds(ctx, "collections", references)
 
-    if (id !== null) {
+  return await visible(
+    await Promise.all(ids.map((id) => ctx.db.get(id))),
+    sight
+  )
+}
+
+/** Loads the files the run's tool calls read, shared, or sent, keeping only
+ *  those the viewer may see. */
+async function loadTouchedFiles(
+  ctx: QueryCtx,
+  traces: Doc<"traces">[],
+  sight: Sight
+) {
+  const references = toolCalls(traces).flatMap(({ tool, input }) =>
+    activityFileIds(tool, input)
+  )
+
+  const ids = referencedIds(ctx, "files", references)
+
+  return await visible(
+    await Promise.all(ids.map((id) => ctx.db.get(id))),
+    sight
+  )
+}
+
+function toolCalls(traces: Doc<"traces">[]) {
+  return traces
+    .filter(
+      (trace) => trace.type === "tool.started" || trace.type === "tool.failed"
+    )
+    .map((trace) => ({
+      tool: optionalString(trace.data.tool.name),
+      input: isRecord(trace.data.input) ? trace.data.input : undefined,
+    }))
+}
+
+function referencedIds<Table extends "collections" | "files">(
+  ctx: QueryCtx,
+  table: Table,
+  references: Array<string | undefined>
+) {
+  const ids = new Set<Id<Table>>()
+
+  for (const reference of references) {
+    const id =
+      reference === undefined ? null : ctx.db.normalizeId(table, reference)
+
+    if (id !== null && ids.size < relationLimit) {
       ids.add(id)
     }
+  }
 
-    if (ids.size >= relationLimit) {
-      break
+  return [...ids]
+}
+
+async function visible<Material extends Parameters<Sight["canSee"]>[0]>(
+  materials: Array<Material | null>,
+  sight: Sight
+) {
+  const seen: Material[] = []
+
+  for (const material of materials) {
+    if (material !== null && (await sight.canSee(material))) {
+      seen.push(material)
     }
   }
 
-  const collections = await Promise.all([...ids].map((id) => ctx.db.get(id)))
-  const visible: Doc<"collections">[] = []
-
-  for (const collection of collections) {
-    if (collection !== null && (await sight.canSee(collection))) {
-      visible.push(collection)
-    }
-  }
-
-  return visible
+  return seen
 }
 
 async function loadTraces(ctx: QueryCtx, runId: Id<"runs">) {
@@ -157,13 +201,6 @@ async function loadFiles(ctx: QueryCtx, runId: Id<"runs">, sight: Sight) {
     .withIndex("by_run", (query) => query.eq("runId", runId))
     .order("asc")
     .take(relationLimit)
-  const visible: Doc<"files">[] = []
 
-  for (const file of files) {
-    if (await sight.canSee(file)) {
-      visible.push(file)
-    }
-  }
-
-  return visible
+  return await visible(files, sight)
 }

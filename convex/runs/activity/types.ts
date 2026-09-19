@@ -58,6 +58,8 @@ export type ActivityItem = {
 export type ActivityData = {
   approvals: Doc<"approvals">[]
   files: Doc<"files">[]
+  /** Files the run's tool calls read, shared, or sent. */
+  touched: Doc<"files">[]
   agents: Doc<"runs">[]
   offers: Doc<"integrationOffers">[]
   collections: Doc<"collections">[]

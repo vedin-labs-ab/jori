@@ -31,13 +31,16 @@ export function projectToolTraces(
   data: ActivityData,
   isRunLive: boolean
 ): ActivityItem[] {
-  const { agents, collections, traces } = data
+  const { agents, collections, touched, traces } = data
   const context: ToolProjectionContext = {
     agents,
     isRunLive,
     labels: toolLabels(traces),
     materialNames: new Map(
-      collections.map((material) => [material._id as string, material.name])
+      [...collections, ...touched].map((material) => [
+        material._id as string,
+        material.name,
+      ])
     ),
   }
   const groups = new Map<string, ToolTrace[]>()

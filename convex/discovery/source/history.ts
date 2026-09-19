@@ -220,6 +220,7 @@ function activityText(run: Doc<"runs">, trace: Doc<"traces">) {
     agents: [],
     offers: [],
     collections: [],
+    touched: [],
     waiters: [],
   })
     .map((item) =>
