@@ -6,7 +6,7 @@
   "homepage": "https://usejori.com",
   "version": "0.0.1",
   "type": "module",
-  "packageManager": "pnpm@12.4.1",
+  "packageManager": "pnpm@12.4.2",
   "scripts": {
     "brand": "node --experimental-strip-types scripts/brand/index.ts",
     "brand:social": "node --experimental-strip-types scripts/brand/capture.ts",
