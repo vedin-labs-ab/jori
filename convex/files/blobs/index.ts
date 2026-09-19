@@ -1,9 +1,10 @@
 import { R2 } from "@convex-dev/r2"
 import { urlWindowMs } from "../../../contracts/runtime/files"
-import { components } from "../../_generated/api"
+import { components, internal } from "../../_generated/api"
 import { type ActionCtx, type MutationCtx } from "../../_generated/server"
 import { requireEnvironmentVariable } from "../../shared/environment"
 import { requireRegion } from "../../shared/origin"
+import { claimUpload, reserveUpload } from "./uploads"
 
 /** File bytes live in a private Cloudflare R2 bucket behind Convex's R2
  *  component. The endpoint is the deployment region's jurisdiction, so an EU
@@ -30,6 +31,7 @@ export async function requireUnusedUpload(
   if ((await linkedFile(ctx, args.key)) !== null) {
     throw new Error("Uploaded file is already in use")
   }
+  await claimUpload(ctx, args.key)
   return { mimeType: metadata.contentType ?? "application/octet-stream" }
 }
 
@@ -40,9 +42,9 @@ export async function linkedFile(ctx: MutationCtx, key: string) {
     .first()
 }
 
-export async function blobUploadUrl(organizationId: string) {
+export async function blobUploadUrl(ctx: MutationCtx, organizationId: string) {
   return await bucket().generateUploadUrl(
-    `${organizationId}/${crypto.randomUUID()}`
+    await reserveUpload(ctx, organizationId)
   )
 }
 
@@ -73,8 +75,11 @@ export async function storeBlob(
   ctx: ActionCtx,
   args: { organizationId: string; bytes: Uint8Array; mimeType: string }
 ) {
+  const key = await ctx.runMutation(internal.files.blobs.uploads.reserve, {
+    organizationId: args.organizationId,
+  })
   return await bucket().store(ctx, new Uint8Array(args.bytes), {
-    key: `${args.organizationId}/${crypto.randomUUID()}`,
+    key,
     type: args.mimeType,
   })
 }

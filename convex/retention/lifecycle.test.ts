@@ -96,7 +96,7 @@ test("a late accepted notice still leaves seven full days before automatic delet
   })
 })
 
-test("every app table is explicitly deleted, retained for billing, or platform scoped", () => {
+test("every app table has an explicit deletion or retention policy", () => {
   const excluded = [
     "accounts",
     "billingRefunds",
@@ -110,6 +110,8 @@ test("every app table is explicitly deleted, retained for billing, or platform s
     "waitlist",
     "models",
     "discoveryScans",
+    // The blob sweep keeps issued keys until uploads can no longer arrive.
+    "uploads",
   ]
   expect(Object.keys(schema.tables).sort()).toEqual(
     [...contentTables, ...excluded].sort()

@@ -12,6 +12,10 @@ export async function seedBlob(
   blob: { size?: number; mimeType?: string; lastModified?: number } = {}
 ) {
   const key = `${organizationId}/${crypto.randomUUID()}`
+  await ctx.db.insert("uploads", {
+    key,
+    createdAt: blob.lastModified ?? Date.now(),
+  })
   await ctx.runMutation(components.r2.lib.upsertMetadata, {
     bucket,
     key,

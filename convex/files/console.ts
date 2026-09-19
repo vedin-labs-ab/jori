@@ -75,10 +75,11 @@ export const uploadUrl = mutation({
   args: {
     organizationId: v.string(),
   },
+  returns: v.object({ key: v.string(), url: v.string() }),
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
 
-    return await blobUploadUrl(args.organizationId)
+    return await blobUploadUrl(ctx, args.organizationId)
   },
 })
 
