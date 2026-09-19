@@ -50,6 +50,7 @@ import type * as billing_refunds_actions from "../billing/refunds/actions.js";
 import type * as billing_refunds_data from "../billing/refunds/data.js";
 import type * as billing_refunds_polar from "../billing/refunds/polar.js";
 import type * as billing_refunds_purchase from "../billing/refunds/purchase.js";
+import type * as billing_refunds_records from "../billing/refunds/records.js";
 import type * as billing_refunds_validation from "../billing/refunds/validation.js";
 import type * as billing_refunds_webhook from "../billing/refunds/webhook.js";
 import type * as billing_storage_actions from "../billing/storage/actions.js";
@@ -772,6 +773,7 @@ declare const fullApi: ApiFromModules<{
   "billing/refunds/data": typeof billing_refunds_data;
   "billing/refunds/polar": typeof billing_refunds_polar;
   "billing/refunds/purchase": typeof billing_refunds_purchase;
+  "billing/refunds/records": typeof billing_refunds_records;
   "billing/refunds/validation": typeof billing_refunds_validation;
   "billing/refunds/webhook": typeof billing_refunds_webhook;
   "billing/storage/actions": typeof billing_storage_actions;
