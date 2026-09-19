@@ -4,7 +4,19 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
+    ignore:
+      # Revisit when @convex-dev/better-auth supports Better Auth 1.7.
+      - dependency-name: better-auth
+        versions: [">=1.7.0"]
+      - dependency-name: "@better-auth/*"
+        versions: [">=1.7.0"]
+      # Later UI releases require an OAuth provider whose security fix needs 1.7.
+      - dependency-name: "@better-auth-ui/*"
+        versions: [">1.6.31"]
+      # Better Auth 1.6 supports Vitest through v4.
+      - dependency-name: vitest
+        versions: [">=5.0.0"]
     groups:
       authentication:
         patterns: ["better-auth", "@better-auth/*", "@better-auth-ui/*", "@convex-dev/better-auth"]
