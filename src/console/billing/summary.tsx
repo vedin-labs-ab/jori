@@ -61,7 +61,7 @@ function PlanCell({
       </p>
       <div className="mt-5 flex gap-2">
         {subscribed ? null : <PlanPicker organizationId={organizationId} />}
-        {account?.hasStripeCustomer ? (
+        {account?.hasCustomer ? (
           <Button
             disabled={checkout.pending !== null}
             onClick={checkout.managePortal}

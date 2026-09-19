@@ -116,7 +116,7 @@ test("every app table is explicitly deleted, retained for billing, or platform s
   )
 })
 
-test("renewal cancellation does not start retention until Stripe reports the effective end", async () => {
+test("renewal cancellation does not start retention until Polar reports the effective end", async () => {
   const t = convexTest(schema, modules)
   vi.stubEnv("JORI_REGION", "eu")
   const endedAt = Date.now() - 60_000
@@ -124,33 +124,23 @@ test("renewal cancellation does not start retention until Stripe reports the eff
     const account = await ensureAccount(ctx, "org")
     await ctx.db.patch(account._id, {
       state: { kind: "active" },
-      stripe: { customerId: "cus_test", subscriptionId: "sub_test" },
+      polar: { customerId: "customer_test", subscriptionId: "sub_test" },
     })
   })
   const subscription = {
     id: "sub_test",
-    customer: "cus_test",
+    customer_id: "customer_test",
     metadata: { region: "eu", organizationId: "org" },
     status: "active",
     cancel_at_period_end: true,
   }
-  await t.mutation(internal.billing.stripe.events.apply, {
-    event: {
-      type: "customer.subscription.updated",
-      data: { object: subscription },
-    },
-  })
+  await t.mutation(internal.billing.polar.events.apply, { subscription })
   expect(await t.run(async (ctx) => await findRetention(ctx, "org"))).toBeNull()
-  await t.mutation(internal.billing.stripe.events.apply, {
-    event: {
-      type: "customer.subscription.deleted",
-      data: {
-        object: {
-          ...subscription,
-          status: "canceled",
-          ended_at: endedAt / 1000,
-        },
-      },
+  await t.mutation(internal.billing.polar.events.apply, {
+    subscription: {
+      ...subscription,
+      status: "canceled",
+      ended_at: new Date(endedAt).toISOString(),
     },
   })
   expect(

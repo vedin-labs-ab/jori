@@ -25,12 +25,7 @@ export function validateReservation(args: Reservation) {
   if (!/^[a-z]{3}$/.test(args.currency)) {
     throw new Error("Use a lowercase ISO currency.")
   }
-  for (const key of [
-    "caseId",
-    "chargeId",
-    "operator",
-    "calculation",
-  ] as const) {
+  for (const key of ["caseId", "orderId", "operator", "calculation"] as const) {
     const value = args[key]
     if (
       value.trim() !== value ||
@@ -60,10 +55,10 @@ export async function requireSettled(
 ) {
   if (
     account.state.kind === "active" ||
-    account.stripe?.subscriptionId !== undefined
+    account.polar?.subscriptionId !== undefined
   ) {
     throw new Error(
-      "Cancel the subscription in Stripe and wait for its webhook first."
+      "Cancel the subscription in Polar and wait for its webhook first."
     )
   }
   if ((account.topUp.charged.releaseAt ?? 0) > Date.now()) {

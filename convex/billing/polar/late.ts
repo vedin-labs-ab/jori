@@ -3,58 +3,51 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
 import { readRecord } from "../../shared/input"
-import { stripeRequest } from "./client"
+import { polarRequest } from "./client"
 import { belongsToRegion } from "./config"
 
 export const cancel = internalAction({
   args: { id: v.id("billingCancellations") },
   handler: async (ctx, args) => {
     const row: Doc<"billingCancellations"> | null = await ctx.runQuery(
-      internal.billing.stripe.cancellation.read,
+      internal.billing.polar.cancellation.read,
       args
     )
     if (row === null || row.canceledAt !== undefined) {
       return
     }
     try {
-      const session = await stripeRequest(
-        `/v1/checkout/sessions/${encodeURIComponent(row.sessionId)}`,
-        { method: "GET" }
+      const order = await polarRequest(
+        `/v1/orders/${encodeURIComponent(row.orderId)}`
       )
       if (
-        session.id !== row.sessionId ||
-        session.subscription !== row.subscriptionId ||
-        session.customer !== row.customerId ||
-        session.payment_status !== "paid" ||
-        readRecord(session.metadata).organizationId !== row.organizationId ||
-        !belongsToRegion(session)
+        order.id !== row.orderId ||
+        order.subscription_id !== row.subscriptionId ||
+        order.customer_id !== row.customerId ||
+        order.paid !== true ||
+        readRecord(order.metadata).organizationId !== row.organizationId ||
+        !belongsToRegion(order)
       ) {
         throw new Error(
-          "Late Checkout session does not match the recorded paid subscription."
+          "Late order does not match the recorded paid subscription."
         )
       }
       const path = `/v1/subscriptions/${encodeURIComponent(row.subscriptionId)}`
-      const subscription = await stripeRequest(path, { method: "GET" })
+      const subscription = await polarRequest(path)
       requireExactSubscription(subscription, row)
       if (
         subscription.status !== "canceled" &&
         subscription.status !== "incomplete_expired"
       ) {
-        const canceled = await stripeRequest(path, {
-          method: "DELETE",
-          params: { invoice_now: false, prorate: false },
-        })
+        const canceled = await polarRequest(path, { method: "DELETE" })
         requireExactSubscription(canceled, row)
         if (canceled.status !== "canceled") {
-          throw new Error("Stripe has not confirmed cancellation.")
+          throw new Error("Polar has not confirmed cancellation.")
         }
       }
-      await ctx.runMutation(
-        internal.billing.stripe.cancellation.completed,
-        args
-      )
+      await ctx.runMutation(internal.billing.polar.cancellation.completed, args)
     } catch (error) {
-      await ctx.runMutation(internal.billing.stripe.cancellation.failed, {
+      await ctx.runMutation(internal.billing.polar.cancellation.failed, {
         ...args,
         error:
           error instanceof Error
@@ -71,7 +64,7 @@ function requireExactSubscription(
 ) {
   if (
     subscription.id !== row.subscriptionId ||
-    subscription.customer !== row.customerId ||
+    subscription.customer_id !== row.customerId ||
     readRecord(subscription.metadata).organizationId !== row.organizationId ||
     !belongsToRegion(subscription)
   ) {

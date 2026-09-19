@@ -51,7 +51,7 @@ export async function seedContent(
     timestamp: 1,
     type: "topup",
     micros: { amount: 10, balance: 0 },
-    stripeId: "cs_test",
+    orderId: "order_test",
     auto: false,
   })
   return { retention, collection, other, kept, storageId, receipt }

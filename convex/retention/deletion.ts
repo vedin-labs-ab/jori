@@ -173,7 +173,7 @@ export const blocked = internalMutation({
 })
 
 function deletionBlock(account: Doc<"accounts"> | null, automatic: boolean) {
-  return account?.state.kind === "active" || account?.stripe?.subscriptionId
+  return account?.state.kind === "active" || account?.polar?.subscriptionId
     ? "Cancel the subscription before deleting this workspace."
     : account && "refundHold" in account && account.refundHold
       ? "Finish the pending refund before deleting this workspace."

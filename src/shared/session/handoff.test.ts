@@ -39,7 +39,7 @@ test("only proxies allowlisted callbacks to the configured region", async () => 
 
 test.each([
   "https://evil.example",
-  "/stripe/events",
+  "/polar/events",
   "//evil.example/google/oauth/callback",
 ])("rejects arbitrary forwarding: %s", async (path) => {
   const fetchMock = vi.fn()

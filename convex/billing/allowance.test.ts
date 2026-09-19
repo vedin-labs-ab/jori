@@ -37,7 +37,7 @@ const account: Account = {
     micros: { threshold: 10, amount: 20, cap: 100 },
     charged: { micros: 50, releaseAt: 999 },
   },
-  stripe: {
+  polar: {
     customerId: "fixture-customer",
     subscriptionId: "fixture-subscription",
   },
@@ -82,7 +82,7 @@ test("grant adds allowance and an honest audit receipt without changing account 
       idempotencyKey: args.idempotencyKey,
     }),
   ])
-  expect(entries[0]).not.toHaveProperty("stripeId")
+  expect(entries[0]).not.toHaveProperty("orderId")
 })
 
 test("a replay returns the original receipt without granting again", async () => {

@@ -24,7 +24,7 @@ export function billingReturnUrl(reopenSettings = false) {
 }
 
 /**
- * Every purchase flow ends on a Stripe-hosted page, so these all resolve to a
+ * Every purchase flow ends on a Polar-hosted page, so these all resolve to a
  * redirect; errors surface as toasts and leave the page in place. `pending`
  * names the flow currently opening (through to the redirect itself) so its
  * button can spin and every money button can disable.
@@ -32,12 +32,12 @@ export function billingReturnUrl(reopenSettings = false) {
 export function useBillingCheckout(organizationId: string) {
   const [pending, setPending] = useState<CheckoutFlow | null>(null)
   const startPlanCheckout = useAction(
-    api.billing.stripe.checkout.startPlanCheckout
+    api.billing.polar.checkout.startPlanCheckout
   )
   const startTopUpCheckout = useAction(
-    api.billing.stripe.checkout.startTopUpCheckout
+    api.billing.polar.checkout.startTopUpCheckout
   )
-  const openPortal = useAction(api.billing.stripe.checkout.openPortal)
+  const openPortal = useAction(api.billing.polar.checkout.openPortal)
   const portalReturnUrl = billingReturnUrl(true)
 
   const redirect = async (

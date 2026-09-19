@@ -12,20 +12,6 @@ export const ensure = internalMutation({
   handler: async (ctx, args) => await ensureAccount(ctx, args.organizationId),
 })
 
-export const attachCustomer = internalMutation({
-  args: { organizationId: v.string(), customerId: v.string() },
-  handler: async (ctx, args) => {
-    const account = await ensureAccount(ctx, args.organizationId)
-
-    await ctx.db.patch(account._id, {
-      stripe: { ...account.stripe, customerId: args.customerId },
-      updatedAt: Date.now(),
-    })
-
-    return null
-  },
-})
-
 /** Pushes the auto-top-up claim into a cooldown after a failed attempt so a
  *  declining card is retried hours apart, not on every debit. */
 export const cooldown = internalMutation({

@@ -1,4 +1,8 @@
-import { bytesToHex } from "./encoding"
+import {
+  base64EncodeBytes,
+  bytesToHex,
+  copyBytesToArrayBuffer,
+} from "./encoding"
 
 // Compares secrets in constant time so the comparison itself never leaks
 // how much of an attacker's guess matched.
@@ -28,9 +32,18 @@ export async function sha256Hex(text: string) {
 
 /** Lowercase hex HMAC-SHA-256 of a UTF-8 string with a UTF-8 secret. */
 export async function hmacSha256Hex(secret: string, value: string) {
+  return bytesToHex(await hmacSha256(new TextEncoder().encode(secret), value))
+}
+
+/** Base64 HMAC-SHA-256 of a UTF-8 string with a binary secret. */
+export async function hmacSha256Base64(secret: Uint8Array, value: string) {
+  return base64EncodeBytes(await hmacSha256(secret, value))
+}
+
+async function hmacSha256(secret: Uint8Array, value: string) {
   const key = await crypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(secret),
+    copyBytesToArrayBuffer(secret),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"]
@@ -41,5 +54,5 @@ export async function hmacSha256Hex(secret: string, value: string) {
     new TextEncoder().encode(value)
   )
 
-  return bytesToHex(new Uint8Array(signature))
+  return new Uint8Array(signature)
 }

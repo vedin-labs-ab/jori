@@ -2,16 +2,16 @@
 import { convexTest } from "convex-test"
 import { vi } from "vitest"
 import { internal } from "../../convex/_generated/api"
-import { stripeEnvironmentNames } from "../../convex/billing/stripe/config"
+import { polarEnvironmentNames } from "../../convex/billing/polar/config"
 import schema from "../../convex/schema"
 
-import { mockStripe } from "./stripe"
+import { mockPolar } from "./polar"
 
 const modules = import.meta.glob("/convex/{_generated,billing}/**/*.{ts,js}")
 export const args = {
   organizationId: "org-eu",
   caseId: "support-123",
-  chargeId: "ch_original",
+  orderId: "order_original",
   amountMinor: 2500,
   currency: "usd",
   allowanceMicros: 10_000_000,
@@ -29,14 +29,15 @@ export async function setup() {
         state: { kind: "paused" },
         micros: { allowance: 10_000_000, wallet: 40_000_000 },
         topUp: { charged: { micros: 0 } },
-        stripe: { customerId: "cus_org" },
+        polar: { customerId: "customer_org" },
         updatedAt: 1,
       })
   )
-  for (const name of stripeEnvironmentNames) {
+  for (const name of polarEnvironmentNames) {
     vi.stubEnv(name, "test_fixture")
   }
-  mockStripe()
+  vi.stubEnv("POLAR_SERVER", "sandbox")
+  mockPolar()
   await t.run(
     async (ctx) =>
       await ctx.db.insert("transactions", {
@@ -44,7 +45,7 @@ export async function setup() {
         type: "topup",
         timestamp: 0,
         micros: { amount: 40_000_000, balance: 50_000_000 },
-        stripeId: "pi_original",
+        orderId: "order_original",
         auto: true,
       })
   )

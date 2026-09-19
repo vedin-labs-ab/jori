@@ -30,7 +30,7 @@ export function addMonths(timestamp: number, months: number) {
  * Hourly heartbeat that refreshes the monthly allowance on each account's
  * billing anchor. Allowances are cron-driven rather than webhook-driven so a
  * missed webhook cannot skip a cycle; unpaid accounts are paused by the
- * Stripe edge, which clears their anchor.
+ * Polar edge, which clears their anchor.
  */
 export const sweep = internalMutation({
   args: {},

@@ -2,7 +2,7 @@
 /// <reference types="vite/client" />
 import { afterEach, expect, test, vi } from "vitest"
 import { args, freezeSettled, setup } from "../../../test/billing/accounts"
-import { mockStripe, refund } from "../../../test/billing/stripe"
+import { mockPolar, refund } from "../../../test/billing/polar"
 import { internal } from "../../_generated/api"
 import { checkRunBudget } from "../guard"
 import { prepare, reconcile, release } from "./actions"
@@ -13,13 +13,13 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-test("operator functions are internal and cannot create real Stripe refunds", () => {
+test("operator functions are internal and cannot create real Polar refunds", () => {
   expect(
     [freeze, prepare, reconcile, release].every((fn) => fn.isInternal)
   ).toBe(true)
 })
 
-test("reserves balances once, verifies Stripe and reconciles once without changing unrelated wallet credits", async () => {
+test("reserves balances once, verifies Polar and reconciles once without changing unrelated wallet credits", async () => {
   const { t, id } = await setup()
   await freezeSettled(t)
   const first = await t.action(internal.billing.refunds.actions.prepare, args)
@@ -30,7 +30,7 @@ test("reserves balances once, verifies Stripe and reconciles once without changi
     allowance: 0,
     wallet: 40_000_000,
   })
-  mockStripe({ refunded: 2500 })
+  mockPolar({ refunded: 2500 })
   const settled = await t.action(internal.billing.refunds.actions.reconcile, {
     caseId: args.caseId,
     refundId: refund.id,
@@ -90,16 +90,16 @@ test.each([
   { refund: { ...refund, status: "pending" } },
   { refund: { ...refund, status: "failed" } },
   { refund: { ...refund, amount: 3000 } },
-  { refund: { ...refund, charge: "ch_another" } },
+  { refund: { ...refund, order_id: "order_another" } },
   { refund: { ...refund, currency: "eur" } },
-  { customer: "cus_another" },
+  { customer: "customer_another" },
 ])(
   "refuses unverified refund and leaves reserved credits held: %j",
   async (options) => {
     const { t, id } = await setup()
     await freezeSettled(t)
     await t.action(internal.billing.refunds.actions.prepare, args)
-    mockStripe({ refunded: 2500, ...options })
+    mockPolar({ refunded: 2500, ...options })
     await expect(
       t.action(internal.billing.refunds.actions.reconcile, {
         caseId: args.caseId,
@@ -119,25 +119,25 @@ test.each([
   }
 )
 
-test("restores canceled reservation only when Stripe proves no new refund or pending attempt", async () => {
+test("restores canceled reservation only when Polar proves no new refund or pending attempt", async () => {
   const { t, id } = await setup()
   await freezeSettled(t)
   await t.action(internal.billing.refunds.actions.prepare, args)
-  mockStripe({ refunds: [{ ...refund, status: "pending" }] })
+  mockPolar({ refunds: [{ ...refund, status: "pending" }] })
   await expect(
     t.action(internal.billing.refunds.actions.release, {
       organizationId: args.organizationId,
       caseId: args.caseId,
     })
   ).rejects.toThrow("pending")
-  mockStripe({ refunded: 2500 })
+  mockPolar({ refunded: 2500 })
   await expect(
     t.action(internal.billing.refunds.actions.release, {
       organizationId: args.organizationId,
       caseId: args.caseId,
     })
   ).rejects.toThrow("pending")
-  mockStripe({ refunds: [{ ...refund, status: "failed" }] })
+  mockPolar({ refunds: [{ ...refund, status: "failed" }] })
   await t.action(internal.billing.refunds.actions.release, {
     organizationId: args.organizationId,
     caseId: args.caseId,
@@ -187,10 +187,10 @@ test("rejects over-refunds, conflicting cases and insufficient credits without m
   })
 })
 
-test("checks current Stripe subscription state before reserving", async () => {
+test("checks current Polar subscription state before reserving", async () => {
   const { t } = await setup()
   await freezeSettled(t)
-  mockStripe({ subscriptions: [{ status: "active" }] })
+  mockPolar({ subscriptions: [{ status: "active" }] })
   await expect(
     t.action(internal.billing.refunds.actions.prepare, args)
   ).rejects.toThrow("Cancel all")
@@ -213,11 +213,14 @@ test("wallet refund removes only the reviewed unused purchased credits", async (
   })
 })
 
-test("an older Stripe refund cannot settle a new reservation", async () => {
+test("an older Polar refund cannot settle a new reservation", async () => {
   const { t } = await setup()
   await freezeSettled(t)
   await t.action(internal.billing.refunds.actions.prepare, args)
-  mockStripe({ refunded: 2500, refund: { ...refund, created: 1 } })
+  mockPolar({
+    refunded: 2500,
+    refund: { ...refund, created_at: new Date(1).toISOString() },
+  })
   await expect(
     t.action(internal.billing.refunds.actions.reconcile, {
       caseId: args.caseId,

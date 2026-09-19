@@ -2,19 +2,19 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
-import { stripeRequest } from "../stripe/client"
-import { reservation } from "./schema"
+import { polarList } from "../polar/client"
 import {
-  chargeRefunds,
-  creditCandidates,
-  readCharge,
+  hasPendingRefund,
+  orderRefunds,
+  readOrder,
   requireNoPendingPayments,
   requireNoSubscriptions,
   requireRefundMatch,
-} from "./stripe"
+} from "./polar"
+import { reservation } from "./schema"
 import { validateReservation } from "./validation"
 
-/** Reserves credits, not money. Support performs the reviewed refund in Stripe. */
+/** Reserves credits, not money. Support performs the reviewed refund in Polar. */
 export const prepare = internalAction({
   args: reservation,
   handler: async (ctx, args): Promise<string> => {
@@ -23,42 +23,28 @@ export const prepare = internalAction({
       internal.billing.refunds.data.read,
       { caseId: args.caseId }
     )
-    const charge = await readCharge(args.chargeId)
-    const customerId = charge.customer
-    if (typeof customerId !== "string" || charge.currency !== args.currency) {
-      throw new Error("Charge customer or currency is invalid.")
+    const order = await readOrder(args.orderId)
+    const customerId = order.customer_id
+    if (typeof customerId !== "string" || order.currency !== args.currency) {
+      throw new Error("Order customer or currency is invalid.")
     }
     await requireNoSubscriptions(customerId)
     await requireNoPendingPayments(customerId)
-    const refunds = await chargeRefunds(args.chargeId)
-    if (
-      refunds.some(
-        (refund) =>
-          !["succeeded", "failed", "canceled"].includes(String(refund.status))
-      )
-    ) {
-      throw new Error("Wait for pending Stripe refunds to settle.")
+    if (hasPendingRefund(await orderRefunds(args.orderId))) {
+      throw new Error("Wait for pending Polar refunds to settle.")
     }
     const priorRefundedMinor =
-      existing?.priorRefundedMinor ?? Number(charge.amount_refunded)
+      existing?.priorRefundedMinor ?? Number(order.refunded_amount)
     if (
       !Number.isSafeInteger(priorRefundedMinor) ||
-      args.amountMinor + priorRefundedMinor > Number(charge.amount)
+      args.amountMinor + priorRefundedMinor > Number(order.net_amount)
     ) {
       throw new Error("Refund exceeds the amount paid after prior refunds.")
     }
-    const creditSourceId: string | undefined =
-      args.walletMicros === 0
-        ? undefined
-        : await ctx.runQuery(internal.billing.refunds.purchase.source, {
-            organizationId: args.organizationId,
-            candidates: await creditCandidates(charge, customerId),
-          })
     return await ctx.runMutation(internal.billing.refunds.data.reserve, {
       ...args,
       customerId,
       priorRefundedMinor,
-      creditSourceId,
     })
   },
 })
@@ -73,32 +59,26 @@ export const reconcile = internalAction({
     if (entry === null || entry.status === "released") {
       throw new Error("No reserved refund for this case.")
     }
-    const refund = await stripeRequest(
-      `/v1/refunds/${encodeURIComponent(args.refundId)}`,
-      { method: "GET" }
-    )
+    const [refund] = await polarList("/v1/refunds/", { id: args.refundId })
     requireRefundMatch(refund, { ...entry, refundId: args.refundId })
-    if (
-      typeof refund.created !== "number" ||
-      refund.created < Math.floor(entry.createdAt / 1000)
-    ) {
+    if (Date.parse(String(refund?.created_at)) < entry.createdAt) {
       throw new Error(
         "The refund predates this reservation. Review the prior refund history."
       )
     }
-    const charge = await readCharge(entry.chargeId)
+    const order = await readOrder(entry.orderId)
     if (
-      charge.customer !== entry.customerId ||
-      Number(charge.amount_refunded) <
+      order.customer_id !== entry.customerId ||
+      Number(order.refunded_amount) <
         entry.priorRefundedMinor + entry.amountMinor
     ) {
-      throw new Error("Charge no longer matches the prepared refund.")
+      throw new Error("Order no longer matches the prepared refund.")
     }
     return await ctx.runMutation(internal.billing.refunds.data.settle, args)
   },
 })
 
-/** Releases a settled hold or restores a reservation proven not paid by Stripe. */
+/** Releases a settled hold or restores a reservation proven not paid by Polar. */
 export const release = internalAction({
   args: { organizationId: v.string(), caseId: v.string() },
   handler: async (ctx, args): Promise<null> => {
@@ -110,14 +90,10 @@ export const release = internalAction({
       throw new Error("Case belongs to another workspace.")
     }
     if (entry?.status === "reserved") {
-      const charge = await readCharge(entry.chargeId)
-      const refunds = await chargeRefunds(entry.chargeId)
+      const order = await readOrder(entry.orderId)
       if (
-        charge.amount_refunded !== entry.priorRefundedMinor ||
-        refunds.some(
-          (refund) =>
-            !["succeeded", "failed", "canceled"].includes(String(refund.status))
-        )
+        order.refunded_amount !== entry.priorRefundedMinor ||
+        hasPendingRefund(await orderRefunds(entry.orderId))
       ) {
         throw new Error(
           "Refund may have been paid or is pending. Reconcile it before releasing credits."

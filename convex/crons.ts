@@ -57,7 +57,7 @@ crons.interval(
 
 // Hourly heartbeat for billing cycles: accounts whose anchor is due get their
 // included usage refreshed and their auto-top-up month reset. Grants are
-// cron-driven so a missed Stripe webhook cannot skip a cycle.
+// cron-driven so a missed Polar webhook cannot skip a cycle.
 crons.interval(
   "billing cycle sweep",
   { hours: 1 },
@@ -86,7 +86,7 @@ crons.interval(
 crons.interval(
   "retry late subscription cancellations",
   { minutes: 5 },
-  internal.billing.stripe.cancellation.retry,
+  internal.billing.polar.cancellation.retry,
   {}
 )
 

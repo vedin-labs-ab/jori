@@ -89,13 +89,13 @@ test("a run accumulates money and tokens into a single debit entry", async () =>
   })
 })
 
-test("top-ups are idempotent on the Stripe id", async () => {
+test("top-ups are idempotent on the Polar order id", async () => {
   const { ctx, insert, patch } = fakeCtx({ _id: "entry-1" })
 
   const credited = await creditTopUp(ctx, {
     account: account(),
     micros: 25_000_000,
-    stripeId: "cs_123",
+    orderId: "order_123",
     auto: false,
     now: 42,
   })
@@ -111,7 +111,7 @@ test("top-ups land in the wallet and state the balance they leave", async () => 
   const credited = await creditTopUp(ctx, {
     account: account(),
     micros: 25_000_000,
-    stripeId: "cs_123",
+    orderId: "order_123",
     auto: true,
     now: 42,
   })
@@ -125,7 +125,7 @@ test("top-ups land in the wallet and state the balance they leave", async () => 
     "transactions",
     expect.objectContaining({
       micros: { amount: 25_000_000, balance: 26_500_000 },
-      stripeId: "cs_123",
+      orderId: "order_123",
       auto: true,
     })
   )

@@ -32,7 +32,7 @@ const configuredAccount = {
     },
     charged: { micros: 0 },
   },
-  stripe: { customerId: "customer-1" },
+  polar: { customerId: "customer-1" },
   updatedAt: 0,
 } as Doc<"accounts">
 

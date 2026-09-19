@@ -43,7 +43,9 @@ export const accounts = defineTable({
       releaseAt: v.optional(v.number()),
     }),
   }),
-  stripe: v.optional(
+  /** Set by the first paid order; Polar keeps the customer under the
+   *  organization's id. */
+  polar: v.optional(
     v.object({
       customerId: v.string(),
       subscriptionId: v.optional(v.string()),
@@ -53,7 +55,6 @@ export const accounts = defineTable({
 })
   .index("by_organization", ["organizationId"])
   .index("by_renewal", ["renewsAt"])
-  .index("by_stripe_customer", ["stripe.customerId"])
 
 /**
  * The money history. Debit rows are one per run and accumulate as the run
@@ -64,8 +65,8 @@ export const accounts = defineTable({
  * pot, attributing each run to its pot, and `micros.balance` is what remained
  * after the entry, so the feed reads as a statement.
  *
- * `stripeId` on top-ups is the Stripe object that paid (checkout session or
- * payment intent) and doubles as the webhook idempotency key.
+ * `orderId` on top-ups is the Polar order that paid and doubles as the
+ * webhook idempotency key.
  */
 export const transactions = defineTable(
   v.union(
@@ -103,12 +104,12 @@ export const transactions = defineTable(
       timestamp: v.number(),
       type: v.literal("topup"),
       micros: v.object({ amount: v.number(), balance: v.number() }),
-      stripeId: v.string(),
+      orderId: v.string(),
       auto: v.boolean(),
     })
   )
 )
   .index("by_organization_and_timestamp", ["organizationId", "timestamp"])
   .index("by_run", ["runId"])
-  .index("by_stripe", ["stripeId"])
+  .index("by_order", ["orderId"])
   .index("by_idempotencyKey", ["idempotencyKey"])

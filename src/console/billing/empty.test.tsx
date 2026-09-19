@@ -44,7 +44,7 @@ const entries: BillingEntry[] = [
     organizationId: "organization",
     timestamp: 3,
     type: "topup",
-    stripeId: "payment",
+    orderId: "payment",
     auto: false,
     micros: { amount: 20_000_000, balance: 29_000_000 },
   },

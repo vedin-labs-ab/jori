@@ -38,7 +38,7 @@ export function environmentFile(target: Target) {
  *  `createAuth` resolves every credential on each auth request, so a missing
  *  Microsoft secret breaks Google sign-in too. Runs execute inside the
  *  deployment, so they need the model key and the Blaxel workspace, key and
- *  image to open a sandbox. Stripe is optional for deployment: its
+ *  image to open a sandbox. Polar is optional for deployment: its
  *  server-side edge rejects billing operations until all billing settings
  *  exist. A deploy is not approval to charge customers. */
 export const deploymentNames = [

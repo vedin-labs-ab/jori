@@ -4,7 +4,7 @@ import { type Doc } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { ensureAccount, getAccount, requireActivePlan } from "./account"
-import { requireStripeConfiguration } from "./stripe/config"
+import { requirePolarConfiguration } from "./polar/config"
 
 const entryPageSize = 30
 
@@ -34,7 +34,7 @@ function publicAccount(account: Doc<"accounts">) {
     micros: account.micros,
     renewsAt: account.renewsAt,
     topUp: account.topUp,
-    hasStripeCustomer: account.stripe !== undefined,
+    hasCustomer: account.polar !== undefined,
     canFundWallet:
       account.state.kind === "active" && account.refundHold === undefined,
   }
@@ -83,7 +83,7 @@ export const configureAutoTopUp = mutation({
     await requireOrganizationAccess(ctx, args.organizationId)
 
     if (args.config !== null) {
-      requireStripeConfiguration()
+      requirePolarConfiguration()
     }
 
     const account = await ensureAccount(ctx, args.organizationId)
@@ -111,7 +111,7 @@ export const configureAutoTopUp = mutation({
       throw new Error("Pick one of the offered monthly caps.")
     }
 
-    if (account.stripe === undefined) {
+    if (account.polar === undefined) {
       throw new Error(
         "Add a payment method to the active plan before enabling auto top-up."
       )

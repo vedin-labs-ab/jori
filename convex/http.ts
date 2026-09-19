@@ -54,10 +54,10 @@ route(
 )
 
 route(
-  "/stripe/events",
+  "/polar/events",
   "POST",
-  () => import("./billing/stripe/http"),
-  (module) => module.handleStripeEvents
+  () => import("./billing/polar/http"),
+  (module) => module.handlePolarEvents
 )
 
 route(

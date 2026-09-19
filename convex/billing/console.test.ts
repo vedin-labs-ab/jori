@@ -4,20 +4,20 @@ import { convexTest } from "convex-test"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { api } from "../_generated/api"
 import schema from "../schema"
-import { stripeEnvironmentNames } from "./stripe/config"
+import { polarEnvironmentNames } from "./polar/config"
 
 const modules = import.meta.glob("/convex/{_generated,billing}/**/*.{ts,js}")
 const organizationId = "organization-1"
 const config = { thresholdUsd: 10, amountUsd: 25, monthlyCapUsd: 100 }
 
 beforeEach(() => {
-  for (const name of stripeEnvironmentNames) {
+  for (const name of polarEnvironmentNames) {
     vi.stubEnv(name, "")
   }
 })
 afterEach(() => vi.unstubAllEnvs())
 
-test("read-only billing remains available to an organization without Stripe", async () => {
+test("read-only billing remains available to an organization without Polar", async () => {
   const t = convexTest(schema, modules)
   const caller = t.withIdentity({ org: organizationId })
   expect(
@@ -25,7 +25,7 @@ test("read-only billing remains available to an organization without Stripe", as
   ).toEqual({ account: null, entries: [] })
 })
 
-test("enabling auto top-up fails before creating an account when Stripe is absent", async () => {
+test("enabling auto top-up fails before creating an account when Polar is absent", async () => {
   const t = convexTest(schema, modules)
   const caller = t.withIdentity({ org: organizationId })
   await expect(
@@ -39,7 +39,7 @@ test("enabling auto top-up fails before creating an account when Stripe is absen
   ).toEqual([])
 })
 
-test("disabling auto top-up is allowed without Stripe", async () => {
+test("disabling auto top-up is allowed without Polar", async () => {
   const t = convexTest(schema, modules)
   const caller = t.withIdentity({ org: organizationId })
   await expect(
@@ -63,7 +63,7 @@ test("a signed-in waitlisted caller without an organization cannot use billing A
     })
   ).rejects.toThrow("no active organization")
   await expect(
-    caller.action(api.billing.stripe.checkout.startPlanCheckout, {
+    caller.action(api.billing.polar.checkout.startPlanCheckout, {
       organizationId,
       businessPurchase: true,
       termsVersion: "2026-09-15",

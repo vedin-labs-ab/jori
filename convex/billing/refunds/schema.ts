@@ -4,7 +4,7 @@ import { v } from "convex/values"
 export const reservation = {
   organizationId: v.string(),
   caseId: v.string(),
-  chargeId: v.string(),
+  orderId: v.string(),
   amountMinor: v.number(),
   currency: v.string(),
   allowanceMicros: v.number(),
@@ -17,7 +17,6 @@ export const reservation = {
 export const billingRefunds = defineTable({
   ...reservation,
   customerId: v.string(),
-  creditSourceId: v.optional(v.string()),
   priorRefundedMinor: v.number(),
   status: v.union(
     v.literal("reserved"),
@@ -30,6 +29,5 @@ export const billingRefunds = defineTable({
 })
   .index("by_caseId", ["caseId"])
   .index("by_refundId", ["refundId"])
-  .index("by_chargeId", ["chargeId"])
-  .index("by_creditSourceId", ["creditSourceId"])
+  .index("by_orderId", ["orderId"])
   .index("by_organizationId", ["organizationId"])

@@ -6,7 +6,7 @@ import { getAccount } from "./account"
  * The only writers of billing balances. Debits drain the monthly allowance
  * first and push any remainder onto the wallet, which is allowed to go
  * negative for in-flight work. Credits and allowances are idempotent where a
- * Stripe object id is available.
+ * Polar order id is available.
  */
 export async function debitRun(
   ctx: MutationCtx,
@@ -63,20 +63,20 @@ export async function debitRun(
   })
 }
 
-/** Returns false when this Stripe payment was already credited. */
+/** Returns false when this Polar order was already credited. */
 export async function creditTopUp(
   ctx: MutationCtx,
   args: {
     account: Doc<"accounts">
     micros: number
-    stripeId: string
+    orderId: string
     auto: boolean
     now: number
   }
 ) {
   const existing = await ctx.db
     .query("transactions")
-    .withIndex("by_stripe", (query) => query.eq("stripeId", args.stripeId))
+    .withIndex("by_order", (query) => query.eq("orderId", args.orderId))
     .unique()
 
   if (existing !== null) {
@@ -98,7 +98,7 @@ export async function creditTopUp(
       amount: args.micros,
       balance: allowance + wallet + args.micros,
     },
-    stripeId: args.stripeId,
+    orderId: args.orderId,
     auto: args.auto,
   })
 

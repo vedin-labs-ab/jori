@@ -20,7 +20,7 @@ import { PurchaseAgreement } from "./agreement"
 /** There is one plan, so subscribing is confirming it. The folder is the
  *  pricing page's, at the dialog's width: the same words and the same
  *  numbers a person read before signing up, then the agreement, then
- *  Stripe. */
+ *  Polar. */
 export function PlanPicker({ organizationId }: { organizationId: string }) {
   const [accepted, setAccepted] = useState(false)
   const checkout = useBillingCheckout(organizationId)

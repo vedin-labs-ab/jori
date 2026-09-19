@@ -1,6 +1,5 @@
 import { v } from "convex/values"
 import { internal } from "../../_generated/api"
-import { type Doc } from "../../_generated/dataModel"
 import {
   internalMutation,
   internalQuery,
@@ -9,28 +8,28 @@ import {
 
 export async function queueCancellation(
   ctx: MutationCtx,
-  account: Doc<"accounts">,
-  subscriptionId: string,
-  sessionId: string
+  args: {
+    organizationId: string
+    customerId: string
+    subscriptionId: string
+    orderId: string
+  }
 ) {
   const existing = await ctx.db
     .query("billingCancellations")
     .withIndex("by_subscriptionId", (q) =>
-      q.eq("subscriptionId", subscriptionId)
+      q.eq("subscriptionId", args.subscriptionId)
     )
     .unique()
-  if (existing !== null || account.stripe === undefined) {
+  if (existing !== null) {
     return
   }
   const id = await ctx.db.insert("billingCancellations", {
-    organizationId: account.organizationId,
-    customerId: account.stripe.customerId,
-    subscriptionId,
-    sessionId,
+    ...args,
     createdAt: Date.now(),
     nextAt: Date.now() + 300_000,
   })
-  await ctx.scheduler.runAfter(0, internal.billing.stripe.late.cancel, { id })
+  await ctx.scheduler.runAfter(0, internal.billing.polar.late.cancel, { id })
 }
 
 export const read = internalQuery({
@@ -77,7 +76,7 @@ export const retry = internalMutation({
       .take(50)
     for (const row of rows) {
       await ctx.db.patch(row._id, { nextAt: Date.now() + 300_000 })
-      await ctx.scheduler.runAfter(0, internal.billing.stripe.late.cancel, {
+      await ctx.scheduler.runAfter(0, internal.billing.polar.late.cancel, {
         id: row._id,
       })
     }

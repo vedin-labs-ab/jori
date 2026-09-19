@@ -6,7 +6,7 @@ export const billingCancellations = defineTable({
   organizationId: v.string(),
   customerId: v.string(),
   subscriptionId: v.string(),
-  sessionId: v.string(),
+  orderId: v.string(),
   createdAt: v.number(),
   canceledAt: v.optional(v.number()),
   nextAt: v.optional(v.number()),

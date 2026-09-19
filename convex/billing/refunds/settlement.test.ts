@@ -1,7 +1,6 @@
 // @vitest-environment edge-runtime
 import { afterEach, expect, test, vi } from "vitest"
 import { args, freezeSettled, setup } from "../../../test/billing/accounts"
-import { mockStripe } from "../../../test/billing/stripe"
 import { internal } from "../../_generated/api"
 
 afterEach(() => {
@@ -61,13 +60,13 @@ test("stopped runs with live workflows still block refund reservation", async ()
   ).resolves.toBeTypeOf("string")
 })
 
-test("wallet refund waits until the exact original payment is credited", async () => {
+test("wallet refund waits until the exact original order is credited", async () => {
   const { t } = await setup()
   await freezeSettled(t)
   await t.run(async (ctx) => {
     const receipt = await ctx.db
       .query("transactions")
-      .withIndex("by_stripe", (q) => q.eq("stripeId", "pi_original"))
+      .withIndex("by_order", (q) => q.eq("orderId", "order_original"))
       .unique()
     if (receipt !== null) {
       await ctx.db.delete(receipt._id)
@@ -79,37 +78,5 @@ test("wallet refund waits until the exact original payment is credited", async (
       allowanceMicros: 0,
       walletMicros: 10_000_000,
     })
-  ).rejects.toThrow("credited top-up receipt")
-})
-
-test("a manual checkout refund resolves its PaymentIntent to the credited session", async () => {
-  const { t } = await setup()
-  await freezeSettled(t)
-  await t.run(async (ctx) => {
-    const receipt = await ctx.db
-      .query("transactions")
-      .withIndex("by_stripe", (q) => q.eq("stripeId", "pi_original"))
-      .unique()
-    if (receipt !== null) {
-      await ctx.db.patch(receipt._id, { stripeId: "cs_original", auto: false })
-    }
-  })
-  mockStripe({
-    checkoutSessions: [
-      {
-        id: "cs_original",
-        payment_intent: "pi_original",
-        customer: "cus_org",
-        payment_status: "paid",
-      },
-    ],
-  })
-  await t.action(internal.billing.refunds.actions.prepare, {
-    ...args,
-    allowanceMicros: 0,
-    walletMicros: 10_000_000,
-  })
-  expect(
-    await t.query(internal.billing.refunds.data.read, { caseId: args.caseId })
-  ).toMatchObject({ creditSourceId: "cs_original", walletMicros: 10_000_000 })
+  ).rejects.toThrow("top-up credited to this workspace")
 })

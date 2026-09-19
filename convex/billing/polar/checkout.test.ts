@@ -2,14 +2,14 @@ import { getFunctionName } from "convex/server"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type ActionCtx } from "../../_generated/server"
 import { openPortal, startPlanCheckout, startTopUpCheckout } from "./checkout"
-import { stripeRequest } from "./client"
-import { stripeEnvironmentNames } from "./config"
+import { polarRequest } from "./client"
+import { polarEnvironmentNames } from "./config"
 
 vi.mock("./client", async (original) => ({
   ...(await original<typeof import("./client")>()),
-  stripeRequest: vi.fn(async () => ({
-    id: "cus_1",
-    url: "https://stripe.test",
+  polarRequest: vi.fn(async () => ({
+    url: "https://polar.test",
+    customer_portal_url: "https://polar.test/portal",
   })),
 }))
 
@@ -23,10 +23,11 @@ const common = {
 beforeEach(() => {
   vi.stubEnv("JORI_REGION", "eu")
   vi.stubEnv("JORI_APP_URL", "https://eu.usejori.com")
-  for (const name of stripeEnvironmentNames) {
+  for (const name of polarEnvironmentNames) {
     vi.stubEnv(name, "configured-test-value")
   }
-  vi.stubEnv("STRIPE_PRICE_CLOUD", "price_cloud")
+  vi.stubEnv("POLAR_PRODUCT_CLOUD", "product_cloud")
+  vi.stubEnv("POLAR_PRODUCT_TOP_UP", "product_top_up")
   vi.clearAllMocks()
 })
 afterEach(() => vi.unstubAllEnvs())
@@ -34,7 +35,7 @@ afterEach(() => vi.unstubAllEnvs())
 test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
   "rejects incomplete billing before creating any resources",
   async (action) => {
-    vi.stubEnv("STRIPE_WEBHOOK_SECRET", "")
+    vi.stubEnv("POLAR_WEBHOOK_SECRET", "")
     const { ctx, runMutation } = context()
     await expect(
       invoke(action, ctx, {
@@ -43,7 +44,7 @@ test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
       })
     ).rejects.toThrow("Billing is not available in this instance yet.")
     expect(runMutation).not.toHaveBeenCalled()
-    expect(stripeRequest).not.toHaveBeenCalled()
+    expect(polarRequest).not.toHaveBeenCalled()
   }
 )
 
@@ -59,63 +60,54 @@ test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
       })
     ).rejects.toThrow("Return URL must point to the Jori app.")
     expect(runMutation).not.toHaveBeenCalled()
-    expect(stripeRequest).not.toHaveBeenCalled()
+    expect(polarRequest).not.toHaveBeenCalled()
   }
 )
 
-test("subscription checkout uses regional metadata and dynamic methods", async () => {
-  await invoke(startPlanCheckout, context().ctx, {
-    ...common,
-  })
-  expect(stripeRequest).toHaveBeenCalledWith("/v1/checkout/sessions", {
-    params: expect.objectContaining({
-      metadata: expect.objectContaining({ region: "eu" }),
-      subscription_data: {
-        metadata: { organizationId: "organization-1", region: "eu" },
-      },
+test("plan checkout sells the plan to the organization as a business in its region", async () => {
+  await invoke(startPlanCheckout, context(false).ctx, { ...common })
+  expect(polarRequest).toHaveBeenCalledWith("/v1/checkouts/", {
+    method: "POST",
+    body: expect.objectContaining({
+      products: ["product_cloud"],
+      external_customer_id: "organization-1",
+      customer_email: "test@example.com",
+      customer_metadata: { organizationId: "organization-1", region: "eu" },
+      metadata: expect.objectContaining({ region: "eu", kind: "plan" }),
+      is_business_customer: true,
+      require_billing_address: true,
       success_url:
         "https://eu.usejori.com/settings?tab=billing&billing=subscribed",
-      cancel_url:
+      return_url:
         "https://eu.usejori.com/settings?tab=billing&billing=canceled",
     }),
   })
-  expect(
-    vi.mocked(stripeRequest).mock.calls[0]?.[1]?.params
-  ).not.toHaveProperty("payment_method_types")
+  expect(vi.mocked(polarRequest).mock.calls[0]?.[1]?.body).not.toHaveProperty(
+    "prices"
+  )
 })
 
-test("top-up checkout tags both session and payment intent", async () => {
+test("top-up checkout prices the chosen amount for that checkout only", async () => {
   await invoke(startTopUpCheckout, context().ctx, { ...common, amountUsd: 25 })
-  expect(stripeRequest).toHaveBeenCalledWith("/v1/checkout/sessions", {
-    params: expect.objectContaining({
-      metadata: expect.objectContaining({ region: "eu", kind: "top-up" }),
-      payment_intent_data: {
-        setup_future_usage: "off_session",
-        metadata: { organizationId: "organization-1", region: "eu" },
+  expect(polarRequest).toHaveBeenCalledWith("/v1/checkouts/", {
+    method: "POST",
+    body: expect.objectContaining({
+      products: ["product_top_up"],
+      prices: {
+        product_top_up: [
+          { amount_type: "fixed", price_amount: 2500, price_currency: "usd" },
+        ],
       },
+      metadata: expect.objectContaining({ region: "eu", kind: "top-up" }),
     }),
-  })
-  expect(
-    vi.mocked(stripeRequest).mock.calls[0]?.[1]?.params
-  ).not.toHaveProperty("payment_method_types")
-})
-
-test("new Stripe customers carry the deployment region", async () => {
-  await invoke(startPlanCheckout, context(false).ctx, {
-    ...common,
-  })
-  expect(stripeRequest).toHaveBeenCalledWith("/v1/customers", {
-    params: {
-      email: "test@example.com",
-      metadata: { organizationId: "organization-1", region: "eu" },
-    },
   })
 })
 
 test("portal stays on the current regional origin", async () => {
   await invoke(openPortal, context().ctx, common)
-  expect(stripeRequest).toHaveBeenCalledWith("/v1/billing_portal/sessions", {
-    params: { customer: "cus_1", return_url: common.returnUrl },
+  expect(polarRequest).toHaveBeenCalledWith("/v1/customer-sessions/", {
+    method: "POST",
+    body: { customer_id: "customer_1", return_url: common.returnUrl },
   })
 })
 
@@ -137,7 +129,7 @@ function invoke(
 function context(hasCustomer = true) {
   const runMutation = vi.fn(async () => ({
     state: { kind: "active" },
-    ...(hasCustomer ? { stripe: { customerId: "cus_1" } } : {}),
+    ...(hasCustomer ? { polar: { customerId: "customer_1" } } : {}),
   }))
   const ctx = {
     auth: {
@@ -176,6 +168,6 @@ test.each([startPlanCheckout, startTopUpCheckout])(
       })
     ).rejects.toThrow("current terms")
     expect(runMutation).not.toHaveBeenCalled()
-    expect(stripeRequest).not.toHaveBeenCalled()
+    expect(polarRequest).not.toHaveBeenCalled()
   }
 )

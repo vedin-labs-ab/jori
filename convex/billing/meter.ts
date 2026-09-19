@@ -66,7 +66,7 @@ export async function meterPricedUsage(
 /**
  * The claim is the release time on the charged total: setting it here means
  * one charge attempt owns the window, so parallel debits cannot double-charge.
- * The Stripe edge clears it on success and extends it into a cooldown on
+ * The Polar edge clears it on success and extends it into a cooldown on
  * decline.
  */
 async function maybeScheduleAutoTopUp(
@@ -81,7 +81,7 @@ async function maybeScheduleAutoTopUp(
     account.state.kind !== "active" ||
     account.refundHold !== undefined ||
     policy === undefined ||
-    account.stripe === undefined
+    account.polar === undefined
   ) {
     return
   }
@@ -99,7 +99,7 @@ async function maybeScheduleAutoTopUp(
   }
 
   await holdAutoTopUp(ctx, account, now + autoTopUp.claimMs)
-  await ctx.scheduler.runAfter(0, internal.billing.stripe.topup.execute, {
+  await ctx.scheduler.runAfter(0, internal.billing.polar.topup.execute, {
     organizationId: account.organizationId,
   })
 }

@@ -30,8 +30,8 @@ export const freeze = internalMutation({
       updatedAt: Date.now(),
     })
     return {
-      customerId: account.stripe?.customerId,
-      subscriptionId: account.stripe?.subscriptionId,
+      customerId: account.polar?.customerId,
+      subscriptionId: account.polar?.subscriptionId,
       micros: account.micros,
     }
   },
@@ -77,7 +77,6 @@ export const reserve = internalMutation({
     ...reservation,
     customerId: v.string(),
     priorRefundedMinor: v.number(),
-    creditSourceId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     validateReservation(args)
@@ -99,8 +98,8 @@ export const reserve = internalMutation({
     const account = await heldAccount(ctx, args.organizationId, args.caseId)
     await requireSettled(ctx, account)
     await requireCreditedPurchase(ctx, args)
-    if (account.stripe?.customerId !== args.customerId) {
-      throw new Error("Stripe customer does not match this workspace.")
+    if (account.polar?.customerId !== args.customerId) {
+      throw new Error("Polar customer does not match this workspace.")
     }
     const allowance = account.micros.allowance - args.allowanceMicros
     const wallet = account.micros.wallet - args.walletMicros
@@ -141,7 +140,7 @@ export const settle = internalMutation({
       .withIndex("by_refundId", (q) => q.eq("refundId", args.refundId))
       .unique()
     if (duplicate !== null) {
-      throw new Error("This Stripe refund already settled another case.")
+      throw new Error("This Polar refund already settled another case.")
     }
     await heldAccount(ctx, entry.organizationId, args.caseId)
     await ctx.db.patch(entry._id, {
@@ -153,7 +152,7 @@ export const settle = internalMutation({
   },
 })
 
-/** Called only after the action checks Stripe for completed or pending refunds. */
+/** Called only after the action checks Polar for completed or pending refunds. */
 export const release = internalMutation({
   args: { organizationId: v.string(), caseId: v.string() },
   handler: async (ctx, args) => {
