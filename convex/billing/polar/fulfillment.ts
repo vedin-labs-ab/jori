@@ -14,8 +14,7 @@ import { belongsToRegion, sellsPlan, sellsTopUp } from "./config"
  * Every payment Polar collects is an order, so a paid order is the one way
  * money reaches an account: a top-up funds the wallet, and the first order
  * of a subscription starts the plan. The order must be paid by the customer
- * Polar keeps under the organization's id; a webhook never creates an
- * account.
+ * checkout made for the organization; a webhook never creates an account.
  */
 export async function applyPaidOrder(
   ctx: MutationCtx,
@@ -30,15 +29,14 @@ export async function applyPaidOrder(
   if (
     organizationId === undefined ||
     customerId === undefined ||
-    order.paid !== true ||
-    readString(order.customer, "external_id") !== organizationId
+    order.paid !== true
   ) {
     return
   }
 
   const account = await getAccount(ctx, organizationId)
 
-  if (account === null) {
+  if (account === null || account.polar?.customerId !== customerId) {
     return
   }
 

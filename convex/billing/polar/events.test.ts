@@ -37,12 +37,7 @@ test.each([
   ["is for another product", { product_id: "product_other" }],
   ["is not in dollars", { currency: "eur" }],
   ["charged nothing", { net_amount: 0 }],
-  [
-    "was paid by a customer kept under another id",
-    {
-      customer: { external_id: "organization-2" },
-    },
-  ],
+  ["was paid by another customer", { customer_id: "customer_foreign" }],
 ])("does not fund the wallet when the order %s", async (_name, change) => {
   const { ctx, insert, patch } = context()
   await handle(ctx, { order: topUp(change) })
@@ -160,7 +155,6 @@ function order(overrides: Record<string, unknown>) {
     paid: true,
     currency: "usd",
     customer_id: "customer_1",
-    customer: { external_id: "organization-1" },
     metadata: { region: "eu", organizationId: "organization-1" },
     ...overrides,
   }
@@ -190,6 +184,7 @@ function context(
   account: Partial<Doc<"accounts">> | null = {
     _id: "account-1" as Doc<"accounts">["_id"],
     organizationId: "organization-1",
+    polar: { customerId: "customer_1" },
     state: { kind: "unsubscribed" },
     micros: { allowance: 0, wallet: 0 },
     topUp: { charged: { micros: 0 } },

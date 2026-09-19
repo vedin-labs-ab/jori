@@ -8,6 +8,7 @@ import { polarEnvironmentNames } from "./config"
 vi.mock("./client", async (original) => ({
   ...(await original<typeof import("./client")>()),
   polarRequest: vi.fn(async () => ({
+    id: "customer_1",
     url: "https://polar.test",
     customer_portal_url: "https://polar.test/portal",
   })),
@@ -64,15 +65,13 @@ test.each([startPlanCheckout, startTopUpCheckout, openPortal])(
   }
 )
 
-test("plan checkout sells the plan to the organization as a business in its region", async () => {
-  await invoke(startPlanCheckout, context(false).ctx, { ...common })
+test("plan checkout sells the plan to the organization's customer as a business in its region", async () => {
+  await invoke(startPlanCheckout, context().ctx, { ...common })
   expect(polarRequest).toHaveBeenCalledWith("/v1/checkouts/", {
     method: "POST",
     body: expect.objectContaining({
       products: ["product_cloud"],
-      external_customer_id: "organization-1",
-      customer_email: "test@example.com",
-      customer_metadata: { organizationId: "organization-1", region: "eu" },
+      customer_id: "customer_1",
       metadata: expect.objectContaining({ region: "eu", kind: "plan" }),
       is_business_customer: true,
       require_billing_address: true,
@@ -85,6 +84,37 @@ test("plan checkout sells the plan to the organization as a business in its regi
   expect(vi.mocked(polarRequest).mock.calls[0]?.[1]?.body).not.toHaveProperty(
     "prices"
   )
+})
+
+test("a new organization becomes a team customer under its own id, so one buyer can own several", async () => {
+  const { ctx, runMutation } = context(false)
+  await invoke(startPlanCheckout, ctx, { ...common })
+  expect(polarRequest).toHaveBeenCalledWith("/v1/customers/", {
+    method: "POST",
+    body: {
+      type: "team",
+      external_id: "organization-1",
+      owner: { email: "test@example.com" },
+      metadata: { organizationId: "organization-1", region: "eu" },
+    },
+  })
+  expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+    organizationId: "organization-1",
+    customerId: "customer_1",
+  })
+})
+
+test("a customer left by an unrecorded attempt is found again by the organization's id", async () => {
+  vi.mocked(polarRequest).mockRejectedValueOnce(new Error("exists"))
+  const { ctx, runMutation } = context(false)
+  await invoke(startPlanCheckout, ctx, { ...common })
+  expect(polarRequest).toHaveBeenCalledWith(
+    "/v1/customers/external/organization-1"
+  )
+  expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+    organizationId: "organization-1",
+    customerId: "customer_1",
+  })
 })
 
 test("top-up checkout prices the chosen amount for that checkout only", async () => {
@@ -133,6 +163,7 @@ function invoke(
 
 function context(hasCustomer = true) {
   const runMutation = vi.fn(async () => ({
+    organizationId: "organization-1",
     state: { kind: "active" },
     ...(hasCustomer ? { polar: { customerId: "customer_1" } } : {}),
   }))

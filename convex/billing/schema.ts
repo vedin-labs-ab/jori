@@ -43,8 +43,7 @@ export const accounts = defineTable({
       releaseAt: v.optional(v.number()),
     }),
   }),
-  /** Set by the first paid order; Polar keeps the customer under the
-   *  organization's id. */
+  /** The team customer Polar keeps under the organization's id. */
   polar: v.optional(
     v.object({
       customerId: v.string(),
