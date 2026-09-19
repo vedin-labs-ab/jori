@@ -1,3 +1,4 @@
+import { installHooks } from "../gate/hooks.ts"
 import { git, requirePrimaryCheckout } from "../git.ts"
 import { installCommand, runCommand } from "../process.ts"
 import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
@@ -9,6 +10,7 @@ import { branchOf, readTaskName, worktreeOf } from "./paths.ts"
  * with dependencies installed so the first command there is the real one.
  */
 requirePrimaryCheckout("Starting a task")
+installHooks()
 
 const task = readTaskName(process.argv.slice(2))
 const branch = branchOf(task)
