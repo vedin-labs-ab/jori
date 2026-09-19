@@ -1,6 +1,6 @@
 import { type MessageContext } from "@contracts/replies/answers"
 import { createFileRoute, type SearchSchemaInput } from "@tanstack/react-router"
-import { billingSearch } from "@/console/billing/return"
+import { billingSearch } from "@/console/billing/actions/return"
 import { ChatHomePage } from "@/console/chat/home"
 import { parseContextSearch } from "@/shared/console/chat/pane/context"
 import { consoleDocumentTitle } from "@/shared/console/shell/routes"

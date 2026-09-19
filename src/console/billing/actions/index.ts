@@ -3,7 +3,7 @@ import { useAction } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { useState } from "react"
 import { showErrorToast } from "@/shared/console/error"
-import { api } from "../../../convex/_generated/api"
+import { api } from "../../../../convex/_generated/api"
 
 export type BillingOverview = FunctionReturnType<
   typeof api.billing.console.overview

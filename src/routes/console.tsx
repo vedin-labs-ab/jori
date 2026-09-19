@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { billingSearch } from "@/console/billing/return"
+import { billingSearch } from "@/console/billing/actions/return"
 
 // The console has no overview page; /console stays the entry path everything
 // links and redirects to, and forwards to the place to ask.

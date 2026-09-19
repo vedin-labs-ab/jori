@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { billingReturnUrl } from "./actions"
+import { billingReturnUrl } from "./index"
 
 describe("billingReturnUrl", () => {
   afterEach(() => {
