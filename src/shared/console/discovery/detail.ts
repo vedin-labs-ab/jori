@@ -6,13 +6,13 @@ export function resultDetail(hit: Hit, query: string) {
   const snippet = resultSnippet(hit, query)
   const parent = hit.title !== hit.resourceName ? hit.resourceName : undefined
   const label = locationLabel(hit)
+  // A row's snippet names its own columns; a table's header match does not.
   const field =
-    kind === "table"
-      ? location.kind === "row"
-        ? label
-        : snippet && (location.start ?? 0) > hit.resourceName.length
-          ? "Column"
-          : undefined
+    kind === "table" &&
+    location.kind !== "row" &&
+    snippet &&
+    (location.start ?? 0) > hit.resourceName.length
+      ? "Column"
       : undefined
   const detail = field && snippet ? `${field}: ${snippet}` : snippet
   const coverage = hit.coverage && coverageLabels[hit.coverage]
@@ -53,10 +53,7 @@ function resultSnippet(hit: Hit, query: string) {
     : snippet
 }
 
-function locationLabel({ kind, location }: Hit) {
-  if (location.kind === "row" && kind === "table") {
-    return location.label
-  }
+function locationLabel({ location }: Hit) {
   if (location.seconds !== undefined) {
     const seconds = Math.floor(location.seconds)
     return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`

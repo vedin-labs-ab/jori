@@ -39,24 +39,20 @@ test("name matches do not dump table schemas or repeat resource names", () => {
   ).toBe("")
 })
 
-test("rows show their table and matched field, without repeating the row name", () => {
+test("rows show their table and matched column, without repeating the row name", () => {
   const row = hit({
     kind: "table",
     title: "Northwind",
     resourceName: "Customer accounts",
-    snippet: "Enterprise",
-    location: { kind: "row", id: "row", label: "Plan", field: "plan" },
+    snippet: "Plan: Enterprise",
+    location: { kind: "row", id: "row" },
   })
   expect(resultDetail(row, "enterprise")).toBe(
     "Customer accounts · Plan: Enterprise"
   )
   expect(
     resultDetail(
-      {
-        ...row,
-        snippet: "Northwind",
-        location: { ...row.location, label: "Account" },
-      },
+      { ...row, snippet: "Northwind" },
       "northwind"
     )
   ).toBe("Customer accounts")

@@ -9,7 +9,9 @@ import { type Gate } from "../../visibility/sight"
 import { discoveryRegion } from "../region"
 
 export type { Row } from "@turbopuffer/turbopuffer/resources/namespaces"
-export const version = "discovery-v1"
+/** Names every namespace. A new model or vector shape cannot share an index
+ *  with the old one, so changing either bumps this and rebuilds. */
+export const version = "discovery-v2"
 const schema: Record<string, AttributeSchema> = {
   title: {
     type: "string",
@@ -18,8 +20,10 @@ const schema: Record<string, AttributeSchema> = {
   text: {
     type: "string",
     full_text_search: { stemming: true, ascii_folding: true },
-    embed: { model: "cohere/embed-v4.0", dims: 512 },
+    embed: { model: "qwen/qwen3-embedding-4b", attribute: "embedding" },
   },
+  // Half precision halves what every row stores for no measurable recall.
+  embedding: { type: "[512]f16", ann: true },
   key: { type: "string" },
   revision: { type: "string" },
   resource: { type: "string" },
@@ -29,8 +33,9 @@ const schema: Record<string, AttributeSchema> = {
   folder: { type: "string" },
   spelling: { type: "[]string" },
 }
-/** Cohere v4's documented inference map is EU for aws-eu-west-1 and US for
- * aws-us-east-1. Never substitute a global endpoint or another model. */
+/** turbopuffer's inference map runs this model in the EU for aws-eu-west-1
+ * and in the US for aws-us-east-1. Never substitute a global endpoint, or a
+ * model the map serves from outside the region. */
 export async function namespace(organizationId: string) {
   const region = discoveryRegion()
   const deployment = requireEnvironmentVariable("CONVEX_CLOUD_URL")

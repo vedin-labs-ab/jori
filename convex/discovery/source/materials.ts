@@ -154,15 +154,17 @@ function collectionSections(
 ): Source["sections"] {
   return document
     ? row.kind === "table"
-      ? fields.map((field) => ({
-          text: field.text,
-          location: {
-            kind: "row" as const,
-            id: document._id,
-            field: field.id,
-            label: field.label,
+      ? [
+          // One passage per row, not per cell: every passage carries its own
+          // vector, and a match reads best beside its column name.
+          {
+            text: fields
+              .filter((field) => field.text)
+              .map((field) => `${field.label}: ${field.text}`)
+              .join("\n"),
+            location: { kind: "row" as const, id: document._id },
           },
-        }))
+        ]
       : [
           {
             text: readable(document.value),

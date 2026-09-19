@@ -38,16 +38,15 @@ async function fixture() {
   }
   return { t, viewer, args, ...data }
 }
-test("an owner can find their row without learning private ancestor names; locators identify the field", async () => {
+test("an owner can find their row without learning private ancestor names; locators point into the row", async () => {
   const { viewer, args, row } = await fixture()
   const hits = await viewer.query(api.discovery.console.visible, args)
   expect(hits).toHaveLength(1)
   expect(hits[0].location).toMatchObject({
     kind: "row",
     id: row,
-    field: "name",
-    start: 0,
-    end: 7,
+    start: 6,
+    end: 13,
   })
   expect(JSON.stringify(hits)).not.toContain("Confidential ancestor")
 })

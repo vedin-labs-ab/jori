@@ -46,7 +46,7 @@ test("workspace and deployment namespace identities are isolated and opaque", as
   await namespace("confidential-workspace")
   const names = mocks.namespace.mock.calls.map((call) => call[0])
   expect(new Set(names).size).toBe(3)
-  expect(names.every((name) => /^discovery-v1-[a-f0-9]{64}$/.test(name))).toBe(
+  expect(names.every((name) => /^discovery-v2-[a-f0-9]{64}$/.test(name))).toBe(
     true
   )
 })
