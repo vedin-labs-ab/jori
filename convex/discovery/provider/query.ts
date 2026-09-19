@@ -138,6 +138,12 @@ function fuse(lists: Row[][], text: string) {
   return [...result.values()].sort((a, b) => b.score - a.score)
 }
 
+/** Past this cosine distance a semantic match is noise. Tuned for the
+ *  embedding model in provider/index: across English and Swedish probes,
+ *  relevant passages sat at 0.23–0.61 and unrelated queries never came
+ *  closer than 0.68. Re-measure when the model changes. */
+const semanticCutoff = 0.65
+
 function readCandidate(row: Row, list: number): Candidate | null {
   if (
     typeof row.key !== "string" ||
@@ -152,7 +158,7 @@ function readCandidate(row: Row, list: number): Candidate | null {
     list === 1 &&
     (typeof row.$dist !== "number" ||
       !Number.isFinite(row.$dist) ||
-      row.$dist > 0.7 ||
+      row.$dist > semanticCutoff ||
       row.$dist < 0)
   ) {
     return null
