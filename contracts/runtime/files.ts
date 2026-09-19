@@ -1,4 +1,4 @@
-import { type RuntimeId } from "./ids"
+import { type RuntimeId } from "./ids.ts"
 
 // Enforced by the broker upload endpoint and pre-checked in the worker, so
 // the cap and its user-facing copy cannot drift apart.

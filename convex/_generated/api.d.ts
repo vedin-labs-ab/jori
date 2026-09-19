@@ -177,6 +177,7 @@ import type * as files_blobs_sweep from "../files/blobs/sweep.js";
 import type * as files_console from "../files/console.js";
 import type * as files_data from "../files/data.js";
 import type * as files_mcp from "../files/mcp.js";
+import type * as files_migrate from "../files/migrate.js";
 import type * as files_names from "../files/names.js";
 import type * as files_records from "../files/records.js";
 import type * as files_share from "../files/share.js";
@@ -879,6 +880,7 @@ declare const fullApi: ApiFromModules<{
   "files/console": typeof files_console;
   "files/data": typeof files_data;
   "files/mcp": typeof files_mcp;
+  "files/migrate": typeof files_migrate;
   "files/names": typeof files_names;
   "files/records": typeof files_records;
   "files/share": typeof files_share;
