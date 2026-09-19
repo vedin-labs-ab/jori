@@ -29,6 +29,12 @@ const subprocessors: readonly Subprocessor[] = [
     purpose: "Stores workspace data and sessions.",
   },
   {
+    logo: "/logos/subprocessors/cloudflare.svg",
+    name: "Cloudflare",
+    url: "https://www.cloudflare.com/cloudflare-customer-dpa/",
+    purpose: "Stores files.",
+  },
+  {
     logo: "/logos/subprocessors/turbopuffer.svg",
     name: "turbopuffer",
     url: "https://turbopuffer.com/docs/security",

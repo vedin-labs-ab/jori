@@ -27,5 +27,5 @@ test("discloses image processing and workspace search alongside the core provide
   expect(
     screen.getByRole("link", { name: "Zoho" }).closest("li")?.textContent
   ).toBe("Zoho Hosts the support mailbox.")
-  expect(within(screen.getByRole("list")).getAllByRole("link")).toHaveLength(11)
+  expect(within(screen.getByRole("list")).getAllByRole("link")).toHaveLength(12)
 })
