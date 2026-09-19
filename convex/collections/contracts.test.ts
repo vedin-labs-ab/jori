@@ -92,7 +92,7 @@ test("all native share handlers return the documented secret-bearing URL and pat
         organizationId: "verification",
         ownerId: personId,
         visibility: { mode: "private" },
-        blobKey: "verification/fixture",
+        blobKey: "test/fixture.txt",
         name: "fixture.txt",
         mimeType: "text/plain",
         size: 17,

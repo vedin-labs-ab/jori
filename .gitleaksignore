@@ -1,0 +1,8 @@
+# Confirmed non-credential fixtures, scoped to their original historical findings.
+# Synthetic blob key in a collection contract test.
+5e6fa88cf47743de0e781ae4c1f4360fbc6409e3:convex/collections/contracts.test.ts:generic-api-key:95
+# Base64-encoded test signing string, not a provider credential.
+46acd3a6e3a86583fc2bf3914911204576c9a11d:convex/billing/polar/http.test.ts:generic-api-key:8
+# Published Svix reference fixture, verified against the pinned upstream source:
+# https://github.com/svix/svix-webhooks/blob/b41728cd98a7e7004a6407a623f43977b82fcba4/javascript/src/webhook.test.ts
+46acd3a6e3a86583fc2bf3914911204576c9a11d:convex/billing/polar/http.test.ts:generic-api-key:56

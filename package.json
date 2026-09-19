@@ -30,6 +30,8 @@
     "check:typecheck": "node node_modules/@typescript/native/bin/tsc --noEmit",
     "check:versions": "node --experimental-strip-types scripts/versions.ts",
     "content:compile": "node --experimental-strip-types scripts/content/index.ts --write",
+    "hooks": "node --experimental-strip-types scripts/gate/hooks.ts",
+    "verify": "node --experimental-strip-types scripts/gate/verify.ts",
     "test": "node --experimental-strip-types scripts/test.ts",
     "task": "node --experimental-strip-types scripts/worktree/start.ts",
     "land": "node --experimental-strip-types scripts/worktree/land.ts",

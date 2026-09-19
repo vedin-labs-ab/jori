@@ -1,12 +1,14 @@
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { packageCommand, runCommand } from "../process.ts"
-import { scanSecrets } from "./secrets.ts"
+import { checkSecurity } from "./security.ts"
 import { isVerified } from "./stamp.ts"
 
-/** Tree-based code checks may be reused; the history scan never is. The
- *  full check includes it, so an uncached gate only scans once. */
+/** Tree-based code checks may be reused; history and advisory checks never are. The
+ *  full check includes security checks, so an uncached gate runs them once. */
 export async function verifyGate(cwd = process.cwd(), skipChecks = false) {
   if (skipChecks || isVerified(cwd)) {
-    await scanSecrets(cwd)
+    await checkSecurity(cwd)
     process.stdout.write(
       skipChecks
         ? "Code gate skipped; no verification recorded.\n"
@@ -18,4 +20,8 @@ export async function verifyGate(cwd = process.cwd(), skipChecks = false) {
 
   await runCommand({ ...packageCommand("check"), cwd })
   await runCommand({ ...packageCommand("test"), cwd })
+}
+
+if (path.resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
+  await verifyGate()
 }

@@ -1,18 +1,20 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type ActionCtx } from "../../_generated/server"
 import { hmacSha256Base64 } from "../../shared/crypto"
-import { base64DecodeBytes } from "../../shared/encoding"
+import { base64DecodeBytes, base64EncodeBytes } from "../../shared/encoding"
 import { polarEnvironmentNames } from "./config"
 import { handlePolarEvents } from "./http"
 
-const secret = "whsec_c2lnbmluZy1rZXktZm9yLXRlc3Rz"
+const testSigningSecret = `whsec_${base64EncodeBytes(
+  new TextEncoder().encode("test-only signing key")
+)}`
 
 beforeEach(() => {
   for (const name of polarEnvironmentNames) {
     vi.stubEnv(name, "configured-test-value")
   }
   vi.stubEnv("POLAR_SERVER", "sandbox")
-  vi.stubEnv("POLAR_WEBHOOK_SECRET", secret)
+  vi.stubEnv("POLAR_WEBHOOK_SECRET", testSigningSecret)
   vi.stubEnv("JORI_REGION", "eu")
 })
 afterEach(() => {
@@ -51,6 +53,8 @@ test.each([
   expect(runMutation).not.toHaveBeenCalled()
 })
 
+// Published reference vector; keep independent of our test signing helper.
+// https://github.com/svix/svix-webhooks/blob/b41728cd98a7e7004a6407a623f43977b82fcba4/javascript/src/webhook.test.ts
 test("verifies the Standard Webhooks reference signature", async () => {
   vi.useFakeTimers({ now: 1_614_265_330_000 })
   vi.stubEnv("POLAR_WEBHOOK_SECRET", "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw")
@@ -140,7 +144,7 @@ async function signed(payload: unknown, headers: Record<string, string> = {}) {
   const timestamp =
     headers["webhook-timestamp"] ?? String(Math.floor(Date.now() / 1000))
   const signature = await hmacSha256Base64(
-    base64DecodeBytes(secret.replace("whsec_", "")),
+    base64DecodeBytes(testSigningSecret.replace("whsec_", "")),
     `message_1.${timestamp}.${body}`
   )
   return new Request("https://example.convex.site/polar/events", {

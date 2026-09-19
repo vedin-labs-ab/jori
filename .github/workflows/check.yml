@@ -37,8 +37,6 @@ jobs:
           echo "GITLEAKS_BIN=$RUNNER_TEMP/gitleaks" >> "$GITHUB_ENV"
           GITLEAKS_BIN="$RUNNER_TEMP/gitleaks" node --experimental-strip-types scripts/gate/secrets.ts
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=moderate
       - name: Install Chromium for browser tests
         run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm check
-      - run: pnpm test
+      - run: pnpm verify
