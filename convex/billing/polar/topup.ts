@@ -3,7 +3,8 @@ import { autoTopUp, microsPerDollar } from "../../../contracts/billing"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
-import { polarRequest, requireString } from "./client"
+import { readString } from "../../shared/input"
+import { polarList, polarRequest, requireString } from "./client"
 import { polarMetadata, topUpProductId } from "./config"
 
 /**
@@ -50,7 +51,7 @@ export const execute = internalAction({
 })
 
 /** Polar charges off-session in two steps: a draft order charges nothing,
- *  and finalizing it charges the customer's default payment method. A
+ *  and finalizing it charges the selected saved payment method. A
  *  decline, or a card that wants a challenge nobody is present for, fails
  *  the finalize and leaves the draft unpaid. */
 async function chargeSavedCard(args: {
@@ -58,6 +59,7 @@ async function chargeSavedCard(args: {
   customerId: string
   organizationId: string
 }) {
+  const paymentMethodId = await savedCard(args.customerId)
   const order = await polarRequest("/v1/orders/", {
     method: "POST",
     body: {
@@ -75,6 +77,27 @@ async function chargeSavedCard(args: {
 
   await polarRequest(
     `/v1/orders/${encodeURIComponent(requireString(order, "id"))}/finalize`,
-    { method: "POST" }
+    { method: "POST", body: { payment_method_id: paymentMethodId } }
   )
+}
+
+/** Enabling auto top-up permits the saved card, but never chooses between
+ * multiple methods when the customer has not selected a default. */
+async function savedCard(customerId: string) {
+  const path = `/v1/customers/${encodeURIComponent(customerId)}`
+  const customer = await polarRequest(path)
+  if (customer.id !== customerId) {
+    throw new Error("Polar customer does not match this workspace.")
+  }
+  const preferred = readString(customer, "default_payment_method_id")
+  if (preferred !== undefined) {
+    return preferred
+  }
+  const methods = await polarList(`${path}/payment-methods`, {})
+  if (methods.length !== 1 || methods[0]?.type !== "card") {
+    throw new Error(
+      "Select a default card in Manage billing before auto top-up."
+    )
+  }
+  return requireString(methods[0], "id")
 }
