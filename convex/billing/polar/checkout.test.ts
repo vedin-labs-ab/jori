@@ -2,11 +2,12 @@ import { getFunctionName } from "convex/server"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type ActionCtx } from "../../_generated/server"
 import { openPortal, startPlanCheckout, startTopUpCheckout } from "./checkout"
-import { polarRequest } from "./client"
+import { polarList, polarRequest } from "./client"
 import { polarEnvironmentNames } from "./config"
 
 vi.mock("./client", async (original) => ({
   ...(await original<typeof import("./client")>()),
+  polarList: vi.fn(),
   polarRequest: vi.fn(async () => ({
     id: "customer_1",
     url: "https://polar.test",
@@ -30,6 +31,9 @@ beforeEach(() => {
   vi.stubEnv("POLAR_PRODUCT_CLOUD", "product_cloud")
   vi.stubEnv("POLAR_PRODUCT_TOP_UP", "product_top_up")
   vi.clearAllMocks()
+  vi.mocked(polarList).mockResolvedValue([
+    { id: "owner_1", customer_id: "customer_1", role: "owner" },
+  ])
 })
 afterEach(() => vi.unstubAllEnvs())
 
@@ -138,13 +142,35 @@ test("top-up checkout prices the chosen amount for that checkout only", async ()
   })
 })
 
-test("portal stays on the current regional origin", async () => {
+test("team customer portal uses its owner member and stays on the current regional origin", async () => {
   await invoke(openPortal, context().ctx, common)
+  expect(polarList).toHaveBeenCalledWith("/v1/customers/customer_1/members", {
+    role: "owner",
+  })
   expect(polarRequest).toHaveBeenCalledWith("/v1/customer-sessions/", {
     method: "POST",
-    body: { customer_id: "customer_1", return_url: common.returnUrl },
+    body: {
+      customer_id: "customer_1",
+      member_id: "owner_1",
+      return_url: common.returnUrl,
+    },
   })
 })
+
+test.each([
+  { members: [] },
+  { members: [{ id: "member_1", customer_id: "customer_1", role: "member" }] },
+  { members: [{ id: "owner_2", customer_id: "customer_2", role: "owner" }] },
+])(
+  "portal rejects a missing owner or a member of another customer",
+  async ({ members }) => {
+    vi.mocked(polarList).mockResolvedValue(members)
+    await expect(invoke(openPortal, context().ctx, common)).rejects.toThrow(
+      "The billing customer has no owner"
+    )
+    expect(polarRequest).not.toHaveBeenCalled()
+  }
+)
 
 function invoke(
   action: unknown,

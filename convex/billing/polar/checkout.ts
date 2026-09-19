@@ -6,7 +6,7 @@ import { type ActionCtx, action } from "../../_generated/server"
 import { requireOrganizationAccess } from "../../access"
 import { requireReturnUrl } from "../../shared/origin"
 import { requireActivePlan, requireNoRefundHold } from "../account"
-import { polarRequest, requireString } from "./client"
+import { polarList, polarRequest, requireString } from "./client"
 import {
   planProductId,
   polarMetadata,
@@ -110,9 +110,25 @@ export const openPortal = action({
       throw new Error("Nothing to manage yet. Subscribe first.")
     }
 
+    const customerId = account.polar.customerId
+    const owners = await polarList(
+      `/v1/customers/${encodeURIComponent(customerId)}/members`,
+      { role: "owner" }
+    )
+    const owner = owners.find(
+      (member) => member.customer_id === customerId && member.role === "owner"
+    )
+    if (owner === undefined) {
+      throw new Error("The billing customer has no owner to open the portal.")
+    }
+
     const session = await polarRequest("/v1/customer-sessions/", {
       method: "POST",
-      body: { customer_id: account.polar.customerId, return_url: returnUrl },
+      body: {
+        customer_id: customerId,
+        member_id: requireString(owner, "id"),
+        return_url: returnUrl,
+      },
     })
 
     return { url: requireString(session, "customer_portal_url") }
