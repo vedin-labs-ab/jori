@@ -171,8 +171,9 @@ import type * as export_records from "../export/records.js";
 import type * as export_support from "../export/support.js";
 import type * as export_validators from "../export/validators.js";
 import type * as files_attachments from "../files/attachments.js";
-import type * as files_blobs from "../files/blobs.js";
-import type * as files_cleanup_orphans from "../files/cleanup/orphans.js";
+import type * as files_blobs_fixtures from "../files/blobs/fixtures.js";
+import type * as files_blobs_index from "../files/blobs/index.js";
+import type * as files_blobs_sweep from "../files/blobs/sweep.js";
 import type * as files_console from "../files/console.js";
 import type * as files_data from "../files/data.js";
 import type * as files_mcp from "../files/mcp.js";
@@ -872,8 +873,9 @@ declare const fullApi: ApiFromModules<{
   "export/support": typeof export_support;
   "export/validators": typeof export_validators;
   "files/attachments": typeof files_attachments;
-  "files/blobs": typeof files_blobs;
-  "files/cleanup/orphans": typeof files_cleanup_orphans;
+  "files/blobs/fixtures": typeof files_blobs_fixtures;
+  "files/blobs/index": typeof files_blobs_index;
+  "files/blobs/sweep": typeof files_blobs_sweep;
   "files/console": typeof files_console;
   "files/data": typeof files_data;
   "files/mcp": typeof files_mcp;
@@ -1432,6 +1434,7 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   betterAuth: import("../betterauth/_generated/component.js").ComponentApi<"betterAuth">;
+  r2: import("@convex-dev/r2/_generated/component.js").ComponentApi<"r2">;
   rateLimiter: import("@convex-dev/rate-limiter/_generated/component.js").ComponentApi<"rateLimiter">;
   workflow: import("@convex-dev/workflow/_generated/component.js").ComponentApi<"workflow">;
 };

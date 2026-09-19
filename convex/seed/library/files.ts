@@ -1,4 +1,3 @@
-import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { clearOrganization, daysAgo, type SeedContext } from "../context"
 import { resolveOwners } from "../people"
@@ -155,11 +154,11 @@ export const files: SeedFile[] = [
 ]
 
 /** Storage holds the bytes; this writes the rows that point at them. The
- *  script uploads first, because only a storage id can be written here. */
+ *  script uploads first, because only a blob key can be written here. */
 export async function seedFiles(
   ctx: MutationCtx,
   seed: SeedContext,
-  uploads: { key: string; storageId: Id<"_storage">; size: number }[]
+  uploads: { key: string; blobKey: string; size: number }[]
 ) {
   const owners = await resolveOwners(ctx, seed)
   const folders = await resolveFolders(ctx, seed)
@@ -180,7 +179,7 @@ export async function seedFiles(
       organizationId: seed.organizationId,
       visibility: { mode: "organization" },
       ownerId: owners(file.owner),
-      storageId: upload.storageId,
+      blobKey: upload.blobKey,
       name: file.name,
       mimeType: file.mimeType,
       size: upload.size,

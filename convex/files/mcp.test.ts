@@ -44,6 +44,7 @@ test("dispatches search_files with the run principal as viewer", async () => {
     runId: undefined,
     query: "report",
     limit: 5,
+    epoch: expect.any(Number),
   })
 })
 
@@ -61,6 +62,7 @@ test("dispatches read_file without a person for organization runs", async () => 
     organizationId: "organization",
     personId: undefined,
     fileId: "file-id",
+    epoch: expect.any(Number),
   })
 })
 

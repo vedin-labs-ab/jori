@@ -1,5 +1,4 @@
 import { useNavigate } from "@tanstack/react-router"
-import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useState } from "react"
 import { AskJoriAction } from "@/shared/console/chat/pane/ask"
@@ -10,11 +9,11 @@ import { type FileDetail } from "@/shared/console/files/types"
 import { ConsoleListLayout } from "@/shared/console/list/frame"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useMemberUrl } from "@/shared/console/materials/fragment"
-import { api } from "../../../convex/_generated/api"
 import { ConsolePage } from "../page"
 import { MaterialLinksDialog } from "../shared/materials/links"
 import { FileDialogs } from "./dialogs"
 import { useFileActions } from "./manage"
+import { useFile, useFiles } from "./query"
 import { useFileSave } from "./save"
 import { useFileSiblings } from "./siblings"
 
@@ -51,8 +50,8 @@ function FileViewContent({
   fileId: GenericId<"files">
   organizationId: string
 }) {
-  const result = useQuery(api.files.console.get, { organizationId, fileId })
-  const files = useQuery(api.files.console.list, { organizationId })
+  const result = useFile(organizationId, fileId)
+  const files = useFiles(organizationId)
 
   if (result === undefined) {
     // While the detail query resolves — every prev/next navigation starts

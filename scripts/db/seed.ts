@@ -1,18 +1,5 @@
 import { spawnSync } from "node:child_process"
 
-type UploadTarget = {
-  key: string
-  mimeType: string
-  body: string
-  url: string
-}
-
-type Upload = {
-  key: string
-  storageId: string
-  size: number
-}
-
 async function main() {
   const options = parseArguments(process.argv.slice(2))
 
@@ -32,40 +19,15 @@ async function main() {
   report("Foundation", runStage("seed:foundation", scope))
   report(
     "Library",
-    runStage("seed:library", { ...scope, uploads: await uploadDocuments() })
+    runStage("seed:library", {
+      ...scope,
+      uploads: runStage("seed:uploads", scope),
+    })
   )
   report("Work", runStage("seed:work", scope))
   report("History", runStage("seed:history", scope))
 
   writeStdout("Seeding finished.")
-}
-
-/** Storage only takes bytes over HTTP, so documents are put in place before
- *  the stage that files them can run. */
-async function uploadDocuments(): Promise<Upload[]> {
-  const targets = runStage("seed:uploads", {}) as UploadTarget[]
-  const uploads: Upload[] = []
-
-  for (const target of targets) {
-    const body = new TextEncoder().encode(target.body)
-    const response = await fetch(target.url, {
-      method: "POST",
-      headers: { "Content-Type": target.mimeType },
-      body,
-    })
-
-    if (!response.ok) {
-      throw new Error(`Uploading ${target.key} failed with ${response.status}.`)
-    }
-
-    const { storageId } = (await response.json()) as { storageId: string }
-
-    uploads.push({ key: target.key, storageId, size: body.byteLength })
-  }
-
-  writeStdout(`Uploaded ${uploads.length} documents to storage.`)
-
-  return uploads
 }
 
 /** Seeding writes fixtures over whatever is there, so the target is never an

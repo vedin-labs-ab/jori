@@ -2,6 +2,7 @@ import { type PaginationOptions } from "convex/server"
 import { type Id } from "../_generated/dataModel"
 import { type QueryCtx } from "../_generated/server"
 import { conversationGate } from "../conversations/access"
+import { blobUrl } from "../files/blobs"
 import { jobGate } from "../jobs/access"
 import { conversationMessages } from "../messages/read"
 import { type Sight } from "../visibility/sight"
@@ -49,7 +50,7 @@ export async function resourcePage(
       )
       return {
         ...visible,
-        page: visible.page.map(({ storageId: _storageId, ...row }) => row),
+        page: visible.page.map(({ blobKey: _blobKey, ...row }) => row),
       }
     }
     case "collections": {
@@ -135,13 +136,7 @@ export async function fileUrl(
   ) {
     throw new Error("File is unavailable for export.")
   }
-  const url = await ctx.storage.getUrl(file.storageId)
-  if (url === null) {
-    throw new Error(
-      "A stored file is missing. Contact support before deleting this workspace."
-    )
-  }
-  return { url, size: file.size }
+  return { url: await blobUrl(file.blobKey), size: file.size }
 }
 
 function pageOptions(cursor: string | null): PaginationOptions {

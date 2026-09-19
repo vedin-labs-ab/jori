@@ -92,7 +92,7 @@ test("all native share handlers return the documented secret-bearing URL and pat
         organizationId: "verification",
         ownerId: personId,
         visibility: { mode: "private" },
-        storageId: await ctx.storage.store(new Blob(["Synthetic fixture"])),
+        blobKey: "verification/fixture",
         name: "fixture.txt",
         mimeType: "text/plain",
         size: 17,

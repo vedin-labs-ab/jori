@@ -3,6 +3,7 @@
 import { v } from "convex/values"
 import { maxFileBytes } from "../../../contracts/runtime/files"
 import { type ActionCtx, internalAction } from "../../_generated/server"
+import { readBlob } from "../../files/blobs"
 import { discoveryRegion } from "../region"
 import { extractMedia } from "./media"
 import { extractPdf } from "./pdf"
@@ -11,7 +12,7 @@ import { bounded, CoverageError, type Extraction } from "./types"
 
 export const extract = internalAction({
   args: {
-    storageId: v.id("_storage"),
+    blobKey: v.string(),
     organizationId: v.string(),
     sourceKey: v.string(),
     revision: v.string(),
@@ -21,7 +22,7 @@ export const extract = internalAction({
   handler: async (ctx, args): Promise<Extraction> => {
     try {
       discoveryRegion()
-      const blob = await ctx.storage.get(args.storageId)
+      const blob = await readBlob(args.blobKey)
       if (!blob) {
         throw new CoverageError("failed", "Stored file content is missing.")
       }

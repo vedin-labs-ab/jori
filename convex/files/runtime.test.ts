@@ -1,6 +1,8 @@
 import { afterEach, expect, test, vi } from "vitest"
+import { registerBlobs } from "../../test/convex/blobs"
 import { transactionalConsoleContext } from "../../test/convex/conversations"
 import { internal } from "../_generated/api"
+import { seedBlob } from "./blobs/fixtures"
 
 vi.mock("../runs/execution/workflow", () => ({ startRun: vi.fn() }))
 afterEach(() => vi.useRealTimers())
@@ -8,7 +10,8 @@ afterEach(() => vi.useRealTimers())
 test("generated files inherit private chat ownership and filing instead of the upload's public default", async () => {
   vi.useFakeTimers()
   const f = await transactionalConsoleContext()
-  const { folderId, storageId } = await f.t.run(async (ctx) => {
+  registerBlobs(f.t)
+  const { folderId, blobKey } = await f.t.run(async (ctx) => {
     const folderId = await ctx.db.insert("folders", {
       organizationId: "org",
       name: "Team work",
@@ -21,13 +24,13 @@ test("generated files inherit private chat ownership and filing instead of the u
     await ctx.db.patch(f.runId, { status: "running" })
     return {
       folderId,
-      storageId: await ctx.storage.store(new Blob(["Private draft"])),
+      blobKey: await seedBlob(ctx, "org"),
     }
   })
   const fileId = await f.t.mutation(internal.files.data.record, {
     organizationId: "org",
     runId: f.runId,
-    storageId,
+    blobKey,
     name: "draft.txt",
     mimeType: "text/plain",
     size: 13,
@@ -43,6 +46,7 @@ test("generated files inherit private chat ownership and filing instead of the u
       organizationId: "org",
       personId: f.people[1],
       fileId,
+      epoch: 0,
     })
   ).toBeNull()
 })

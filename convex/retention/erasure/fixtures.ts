@@ -1,9 +1,7 @@
-import { type StorageActionWriter } from "convex/server"
 import { type MutationCtx } from "../../_generated/server"
 import { authComponent, createAdapterOptions } from "../../auth"
-export async function seedContent(
-  ctx: MutationCtx & { storage: StorageActionWriter }
-) {
+import { seedBlob } from "../../files/blobs/fixtures"
+export async function seedContent(ctx: MutationCtx) {
   const retention = await ctx.db.insert("workspaceRetention", {
     organizationId: "org",
     state: "deleting",
@@ -45,7 +43,7 @@ export async function seedContent(
     createdAt: 1,
     updatedAt: 1,
   })
-  const storageId = await seedFile(ctx)
+  const blobKey = await seedFile(ctx)
   const receipt = await ctx.db.insert("transactions", {
     organizationId: "org",
     timestamp: 1,
@@ -54,7 +52,7 @@ export async function seedContent(
     orderId: "order_test",
     auto: false,
   })
-  return { retention, collection, other, kept, storageId, receipt }
+  return { retention, collection, other, kept, blobKey, receipt }
 }
 
 export async function seedAuth(ctx: MutationCtx) {
@@ -100,12 +98,12 @@ export async function seedAuth(ctx: MutationCtx) {
   return { user: user.id, org: org.id, other: other.id }
 }
 
-async function seedFile(ctx: MutationCtx & { storage: StorageActionWriter }) {
-  const storageId = await ctx.storage.store(new Blob(["private file"]))
+async function seedFile(ctx: MutationCtx) {
+  const blobKey = await seedBlob(ctx, "org")
   await ctx.db.insert("files", {
     organizationId: "org",
     visibility: { mode: "organization" },
-    storageId,
+    blobKey,
     name: "secret.txt",
     mimeType: "text/plain",
     size: 12,
@@ -113,7 +111,7 @@ async function seedFile(ctx: MutationCtx & { storage: StorageActionWriter }) {
     updatedAt: 1,
   })
 
-  return storageId
+  return blobKey
 }
 
 async function seedInvitations(

@@ -1,4 +1,3 @@
-import { useQuery } from "convex/react"
 import { useMemo } from "react"
 import {
   type FileSiblings,
@@ -6,7 +5,7 @@ import {
   noSiblings,
 } from "@/shared/console/files/siblings"
 import { type FileRow } from "@/shared/console/files/types"
-import { api } from "../../../convex/_generated/api"
+import { useFiles } from "./query"
 
 /** The current file's neighbors, read off the same list query the files
  *  page subscribes to. */
@@ -14,7 +13,7 @@ export function useFileSiblings(
   organizationId: string,
   fileId: FileRow["fileId"]
 ): FileSiblings {
-  const files = useQuery(api.files.console.list, { organizationId })
+  const files = useFiles(organizationId)
 
   return useMemo(
     () => (files === undefined ? noSiblings : fileSiblings(files, fileId)),

@@ -9,20 +9,20 @@ import {
   normalizeStoredVisibility,
   type StoredVisibility,
 } from "../visibility/schema"
-import { deleteUnusedBlob, requireUnusedUpload } from "./blobs"
+import { deleteBlob, requireUnusedUpload } from "./blobs"
 import { canViewFile, type FileViewer } from "./data"
 import { normalizeFileName } from "./names"
 
 // File record writes shared by the console mutations: upload, details,
 // blob replacement, and removal. Every write starts from a viewable file.
 
-/** Records a console upload: metadata comes from storage, the uploader owns
+/** Records a console upload: size and type come from storage, the uploader owns
  *  the row, and visibility defaults to the whole organization. */
 export async function insertUploadedFile(
   ctx: MutationCtx,
   viewer: FileViewer,
   args: {
-    storageId: Id<"_storage">
+    key: string
     name: string
     visibility?: StoredVisibility
     folderId?: Id<"folders">
@@ -36,7 +36,10 @@ export async function insertUploadedFile(
     throw new Error("Private files need a resolvable owner")
   }
 
-  const metadata = await requireUnusedUpload(ctx, args.storageId)
+  const upload = await requireUnusedUpload(ctx, {
+    organizationId: viewer.organizationId,
+    key: args.key,
+  })
 
   const now = Date.now()
   const fileId = await ctx.db.insert("files", {
@@ -48,10 +51,10 @@ export async function insertUploadedFile(
       personId: viewer.personId,
       folderId: args.folderId,
     }),
-    storageId: args.storageId,
+    blobKey: args.key,
     name: normalizeFileName(args.name),
-    mimeType: metadata.contentType ?? "application/octet-stream",
-    size: metadata.size,
+    mimeType: upload.mimeType,
+    size: upload.size,
     createdAt: now,
     updatedAt: now,
   })
@@ -78,23 +81,26 @@ export async function patchFileDetails(
 }
 
 /** Swaps the file's content for a freshly uploaded blob: the row keeps its
- *  identity while storage id, size, and updatedAt follow the new upload.
- *  Last write wins; the replaced blob goes when no other row references it. */
+ *  identity while blob key, size, and updatedAt follow the new upload.
+ *  Last write wins, and the replaced blob is deleted. */
 export async function swapFileBlob(
   ctx: MutationCtx,
   viewer: FileViewer,
-  args: { fileId: Id<"files">; storageId: Id<"_storage"> }
+  args: { fileId: Id<"files">; key: string }
 ) {
   const file = await requireViewableFile(ctx, viewer, args.fileId)
-  const metadata = await requireUnusedUpload(ctx, args.storageId)
+  const upload = await requireUnusedUpload(ctx, {
+    organizationId: file.organizationId,
+    key: args.key,
+  })
 
   await ctx.db.patch(file._id, {
-    storageId: args.storageId,
-    size: metadata.size,
+    blobKey: args.key,
+    size: upload.size,
     updatedAt: Date.now(),
   })
   await mark(ctx, file.organizationId, file._id)
-  await deleteUnusedBlob(ctx, file.storageId)
+  await deleteBlob(ctx, file.blobKey)
 }
 
 export async function removeFileWithBlob(
@@ -105,13 +111,13 @@ export async function removeFileWithBlob(
   await purgeFile(ctx, await requireViewableFile(ctx, viewer, fileId))
 }
 
-/** Remove the row and its share capabilities, then its unreferenced blob.
+/** Remove the row and its share capabilities, then its blob.
  * Reached through console, folder, and workspace deletion. */
 export async function purgeFile(ctx: MutationCtx, file: Doc<"files">) {
   await ctx.db.delete(file._id)
   await mark(ctx, file.organizationId, file._id)
   await deleteTargetShares(ctx, { kind: "file", id: file._id })
-  await deleteUnusedBlob(ctx, file.storageId)
+  await deleteBlob(ctx, file.blobKey)
 }
 
 export async function requireViewableFile(

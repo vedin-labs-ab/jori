@@ -75,7 +75,7 @@ async function file(
       { text: row.name, location: { kind: "resource", id, field: "name" } },
     ],
     file: {
-      storageId: row.storageId,
+      blobKey: row.blobKey,
       name: row.name,
       mimeType: row.mimeType,
       size: row.size,

@@ -1,5 +1,6 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
+import { useFile } from "@/console/files/query"
 import { EditFileDialog } from "@/shared/console/files/edit"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
@@ -164,12 +165,7 @@ function StoreDialogs({ onClose, organizationId, request }: KindDialogs) {
 
 function FileDialogs({ onClose, organizationId, request }: KindDialogs) {
   const actions = useFileActions(organizationId, { onSaved: onClose })
-  const result = useQuery(
-    api.files.console.get,
-    request === undefined
-      ? "skip"
-      : { organizationId, fileId: request.resource.id as GenericId<"files"> }
-  )
+  const result = useFile(organizationId, request?.resource.id)
   const file = useRetained(
     result?.status === "ready" && result.file !== null ? result.file : undefined
   )

@@ -1,6 +1,8 @@
 import { afterEach, expect, test, vi } from "vitest"
+import { registerBlobs } from "../../../test/convex/blobs"
 import { transactionalConsoleContext } from "../../../test/convex/conversations"
 import { internal } from "../../_generated/api"
+import { seedBlob } from "../../files/blobs/fixtures"
 import { insertConsoleReply } from "../../messages/console/records"
 import {
   claimReusableSandbox,
@@ -115,14 +117,13 @@ test("a visibility transition rejects late replies and summaries from the old ex
     runId: f.runId,
     result: "Late personal outcome",
   })
-  const storageId = await f.t.run((ctx) =>
-    ctx.storage.store(new Blob(["late result"]))
-  )
+  registerBlobs(f.t)
+  const blobKey = await f.t.run((ctx) => seedBlob(ctx, "org"))
   await expect(
     f.t.mutation(internal.files.data.record, {
       organizationId: "org",
       runId: f.runId,
-      storageId,
+      blobKey,
       name: "late.txt",
       mimeType: "text/plain",
       size: 11,

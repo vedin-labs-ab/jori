@@ -1,10 +1,8 @@
-import { type GenericId } from "convex/values"
-
-/** POSTs a blob to a Convex upload URL and returns the new storage id.
- *  Convex records the blob's content type as the file's mime type. */
+/** PUTs a blob to a signed upload URL. Storage records the blob's content
+ *  type as the file's mime type. */
 export async function uploadToStorage(uploadUrl: string, blob: Blob) {
   const response = await fetch(uploadUrl, {
-    method: "POST",
+    method: "PUT",
     headers: {
       "Content-Type": blob.type === "" ? "application/octet-stream" : blob.type,
     },
@@ -12,12 +10,6 @@ export async function uploadToStorage(uploadUrl: string, blob: Blob) {
   })
 
   if (!response.ok) {
-    throw new Error(`Upload failed: ${await response.text()}`)
+    throw new Error("Upload failed")
   }
-
-  const { storageId } = (await response.json()) as {
-    storageId: GenericId<"_storage">
-  }
-
-  return storageId
 }

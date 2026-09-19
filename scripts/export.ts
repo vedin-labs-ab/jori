@@ -4,6 +4,7 @@ import { mkdir, open, stat, writeFile } from "node:fs/promises"
 import path from "node:path"
 import { Readable } from "node:stream"
 import { pipeline } from "node:stream/promises"
+import { urlEpoch } from "../contracts/files.ts"
 import { isTarget } from "./env/names.ts"
 import { loadTarget } from "./env/target.ts"
 
@@ -112,7 +113,10 @@ async function pages(
   }
 }
 async function download(fileId: string) {
-  const file = run("export/support:file", { fileId }) as {
+  const file = run("export/support:file", {
+    fileId,
+    epoch: urlEpoch(Date.now()),
+  }) as {
     url: string
     size: number
   }

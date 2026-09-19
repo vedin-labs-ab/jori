@@ -1,4 +1,4 @@
-import { useMutation } from "convex/react"
+import { useAction, useMutation } from "convex/react"
 import { type FileSave } from "@/shared/console/files/editor/section"
 import { type FileDetail } from "@/shared/console/files/types"
 import { api } from "../../../convex/_generated/api"
@@ -12,16 +12,14 @@ export function useFileSave(
   file: Pick<FileDetail, "fileId" | "mimeType">
 ): FileSave {
   const generateUploadUrl = useMutation(api.files.console.uploadUrl)
-  const replaceFile = useMutation(api.files.console.replace)
+  const replaceFile = useAction(api.files.console.replace)
 
   return async function save(text: string) {
     try {
-      const storageId = await uploadToStorage(
-        await generateUploadUrl({ organizationId }),
-        new Blob([text], { type: file.mimeType })
-      )
+      const { key, url } = await generateUploadUrl({ organizationId })
 
-      await replaceFile({ organizationId, fileId: file.fileId, storageId })
+      await uploadToStorage(url, new Blob([text], { type: file.mimeType }))
+      await replaceFile({ organizationId, fileId: file.fileId, key })
 
       return true
     } catch {

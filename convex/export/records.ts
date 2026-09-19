@@ -97,7 +97,7 @@ export function sanitize(table: string, row: Record<string, unknown>) {
 }
 
 const sensitive =
-  /^(credentials|secret|secrets|password|accessToken|refreshToken|token|tokenHash|authorization|cookie|cookies|apiKey|clientSecret|storageId)$/i
+  /^(credentials|secret|secrets|password|accessToken|refreshToken|token|tokenHash|authorization|cookie|cookies|apiKey|clientSecret|blobKey)$/i
 function redact(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(redact)

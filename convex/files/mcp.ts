@@ -1,3 +1,4 @@
+import { urlEpoch } from "../../contracts/files"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
@@ -35,6 +36,7 @@ export async function callJoriFileTool(
     return await ctx.runQuery(internal.files.data.search, {
       ...(args as SearchFilesArgs),
       ...viewer,
+      epoch: urlEpoch(Date.now()),
     })
   }
 
@@ -42,6 +44,7 @@ export async function callJoriFileTool(
     return await ctx.runQuery(internal.files.data.read, {
       ...(args as ReadFileArgs),
       ...viewer,
+      epoch: urlEpoch(Date.now()),
     })
   }
 

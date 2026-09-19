@@ -141,7 +141,7 @@ async function extract(
   const extracted = await ctx.runAction(
     internal.discovery.extraction.index.extract,
     {
-      storageId: source.file.storageId,
+      blobKey: source.file.blobKey,
       organizationId: source.organizationId,
       sourceKey: state.key,
       revision: source.revision,
@@ -183,5 +183,5 @@ async function extract(
 }
 
 function fileIdentity(source: Projection) {
-  return `${version}:${source.file?.storageId}:${source.file?.mimeType}:${source.file?.name.split(".").at(-1)?.toLowerCase()}`
+  return `${version}:${source.file?.blobKey}:${source.file?.mimeType}:${source.file?.name.split(".").at(-1)?.toLowerCase()}`
 }

@@ -2,6 +2,7 @@ import { useQuery } from "convex/react"
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
+import { useAcrossEpochs, useUrlEpoch } from "@/shared/files/epoch"
 import { fileKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/files/size"
 import { api } from "../../../convex/_generated/api"
@@ -19,10 +20,15 @@ export function FileShareView({
   fileId: string
   secret: string | null
 }) {
-  const file = useQuery(api.files.share.get, {
-    fileId,
-    secret: secret ?? undefined,
-  })
+  const epoch = useUrlEpoch()
+  const file = useAcrossEpochs(
+    useQuery(api.files.share.get, {
+      fileId,
+      secret: secret ?? undefined,
+      epoch,
+    }),
+    fileId
+  )
   const isExpired = useShareExpired(file?.expiresAt)
   const openPath = `/files/${encodeURIComponent(fileId)}`
 

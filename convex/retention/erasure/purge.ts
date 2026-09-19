@@ -20,7 +20,7 @@ export async function purgeContent(
     if (!(await belongsToWorkspace(ctx, item, row.organizationId))) {
       continue
     }
-    if (table === "files" && "storageId" in item && item.storageId) {
+    if (table === "files" && "blobKey" in item) {
       await purgeFile(ctx, item as Doc<"files">)
     } else {
       await ctx.db.delete(item._id)

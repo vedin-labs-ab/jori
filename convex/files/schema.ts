@@ -11,7 +11,8 @@ export const fileFields = {
   visibility: visibilityValidator,
   ownerId: v.optional(v.id("persons")),
   runId: v.optional(v.id("runs")),
-  storageId: v.id("_storage"),
+  /** The file's bytes in blob storage (see files/blobs). */
+  blobKey: v.string(),
   name: v.string(),
   mimeType: v.string(),
   size: v.number(),
@@ -24,7 +25,7 @@ export const files = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 })
-  .index("by_storageId", ["storageId"])
+  .index("by_blobKey", ["blobKey"])
   .index("by_run", ["runId"])
   .index("by_organization_and_created_at", ["organizationId", "createdAt"])
   .index("by_folder", ["folderId"])

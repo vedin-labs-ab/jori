@@ -1,6 +1,12 @@
 import { v } from "convex/values"
-import { internalMutation } from "./_generated/server"
-import { seedContext } from "./seed/context"
+import { internal } from "./_generated/api"
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server"
+import { storeBlob } from "./files/blobs"
+import { type SeedContext, seedContext } from "./seed/context"
 import { seedRuns } from "./seed/history/runs"
 import { seedTraces } from "./seed/history/traces"
 import { seedUsage } from "./seed/history/usage"
@@ -38,24 +44,40 @@ export const foundation = internalMutation({
   },
 })
 
-/** The manifest the script uploads before the library stage can file it:
- *  each document's bytes, and the URL to put them at. */
-export const uploads = internalMutation({
-  args: {},
-  handler: async (ctx) => {
-    const targets = []
+/** Storage only takes bytes from an action, so the documents are put in
+ *  place before the stage that files them can run. */
+export const uploads = internalAction({
+  args: organization,
+  handler: async (
+    ctx,
+    args
+  ): Promise<{ key: string; blobKey: string; size: number }[]> => {
+    const { organizationId }: SeedContext = await ctx.runQuery(
+      internal.seed.target,
+      args
+    )
+    const stored = []
 
     for (const file of files) {
-      targets.push({
+      const bytes = new TextEncoder().encode(file.body)
+      stored.push({
         key: file.key,
-        mimeType: file.mimeType,
-        body: file.body,
-        url: await ctx.storage.generateUploadUrl(),
+        blobKey: await storeBlob(ctx, {
+          organizationId,
+          bytes,
+          mimeType: file.mimeType,
+        }),
+        size: bytes.byteLength,
       })
     }
 
-    return targets
+    return stored
   },
+})
+
+export const target = internalQuery({
+  args: organization,
+  handler: async (ctx, args) => await seedContext(ctx, args.organizationId),
 })
 
 /** Folders, the tables and stores filed in them, and the documents whose
@@ -66,7 +88,7 @@ export const library = internalMutation({
     uploads: v.array(
       v.object({
         key: v.string(),
-        storageId: v.id("_storage"),
+        blobKey: v.string(),
         size: v.number(),
       })
     ),

@@ -7,6 +7,7 @@ import {
 } from "../../../../contracts/runtime/files"
 import { internal } from "../../../_generated/api"
 import { internalAction } from "../../../_generated/server"
+import { readBlob } from "../../../files/blobs"
 import { openSandbox } from "../blaxel"
 import { sandboxFilePath } from "../path"
 import { sandboxName } from "./client"
@@ -28,9 +29,9 @@ export const file = internalAction({
     if (source.size > maxFileBytes) {
       throw new Error(fileTooLargeError)
     }
-    // storage.get resolves only this deployment's blob ID. No URL is accepted,
-    // minted, exposed to Blaxel, or followed by this transfer.
-    const blob = await ctx.storage.get(source.storageId)
+    // The key resolves only in this deployment's bucket. No URL is accepted
+    // from the run or exposed to Blaxel by this transfer.
+    const blob = await readBlob(source.blobKey)
     if (blob === null) {
       throw new Error("Stored file was not found.")
     }

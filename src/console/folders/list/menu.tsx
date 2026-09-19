@@ -1,4 +1,3 @@
-import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { FolderInput, FolderMinus } from "lucide-react"
 import { useState } from "react"
@@ -8,6 +7,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
+import { useFile } from "@/console/files/query"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
@@ -17,7 +17,6 @@ import { MaterialRowMenu } from "@/shared/console/materials/actions/menu"
 import { menuWidth, RowMenuTrigger } from "@/shared/console/menu"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
-import { api } from "../../../../convex/_generated/api"
 import { type FolderResourceActions } from "./actions"
 
 // A filed resource offers the same menu here that it offers on its own
@@ -97,14 +96,9 @@ function MaterialResourceMenu({ actions, resource }: ResourceMenu) {
 function FileResourceMenu({ actions, resource }: ResourceMenu) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const result = useQuery(
-    api.files.console.get,
-    isMenuOpen
-      ? {
-          organizationId: actions.organizationId,
-          fileId: resource.id as GenericId<"files">,
-        }
-      : "skip"
+  const result = useFile(
+    actions.organizationId,
+    isMenuOpen ? resource.id : undefined
   )
   const file = {
     fileId: resource.id as GenericId<"files">,

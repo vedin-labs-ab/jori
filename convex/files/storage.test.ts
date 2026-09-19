@@ -1,67 +1,67 @@
 import { convexTest } from "convex-test"
 import { expect, test, vi } from "vitest"
+import { registerBlobs } from "../../test/convex/blobs"
 import { internal } from "../_generated/api"
-import { type Id } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { purgeContent } from "../retention/erasure/purge"
 import { contentTables } from "../retention/erasure/tables"
 import schema from "../schema"
+import { blobExists, seedBlob } from "./blobs/fixtures"
 import { insertUploadedFile, purgeFile, swapFileBlob } from "./records"
 
-test("uploads cannot claim another file's blob or delete it through replacement", async () => {
+function storage() {
   const t = convexTest(schema, import.meta.glob("/convex/**/*.{ts,js}"))
+  registerBlobs(t)
+  return t
+}
+
+test("uploads cannot claim another organization's blob or one already in use", async () => {
+  const t = storage()
   const viewer = { organizationId: "other-organization" }
   const created = await t.run(async (ctx) => {
-    const originalStorageId = await ctx.storage.store(new Blob(["Original"]))
-    const originalFileId = await insertUploadedFile(
+    const originalKey = await seedBlob(ctx, "organization")
+    await insertUploadedFile(
       ctx,
       { organizationId: "organization" },
-      { storageId: originalStorageId, name: "original.txt" }
+      { key: originalKey, name: "original.txt" }
     )
-    const ownStorageId = await ctx.storage.store(new Blob(["Own file"]))
+    const ownKey = await seedBlob(ctx, viewer.organizationId)
     const ownFileId = await insertUploadedFile(ctx, viewer, {
-      storageId: ownStorageId,
+      key: ownKey,
       name: "own.txt",
     })
-    return { originalStorageId, originalFileId, ownStorageId, ownFileId }
+    return { originalKey, ownKey, ownFileId }
   })
   await expect(
     t.run((ctx) =>
       insertUploadedFile(ctx, viewer, {
-        storageId: created.originalStorageId,
+        key: created.originalKey,
         name: "claimed.txt",
       })
     )
+  ).rejects.toThrow("Uploaded file was not found in storage")
+  await expect(
+    t.run((ctx) =>
+      swapFileBlob(ctx, viewer, {
+        fileId: created.ownFileId,
+        key: created.ownKey,
+      })
+    )
   ).rejects.toThrow("Uploaded file is already in use")
-  for (const existingStorageId of [
-    created.originalStorageId,
-    created.ownStorageId,
-  ]) {
-    await expect(
-      t.run((ctx) =>
-        swapFileBlob(ctx, viewer, {
-          fileId: created.ownFileId,
-          storageId: existingStorageId,
-        })
-      )
-    ).rejects.toThrow("Uploaded file is already in use")
-  }
   await expect(
     t.mutation(internal.files.data.record, {
       organizationId: viewer.organizationId,
       visibility: { mode: "organization" },
-      storageId: created.originalStorageId,
+      blobKey: created.ownKey,
       name: "claimed.txt",
       mimeType: "text/plain",
       size: 8,
     })
   ).rejects.toThrow("Uploaded file is already in use")
   await t.run(async (ctx) => {
-    expect(await ctx.storage.get(created.originalStorageId)).not.toBeNull()
-    expect(await ctx.storage.get(created.ownStorageId)).not.toBeNull()
-    expect((await ctx.db.get(created.ownFileId))?.storageId).toBe(
-      created.ownStorageId
-    )
+    expect(await blobExists(ctx, created.originalKey)).toBe(true)
+    expect(await blobExists(ctx, created.ownKey)).toBe(true)
+    expect((await ctx.db.get(created.ownFileId))?.blobKey).toBe(created.ownKey)
     expect((await ctx.db.query("files").collect()).length).toBe(2)
   })
 })
@@ -76,7 +76,7 @@ test("private uploads require a resolvable owner", async () => {
       ctx,
       { organizationId: "organization" },
       {
-        storageId: "storage-id" as Id<"_storage">,
+        key: "organization/blob",
         name: "note.txt",
         visibility: { mode: "private" },
       }
@@ -85,43 +85,31 @@ test("private uploads require a resolvable owner", async () => {
 })
 
 test.each(["remove", "replace", "retention"] as const)(
-  "%s keeps a legacy shared blob until its last file is removed",
+  "%s deletes the file's blob",
   async (operation) => {
-    const t = convexTest(schema, import.meta.glob("/convex/**/*.{ts,js}"))
+    const t = storage()
     await t.run(async (ctx) => {
-      const storageId = await ctx.storage.store(new Blob(["Shared content"]))
+      const key = await seedBlob(ctx, "organization")
       const fileId = await insertUploadedFile(
         ctx,
         { organizationId: "organization" },
-        { storageId, name: "original.txt" }
+        { key, name: "original.txt" }
       )
       const file = await ctx.db.get(fileId)
       if (!file) {
         throw new Error("Missing file")
       }
-      const otherId = await ctx.db.insert("files", {
-        organizationId: "other-organization",
-        visibility: { mode: "organization" },
-        storageId,
-        name: "legacy.txt",
-        mimeType: file.mimeType,
-        size: file.size,
-        createdAt: 0,
-        updatedAt: 0,
-      })
       if (operation === "remove") {
         await purgeFile(ctx, file)
       } else if (operation === "replace") {
-        const replacement = await ctx.storage.store(new Blob(["Replacement"]))
+        const replacement = await seedBlob(ctx, "organization")
         await swapFileBlob(
           ctx,
           { organizationId: "organization" },
-          {
-            fileId,
-            storageId: replacement,
-          }
+          { fileId, key: replacement }
         )
-        expect((await ctx.db.get(fileId))?.storageId).toBe(replacement)
+        expect((await ctx.db.get(fileId))?.blobKey).toBe(replacement)
+        expect(await blobExists(ctx, replacement)).toBe(true)
       } else {
         const retentionId = await ctx.db.insert("workspaceRetention", {
           organizationId: "organization",
@@ -137,13 +125,7 @@ test.each(["remove", "replace", "retention"] as const)(
         await purgeContent(ctx, retention)
         expect(await ctx.db.get(fileId)).toBeNull()
       }
-      expect(await ctx.storage.get(storageId)).not.toBeNull()
-      const other = await ctx.db.get(otherId)
-      if (!other) {
-        throw new Error("Other workspace file was removed")
-      }
-      await purgeFile(ctx, other)
-      expect(await ctx.storage.get(storageId)).toBeNull()
+      expect(await blobExists(ctx, key)).toBe(false)
     })
   }
 )

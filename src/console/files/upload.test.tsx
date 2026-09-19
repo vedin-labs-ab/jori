@@ -11,14 +11,11 @@ const uploads = vi.hoisted(() => ({
 
 vi.mock("convex/react", async (importOriginal) => {
   const original = await importOriginal<typeof import("convex/react")>()
-  const { getFunctionName } = await import("convex/server")
 
   return {
     ...original,
-    useMutation: (reference: Parameters<typeof original.useMutation>[0]) =>
-      getFunctionName(reference).endsWith(":create")
-        ? uploads.createFile
-        : uploads.generateUploadUrl,
+    useAction: () => uploads.createFile,
+    useMutation: () => uploads.generateUploadUrl,
   }
 })
 
@@ -30,8 +27,10 @@ afterEach(cleanup)
 
 beforeEach(() => {
   uploads.createFile.mockReset().mockResolvedValue(null)
-  uploads.generateUploadUrl.mockReset().mockResolvedValue("https://upload.test")
-  uploads.uploadToStorage.mockReset().mockResolvedValue("storage-1")
+  uploads.generateUploadUrl
+    .mockReset()
+    .mockResolvedValue({ key: "org-1/blob-1", url: "https://upload.test" })
+  uploads.uploadToStorage.mockReset().mockResolvedValue(undefined)
 })
 
 test("a file goes to storage, then lands as a row with the batch's fields", async () => {
@@ -52,7 +51,7 @@ test("a file goes to storage, then lands as a row with the batch's fields", asyn
   )
   expect(uploads.createFile).toHaveBeenCalledWith({
     organizationId: "org-1",
-    storageId: "storage-1",
+    key: "org-1/blob-1",
     name: "notes.txt",
     visibility: { mode: "private" },
     folderId: "folder-1",

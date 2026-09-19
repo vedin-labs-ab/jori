@@ -4,6 +4,10 @@ import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
 import { callNotionTool } from "./notion"
 
+vi.mock("../../files/blobs", () => ({
+  readBlob: async () => new Blob(["data"], { type: "image/png" }),
+}))
+
 afterEach(() => vi.unstubAllGlobals())
 
 test("creates Notion pages with icon and cover payloads", async () => {
@@ -105,9 +109,6 @@ function fileContext() {
   return {
     ctx: {
       runQuery: vi.fn(async () => file()),
-      storage: {
-        get: vi.fn(async () => new Blob(["data"], { type: "image/png" })),
-      },
     } as unknown as ActionCtx,
     run: {
       organizationId: "organization",
@@ -123,7 +124,7 @@ function file(): Doc<"files"> {
     organizationId: "organization",
     visibility: { mode: "organization" },
     runId: "run_1",
-    storageId: "storage_1",
+    blobKey: "organization/blob_1",
     name: "ÅÄÖ-🚀.png",
     mimeType: "image/png",
     size: 4,

@@ -2,9 +2,11 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
 import { expect, test, vi } from "vitest"
+import { registerBlobs } from "../../../test/convex/blobs"
 import { api, internal } from "../../_generated/api"
 import { authComponent, createAdapterOptions } from "../../auth"
 import authSchema from "../../betterauth/schema"
+import { blobExists } from "../../files/blobs/fixtures"
 import schema from "../../schema"
 import { beginDeletion } from "../deletion"
 import { eraseAuth } from "./auth"
@@ -17,6 +19,7 @@ const authModules = import.meta.glob("/convex/betterauth/**/*.{ts,js}")
 
 test("batched purge deletes parent-scoped contents and blobs while preserving another workspace and billing", async () => {
   const t = convexTest(schema, modules)
+  registerBlobs(t)
   const ids = await t.run(seedContent)
   for (let batch = 0; batch < contentTables.length + 20; batch++) {
     const done = await t.run(async (ctx) => {
@@ -35,7 +38,7 @@ test("batched purge deletes parent-scoped contents and blobs while preserving an
     expect(await ctx.db.get(ids.kept)).not.toBeNull()
     expect(await ctx.db.get(ids.other)).not.toBeNull()
     expect(await ctx.db.get(ids.collection)).toBeNull()
-    expect(await ctx.storage.get(ids.storageId)).toBeNull()
+    expect(await blobExists(ctx, ids.blobKey)).toBe(false)
     expect(await ctx.db.get(ids.receipt)).not.toBeNull()
   })
 })

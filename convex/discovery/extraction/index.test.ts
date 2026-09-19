@@ -11,6 +11,9 @@ vi.mock("./pdf", () => ({
     partial: false,
   }),
 }))
+vi.mock("../../files/blobs", () => ({
+  readBlob: async () => new Blob(["synthetic"], { type: "application/pdf" }),
+}))
 vi.mock("./media", () => ({
   extractMedia: async () => {
     throw new Error("OCR temporarily unavailable")
@@ -21,14 +24,11 @@ test("a temporary OCR outage preserves selectable text and requests a retry", as
   vi.stubEnv("JORI_REGION", "eu")
   vi.stubEnv("CONVEX_CLOUD_URL", "https://preview.eu-west-1.convex.cloud")
   const t = convexTest(schema, import.meta.glob("/convex/**/*.{ts,js}"))
-  const storageId = await t.run((ctx) =>
-    ctx.storage.store(new Blob(["synthetic"], { type: "application/pdf" }))
-  )
   const result = await t.action(internal.discovery.extraction.index.extract, {
     organizationId: "org",
     sourceKey: "file:test",
     revision: "1",
-    storageId,
+    blobKey: "org/test",
     fileName: "test.pdf",
     mimeType: "application/pdf",
   })

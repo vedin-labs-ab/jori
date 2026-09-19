@@ -22,6 +22,7 @@ import {
   type ResourceViewer,
   resourceViewerArgs,
 } from "../visibility/resources"
+import { blobUrl } from "./blobs"
 import { requireViewableFile } from "./records"
 
 export const mint = internalMutation({
@@ -92,11 +93,14 @@ export const page = query({
 })
 
 /** Anonymous read: the share secret is the whole credential. Returns null
- *  on every failure so callers cannot probe which files exist. Direct storage
- *  URLs are reusable bearer URLs. Share expiry blocks further URL disclosure,
- *  but does not revoke a storage URL that a recipient already obtained. */
+ *  on every failure so callers cannot probe which files exist. The signed
+ *  URL outlives an expired or revoked share by at most two URL windows. */
 export const get = query({
-  args: { fileId: v.string(), secret: v.optional(v.string()) },
+  args: {
+    fileId: v.string(),
+    secret: v.optional(v.string()),
+    epoch: v.number(),
+  },
   handler: async (ctx, args) => {
     const opened = await openFileShare(ctx, args)
 
@@ -109,7 +113,7 @@ export const get = query({
       mimeType: opened.file.mimeType,
       size: opened.file.size,
       createdAt: opened.file.createdAt,
-      url: await ctx.storage.getUrl(opened.file.storageId),
+      url: await blobUrl(opened.file.blobKey),
       expiresAt: opened.expiresAt,
     }
   },

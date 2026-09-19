@@ -14,6 +14,10 @@ export const children = internalQuery({
   handler: async (ctx, args) => childPage(ctx, args),
 })
 export const file = internalQuery({
-  args: { organizationId: v.string(), fileId: v.id("files") },
+  args: {
+    organizationId: v.string(),
+    fileId: v.id("files"),
+    epoch: v.number(),
+  },
   handler: async (ctx, args) => fileUrl(ctx, args.organizationId, args.fileId),
 })

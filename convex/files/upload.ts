@@ -3,6 +3,7 @@ import { type RuntimeId } from "../../contracts/runtime/ids"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
+import { blobUrl, deleteBlob, storeBlob } from "./blobs"
 import { normalizeFileName } from "./names"
 
 /** Store and record in the calling deployment. Failed records leave no blob. */
@@ -17,19 +18,17 @@ export async function uploadRunFile(
   }
 ): Promise<UploadedFile> {
   const name = normalizeFileName(args.name)
-  const storageId = await ctx.storage.store(
-    new Blob([new Uint8Array(args.bytes)], { type: args.mimeType })
-  )
+  const blobKey = await storeBlob(ctx, args)
 
   try {
-    const url = await ctx.storage.getUrl(storageId)
+    const url = await blobUrl(blobKey)
     const fileId = await ctx.runMutation(internal.files.data.record, {
       mimeType: args.mimeType,
       name,
       organizationId: args.organizationId,
       runId: args.runId,
       size: args.bytes.byteLength,
-      storageId,
+      blobKey,
       visibility: { mode: "organization" },
     })
 
@@ -41,7 +40,7 @@ export async function uploadRunFile(
       url,
     }
   } catch (error) {
-    await ctx.storage.delete(storageId)
+    await deleteBlob(ctx, blobKey)
     throw error
   }
 }

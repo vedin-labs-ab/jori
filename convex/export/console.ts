@@ -28,7 +28,11 @@ export const children = query({
 })
 
 export const file = query({
-  args: { organizationId: v.string(), fileId: v.id("files") },
+  args: {
+    organizationId: v.string(),
+    fileId: v.id("files"),
+    epoch: v.number(),
+  },
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
     return fileUrl(

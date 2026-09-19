@@ -102,7 +102,7 @@ test("child exports and file downloads reject forged foreign or private parent I
     const file = await ctx.db.insert("files", {
       organizationId: "org",
       visibility: { mode: "private" },
-      storageId: await ctx.storage.store(new Blob(["secret"])),
+      blobKey: "org/secret",
       name: "secret.txt",
       mimeType: "text/plain",
       size: 1,
@@ -132,6 +132,7 @@ test("child exports and file downloads reject forged foreign or private parent I
     caller.query(api.export.console.file, {
       organizationId: "org",
       fileId: ids.file,
+      epoch: 0,
     })
   ).rejects.toThrow("File is unavailable")
 })

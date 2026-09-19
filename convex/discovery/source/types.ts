@@ -2,7 +2,6 @@ import {
   type DiscoveryKind,
   type MatchLocation,
 } from "../../../contracts/discovery"
-import { type Id } from "../../_generated/dataModel"
 import { type Gate } from "../../visibility/sight"
 export type Section = { text: string; location: MatchLocation }
 export type Source = {
@@ -18,7 +17,7 @@ export type Source = {
   gate: Gate
   sections: Section[]
   file?: {
-    storageId: Id<"_storage">
+    blobKey: string
     name: string
     mimeType: string
     size: number

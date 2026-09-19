@@ -1,7 +1,8 @@
-import { expect, test, vi } from "vitest"
+import { beforeEach, expect, test, vi } from "vitest"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type MutationCtx, type QueryCtx } from "../_generated/server"
 import { withOwnerDisplay } from "../persons/names"
+import { deleteBlob, requireUnusedUpload } from "./blobs"
 import { toConsoleRow } from "./console"
 import {
   insertUploadedFile,
@@ -11,29 +12,34 @@ import {
 } from "./records"
 
 vi.mock("../discovery/sync/intent")
+vi.mock("./blobs", () => ({
+  blobUrl: vi.fn(async () => "https://files.example/costs.csv"),
+  deleteBlob: vi.fn(async () => undefined),
+  requireUnusedUpload: vi.fn(),
+}))
+
+beforeEach(() => {
+  vi.mocked(requireUnusedUpload).mockResolvedValue({
+    mimeType: "text/csv",
+    size: 42,
+  })
+})
 
 const owner = "person-owner" as Id<"persons">
 const other = "person-other" as Id<"persons">
-const storageId = "storage-id" as Id<"_storage">
+const blobKey = "organization/blob"
 const fileId = "file-id" as Id<"files">
 const folderId = "folder-id" as Id<"folders">
-const nextStorageId = "storage-next" as Id<"_storage">
-
-function uploadedBlob() {
-  return { get: vi.fn(async () => ({ contentType: "text/csv", size: 42 })) }
-}
+const nextBlobKey = "organization/next"
 
 test("records console uploads with storage metadata and defaults", async () => {
   const insert = vi.fn(async () => fileId)
-  const ctx = fileContext({
-    insert,
-    system: uploadedBlob(),
-  })
+  const ctx = fileContext({ insert })
 
   await insertUploadedFile(
     ctx,
     { organizationId: "organization", personId: owner },
-    { storageId, name: "exports/costs.csv" }
+    { key: blobKey, name: "exports/costs.csv" }
   )
 
   expect(insert).toHaveBeenCalledWith("files", {
@@ -41,7 +47,7 @@ test("records console uploads with storage metadata and defaults", async () => {
     visibility: { mode: "organization" },
     ownerId: owner,
     folderId: undefined,
-    storageId,
+    blobKey,
     name: "costs.csv",
     mimeType: "text/csv",
     size: 42,
@@ -59,13 +65,12 @@ test("uploads stamp the folder when creation names one", async () => {
       organizationId: "organization",
       visibility: { mode: "organization" },
     })),
-    system: uploadedBlob(),
   })
 
   await insertUploadedFile(
     ctx,
     { organizationId: "organization", personId: owner },
-    { storageId, name: "costs.csv", folderId }
+    { key: blobKey, name: "costs.csv", folderId }
   )
 
   expect(insert).toHaveBeenCalledWith(
@@ -78,102 +83,92 @@ test("uploads reject a folder from another organization", async () => {
   const ctx = fileContext({
     insert: vi.fn(),
     get: vi.fn(async () => ({ _id: folderId, organizationId: "elsewhere" })),
-    system: uploadedBlob(),
   })
 
   await expect(
     insertUploadedFile(
       ctx,
       { organizationId: "organization", personId: owner },
-      { storageId, name: "costs.csv", folderId }
+      { key: blobKey, name: "costs.csv", folderId }
     )
   ).rejects.toThrow("Folder was not found.")
 })
 
 test("deleting a file takes its blob and share links with the row", async () => {
-  const storageDelete = vi.fn(async () => undefined)
   const rowDelete = vi.fn(async () => undefined)
   const shares = [{ _id: "shares:1" }]
-  const ctx = fileContext(
-    {
-      get: vi.fn(async () => organizationFile()),
-      delete: rowDelete,
-      query: (table: string) =>
-        table === "shares"
-          ? { withIndex: () => ({ take: async () => shares }) }
-          : workspaceQuery(table),
-    },
-    { delete: storageDelete }
-  )
+  const ctx = fileContext({
+    get: vi.fn(async () => organizationFile()),
+    delete: rowDelete,
+    query: (table: string) =>
+      table === "shares"
+        ? { withIndex: () => ({ take: async () => shares }) }
+        : workspaceQuery(table),
+  })
 
   await removeFileWithBlob(ctx, { organizationId: "organization" }, fileId)
 
-  expect(storageDelete).toHaveBeenCalledWith(storageId)
+  expect(deleteBlob).toHaveBeenCalledWith(ctx, blobKey)
   expect(rowDelete).toHaveBeenCalledWith(fileId)
   expect(rowDelete).toHaveBeenCalledWith("shares:1")
 })
 
 test("replacing content swaps the blob and updates the row", async () => {
-  const storageDelete = vi.fn(async () => undefined)
   const patch = vi.fn(async () => undefined)
-  const ctx = fileContext(
-    {
-      get: vi.fn(async () => organizationFile()),
-      patch,
-      system: { get: vi.fn(async () => ({ size: 99 })) },
-    },
-    { delete: storageDelete }
-  )
+  const ctx = fileContext({
+    get: vi.fn(async () => organizationFile()),
+    patch,
+  })
+  vi.mocked(requireUnusedUpload).mockResolvedValue({
+    mimeType: "text/csv",
+    size: 99,
+  })
 
   await swapFileBlob(
     ctx,
     { organizationId: "organization", personId: owner },
-    { fileId, storageId: nextStorageId }
+    { fileId, key: nextBlobKey }
   )
 
-  expect(storageDelete).toHaveBeenCalledWith(storageId)
+  expect(deleteBlob).toHaveBeenCalledWith(ctx, blobKey)
   expect(patch).toHaveBeenCalledWith(fileId, {
-    storageId: nextStorageId,
+    blobKey: nextBlobKey,
     size: 99,
     updatedAt: expect.any(Number),
   })
 })
 
 test("replacing content rejects a missing upload and hidden files", async () => {
-  const ctx = fileContext(
-    {
-      get: vi.fn(async () => personalFile()),
-      patch: vi.fn(),
-      system: { get: vi.fn(async () => null) },
-    },
-    { delete: vi.fn() }
+  const ctx = fileContext({
+    get: vi.fn(async () => personalFile()),
+    patch: vi.fn(),
+  })
+  vi.mocked(requireUnusedUpload).mockRejectedValue(
+    new Error("Uploaded file was not found in storage")
   )
 
   await expect(
     swapFileBlob(
       ctx,
       { organizationId: "organization", personId: other },
-      { fileId, storageId: nextStorageId }
+      { fileId, key: nextBlobKey }
     )
   ).rejects.toThrow("File was not found")
   await expect(
     swapFileBlob(
       ctx,
       { organizationId: "organization", personId: owner },
-      { fileId, storageId: nextStorageId }
+      { fileId, key: nextBlobKey }
     )
   ).rejects.toThrow("Uploaded file was not found in storage")
 })
 
 test("editing and deleting respect personal-file visibility", async () => {
-  const ctx = fileContext(
-    {
-      get: vi.fn(async () => personalFile()),
-      delete: vi.fn(),
-      patch: vi.fn(),
-    },
-    { delete: vi.fn() }
-  )
+  const ctx = fileContext({
+    get: vi.fn(async () => personalFile()),
+    delete: vi.fn(),
+    patch: vi.fn(),
+  })
   const stranger = { organizationId: "organization", personId: other }
 
   await expect(removeFileWithBlob(ctx, stranger, fileId)).rejects.toThrow(
@@ -212,12 +207,11 @@ test("console rows name the uploading person as the owner", async () => {
         }),
       })),
     },
-    storage: { getUrl: vi.fn(async () => "https://files.example/costs.csv") },
   } as unknown as QueryCtx
 
   const row = await withOwnerDisplay(
     ctx,
-    await toConsoleRow(ctx, { ...organizationFile(), ownerId: owner })
+    await toConsoleRow({ ...organizationFile(), ownerId: owner })
   )
 
   expect(row).toMatchObject({
@@ -229,14 +223,12 @@ test("console rows name the uploading person as the owner", async () => {
 })
 
 test("agent-saved rows carry run provenance and no owner name", async () => {
-  const ctx = {
-    storage: { getUrl: vi.fn(async () => null) },
-  } as unknown as QueryCtx
+  const ctx = {} as unknown as QueryCtx
   const runId = "run-id" as Id<"runs">
 
   const row = await withOwnerDisplay(
     ctx,
-    await toConsoleRow(ctx, { ...organizationFile(), runId })
+    await toConsoleRow({ ...organizationFile(), runId })
   )
 
   expect(row).toMatchObject({ source: "run", runId, ownerName: undefined })
@@ -248,7 +240,7 @@ function organizationFile(): Doc<"files"> {
     _creationTime: 0,
     organizationId: "organization",
     visibility: { mode: "organization" },
-    storageId,
+    blobKey,
     name: "costs.csv",
     mimeType: "text/csv",
     size: 42,
@@ -275,9 +267,6 @@ function workspaceQuery(table: string) {
   return { withIndex: () => ({ unique: async () => null }) }
 }
 
-function fileContext(db: object, storage?: object) {
-  return {
-    db: { query: workspaceQuery, ...db },
-    storage,
-  } as unknown as MutationCtx
+function fileContext(db: object) {
+  return { db: { query: workspaceQuery, ...db } } as unknown as MutationCtx
 }

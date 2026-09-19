@@ -1,9 +1,7 @@
-import { useQuery } from "convex/react"
-import { type GenericId } from "convex/values"
+import { useFile } from "@/console/files/query"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { type FileDetail } from "@/shared/console/files/types"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
-import { api } from "../../../../convex/_generated/api"
 import { useFileSave } from "../../files/save"
 
 /** A file in the pane: its body over the same save its page uses, with
@@ -15,10 +13,7 @@ export function PaneFile({
   id: string
   organizationId: string
 }) {
-  const result = useQuery(api.files.console.get, {
-    organizationId,
-    fileId: id as GenericId<"files">,
-  })
+  const result = useFile(organizationId, id)
 
   if (result === undefined) {
     return <ConsoleListLoading />

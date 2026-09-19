@@ -7,8 +7,15 @@ import {
 import { internal } from "../../../_generated/api"
 import { type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
+import { blobUrl, deleteBlob, storeBlob } from "../../../files/blobs"
 import { openSandbox } from "../blaxel"
 import { readSandboxFile } from "./client"
+
+vi.mock("../../../files/blobs", () => ({
+  blobUrl: vi.fn(),
+  deleteBlob: vi.fn(),
+  storeBlob: vi.fn(),
+}))
 
 vi.mock("./client", () => ({
   readSandboxFile: vi.fn(),
@@ -44,7 +51,7 @@ beforeEach(() => vi.clearAllMocks())
 test.each([17 * 1024 * 1024, maxFileBytes])(
   "exports %i bytes directly to storage and returns metadata only",
   async (size) => {
-    const { ctx, storage, runQuery, runMutation, read } = fixture(size)
+    const { ctx, runQuery, runMutation, read } = fixture(size)
     const result = await handler(ctx, args)
     expect(result).toEqual({
       sandboxId: "sandbox-1",
@@ -66,17 +73,17 @@ test.each([17 * 1024 * 1024, maxFileBytes])(
       expect.anything(),
       "/home/user/workspace/output.bin"
     )
-    expect(storage.store.mock.calls[0]?.[0].size).toBe(size)
+    expect(vi.mocked(storeBlob).mock.calls[0]?.[1].bytes.byteLength).toBe(size)
     expect(runMutation).toHaveBeenNthCalledWith(2, internal.files.data.record, {
       organizationId: "organization-1",
       runId: args.runId,
-      storageId: "storage-1",
+      blobKey: "organization-1/blob-1",
       visibility: { mode: "organization" },
       name: args.name,
       mimeType: args.mimeType,
       size,
     })
-    expect(storage.delete).not.toHaveBeenCalled()
+    expect(deleteBlob).not.toHaveBeenCalled()
   }
 )
 
@@ -84,19 +91,19 @@ test.each([
   [0, "File is empty"],
   [maxFileBytes + 1, fileTooLargeError],
 ])("rejects %i bytes before reading the file", async (size, error) => {
-  const { ctx, read, storage } = fixture(Number(size))
+  const { ctx, read } = fixture(Number(size))
   await expect(handler(ctx, args)).rejects.toThrow(String(error))
   expect(read).not.toHaveBeenCalled()
-  expect(storage.store).not.toHaveBeenCalled()
+  expect(storeBlob).not.toHaveBeenCalled()
 })
 
 test.each([0, maxFileBytes + 1])(
   "rechecks the actual bytes when the file changes to %i bytes",
   async (size) => {
-    const { ctx, read, storage } = fixture(1)
+    const { ctx, read } = fixture(1)
     read.mockResolvedValue(new Uint8Array(size))
     await expect(handler(ctx, args)).rejects.toThrow()
-    expect(storage.store).not.toHaveBeenCalled()
+    expect(storeBlob).not.toHaveBeenCalled()
   }
 )
 
@@ -127,16 +134,16 @@ test("does not accept a caller-supplied sandbox or create one for an export", as
 })
 
 test("does not upload when the sandbox file is missing", async () => {
-  const { ctx, getInfo, storage } = fixture(1)
+  const { ctx, getInfo } = fixture(1)
   getInfo.mockRejectedValue(new Error("File not found"))
   await expect(handler(ctx, args)).rejects.toThrow("File not found")
-  expect(storage.store).not.toHaveBeenCalled()
+  expect(storeBlob).not.toHaveBeenCalled()
 })
 
 test.each(["/home/user/workspace", "/home/user/workspace/output.bin"])(
   "rejects a symlink at %s before reading bytes",
   async (path) => {
-    const { ctx, getInfo, read, storage } = fixture(1)
+    const { ctx, getInfo, read } = fixture(1)
     getInfo.mockImplementation(async (_sandbox, current) => ({
       size: 1,
       type: current.endsWith(".bin") ? "file" : "dir",
@@ -144,7 +151,7 @@ test.each(["/home/user/workspace", "/home/user/workspace/output.bin"])(
     }))
     await expect(handler(ctx, args)).rejects.toThrow("symbolic links")
     expect(read).not.toHaveBeenCalled()
-    expect(storage.store).not.toHaveBeenCalled()
+    expect(storeBlob).not.toHaveBeenCalled()
   }
 )
 
@@ -156,17 +163,23 @@ test("rejects a directory at the file path", async () => {
 })
 
 test("removes the stored blob if recording fails", async () => {
-  const { ctx, storage, runMutation } = fixture(1)
+  const { ctx, runMutation } = fixture(1)
   runMutation.mockRejectedValueOnce(new Error("Record failed"))
   await expect(handler(ctx, args)).rejects.toThrow("Record failed")
-  expect(storage.delete).toHaveBeenCalledExactlyOnceWith("storage-1")
+  expect(deleteBlob).toHaveBeenCalledExactlyOnceWith(
+    ctx,
+    "organization-1/blob-1"
+  )
 })
 
 test("gets the URL before recording so URL failure cannot leave a broken row", async () => {
-  const { ctx, storage, runMutation } = fixture(1)
-  storage.getUrl.mockRejectedValue(new Error("URL failed"))
+  const { ctx, runMutation } = fixture(1)
+  vi.mocked(blobUrl).mockRejectedValue(new Error("URL failed"))
   await expect(handler(ctx, args)).rejects.toThrow("URL failed")
-  expect(storage.delete).toHaveBeenCalledExactlyOnceWith("storage-1")
+  expect(deleteBlob).toHaveBeenCalledExactlyOnceWith(
+    ctx,
+    "organization-1/blob-1"
+  )
   expect(runMutation).toHaveBeenCalledTimes(1)
 })
 
@@ -175,7 +188,7 @@ function fileMetadata(size: number) {
     name: args.name,
     mimeType: args.mimeType,
     size,
-    url: "https://regional.convex.cloud/api/storage/storage-1",
+    url: "https://account.eu.r2.cloudflarestorage.com/blob-1?signed",
   }
 }
 
@@ -196,11 +209,8 @@ function fixture(size: number) {
   vi.mocked(openSandbox).mockResolvedValue({
     metadata: { name: "sandbox-1" },
   } as unknown as Awaited<ReturnType<typeof openSandbox>>)
-  const storage = {
-    store: vi.fn(async (_blob: Blob) => "storage-1"),
-    getUrl: vi.fn(async () => fileMetadata(size).url),
-    delete: vi.fn(),
-  }
+  vi.mocked(storeBlob).mockResolvedValue("organization-1/blob-1")
+  vi.mocked(blobUrl).mockResolvedValue(fileMetadata(size).url)
   const runQuery = vi.fn(
     async (): Promise<{ organizationId: string } | null> => ({
       organizationId: "organization-1",
@@ -210,8 +220,7 @@ function fixture(size: number) {
     .fn(async (): Promise<unknown> => "files:1")
     .mockResolvedValueOnce({ externalId: "sandbox-1" })
   return {
-    ctx: { storage, runQuery, runMutation } as unknown as ActionCtx,
-    storage,
+    ctx: { runQuery, runMutation } as unknown as ActionCtx,
     runQuery,
     runMutation,
     getInfo,

@@ -1,3 +1,4 @@
+import { urlEpoch } from "@contracts/files"
 import { type ConvexReactClient } from "convex/react"
 import { type GenericId as Id } from "convex/values"
 import { api } from "../../../../convex/_generated/api"
@@ -39,6 +40,7 @@ export async function workspaceExport(
           const file = await client.query(api.export.console.file, {
             organizationId,
             fileId: row._id as Id<"files">,
+            epoch: urlEpoch(Date.now()),
           })
           if (Math.ceil((file.size * 4) / 3) > remaining()) {
             throw new Error(

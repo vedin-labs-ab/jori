@@ -79,7 +79,7 @@ crons.interval(
 crons.interval(
   "unregistered upload cleanup",
   { hours: 1 },
-  internal.files.cleanup.orphans.sweep,
+  internal.files.blobs.sweep.run,
   {}
 )
 

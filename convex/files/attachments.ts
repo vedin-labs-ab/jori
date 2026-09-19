@@ -3,6 +3,7 @@ import { type Doc, type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { executionPrincipalPersonId } from "../runs/principal"
 import { optionalString, requiredString } from "../shared/input"
+import { readBlob } from "./blobs"
 
 export type FileAttachment = {
   fileId: Id<"files">
@@ -63,7 +64,7 @@ async function readAttachment(
     )
   }
 
-  const blob = await context.ctx.storage.get(file.storageId)
+  const blob = await readBlob(file.blobKey)
 
   if (blob === null) {
     throw new Error(`File is missing: ${file.name}`)

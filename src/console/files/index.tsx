@@ -1,4 +1,3 @@
-import { useQuery } from "convex/react"
 import { Upload } from "lucide-react"
 import { useState } from "react"
 import { useFolderNames } from "@/console/shared/materials/names"
@@ -26,12 +25,12 @@ import {
 } from "@/shared/console/list/frame"
 import { ConsoleListPager } from "@/shared/console/list/pager"
 import { closeOnDismiss } from "@/shared/console/retain"
-import { api } from "../../../convex/_generated/api"
 import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
 import { UploadFileDialog } from "./dialogs"
 import { useFileActions, useFileBulk } from "./manage"
+import { useFiles } from "./query"
 
 export function FilesPage() {
   return (
@@ -44,7 +43,7 @@ export function FilesPage() {
 /** The whole organization's files behind header-embedded controls: facets
  *  and sorts narrow client-side, the shared pager windows the result. */
 function useFileList(organizationId: string) {
-  const files = useQuery(api.files.console.list, { organizationId })
+  const files = useFiles(organizationId)
   const folders = useFolderNames(organizationId)
   const listing = useListState({
     config: fileListConfig(folders, files ?? []),

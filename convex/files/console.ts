@@ -1,6 +1,9 @@
 import { v } from "convex/values"
-import { type Doc } from "../_generated/dataModel"
+import { internal } from "../_generated/api"
+import { type Doc, type Id } from "../_generated/dataModel"
 import {
+  action,
+  internalMutation,
   type MutationCtx,
   mutation,
   type QueryCtx,
@@ -11,6 +14,7 @@ import { resolveConsolePerson } from "../persons/account"
 import { withOwnerDisplay, withOwnerDisplays } from "../persons/names"
 import { visibilityValidator } from "../visibility/schema"
 import { createSight } from "../visibility/sight"
+import { blobUploadUrl, blobUrl, syncBlob } from "./blobs"
 import { canViewFile, type FileViewer, visibleFiles } from "./data"
 import {
   insertUploadedFile,
@@ -24,6 +28,7 @@ const maxConsoleFiles = 500
 export const list = query({
   args: {
     organizationId: v.string(),
+    epoch: v.number(),
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
@@ -39,7 +44,7 @@ export const list = query({
 
     return await withOwnerDisplays(
       ctx,
-      await Promise.all(visible.map((file) => toConsoleRow(ctx, file)))
+      await Promise.all(visible.map(toConsoleRow))
     )
   },
 })
@@ -48,6 +53,7 @@ export const get = query({
   args: {
     organizationId: v.string(),
     fileId: v.id("files"),
+    epoch: v.number(),
   },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
@@ -60,7 +66,7 @@ export const get = query({
 
     return {
       status: "ready" as const,
-      file: await withOwnerDisplay(ctx, await toConsoleRow(ctx, file)),
+      file: await withOwnerDisplay(ctx, await toConsoleRow(file)),
     }
   },
 })
@@ -72,18 +78,31 @@ export const uploadUrl = mutation({
   handler: async (ctx, args) => {
     await requireOrganizationAccess(ctx, args.organizationId)
 
-    return await ctx.storage.generateUploadUrl()
+    return await blobUploadUrl(args.organizationId)
   },
 })
 
-export const create = mutation({
-  args: {
-    organizationId: v.string(),
-    storageId: v.id("_storage"),
-    name: v.string(),
-    visibility: v.optional(visibilityValidator),
-    folderId: v.optional(v.id("folders")),
+const createArgs = {
+  organizationId: v.string(),
+  key: v.string(),
+  name: v.string(),
+  visibility: v.optional(visibilityValidator),
+  folderId: v.optional(v.id("folders")),
+}
+
+/** Recording an upload first reads its size and type from storage, which
+ *  only an action can do; the caller's identity carries into the mutation. */
+export const create = action({
+  args: createArgs,
+  handler: async (ctx, args): Promise<Id<"files">> => {
+    await syncBlob(ctx, args.key)
+
+    return await ctx.runMutation(internal.files.console.insert, args)
   },
+})
+
+export const insert = internalMutation({
+  args: createArgs,
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const viewer = await resolveViewer(ctx, args.organizationId, identity)
@@ -108,12 +127,23 @@ export const update = mutation({
   },
 })
 
-export const replace = mutation({
-  args: {
-    organizationId: v.string(),
-    fileId: v.id("files"),
-    storageId: v.id("_storage"),
+const replaceArgs = {
+  organizationId: v.string(),
+  fileId: v.id("files"),
+  key: v.string(),
+}
+
+export const replace = action({
+  args: replaceArgs,
+  handler: async (ctx, args): Promise<null> => {
+    await syncBlob(ctx, args.key)
+
+    return await ctx.runMutation(internal.files.console.swap, args)
   },
+})
+
+export const swap = internalMutation({
+  args: replaceArgs,
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const viewer = await resolveViewer(ctx, args.organizationId, identity)
@@ -152,7 +182,7 @@ async function resolveViewer(
 /** Console shape of one file. The owner fields show the uploading person;
  *  an agent-saved file has run provenance and no owner, and the console
  *  shows it as Jori's own. */
-export async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
+export async function toConsoleRow(file: Doc<"files">) {
   return {
     fileId: file._id,
     name: file.name,
@@ -165,6 +195,6 @@ export async function toConsoleRow(ctx: QueryCtx, file: Doc<"files">) {
     ownerId: file.ownerId,
     createdAt: file.createdAt,
     updatedAt: file.updatedAt,
-    url: await ctx.storage.getUrl(file.storageId),
+    url: await blobUrl(file.blobKey),
   }
 }

@@ -15,7 +15,7 @@ import {
   resourceViewerArgs,
 } from "../visibility/resources"
 import { type Sight } from "../visibility/sight"
-import { requireUnusedUpload } from "./blobs"
+import { blobUrl, requireUnusedUpload } from "./blobs"
 import { fileFields } from "./schema"
 
 const maxFileSearchResults = 100
@@ -27,7 +27,10 @@ export const record = internalMutation({
   args: fileFields,
   handler: async (ctx, args) => {
     await assertWorkspaceAvailable(ctx, args.organizationId)
-    await requireUnusedUpload(ctx, args.storageId)
+    await requireUnusedUpload(ctx, {
+      organizationId: args.organizationId,
+      key: args.blobKey,
+    })
     const now = Date.now()
     const fileId = await ctx.db.insert("files", {
       ...args,
@@ -53,6 +56,7 @@ export const search = internalQuery({
     query: v.optional(v.string()),
     mimeType: v.optional(v.string()),
     limit: v.optional(v.number()),
+    epoch: v.number(),
   },
   handler: async (ctx, args) => {
     const limit = boundedNumber(args.limit, 25, 1, maxFileSearchResults)
@@ -82,9 +86,7 @@ export const search = internalQuery({
       }
     }
 
-    return await Promise.all(
-      matches.map(async (file) => await summarizeFile(ctx, file))
-    )
+    return await Promise.all(matches.map(summarizeFile))
   },
 })
 
@@ -94,11 +96,11 @@ const viewerFileArgs = {
 }
 
 export const read = internalQuery({
-  args: viewerFileArgs,
+  args: { ...viewerFileArgs, epoch: v.number() },
   handler: async (ctx, args) => {
     const file = await getVisibleFile(ctx, args)
 
-    return file === null ? null : await summarizeFile(ctx, file)
+    return file === null ? null : await summarizeFile(file)
   },
 })
 
@@ -110,7 +112,7 @@ export const getVisible = internalQuery({
 /** A run may import only its own generated files from this deployment. */
 export const forRun = internalQuery({
   args: { fileId: v.id("files"), runId: v.id("runs") },
-  returns: v.object({ storageId: v.id("_storage"), size: v.number() }),
+  returns: v.object({ blobKey: v.string(), size: v.number() }),
   handler: async (ctx, args) => {
     const [file, run] = await Promise.all([
       ctx.db.get(args.fileId),
@@ -124,7 +126,7 @@ export const forRun = internalQuery({
     ) {
       throw new Error("File does not belong to this run.")
     }
-    return { storageId: file.storageId, size: file.size }
+    return { blobKey: file.blobKey, size: file.size }
   },
 })
 
@@ -189,13 +191,13 @@ function matchesMimeType(file: Doc<"files">, mimeType: string | undefined) {
     : fileMimeType === mimeType
 }
 
-async function summarizeFile(ctx: QueryCtx, file: Doc<"files">) {
+async function summarizeFile(file: Doc<"files">) {
   return {
     fileId: file._id,
     name: file.name,
     mimeType: file.mimeType,
     size: file.size,
     createdAt: file.createdAt,
-    url: await ctx.storage.getUrl(file.storageId),
+    url: await blobUrl(file.blobKey),
   }
 }

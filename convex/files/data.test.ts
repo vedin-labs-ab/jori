@@ -65,7 +65,7 @@ function fakeFile(overrides: Partial<Doc<"files">>): Doc<"files"> {
     _id: "file-id",
     _creationTime: 0,
     organizationId: "organization",
-    storageId: "storage-id",
+    blobKey: "organization/blob",
     name: "report.pdf",
     mimeType: "application/pdf",
     size: 5,
