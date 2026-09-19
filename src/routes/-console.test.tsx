@@ -4,7 +4,7 @@ import { Route } from "./console"
 
 function caughtBeforeLoad() {
   try {
-    Route.options.beforeLoad?.({} as never)
+    Route.options.beforeLoad?.({ search: {} } as never)
   } catch (error) {
     return error
   }
@@ -16,5 +16,9 @@ test("the console entry path forwards to the chat", () => {
   const thrown = caughtBeforeLoad()
 
   expect(isRedirect(thrown)).toBe(true)
-  expect((thrown as { options: { to?: string } }).options.to).toBe("/chat")
+  expect((thrown as { options: unknown }).options).toMatchObject({
+    to: "/chat",
+    search: {},
+    replace: true,
+  })
 })
