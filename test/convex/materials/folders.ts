@@ -37,7 +37,7 @@ export function fileDoc(overrides: FileOverrides = {}) {
     organizationId: "org",
     visibility: { mode: "organization" },
     ownerId: testOwner,
-    storageId: "storage:1",
+    blobKey: "organization/blob-1",
     name: "costs.csv",
     mimeType: "text/csv",
     size: 42,

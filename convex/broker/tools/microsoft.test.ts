@@ -8,6 +8,11 @@ import { schemaViolations } from "../../../test/convex/schema"
 import { integration } from "../../../test/convex/tools"
 import { callMicrosoftTool } from "./microsoft"
 
+vi.mock("../../files/blobs", async () => ({
+  readBlob: async () =>
+    (await import("../../../test/convex/broker")).fileBlob(),
+}))
+
 afterEach(() => vi.unstubAllGlobals())
 
 describe("Microsoft Calendar discovery", () => {

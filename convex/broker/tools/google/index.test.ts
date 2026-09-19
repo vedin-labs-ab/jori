@@ -11,6 +11,11 @@ import { schemaViolations } from "../../../../test/convex/schema"
 import { integration } from "../../../../test/convex/tools"
 import { callGoogleTool } from "."
 
+vi.mock("../../../files/blobs", async () => ({
+  readBlob: async () =>
+    (await import("../../../../test/convex/broker")).fileBlob(),
+}))
+
 afterEach(() => vi.unstubAllGlobals())
 
 test("sends a new Gmail message", async () => {

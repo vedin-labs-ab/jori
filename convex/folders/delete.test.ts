@@ -3,23 +3,24 @@ import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { tableDoc, testOwner } from "../../test/convex/materials/collections"
 import { fileDoc, folderDoc, jobDoc } from "../../test/convex/materials/folders"
 import { type Doc, type Id } from "../_generated/dataModel"
+import { deleteBlob } from "../files/blobs"
 import { recordUsageEnded } from "../usage/record"
 import { removeFolder } from "./records"
 
 vi.mock("../discovery/sync/intent")
+vi.mock("../files/blobs", () => ({ deleteBlob: vi.fn() }))
 
 // Deleting a folder deletes its whole subtree. Everything filed anywhere
 // inside either follows the deleted folder's parent or dies with the
 // folders, depending on what the deleting person asked for.
 
 function deletionContext() {
-  const storage = { delete: vi.fn(async () => undefined) }
   const scheduler = {
     runAfter: vi.fn(async () => undefined),
     cancel: vi.fn(async () => undefined),
   }
 
-  return { ...databaseContext({ scheduler, storage }), scheduler, storage }
+  return { ...databaseContext({ scheduler }), scheduler }
 }
 
 async function seedFiledResources(
@@ -120,7 +121,7 @@ test("a destination that was itself deleted falls back to the root", async () =>
 })
 
 test("deleting the contents purges each resource through its own domain", async () => {
-  const { database, ctx, scheduler, storage } = deletionContext()
+  const { database, ctx, scheduler } = deletionContext()
   const folderId = await database.insert("folders", folderDoc())
   const childId = await database.insert(
     "folders",
@@ -165,7 +166,7 @@ test("deleting the contents purges each resource through its own domain", async 
   expect(await database.get(collectionShareId)).toBeNull()
   expect(await database.get(seeded.fileId)).toBeNull()
   expect(await database.get(fileShareId)).toBeNull()
-  expect(storage.delete).toHaveBeenCalledWith("storage:1")
+  expect(deleteBlob).toHaveBeenCalledWith(ctx, "organization/blob-1")
   expect(await database.get(seeded.jobId)).toBeNull()
   expect(await database.get(ownedJobId)).toBeNull()
   expect(scheduler.cancel).toHaveBeenCalledWith("s1")

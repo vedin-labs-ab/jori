@@ -5,6 +5,11 @@ import { integrationDoc } from "../../../test/convex/integrations"
 import { type Doc } from "../../_generated/dataModel"
 import { callSlackTool } from "./slack"
 
+vi.mock("../../files/blobs", async () => ({
+  readBlob: async () =>
+    (await import("../../../test/convex/broker")).fileBlob(),
+}))
+
 const originalFetch = globalThis.fetch
 
 afterEach(() => {

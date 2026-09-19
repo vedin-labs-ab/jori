@@ -19,6 +19,12 @@ export function mockJsonFetch(responseBody: (url: URL) => unknown) {
   return calls
 }
 
+/** The bytes behind the file context's one file. Tests that attach it mock
+ *  convex/files/blobs so `readBlob` returns this. */
+export function fileBlob() {
+  return new Blob([new Uint8Array([104, 101, 108, 108, 111])])
+}
+
 export function createFileContext() {
   return {
     run: {
@@ -43,18 +49,13 @@ export function createFileContext() {
         organizationId: "organization",
         scope: "organization",
         runId: "run-id",
-        storageId: "storage-id",
+        blobKey: "organization/blob-id",
         name: "kitten.png",
         mimeType: "image/png",
         size: 5,
         createdAt: 0,
         updatedAt: 0,
       })),
-      storage: {
-        get: vi.fn(
-          async () => new Blob([new Uint8Array([104, 101, 108, 108, 111])])
-        ),
-      },
     },
   } as never
 }
