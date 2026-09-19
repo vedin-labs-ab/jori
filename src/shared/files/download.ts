@@ -21,7 +21,7 @@ export async function downloadUrl(filename: string, url: string) {
   downloadBlob(filename, await response.blob())
 }
 
-function downloadBlob(filename: string, blob: Blob) {
+export function downloadBlob(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement("a")
   anchor.href = url

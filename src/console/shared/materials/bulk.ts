@@ -1,23 +1,29 @@
+import { useState } from "react"
+import { toast } from "sonner"
 import { type CountedNoun, countNoun } from "@/shared/console/count"
+import { showErrorToast } from "@/shared/console/error"
 import { useBulkRunner } from "@/shared/console/list/bulk"
 import { type RowSelection } from "@/shared/console/list/selection"
 
-/** The selection bar's actions: each removes or downloads per selected row,
- *  through the same mutation and exporter the row-level actions use. */
+/** Removes selected rows individually. Downloads may use one archive for
+ * the selection or the same exporter as each row's menu. */
 export function useMaterialBulk<Row>({
   download,
+  downloadAll,
   noun,
   remove,
   removal,
   selection,
 }: {
   download: (row: Row) => Promise<unknown>
+  downloadAll?: (rows: Row[]) => Promise<unknown>
   noun: CountedNoun
   remove: (row: Row) => Promise<unknown>
   removal: { success: (rows: Row[]) => string; verb: string }
   selection: RowSelection<Row>
 }) {
   const runner = useBulkRunner()
+  const [isDownloading, setIsDownloading] = useState(false)
 
   function removeSelected() {
     const rows = selection.selected
@@ -32,6 +38,22 @@ export function useMaterialBulk<Row>({
   function downloadSelected() {
     const rows = selection.selected
 
+    if (downloadAll) {
+      setIsDownloading(true)
+      void downloadAll(rows)
+        .then(() =>
+          toast.success(`Download ready for ${countNoun(rows.length, noun)}.`)
+        )
+        .catch((error: unknown) =>
+          showErrorToast(
+            error,
+            `Could not download the selected ${noun.plural}.`
+          )
+        )
+        .finally(() => setIsDownloading(false))
+      return
+    }
+
     void runner.run(rows, download, {
       intervalMs: 300,
       noun: noun.plural,
@@ -40,5 +62,9 @@ export function useMaterialBulk<Row>({
     })
   }
 
-  return { downloadSelected, isBusy: runner.isBusy, removeSelected }
+  return {
+    downloadSelected,
+    isBusy: runner.isBusy || isDownloading,
+    removeSelected,
+  }
 }

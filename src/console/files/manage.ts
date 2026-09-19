@@ -7,7 +7,7 @@ import { fileNoun } from "@/shared/console/files/list/config"
 import { type FileRow } from "@/shared/console/files/types"
 import { type RowSelection } from "@/shared/console/list/selection"
 import { type MaterialEdit } from "@/shared/console/materials/dialogs/edit"
-import { downloadUrl } from "@/shared/files/download"
+import { downloadFiles } from "@/shared/files/archive"
 import { api } from "../../../convex/_generated/api"
 import { useMaterialBulk } from "../shared/materials/bulk"
 
@@ -64,13 +64,8 @@ export function useFileBulk(
   const removeFile = useMutation(api.files.console.remove)
 
   return useMaterialBulk({
-    download: async (row) => {
-      if (row.url === null) {
-        throw new Error("File has no download URL")
-      }
-
-      await downloadUrl(row.name, row.url)
-    },
+    downloadAll: downloadFiles,
+    download: (row) => downloadFiles([row]),
     noun: fileNoun,
     remove: (row) => removeFile({ organizationId, fileId: row.fileId }),
     removal: {
