@@ -4,6 +4,7 @@ import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { internalAction } from "../../_generated/server"
 import { readString } from "../../shared/input"
+import { automaticTopUpsAvailable } from "../capabilities"
 import { polarList, polarRequest, requireString } from "./client"
 import { polarMetadata, topUpProductId } from "./config"
 
@@ -15,6 +16,10 @@ import { polarMetadata, topUpProductId } from "./config"
 export const execute = internalAction({
   args: { organizationId: v.string() },
   handler: async (ctx, args) => {
+    if (!automaticTopUpsAvailable()) {
+      return null
+    }
+
     const account: Doc<"accounts"> | null = await ctx.runQuery(
       internal.billing.polar.data.read,
       { organizationId: args.organizationId }

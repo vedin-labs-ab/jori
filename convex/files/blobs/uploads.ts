@@ -17,8 +17,8 @@ export const reserve = internalMutation({
   handler: async (ctx, args) => await reserveUpload(ctx, args.organizationId),
 })
 
-/** Consumed in the transaction that records the file. Cleanup and recording
- * therefore cannot both claim the same upload. */
+/** Claim once, retaining the key until cleanup after its URL expires. Deleting
+ * a file can let that URL recreate its blob before then, without metadata. */
 export async function claimUpload(ctx: MutationCtx, key: string) {
   const upload = await ctx.db
     .query("uploads")
@@ -27,5 +27,8 @@ export async function claimUpload(ctx: MutationCtx, key: string) {
   if (upload === null || upload.createdAt <= Date.now() - uploadGraceMs) {
     throw new Error("Upload expired. Upload the file again.")
   }
-  await ctx.db.delete(upload._id)
+  if (upload.claimed === true) {
+    throw new Error("Upload already used. Upload the file again.")
+  }
+  await ctx.db.patch(upload._id, { claimed: true })
 }

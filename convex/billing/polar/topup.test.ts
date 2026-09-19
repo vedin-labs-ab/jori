@@ -13,6 +13,7 @@ const handle = (
 )._handler
 
 beforeEach(() => {
+  vi.stubEnv("POLAR_OFF_SESSION_ENABLED", "true")
   for (const name of polarEnvironmentNames) {
     vi.stubEnv(name, "configured-test-value")
   }
@@ -148,4 +149,13 @@ test("a declined saved card starts cooldown without crediting the wallet", async
     expect.anything(),
     expect.objectContaining({ cooldownMs: expect.any(Number) })
   )
+})
+
+test("a queued charge cannot contact Polar after capability is disabled", async () => {
+  const { ctx, fetch, runMutation } = fixture()
+  vi.stubEnv("POLAR_OFF_SESSION_ENABLED", "")
+  await handle(ctx, { organizationId: "organization_1" })
+  expect(ctx.runQuery).not.toHaveBeenCalled()
+  expect(fetch).not.toHaveBeenCalled()
+  expect(runMutation).not.toHaveBeenCalled()
 })

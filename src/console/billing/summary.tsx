@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { longDate } from "@/shared/console/time"
+import { FieldHelp } from "@/shared/field"
 import { type BillingAccount, useBillingCheckout } from "./actions"
 import { Balance } from "./balance"
 import { PlanPicker } from "./plan"
@@ -17,14 +19,20 @@ import { PlanPicker } from "./plan"
  */
 export function SummaryBand({
   account,
+  deletesAt,
   organizationId,
 }: {
   account: BillingAccount | null
+  deletesAt?: number
   organizationId: string
 }) {
   return (
     <div className="grid min-w-0 lg:grid-cols-[5fr_7fr]">
-      <PlanCell account={account} organizationId={organizationId} />
+      <PlanCell
+        account={account}
+        deletesAt={deletesAt}
+        organizationId={organizationId}
+      />
       <CardContent className="min-w-0 pt-0 pb-4 lg:py-4">
         <Balance account={account} organizationId={organizationId} />
       </CardContent>
@@ -32,11 +40,15 @@ export function SummaryBand({
   )
 }
 
+/** The badge states a pause and its hint says what that stops and costs,
+ *  so the page needs no alert to repeat it. */
 function PlanCell({
   account,
+  deletesAt,
   organizationId,
 }: {
   account: BillingAccount | null
+  deletesAt?: number
   organizationId: string
 }) {
   const checkout = useBillingCheckout(organizationId)
@@ -45,12 +57,26 @@ function PlanCell({
   return (
     <CardContent className="min-w-0 py-4">
       <MetricLabel>Plan</MetricLabel>
-      <div className="mt-1.5 flex items-baseline gap-2">
+      <div className="mt-1.5 flex items-center gap-2">
         <span className="font-medium text-2xl tracking-tight">
           {planName(account)}
         </span>
         {account?.state.kind === "paused" ? (
-          <Badge variant="destructive">Paused</Badge>
+          <>
+            <Badge variant="destructive">Paused</Badge>
+            <FieldHelp label="What a paused plan means" side="top">
+              <p>
+                Scheduled work is on hold and mentions go unanswered until you
+                subscribe again.
+              </p>
+              {deletesAt === undefined ? null : (
+                <p>
+                  Without a plan, the organization and its data are deleted on{" "}
+                  {longDate(deletesAt)}.
+                </p>
+              )}
+            </FieldHelp>
+          </>
         ) : null}
       </div>
       <p className="mt-1.5 text-xs/relaxed text-muted-foreground">

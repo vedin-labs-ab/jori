@@ -3,16 +3,21 @@ import { convexTest } from "convex-test"
 import { afterEach, expect, test, vi } from "vitest"
 import { internal } from "../../_generated/api"
 import schema from "../../schema"
+import { project } from "../source"
 import { findSource, mark, raise } from "./intent"
 
 const provider = vi.hoisted(() => ({
   rows: new Map<string, Record<string, unknown>>(),
   fail: false,
+  removeFail: false,
 }))
 vi.mock("../provider", () => ({
   version: "test",
   accessTokens: () => ["org"],
   remove: async (_org: string, keys: string[]) => {
+    if (provider.removeFail) {
+      throw new Error("Interrupted removal")
+    }
     for (const [id, row] of provider.rows) {
       if (keys.includes(String(row.key))) {
         provider.rows.delete(id)
@@ -36,6 +41,7 @@ async function fixture() {
   vi.setSystemTime(100_000)
   provider.rows.clear()
   provider.fail = false
+  provider.removeFail = false
   const t = convexTest(schema, modules)
   const id = await t.run(async (ctx) => {
     const owner = await ctx.db.insert("persons", {
@@ -143,4 +149,74 @@ test("a superseded publication and partial passage write cannot preserve accepte
       generation: 2,
     })
   ).toBe(false)
+})
+
+async function traceFixture() {
+  const { t, work } = await fixture()
+  const timestamp = Date.now()
+  const expiresAt = timestamp + 90 * 24 * 60 * 60_000
+  const { runId, traceId } = await t.run(async (ctx) => {
+    const runId = await ctx.db.insert("runs", {
+      organizationId: "org",
+      cause: { type: "manual" },
+      audience: "organization",
+      principal: { kind: "organization" },
+      createdAt: timestamp,
+      snapshot: {
+        title: "Original run",
+        source: { type: "manual" },
+        context: [],
+      },
+      status: "completed",
+    })
+    const traceId = await ctx.db.insert("traces", {
+      organizationId: "org",
+      runId,
+      key: "retention-fixture",
+      timestamp,
+      sequence: 0,
+      type: "run.failed",
+      data: { error: "A searchable trace failure" },
+    })
+    await mark(ctx, "org", traceId)
+    return { runId, traceId }
+  })
+  return { t, work, expiresAt, runId, traceId }
+}
+
+test("90-day trace expiry removes only search copies and retries provider failures", async () => {
+  const { t, work, expiresAt, runId, traceId } = await traceFixture()
+  const key = `traces:${traceId}`
+  const indexed = () =>
+    [...provider.rows.values()].some((row) => row.key === key)
+  await work()
+  expect(indexed()).toBe(true)
+  expect(await t.run((ctx) => findSource(ctx, key))).toMatchObject({
+    expiresAt,
+  })
+  vi.setSystemTime(expiresAt - 1)
+  expect(await t.run((ctx) => project(ctx, key))).not.toBeNull()
+  vi.setSystemTime(expiresAt)
+  expect(await t.run((ctx) => project(ctx, key))).toBeNull()
+  expect(await t.run((ctx) => project(ctx, `runs:${runId}`))).not.toBeNull()
+  await t.mutation(internal.discovery.sync.sweep.run, {})
+  expect(await t.run((ctx) => findSource(ctx, key))).toMatchObject({
+    pending: true,
+  })
+  provider.removeFail = true
+  await work()
+  expect(indexed()).toBe(true)
+  expect(await t.run((ctx) => findSource(ctx, key))).toMatchObject({
+    pending: true,
+    attempts: 1,
+  })
+  provider.removeFail = false
+  await work()
+  expect(indexed()).toBe(false)
+  expect(await t.run((ctx) => findSource(ctx, key))).toBeNull()
+  expect(await t.run((ctx) => ctx.db.get(traceId))).not.toBeNull()
+  expect(await t.run((ctx) => ctx.db.get(runId))).not.toBeNull()
+  await t.run((ctx) => mark(ctx, "org", traceId))
+  await work()
+  expect(indexed()).toBe(false)
 })

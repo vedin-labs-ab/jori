@@ -1,3 +1,5 @@
+import { PutObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { R2 } from "@convex-dev/r2"
 import { urlWindowMs } from "../../../contracts/runtime/files"
 import { components, internal } from "../../_generated/api"
@@ -43,9 +45,20 @@ export async function linkedFile(ctx: MutationCtx, key: string) {
 }
 
 export async function blobUploadUrl(ctx: MutationCtx, organizationId: string) {
-  return await bucket().generateUploadUrl(
-    await reserveUpload(ctx, organizationId)
+  const storage = bucket()
+  const key = await reserveUpload(ctx, organizationId)
+  // A claimed upload must not be overwritten through its still-valid URL:
+  // file size, quota and extracted text all describe the first stored object.
+  const url = await getSignedUrl(
+    storage.client,
+    new PutObjectCommand({
+      Bucket: storage.config.bucket,
+      Key: key,
+      IfNoneMatch: "*",
+    }),
+    { expiresIn: urlWindowMs / 1000 }
   )
+  return { key, url }
 }
 
 /** Valid for two URL windows; callers re-request every window. See

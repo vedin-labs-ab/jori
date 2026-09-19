@@ -1,5 +1,6 @@
 import { autoTopUp, formatUsd, microsToDollars } from "@contracts/billing"
 import { useMutation } from "convex/react"
+import { RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import { Label } from "@/components/ui/label"
 import {
@@ -11,11 +12,34 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { showErrorToast } from "@/shared/console/error"
+import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { api } from "../../../convex/_generated/api"
 import { type BillingAccount } from "./actions"
 
-/** One sentence with the three knobs inline: trigger, amount, monthly cap. */
 export function AutoTopUpRow({
+  available,
+  ...props
+}: {
+  available: boolean
+  account: BillingAccount | null
+  organizationId: string
+}) {
+  if (!available) {
+    return (
+      <ConsoleEmptyState
+        className="rounded-none border-t"
+        description="Use Top up to add prepaid usage whenever you need it."
+        icon={RefreshCw}
+        title="Automatic top-ups are coming soon"
+      />
+    )
+  }
+
+  return <AutoTopUpSettings {...props} />
+}
+
+/** One sentence with the three knobs inline: trigger, amount, monthly cap. */
+function AutoTopUpSettings({
   account,
   organizationId,
 }: {

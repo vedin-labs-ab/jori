@@ -32,7 +32,7 @@ const presetOptions = topUp.presetsUsd.map((preset) => ({
 
 /**
  * Presets cover the common case; the input takes any whole amount from the
- * minimum up. Checkout also saves the card, which unlocks auto top-up.
+ * minimum up.
  */
 export function TopUpDialog({
   available,
@@ -76,8 +76,7 @@ export function TopUpDialog({
         <DialogHeader>
           <DialogTitle>Top up the wallet</DialogTitle>
           <DialogDescription>
-            Prepaid usage that rolls over until it is used. The card is saved
-            for auto top-ups.
+            Prepaid usage that rolls over until it is used.
           </DialogDescription>
         </DialogHeader>
         <DialogForm

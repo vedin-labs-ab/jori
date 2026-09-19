@@ -33,6 +33,7 @@ export async function beginDeletion(
     stage: 0,
     nextAt: now,
     blocked: undefined,
+    waiting: undefined,
   }
   const id =
     existing?._id ??
@@ -66,7 +67,7 @@ export const step = internalMutation({
     }
     await ctx.db.patch(row._id, {
       nextAt: Date.now() + 60_000,
-      blocked: undefined,
+      waiting: undefined,
     })
     const delay = await advance(ctx, row)
     if (delay !== null) {
@@ -114,7 +115,7 @@ async function advance(ctx: MutationCtx, row: Doc<"workspaceRetention">) {
     (row.startedAt ?? Date.now()) + 35 * 60_000 - Date.now()
   if (drainRemaining > 0) {
     await ctx.db.patch(row._id, {
-      blocked: "Waiting for in-flight work to finish.",
+      waiting: "Waiting for in-flight work to finish.",
       nextAt: Date.now() + drainRemaining,
     })
     return drainRemaining
@@ -159,13 +160,14 @@ export const sandboxRemoved = internalMutation({
   },
 })
 
-export const blocked = internalMutation({
+/** A failed stage that retries by itself; nobody has to act on it. */
+export const waiting = internalMutation({
   args: { id: v.id("workspaceRetention"), message: v.string() },
   handler: async (ctx, args) => {
     const row = await ctx.db.get(args.id)
     if (row?.state === "deleting") {
       await ctx.db.patch(row._id, {
-        blocked: args.message,
+        waiting: args.message,
         nextAt: Date.now() + 60_000,
       })
     }
@@ -173,7 +175,9 @@ export const blocked = internalMutation({
 })
 
 function deletionBlock(account: Doc<"accounts"> | null, automatic: boolean) {
-  return account?.state.kind === "active" || account?.polar?.subscriptionId
+  return account?.state.kind === "active" ||
+    account?.polar?.subscriptionId ||
+    account?.storage
     ? "Cancel the subscription before deleting this workspace."
     : account && "refundHold" in account && account.refundHold
       ? "Finish the pending refund before deleting this workspace."

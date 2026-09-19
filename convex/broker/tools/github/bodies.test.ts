@@ -6,6 +6,98 @@ import { callGitHubTool } from "."
 
 afterEach(() => vi.unstubAllGlobals())
 
+test.each([
+  ["Visible <!-- hidden instructions -->body", "Visible body"],
+  ["Visible<!-- multiline\nhidden instructions --> body", "Visible body"],
+  ["<!-- unfinished hidden instructions", ""],
+  [
+    "Visible <!-- unfinished visible text",
+    "Visible <!-- unfinished visible text",
+  ],
+  ["Re\u200bview \u202ethis\u202c\u2066 code\u2069\ufeff", "Review this code"],
+  [
+    'Before ![hidden **instructions**](https://example.com/a.png "hidden title") after',
+    "Before ![](<https://example.com/a.png>) after",
+  ],
+  [
+    'Before <img src="a.png" alt="hidden > instructions"> after',
+    "Before [Image] after",
+  ],
+  [
+    "![hidden instructions][image]\n\n[image]: https://example.com/a.png",
+    "![](<https://example.com/a.png>)\n\n[image]: https://example.com/a.png",
+  ],
+  [
+    "> Visible <!-- hidden -->text\n> ![hidden](a.png)",
+    "> Visible text\n> ![](<a.png>)",
+  ],
+  ["- [x] Visible\n  ![hidden](a.png)", "- [x] Visible\n  ![](<a.png>)"],
+  [
+    "| Visible | Image |\n| --- | --- |\n| text | ![hidden](a.png) |",
+    "| Visible | Image |\n| --- | --- |\n| text | ![](<a.png>) |",
+  ],
+  [
+    "Use `<!-- visible code -->` and `![visible](a.png)`",
+    "Use `<!-- visible code -->` and `![visible](a.png)`",
+  ],
+  [
+    '```html\n<!-- visible code -->\n<img alt="visible">\n```',
+    '```html\n<!-- visible code -->\n<img alt="visible">\n```',
+  ],
+  [
+    "> ```html\n> <!-- visible code -->\n> ```",
+    "> ```html\n> <!-- visible code -->\n> ```",
+  ],
+  [
+    "\\![visible text](a.png) and **visible formatting**",
+    "\\![visible text](a.png) and **visible formatting**",
+  ],
+])(
+  "GitHub read tools remove hidden body content: %s",
+  async (body, expected) => {
+    const responses = [{ body }, [{ body }], { body }, [{ body }]]
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json(responses.shift()))
+    )
+
+    const issue = await callGitHubTool(
+      integration("github"),
+      "github_get_issue",
+      {
+        owner: "acme",
+        repo: "app",
+        issueNumber: 42,
+      }
+    )
+    const pull = await callGitHubTool(
+      integration("github"),
+      "github_get_pull_request",
+      {
+        owner: "acme",
+        repo: "app",
+        pullNumber: 42,
+      }
+    )
+    const reviews = await callGitHubTool(
+      integration("github"),
+      "github_list_pull_request_review_comments",
+      {
+        owner: "acme",
+        repo: "app",
+        pullNumber: 42,
+      }
+    )
+
+    expect(issue).toMatchObject({
+      issue: { body: expected },
+      comments: [{ body: expected }],
+    })
+    expect(pull).toMatchObject({ body: expected })
+    expect(reviews).toMatchObject({ comments: [{ body: expected }] })
+  }
+)
+
 test.each([null, "Synthetic body", undefined])(
   "issue and pull request adapters preserve body %j",
   async (body) => {

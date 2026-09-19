@@ -82,3 +82,24 @@ test("wallet refund waits until the exact original order is credited", async () 
     })
   ).rejects.toThrow("top-up credited to this workspace")
 })
+
+test("refund reservation waits for the extra storage subscription to end too", async () => {
+  const { t, id } = await setup()
+  await freezeSettled(t)
+  await t.run(
+    async (ctx) =>
+      await ctx.db.patch(id, {
+        storage: {
+          subscriptionId: "storage-sub",
+          purchaseOrderId: "storage-order",
+          extraGb: 0,
+        },
+      })
+  )
+  await expect(
+    t.action(internal.billing.refunds.actions.prepare, args)
+  ).rejects.toThrow("Cancel the subscription")
+  expect(
+    (await t.run(async (ctx) => await ctx.db.get(id)))?.micros.allowance
+  ).toBe(10_000_000)
+})

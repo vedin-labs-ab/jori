@@ -42,7 +42,11 @@ test("a folder's usage is the overview of that folder's subtree", () => {
     api.folders.usage.overview,
     { organizationId: "organization", days: 7, folderId: "folders:1" },
   ])
-  expect(useQuery).toHaveBeenCalledTimes(1)
+  expect(useQuery).toHaveBeenCalledWith(api.files.capacity.console.overview, {
+    organizationId: "organization",
+    folderId: "folders:1",
+  })
+  expect(useQuery).toHaveBeenCalledTimes(2)
   expect(
     screen.queryByRole("region", { name: "Organization credit" })
   ).toBeNull()

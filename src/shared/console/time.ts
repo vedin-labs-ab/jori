@@ -89,6 +89,13 @@ export function shortDate(timestamp: number) {
   }).format(timestamp)
 }
 
+/** With the year, for a date far enough out to cross into the next one. */
+export function longDate(timestamp: number) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "long" }).format(
+    timestamp
+  )
+}
+
 export function absoluteTime(timestamp: number) {
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",

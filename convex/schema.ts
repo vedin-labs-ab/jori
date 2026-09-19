@@ -17,6 +17,7 @@ import {
 import { emailSubmissions } from "./email/schema"
 import { events } from "./events/schema"
 import { uploads } from "./files/blobs/schema"
+import { fileUsage } from "./files/capacity/schema"
 import { files } from "./files/schema"
 import { folders } from "./folders/schema"
 import { githubRecoveries } from "./integrations/github/ingress/schema"
@@ -66,6 +67,7 @@ export default defineSchema({
   allowlist,
   waitlist,
   files,
+  fileUsage,
   uploads,
   accounts,
   billingRefunds,

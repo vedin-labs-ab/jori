@@ -105,3 +105,22 @@ test("metadata cannot override the deployment region", () => {
     polarMetadata({ region: "us", organizationId: "organization-1" })
   ).toEqual({ region: "eu", organizationId: "organization-1" })
 })
+
+test("subscription changes send the JSON patch body and preserve the pinned API contract", async () => {
+  const fetch = vi.fn(async () => Response.json({}))
+  vi.stubGlobal("fetch", fetch)
+  await polarRequest("/v1/subscriptions/storage-test", {
+    method: "PATCH",
+    body: { units: 40, proration_behavior: "invoice" },
+  })
+  const [, init] = fetch.mock.calls[0] as unknown as [URL, RequestInit]
+  expect(init.method).toBe("PATCH")
+  expect(init.headers).toMatchObject({
+    "content-type": "application/json",
+    "polar-version": "2026-10",
+  })
+  expect(JSON.parse(String(init.body))).toEqual({
+    units: 40,
+    proration_behavior: "invoice",
+  })
+})

@@ -48,6 +48,7 @@ test("records console uploads with storage metadata and defaults", async () => {
     name: "costs.csv",
     mimeType: "text/csv",
     size: 42,
+    metered: true,
     createdAt: expect.any(Number),
     updatedAt: expect.any(Number),
   })
@@ -254,12 +255,14 @@ function workspaceQuery(table: string) {
   if (table === "files") {
     return { withIndex: () => ({ first: async () => null }) }
   }
-  if (table !== "workspaceRetention") {
+  if (!["workspaceRetention", "fileUsage", "accounts"].includes(table)) {
     throw new Error(`Unexpected table in file fixture: ${table}`)
   }
   return { withIndex: () => ({ unique: async () => null }) }
 }
 
 function fileContext(db: object) {
-  return { db: { query: workspaceQuery, ...db } } as unknown as MutationCtx
+  return {
+    db: { query: workspaceQuery, insert: vi.fn(), patch: vi.fn(), ...db },
+  } as unknown as MutationCtx
 }

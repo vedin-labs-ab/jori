@@ -21,7 +21,7 @@ export async function ensureNotice(
       await ctx.db.patch(row._id, {
         noticeAt: now,
         deletesAt: Math.max(row.deletesAt, now + noticeMs),
-        blocked: undefined,
+        waiting: undefined,
       })
       return now
     }
@@ -56,12 +56,13 @@ export async function ensureNotice(
   await ctx.db.patch(row._id, {
     noticeId,
     noticeRetryAt: Date.now() + dayMs,
-    blocked: "Waiting for deletion notice delivery.",
+    blocked: undefined,
+    waiting: "Waiting for deletion notice delivery.",
   })
   return null
 }
 
-async function ownerEmail(ctx: MutationCtx, organizationId: string) {
+export async function ownerEmail(ctx: MutationCtx, organizationId: string) {
   const adapter = authComponent.adapter(ctx)(createAdapterOptions())
   const organization = await adapter.findOne<{ name: string }>({
     model: "organization",

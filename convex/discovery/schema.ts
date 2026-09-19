@@ -23,6 +23,7 @@ export const discoverySources = defineTable({
   cascadeCursor: v.optional(v.union(v.string(), v.null())),
   error: v.optional(v.string()),
   indexedAt: v.optional(v.number()),
+  expiresAt: v.optional(v.number()),
   raisedAt: v.number(),
 })
   .index("by_key", ["key"])
@@ -32,6 +33,7 @@ export const discoverySources = defineTable({
     "pending",
     "nextAt",
   ])
+  .index("by_pending_and_expiresAt", ["pending", "expiresAt"])
   .index("by_organizationId_and_pending", ["organizationId", "pending"])
   .index("by_organizationId_and_resourceKey", ["organizationId", "resourceKey"])
   .index("by_organizationId_and_authorityKey", [

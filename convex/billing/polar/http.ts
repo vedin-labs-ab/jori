@@ -3,6 +3,7 @@ import { type ActionCtx } from "../../_generated/server"
 import { hmacSha256Base64, timingSafeEqual } from "../../shared/crypto"
 import { base64DecodeBytes } from "../../shared/encoding"
 import { readRecord, readString } from "../../shared/input"
+import { sellsStorage } from "../storage/config"
 import { polarRequest } from "./client"
 import {
   belongsToRegion,
@@ -40,9 +41,18 @@ export async function handlePolarEvents(ctx: ActionCtx, request: Request) {
     const path = encodeURIComponent(id)
 
     if (type === "order.paid" || type === "order.refunded") {
-      await ctx.runMutation(internal.billing.polar.events.apply, {
-        order: await polarRequest(`/v1/orders/${path}`),
-      })
+      const order = await polarRequest(`/v1/orders/${path}`)
+      const subscriptionId = readString(order, "subscription_id")
+      if (
+        sellsStorage(order.product_id) &&
+        belongsToRegion(order) &&
+        subscriptionId !== undefined
+      ) {
+        order.subscription = await polarRequest(
+          `/v1/subscriptions/${encodeURIComponent(subscriptionId)}`
+        )
+      }
+      await ctx.runMutation(internal.billing.polar.events.apply, { order })
     } else if (type.startsWith("subscription.")) {
       await ctx.runMutation(internal.billing.polar.events.apply, {
         subscription: await polarRequest(`/v1/subscriptions/${path}`),

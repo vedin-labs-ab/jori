@@ -5,6 +5,7 @@ import { type MutationCtx } from "../_generated/server"
 import { liveModelRate } from "../model/rate"
 import { recordUsageDebit } from "../usage/record"
 import { availableMicros, ensureAccount, holdAutoTopUp } from "./account"
+import { automaticTopUpsAvailable } from "./capabilities"
 import { debitRun } from "./ledger"
 
 /**
@@ -78,6 +79,7 @@ async function maybeScheduleAutoTopUp(
   const { micros: charged, releaseAt } = account.topUp.charged
 
   if (
+    !automaticTopUpsAvailable() ||
     account.state.kind !== "active" ||
     account.refundHold !== undefined ||
     policy === undefined ||

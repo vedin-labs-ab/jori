@@ -8,6 +8,8 @@ import { getAccount } from "../account"
 import { addMonths } from "../cycle"
 import { creditTopUp, resetAllowance } from "../ledger"
 import { applyTopUpRefund } from "../refunds/webhook"
+import { sellsStorage } from "../storage/config"
+import { applyStorageOrder } from "../storage/sync"
 import { queueCancellation } from "./cancellation"
 import { belongsToRegion, sellsPlan, sellsTopUp } from "./config"
 
@@ -41,7 +43,9 @@ export async function applyPaidOrder(
     return
   }
 
-  if (sellsTopUp(order.product_id)) {
+  if (sellsStorage(order.product_id)) {
+    await applyStorageOrder(ctx, account, order)
+  } else if (sellsTopUp(order.product_id)) {
     await applyTopUp(ctx, account, order)
   } else if (order.billing_reason === "subscription_create") {
     await applyPlan(ctx, account, order, customerId)

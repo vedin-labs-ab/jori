@@ -6,6 +6,7 @@ import { type MutationCtx } from "../_generated/server"
 import { purgeContent } from "../retention/erasure/purge"
 import { contentTables } from "../retention/erasure/tables"
 import schema from "../schema"
+import { blobUploadUrl } from "./blobs"
 import { blobExists, seedBlob } from "./blobs/fixtures"
 import { insertUploadedFile, purgeFile, swapFileBlob } from "./records"
 
@@ -14,6 +15,25 @@ function storage() {
   registerBlobs(t)
   return t
 }
+
+test("upload URLs require a signed create-only condition for their reserved key", async () => {
+  const t = storage()
+  await t.run(async (ctx) => {
+    const upload = await blobUploadUrl(ctx, "organization")
+    const url = new URL(upload.url)
+    expect(url.hostname).toBe("test-bucket.account.eu.r2.cloudflarestorage.com")
+    expect(decodeURIComponent(url.pathname)).toBe(`/${upload.key}`)
+    expect(url.searchParams.get("X-Amz-SignedHeaders")?.split(";")).toContain(
+      "if-none-match"
+    )
+    expect(url.searchParams.get("X-Amz-Expires")).toBe("900")
+    const reservation = await ctx.db
+      .query("uploads")
+      .withIndex("by_key", (q) => q.eq("key", upload.key))
+      .unique()
+    expect(reservation?.key).toBe(upload.key)
+  })
+})
 
 test("uploads cannot claim another organization's blob or one already in use", async () => {
   const t = storage()

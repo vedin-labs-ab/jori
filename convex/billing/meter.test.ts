@@ -1,4 +1,4 @@
-import { beforeEach, expect, test, vi } from "vitest"
+import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { type Doc } from "../_generated/dataModel"
 import { type MutationCtx } from "../_generated/server"
 import { liveModelRate } from "../model/rate"
@@ -60,6 +60,7 @@ function meterOnce(account: Doc<"accounts">, schedule: () => void) {
 }
 
 beforeEach(() => {
+  vi.stubEnv("POLAR_OFF_SESSION_ENABLED", "true")
   vi.mocked(ensureAccount).mockReset()
   vi.mocked(holdAutoTopUp).mockReset()
   vi.mocked(debitRun).mockReset()
@@ -143,6 +144,17 @@ test("a spent monthly cap holds the charge back", async () => {
     schedule
   )
 
+  expect(holdAutoTopUp).not.toHaveBeenCalled()
+  expect(schedule).not.toHaveBeenCalled()
+})
+
+afterEach(() => vi.unstubAllEnvs())
+
+test("a previously enabled policy cannot schedule a charge while capability is off", async () => {
+  vi.stubEnv("POLAR_OFF_SESSION_ENABLED", "")
+  const schedule = vi.fn()
+  await meterOnce({ ...configuredAccount, state: { kind: "active" } }, schedule)
+  expect(debitRun).toHaveBeenCalledOnce()
   expect(holdAutoTopUp).not.toHaveBeenCalled()
   expect(schedule).not.toHaveBeenCalled()
 })

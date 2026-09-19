@@ -1,8 +1,8 @@
 import { readNumber, readRecord } from "../../shared/input"
 import { requirePolarAccessToken, requirePolarBaseUrl } from "./config"
 
-/** Polar keeps a version for about nine months; move this forward with the
- *  webhook endpoint's version before the pinned one is removed. */
+/** Pin the API and webhook contracts together. Polar rotates quarterly;
+ * nine months of support includes its initial three-month preview. */
 const apiVersion = "2026-10"
 
 type PolarQuery = Record<string, string | number | string[]>
@@ -15,12 +15,13 @@ type PolarQuery = Record<string, string | number | string[]>
 export async function polarRequest(
   path: string,
   args?: {
-    method?: "GET" | "POST" | "DELETE"
+    method?: "GET" | "POST" | "PATCH" | "DELETE"
     query?: PolarQuery
     body?: Record<string, unknown>
   }
 ): Promise<Record<string, unknown>> {
   const method = args?.method ?? "GET"
+  const sendsBody = method === "POST" || method === "PATCH"
   const url = new URL(path, requirePolarBaseUrl())
   for (const [key, value] of Object.entries(args?.query ?? {})) {
     for (const item of [value].flat()) {
@@ -33,9 +34,9 @@ export async function polarRequest(
       authorization: `Bearer ${requirePolarAccessToken()}`,
       accept: "application/json",
       "polar-version": apiVersion,
-      ...(method === "POST" ? { "content-type": "application/json" } : {}),
+      ...(sendsBody ? { "content-type": "application/json" } : {}),
     },
-    ...(method === "POST" ? { body: JSON.stringify(args?.body ?? {}) } : {}),
+    ...(sendsBody ? { body: JSON.stringify(args?.body ?? {}) } : {}),
   })
   if (!response.ok) {
     // Provider messages can reflect submitted credentials or customer values.

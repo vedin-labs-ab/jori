@@ -1,5 +1,7 @@
 import { type MutationCtx } from "../../_generated/server"
-import { clearOrganization, daysAgo, type SeedContext } from "../context"
+import { changeUsage } from "../../files/capacity/meter"
+import { purgeFile } from "../../files/records"
+import { daysAgo, type SeedContext } from "../context"
 import { resolveOwners } from "../people"
 import { resolveFolders } from "./folders"
 
@@ -164,7 +166,19 @@ export async function seedFiles(
   const folders = await resolveFolders(ctx, seed)
   const stored = new Map(uploads.map((upload) => [upload.key, upload]))
 
-  await clearOrganization(ctx, ["files"], seed.organizationId)
+  const previous = await ctx.db
+    .query("files")
+    .withIndex("by_organization_and_created_at", (index) =>
+      index.eq("organizationId", seed.organizationId)
+    )
+    .collect()
+  const incoming = new Set(uploads.map((upload) => upload.blobKey))
+  if (previous.some((file) => incoming.has(file.blobKey))) {
+    throw new Error("Upload fresh seed files before replacing the library.")
+  }
+  for (const file of previous) {
+    await purgeFile(ctx, file)
+  }
 
   for (const file of files) {
     const upload = stored.get(file.key)
@@ -174,6 +188,14 @@ export async function seedFiles(
     }
 
     const createdAt = daysAgo(seed, file.created, 13)
+    const folderId = folders.get(file.folder)
+    await changeUsage(ctx, {
+      organizationId: seed.organizationId,
+      folderId,
+      bytes: upload.size,
+      count: 1,
+      enforce: true,
+    })
 
     await ctx.db.insert("files", {
       organizationId: seed.organizationId,
@@ -183,7 +205,8 @@ export async function seedFiles(
       name: file.name,
       mimeType: file.mimeType,
       size: upload.size,
-      folderId: folders.get(file.folder),
+      folderId,
+      metered: true,
       createdAt,
       updatedAt: createdAt,
     })

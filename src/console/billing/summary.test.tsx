@@ -23,8 +23,18 @@ const paused: BillingAccount = {
 }
 
 test("a revoked plan can subscribe again while keeping access to billing history", () => {
-  render(<SummaryBand account={paused} organizationId="organization" />)
+  render(
+    <SummaryBand
+      account={paused}
+      deletesAt={Date.UTC(2026, 11, 18, 12)}
+      organizationId="organization"
+    />
+  )
   expect(screen.getByText("Paused")).toBeDefined()
+  // The badge's hint is the only place the page says what a pause costs.
+  expect(
+    screen.getByRole("button", { name: "What a paused plan means" })
+  ).toBeDefined()
   expect(screen.getByRole("button", { name: "Manage billing" })).toBeDefined()
   fireEvent.click(screen.getByRole("button", { name: "Subscribe" }))
   expect(

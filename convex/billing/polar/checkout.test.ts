@@ -8,7 +8,15 @@ import { polarEnvironmentNames } from "./config"
 vi.mock("./client", async (original) => ({
   ...(await original<typeof import("./client")>()),
   polarList: vi.fn(),
-  polarRequest: vi.fn(async () => ({
+  polarRequest: vi.fn(async (path, args) => ({
+    ...(path === "/v1/checkouts/"
+      ? {
+          status: "open",
+          customer_id: args.body.customer_id,
+          product_id: args.body.products[0],
+          metadata: args.body.metadata,
+        }
+      : {}),
     id: "customer_1",
     url: "https://polar.test",
     customer_portal_url: "https://polar.test/portal",
@@ -31,9 +39,11 @@ beforeEach(() => {
   vi.stubEnv("POLAR_PRODUCT_CLOUD", "product_cloud")
   vi.stubEnv("POLAR_PRODUCT_TOP_UP", "product_top_up")
   vi.clearAllMocks()
-  vi.mocked(polarList).mockResolvedValue([
-    { id: "owner_1", customer_id: "customer_1", role: "owner" },
-  ])
+  vi.mocked(polarList).mockImplementation(async (path) =>
+    path.endsWith("/members")
+      ? [{ id: "owner_1", customer_id: "customer_1", role: "owner" }]
+      : []
+  )
 })
 afterEach(() => vi.unstubAllEnvs())
 
@@ -188,11 +198,27 @@ function invoke(
 }
 
 function context(hasCustomer = true) {
-  const runMutation = vi.fn(async () => ({
-    organizationId: "organization-1",
-    state: { kind: "active" },
-    ...(hasCustomer ? { polar: { customerId: "customer_1" } } : {}),
-  }))
+  const runMutation = vi.fn(async (ref, args) => {
+    const name = getFunctionName(ref)
+    if (name.endsWith("reservation:reserve")) {
+      return {
+        attempt: args.attempt,
+        productId: args.productId,
+        started: false,
+      }
+    }
+    if (name.endsWith("reservation:start")) {
+      return true
+    }
+    if (name.endsWith("reservation:attach")) {
+      return null
+    }
+    return {
+      organizationId: "organization-1",
+      state: { kind: "active" },
+      ...(hasCustomer ? { polar: { customerId: "customer_1" } } : {}),
+    }
+  })
   const ctx = {
     auth: {
       getUserIdentity: async () => ({

@@ -39,7 +39,7 @@ test("workspace purge waits for acknowledged search deletion and retries provide
   const waiting = await t.run((ctx) => ctx.db.get(id))
   expect(waiting?.discoveryErasedAt).toBeUndefined()
   expect(waiting?.state).toBe("deleting")
-  expect(waiting?.blocked).toBe(
+  expect(waiting?.waiting).toBe(
     "Search deletion is waiting for the regional service."
   )
   expect(

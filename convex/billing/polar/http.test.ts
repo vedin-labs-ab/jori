@@ -158,3 +158,31 @@ async function signed(payload: unknown, headers: Record<string, string> = {}) {
     },
   })
 }
+
+test("paid storage reads current subscription capacity rather than the order snapshot", async () => {
+  vi.stubEnv("POLAR_PRODUCT_STORAGE", "storage_product")
+  const order = {
+    id: "object_1",
+    product_id: "storage_product",
+    subscription_id: "storage_sub",
+    metadata: { region: "eu" },
+    subscription: { units: 9999 },
+  }
+  const subscription = { id: "storage_sub", units: 40, status: "active" }
+  const fetch = vi.fn(async (url: URL) =>
+    Response.json(url.pathname.startsWith("/v1/orders/") ? order : subscription)
+  )
+  vi.stubGlobal("fetch", fetch)
+  const runMutation = vi.fn()
+  await handlePolarEvents(
+    { runMutation } as unknown as ActionCtx,
+    await signed(event("order.paid"))
+  )
+  expect(fetch.mock.calls.map(([url]) => url.pathname)).toEqual([
+    "/v1/orders/object_1",
+    "/v1/subscriptions/storage_sub",
+  ])
+  expect(runMutation).toHaveBeenCalledWith(expect.anything(), {
+    order: { ...order, subscription },
+  })
+})

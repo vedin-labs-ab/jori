@@ -6,6 +6,7 @@ import { v } from "convex/values"
 export const uploads = defineTable({
   key: v.string(),
   createdAt: v.number(),
+  claimed: v.optional(v.boolean()),
 })
   .index("by_key", ["key"])
   .index("by_createdAt", ["createdAt"])

@@ -4,6 +4,7 @@ import { type Doc } from "../_generated/dataModel"
 import { mutation, type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { ensureAccount, getAccount, requireActivePlan } from "./account"
+import { automaticTopUpsAvailable } from "./capabilities"
 import { requirePolarConfiguration } from "./polar/config"
 
 const entryPageSize = 30
@@ -21,6 +22,7 @@ export const overview = query({
     const account = await getAccount(ctx, args.organizationId)
 
     return {
+      automaticTopUpsAvailable: automaticTopUpsAvailable(),
       account: account === null ? null : publicAccount(account),
       entries:
         account === null ? [] : await readEntries(ctx, args.organizationId),
@@ -87,6 +89,11 @@ export const configureAutoTopUp = mutation({
 
     if (args.config !== null) {
       requirePolarConfiguration()
+      if (!automaticTopUpsAvailable()) {
+        throw new Error(
+          "Automatic top-ups are coming soon. Top up manually for now."
+        )
+      }
     }
 
     const account = await ensureAccount(ctx, args.organizationId)

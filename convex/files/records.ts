@@ -10,6 +10,7 @@ import {
   type StoredVisibility,
 } from "../visibility/schema"
 import { deleteBlob, requireUnusedUpload } from "./blobs"
+import { changeUsage, meterFile } from "./capacity/meter"
 import { canViewFile, type FileViewer } from "./data"
 import { normalizeFileName } from "./names"
 
@@ -43,15 +44,24 @@ export async function insertUploadedFile(
   })
 
   const now = Date.now()
+  const folderId = await resolveCreationFolder(ctx, {
+    organizationId: viewer.organizationId,
+    personId: viewer.personId,
+    folderId: args.folderId,
+  })
+  await changeUsage(ctx, {
+    organizationId: viewer.organizationId,
+    folderId,
+    bytes: args.size,
+    count: 1,
+    enforce: true,
+  })
   const fileId = await ctx.db.insert("files", {
     organizationId: viewer.organizationId,
     visibility,
     ownerId: viewer.personId,
-    folderId: await resolveCreationFolder(ctx, {
-      organizationId: viewer.organizationId,
-      personId: viewer.personId,
-      folderId: args.folderId,
-    }),
+    folderId,
+    metered: true,
     blobKey: args.key,
     name: normalizeFileName(args.name),
     mimeType: upload.mimeType,
@@ -95,6 +105,14 @@ export async function swapFileBlob(
     key: args.key,
   })
 
+  await meterFile(ctx, file)
+  await changeUsage(ctx, {
+    ...file,
+    bytes: args.size - file.size,
+    count: 0,
+    enforce: true,
+  })
+
   await ctx.db.patch(file._id, {
     blobKey: args.key,
     size: args.size,
@@ -115,6 +133,9 @@ export async function removeFileWithBlob(
 /** Remove the row and its share capabilities, then its blob.
  * Reached through console, folder, and workspace deletion. */
 export async function purgeFile(ctx: MutationCtx, file: Doc<"files">) {
+  if (file.metered) {
+    await changeUsage(ctx, { ...file, bytes: -file.size, count: -1 })
+  }
   await ctx.db.delete(file._id)
   await mark(ctx, file.organizationId, file._id)
   await deleteTargetShares(ctx, { kind: "file", id: file._id })

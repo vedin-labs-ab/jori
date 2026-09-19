@@ -3,6 +3,7 @@ import { convexTest } from "convex-test"
 import { afterEach, expect, test, vi } from "vitest"
 import { internal } from "../../_generated/api"
 import schema from "../../schema"
+import { sourceTables } from "../source/types"
 import { raise } from "./intent"
 
 const modules = import.meta.glob("/convex/**/*.{ts,js}")
@@ -72,4 +73,71 @@ test("old acknowledgments cannot clear newer edits; a failed source remains retr
   const row = await t.run((ctx) => ctx.db.query("discoverySources").first())
   expect(row).toMatchObject({ pending: true, attempts: 8 })
   expect(row?.nextAt).toBeGreaterThan(Date.now())
+})
+
+test("expiry drains bounded pages without a deleting workspace blocking later traces", async () => {
+  const t = await fixture()
+  await t.run(async (ctx) => {
+    await ctx.db.insert("workspaceRetention", {
+      organizationId: "deleting",
+      state: "deleting",
+      endedAt: 1,
+      deletesAt: 1,
+    })
+    for (let i = 0; i < 51; i++) {
+      await ctx.db.insert("discoverySources", {
+        organizationId: i < 50 ? "deleting" : "org",
+        key: `traces:${i}`,
+        lane: "text",
+        generation: 1,
+        pending: false,
+        nextAt: 0,
+        attempts: 0,
+        raisedAt: 1,
+        expiresAt: i + 1,
+      })
+    }
+  })
+  await t.mutation(internal.discovery.sync.sweep.expire, {})
+  expect(
+    await t.run((ctx) => ctx.db.system.query("_scheduled_functions").collect())
+  ).toHaveLength(1)
+  await t.mutation(internal.discovery.sync.sweep.expire, {})
+  const sources = await t.run((ctx) =>
+    ctx.db.query("discoverySources").collect()
+  )
+  expect(sources.every((source) => source.expiresAt === undefined)).toBe(true)
+  expect(
+    sources.filter((source) => source.pending).map((source) => source.key)
+  ).toEqual(["traces:50"])
+})
+
+test("reconciliation prunes legacy acknowledged trace tombstones without recreating work", async () => {
+  const t = await fixture()
+  await t.run(async (ctx) => {
+    await ctx.db.insert("discoverySources", {
+      organizationId: "org",
+      key: "traces:removed",
+      lane: "text",
+      generation: 1,
+      pending: false,
+      nextAt: 0,
+      attempts: 0,
+      raisedAt: 1,
+      parts: 0,
+    })
+    await ctx.db.insert("discoveryScans", {
+      name: "sources",
+      table: sourceTables.length,
+      cursor: null,
+      nextAt: 0,
+    })
+  })
+  await t.mutation(internal.discovery.sync.sweep.page, {})
+  expect(
+    await t.run((ctx) => ctx.db.query("discoverySources").first())
+  ).toBeNull()
+  expect(
+    await t.run((ctx) => ctx.db.query("discoveryQueues").first())
+  ).toBeNull()
 })

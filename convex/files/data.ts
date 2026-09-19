@@ -16,6 +16,7 @@ import {
 } from "../visibility/resources"
 import { type Sight } from "../visibility/sight"
 import { blobUrl, requireUnusedUpload } from "./blobs"
+import { changeUsage } from "./capacity/meter"
 import { fileFields } from "./schema"
 
 const maxFileSearchResults = 100
@@ -32,14 +33,23 @@ export const record = internalMutation({
       key: args.blobKey,
     })
     const now = Date.now()
-    const fileId = await ctx.db.insert("files", {
-      ...args,
-      ...(args.runId === undefined
+    const creation =
+      args.runId === undefined
         ? {}
         : await resourceCreation(ctx, {
             organizationId: args.organizationId,
             runId: args.runId,
-          })),
+          })
+    const values = { ...args, ...creation }
+    await changeUsage(ctx, {
+      ...values,
+      bytes: args.size,
+      count: 1,
+      enforce: true,
+    })
+    const fileId = await ctx.db.insert("files", {
+      ...values,
+      metered: true,
       createdAt: now,
       updatedAt: now,
     })

@@ -1,3 +1,4 @@
+import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Doc, type TableNames } from "../../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../../_generated/server"
@@ -9,7 +10,9 @@ import { findSource, raise } from "./intent"
  * reconciled weekly, in small pages, without re-embedding unchanged sources. */
 export const run = internalMutation({
   args: {},
+  returns: v.null(),
   handler: async (ctx) => {
+    await expireSources(ctx)
     const queues = await ctx.db
       .query("discoveryQueues")
       .withIndex("by_nextAt", (q) => q.lte("nextAt", Date.now()))
@@ -36,8 +39,32 @@ export const run = internalMutation({
     if (scan && scan.nextAt <= Date.now()) {
       await ctx.scheduler.runAfter(0, internal.discovery.sync.sweep.page, {})
     }
+    return null
   },
 })
+export const expire = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: expireSources,
+})
+async function expireSources(ctx: MutationCtx) {
+  const expired = await ctx.db
+    .query("discoverySources")
+    .withIndex("by_pending_and_expiresAt", (q) =>
+      q.eq("pending", false).gt("expiresAt", 0).lte("expiresAt", Date.now())
+    )
+    .take(50)
+  for (const source of expired) {
+    // The outbox owns retries from here; a workspace being erased must not
+    // leave an expiry at the front of this index while its purge finishes.
+    await ctx.db.patch(source._id, { expiresAt: undefined })
+    await raise(ctx, source.organizationId, source.key)
+  }
+  if (expired.length === 50) {
+    await ctx.scheduler.runAfter(100, internal.discovery.sync.sweep.expire, {})
+  }
+  return null
+}
 export const page = internalMutation({
   args: {},
   handler: async (ctx) => {
@@ -118,6 +145,9 @@ async function reconcile(
   }
   try {
     const source = await project(ctx, key)
+    if (!source && (await retired(ctx, state))) {
+      return
+    }
     if (rebuilding || !state || state.revision !== source?.revision) {
       if (rebuilding && state) {
         await ctx.db.patch(state._id, {
@@ -130,4 +160,18 @@ async function reconcile(
   } catch {
     await raise(ctx, organizationId, key)
   }
+}
+
+async function retired(
+  ctx: MutationCtx,
+  state: Doc<"discoverySources"> | null
+) {
+  if (!state) {
+    return true
+  }
+  if (!state.key.startsWith("traces:") || state.pending || state.parts !== 0) {
+    return false
+  }
+  await ctx.db.delete(state._id)
+  return true
 }

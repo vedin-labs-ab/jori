@@ -19,6 +19,7 @@ afterEach(() => {
 test("names each inline auto top-up control", () => {
   render(
     <AutoTopUpRow
+      available
       account={
         {
           canFundWallet: true,
@@ -53,6 +54,7 @@ test("names each inline auto top-up control", () => {
 test("explains why organizations without a plan cannot enable auto top-up", () => {
   render(
     <AutoTopUpRow
+      available
       account={
         {
           canFundWallet: false,
@@ -74,4 +76,22 @@ test("explains why organizations without a plan cannot enable auto top-up", () =
   expect(
     screen.getByText("Available once the organization is on an active plan.")
   ).toBeDefined()
+})
+
+test("unavailable automatic top-ups show the shared empty state without charge controls", () => {
+  const { container } = render(
+    <AutoTopUpRow
+      available={false}
+      account={null}
+      organizationId="organization"
+    />
+  )
+  expect(screen.getByText("Automatic top-ups are coming soon")).toBeDefined()
+  expect(
+    screen.getByText("Use Top up to add prepaid usage whenever you need it.")
+  ).toBeDefined()
+  expect(container.querySelector('[data-slot="empty"]')).not.toBeNull()
+  expect(screen.queryByRole("switch")).toBeNull()
+  expect(screen.queryByRole("combobox")).toBeNull()
+  expect(configure).not.toHaveBeenCalled()
 })

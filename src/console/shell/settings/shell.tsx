@@ -13,7 +13,7 @@ import { SettingsMobileNav, SettingsSidebar } from "./nav"
 import { type SettingsDialogView } from "./types"
 
 type SettingsDialogProps<Value extends string> = {
-  children: (view: Value) => ReactNode
+  children: (view: Value, onViewChange: (view: Value) => void) => ReactNode
   description: string
   headerAction?: (view: Value) => ReactNode
   initialView: Value
@@ -95,7 +95,7 @@ function SettingsDialog<Value extends string>({
                 "min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:p-6"
               )}
             >
-              {children(view)}
+              {children(view, setView)}
             </div>
           </div>
         </SidebarProvider>

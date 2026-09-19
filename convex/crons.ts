@@ -11,6 +11,13 @@ crons.interval(
 )
 
 crons.interval(
+  "storage capacity retention",
+  { hours: 1 },
+  internal.files.capacity.retention.sweep.run,
+  {}
+)
+
+crons.interval(
   "integration webhook recovery",
   { minutes: 5 },
   internal.integrations.webhooks.delivery.sweep,

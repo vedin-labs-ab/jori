@@ -55,6 +55,7 @@ async function complete(ctx: ActionCtx, item: Prepared) {
           textHash: item.textHash,
           fileKey: item.fileKey,
           coverage: item.coverage,
+          expiresAt: source.expiresAt,
         }
       : {}),
   })

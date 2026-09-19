@@ -6,6 +6,7 @@ import { conversationGate } from "../conversations/access"
 import { purgeConversation } from "../conversations/filing/delete"
 import { fileConversation } from "../conversations/filing/move"
 import { mark } from "../discovery/sync/intent"
+import { moveFile } from "../files/capacity/meter"
 import { purgeFile } from "../files/records"
 import { jobGate } from "../jobs/access"
 import { removeJob } from "../jobs/lifecycle"
@@ -102,7 +103,7 @@ const registry: Record<FiledTable, FilingEntry> = {
     load: (ctx, resourceId) => loadRow(ctx, "files", resourceId),
     gate: (row) => row as Doc<"files">,
     setFolder: (ctx, row, folderId) =>
-      ctx.db.patch(row._id as Id<"files">, { folderId }),
+      moveFile(ctx, row as Doc<"files">, folderId),
     purge: (ctx, row) => purgeFile(ctx, row as Doc<"files">),
   },
   jobs: {

@@ -8,6 +8,8 @@ import { readRecord, readString } from "../../shared/input"
 import { getAccount } from "../account"
 import { addMonths } from "../cycle"
 import { resetAllowance } from "../ledger"
+import { sellsStorage } from "../storage/config"
+import { applyStorageSubscription, cancelStorage } from "../storage/sync"
 import { belongsToRegion, sellsPlan } from "./config"
 import { applyPaidOrder } from "./fulfillment"
 
@@ -52,6 +54,10 @@ async function applySubscription(
   )
   const account =
     organizationId === undefined ? null : await getAccount(ctx, organizationId)
+  if (account !== null && sellsStorage(subscription.product_id)) {
+    await applyStorageSubscription(ctx, account, subscription)
+    return
+  }
   // Only a paid order may attach the first subscription to an account.
   if (
     account?.polar === undefined ||
@@ -70,6 +76,7 @@ async function applySubscription(
     status === "paused" ||
     status === "incomplete_expired"
   ) {
+    await cancelStorage(ctx, account)
     const endedAt = subscriptionEnd(subscription, now)
     await retainWorkspace(ctx, account.organizationId, endedAt)
     await ctx.db.patch(account._id, {

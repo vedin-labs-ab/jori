@@ -7,11 +7,14 @@ import {
   useAuthPlugin,
   useHasPermission
 } from "@better-auth-ui/react"
+import { useQuery } from "convex/react"
 import { useState } from "react"
+import { api } from "../../../../convex/_generated/api"
 
 import { Button } from "@/components/ui/button"
 import { CardDescription, CardTitle } from "@/components/ui/card"
 import { organizationPlugin } from "@/components/auth/lib/organization-plugin"
+import { longDate } from "@/shared/console/time"
 import { DeleteOrganizationDialog } from "./delete-organization-dialog"
 import { DeleteOrganizationSkeleton } from "./delete-organization-skeleton"
 
@@ -35,6 +38,13 @@ export function DeleteOrganization() {
     }
   )
 
+  // An ended subscription schedules its own deletion, so beside that notice
+  // this row has to say it is the other one: by hand, and today.
+  const retention = useQuery(
+    api.retention.console.status,
+    activeOrganization ? { organizationId: activeOrganization.id } : "skip"
+  )
+
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   if (permissionPending) {
@@ -53,7 +63,9 @@ export function DeleteOrganization() {
         </CardTitle>
 
         <CardDescription className="mt-0.5">
-          Permanently remove this workspace and its data. Export anything you need first.
+          {retention?.state === "retained"
+            ? `Delete this organization and its data today instead of on ${longDate(retention.deletesAt)}. Export anything you need first.`
+            : "Permanently delete this organization and its data. Export anything you need first."}
         </CardDescription>
       </div>
 

@@ -69,6 +69,24 @@ test("active subscriptions and purchased balances require settlement before dele
   })
 })
 
+test("a storage subscription must be canceled before manual or automatic workspace deletion", async () => {
+  const t = convexTest(schema, modules)
+  await t.run(async (ctx) => {
+    const account = await ensureAccount(ctx, "org")
+    await ctx.db.patch(account._id, {
+      state: { kind: "paused" },
+      storage: {
+        subscriptionId: "test-storage",
+        purchaseOrderId: "test-order",
+        extraGb: 4,
+      },
+    })
+    await expect(beginDeletion(ctx, "org")).rejects.toThrow("Cancel")
+    expect(await beginDeletion(ctx, "org", true)).toContain("Cancel")
+    expect(await findRetention(ctx, "org")).toBeNull()
+  })
+})
+
 test("a late accepted notice still leaves seven full days before automatic deletion", async () => {
   const t = convexTest(schema, modules)
   const id = await t.run(async (ctx) => {
@@ -94,6 +112,25 @@ test("a late accepted notice still leaves seven full days before automatic delet
     noticeAt: Date.now(),
     deletesAt: Date.now() + 7 * dayMs,
   })
+})
+
+test("a wait that ends by itself is not a block the console sends people to support for", async () => {
+  const t = convexTest(schema, modules)
+  const id = await t.run(
+    async (ctx) =>
+      await ctx.db.insert("workspaceRetention", {
+        organizationId: "org",
+        state: "deleting",
+        endedAt: Date.now(),
+        deletesAt: Date.now(),
+        startedAt: Date.now(),
+        stage: 6,
+      })
+  )
+  await t.mutation(internal.retention.deletion.step, { id })
+  const row = await t.run(async (ctx) => await ctx.db.get(id))
+  expect(row?.waiting).toBe("Waiting for in-flight work to finish.")
+  expect(row?.blocked).toBeUndefined()
 })
 
 test("every app table has an explicit deletion or retention policy", () => {

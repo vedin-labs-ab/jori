@@ -16,7 +16,10 @@ export const workspaceRetention = defineTable({
   startedAt: v.optional(v.number()),
   completedAt: v.optional(v.number()),
   discoveryErasedAt: v.optional(v.number()),
+  /** Why deletion cannot go on until a person acts. */
   blocked: v.optional(v.string()),
+  /** What deletion is waiting on that resolves or retries by itself. */
+  waiting: v.optional(v.string()),
   stage: v.optional(v.number()),
   cursor: v.optional(v.string()),
   nextAt: v.optional(v.number()),

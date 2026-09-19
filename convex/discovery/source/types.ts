@@ -14,6 +14,7 @@ export type Source = {
   title: string
   resourceName: string
   updatedAt: number
+  expiresAt?: number
   gate: Gate
   sections: Section[]
   file?: {

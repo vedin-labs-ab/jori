@@ -22,6 +22,7 @@ export const fileFields = {
 
 export const files = defineTable({
   ...fileFields,
+  metered: v.optional(v.boolean()),
   createdAt: v.number(),
   updatedAt: v.number(),
 })

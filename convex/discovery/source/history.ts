@@ -8,6 +8,10 @@ import { canSeeRun } from "../../runs/visibility"
 import { type QueryLikeCtx } from "../../shared/context"
 import { type Sight } from "../../visibility/sight"
 import { type Source } from "./types"
+
+// Only search copies expire. Runs and their original trace records remain intact.
+const traceSearchRetention = 90 * 24 * 60 * 60_000
+
 export async function history(
   ctx: QueryLikeCtx,
   table: string,
@@ -131,6 +135,9 @@ async function run(
 ): Promise<Source | null> {
   const tid = table === "traces" ? ctx.db.normalizeId("traces", id) : null
   const trace = tid ? await ctx.db.get(tid) : null
+  if (trace && trace.timestamp + traceSearchRetention <= Date.now()) {
+    return null
+  }
   const rid = table === "runs" ? ctx.db.normalizeId("runs", id) : trace?.runId
   const row = rid ? await ctx.db.get(rid) : null
   if (
@@ -185,6 +192,7 @@ async function runSource(
     resourceName: row.snapshot.title,
     gate,
     updatedAt: trace?.timestamp ?? row.endedAt ?? row.createdAt,
+    ...(trace ? { expiresAt: trace.timestamp + traceSearchRetention } : {}),
     sections: [
       {
         text,

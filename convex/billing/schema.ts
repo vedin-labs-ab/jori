@@ -1,6 +1,14 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 
+/** A recurring checkout stays reserved through uncertain provider responses. */
+export const checkoutReservation = v.object({
+  attempt: v.string(),
+  productId: v.string(),
+  started: v.boolean(),
+  checkoutId: v.optional(v.string()),
+})
+
 /**
  * One row per organization: what the organization is paying for, plus the two
  * spendable pots in integer micro-dollars. `allowance` is the monthly
@@ -48,6 +56,22 @@ export const accounts = defineTable({
     v.object({
       customerId: v.string(),
       subscriptionId: v.optional(v.string()),
+    })
+  ),
+  checkouts: v.optional(
+    v.object({
+      plan: v.optional(checkoutReservation),
+      storage: v.optional(checkoutReservation),
+    })
+  ),
+  storageUpdatedAt: v.optional(v.number()),
+  storage: v.optional(
+    v.object({
+      subscriptionId: v.string(),
+      purchaseOrderId: v.string(),
+      extraGb: v.number(),
+      renewsAt: v.optional(v.number()),
+      pendingGb: v.optional(v.number()),
     })
   ),
   updatedAt: v.number(),

@@ -1,5 +1,6 @@
 import { compactRecord } from "../../../../contracts/json"
 import { readArray, readNested, readRecord } from "../../../shared/input"
+import { visibleGitHubBody } from "./body"
 
 export function summarizeRepository(repository: Record<string, unknown>) {
   return compactRecord({
@@ -18,7 +19,7 @@ export function summarizeIssue(issue: Record<string, unknown>) {
     id: issue.id,
     number: issue.number,
     title: issue.title,
-    body: issue.body,
+    body: visibleGitHubBody(issue.body),
     state: issue.state,
     htmlUrl: issue.html_url,
     pullRequest: issue.pull_request !== undefined,
@@ -37,7 +38,7 @@ export function summarizePullRequest(pullRequest: Record<string, unknown>) {
     id: pullRequest.id,
     number: pullRequest.number,
     title: pullRequest.title,
-    body: pullRequest.body,
+    body: visibleGitHubBody(pullRequest.body),
     state: pullRequest.state,
     draft: pullRequest.draft,
     merged: pullRequest.merged,
@@ -57,7 +58,7 @@ export function summarizePullRequest(pullRequest: Record<string, unknown>) {
 export function summarizeComment(comment: Record<string, unknown>) {
   return compactRecord({
     id: comment.id,
-    body: comment.body,
+    body: visibleGitHubBody(comment.body),
     htmlUrl: comment.html_url,
     author: readNested(comment, "user", "login"),
     createdAt: comment.created_at,

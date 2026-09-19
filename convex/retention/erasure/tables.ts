@@ -33,6 +33,7 @@ export const contentTables = [
   "permissions",
   "skills",
   "files",
+  "fileUsage",
   "collections",
   "folders",
   "persons",

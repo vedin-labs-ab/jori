@@ -48,7 +48,7 @@ export const run = internalAction({
       }
       await ctx.runMutation(internal.discovery.sync.erasure.finished, args)
     } catch {
-      await ctx.runMutation(internal.retention.deletion.blocked, {
+      await ctx.runMutation(internal.retention.deletion.waiting, {
         id: row._id,
         message: "Search deletion is waiting for the regional service.",
       })
@@ -64,7 +64,7 @@ export const finished = internalMutation({
     }
     await ctx.db.patch(row._id, {
       discoveryErasedAt: Date.now(),
-      blocked: undefined,
+      waiting: undefined,
     })
     await ctx.scheduler.runAfter(0, internal.retention.deletion.step, args)
   },

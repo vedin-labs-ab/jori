@@ -22,7 +22,7 @@ export const clean = internalAction({
           sandboxId: target._id,
         })
       } catch {
-        await ctx.runMutation(internal.retention.deletion.blocked, {
+        await ctx.runMutation(internal.retention.deletion.waiting, {
           id: args.id,
           message: "Sandbox removal failed; deletion will retry.",
         })

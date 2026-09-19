@@ -11,6 +11,7 @@ const organizationId = "organization-1"
 const config = { thresholdUsd: 10, amountUsd: 25, monthlyCapUsd: 100 }
 
 beforeEach(() => {
+  vi.stubEnv("POLAR_OFF_SESSION_ENABLED", "")
   for (const name of polarEnvironmentNames) {
     vi.stubEnv(name, "")
   }
@@ -22,7 +23,7 @@ test("read-only billing remains available to an organization without Polar", asy
   const caller = t.withIdentity({ org: organizationId })
   expect(
     await caller.query(api.billing.console.overview, { organizationId })
-  ).toEqual({ account: null, entries: [] })
+  ).toEqual({ account: null, entries: [], automaticTopUpsAvailable: false })
 })
 
 test("enabling auto top-up fails before creating an account when Polar is absent", async () => {
@@ -136,3 +137,60 @@ test.each([
     expect(overview.account?.hasCustomer).toBe(true)
   }
 )
+
+test.each(["", "false", "1", "TRUE"])(
+  "configured billing cannot enable auto top-up without explicit capability: %s",
+  async (capability) => {
+    for (const name of polarEnvironmentNames) {
+      vi.stubEnv(name, "configured-test-value")
+    }
+    vi.stubEnv("POLAR_OFF_SESSION_ENABLED", capability)
+    const t = convexTest(schema, modules)
+    const caller = t.withIdentity({ org: organizationId })
+    await expect(
+      caller.mutation(api.billing.console.configureAutoTopUp, {
+        organizationId,
+        config,
+      })
+    ).rejects.toThrow("Automatic top-ups are coming soon")
+    expect(
+      await t.run(async (ctx) => await ctx.db.query("accounts").take(1))
+    ).toEqual([])
+    expect(
+      (await caller.query(api.billing.console.overview, { organizationId }))
+        .automaticTopUpsAvailable
+    ).toBe(false)
+  }
+)
+
+test("explicit capability exposes settings and permits a configured active account", async () => {
+  for (const name of polarEnvironmentNames) {
+    vi.stubEnv(name, "configured-test-value")
+  }
+  vi.stubEnv("POLAR_OFF_SESSION_ENABLED", "true")
+  const t = convexTest(schema, modules)
+  await t.run(async (ctx) => {
+    await ctx.db.insert("accounts", {
+      organizationId,
+      state: { kind: "active" },
+      micros: { allowance: 0, wallet: 0 },
+      topUp: { charged: { micros: 0 } },
+      polar: { customerId: "customer" },
+      updatedAt: 1,
+    })
+  })
+  const caller = t.withIdentity({ org: organizationId })
+  await caller.mutation(api.billing.console.configureAutoTopUp, {
+    organizationId,
+    config,
+  })
+  const overview = await caller.query(api.billing.console.overview, {
+    organizationId,
+  })
+  expect(overview.automaticTopUpsAvailable).toBe(true)
+  expect(overview.account?.topUp.micros).toEqual({
+    threshold: 10_000_000,
+    amount: 25_000_000,
+    cap: 100_000_000,
+  })
+})

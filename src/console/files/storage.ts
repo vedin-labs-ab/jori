@@ -5,6 +5,7 @@ export async function uploadToStorage(uploadUrl: string, blob: Blob) {
     method: "PUT",
     headers: {
       "Content-Type": blob.type === "" ? "application/octet-stream" : blob.type,
+      "If-None-Match": "*",
     },
     body: blob,
   })

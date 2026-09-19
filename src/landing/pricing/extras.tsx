@@ -2,9 +2,6 @@ import { storageUsdPerGbMonth } from "@contracts/billing"
 import { type ReactNode } from "react"
 import { Section } from "../section"
 
-/** What the cloud plan grows into, at the rates it grows at. Both draw on
- *  prepaid credit under a limit the organization sets, so the page never
- *  has to say "no surprise invoice": there is no invoice to surprise. */
 export function Extras() {
   return (
     <Section
@@ -20,7 +17,7 @@ export function Extras() {
           value="Published model rates"
         />
         <Row
-          note="Billed for the time you store it, under a limit you set."
+          note="Choose extra capacity that renews monthly. File storage and search indexing are included."
           term="Additional file storage"
           value={`$${storageUsdPerGbMonth.toFixed(2)} per GB-month`}
         />

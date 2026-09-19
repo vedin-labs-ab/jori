@@ -69,6 +69,14 @@ Usage can consume included credits and separately purchased credits. Included
 credits refresh on the schedule shown for your plan and do not roll over.
 Separately purchased credits carry forward until used or refunded.
 
+Extra storage is an optional monthly subscription for the capacity shown before
+purchase. Increases take effect after payment; reductions take effect at the
+next renewal. If your files exceed your available capacity, new uploads and
+changes that increase storage stop. You can still download and delete files.
+We give you 30 days' notice to reduce usage or restore capacity before deleting
+excess files, starting with the most recently added files. We show the affected
+files and deletion date in Jori.
+
 You can enable automatic credit top-ups and choose their limits. Turning them
 off stops future automatic purchases. Charges already incurred remain payable.
 Promotional credits have no cash refund value.

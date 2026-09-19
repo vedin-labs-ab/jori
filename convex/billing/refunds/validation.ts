@@ -55,7 +55,8 @@ export async function requireSettled(
 ) {
   if (
     account.state.kind === "active" ||
-    account.polar?.subscriptionId !== undefined
+    account.polar?.subscriptionId !== undefined ||
+    account.storage !== undefined
   ) {
     throw new Error(
       "Cancel the subscription in Polar and wait for its webhook first."

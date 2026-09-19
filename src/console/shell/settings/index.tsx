@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { lazy, Suspense } from "react"
 
+import { SectionGroup } from "@/components/ui/section"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SettingsDialog } from "./shell"
 import { type SettingsDialogView } from "./types"
@@ -136,9 +137,10 @@ export function OrganizationDialog({
       open={open}
       views={organizationViews}
     >
-      {(view) => (
+      {(view, onViewChange) => (
         <Suspense fallback={<Skeleton className="h-56" />}>
           <OrganizationSettingsContent
+            onViewChange={onViewChange}
             organizationId={organizationId}
             view={view}
           />
@@ -158,21 +160,26 @@ function AccountSettingsContent({ view }: { view: AccountSettingsView }) {
 }
 
 function OrganizationSettingsContent({
+  onViewChange,
   organizationId,
   view,
 }: {
+  onViewChange: (view: OrganizationSettingsView) => void
   organizationId: string
   view: OrganizationSettingsView
 }) {
   switch (view) {
     case "general":
       return (
-        <div className="flex flex-col gap-6">
-          <RetentionNotice organizationId={organizationId} />
+        <SectionGroup>
+          <RetentionNotice
+            onOpenBilling={() => onViewChange("billing")}
+            organizationId={organizationId}
+          />
           <OrganizationSettings>
             <WorkspaceExport organizationId={organizationId} />
           </OrganizationSettings>
-        </div>
+        </SectionGroup>
       )
     case "people":
       return <OrganizationPeople />

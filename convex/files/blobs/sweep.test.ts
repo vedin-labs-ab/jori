@@ -9,9 +9,10 @@ import { internal } from "../../_generated/api"
 import { purgeContent } from "../../retention/erasure/purge"
 import { contentTables } from "../../retention/erasure/tables"
 import schema from "../../schema"
+import { insertUploadedFile, purgeFile } from "../records"
 import { blobExists, seedBlob } from "./fixtures"
 import { blobUploadUrl, requireUnusedUpload, storeBlob } from "./index"
-import { uploadGraceMs } from "./uploads"
+import { claimUpload, uploadGraceMs } from "./uploads"
 
 const modules = import.meta.glob("/convex/**/*.{ts,js}")
 const dayAgo = Date.now() - 25 * 60 * 60 * 1000
@@ -132,6 +133,53 @@ test("a failed runtime store remains discoverable before metadata exists", async
   expect(objects.size).toBe(1)
   await t.mutation(internal.files.blobs.sweep.run, { cutoff: Date.now() })
   expect(objects.size).toBe(0)
+})
+
+test("deleting a claimed file cannot hide a replayed upload from cleanup or allow reclaiming it", async () => {
+  vi.useFakeTimers()
+  const startedAt = Date.now()
+  const t = convexTest(schema, modules)
+  registerBlobs(t)
+  const key = await t.run(async (ctx) => {
+    const key = await seedBlob(ctx, "org")
+    const fileId = await insertUploadedFile(
+      ctx,
+      { organizationId: "org" },
+      {
+        key,
+        size: 1,
+        name: "original.txt",
+      }
+    )
+    const file = await ctx.db.get(fileId)
+    if (file === null) {
+      throw new Error("Missing file")
+    }
+    await purgeFile(ctx, file)
+    expect(await blobExists(ctx, key)).toBe(false)
+    return key
+  })
+  // The original signed URL recreates the now-absent key without syncing
+  // metadata. Its consumed reservation must still make the bytes discoverable.
+  const objects = new Set([key])
+  vi.spyOn(R2.prototype, "deleteObject").mockImplementation(
+    async (_ctx, key) => {
+      objects.delete(key)
+    }
+  )
+  await expect(
+    t.mutation(async (ctx) => {
+      await claimUpload(ctx, key)
+    })
+  ).rejects.toThrow("Upload already used")
+  await t.mutation(internal.files.blobs.sweep.run, {})
+  expect(objects.has(key)).toBe(true)
+  vi.setSystemTime(startedAt + uploadGraceMs)
+  await t.mutation(internal.files.blobs.sweep.run, {})
+  expect(objects.has(key)).toBe(false)
+  expect(
+    await t.run(async (ctx) => await ctx.db.query("uploads").collect())
+  ).toEqual([])
 })
 
 test("expired uploads cannot be claimed before or after cleanup", async () => {

@@ -17,13 +17,13 @@ export const plan = {
   label: "Cloud",
   monthlyPriceUsd: 59,
   monthlyAllowanceMicros: 20 * microsPerDollar,
+  /** Raw file bytes only; search indexing is included, other records are not metered. */
   storageGb: 25,
 } as const
 
-/** File storage past the plan's, billed for the time it is stored. The
- *  rate covers keeping a file searchable as well as keeping it: its search
- *  index costs more than its bytes do. */
-export const storageUsdPerGbMonth = 0.25
+/** Additional file capacity is purchased in whole GB each month. The rate
+ * includes its search index; unused capacity does not fund the usage wallet. */
+export const storageUsdPerGbMonth = 1
 
 /**
  * Interactive work (console instructions, mentions) may dip slightly below a
@@ -147,3 +147,15 @@ export type ProviderUsage = {
 
 /** Bump when changing the terms customers accept at purchase. */
 export const termsVersion = "2026-09-19"
+
+/** Capacity uses decimal GB, matching the quantity sold at checkout. */
+export const storage = {
+  bytesPerGb: 1_000_000_000,
+  minimumExtraGb: 1,
+  maximumExtraGb: 10_000,
+  graceMs: 30 * 24 * 60 * 60 * 1000,
+} as const
+
+export function extraStorageMonthlyUsd(extraGb: number) {
+  return extraGb * storageUsdPerGbMonth
+}

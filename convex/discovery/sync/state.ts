@@ -105,14 +105,22 @@ export const finish = internalMutation({
     fileKey: v.optional(v.string()),
     coverage: v.optional(v.string()),
     parts: v.number(),
+    expiresAt: v.optional(v.number()),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const row = await findSource(ctx, args.key)
     if (!row || row.generation !== args.generation) {
-      return
+      return null
     }
     if (await isWorkspaceDeleting(ctx, row.organizationId)) {
-      return
+      return null
+    }
+    // Trace search state has no dependents. Drop its acknowledged tombstone;
+    // reconciliation skips expired source records instead of recreating it.
+    if (row.key.startsWith("traces:") && !args.revision && args.parts === 0) {
+      await ctx.db.delete(row._id)
+      return null
     }
     const { cascade, phase, cursor } = await cascadeChildren(ctx, row)
     const { key: _key, generation: _generation, ...fields } = args
@@ -122,6 +130,7 @@ export const finish = internalMutation({
       textHash: args.textHash,
       fileKey: args.fileKey,
       coverage: args.coverage,
+      expiresAt: args.expiresAt,
       pending: cascade,
       cascade,
       cascadePhase: phase,
@@ -131,6 +140,7 @@ export const finish = internalMutation({
       attempts: 0,
       error: undefined,
     })
+    return null
   },
 })
 
