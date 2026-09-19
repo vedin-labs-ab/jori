@@ -10,6 +10,7 @@ const provider = vi.hoisted(() => ({
   rows: new Map<string, Record<string, unknown>>(),
   fail: false,
   removeFail: false,
+  pruneFail: false,
 }))
 vi.mock("../provider", () => ({
   version: "test",
@@ -32,6 +33,17 @@ vi.mock("../provider", () => ({
       provider.rows.set(String(row.id), row)
     }
   },
+  prune: async (_org: string, key: string, rows: Record<string, unknown>[]) => {
+    if (provider.pruneFail) {
+      throw new Error("Interrupted pruning")
+    }
+    const ids = new Set(rows.map((row) => row.id))
+    for (const [id, row] of provider.rows) {
+      if (row.key === key && !ids.has(id)) {
+        provider.rows.delete(id)
+      }
+    }
+  },
   refresh: vi.fn(),
 }))
 const modules = import.meta.glob("/convex/**/*.{ts,js}")
@@ -42,6 +54,7 @@ async function fixture() {
   provider.rows.clear()
   provider.fail = false
   provider.removeFail = false
+  provider.pruneFail = false
   const t = convexTest(schema, modules)
   const id = await t.run(async (ctx) => {
     const owner = await ctx.db.insert("persons", {
@@ -84,22 +97,39 @@ async function fixture() {
   }
   return { t, id, work, edit }
 }
-test("a destructive upload failure followed by reverting the source rebuilds the provider copy", async () => {
+test("an interrupted edit preserves the old copy but rejects it until a retry or source revert succeeds", async () => {
   const { t, id, work, edit } = await fixture()
   await work()
   expect([...provider.rows.values()][0]?.title).toBe("Original A")
   await edit("Changed B")
   provider.fail = true
   await work()
-  expect(provider.rows.size).toBe(0)
+  expect([...provider.rows.values()][0]?.title).toBe("Original A")
   expect(await t.run((ctx) => findSource(ctx, `folders:${id}`))).toMatchObject({
     pending: true,
     attempts: 1,
   })
+  expect(
+    (await t.run((ctx) => findSource(ctx, `folders:${id}`)))?.revision
+  ).toBeUndefined()
   await edit("Original A")
   provider.fail = false
   await work()
   expect([...provider.rows.values()][0]?.title).toBe("Original A")
+  expect(await t.run((ctx) => findSource(ctx, `folders:${id}`))).toMatchObject({
+    pending: false,
+  })
+  await edit("Changed C")
+  provider.pruneFail = true
+  await work()
+  expect(provider.rows.size).toBe(2)
+  expect(
+    (await t.run((ctx) => findSource(ctx, `folders:${id}`)))?.revision
+  ).toBeUndefined()
+  provider.pruneFail = false
+  await work()
+  expect([...provider.rows.values()]).toHaveLength(1)
+  expect([...provider.rows.values()][0]?.title).toBe("Changed C")
   expect(await t.run((ctx) => findSource(ctx, `folders:${id}`))).toMatchObject({
     pending: false,
   })

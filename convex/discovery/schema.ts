@@ -52,7 +52,7 @@ export const discoveryPassages = defineTable({
   organizationId: v.string(),
   key: v.string(),
   part: v.number(),
-  text: v.string(),
+  text: v.union(v.string(), v.bytes()),
   location,
 })
   .index("by_key_and_part", ["key", "part"])

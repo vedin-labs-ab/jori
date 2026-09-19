@@ -29,5 +29,11 @@ export async function project(
     ...(source.gate.folderId ? { folderId: source.gate.folderId } : {}),
   }
   const { updatedAt: _updatedAt, ...content } = { ...source, gate }
-  return { ...source, gate, revision: await sha256Hex(JSON.stringify(content)) }
+  // Chunk boundaries determine provider part numbers and locally hydrated excerpts.
+  // Invalidate older projections when that mapping changes.
+  return {
+    ...source,
+    gate,
+    revision: await sha256Hex(JSON.stringify([2, content])),
+  }
 }

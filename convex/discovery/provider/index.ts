@@ -71,12 +71,45 @@ export async function upsert(organizationId: string, rows: Row[]) {
   const ns = await namespace(organizationId)
   // Native embedding writes allow at most 30 rows. Batch across sources too.
   for (let start = 0; start < rows.length; start += 30) {
+    const batch = rows.slice(start, start + 30)
+    // IDs include the exact embedded text. Existing chunks only need their
+    // current revision, location, and grants patched; never embed them again.
+    const existing = await ns
+      .query({
+        filters: ["id", "In", batch.map((row) => row.id)],
+        rank_by: ["id", "asc"],
+        top_k: batch.length,
+        include_attributes: false,
+      })
+      .catch((error: unknown) => {
+        ignoreMissing(error)
+        return { rows: [] }
+      })
+    const ids = new Set(existing.rows?.map((row) => row.id))
     await ns.write({
       schema,
       distance_metric: "cosine_distance",
-      upsert_rows: rows.slice(start, start + 30),
+      upsert_rows: batch.filter((row) => !ids.has(row.id)),
+      patch_rows: batch
+        .filter((row) => ids.has(row.id))
+        .map(({ text: _text, ...row }) => row),
     })
   }
+}
+/** Publish all current chunks before pruning obsolete ones. The outbox keeps
+ * the source unreadable until both steps and the local passage cache succeed. */
+export async function prune(organizationId: string, key: string, rows: Row[]) {
+  await (await namespace(organizationId))
+    .write({
+      delete_by_filter: [
+        "And",
+        [
+          ["key", "Eq", key],
+          ["id", "NotIn", rows.map((row) => row.id)],
+        ],
+      ],
+    })
+    .catch(ignoreMissing)
 }
 export async function remove(organizationId: string, keys: string[]) {
   if (!keys.length) {

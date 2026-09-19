@@ -99,8 +99,8 @@ export const page = internalMutation({
   },
 })
 export const rebuild = internalMutation({
-  args: {},
-  handler: async (ctx) => {
+  args: { force: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
     const scan = await ctx.db
       .query("discoveryScans")
       .withIndex("by_name", (q) => q.eq("name", "sources"))
@@ -110,7 +110,7 @@ export const rebuild = internalMutation({
         table: 0,
         cursor: null,
         nextAt: Date.now(),
-        rebuilding: true,
+        rebuilding: args.force ?? true,
       })
     }
     await ctx.scheduler.runAfter(0, internal.discovery.sync.sweep.run, {})

@@ -2,7 +2,7 @@ import { v } from "convex/values"
 import { internal } from "../../_generated/api"
 import { type Doc } from "../../_generated/dataModel"
 import { type ActionCtx, internalAction } from "../../_generated/server"
-import { refresh, remove, upsert } from "../provider"
+import { prune, refresh, remove, upsert } from "../provider"
 import { lane } from "../schema"
 import { type Projection } from "../source/types"
 import { type Prepared, prepare } from "./prepare"
@@ -115,13 +115,16 @@ async function publish(
   try {
     await remove(
       organizationId,
-      prepared.filter((p) => !p.source || !p.reuse).map((p) => p.state.key)
+      prepared.filter((p) => !p.source).map((p) => p.state.key)
     )
     await upsert(
       organizationId,
       prepared.flatMap((p) => p.rows)
     )
     for (const item of prepared) {
+      if (item.source && !item.reuse) {
+        await prune(organizationId, item.state.key, item.rows)
+      }
       if (
         item.reuse &&
         item.source &&

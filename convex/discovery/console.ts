@@ -22,6 +22,7 @@ import { loadPersonTeamIds } from "../visibility/viewer"
 import { type Viewer } from "./provider/query"
 import { collect } from "./retrieval"
 import { project } from "./source"
+import { unpack } from "./source/cache"
 import { chunks } from "./source/text"
 import { findSource } from "./sync/intent"
 
@@ -177,7 +178,7 @@ async function visibleHit(
   if (!section) {
     return null
   }
-  const { snippet, focus } = excerpt(section.text, text)
+  const { snippet, focus } = excerpt(unpack(section.text), text)
   return {
     candidate,
     kind: source.kind,

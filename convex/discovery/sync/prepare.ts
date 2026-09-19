@@ -4,6 +4,7 @@ import { type ActionCtx } from "../../_generated/server"
 import { sha256Hex } from "../../shared/crypto"
 import { accessTokens, type Row, version } from "../provider"
 import { spellingKeys } from "../provider/spelling"
+import { unpack } from "../source/cache"
 import { chunks } from "../source/text"
 import { type Projection, type Section } from "../source/types"
 export type Prepared = {
@@ -39,29 +40,7 @@ export async function prepare(
     })
   )
   const reuse = textHash === state.textHash
-  const prefix = (await sha256Hex(state.key)).slice(0, 40)
-  const rows: Row[] = reuse
-    ? []
-    : sections.map((section, part) => ({
-        id: `${prefix}-${part}`,
-        key: state.key,
-        revision: source.revision,
-        resource: source.resourceKey,
-        kind: source.kind,
-        part,
-        title: source.title,
-        text: [
-          source.resourceName,
-          source.title,
-          section.location.label,
-          section.text,
-        ]
-          .filter(Boolean)
-          .join("\n"),
-        spelling: spellingKeys(source.title),
-        access: accessTokens(source.gate),
-        folder: source.gate.folderId ?? "root",
-      }))
+  const rows = reuse ? [] : await prepareRows(state.key, source, sections)
   return {
     state,
     source,
@@ -73,6 +52,41 @@ export async function prepare(
     coverage,
     retryable,
   }
+}
+
+async function prepareRows(
+  key: string,
+  source: Projection,
+  sections: Section[]
+): Promise<Row[]> {
+  const occurrences = new Map<string, number>()
+  return Promise.all(
+    sections.map(async (section, part) => {
+      const text = [
+        source.resourceName,
+        source.title,
+        section.location.label,
+        section.text,
+      ]
+        .filter(Boolean)
+        .join("\n")
+      const occurrence = occurrences.get(text) ?? 0
+      occurrences.set(text, occurrence + 1)
+      return {
+        id: await sha256Hex(JSON.stringify([key, text, occurrence])),
+        key,
+        revision: source.revision,
+        resource: source.resourceKey,
+        kind: source.kind,
+        part,
+        title: source.title,
+        text,
+        spelling: spellingKeys(source.title),
+        access: accessTokens(source.gate),
+        folder: source.gate.folderId ?? "root",
+      }
+    })
+  )
 }
 
 async function fileSections(
@@ -121,7 +135,9 @@ async function cached(ctx: ActionCtx, key: string) {
       internal.discovery.sync.state.cached,
       { key, after }
     )
-    stored.push(...page.map((p) => ({ text: p.text, location: p.location })))
+    stored.push(
+      ...page.map((p) => ({ text: unpack(p.text), location: p.location }))
+    )
     if (page.length < 100) {
       break
     }

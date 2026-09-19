@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { location } from "../../../contracts/discovery/validators"
 import { internalMutation } from "../../_generated/server"
 import { isWorkspaceDeleting } from "../../retention/access"
+import { pack } from "../source/cache"
 import { findSource } from "./intent"
 export const store = internalMutation({
   args: {
@@ -36,6 +37,7 @@ export const store = internalMutation({
         key: args.key,
         part,
         ...section,
+        text: pack(section.text),
       }
       if (old) {
         await ctx.db.replace(old._id, value)
