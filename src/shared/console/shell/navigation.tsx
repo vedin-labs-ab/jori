@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
@@ -77,6 +76,7 @@ export function ConsoleSidebar({
       onCloseAutoFocus={onCloseAutoFocus}
       // The input owns Escape while renaming inside the mobile sheet.
       onEscapeKeyDown={onCloseAutoFocus}
+      variant="inset"
     >
       <SidebarHeader>
         <div className="flex items-center gap-1">
@@ -112,7 +112,6 @@ export function ConsoleSidebar({
         {platform}
       </SidebarContent>
       <SidebarFooter>{account}</SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   )
 }

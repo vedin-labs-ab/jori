@@ -92,10 +92,9 @@ export function ConsoleFrame({
       open={sidebarOpen}
     >
       {sidebar}
-      {/* isolate keeps page z-indexes (sticky table headers, the
-          selection bar) inside the inset's own stacking context, so
-          full-bleed content can't outpaint the sidebar rail's hover
-          strip at the boundary. */}
+      {/* isolate and overflow-hidden keep full-bleed content (sticky
+          table headers, the selection bar) inside the inset: in its own
+          stacking context, and clipped to its rounded corners. */}
       {/* outline-none: the inset is the skip link's landing target, and
           the browser's focus ring around the whole content region reads
           as a broken border where the fixed sidebar overlaps it. */}
@@ -108,7 +107,7 @@ export function ConsoleFrame({
           phone-sized box on the landing page, so the header and the page
           gutters ask the inset how wide it is. */}
       <SidebarInset
-        className="@container/inset isolate min-h-0 min-w-0 outline-none"
+        className="@container/inset isolate min-h-0 min-w-0 overflow-hidden outline-none"
         id={contentId}
         tabIndex={-1}
       >

@@ -13,8 +13,8 @@ import { DemoSidebar } from "./sidebar"
 
 /** The box a mock console sits in. The frame fills it instead of the
  *  viewport, and the transform makes the container what the sidebar's
- *  fixed positioning is measured against, so the sidebar, its rail, the
- *  header, and the inset all stay inside; the sidebar's own viewport
+ *  fixed positioning is measured against, so the sidebar, the header,
+ *  and the inset all stay inside; the sidebar's own viewport
  *  heights are overridden through its slots for the same reason. On a
  *  narrow viewport the sidebar and the filter panel would open as sheets
  *  over the whole page, so their triggers are left out there. */
