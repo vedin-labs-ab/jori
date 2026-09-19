@@ -3,10 +3,10 @@ import { promptedTool, runtimeInput } from "../../../../test/convex/prompt"
 import { type PlaceContext } from "../../../places/context"
 import { assemblePrompt } from "."
 
-function inputWithPlace(claims: PlaceContext["claims"]) {
+function inputWithPlace(claims: PlaceContext["claims"], external = false) {
   return {
     ...runtimeInput("slack", { channel: { id: "C123" }, ts: "123.456" }),
-    place: { name: "support", claims } satisfies PlaceContext,
+    place: { name: "support", external, claims } satisfies PlaceContext,
   } as Parameters<typeof assemblePrompt>[0]
 }
 
@@ -48,6 +48,20 @@ test("orders sections canonically regardless of claim order", () => {
   expect(block.indexOf("Purpose:")).toBeLessThan(
     block.indexOf("Jori's role here:")
   )
+})
+
+test("a channel outsiders read says so, even before it has a profile", () => {
+  const notice = "People outside your organization read this channel."
+  const shared = assemblePrompt(inputWithPlace([], true), {
+    promptedTools: [promptedTool()],
+  })
+  const internal = assemblePrompt(
+    inputWithPlace([{ section: "purpose", text: "Customer bug intake." }]),
+    { promptedTools: [promptedTool()] }
+  )
+
+  expect(shared.place).toContain(notice)
+  expect(internal.place).not.toContain(notice)
 })
 
 test("omits the place message when the run has no place", () => {

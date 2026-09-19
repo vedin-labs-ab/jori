@@ -42,6 +42,9 @@ export const places = defineTable({
   externalId: v.string(),
   name: v.string(),
   visibility: placeVisibility,
+  /** People outside the organization read what is posted here, as in a
+   *  Slack Connect channel. */
+  external: v.optional(v.boolean()),
   claims: v.array(placeClaim),
   // Watermark: createdAt of the newest message the profile has seen.
   profiledAt: v.optional(v.number()),

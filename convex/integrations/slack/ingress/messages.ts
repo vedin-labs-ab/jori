@@ -90,6 +90,7 @@ function slackMessagePlace(data: unknown): ObservedPlace | undefined {
     externalId,
     name: readString(channel, "name") ?? externalId,
     visibility,
+    ...(channel.external === true ? { external: true } : {}),
   }
 }
 

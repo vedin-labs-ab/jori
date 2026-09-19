@@ -12,12 +12,15 @@ export type ObservedPlace = {
   externalId: string
   name: string
   visibility: PlaceVisibility
+  /** People outside the organization read what is posted here. */
+  external?: boolean
 }
 
 export const observedPlaceValidator = v.object({
   externalId: v.string(),
   name: v.string(),
   visibility: placeVisibility,
+  external: v.optional(v.boolean()),
 })
 
 export async function ensurePlace(
@@ -43,6 +46,7 @@ export async function ensurePlace(
     externalId: input.place.externalId,
     name: input.place.name,
     visibility: input.place.visibility,
+    external: input.place.external,
     claims: [],
   })
 }
@@ -73,17 +77,21 @@ async function refreshPlace(
   place: Doc<"places">,
   observed: ObservedPlace
 ): Promise<Doc<"places">> {
+  const facts = {
+    name: observed.name,
+    visibility: observed.visibility,
+    external: observed.external,
+  }
+
   if (
-    place.name === observed.name &&
-    place.visibility === observed.visibility
+    place.name === facts.name &&
+    place.visibility === facts.visibility &&
+    place.external === facts.external
   ) {
     return place
   }
 
-  await ctx.db.patch(place._id, {
-    name: observed.name,
-    visibility: observed.visibility,
-  })
+  await ctx.db.patch(place._id, facts)
 
-  return { ...place, name: observed.name, visibility: observed.visibility }
+  return { ...place, ...facts }
 }

@@ -29,6 +29,7 @@ export function createPlaceMessage(input: AgentRuntimeInput) {
       label: kind.label,
       noun: kind.noun,
       name: placeDisplayName(input.surface, input.place.name),
+      external: input.place.external,
       sections: sectionValues(input.place),
     },
   })

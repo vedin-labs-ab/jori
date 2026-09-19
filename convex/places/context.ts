@@ -7,6 +7,7 @@ import { type PlaceClaim } from "./schema"
 // message's own stamp is the privacy gate — no other place is reachable.
 export type PlaceContext = {
   name: string
+  external: boolean
   claims: Pick<PlaceClaim, "section" | "text">[]
 }
 
@@ -20,12 +21,14 @@ export async function readPlaceContext(
 
   const place = await ctx.db.get(message.placeId)
 
-  if (place === null || place.claims.length === 0) {
+  // An unprofiled place says nothing, unless the run must know who reads it.
+  if (place === null || (place.claims.length === 0 && !place.external)) {
     return null
   }
 
   return {
     name: place.name,
+    external: place.external === true,
     claims: place.claims.map((claim) => ({
       section: claim.section,
       text: claim.text,

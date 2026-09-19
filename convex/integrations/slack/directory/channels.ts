@@ -10,6 +10,8 @@ type SlackChannelContext = {
   id: string
   name: string
   visibility?: "private" | "public"
+  /** A Slack Connect channel: people from other workspaces read it. */
+  external?: true
 }
 
 export async function enrichSlackMessageData(args: {
@@ -87,5 +89,6 @@ function channelVisibility(channel: Record<string, unknown>) {
   return {
     visibility:
       channel.is_private === true ? ("private" as const) : ("public" as const),
+    ...(channel.is_ext_shared === true ? { external: true as const } : {}),
   }
 }
