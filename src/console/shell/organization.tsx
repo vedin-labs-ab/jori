@@ -35,11 +35,13 @@ import { OrganizationDialog } from "./settings"
  *  behind it is where the person came from, not where they are. */
 export function SidebarOrganizationSwitcher({
   onboarding,
-  onOpen,
+  prepare,
 }: {
   onboarding?: "current" | "new"
-  /** Called as the menu opens, for whatever it may lead to next. */
-  onOpen?: () => void
+  /** Readies what the menu may lead to. It is started as the menu opens
+   *  and waited for before the console is left, so what comes next is
+   *  there to take its place. */
+  prepare?: () => Promise<unknown>
 }) {
   const { isMobile } = useSidebar()
   const navigate = useNavigate()
@@ -54,10 +56,17 @@ export function SidebarOrganizationSwitcher({
       (organization) => organization.id !== shown?.id
     ) ?? []
 
+  // Going on without it is no worse than waiting on a download that failed.
+  const ready = async () => {
+    await prepare?.().catch(() => undefined)
+  }
+
   // The page goes first, so the next organization never opens on a page
   // about something of this one's. The one still active behind a new
   // organization needs no activating to go back to.
   async function select(organizationId: string) {
+    await ready()
+
     const from = window.location.pathname.replace(/\/$/, "")
     const to = organizationNeutralPath(from)
 
@@ -76,13 +85,13 @@ export function SidebarOrganizationSwitcher({
         isMobile={isMobile}
         onCreate={
           onboarding === undefined
-            ? () => void navigate({ to: "/new" })
+            ? () => void ready().then(() => navigate({ to: "/new" }))
             : undefined
         }
         onManage={
           onboarding === undefined ? () => setManaging(true) : undefined
         }
-        onOpen={onOpen}
+        onOpen={() => void ready()}
         onSelect={select}
         organizations={others}
         shown={

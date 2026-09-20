@@ -97,16 +97,21 @@ afterEach(() => {
   window.history.replaceState(null, "", "/")
 })
 
+/** Opens the switcher's menu the way a pointer does. */
+function openMenu(trigger: RegExp) {
+  fireEvent.pointerDown(screen.getByRole("button", { name: trigger }), {
+    button: 0,
+    ctrlKey: false,
+  })
+}
+
 test("keeps the switcher open with a stable pending organization row", async () => {
   auth.activateOrganization.mockImplementation(
     () => new Promise(() => undefined)
   )
   render(<SidebarOrganizationSwitcher />)
 
-  fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
-    button: 0,
-    ctrlKey: false,
-  })
+  openMenu(/Vedin Labs/)
   fireEvent.click(await screen.findByRole("menuitem", { name: /test/ }))
 
   await waitFor(() =>
@@ -142,10 +147,7 @@ test("keeps the switcher open with a stable pending organization row", async () 
 test("an organization in onboarding offers only the way to another", async () => {
   render(<SidebarOrganizationSwitcher onboarding="current" />)
 
-  fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
-    button: 0,
-    ctrlKey: false,
-  })
+  openMenu(/Vedin Labs/)
 
   expect(await screen.findByRole("menuitem", { name: /test/ })).toBeDefined()
   expect(
@@ -160,10 +162,7 @@ test("a new organization shows none as chosen, and going back needs no activatin
 
   // The organization still active behind the new one is one to go back to,
   // listed with the rest instead of shown as where the person is.
-  fireEvent.pointerDown(
-    screen.getByRole("button", { name: /New organization/ }),
-    { button: 0, ctrlKey: false }
-  )
+  openMenu(/New organization/)
   fireEvent.click(await screen.findByRole("menuitem", { name: /Vedin Labs/ }))
 
   await waitFor(() => expect(navigate).toHaveBeenCalledWith({ to: "/chat" }))
@@ -173,10 +172,7 @@ test("a new organization shows none as chosen, and going back needs no activatin
 test("an organization left mid-onboarding says so, and only that one does", async () => {
   render(<SidebarOrganizationSwitcher />)
 
-  fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
-    button: 0,
-    ctrlKey: false,
-  })
+  openMenu(/Vedin Labs/)
 
   const unfinished = await screen.findByRole("menuitem", {
     name: /Other organization/,
@@ -190,11 +186,7 @@ test("an organization left mid-onboarding says so, and only that one does", asyn
 test("a finished switch puts the menu away and leaves it usable", async () => {
   auth.activateOrganization.mockResolvedValue(undefined)
   render(<SidebarOrganizationSwitcher />)
-  const open = () =>
-    fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
-      button: 0,
-      ctrlKey: false,
-    })
+  const open = () => openMenu(/Vedin Labs/)
 
   open()
   fireEvent.click(await screen.findByRole("menuitem", { name: /test/ }))
@@ -216,10 +208,7 @@ test("restores the switcher after a failed organization change", async () => {
   auth.activateOrganization.mockRejectedValue(new Error("network"))
   render(<SidebarOrganizationSwitcher />)
 
-  fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
-    button: 0,
-    ctrlKey: false,
-  })
+  openMenu(/Vedin Labs/)
   fireEvent.click(await screen.findByRole("menuitem", { name: /test/ }))
 
   await waitFor(() =>
@@ -282,3 +271,27 @@ test.each(["portal", "storage", "subscribed", "topped-up", "canceled"])(
     }
   }
 )
+
+test("the console is left only once what comes next is ready to take its place", async () => {
+  let ready = () => undefined
+  const prepare = vi.fn(
+    () =>
+      new Promise<void>((resolve) => {
+        ready = resolve
+      })
+  )
+  render(<SidebarOrganizationSwitcher prepare={prepare} />)
+
+  openMenu(/Vedin Labs/)
+
+  // Started as the menu opens, while the person is still reading it.
+  await waitFor(() => expect(prepare).toHaveBeenCalled())
+
+  fireEvent.click(
+    await screen.findByRole("menuitem", { name: /Create organization/ })
+  )
+  expect(navigate).not.toHaveBeenCalled()
+
+  ready()
+  await waitFor(() => expect(navigate).toHaveBeenCalledWith({ to: "/new" }))
+})

@@ -49,9 +49,7 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
                   organization={
                     // A new organization and an unfinished one both open
                     // onboarding, so it is fetched while the menu is read.
-                    <SidebarOrganizationSwitcher
-                      onOpen={() => void loadOnboarding()}
-                    />
+                    <SidebarOrganizationSwitcher prepare={loadOnboarding} />
                   }
                   pathname={pathname}
                   search={<SidebarSearch />}
