@@ -273,7 +273,7 @@ test.each(["portal", "storage", "subscribed", "topped-up", "canceled"])(
 )
 
 test("the console is left only once what comes next is ready to take its place", async () => {
-  let ready = () => undefined
+  let ready: () => void = () => undefined
   const prepare = vi.fn(
     () =>
       new Promise<void>((resolve) => {
