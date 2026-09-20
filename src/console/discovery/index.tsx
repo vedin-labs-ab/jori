@@ -25,9 +25,10 @@ export function ConsoleSearch({
 }) {
   const active = useActiveOrganization().data
   return (
+    // Not keyed by organization: the palette's state resets whenever it
+    // closes, and a key here would remount the whole console inside it.
     <WorkspaceSearch
       chats={chats}
-      key={active?.id}
       organizationId={active?.id}
       organizationName={active?.name}
     >

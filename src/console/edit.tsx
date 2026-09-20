@@ -14,9 +14,7 @@ export function ConsoleEditing({ children }: { children: ReactNode }) {
   return organizationId === undefined ? (
     children
   ) : (
-    <BoundEditing key={organizationId} organizationId={organizationId}>
-      {children}
-    </BoundEditing>
+    <BoundEditing organizationId={organizationId}>{children}</BoundEditing>
   )
 }
 function BoundEditing({
@@ -27,7 +25,11 @@ function BoundEditing({
   children: ReactNode
 }) {
   const persistence = usePersistence(organizationId)
-  return <EditingProvider {...persistence}>{children}</EditingProvider>
+  return (
+    <EditingProvider {...persistence} scope={organizationId}>
+      {children}
+    </EditingProvider>
+  )
 }
 function usePersistence(organizationId: string): EditPersistence {
   const changes = useChanges(organizationId)
