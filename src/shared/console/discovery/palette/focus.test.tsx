@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
-import { SearchPalette } from "./palette"
-import { type PaletteProps } from "./types"
+import { type PaletteProps } from "../types"
+import { SearchPalette } from "./index"
 
 const hits: PaletteProps["state"]["hits"] = [
   {

@@ -1,6 +1,6 @@
 import { type ComponentProps, useRef } from "react"
 import { type CommandDialog } from "@/components/ui/command"
-import { type PaletteProps } from "./types"
+import { type PaletteProps } from "../types"
 
 /** Search has no DialogTrigger: shortcuts can open it from any control. */
 export function usePaletteFocus(props: PaletteProps) {

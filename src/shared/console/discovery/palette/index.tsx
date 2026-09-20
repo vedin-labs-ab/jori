@@ -10,11 +10,11 @@ import { Kbd } from "@/components/ui/kbd"
 import { useShortcuts } from "@/shared/shortcuts"
 import { useHeldModifiers } from "@/shared/shortcuts/hold"
 import { shortcutLabel } from "@/shared/shortcuts/keys"
-import { pageBindings, pageKeys, resultKeys, searchKeys } from "./bindings"
+import { pageBindings, pageKeys, resultKeys, searchKeys } from "../bindings"
+import { PageShortcuts } from "../guide"
+import { Results } from "../list"
+import { type PaletteProps } from "../types"
 import { usePaletteFocus } from "./focus"
-import { PageShortcuts } from "./guide"
-import { Results } from "./list"
-import { type PaletteProps } from "./types"
 
 export function SearchPalette(props: PaletteProps) {
   const scope = useRef<HTMLDivElement>(null)
