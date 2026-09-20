@@ -54,6 +54,7 @@ export function ListRow<Row>({
         {...props}
         {...drag.attributes}
         className={cn(rowFocusClasses, rowDragClasses(drag), className)}
+        aria-selected={isSelected}
         data-row-id={selection.identify(row)}
         data-state={isSelected ? "selected" : undefined}
         onClick={(event) => {
