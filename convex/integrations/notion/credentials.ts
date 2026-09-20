@@ -27,7 +27,7 @@ export async function expireRevokedNotionAccess(
     return
   }
   const expired = await ctx.runMutation(
-    internal.integrations.notion.data.expire,
+    internal.integrations.expire.markExpired,
     {
       integrationId: integration._id,
       expectedSnapshot: credentialSnapshot(integration),

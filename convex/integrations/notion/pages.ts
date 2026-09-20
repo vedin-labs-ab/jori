@@ -31,7 +31,7 @@ export async function enrichNotionEventData(
     if (!(error instanceof NotionApiError) || error.status !== 401) {
       throw error
     }
-    await ctx.runMutation(internal.integrations.notion.data.expire, {
+    await ctx.runMutation(internal.integrations.expire.markExpired, {
       integrationId: args.integration._id,
       expectedSnapshot: credentialSnapshot(args.integration),
     })

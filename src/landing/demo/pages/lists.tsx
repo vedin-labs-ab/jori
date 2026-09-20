@@ -62,7 +62,6 @@ export function TablesPage() {
     setRequest(withMaterial(kind, materialOf(state, table.tableId)))
   const create = () => editing?.create("table", undefined, "list")
   const list = useMaterialListOverlays({
-    create: null,
     deleteDescription: tableDeleteDescription,
     identify: (table) => table.tableId,
     noun: tableNoun,
@@ -117,7 +116,6 @@ export function StoresPage() {
     setRequest(withMaterial(kind, materialOf(state, store.storeId)))
   const create = () => editing?.create("store", undefined, "list")
   const list = useMaterialListOverlays({
-    create: null,
     deleteDescription: storeDeleteDescription,
     identify: (store) => store.storeId,
     noun: storeNoun,
@@ -170,7 +168,6 @@ export function FilesPage() {
     setRequest(withMaterial(kind, materialOf(state, file.fileId)))
   const upload = () => setIsUploadOpen(true)
   const list = useMaterialListOverlays({
-    create: null,
     deleteDescription: fileDeleteDescription,
     identify: (file) => file.fileId,
     noun: fileNoun,

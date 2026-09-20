@@ -32,7 +32,6 @@ export function ConsolePage(props: {
   chrome?: "shell" | "none"
   /** Starts a new organization's onboarding in place of the page. */
   creating?: boolean
-  loadingFallback?: ReactNode
 }) {
   const framedOrganizationId = useOrganizationId()
 
@@ -52,18 +51,16 @@ function UnframedConsolePage({
   children,
   chrome = "shell",
   creating = false,
-  loadingFallback,
 }: {
   children: (organizationId: string) => ReactNode
   chrome?: "shell" | "none"
   creating?: boolean
-  loadingFallback?: ReactNode
 }) {
   const session = useAuthenticatedSession()
   const convex = useConvexSession()
   const active = useActiveOrganization()
   const organizations = useListOrganizations()
-  const loader = loadingFallback ?? <FullscreenSkeletonLoader />
+  const loader = <FullscreenSkeletonLoader />
 
   if (
     session.isPending ||

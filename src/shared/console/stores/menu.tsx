@@ -23,13 +23,11 @@ import { type ValueEditorView } from "./value/state"
  *  form to switch to, which leaves the group out rather than offering a
  *  choice of one. */
 export function StoreMenuItems({
-  onCopy,
   onSchema,
   onViewChange,
   store,
   view,
 }: {
-  onCopy?: () => void
   onSchema: () => void
   onViewChange?: (view: ValueEditorView) => void
   store: StoreDetail
@@ -63,7 +61,7 @@ export function StoreMenuItems({
       </DropdownMenuItem>
       <DropdownMenuItem
         disabled={store.version === 0}
-        onSelect={onCopy ?? (() => void copyText(formatJsonText(store.value)))}
+        onSelect={() => void copyText(formatJsonText(store.value))}
       >
         <Copy />
         Copy value

@@ -131,14 +131,12 @@ export function DetailFrame({
   className,
   contentClassName,
   header,
-  headerClassName,
 }: {
   action?: ReactNode
   children: ReactNode
   className?: string
   contentClassName?: string
   header?: ReactNode
-  headerClassName?: string
 }) {
   const hasHeader = header !== undefined || action !== undefined
 
@@ -150,12 +148,7 @@ export function DetailFrame({
       )}
     >
       {hasHeader ? (
-        <div
-          className={cn(
-            "flex min-w-0 items-center justify-between gap-2 border-b px-2.5 py-1.5 text-muted-foreground",
-            headerClassName
-          )}
-        >
+        <div className="flex min-w-0 items-center justify-between gap-2 border-b px-2.5 py-1.5 text-muted-foreground">
           <div className="min-w-0 truncate">{header}</div>
           {action === undefined ? null : (
             <div className="shrink-0">{action}</div>

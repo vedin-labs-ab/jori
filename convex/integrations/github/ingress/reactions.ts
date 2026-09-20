@@ -13,7 +13,7 @@ import {
 } from "../../../reactions/data"
 import { activeSessionIntegration } from "../../../sessions/integration"
 import { createIntegrationActor } from "../../../shared/actor"
-import { boundedNumber, readRecord, readString } from "../../../shared/input"
+import { readRecord, readString } from "../../../shared/input"
 import { credentialSnapshot } from "../../connect/snapshot"
 import { githubJsonArray } from "../api"
 import { createGitHubInstallationToken } from "../app"
@@ -25,8 +25,7 @@ import {
   uniqueGitHubReactionTargets,
 } from "./targets"
 
-const defaultTargetLimit = 20
-const maxTargetLimit = 50
+const targetLimit = 20
 const reactionsPerTarget = 100
 const tokenRefreshBufferMs = 5 * 60 * 1000
 
@@ -49,7 +48,6 @@ type GitHubReactionSyncPlan = {
 export const sessionTargets = internalQuery({
   args: {
     sessionId: v.id("sessions"),
-    limit: v.optional(v.number()),
   },
   returns: v.any(),
   handler: async (ctx, args): Promise<GitHubReactionSyncPlan | null> => {
@@ -66,7 +64,7 @@ export const sessionTargets = internalQuery({
 
     const messages = await recentConversationMessages(ctx, {
       integration,
-      limit: boundedNumber(args.limit, defaultTargetLimit, 1, maxTargetLimit),
+      limit: targetLimit,
       conversation,
     })
 

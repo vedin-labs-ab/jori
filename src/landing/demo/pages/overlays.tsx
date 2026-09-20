@@ -21,13 +21,11 @@ import { DemoMoveDialog } from "../dialogs/move"
 import { type DemoMaterial } from "../fixtures/types"
 import { useDemoWorkspace } from "../workspace"
 
-/** Everything below and over a material list: the pager, the row menus'
- *  dialogs, and the create dialog the page brings, beside the selection's
- *  move and remove for the list to offer. */
+/** Everything below and over a material list: the pager and the row menus'
+ *  dialogs, beside the selection's move and remove for the list to offer. */
 export function useMaterialListOverlays<
   Row extends { archivedAt?: number; name: string },
 >({
-  create,
   deleteDescription,
   identify,
   noun,
@@ -37,7 +35,6 @@ export function useMaterialListOverlays<
   selection,
   toMaterial,
 }: {
-  create: ReactNode
   deleteDescription: string
   identify: (row: Row) => string
   noun: CountedNoun
@@ -88,7 +85,6 @@ export function useMaterialListOverlays<
         }
       />
       <MaterialDialogs onClose={onCloseRequest} request={request} />
-      {create}
     </>
   )
 
