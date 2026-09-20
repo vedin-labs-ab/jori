@@ -42,6 +42,13 @@ test("shows the renewals under Tables and keeps a corrected cell", async () => {
   expect(await screen.findByText("Harbor House")).toBeDefined()
   expect(screen.getByText("Larkspur Hotels")).toBeDefined()
   expect(screen.getByRole("link", { name: "Tables" })).toBeDefined()
+  expect(screen.getByRole("tablist", { name: "Materials" })).toBeDefined()
+  const panel = screen.getByRole("tabpanel", { name: "Table" })
+  for (const tab of screen.getAllByRole("tab")) {
+    expect(
+      document.getElementById(tab.getAttribute("aria-controls") ?? "")
+    ).toBe(panel)
+  }
 
   fireEvent.click(
     first(screen.getAllByRole("button", { name: /Edit Customer$/ }))
@@ -52,5 +59,18 @@ test("shows the renewals under Tables and keeps a corrected cell", async () => {
   fireEvent.change(editor, { target: { value: "Harbor House Ltd" } })
   fireEvent.keyDown(editor, { key: "Enter" })
 
+  expect(await screen.findByText("Harbor House Ltd")).toBeDefined()
+
+  fireEvent.mouseDown(screen.getByRole("tab", { name: "Store" }), {
+    button: 0,
+    ctrlKey: false,
+  })
+  expect(screen.getByRole("tabpanel", { name: "Store" })).toBe(panel)
+
+  fireEvent.mouseDown(screen.getByRole("tab", { name: "Table" }), {
+    button: 0,
+    ctrlKey: false,
+  })
+  expect(screen.getByRole("tabpanel", { name: "Table" })).toBe(panel)
   expect(await screen.findByText("Harbor House Ltd")).toBeDefined()
 })

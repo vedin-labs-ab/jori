@@ -1,4 +1,5 @@
 import { Database, File, Table2 } from "lucide-react"
+import { useId } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Jori } from "@/shared/brand"
 import { DemoConsole } from "../../demo/console"
@@ -31,6 +32,9 @@ function activePath(pathname: string) {
  *  a file, one at a time, under the crumb that says where each lives. */
 export function Materials() {
   const console = useDemoNavigation(pages[0].path)
+  const id = useId()
+  const selected = activePath(console.location.pathname)
+  const panelId = `${id}-panel`
 
   return (
     <Section
@@ -62,23 +66,37 @@ export function Materials() {
       <Tabs
         className="mt-12"
         onValueChange={(path) => console.navigation.navigate(path)}
-        value={activePath(console.location.pathname)}
+        value={selected}
       >
-        <TabsList>
+        <TabsList aria-label="Materials">
           {pages.map((page) => (
-            <TabsTrigger key={page.path} value={page.path}>
+            <TabsTrigger
+              aria-controls={panelId}
+              id={`${id}-${page.path}`}
+              key={page.path}
+              value={page.path}
+            >
               <page.icon />
               {page.label}
             </TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
-      <DemoConsole
-        lazy
-        className="mt-4 h-[26rem]"
-        navigation={console}
-        sidebar={false}
-      />
+      {/* One panel keeps the console mounted as tabs change, including
+          when navigation inside the demo leaves these material pages. */}
+      <div
+        aria-label={selected === "" ? "Materials" : undefined}
+        aria-labelledby={selected === "" ? undefined : `${id}-${selected}`}
+        id={panelId}
+        role="tabpanel"
+      >
+        <DemoConsole
+          lazy
+          className="mt-4 h-[26rem]"
+          navigation={console}
+          sidebar={false}
+        />
+      </div>
     </Section>
   )
 }
