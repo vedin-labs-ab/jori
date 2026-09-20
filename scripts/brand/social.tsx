@@ -38,7 +38,7 @@ export function SocialImage() {
           "absolute left-16 text-balance font-medium tracking-[-0.045em]",
           square
             ? "top-[178px] max-w-[920px] text-[82px] leading-[1.06]"
-            : "top-[135px] max-w-[1000px] text-[66px] leading-[1.04]"
+            : "top-[135px] max-w-[800px] text-[66px] leading-[1.04]"
         )}
       >
         {brandHeadline}

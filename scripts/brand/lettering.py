@@ -14,7 +14,15 @@ font = instantiateVariableFont(
 )
 glyphs = font.getGlyphSet()
 cmap = font.getBestCmap()
-scale = 48 / font["head"].unitsPerEm
+# The glyphs are outlined at 48 units, which the footer's cropped name is
+# tuned to. The lockup scales them down to the site header's proportions,
+# where a 16px name sits beside a 32px mark: half the mark's 52 units tall,
+# a quarter of it away.
+glyph_size = 48
+mark = 52
+gap = mark / 4
+lockup = mark / 2 / glyph_size
+scale = glyph_size / font["head"].unitsPerEm
 paths = []
 cursor = 0
 for letter in "Jori":
@@ -30,13 +38,13 @@ left = min(bounds[0] for _, bounds in paths)
 top = min(bounds[1] for _, bounds in paths)
 right = max(bounds[2] for _, bounds in paths)
 bottom = max(bounds[3] for _, bounds in paths)
-offset_x = round(65 - left, 3)
-offset_y = round((52 - (bottom - top)) / 2 - top, 3)
-width = round(65 + right - left, 3)
+offset_x = round(mark + gap - left * lockup, 3)
+offset_y = round((mark - (bottom - top) * lockup) / 2 - top * lockup, 3)
+width = round(mark + gap + (right - left) * lockup, 3)
 source = (
     "// Generated from Geist Medium, SIL OFL 1.1, by scripts/brand/lettering.py.\n"
     f"export const wordmarkWidth = {width}\n"
-    f'export const wordmarkTransform = "translate({offset_x} {offset_y})"\n'
+    f'export const wordmarkTransform = "translate({offset_x} {offset_y}) scale({round(lockup, 5)})"\n'
     "export const wordmarkPaths = [\n"
     + "".join(f'  "{data}",\n' for data, _ in paths)
     + "] as const\n"
