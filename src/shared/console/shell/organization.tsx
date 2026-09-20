@@ -1,5 +1,5 @@
 import { Briefcase, ChevronDown } from "lucide-react"
-import { type ComponentProps } from "react"
+import { type ComponentProps, type ReactNode } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils"
 /** What the sidebar shows of the active organization. */
 type OrganizationIdentity = {
   logo?: string
+  /** Drawn in place of the logo, where the row stands for no organization. */
+  mark?: ReactNode
   name: string
 }
 
@@ -52,15 +54,17 @@ function OrganizationRow({
 
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <Avatar className="size-6 [&_[data-slot=avatar-fallback]]:text-xs">
-        <AvatarImage
-          alt={organization.name}
-          src={logoSource(organization.logo)}
-        />
-        <AvatarFallback className="text-muted-foreground! text-sm">
-          {initials === "" ? <Briefcase className="size-4" /> : initials}
-        </AvatarFallback>
-      </Avatar>
+      {organization.mark ?? (
+        <Avatar className="size-6 [&_[data-slot=avatar-fallback]]:text-xs">
+          <AvatarImage
+            alt={organization.name}
+            src={logoSource(organization.logo)}
+          />
+          <AvatarFallback className="text-muted-foreground! text-sm">
+            {initials === "" ? <Briefcase className="size-4" /> : initials}
+          </AvatarFallback>
+        </Avatar>
+      )}
       <div className="flex min-w-0 flex-col">
         <div className="flex min-w-0 items-center gap-2">
           <p className="truncate font-medium text-foreground text-xs/relaxed">

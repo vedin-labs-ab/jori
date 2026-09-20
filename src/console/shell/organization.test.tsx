@@ -20,7 +20,8 @@ import { Route as ChatRoute } from "@/routes/_workspace/chat/index"
 import { Route as ConsoleRoute } from "@/routes/console"
 import { SidebarOrganizationSwitcher } from "./organization"
 
-const { auth, toast } = vi.hoisted(() => ({
+const { auth, navigate, toast } = vi.hoisted(() => ({
+  navigate: vi.fn(async () => undefined),
   auth: {
     activateOrganization: vi.fn(),
     organizations: [
@@ -30,6 +31,11 @@ const { auth, toast } = vi.hoisted(() => ({
     ],
   },
   toast: { error: vi.fn() },
+}))
+
+vi.mock("@tanstack/react-router", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@tanstack/react-router")>()),
+  useNavigate: () => navigate,
 }))
 
 vi.mock("@/shared/session/auth", () => ({
@@ -75,6 +81,7 @@ vi.mock("@/console/billing", () => ({
 vi.mock("sonner", () => ({ toast }))
 
 beforeEach(() => {
+  navigate.mockClear()
   auth.activateOrganization.mockReset()
   toast.error.mockReset()
 })
@@ -127,7 +134,7 @@ test("keeps the switcher open with a stable pending organization row", async () 
 })
 
 test("an organization in onboarding offers only the way to another", async () => {
-  render(<SidebarOrganizationSwitcher switchOnly />)
+  render(<SidebarOrganizationSwitcher onboarding="current" />)
 
   fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
     button: 0,
@@ -139,6 +146,21 @@ test("an organization in onboarding offers only the way to another", async () =>
     screen.queryByRole("menuitem", { name: /Create organization/ })
   ).toBeNull()
   expect(screen.queryByRole("button", { name: /Manage/ })).toBeNull()
+})
+
+test("a new organization shows none as chosen, and going back needs no activating", async () => {
+  render(<SidebarOrganizationSwitcher onboarding="new" />)
+
+  // The organization still active behind the new one is one to go back to,
+  // listed with the rest instead of shown as where the person is.
+  fireEvent.pointerDown(
+    screen.getByRole("button", { name: /New organization/ }),
+    { button: 0, ctrlKey: false }
+  )
+  fireEvent.click(await screen.findByRole("menuitem", { name: /Vedin Labs/ }))
+
+  await waitFor(() => expect(navigate).toHaveBeenCalledWith({ to: "/chat" }))
+  expect(auth.activateOrganization).not.toHaveBeenCalled()
 })
 
 test("restores the switcher after a failed organization change", async () => {

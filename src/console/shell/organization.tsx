@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router"
 import { type Organization } from "better-auth/client"
 import { Plus, Settings } from "lucide-react"
-import { useState } from "react"
+import { type ComponentProps, useState } from "react"
 import { toast } from "sonner"
 import { OrganizationView } from "@/components/auth/organization/organization-view"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,7 @@ import {
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { billingSearch } from "@/console/billing/actions/return"
+import { BrandIcon } from "@/shared/brand"
 import { SidebarOrganization } from "@/shared/console/shell/organization"
 import {
   activateOrganization,
@@ -33,12 +34,14 @@ function billingSettingsRequested() {
 }
 
 /** The organization at the sidebar's head, and the menu it opens: manage
- *  this one, switch to another, or start a new one. `switchOnly` leaves
- *  only the switching, for an organization still in onboarding. */
+ *  this one, switch to another, or start a new one. Onboarding leaves only
+ *  the switching. Onboarding the current organization shows it as usual;
+ *  onboarding a new one shows none as chosen, since the one still active
+ *  behind it is where the person came from, not where they are. */
 export function SidebarOrganizationSwitcher({
-  switchOnly = false,
+  onboarding,
 }: {
-  switchOnly?: boolean
+  onboarding?: "current" | "new"
 }) {
   const { isMobile } = useSidebar()
   const navigate = useNavigate()
@@ -46,21 +49,48 @@ export function SidebarOrganizationSwitcher({
   const organizations = useListOrganizations()
   const [billingRequested] = useState(billingSettingsRequested)
   const [managing, setManaging] = useState(billingRequested)
+  const shown = onboarding === "new" ? undefined : (active.data ?? undefined)
   const others =
     organizations.data?.filter(
-      (organization) => organization.id !== active.data?.id
+      (organization) => organization.id !== shown?.id
     ) ?? []
+
+  // A new organization is left for the console, whichever organization is
+  // picked; the one still active needs no activating to go back to.
+  async function select(organizationId: string) {
+    if (onboarding === "new") {
+      await navigate({ to: "/chat" })
+    }
+
+    if (organizationId !== active.data?.id) {
+      await activateOrganization(organizationId)
+    }
+  }
 
   return (
     <>
       <OrganizationMenu
-        active={active.data ?? undefined}
         isMobile={isMobile}
-        onCreate={switchOnly ? undefined : () => void navigate({ to: "/new" })}
-        onManage={switchOnly ? undefined : () => setManaging(true)}
+        onCreate={
+          onboarding === undefined
+            ? () => void navigate({ to: "/new" })
+            : undefined
+        }
+        onManage={
+          onboarding === undefined ? () => setManaging(true) : undefined
+        }
+        onSelect={select}
         organizations={others}
+        shown={
+          onboarding === "new"
+            ? {
+                mark: <BrandIcon className="size-6" />,
+                name: "New organization",
+              }
+            : shown && { logo: shown.logo ?? undefined, name: shown.name }
+        }
       />
-      {active.data && !switchOnly ? (
+      {active.data && onboarding === undefined ? (
         <OrganizationDialog
           initialView={billingRequested ? "billing" : "general"}
           onOpenChange={setManaging}
@@ -73,19 +103,22 @@ export function SidebarOrganizationSwitcher({
 }
 
 function OrganizationMenu({
-  active,
   isMobile,
   onCreate,
   onManage,
+  onSelect,
   organizations,
+  shown,
 }: {
-  active: Organization | undefined
   isMobile: boolean
   /** Left out where starting a new organization is not on offer. */
   onCreate?: () => void
   /** Left out where managing this one is not on offer. */
   onManage?: () => void
+  onSelect: (organizationId: string) => Promise<void>
   organizations: Organization[]
+  /** What the trigger shows; a skeleton until it is known. */
+  shown: ComponentProps<typeof SidebarOrganization>["organization"]
 }) {
   const [open, setOpen] = useState(false)
   const [switchingId, setSwitchingId] = useState<string | null>(null)
@@ -95,7 +128,7 @@ function OrganizationMenu({
     setSwitchingId(organizationId)
 
     try {
-      await activateOrganization(organizationId)
+      await onSelect(organizationId)
     } catch {
       setSwitchingId(null)
       toast.error("Couldn't switch organization. Try again.")
@@ -107,7 +140,13 @@ function OrganizationMenu({
       open={open}
       onOpenChange={(nextOpen) => !switching && setOpen(nextOpen)}
     >
-      <OrganizationMenuTrigger active={active} switching={switching} />
+      <DropdownMenuTrigger asChild>
+        <SidebarOrganization
+          aria-busy={switching}
+          disabled={switching}
+          organization={shown}
+        />
+      </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
         aria-busy={switching}
@@ -115,8 +154,14 @@ function OrganizationMenu({
         side={isMobile ? "bottom" : "right"}
         sideOffset={4}
       >
-        <OrganizationMenuHeader onManage={onManage} switching={switching} />
-        <DropdownMenuSeparator />
+        {/* The header is there for Manage; without it, it would only
+            repeat the trigger. */}
+        {onManage === undefined ? null : (
+          <>
+            <OrganizationMenuHeader onManage={onManage} switching={switching} />
+            <DropdownMenuSeparator />
+          </>
+        )}
         <OrganizationOptions
           onCreate={onCreate}
           onSelect={(id) => void switchOrganization(id)}
@@ -128,51 +173,26 @@ function OrganizationMenu({
   )
 }
 
-/** The shared trigger, showing the active organization. */
-function OrganizationMenuTrigger({
-  active,
-  switching,
-}: {
-  active: Organization | undefined
-  switching: boolean
-}) {
-  return (
-    <DropdownMenuTrigger asChild>
-      <SidebarOrganization
-        aria-busy={switching}
-        disabled={switching}
-        organization={
-          active === undefined
-            ? undefined
-            : { logo: active.logo ?? undefined, name: active.name }
-        }
-      />
-    </DropdownMenuTrigger>
-  )
-}
-
 function OrganizationMenuHeader({
   onManage,
   switching,
 }: {
-  onManage?: () => void
+  onManage: () => void
   switching: boolean
 }) {
   return (
     <DropdownMenuLabel className="p-0 font-normal">
       <div className="flex items-center justify-between gap-3 px-1 py-1.5">
         <OrganizationView className="min-w-0 flex-1" hideRole hideSlug />
-        {onManage === undefined ? null : (
-          <Button
-            disabled={switching}
-            onClick={onManage}
-            size="sm"
-            variant="outline"
-          >
-            <Settings className="text-muted-foreground" />
-            Manage
-          </Button>
-        )}
+        <Button
+          disabled={switching}
+          onClick={onManage}
+          size="sm"
+          variant="outline"
+        >
+          <Settings className="text-muted-foreground" />
+          Manage
+        </Button>
       </div>
     </DropdownMenuLabel>
   )

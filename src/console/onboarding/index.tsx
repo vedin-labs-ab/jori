@@ -55,7 +55,11 @@ export function Onboarding({ organizationId }: { organizationId?: string }) {
         organization={organization}
         pathname={pathname}
         switcher={
-          alone ? undefined : <SidebarOrganizationSwitcher switchOnly />
+          alone ? undefined : (
+            <SidebarOrganizationSwitcher
+              onboarding={organizationId === undefined ? "new" : "current"}
+            />
+          )
         }
       >
         {loading ? null : (
