@@ -4,7 +4,13 @@ import {
   VisibilityField,
 } from "@/shared/console/visibility/field"
 import { AdvancedSettings } from "../../../materials/form"
-import { derivedScope, getJobScopeConflict } from "../../access"
+import {
+  derivedScope,
+  getDefaultJobSurfaceTools,
+  getJobScopeConflict,
+  type JobSurfaceIntegration,
+  jobSurfaceIntegrations,
+} from "../../access"
 import { type JobPolicyPermissions } from "../../access/policy"
 import { type JobFormValues } from "../../types"
 import { readJobInstructionsError, readJobNameError } from "../errors"
@@ -12,7 +18,6 @@ import { readAdditionalJobSurfaces } from "../instructions/document"
 import { AccessFields } from "./access"
 import { JobInstructionsSection } from "./instructions"
 import { JobNameField } from "./name"
-import { JobToolRisk } from "./risk"
 import { JobTiming } from "./timing"
 
 /** The Folder field's contract: the fields say where it sits and what it
@@ -52,8 +57,13 @@ export type JobEditorFieldsProps = {
  *  The container every field inside keys its layout to. */
 export function JobEditorFields(props: JobEditorFieldsProps) {
   const { onValuesChange, values } = props
-  const { actions, additionalSurfaces, instructionsError, nameError } =
-    useFieldState(props)
+  const {
+    actions,
+    additionalSurfaces,
+    available,
+    instructionsError,
+    nameError,
+  } = useFieldState(props)
 
   return (
     // The fields measure themselves: the same set edits in a dialog on a
@@ -75,12 +85,13 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
       />
       <AccessFields
         additionalSurfaces={additionalSurfaces}
+        available={available}
+        onAdditionalSurfaceAdd={actions.addAdditionalSurface}
         onAdditionalSurfaceChange={actions.updateAdditionalSurface}
         onAdditionalSurfaceRemove={actions.removeAdditionalSurface}
         permissions={props.permissions}
         scope={values.scope}
       />
-      <JobToolRisk surfaces={values.surfaces} permissions={props.permissions} />
       <JobTiming
         eventFields={props.eventFields}
         showRunPreview={props.showRunPreview}
@@ -116,6 +127,7 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
 function useFieldState({
   error,
   onValuesChange,
+  permissions,
   values,
 }: JobEditorFieldsProps) {
   const scopeConflict = getJobScopeConflict(values.scope, values.surfaces)
@@ -129,8 +141,16 @@ function useFieldState({
   )
 
   return {
-    actions: createFieldActions(values, onValuesChange),
+    actions: createFieldActions(values, onValuesChange, permissions),
     additionalSurfaces,
+    available: jobSurfaceIntegrations
+      .map((item) => item.integration)
+      .filter(
+        (integration) =>
+          !values.surfaces.some(
+            (surface) => surface.integration === integration
+          )
+      ),
     instructionsError:
       scopeConflict?.message ??
       readJobInstructionsError(error, values.instructions),
@@ -140,13 +160,24 @@ function useFieldState({
 
 function createFieldActions(
   values: JobFormValues,
-  onValuesChange: (values: JobFormValues) => void
+  onValuesChange: (values: JobFormValues) => void,
+  permissions: JobPolicyPermissions
 ) {
   const updateValues = (updates: Partial<JobFormValues>) => {
     onValuesChange({ ...values, ...updates })
   }
 
   return {
+    addAdditionalSurface: (integration: JobSurfaceIntegration) =>
+      updateValues({
+        surfaces: [
+          ...values.surfaces,
+          {
+            integration,
+            tools: getDefaultJobSurfaceTools(integration, permissions),
+          },
+        ],
+      }),
     removeAdditionalSurface: (
       integration: JobFormValues["surfaces"][number]["integration"]
     ) =>

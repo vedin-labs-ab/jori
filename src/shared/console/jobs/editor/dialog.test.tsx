@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react"
 import { afterEach, describe, expect, test, vi } from "vitest"
-import { emptyJobForm, type Job } from "../types"
+import { emptyJobForm, type Job, type JobFormValues } from "../types"
 import { JobEditorDialog } from "./dialog"
 
 // Load real lazy views before interaction assertions start their deadlines.
@@ -129,45 +129,8 @@ describe("job dialog sharing validation", () => {
   })
 })
 
-describe("job dialog tool warning", () => {
-  test("explains a risky combination without blocking save", () => {
-    const onSave = vi.fn()
-    renderJobDialog({
-      error: undefined,
-      onSave,
-      values: {
-        ...emptyJobForm,
-        name: "Research renewals",
-        instructions: "Research the companies in the renewals table.",
-        surfaces: [{ integration: "jori", tools: ["read_table", "web_fetch"] }],
-      },
-    })
-
-    expect(screen.getByRole("status").textContent).toContain(
-      "This job could expose private data"
-    )
-    fireEvent.click(screen.getByText("Tools in this combination"))
-    expect(screen.getByText("Jori: Read table")).toBeDefined()
-    expect(screen.getAllByText("Jori: Fetch web page")).toHaveLength(2)
-    fireEvent.click(screen.getByRole("button", { name: "Create job" }))
-    expect(onSave).toHaveBeenCalledOnce()
-  })
-
-  test("leaves two-capability grants without a warning", () => {
-    renderJobDialog({
-      error: undefined,
-      values: {
-        ...emptyJobForm,
-        instructions: "Research the public web.",
-        surfaces: [{ integration: "jori", tools: ["web_fetch"] }],
-      },
-    })
-    expect(screen.queryByText("This job could expose private data")).toBeNull()
-  })
-})
-
 describe("job dialog access controls", () => {
-  test("shows no access section while the instructions name every grant", async () => {
+  test("lists no additional access while the instructions name every grant", async () => {
     renderJobDialog({
       error: undefined,
       values: {
@@ -179,8 +142,9 @@ describe("job dialog access controls", () => {
     })
 
     expect(await findInstructionsTextbox()).toBeDefined()
-    expect(screen.queryByText("Access")).toBeNull()
-    expect(screen.queryByText("Additional access")).toBeNull()
+    expect(
+      screen.queryByRole("button", { name: /GitHub additional access/ })
+    ).toBeNull()
     expect(screen.queryByRole("checkbox")).toBeNull()
   })
 
@@ -202,6 +166,38 @@ describe("job dialog access controls", () => {
         name: "GitHub additional access: 1 tool enabled. Configure tools.",
       })
     ).toBeDefined()
+  })
+
+  test("adds access the instructions do not name, leaving out what the job holds", async () => {
+    const onValuesChange = vi.fn()
+    renderJobDialog({
+      error: undefined,
+      onValuesChange,
+      values: {
+        ...emptyJobForm,
+        instructions: "Summarize @GitHub changes.",
+        surfaces: [{ integration: "github", tools: ["github_get_issue"] }],
+      },
+    })
+
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Add access" }), {
+      button: 0,
+      ctrlKey: false,
+    })
+
+    expect(await screen.findByRole("menuitem", { name: "Slack" })).toBeDefined()
+    expect(screen.queryByRole("menuitem", { name: "GitHub" })).toBeNull()
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Slack" }))
+
+    expect(onValuesChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        surfaces: [
+          { integration: "github", tools: ["github_get_issue"] },
+          expect.objectContaining({ integration: "slack" }),
+        ],
+      })
+    )
   })
 })
 
@@ -233,11 +229,13 @@ function renderJobDialog({
   job,
   values,
   onSave = () => undefined,
+  onValuesChange = () => undefined,
 }: {
   error: string | undefined
   job?: Job
   values: typeof emptyJobForm
   onSave?: () => void
+  onValuesChange?: (values: JobFormValues) => void
 }) {
   return render(
     <JobEditorDialog
@@ -255,7 +253,7 @@ function renderJobDialog({
       job={job}
       onOpenChange={() => undefined}
       onSave={onSave}
-      onValuesChange={() => undefined}
+      onValuesChange={onValuesChange}
       permissions={undefined}
       policyKey="test"
       skills={[]}

@@ -1,6 +1,12 @@
-import { X } from "lucide-react"
+import { Plus, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { ProviderLogo } from "@/shared/logo/provider"
@@ -9,51 +15,87 @@ import {
   getJobSurfaceScopeIssue,
   type JobScope,
   type JobSurfaceFormValue,
+  type JobSurfaceIntegration,
 } from "../../access"
 import { type JobPolicyPermissions } from "../../access/policy"
 import { JobSurfaceToolsDialog } from "../instructions/access/tools"
 
-/** Access a job holds that its instructions do not name with an `@`. */
+/** Access a job holds that its instructions do not name with an `@`: what
+ *  it holds that way, and a menu to add what it does not hold at all. */
 export function AccessFields({
   additionalSurfaces,
+  available,
+  onAdditionalSurfaceAdd,
   onAdditionalSurfaceChange,
   onAdditionalSurfaceRemove,
   permissions,
   scope,
 }: {
   additionalSurfaces: JobSurfaceFormValue[]
+  /** The integrations the job holds no access to yet. */
+  available: readonly JobSurfaceIntegration[]
+  onAdditionalSurfaceAdd: (integration: JobSurfaceIntegration) => void
   onAdditionalSurfaceChange: (surface: JobSurfaceFormValue) => void
-  onAdditionalSurfaceRemove: (
-    integration: JobSurfaceFormValue["integration"]
-  ) => void
+  onAdditionalSurfaceRemove: (integration: JobSurfaceIntegration) => void
   permissions: JobPolicyPermissions
   scope: JobScope
 }) {
-  if (additionalSurfaces.length === 0) {
-    return null
-  }
-
   return (
     <div className="grid gap-1.5">
-      <div>
+      <div className="flex items-center justify-between gap-2">
         <Label className="font-normal text-xs">Additional access</Label>
-        <p className="text-muted-foreground text-xs">
-          Access saved outside the instruction references.
-        </p>
+        <AddAccess available={available} onAdd={onAdditionalSurfaceAdd} />
       </div>
-      <div className="flex flex-wrap gap-1.5">
-        {additionalSurfaces.map((surface) => (
-          <AdditionalSurface
-            key={surface.integration}
-            onChange={onAdditionalSurfaceChange}
-            onRemove={onAdditionalSurfaceRemove}
-            permissions={permissions}
-            scope={scope}
-            surface={surface}
-          />
-        ))}
-      </div>
+      {additionalSurfaces.length === 0 ? null : (
+        <div className="flex flex-wrap gap-1.5">
+          {additionalSurfaces.map((surface) => (
+            <AdditionalSurface
+              key={surface.integration}
+              onChange={onAdditionalSurfaceChange}
+              onRemove={onAdditionalSurfaceRemove}
+              permissions={permissions}
+              scope={scope}
+              surface={surface}
+            />
+          ))}
+        </div>
+      )}
     </div>
+  )
+}
+
+function AddAccess({
+  available,
+  onAdd,
+}: {
+  available: readonly JobSurfaceIntegration[]
+  onAdd: (integration: JobSurfaceIntegration) => void
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label="Add access"
+          disabled={available.length === 0}
+          size="icon"
+          type="button"
+          variant="ghost"
+        >
+          <Plus aria-hidden="true" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        {available.map((integration) => (
+          <DropdownMenuItem
+            key={integration}
+            onSelect={() => onAdd(integration)}
+          >
+            <ProviderLogo surface={integration} />
+            {getJobSurfaceLabel(integration)}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -65,7 +107,7 @@ function AdditionalSurface({
   surface,
 }: {
   onChange: (surface: JobSurfaceFormValue) => void
-  onRemove: (integration: JobSurfaceFormValue["integration"]) => void
+  onRemove: (integration: JobSurfaceIntegration) => void
   permissions: JobPolicyPermissions
   scope: JobScope
   surface: JobSurfaceFormValue

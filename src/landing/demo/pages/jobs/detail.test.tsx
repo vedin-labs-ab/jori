@@ -78,20 +78,6 @@ test("a job that is gone reads as not found", async () => {
   expect(await screen.findByText("Job not found")).toBeDefined()
 })
 
-test("the demo editor warns about a job that reads private data and the web", async () => {
-  render(<DemoConsoleAt path={`/jobs/${jobId("competitor")}`} />)
-  fireEvent.click(await screen.findByRole("button", { name: "Edit" }))
-  const editor = await screen.findByRole("dialog", { name: "Edit job" })
-  expect(
-    within(editor).getByText("This job could expose private data")
-  ).toBeDefined()
-  expect(
-    within(editor)
-      .getByRole("button", { name: "Save changes" })
-      .hasAttribute("disabled")
-  ).toBe(false)
-})
-
 test("a filed job keeps the same owner and status through its page and title menu", async () => {
   render(<DemoConsoleAt path={`/folders/${folderId("design")}`} />)
   const link = await screen.findByRole("link", { name: "Design review digest" })
