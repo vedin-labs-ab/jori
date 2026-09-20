@@ -23,6 +23,7 @@ export function CellInput({
   value: string
 }) {
   const left = useRef(false)
+  const cancelled = useRef(false)
 
   return (
     <CellError className="h-full min-w-0" message={message}>
@@ -43,6 +44,7 @@ export function CellInput({
           onKeyDown={(event) =>
             handleEditorKey(event, {
               close: onClose,
+              cancelled,
               left,
               restore: onRestoreFocus,
               commit: onCommit,
@@ -63,6 +65,7 @@ function handleEditorKey(
   event: KeyboardEvent<HTMLInputElement>,
   editor: {
     close: () => void
+    cancelled: { current: boolean }
     left: { current: boolean }
     restore: () => void
     commit: (text: string) => Promise<boolean>
@@ -75,13 +78,14 @@ function handleEditorKey(
 
   if (event.key === "Enter") {
     void editor.commit(draft).then((committed) => {
-      if (committed) {
+      if (committed && !editor.cancelled.current) {
         restore()
       }
     })
   }
 
   if (event.key === "Escape") {
+    editor.cancelled.current = true
     editor.close()
     restore()
   }
@@ -92,7 +96,7 @@ function handleEditorKey(
     const direction = event.shiftKey ? -1 : 1
 
     void editor.commit(draft).then((committed) => {
-      if (committed && !editor.left.current) {
+      if (committed && !editor.left.current && !editor.cancelled.current) {
         editor.onAdvance?.(direction)
         restore()
       }

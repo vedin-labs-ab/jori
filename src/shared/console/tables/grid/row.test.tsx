@@ -225,3 +225,30 @@ test.each(["Enter", "Tab"])(
     expect(document.activeElement).toBe(destination)
   }
 )
+
+test("Escape closes a pending Tab edit without advancing when its save finishes", async () => {
+  let resolveCommit: (committed: boolean) => void = () => undefined
+  const pending = new Promise<boolean>((resolve) => {
+    resolveCommit = resolve
+  })
+  onCommit.mockReturnValue(pending)
+  renderRow()
+  fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
+  const editor = screen.getByRole("textbox", { name: "Title value" })
+  fireEvent.change(editor, { target: { value: "Call Grace" } })
+  fireEvent.keyDown(editor, { key: "Tab" })
+  fireEvent.keyDown(editor, { key: "Escape" })
+
+  await waitFor(() => {
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: /Edit Title$/ })
+    )
+  })
+  await act(async () => resolveCommit(true))
+
+  expect(screen.queryByRole("textbox")).toBeNull()
+  expect(document.activeElement).toBe(
+    screen.getByRole("button", { name: /Edit Title$/ })
+  )
+  expect(onCommit).toHaveBeenCalledOnce()
+})
