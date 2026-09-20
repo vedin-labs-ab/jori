@@ -9,17 +9,17 @@ import {
 import { toast } from "sonner"
 import { readErrorMessage } from "../error"
 import {
+  type CreateKind,
   type Edit,
   type EditItem,
-  type EditKind,
   type EditSurface,
 } from "./state"
 
 export type EditPersistence = {
-  name: (kind: EditKind, parentId?: string) => string
-  onCreate: (kind: EditKind, parentId?: string) => Promise<EditItem>
+  name: (kind: CreateKind, parentId?: string) => string
+  onCreate: (kind: CreateKind, parentId?: string) => Promise<EditItem>
   onRename: (item: EditItem, name: string) => Promise<unknown>
-  onReveal?: (kind: EditKind, parentId?: string) => void
+  onReveal?: (kind: CreateKind, parentId?: string) => void
 }
 type Session = {
   latest: RefObject<EditPersistence>
@@ -64,7 +64,7 @@ function actionsFor(session: Session) {
       })
     },
     create: (
-      kind: EditKind,
+      kind: CreateKind,
       parentId: string | undefined,
       surface: EditSurface
     ) => {
@@ -90,7 +90,7 @@ async function run(session: Session, action: () => Promise<void>) {
 }
 async function create(
   session: Session,
-  kind: EditKind,
+  kind: CreateKind,
   parentId: string | undefined,
   surface: EditSurface
 ) {

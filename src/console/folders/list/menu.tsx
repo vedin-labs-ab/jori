@@ -74,9 +74,10 @@ function MaterialResourceMenu({ actions, resource }: ResourceMenu) {
       noun={isTable ? "table" : "store"}
       onAccess={() => actions.onAccess(resource)}
       onDelete={() => actions.removal.remove(resource)}
-      onEdit={() => actions.onEdit(resource)}
+      onEdit={() => actions.onRename(resource)}
       onMoveToFolder={() => actions.onMove(resource)}
       onRestore={() => actions.removal.restore(resource)}
+      renamesInPlace
       onUnfile={
         actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
       }
@@ -106,9 +107,10 @@ function FileResourceMenu({ actions, resource }: ResourceMenu) {
           file={{ name: resource.name, url }}
           isPending={actions.files.pendingFileId === resource.id}
           onAccess={() => actions.onAccess(resource)}
-          onEdit={() => actions.onEdit(resource)}
+          onEdit={() => actions.onRename(resource)}
           onMoveToFolder={() => actions.onMove(resource)}
           onRemove={() => setIsDeleteOpen(true)}
+          renamesInPlace
           onUnfile={
             actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
           }

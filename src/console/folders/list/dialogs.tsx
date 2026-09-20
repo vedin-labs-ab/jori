@@ -1,25 +1,20 @@
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useFile } from "@/console/files/query"
-import { EditFileDialog } from "@/shared/console/files/edit"
 import { type FolderResource } from "@/shared/console/folders/types"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
 import { api } from "../../../../convex/_generated/api"
 import { ConversationVisibility } from "../../chat/filing/access"
-import { useFileActions } from "../../files/manage"
 import { OrganizationVisibilityDialog } from "../../shared/visibility/dialog"
-import { EditStoreDialog } from "../../stores/edit"
-import { EditTableDialog } from "../../tables/edit"
 
-// Editing and sharing a filed resource asks for more than a listing row
-// carries — a full audience, for one — so each kind resolves its own
-// row through the query its own page already uses, and the dialog opens on
-// what comes back. The resolved row is retained so closing animates out.
+// Sharing a filed resource asks for more than a listing row carries — a
+// full audience — so each kind resolves its own row through the query its
+// own page already uses, and the dialog opens on what comes back. The
+// resolved row is retained so closing animates out. Renaming needs none of
+// this: a row is renamed in place.
 
-export type ResourceRequest = {
-  kind: "access" | "edit"
-  resource: FolderResource
-}
+/** The resource whose audience is being set. */
+export type ResourceRequest = { resource: FolderResource }
 
 export function FolderResourceDialogs({
   onClose,
@@ -77,7 +72,7 @@ function ChatDialog({ onClose, organizationId, request }: KindDialogs) {
       conversationId={resource.id as GenericId<"conversations">}
       key={resource.id}
       onClose={onClose}
-      open={request?.kind === "access"}
+      open={request !== undefined}
       organizationId={organizationId}
     />
   )
@@ -104,22 +99,15 @@ function TableDialogs({ onClose, organizationId, request }: KindDialogs) {
   }
 
   return (
-    <>
-      <EditTableDialog
-        onOpenChange={closeOnDismiss(onClose)}
-        organizationId={organizationId}
-        table={request?.kind === "edit" ? table : undefined}
-      />
-      <OrganizationVisibilityDialog
-        noun="table"
-        onOpenChange={closeOnDismiss(onClose)}
-        open={request?.kind === "access"}
-        organizationId={organizationId}
-        ownerId={table.ownerId}
-        target={{ kind: "table", id: table.tableId }}
-        value={table.visibility}
-      />
-    </>
+    <OrganizationVisibilityDialog
+      noun="table"
+      onOpenChange={closeOnDismiss(onClose)}
+      open={request !== undefined}
+      organizationId={organizationId}
+      ownerId={table.ownerId}
+      target={{ kind: "table", id: table.tableId }}
+      value={table.visibility}
+    />
   )
 }
 
@@ -144,27 +132,19 @@ function StoreDialogs({ onClose, organizationId, request }: KindDialogs) {
   }
 
   return (
-    <>
-      <EditStoreDialog
-        onOpenChange={closeOnDismiss(onClose)}
-        organizationId={organizationId}
-        store={request?.kind === "edit" ? store : undefined}
-      />
-      <OrganizationVisibilityDialog
-        noun="store"
-        onOpenChange={closeOnDismiss(onClose)}
-        open={request?.kind === "access"}
-        organizationId={organizationId}
-        ownerId={store.ownerId}
-        target={{ kind: "store", id: store.storeId }}
-        value={store.visibility}
-      />
-    </>
+    <OrganizationVisibilityDialog
+      noun="store"
+      onOpenChange={closeOnDismiss(onClose)}
+      open={request !== undefined}
+      organizationId={organizationId}
+      ownerId={store.ownerId}
+      target={{ kind: "store", id: store.storeId }}
+      value={store.visibility}
+    />
   )
 }
 
 function FileDialogs({ onClose, organizationId, request }: KindDialogs) {
-  const actions = useFileActions(organizationId, { onSaved: onClose })
   const result = useFile(organizationId, request?.resource.id)
   const file = useRetained(
     result?.status === "ready" && result.file !== null ? result.file : undefined
@@ -175,22 +155,14 @@ function FileDialogs({ onClose, organizationId, request }: KindDialogs) {
   }
 
   return (
-    <>
-      <EditFileDialog
-        file={request?.kind === "edit" ? file : undefined}
-        isSaving={actions.pendingFileId !== undefined}
-        onOpenChange={closeOnDismiss(onClose)}
-        onSave={actions.saveFile}
-      />
-      <OrganizationVisibilityDialog
-        noun="file"
-        onOpenChange={closeOnDismiss(onClose)}
-        open={request?.kind === "access"}
-        organizationId={organizationId}
-        ownerId={file.ownerId}
-        target={{ kind: "file", id: file.fileId }}
-        value={file.visibility}
-      />
-    </>
+    <OrganizationVisibilityDialog
+      noun="file"
+      onOpenChange={closeOnDismiss(onClose)}
+      open={request !== undefined}
+      organizationId={organizationId}
+      ownerId={file.ownerId}
+      target={{ kind: "file", id: file.fileId }}
+      value={file.visibility}
+    />
   )
 }

@@ -60,6 +60,7 @@ function useChanges(
   const tableRename = useMutation(api.tables.console.update)
   const storeCreate = useMutation(api.stores.console.create)
   const storeRename = useMutation(api.stores.console.update)
+  const fileRename = useMutation(api.files.console.update)
   return {
     onCreate: async (kind, parentId) => {
       const folderId = parentId as GenericId<"folders"> | undefined
@@ -99,6 +100,13 @@ function useChanges(
         return folderRename({
           organizationId,
           folderId: item.id as GenericId<"folders">,
+          name,
+        })
+      }
+      if (item.kind === "file") {
+        return fileRename({
+          organizationId,
+          fileId: item.id as GenericId<"files">,
           name,
         })
       }

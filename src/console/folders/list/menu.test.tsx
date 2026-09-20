@@ -35,7 +35,7 @@ test("a filed table offers the menu its own list row offers, plus unfiling", () 
 
   expect(itemLabels()).toEqual([
     "Open",
-    "Rename…",
+    "Rename",
     "Audience…",
     "Move to folder…",
     "Remove from folder",
@@ -78,7 +78,7 @@ test("a filed file offers its own menu; the links resolve on demand", () => {
   // carry; everything the row already knows is there at once.
   expect(itemLabels()).toEqual([
     "Open",
-    "Rename…",
+    "Rename",
     "Audience…",
     "Move to folder…",
     "Remove from folder",
@@ -204,7 +204,7 @@ function stubActions(
       saveFile: () => undefined,
     },
     onAccess: vi.fn(),
-    onEdit: vi.fn(),
+    onRename: vi.fn(),
     onMove: vi.fn(),
     onUnfile: vi.fn(),
     organizationId: "org-1",

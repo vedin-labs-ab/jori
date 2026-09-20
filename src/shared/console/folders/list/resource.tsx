@@ -2,6 +2,7 @@ import { type ReactNode } from "react"
 import { TableCell } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../dot"
+import { ItemName } from "../../edit/name"
 import { CreatedItemRow } from "../../edit/row"
 import { type Edit } from "../../edit/state"
 import { JobStatus } from "../../jobs/status"
@@ -21,6 +22,7 @@ import { type DragPayload } from "../drag/plan"
 import { useResourceRowDrag } from "../drag/state"
 import {
   type FolderResource,
+  isRenamedInPlace,
   resourceDestination,
   resourcePresentation,
 } from "../types"
@@ -84,8 +86,7 @@ function ResourceLink({
   folderId: string | undefined
 }) {
   const Icon = resourcePresentation(resource).icon
-
-  return (
+  const link = (
     <ConsoleLink
       data-edit-key={`${resource.type}:${resource.id}`}
       {...resourceDestination(resource)}
@@ -97,6 +98,23 @@ function ResourceLink({
       <span className="truncate">{resource.name}</span>
       <VisibilityNameMark {...resource} folderId={folderId} />
     </ConsoleLink>
+  )
+
+  return isRenamedInPlace(resource) ? (
+    <ItemName
+      icon={Icon}
+      item={{
+        id: resource.id,
+        kind: resource.type,
+        name: resource.name,
+        parentId: folderId,
+      }}
+      surface="contents"
+    >
+      {link}
+    </ItemName>
+  ) : (
+    link
   )
 }
 

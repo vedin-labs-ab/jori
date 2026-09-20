@@ -1,7 +1,7 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { type CountedNoun } from "../../count"
-import { type EditItem, type EditKind } from "../../edit/state"
+import { type CreateKind, type EditItem } from "../../edit/state"
 import { type ResourceDragItem } from "../../folders/drag/plan"
 import {
   type ColumnTier,
@@ -44,7 +44,7 @@ export type MaterialCreate = {
 
 /** What tells one material list from another. */
 export type MaterialListKind<Row> = {
-  creationKind?: Exclude<EditKind, "folder">
+  creationKind?: Exclude<CreateKind, "folder">
   createdRow?: (item: EditItem) => Row | undefined
   columns: readonly MaterialColumn<Row>[]
   /** The page's create actions, the primary one first. */

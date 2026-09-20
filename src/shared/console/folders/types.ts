@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { fileKind } from "@/shared/files/kind"
 import { type api } from "../../../../convex/_generated/api"
+import { type EditKind } from "../edit/state"
 import { type ConsoleDestination } from "../shell/location"
 
 type FolderTreeResult = FunctionReturnType<typeof api.folders.console.tree>
@@ -57,6 +58,18 @@ export type FiledResourceType = FunctionArgs<
 
 export function toFiledType(type: FolderResource["type"]): FiledResourceType {
   return type === "table" || type === "store" ? "collection" : type
+}
+
+/** What has only a name to change is renamed where it is read, the way a
+ *  folder is. A job is edited whole and a chat names itself, so neither is. */
+export function isRenamedInPlace(
+  resource: FolderResource
+): resource is FolderResource & { type: EditKind } {
+  return (
+    resource.type === "table" ||
+    resource.type === "store" ||
+    resource.type === "file"
+  )
 }
 
 /** How a filed resource presents in lists and drag ghosts. The parameter

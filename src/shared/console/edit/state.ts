@@ -2,7 +2,10 @@ import { createContext, useContext, useRef } from "react"
 import { type StoreSummary } from "../stores/types"
 import { type TableSummary } from "../tables/types"
 
-export type EditKind = "folder" | "table" | "store"
+/** What is made in place, named as it is created. */
+export type CreateKind = "folder" | "table" | "store"
+/** What is renamed in place: those, and a file, which arrives by upload. */
+export type EditKind = CreateKind | "file"
 export type EditSurface = "sidebar" | "contents" | "title" | "table" | "store"
 export type EditItem = {
   id: string
@@ -24,7 +27,7 @@ export type Editing = {
   claim: (target: string) => void
   begin: (item: EditItem, surface: EditSurface) => void
   create: (
-    kind: EditKind,
+    kind: CreateKind,
     parentId: string | undefined,
     surface: EditSurface
   ) => void

@@ -112,6 +112,7 @@ export function FileMenuItems({
   onMoveToFolder,
   onRemove,
   onUnfile,
+  renamesInPlace,
   withLinks,
 }: {
   file: { name: string; url: string | null }
@@ -122,6 +123,8 @@ export function FileMenuItems({
   onRemove: () => void
   /** Folder listings only: unfiling acts on the filing, not on the file. */
   onUnfile?: () => void
+  /** Folder listings only: the name is edited where it is read. */
+  renamesInPlace?: boolean
   /** Whether to lead with Open and Download. */
   withLinks: boolean
 }) {
@@ -134,6 +137,7 @@ export function FileMenuItems({
         onEdit={onEdit}
         onMoveToFolder={onMoveToFolder}
         onUnfile={onUnfile}
+        renamesInPlace={renamesInPlace}
       />
       <MenuItem disabled={isPending} onSelect={onRemove} variant="destructive">
         <Trash2 />

@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react"
+import { Check, type LucideIcon, X } from "lucide-react"
 import { type ReactNode, useEffect, useId, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,10 +10,13 @@ import { type EditItem, type EditSurface, useEditing } from "./state"
 /** Replaces the name, never nests an input inside its navigation link.
  *  A single mounted view claims the edit when the same item is repeated. */
 export function ItemName({
+  icon,
   item,
   surface,
   children,
 }: {
+  /** The row's own icon, where the kind alone does not decide it. */
+  icon?: LucideIcon
   item: EditItem
   surface: EditSurface
   children: ReactNode
@@ -21,7 +24,7 @@ export function ItemName({
   const editing = useEditing()
   const container = useRef<HTMLFieldSetElement>(null)
   const target = useId()
-  const Icon = editIcons[item.kind]
+  const Icon = icon ?? editIcons[item.kind]
   const match =
     editing?.edit?.item.id === item.id &&
     editing.edit.item.kind === item.kind &&

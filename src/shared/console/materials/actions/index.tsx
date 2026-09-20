@@ -25,6 +25,9 @@ export type MaterialMenuActions = {
   /** Folder listings only: leaving a folder acts on the filing, not on the
    *  material, so it belongs where the filing is on show. */
   onUnfile?: () => void
+  /** Folder listings only: the name is edited where it is read, so the
+   *  item opens nothing and drops its ellipsis. */
+  renamesInPlace?: boolean
 }
 
 export function MaterialMenuItems({
@@ -37,6 +40,7 @@ export function MaterialMenuItems({
   onRemove,
   onRestore,
   onUnfile,
+  renamesInPlace,
 }: MaterialMenuActions & { onRemove: () => void }) {
   const isArchived = material.archivedAt !== undefined
   const isPending = isDeleting || isRestoring
@@ -49,6 +53,7 @@ export function MaterialMenuItems({
         onEdit={onEdit}
         onMoveToFolder={onMoveToFolder}
         onUnfile={onUnfile}
+        renamesInPlace={renamesInPlace}
       />
       {isArchived ? (
         <MenuItem disabled={isPending} onSelect={onRestore}>
@@ -74,18 +79,20 @@ export function MaterialCoreItems({
   onEdit,
   onMoveToFolder,
   onUnfile,
+  renamesInPlace = false,
 }: {
   isPending: boolean
   onAccess: () => void
   onEdit: () => void
   onMoveToFolder: () => void
   onUnfile?: () => void
+  renamesInPlace?: boolean
 }) {
   return (
     <>
       <MenuItem disabled={isPending} onSelect={onEdit}>
         <Pencil />
-        Rename…
+        {renamesInPlace ? "Rename" : "Rename…"}
       </MenuItem>
       <MaterialFilingItems
         isPending={isPending}

@@ -10,7 +10,7 @@ import { getFunctionName } from "convex/server"
 import { toast } from "sonner"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { ItemName } from "@/shared/console/edit/name"
-import { type EditKind, useEditing } from "@/shared/console/edit/state"
+import { type CreateKind, useEditing } from "@/shared/console/edit/state"
 import { ConsoleEditing } from "./edit"
 
 const { create, rename, navigate } = vi.hoisted(() => ({
@@ -40,13 +40,13 @@ beforeEach(() => {
   rename.mockResolvedValue(null)
 })
 
-function setup(kind: EditKind, parentId?: string, sidebar = false) {
+function setup(kind: CreateKind, parentId?: string, sidebar = false) {
   function Controls({
     kind,
     parentId,
     sidebar,
   }: {
-    kind: EditKind
+    kind: CreateKind
     parentId?: string
     sidebar?: boolean
   }) {
@@ -213,4 +213,42 @@ test("failed creation clears its placeholder and allows another attempt", async 
   fireEvent.click(screen.getByText("New item"))
   await screen.findByRole("textbox")
   expect(create).toHaveBeenCalledTimes(2)
+})
+
+test("a filed file is renamed where it is read, through the files mutation", async () => {
+  function Row() {
+    const editing = useEditing()
+    const item = { id: "file-1", kind: "file" as const, name: "Invoice.pdf" }
+    return (
+      <>
+        <button onClick={() => editing?.begin(item, "contents")} type="button">
+          Rename
+        </button>
+        <ItemName item={item} surface="contents">
+          <a href="#file">{item.name}</a>
+        </ItemName>
+      </>
+    )
+  }
+  render(
+    <ConsoleEditing>
+      <Row />
+    </ConsoleEditing>
+  )
+
+  fireEvent.click(screen.getByText("Rename"))
+  const input = (await screen.findByRole("textbox")) as HTMLInputElement
+  expect(input.value).toBe("Invoice.pdf")
+  expect(screen.queryByRole("dialog")).toBeNull()
+
+  fireEvent.change(input, { target: { value: "Invoice March.pdf" } })
+  fireEvent.keyDown(input, { key: "Enter" })
+
+  await waitFor(() =>
+    expect(rename).toHaveBeenCalledExactlyOnceWith({
+      organizationId: "org-1",
+      fileId: "file-1",
+      name: "Invoice March.pdf",
+    })
+  )
 })
