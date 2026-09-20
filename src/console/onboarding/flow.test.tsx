@@ -29,6 +29,7 @@ const running = {
 
 function renderFlow(props: Partial<Parameters<typeof OnboardingFlow>[0]> = {}) {
   const callbacks = {
+    onApprove: vi.fn(async () => undefined),
     onCreate: vi.fn(async () => undefined),
     onDeclareTimezone: vi.fn(async () => undefined),
     onDiscover: vi.fn(async () => undefined),
@@ -41,6 +42,7 @@ function renderFlow(props: Partial<Parameters<typeof OnboardingFlow>[0]> = {}) {
       logo={<div>Logo</div>}
       name="Albin"
       organization="Copperline"
+      proposal={undefined}
       timezone={undefined}
       {...callbacks}
       {...props}
@@ -112,31 +114,86 @@ test("walks from the details to Jori reading the website", async () => {
   expect(onDiscover).toHaveBeenCalledWith("copperline.example")
 })
 
-test("skipping the website ends on the way into a chat, with no profile to review", () => {
+const ready = {
+  ...(running as object),
+  endedAt: 25_000,
+  status: "completed",
+  steps: [
+    {
+      completedAt: 25_000,
+      id: "summary",
+      kind: "summary",
+      label: "Drafting profile",
+      startedAt: 12_000,
+    },
+  ],
+} as unknown as OrganizationDiscovery
+
+const proposal = {
+  aliases: [],
+  domains: ["copperline.example"],
+  generatedAt: 0,
+  name: "Copperline Roofing",
+  sources: [{ primary: true, url: "https://copperline.example/" }],
+  summary: "Roofs and gutters.",
+  website: "https://copperline.example/",
+}
+
+test("skipping the website ends on a chat or the tools, with nothing to review", () => {
   const { onDiscover, onFinish } = renderFlow({ timezone: "Europe/Stockholm" })
 
   fireEvent.click(screen.getByRole("button", { name: "I'll do this later" }))
 
   expect(screen.getByText("Copperline is ready.")).toBeDefined()
-  expect(
-    screen.queryByRole("button", { name: "Review your profile" })
-  ).toBeNull()
   expect(onFinish).not.toHaveBeenCalled()
 
-  fireEvent.click(screen.getByRole("button", { name: "Start a chat" }))
+  fireEvent.click(screen.getByRole("button", { name: "Connect your tools" }))
+  expect(onFinish).toHaveBeenLastCalledWith("/integrations")
 
-  expect(onFinish).toHaveBeenCalledWith()
+  fireEvent.click(screen.getByRole("button", { name: "Start a chat" }))
+  expect(onFinish).toHaveBeenLastCalledWith()
   expect(onDiscover).not.toHaveBeenCalled()
 })
 
-test("a discovery already under way reopens on its step and ends at the profile", () => {
-  const { onFinish } = renderFlow({ discovery: running })
+test("what Jori drafted is corrected and kept inside the flow", async () => {
+  const { onApprove } = renderFlow({ discovery: ready, proposal })
+
+  fireEvent.click(screen.getByRole("button", { name: "Review profile" }))
+
+  // The draft arrives as plain fields, said to come from the site.
+  expect(screen.getByText("Does this sound like Copperline?")).toBeDefined()
+  expect(screen.getByText(/1 page on copperline[.]example/)).toBeDefined()
+  fireEvent.change(screen.getByLabelText("What you do"), {
+    target: { value: "Roofs, gutters, and a ten-year guarantee." },
+  })
+  fireEvent.click(screen.getByRole("button", { name: "Looks right" }))
+
+  await waitFor(() =>
+    expect(onApprove).toHaveBeenCalledExactlyOnceWith({
+      name: "Copperline Roofing",
+      summary: "Roofs, gutters, and a ten-year guarantee.",
+    })
+  )
+  expect(await screen.findByText("Copperline is ready.")).toBeDefined()
+})
+
+test("a draft can be left for later without keeping or discarding it", () => {
+  const { onApprove } = renderFlow({ discovery: ready, proposal })
+
+  fireEvent.click(screen.getByRole("button", { name: "Review profile" }))
+  fireEvent.click(screen.getByRole("button", { name: "Skip for now" }))
+
+  expect(screen.getByText("Copperline is ready.")).toBeDefined()
+  expect(onApprove).not.toHaveBeenCalled()
+})
+
+test("a discovery still under way reopens on its step and can be left running", () => {
+  renderFlow({ discovery: running })
 
   expect(screen.getByText("Exploring your website")).toBeDefined()
 
   // Discovery keeps going, so there is no waiting it out.
   fireEvent.click(screen.getByRole("button", { name: "Continue" }))
-  fireEvent.click(screen.getByRole("button", { name: "Review your profile" }))
 
-  expect(onFinish).toHaveBeenCalledWith("/context")
+  expect(screen.getByText("Copperline is ready.")).toBeDefined()
 })

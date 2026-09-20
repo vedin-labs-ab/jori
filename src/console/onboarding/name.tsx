@@ -13,6 +13,7 @@ export function NameStep({
   name,
   onCancel,
   onCreate,
+  pending,
 }: {
   /** What to call the person on their first organization. */
   name: string | undefined
@@ -21,10 +22,13 @@ export function NameStep({
   /** Creates and opens the organization. Opening it remounts onboarding on
    *  the next step, so the button keeps its spinner until then. */
   onCreate: (organization: string) => Promise<void>
+  /** The name already submitted, while the organization opens: the step
+   *  stands as it was left, busy, until onboarding moves on. */
+  pending?: string
 }) {
-  const [organization, setOrganization] = useState("")
+  const [organization, setOrganization] = useState(pending ?? "")
   const [error, setError] = useState<string>()
-  const [isCreating, setIsCreating] = useState(false)
+  const [isCreating, setIsCreating] = useState(pending !== undefined)
 
   const submit = async () => {
     if (organization.trim() === "") {
@@ -65,7 +69,7 @@ export function NameStep({
           <Input
             aria-describedby="onboarding-organization-error"
             aria-invalid={error === undefined ? undefined : true}
-            autoFocus
+            autoFocus={pending === undefined}
             disabled={isCreating}
             id="onboarding-organization"
             onChange={(event) => {

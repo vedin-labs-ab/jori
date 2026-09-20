@@ -14,7 +14,12 @@ import { ensureCurrentPerson } from "../persons/account"
 import { assertWorkspaceAvailable } from "../retention/access"
 import { createPersonActor } from "../shared/actor"
 import { type QueryLikeCtx } from "../shared/context"
-import { factsEqual, type OrganizationFacts, unique } from "./facts"
+import {
+  editedFacts,
+  factsEqual,
+  type OrganizationFacts,
+  unique,
+} from "./facts"
 import { organizationFacts, organizationSourceSnapshot } from "./schema"
 import {
   readApprovedSources,
@@ -35,7 +40,17 @@ export const get = query({
 })
 
 export const approve = mutation({
-  args: { organizationId: v.string() },
+  args: {
+    organizationId: v.string(),
+    /** What the person changed while reviewing: a field given here replaces
+     *  the draft's, and one given blank clears it. */
+    edits: v.optional(
+      v.object({
+        name: v.optional(v.string()),
+        summary: v.optional(v.string()),
+      })
+    ),
+  },
   handler: async (ctx, args) => {
     const identity = await requireOrganizationAccess(ctx, args.organizationId)
     const personId = await ensureCurrentPerson(ctx, args.organizationId)
@@ -47,7 +62,7 @@ export const approve = mutation({
 
     const now = Date.now()
     await ctx.db.patch(profile._id, {
-      ...derivedFacts(profile.proposed),
+      ...derivedFacts({ ...profile.proposed, ...editedFacts(args.edits) }),
       proposed: undefined,
       approvedAt: now,
       approvedBy: createPersonActor(personId, readUserProfile(identity)),

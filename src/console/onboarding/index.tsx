@@ -1,5 +1,6 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router"
 import { useAction, useMutation, useQuery } from "convex/react"
+import { type ReactNode, useEffect } from "react"
 import { ChangeOrganizationLogo } from "@/components/auth/organization/change-organization-logo"
 import { UserInvitations } from "@/components/auth/organization/user-invitations"
 import { UserButton } from "@/components/auth/user/user-button"
@@ -17,14 +18,15 @@ import { SidebarUserButton } from "../shell/account"
 import { SidebarOrganizationSwitcher } from "../shell/organization"
 import { OnboardingFlow } from "./flow"
 import { OnboardingFrame } from "./frame"
+import { beginHandoff, endHandoff, type OnboardingHandoff } from "./handoff"
+import { NameStep } from "./name"
+import { OnboardingStage } from "./stage"
+import { onboardingSteps } from "./steps"
 
 /** Onboarding bound to the session and Convex: for the organization named,
  *  which has not been through it, or with none named, for one about to be
  *  created. */
 export function Onboarding({ organizationId }: { organizationId?: string }) {
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  })
   const navigate = useNavigate()
   const session = useSession()
   const active = useActiveOrganization()
@@ -40,6 +42,74 @@ export function Onboarding({ organizationId }: { organizationId?: string }) {
     organizationId !== undefined &&
     (discovery === undefined || profile === undefined)
 
+  // The step that waited out the remount has done its job.
+  useEffect(endHandoff, [])
+
+  return (
+    <OnboardingChrome alone={alone} fresh={organizationId === undefined}>
+      {loading ? null : (
+        <OnboardingFlow
+          discovery={discovery ?? null}
+          invitations={alone ? <UserInvitations /> : undefined}
+          logo={<ChangeOrganizationLogo />}
+          name={session.data?.user.name.trim().split(/\s+/)[0] || undefined}
+          onApprove={actions.approve}
+          onCancel={alone ? undefined : () => void navigate({ to: "/chat" })}
+          onCreate={(name) => createOrganization(name, alone)}
+          onDeclareTimezone={actions.declareTimezone}
+          onDiscover={actions.discover}
+          onFinish={(destination) => void actions.finish(destination)}
+          organization={organization}
+          proposal={profile?.proposed}
+          timezone={profile?.declared?.timezone}
+        />
+      )}
+    </OnboardingChrome>
+  )
+}
+
+/** The name step as it was submitted, held on screen while the new
+ *  organization opens. The console's gates show it in place of their loader,
+ *  so creating an organization never blanks the screen. */
+export function OnboardingHandoffStep({
+  handoff,
+}: {
+  handoff: OnboardingHandoff
+}) {
+  return (
+    <OnboardingChrome alone={handoff.alone} fresh>
+      <OnboardingStage
+        mood="working"
+        position={1}
+        settled
+        stepKey="name"
+        total={onboardingSteps.length}
+      >
+        <NameStep
+          name={undefined}
+          onCancel={handoff.alone ? undefined : () => undefined}
+          onCreate={async () => undefined}
+          pending={handoff.name}
+        />
+      </OnboardingStage>
+    </OnboardingChrome>
+  )
+}
+
+/** The frame with the session's own account and switcher in it. */
+function OnboardingChrome({
+  alone,
+  children,
+  fresh,
+}: {
+  alone: boolean
+  children: ReactNode
+  fresh: boolean
+}) {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+
   return (
     <>
       <SkipToContent />
@@ -52,31 +122,17 @@ export function Onboarding({ organizationId }: { organizationId?: string }) {
           )
         }
         contentId={mainContentId}
-        fresh={organizationId === undefined}
+        fresh={fresh}
         pathname={pathname}
         switcher={
           alone ? undefined : (
             <SidebarOrganizationSwitcher
-              onboarding={organizationId === undefined ? "new" : "current"}
+              onboarding={fresh ? "new" : "current"}
             />
           )
         }
       >
-        {loading ? null : (
-          <OnboardingFlow
-            discovery={discovery ?? null}
-            invitations={alone ? <UserInvitations /> : undefined}
-            logo={<ChangeOrganizationLogo />}
-            name={session.data?.user.name.trim().split(/\s+/)[0] || undefined}
-            onCancel={alone ? undefined : () => void navigate({ to: "/chat" })}
-            onCreate={createOrganization}
-            onDeclareTimezone={actions.declareTimezone}
-            onDiscover={actions.discover}
-            onFinish={(destination) => void actions.finish(destination)}
-            organization={organization}
-            timezone={profile?.declared?.timezone}
-          />
-        )}
+        {children}
       </OnboardingFrame>
     </>
   )
@@ -89,6 +145,7 @@ function useOnboarding(organizationId: string | undefined) {
   const discover = useAction(api.organization.onboarding.discover)
   const complete = useAction(api.organization.onboarding.complete)
   const declareTimezone = useMutation(api.organization.profile.declareTimezone)
+  const approve = useMutation(api.organization.profile.approve)
   const navigate = useNavigate()
   const active = useActiveOrganization()
 
@@ -103,7 +160,10 @@ function useOnboarding(organizationId: string | undefined) {
   return {
     discovery: useQuery(api.organization.discovery.get, scope),
     profile: useQuery(api.organization.profile.get, scope),
-    finish: async (destination: "/chat" | "/context" = "/chat") => {
+    approve: async (edits: { name: string; summary: string }) => {
+      await approve({ organizationId: onboarded(), edits })
+    },
+    finish: async (destination: "/chat" | "/integrations" = "/chat") => {
       try {
         await complete({ organizationId: onboarded() })
         await navigate({ to: destination })
@@ -124,8 +184,9 @@ function useOnboarding(organizationId: string | undefined) {
 
 /** Creates the organization and opens it. Opening starts the session's
  *  connection over, which remounts onboarding on the new organization's
- *  next step. */
-async function createOrganization(name: string) {
+ *  next step; the name step is handed off first, so it stays on screen
+ *  until then. */
+async function createOrganization(name: string, alone: boolean) {
   // Better Auth requires a unique slug; Jori never shows one, so it is
   // generated rather than asked for.
   const { data, error } = await authClient.organization.create({
@@ -137,5 +198,12 @@ async function createOrganization(name: string) {
     throw new Error(error?.message ?? "Couldn't create the organization.")
   }
 
-  await activateOrganization(data.id)
+  beginHandoff({ alone, name })
+
+  try {
+    await activateOrganization(data.id)
+  } catch (caught) {
+    endHandoff()
+    throw caught
+  }
 }

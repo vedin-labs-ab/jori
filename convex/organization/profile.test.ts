@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 import { type Doc } from "../_generated/dataModel"
-import { factsEqual } from "./facts"
+import { editedFacts, factsEqual } from "./facts"
 import { approvedFacts, derivedFacts } from "./profile"
 
 function buildProfile(
@@ -56,5 +56,21 @@ describe("approvedFacts", () => {
       true
     )
     expect(derivedFacts(withDeclared).domains).toEqual(["acme.com"])
+  })
+})
+
+describe("editedFacts", () => {
+  test("a reviewer's text replaces the draft's, trimmed, and blank clears it", () => {
+    expect(editedFacts({ name: "  Copperline  ", summary: " " })).toEqual({
+      name: "Copperline",
+      summary: undefined,
+    })
+  })
+
+  test("a field the reviewer left alone keeps the draft's", () => {
+    expect(editedFacts({ summary: "Roofing, done right." })).toEqual({
+      summary: "Roofing, done right.",
+    })
+    expect(editedFacts(undefined)).toEqual({})
   })
 })

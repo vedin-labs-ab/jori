@@ -12,7 +12,8 @@ import {
 } from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
 import { IntegrationCallbackToasts } from "./integrations/callback"
-import { Onboarding } from "./onboarding"
+import { Onboarding, OnboardingHandoffStep } from "./onboarding"
+import { readHandoff } from "./onboarding/handoff"
 import { readOnboarded } from "./onboarding/state"
 import { OrganizationContext, useOrganizationId } from "./organization/context"
 import { OrganizationSession } from "./organization/session"
@@ -62,7 +63,15 @@ function UnframedConsolePage({
   const convex = useConvexSession()
   const active = useActiveOrganization()
   const organizations = useListOrganizations()
-  const loader = loadingFallback ?? <FullscreenSkeletonLoader />
+  // Creating an organization remounts the console from here down. The step
+  // that did it stands in for the loader, so the screen never blanks.
+  const handoff = readHandoff()
+  const loader =
+    handoff === undefined ? (
+      (loadingFallback ?? <FullscreenSkeletonLoader />)
+    ) : (
+      <OnboardingHandoffStep handoff={handoff} />
+    )
 
   if (
     session.isPending ||

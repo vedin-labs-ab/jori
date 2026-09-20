@@ -34,3 +34,15 @@ export function unique(values: string[]) {
 function clean(value: string | undefined) {
   return optionalString(value) ?? null
 }
+
+/** The reviewer's text, trimmed; a field left out keeps the draft's. */
+export function editedFacts(
+  edits: { name?: string; summary?: string } | undefined
+) {
+  return {
+    ...(edits?.name === undefined ? {} : { name: optionalString(edits.name) }),
+    ...(edits?.summary === undefined
+      ? {}
+      : { summary: optionalString(edits.summary) }),
+  }
+}

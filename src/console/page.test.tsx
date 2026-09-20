@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
+import { beginHandoff, endHandoff } from "./onboarding/handoff"
 import { useOrganizationId } from "./organization/context"
 import { ConsolePage } from "./page"
 
@@ -67,6 +68,9 @@ vi.mock("@/shared/console/time", async (original) => ({
 vi.mock("./onboarding", () => ({
   Onboarding: ({ organizationId }: { organizationId?: string }) => (
     <div>Onboarding {organizationId ?? "a new organization"}</div>
+  ),
+  OnboardingHandoffStep: ({ handoff }: { handoff: { name: string } }) => (
+    <div>Creating {handoff.name}</div>
   ),
 }))
 vi.mock("./integrations/callback", () => ({
@@ -143,6 +147,20 @@ test("a page that starts a new organization onboards one beside an onboarded one
 
   expect(await screen.findByText("Onboarding a new organization")).toBeDefined()
   expect(screen.queryByText("Console")).toBeNull()
+})
+
+test("creating an organization keeps its step on screen in place of the loader", () => {
+  beginHandoff({ alone: true, name: "Copperline" })
+
+  try {
+    // The gates are still resolving the organization that was just made.
+    render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+
+    expect(screen.getByText("Creating Copperline")).toBeDefined()
+    expect(screen.queryByText("Loading console")).toBeNull()
+  } finally {
+    endHandoff()
+  }
 })
 
 test("a nested page reuses the console chrome and gate queries", async () => {
