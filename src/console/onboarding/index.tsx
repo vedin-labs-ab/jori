@@ -118,9 +118,9 @@ function useOnboarding(organizationId: string | undefined) {
   }
 }
 
-/** Creates the organization and opens it. Opening reloads the page, since
- *  the Convex token carries the organization claim and is minted per load;
- *  the reload lands on the new organization's next onboarding step. */
+/** Creates the organization and opens it. Opening starts the session's
+ *  connection over, which remounts onboarding on the new organization's
+ *  next step. */
 async function createOrganization(name: string) {
   // Better Auth requires a unique slug; Jori never shows one, so it is
   // generated rather than asked for.

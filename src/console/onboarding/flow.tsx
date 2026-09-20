@@ -8,10 +8,11 @@ import {
 } from "../context/organization/discovery/website"
 import { type OrganizationDiscovery } from "../context/organization/types"
 import { DetailsStep } from "./details"
+import { DoneStep } from "./done"
 import { NameStep } from "./name"
 import { OnboardingStep } from "./step"
 
-const steps = ["name", "details", "website", "working"] as const
+const steps = ["name", "details", "website", "working", "done"] as const
 
 type Step = (typeof steps)[number]
 
@@ -38,8 +39,9 @@ type Props = {
 }
 
 /** The onboarding sequence, one ask per step: the organization's name, its
- *  logo and timezone, its website, then Jori reading it. Creating the
- *  organization reloads the page, so the step shown first is read from what
+ *  logo and timezone, its website, Jori reading it, then the way into the
+ *  console. Creating the
+ *  organization remounts the flow, so the step shown first is read from what
  *  the organization already has, and a reload never asks twice.
  *
  *  Props in, callbacks out: the console binds it to the session and Convex. */
@@ -84,7 +86,7 @@ export function OnboardingFlow(props: Props) {
             <WebsiteStep
               onDiscover={props.onDiscover}
               onDone={() => setStep("working")}
-              onSkip={() => props.onFinish()}
+              onSkip={() => setStep("done")}
               organization={props.organization}
             />
           ) : null}
@@ -92,9 +94,19 @@ export function OnboardingFlow(props: Props) {
             <DiscoveryWorkingStep
               discovery={props.discovery}
               layout={OnboardingStep}
-              leaveLabel="Continue to Jori"
-              onClose={() => props.onFinish()}
-              onReviewProfile={() => props.onFinish("/context")}
+              leaveLabel="Continue"
+              onClose={() => setStep("done")}
+            />
+          ) : null}
+          {step === "done" ? (
+            <DoneStep
+              onChat={() => props.onFinish()}
+              onReview={
+                props.discovery === null
+                  ? undefined
+                  : () => props.onFinish("/context")
+              }
+              organization={props.organization ?? "Your organization"}
             />
           ) : null}
         </div>

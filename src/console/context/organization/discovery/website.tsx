@@ -140,8 +140,8 @@ export function DiscoveryWorkingStep({
 }: {
   discovery: OrganizationDiscovery | undefined
   layout?: DiscoveryStepLayout
-  /** How this host names leaving: offered while discovery runs, where no
-   *  dialog close does, and after it fails. */
+  /** How this host names moving on: offered while discovery runs, where
+   *  no dialog close does, and once it has ended either way. */
   leaveLabel?: string
   onClose: () => void
   onReviewProfile?: () => void
@@ -231,7 +231,7 @@ function workingDescription(discovery: OrganizationDiscovery | undefined) {
 
 function workingActionLabel({
   failed,
-  leaveLabel = "Close",
+  leaveLabel,
   ready,
   reviewable,
 }: {
@@ -245,11 +245,11 @@ function workingActionLabel({
   }
 
   if (failed) {
-    return leaveLabel
+    return leaveLabel ?? "Close"
   }
 
   if (ready) {
-    return "Done"
+    return leaveLabel ?? "Done"
   }
 
   return "Extracting"

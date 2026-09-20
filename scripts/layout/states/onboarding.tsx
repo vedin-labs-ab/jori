@@ -9,8 +9,8 @@ type Discovery = NonNullable<OrganizationDiscovery>
 
 /** Onboarding with nothing behind it: `onboarding-<step>` stands alone,
  *  `onboarding-<step>-switcher` keeps the sidebar of a person with other
- *  organizations. The steps are name, details, website, working, ready, and
- *  failed; `-error` refuses whatever the step submits. */
+ *  organizations. The steps are name, details, website, working, ready,
+ *  failed, and done (a click on from any of the last three); `-error` refuses whatever the step submits. */
 export function OnboardingState({ state }: { state: string }) {
   const [, step, ...rest] = state.split("-")
   const switcher = rest.includes("switcher")

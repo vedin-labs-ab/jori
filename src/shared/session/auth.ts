@@ -12,6 +12,7 @@ import { organizationClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
 import { useConvexAuth } from "convex/react"
 import { regionConfig, requireRegionOrigin } from "../region/config"
+import { reconnect } from "./epoch"
 
 /** The single Better Auth client. Jori components read session and
  *  organization state through the hooks below so tests can mock one seam. */
@@ -73,13 +74,18 @@ export function useConvexSession() {
   }
 }
 
-/** Activates an organization and reloads the current console route. The
- *  Convex JWT carries the active organization claim and is cached per
- *  session, so a full navigation is the reliable way to re-mint it. */
+/** Activates an organization in place. The Convex JWT carries the active
+ *  organization claim, so the connection starts over to mint one for the new
+ *  claim, and what the cache held about the old organization is forgotten in
+ *  the same tick: the console holds its loader until both are known again,
+ *  and never pairs one organization with the other's token. */
 export async function activateOrganization(organizationId: string | null) {
   await authClient.organization.setActive({
     organizationId,
     fetchOptions: { throw: true },
   })
-  window.location.reload()
+  void authQueryClient.resetQueries({
+    predicate: (query) => query.queryKey.includes("organization"),
+  })
+  reconnect()
 }

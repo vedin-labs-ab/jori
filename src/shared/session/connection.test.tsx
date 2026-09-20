@@ -2,7 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { useEffect } from "react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { authQueryClient, useConvexSession } from "./auth"
+import { activateOrganization, authQueryClient, useConvexSession } from "./auth"
 import { SessionConnection } from "./connection"
 
 const state = vi.hoisted(() => ({
@@ -12,6 +12,7 @@ const state = vi.hoisted(() => ({
   },
   refetch: vi.fn(async () => undefined),
   token: vi.fn(async () => ({ data: { token: "token" } })),
+  setActive: vi.fn(async () => undefined),
   setAuth: vi.fn(),
   clearAuth: vi.fn(),
   reportAuth: (_authenticated: boolean) => {},
@@ -22,6 +23,7 @@ vi.mock("better-auth/react", () => ({
   createAuthClient: () => ({
     useSession: () => ({ ...state.session, refetch: state.refetch }),
     convex: { token: state.token },
+    organization: { setActive: state.setActive },
   }),
 }))
 vi.mock("../region/config", () => ({
@@ -105,6 +107,26 @@ test("a lost token closes protected queries and reconnects without reloading", a
   expect(authQueryClient.invalidateQueries).toHaveBeenCalledTimes(1)
   expect(state.token).toHaveBeenCalledTimes(2)
   expect(screen.getByText("Workspace")).toBeDefined()
+})
+
+test("activating an organization mints its token in place and forgets the old one", async () => {
+  const active = ["auth", "user", "id", "organization", "active", null]
+  await openWorkspace()
+  authQueryClient.setQueryData(active, { id: "previous" })
+  authQueryClient.setQueryData(["auth", "session"], { id: "session" })
+
+  await act(() => activateOrganization("next"))
+
+  expect(state.setActive).toHaveBeenCalledWith({
+    organizationId: "next",
+    fetchOptions: { throw: true },
+  })
+  // The workspace remounts on a fresh token; the page never reloads.
+  expect(unmount).toHaveBeenCalledTimes(1)
+  expect(state.token).toHaveBeenCalledTimes(2)
+  expect(screen.getByText("Workspace")).toBeDefined()
+  expect(authQueryClient.getQueryData(active)).toBeUndefined()
+  expect(authQueryClient.getQueryData(["auth", "session"])).toBeDefined()
 })
 
 test("routine rotation and paused token refresh preserve the mounted workspace", async () => {

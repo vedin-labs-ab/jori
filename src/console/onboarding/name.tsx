@@ -18,8 +18,8 @@ export function NameStep({
   name: string | undefined
   /** Backs out, for a person who has an organization to go back to. */
   onCancel?: () => void
-  /** Creates and opens the organization. Opening it reloads, so a resolved
-   *  promise is never seen and the button keeps its spinner. */
+  /** Creates and opens the organization. Opening it remounts onboarding on
+   *  the next step, so the button keeps its spinner until then. */
   onCreate: (organization: string) => Promise<void>
 }) {
   const [organization, setOrganization] = useState("")

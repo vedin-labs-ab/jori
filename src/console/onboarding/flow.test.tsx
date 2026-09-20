@@ -112,21 +112,31 @@ test("walks from the details to Jori reading the website", async () => {
   expect(onDiscover).toHaveBeenCalledWith("copperline.example")
 })
 
-test("skipping the website leaves onboarding without a destination", () => {
+test("skipping the website ends on the way into a chat, with no profile to review", () => {
   const { onDiscover, onFinish } = renderFlow({ timezone: "Europe/Stockholm" })
 
   fireEvent.click(screen.getByRole("button", { name: "I'll do this later" }))
+
+  expect(screen.getByText("Copperline is ready.")).toBeDefined()
+  expect(
+    screen.queryByRole("button", { name: "Review your profile" })
+  ).toBeNull()
+  expect(onFinish).not.toHaveBeenCalled()
+
+  fireEvent.click(screen.getByRole("button", { name: "Start a chat" }))
 
   expect(onFinish).toHaveBeenCalledWith()
   expect(onDiscover).not.toHaveBeenCalled()
 })
 
-test("a discovery already under way reopens on the last step", () => {
+test("a discovery already under way reopens on its step and ends at the profile", () => {
   const { onFinish } = renderFlow({ discovery: running })
 
   expect(screen.getByText("Exploring your website")).toBeDefined()
 
-  fireEvent.click(screen.getByRole("button", { name: "Continue to Jori" }))
+  // Discovery keeps going, so there is no waiting it out.
+  fireEvent.click(screen.getByRole("button", { name: "Continue" }))
+  fireEvent.click(screen.getByRole("button", { name: "Review your profile" }))
 
-  expect(onFinish).toHaveBeenCalledWith()
+  expect(onFinish).toHaveBeenCalledWith("/context")
 })

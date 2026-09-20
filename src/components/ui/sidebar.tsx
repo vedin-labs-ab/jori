@@ -746,5 +746,6 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
+  storedSidebarOpen,
   useSidebar,
 }
