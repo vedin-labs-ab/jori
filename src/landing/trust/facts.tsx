@@ -15,7 +15,8 @@ import {
   UserCheck,
   Users,
 } from "lucide-react"
-import { Definition, Jori, Region, Section } from "../section"
+import { Jori } from "@/shared/brand"
+import { Definition, Region, Section } from "../section"
 import { Subprocessors } from "./subprocessors"
 
 export function ScopeSection() {

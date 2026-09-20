@@ -1,11 +1,12 @@
 import { CircleDotDashed } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
+import { Jori } from "@/shared/brand"
 import { ProviderLogo } from "@/shared/logo/provider"
 import { DemoConsole } from "../demo/console"
 import { chaseRunId } from "../demo/fixtures/runs"
 import { useDemoNavigation } from "../demo/navigation"
 import { DemoWorkspaceProvider } from "../demo/provider"
-import { Jori, Prop, Section } from "../section"
+import { Prop, Section } from "../section"
 
 export function ApprovalsSection() {
   return (

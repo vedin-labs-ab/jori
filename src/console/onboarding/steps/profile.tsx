@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
+import { Jori } from "@/shared/brand"
 import { countLabel } from "@/shared/console/count"
 import { showErrorToast } from "@/shared/console/error"
 import { sourceLabel } from "../../context/organization/discovery/url"
@@ -47,7 +48,12 @@ export function ProfileStep({
       }}
     >
       <OnboardingStep
-        description={`${readFrom(proposal)} Fix anything that's off. Jori starts every job from this.`}
+        description={
+          <>
+            <Jori tilt="slight" /> {readFrom(proposal)} Fix anything that's off.
+            It's what every job builds on.
+          </>
+        }
         primary={
           <Button disabled={isSaving} type="submit">
             {isSaving ? <Spinner /> : null}
@@ -92,7 +98,8 @@ export function ProfileStep({
   )
 }
 
-/** Where the draft came from, said plainly: how much Jori read, and where. */
+/** Where the draft came from, said plainly: how much Jori read, and where.
+ *  It follows Jori's name, which the step sets as the mark. */
 function readFrom(proposal: ContextProposal) {
   const pages = proposal.sources?.length ?? 0
   // The site by name: a root address reads without its trailing slash.
@@ -103,11 +110,11 @@ function readFrom(proposal: ContextProposal) {
 
   if (pages === 0) {
     return site === undefined
-      ? "Jori drafted this from your website."
-      : `Jori drafted this from ${site}.`
+      ? "drafted this from your website."
+      : `drafted this from ${site}.`
   }
 
   return site === undefined
-    ? `Jori drafted this from ${countLabel(pages, "page")}.`
-    : `Jori drafted this from ${countLabel(pages, "page")} on ${site}.`
+    ? `drafted this from ${countLabel(pages, "page")}.`
+    : `drafted this from ${countLabel(pages, "page")} on ${site}.`
 }

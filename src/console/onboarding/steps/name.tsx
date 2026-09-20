@@ -4,6 +4,7 @@ import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
+import { Jori } from "@/shared/brand"
 import { readErrorMessage } from "@/shared/console/error"
 import { OnboardingStep } from "./layout"
 
@@ -93,8 +94,13 @@ function copy(first: boolean, name: string | undefined) {
   return {
     title:
       name === undefined ? "Welcome to Jori." : `Welcome to Jori, ${name}.`,
-    description:
-      "Jori is a shared drive for the work you hand to AI. Describe a job in plain words, say when it runs, and it runs. Start by naming your organization.",
+    description: (
+      <>
+        <Jori /> is a shared drive for the work you hand to AI. Describe a job
+        in plain words, say when it runs, and it runs. Start by naming your
+        organization.
+      </>
+    ),
   }
 }
 

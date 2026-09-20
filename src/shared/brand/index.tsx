@@ -97,3 +97,28 @@ function MarkArtwork() {
     </>
   )
 }
+
+const tilts = {
+  left: { mark: "-rotate-[9deg]", name: "rotate-[3deg]" },
+  right: { mark: "rotate-[8deg]", name: "-rotate-[3deg]" },
+  slight: { mark: "-rotate-[6deg]", name: "rotate-[2deg]" },
+  steep: { mark: "rotate-[11deg]", name: "-rotate-[4deg]" },
+}
+
+/** Jori named in a line of prose: the mark ahead of the name, the two set
+ *  at opposing angles, in the foreground so the pair stands out of a muted
+ *  paragraph. It is sized in ems, so it fits whatever text it sits in. A
+ *  paragraph names Jori this way once at most. */
+export function Jori({ tilt = "left" }: { tilt?: keyof typeof tilts }) {
+  return (
+    <span className="whitespace-nowrap font-semibold text-foreground">
+      <BrandIcon
+        className={cn(
+          "mr-[0.3em] inline-block size-[0.95em] align-[-0.15em]",
+          tilts[tilt].mark
+        )}
+      />
+      <span className={cn("inline-block", tilts[tilt].name)}>Jori</span>
+    </span>
+  )
+}

@@ -1,7 +1,8 @@
 import { getToolPermission } from "@contracts/permissions"
 import { Globe } from "lucide-react"
+import { Jori } from "@/shared/brand"
 import { ProviderLogo } from "@/shared/logo/provider"
-import { Jori, Prop, Section } from "../section"
+import { Prop, Section } from "../section"
 
 export function ModesSection() {
   return (

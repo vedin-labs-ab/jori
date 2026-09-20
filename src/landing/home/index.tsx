@@ -1,5 +1,5 @@
+import { Jori } from "@/shared/brand"
 import { DemoWorkspaceProvider } from "../demo/provider"
-import { Jori } from "../section"
 import { MarketingShell } from "../shell"
 import { Hero } from "./hero"
 import { Infrastructure } from "./infrastructure"

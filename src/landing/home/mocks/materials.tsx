@@ -1,11 +1,12 @@
 import { Database, File, Table2 } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Jori } from "@/shared/brand"
 import { DemoConsole } from "../../demo/console"
 import { notesFileId } from "../../demo/fixtures/materials/files"
 import { watchStoreId } from "../../demo/fixtures/materials/stores"
 import { renewalsTableId } from "../../demo/fixtures/materials/tables"
 import { useDemoNavigation } from "../../demo/navigation"
-import { Definition, Jori, Section } from "../../section"
+import { Definition, Section } from "../../section"
 
 /** One of each material the hero's job touches, at the page the console
  *  gives it, named for its kind with the icon the console files it under,

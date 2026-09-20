@@ -1,7 +1,6 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { cn } from "@/lib/utils"
-import { BrandIcon } from "@/shared/brand"
 import { RegionFlag } from "@/shared/region/flags"
 
 /**
@@ -183,28 +182,6 @@ export function Sigil({ kind }: { kind: keyof typeof sigils }) {
       )}
     >
       {sigil.glyph}
-    </span>
-  )
-}
-
-const tilts = {
-  left: { mark: "-rotate-[9deg]", name: "rotate-[3deg]" },
-  right: { mark: "rotate-[8deg]", name: "-rotate-[3deg]" },
-  slight: { mark: "-rotate-[6deg]", name: "rotate-[2deg]" },
-  steep: { mark: "rotate-[11deg]", name: "-rotate-[4deg]" },
-}
-
-/** Marketing mentions keep the mark and live name at opposing angles. */
-export function Jori({ tilt = "left" }: { tilt?: keyof typeof tilts }) {
-  return (
-    <span className="whitespace-nowrap font-semibold text-foreground">
-      <BrandIcon
-        className={cn(
-          "mr-[0.3em] inline-block size-[0.95em] align-[-0.15em]",
-          tilts[tilt].mark
-        )}
-      />
-      <span className={cn("inline-block", tilts[tilt].name)}>Jori</span>
     </span>
   )
 }

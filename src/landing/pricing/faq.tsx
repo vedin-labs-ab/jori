@@ -1,7 +1,8 @@
 import { formatUsd, interactiveGraceMicros } from "@contracts/billing"
 import { Link } from "@tanstack/react-router"
 import { type ReactNode } from "react"
-import { Jori, Section } from "../section"
+import { Jori } from "@/shared/brand"
+import { Section } from "../section"
 
 /**
  * Four questions, and only the four: the ones that would stop someone

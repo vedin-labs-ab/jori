@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
+import { Jori } from "@/shared/brand"
 import { DemoConsole } from "../../demo/console"
 import { chaseRunId } from "../../demo/fixtures/runs"
 import { useDemoNavigation } from "../../demo/navigation"
-import { Definition, Jori, Section } from "../../section"
+import { Definition, Section } from "../../section"
 
 /** The record: the Activity page over Copperline's runs, with the chase
  *  job's run open, a live run to stop, and an approval to decide. */

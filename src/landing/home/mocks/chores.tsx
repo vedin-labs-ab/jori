@@ -1,6 +1,7 @@
+import { Jori } from "@/shared/brand"
 import { DemoConsole } from "../../demo/console"
 import { useDemoNavigation } from "../../demo/navigation"
-import { Jori, Section } from "../../section"
+import { Section } from "../../section"
 
 /** The chores pillar: the Jobs page itself over Copperline's eight jobs.
  *  The list is the argument, so the section is the list and nothing else. */

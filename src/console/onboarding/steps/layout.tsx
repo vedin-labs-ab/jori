@@ -14,7 +14,7 @@ export function OnboardingStep({
   secondary,
 }: {
   title: string
-  description: string
+  description: ReactNode
   children?: ReactNode
   primary: ReactNode
   secondary?: ReactNode

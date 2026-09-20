@@ -21,7 +21,7 @@ import { discoveryFailed, discoveryReadyForReview } from "./progress/tasks"
  *  the page itself during onboarding. */
 export type DiscoveryStepLayout = ComponentType<{
   title: string
-  description: string
+  description: ReactNode
   children: ReactNode
   primary: ReactNode
   secondary?: ReactNode
@@ -63,7 +63,7 @@ export function WebsiteDiscoveryStep({
   website,
 }: {
   continueLabel?: string
-  description: string
+  description: ReactNode
   error: string | null
   inputId: string
   isSubmitting: boolean
@@ -213,7 +213,7 @@ function workingTitle({ failed, ready }: { failed: boolean; ready: boolean }) {
 
 function workingDescription(discovery: OrganizationDiscovery | undefined) {
   if (discoveryReadyForReview(discovery)) {
-    return "Review and approve what Jori drafted from your site."
+    return "Review and approve the profile drafted from your site."
   }
 
   if (discoveryFailed(discovery)) {

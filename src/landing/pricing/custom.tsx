@@ -1,6 +1,6 @@
 import { ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Jori } from "../section"
+import { Jori } from "@/shared/brand"
 
 /** The third folder is a conversation, not a plan, so it is not a tab. It
  *  is a dark green card in either scheme: the dark tokens, with the brand

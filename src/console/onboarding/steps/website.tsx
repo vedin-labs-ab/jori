@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Jori } from "@/shared/brand"
 import { reportWebsiteStartError } from "../../context/organization/discovery/url"
 import { WebsiteDiscoveryStep } from "../../context/organization/discovery/website"
 import { OnboardingStep } from "./layout"
@@ -34,7 +35,12 @@ export function WebsiteStep({
 
   return (
     <WebsiteDiscoveryStep
-      description="Jori reads only your public pages to learn what you do and how you describe it. Every job Jori runs starts from that."
+      description={
+        <>
+          <Jori tilt="right" /> reads only your public pages to learn what you
+          do and how you describe it. Every job starts from that.
+        </>
+      }
       error={error}
       inputId="onboarding-website"
       isSubmitting={isSubmitting}

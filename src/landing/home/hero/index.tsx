@@ -1,6 +1,7 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Jori } from "@/shared/brand"
 import { brandHeadline } from "@/shared/brand/content"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { GetStarted } from "../../cta"
@@ -9,7 +10,7 @@ import { folderId } from "../../demo/fixtures/folders"
 import { jobId } from "../../demo/fixtures/jobs"
 import { renewalsTableId } from "../../demo/fixtures/materials/tables"
 import { useDemoNavigation } from "../../demo/navigation"
-import { Jori, Mention } from "../../section"
+import { Mention } from "../../section"
 import { RenewalsThread } from "./thread"
 
 /** The console opens on the folder the thread beside it files into. */

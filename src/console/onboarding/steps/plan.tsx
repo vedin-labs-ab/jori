@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import { Jori } from "@/shared/brand"
 import { showErrorToast } from "@/shared/console/error"
 import { PurchaseAgreement } from "../../billing/agreement"
 import { CheckoutButton, PlanOffer } from "../../billing/plan"
@@ -39,7 +40,12 @@ export function PlanStep({
 
   return (
     <OnboardingStep
-      description={`Jori starts working once ${organization} is on a plan. There's only one, it covers everyone, and you can cancel any time.`}
+      description={
+        <>
+          <Jori tilt="steep" /> starts working once {organization} is on a plan.
+          There's only one, it covers everyone, and you can cancel any time.
+        </>
+      }
       primary={
         <CheckoutButton
           disabled={!accepted || isLeaving}

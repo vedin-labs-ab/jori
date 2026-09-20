@@ -1,4 +1,5 @@
-import { Definition, Jori, Region, Section } from "../section"
+import { Jori } from "@/shared/brand"
+import { Definition, Region, Section } from "../section"
 
 /** Where it runs. The exception used to hide in a tooltip; a reader
  *  weighing residency wants it in the list, beside the claim it limits. */

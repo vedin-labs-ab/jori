@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { Jori } from "@/shared/brand"
 import { ProviderLogo } from "@/shared/logo/provider"
 import { OnboardingStep } from "./layout"
 
@@ -27,7 +28,12 @@ export function DoneStep({
 }) {
   return (
     <OnboardingStep
-      description="Start with a chat. Tell Jori about something you do by hand, and turn it into a job that runs without you."
+      description={
+        <>
+          Start with a chat. Tell <Jori /> about something you do by hand, and
+          turn it into a job that runs without you.
+        </>
+      }
       primary={
         <Button autoFocus onClick={onChat}>
           Start a chat
@@ -54,8 +60,8 @@ export function DoneStep({
           ))}
         </ul>
         <p className="text-muted-foreground text-xs leading-relaxed">
-          Jori does more where your team already works. Connect Slack, GitHub,
-          Linear, and the rest whenever you like.
+          Jobs can work inside the tools your team already uses. Connect Slack,
+          GitHub, Linear, and the rest whenever you like.
         </p>
       </div>
     </OnboardingStep>

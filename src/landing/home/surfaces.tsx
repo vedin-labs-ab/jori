@@ -1,8 +1,9 @@
 import { integrationLabels, integrations } from "@contracts/integrations"
 import { CircleDot } from "lucide-react"
+import { Jori } from "@/shared/brand"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { Organization } from "../demo/organization"
-import { Chip, Jori, Mention, Prop, Section } from "../section"
+import { Chip, Mention, Prop, Section } from "../section"
 
 /** The surfaces: a mention in a thread is the other way in, and what comes
  *  back lands in the same folders. The two cards are message surfaces, not

@@ -1,4 +1,5 @@
-import { Jori, PageIntro } from "../section"
+import { Jori } from "@/shared/brand"
+import { PageIntro } from "../section"
 import { MarketingShell } from "../shell"
 import { Custom } from "./custom"
 import { Extras } from "./extras"
