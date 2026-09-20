@@ -62,3 +62,29 @@ test("domain validation describes its input and successful submission restores f
     screen.getByRole("button", { name: "Add" })
   )
 })
+
+test("domain save does not move focus after the user continues elsewhere", async () => {
+  let complete: (() => void) | undefined
+  declareDomain.mockImplementation(
+    () =>
+      new Promise<void>((resolve) => {
+        complete = resolve
+      })
+  )
+  render(
+    <>
+      <AddDomainControl organizationId="organization" />
+      <button type="button">Edit profile</button>
+    </>
+  )
+  fireEvent.click(screen.getByRole("button", { name: "Add" }))
+  fireEvent.change(screen.getByRole("textbox", { name: "Domain to add" }), {
+    target: { value: "example.com" },
+  })
+  fireEvent.click(screen.getByRole("button", { name: "Add" }))
+  const next = screen.getByRole("button", { name: "Edit profile" })
+  next.focus()
+  complete?.()
+  await waitFor(() => expect(screen.queryByRole("textbox")).toBeNull())
+  expect(document.activeElement).toBe(next)
+})

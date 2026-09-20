@@ -1,7 +1,7 @@
 import { parseWebsiteAddress } from "@contracts/website"
 import { useMutation } from "convex/react"
 import { Plus, X } from "lucide-react"
-import { useEffect, useId, useRef, useState } from "react"
+import { type Ref, useId, useLayoutEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { FieldError } from "@/components/ui/field"
@@ -35,9 +35,10 @@ export function AddDomainControl({
   const [error, setError] = useState<string | null>(null)
 
   const trigger = useRef<HTMLButtonElement>(null)
+  const form = useRef<HTMLFormElement>(null)
   const restoreFocus = useRef(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open && restoreFocus.current) {
       restoreFocus.current = false
       trigger.current?.focus()
@@ -45,7 +46,8 @@ export function AddDomainControl({
   }, [open])
 
   const close = () => {
-    restoreFocus.current = true
+    restoreFocus.current =
+      form.current?.contains(document.activeElement) ?? false
     setOpen(false)
     setValue("")
     setError(null)
@@ -87,6 +89,7 @@ export function AddDomainControl({
   return (
     <AddDomainForm
       error={error}
+      formRef={form}
       onChange={(next) => {
         setValue(next)
         setError(null)
@@ -100,12 +103,14 @@ export function AddDomainControl({
 
 function AddDomainForm({
   error,
+  formRef,
   onChange,
   onClose,
   onSubmit,
   value,
 }: {
   error: string | null
+  formRef: Ref<HTMLFormElement>
   onChange: (value: string) => void
   onClose: () => void
   onSubmit: () => void
@@ -115,6 +120,7 @@ function AddDomainForm({
 
   return (
     <form
+      ref={formRef}
       className="grid min-w-0 justify-items-end gap-2"
       onSubmit={(event) => {
         event.preventDefault()
