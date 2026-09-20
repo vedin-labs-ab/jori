@@ -14,7 +14,6 @@ import { Route as WorkspaceRouteImport } from './routes/_workspace'
 import { Route as ConsoleRouteImport } from './routes/console'
 import { Route as DeletionRouteImport } from './routes/deletion'
 import { Route as DpaRouteImport } from './routes/dpa'
-import { Route as NewRouteImport } from './routes/new'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SignInRouteImport } from './routes/sign-in'
@@ -26,6 +25,7 @@ import { Route as WorkspaceContextRouteImport } from './routes/_workspace/contex
 import { Route as WorkspaceFilesRouteImport } from './routes/_workspace/files'
 import { Route as WorkspaceFoldersRouteImport } from './routes/_workspace/folders'
 import { Route as WorkspaceIntegrationsRouteImport } from './routes/_workspace/integrations'
+import { Route as WorkspaceNewRouteImport } from './routes/_workspace/new'
 import { Route as WorkspaceRunsRouteImport } from './routes/_workspace/runs'
 import { Route as WorkspaceSkillsRouteImport } from './routes/_workspace/skills'
 import { Route as WorkspaceStoresRouteImport } from './routes/_workspace/stores'
@@ -74,11 +74,6 @@ const DeletionRoute = DeletionRouteImport.update({
 const DpaRoute = DpaRouteImport.update({
   id: '/dpa',
   path: '/dpa',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewRoute = NewRouteImport.update({
-  id: '/new',
-  path: '/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PricingRoute = PricingRouteImport.update({
@@ -134,6 +129,11 @@ const WorkspaceFoldersRoute = WorkspaceFoldersRouteImport.update({
 const WorkspaceIntegrationsRoute = WorkspaceIntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceNewRoute = WorkspaceNewRouteImport.update({
+  id: '/new',
+  path: '/new',
   getParentRoute: () => WorkspaceRoute,
 } as any)
 const WorkspaceRunsRoute = WorkspaceRunsRouteImport.update({
@@ -275,7 +275,6 @@ export interface FileRoutesByFullPath {
   '/console': typeof ConsoleRoute
   '/deletion': typeof DeletionRoute
   '/dpa': typeof DpaRoute
-  '/new': typeof NewRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
@@ -287,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/files': typeof WorkspaceFilesRouteWithChildren
   '/folders': typeof WorkspaceFoldersRouteWithChildren
   '/integrations': typeof WorkspaceIntegrationsRouteWithChildren
+  '/new': typeof WorkspaceNewRoute
   '/runs': typeof WorkspaceRunsRoute
   '/skills': typeof WorkspaceSkillsRoute
   '/stores': typeof WorkspaceStoresRouteWithChildren
@@ -318,13 +318,13 @@ export interface FileRoutesByTo {
   '/console': typeof ConsoleRoute
   '/deletion': typeof DeletionRoute
   '/dpa': typeof DpaRoute
-  '/new': typeof NewRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
   '/sign-out': typeof SignOutRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
+  '/new': typeof WorkspaceNewRoute
   '/runs': typeof WorkspaceRunsRoute
   '/skills': typeof WorkspaceSkillsRoute
   '/context/places': typeof WorkspaceContextPlacesRoute
@@ -356,7 +356,6 @@ export interface FileRoutesById {
   '/console': typeof ConsoleRoute
   '/deletion': typeof DeletionRoute
   '/dpa': typeof DpaRoute
-  '/new': typeof NewRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/sign-in': typeof SignInRoute
@@ -368,6 +367,7 @@ export interface FileRoutesById {
   '/_workspace/files': typeof WorkspaceFilesRouteWithChildren
   '/_workspace/folders': typeof WorkspaceFoldersRouteWithChildren
   '/_workspace/integrations': typeof WorkspaceIntegrationsRouteWithChildren
+  '/_workspace/new': typeof WorkspaceNewRoute
   '/_workspace/runs': typeof WorkspaceRunsRoute
   '/_workspace/skills': typeof WorkspaceSkillsRoute
   '/_workspace/stores': typeof WorkspaceStoresRouteWithChildren
@@ -401,7 +401,6 @@ export interface FileRouteTypes {
     | '/console'
     | '/deletion'
     | '/dpa'
-    | '/new'
     | '/pricing'
     | '/privacy'
     | '/sign-in'
@@ -413,6 +412,7 @@ export interface FileRouteTypes {
     | '/files'
     | '/folders'
     | '/integrations'
+    | '/new'
     | '/runs'
     | '/skills'
     | '/stores'
@@ -444,13 +444,13 @@ export interface FileRouteTypes {
     | '/console'
     | '/deletion'
     | '/dpa'
-    | '/new'
     | '/pricing'
     | '/privacy'
     | '/sign-in'
     | '/sign-out'
     | '/terms'
     | '/trust'
+    | '/new'
     | '/runs'
     | '/skills'
     | '/context/places'
@@ -481,7 +481,6 @@ export interface FileRouteTypes {
     | '/console'
     | '/deletion'
     | '/dpa'
-    | '/new'
     | '/pricing'
     | '/privacy'
     | '/sign-in'
@@ -493,6 +492,7 @@ export interface FileRouteTypes {
     | '/_workspace/files'
     | '/_workspace/folders'
     | '/_workspace/integrations'
+    | '/_workspace/new'
     | '/_workspace/runs'
     | '/_workspace/skills'
     | '/_workspace/stores'
@@ -526,7 +526,6 @@ export interface RootRouteChildren {
   ConsoleRoute: typeof ConsoleRoute
   DeletionRoute: typeof DeletionRoute
   DpaRoute: typeof DpaRoute
-  NewRoute: typeof NewRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   SignInRoute: typeof SignInRoute
@@ -573,13 +572,6 @@ declare module '@tanstack/react-router' {
       path: '/dpa'
       fullPath: '/dpa'
       preLoaderRoute: typeof DpaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/new': {
-      id: '/new'
-      path: '/new'
-      fullPath: '/new'
-      preLoaderRoute: typeof NewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pricing': {
@@ -657,6 +649,13 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/integrations'
       preLoaderRoute: typeof WorkspaceIntegrationsRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/new': {
+      id: '/_workspace/new'
+      path: '/new'
+      fullPath: '/new'
+      preLoaderRoute: typeof WorkspaceNewRouteImport
       parentRoute: typeof WorkspaceRoute
     }
     '/_workspace/runs': {
@@ -944,6 +943,7 @@ interface WorkspaceRouteChildren {
   WorkspaceFilesRoute: typeof WorkspaceFilesRouteWithChildren
   WorkspaceFoldersRoute: typeof WorkspaceFoldersRouteWithChildren
   WorkspaceIntegrationsRoute: typeof WorkspaceIntegrationsRouteWithChildren
+  WorkspaceNewRoute: typeof WorkspaceNewRoute
   WorkspaceRunsRoute: typeof WorkspaceRunsRoute
   WorkspaceSkillsRoute: typeof WorkspaceSkillsRoute
   WorkspaceStoresRoute: typeof WorkspaceStoresRouteWithChildren
@@ -958,6 +958,7 @@ const WorkspaceRouteChildren: WorkspaceRouteChildren = {
   WorkspaceFilesRoute: WorkspaceFilesRouteWithChildren,
   WorkspaceFoldersRoute: WorkspaceFoldersRouteWithChildren,
   WorkspaceIntegrationsRoute: WorkspaceIntegrationsRouteWithChildren,
+  WorkspaceNewRoute: WorkspaceNewRoute,
   WorkspaceRunsRoute: WorkspaceRunsRoute,
   WorkspaceSkillsRoute: WorkspaceSkillsRoute,
   WorkspaceStoresRoute: WorkspaceStoresRouteWithChildren,
@@ -976,7 +977,6 @@ const rootRouteChildren: RootRouteChildren = {
   ConsoleRoute: ConsoleRoute,
   DeletionRoute: DeletionRoute,
   DpaRoute: DpaRoute,
-  NewRoute: NewRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   SignInRoute: SignInRoute,

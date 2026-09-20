@@ -187,13 +187,15 @@ test("a draft can be left for later without keeping or discarding it", () => {
   expect(onApprove).not.toHaveBeenCalled()
 })
 
-test("a discovery still under way reopens on its step and can be left running", () => {
+test("a discovery under way reopens on its step, with no way past it until it ends", () => {
   renderFlow({ discovery: running })
 
   expect(screen.getByText("Exploring your website")).toBeDefined()
-
-  // Discovery keeps going, so there is no waiting it out.
-  fireEvent.click(screen.getByRole("button", { name: "Continue" }))
-
-  expect(screen.getByText("Copperline is ready.")).toBeDefined()
+  // Skipping is for before the site is read. Once Jori has started, the
+  // step waits for what it started.
+  expect(
+    (screen.getByRole("button", { name: /Extracting/ }) as HTMLButtonElement)
+      .disabled
+  ).toBe(true)
+  expect(screen.queryByRole("button", { name: "Continue" })).toBeNull()
 })

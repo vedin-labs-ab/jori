@@ -16,7 +16,6 @@ const state = vi.hoisted(() => ({
   setAuth: vi.fn(),
   clearAuth: vi.fn(),
   reportAuth: (_authenticated: boolean) => {},
-  reportRefresh: (_refreshing: boolean) => {},
 }))
 
 vi.mock("better-auth/react", () => ({
@@ -43,15 +42,12 @@ beforeEach(() => {
   state.refetch.mockReset().mockResolvedValue(undefined)
   state.token.mockReset().mockResolvedValue({ data: { token: "token" } })
   state.clearAuth.mockReset()
-  state.setAuth
-    .mockReset()
-    .mockImplementation((fetchToken, reportAuth, reportRefresh) => {
-      state.reportAuth = reportAuth
-      state.reportRefresh = reportRefresh
-      void fetchToken({ forceRefreshToken: true }).then(
-        (token: string | null) => reportAuth(Boolean(token))
-      )
-    })
+  state.setAuth.mockReset().mockImplementation((fetchToken, reportAuth) => {
+    state.reportAuth = reportAuth
+    void fetchToken({ forceRefreshToken: true }).then((token: string | null) =>
+      reportAuth(Boolean(token))
+    )
+  })
   unmount.mockClear()
 })
 
@@ -109,32 +105,41 @@ test("a lost token closes protected queries and reconnects without reloading", a
   expect(screen.getByText("Workspace")).toBeDefined()
 })
 
-test("activating an organization mints its token in place and forgets the old one", async () => {
-  const active = ["auth", "user", "id", "organization", "active", null]
+test("activating an organization swaps its token in place, with the workspace still mounted", async () => {
   await openWorkspace()
-  authQueryClient.setQueryData(active, { id: "previous" })
-  authQueryClient.setQueryData(["auth", "session"], { id: "session" })
+  const workspace = screen.getByText("Workspace")
+  const refetchQueries = vi
+    .spyOn(authQueryClient, "refetchQueries")
+    .mockResolvedValue(undefined)
 
-  await act(() => activateOrganization("next"))
+  await act(() => activateOrganization("next", { inPlace: true }))
 
   expect(state.setActive).toHaveBeenCalledWith({
     organizationId: "next",
     fetchOptions: { throw: true },
   })
-  // The workspace remounts on a fresh token; the page never reloads.
-  expect(unmount).toHaveBeenCalledTimes(1)
+  // A second token, minted for the new claim, and nothing torn down for it.
   expect(state.token).toHaveBeenCalledTimes(2)
-  expect(screen.getByText("Workspace")).toBeDefined()
-  expect(authQueryClient.getQueryData(active)).toBeUndefined()
-  expect(authQueryClient.getQueryData(["auth", "session"])).toBeDefined()
+  expect(screen.getByText("Workspace")).toBe(workspace)
+  expect(unmount).not.toHaveBeenCalled()
+  // The organization is read again only once Convex holds the new token.
+  expect(refetchQueries).toHaveBeenCalledOnce()
+  expect(state.setAuth.mock.invocationCallOrder[1]).toBeLessThan(
+    refetchQueries.mock.invocationCallOrder[0]
+  )
 })
 
-test("routine rotation and paused token refresh preserve the mounted workspace", async () => {
+test("routine token rotation preserves the mounted workspace", async () => {
   await openWorkspace()
   const workspace = screen.getByText("Workspace")
-  act(() => state.reportRefresh(true))
+  const fetchToken = state.setAuth.mock.calls[0][0]
+
+  // Convex rotates by asking its fetcher for a fresh token; React hears
+  // nothing of it.
+  await act(() => fetchToken({ forceRefreshToken: true }))
   await act(() => vi.advanceTimersByTimeAsync(60_000))
-  act(() => state.reportRefresh(false))
+
+  expect(state.token).toHaveBeenCalledTimes(2)
   expect(screen.getByText("Workspace")).toBe(workspace)
   expect(unmount).not.toHaveBeenCalled()
   expect(state.setAuth).toHaveBeenCalledTimes(1)

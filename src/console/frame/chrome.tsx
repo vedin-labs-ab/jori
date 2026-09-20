@@ -1,3 +1,4 @@
+import { useRouterState } from "@tanstack/react-router"
 import { type ReactNode, Suspense } from "react"
 import { ConsolePageLayout } from "@/shared/console/layout"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
@@ -12,8 +13,15 @@ import { ConsolePage } from "../page"
  * between a list and one material reads as a page load.
  */
 export default function WorkspaceChrome({ children }: { children: ReactNode }) {
+  // Starting an organization is a page of the workspace like any other, so
+  // the gate that onboards it is the one that then opens its console.
+  const creating = useRouterState({
+    select: (state) =>
+      state.matches.some((match) => match.routeId === "/_workspace/new"),
+  })
+
   return (
-    <ConsolePage>
+    <ConsolePage creating={creating}>
       {() => (
         <Suspense
           fallback={

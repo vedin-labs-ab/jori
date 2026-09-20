@@ -10,9 +10,9 @@ import { convexClient } from "@convex-dev/better-auth/client/plugins"
 import { QueryClient } from "@tanstack/react-query"
 import { organizationClient } from "better-auth/client/plugins"
 import { createAuthClient } from "better-auth/react"
-import { useConvexAuth } from "convex/react"
+import { useSyncExternalStore } from "react"
 import { regionConfig, requireRegionOrigin } from "../region/config"
-import { reconnect } from "./epoch"
+import { refreshConvexToken, useConvexConnection } from "./convex"
 
 /** The single Better Auth client. Jori components read session and
  *  organization state through the hooks below so tests can mock one seam. */
@@ -65,7 +65,7 @@ export function useListOrganizations() {
 /** Convex keeps confirmed sessions authenticated during token rotation. If
  * refresh fails, close query gates until SessionConnection reconnects. */
 export function useConvexSession() {
-  const { isAuthenticated, isLoading } = useConvexAuth()
+  const { isAuthenticated, isLoading } = useConvexConnection()
   const { data: session } = authClient.useSession()
 
   return {
@@ -74,18 +74,58 @@ export function useConvexSession() {
   }
 }
 
-/** Activates an organization in place. The Convex JWT carries the active
- *  organization claim, so the connection starts over to mint one for the new
- *  claim, and what the cache held about the old organization is forgotten in
- *  the same tick: the console holds its loader until both are known again,
- *  and never pairs one organization with the other's token. */
-export async function activateOrganization(organizationId: string | null) {
+/** Activates an organization without a page load. The Convex token carries
+ *  the active organization as a claim, so it is swapped for one minted from
+ *  the session as it now stands, and the organization queries are read again
+ *  only once Convex has accepted it: nothing ever pairs one organization
+ *  with the other's token.
+ *
+ *  Whatever is mounted for the old organization must be gone before its
+ *  queries run under the new claim, so the console holds its loader for the
+ *  length of the switch. `inPlace` skips that, for a caller that stays on
+ *  screen and has nothing scoped to the old organization: onboarding. */
+export async function activateOrganization(
+  organizationId: string | null,
+  { inPlace = false }: { inPlace?: boolean } = {}
+) {
   await authClient.organization.setActive({
     organizationId,
     fetchOptions: { throw: true },
   })
-  void authQueryClient.resetQueries({
-    predicate: (query) => query.queryKey.includes("organization"),
-  })
-  reconnect()
+  setSwitching(!inPlace)
+
+  try {
+    await refreshConvexToken()
+    await authQueryClient.refetchQueries({
+      predicate: (query) => query.queryKey.includes("organization"),
+    })
+  } finally {
+    setSwitching(false)
+  }
+}
+
+let switching = false
+const switchingListeners = new Set<() => void>()
+
+function setSwitching(next: boolean) {
+  if (switching !== next) {
+    switching = next
+
+    for (const listener of switchingListeners) {
+      listener()
+    }
+  }
+}
+
+/** Whether the console is between two organizations. */
+export function useOrganizationSwitching() {
+  return useSyncExternalStore(
+    (listener) => {
+      switchingListeners.add(listener)
+
+      return () => switchingListeners.delete(listener)
+    },
+    () => switching,
+    () => false
+  )
 }

@@ -41,6 +41,7 @@ vi.mock("@tanstack/react-router", async (importOriginal) => ({
 vi.mock("@/shared/session/auth", () => ({
   activateOrganization: auth.activateOrganization,
   useActiveOrganization: () => ({ data: auth.organizations[0] }),
+  useOrganizationSwitching: () => false,
   useListOrganizations: () => ({ data: auth.organizations }),
 }))
 

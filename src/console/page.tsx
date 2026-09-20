@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react"
-import { ShieldAlert } from "lucide-react"
+import { Building2, ShieldAlert } from "lucide-react"
 import { type ReactNode, useEffect } from "react"
+import { Button } from "@/components/ui/button"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
@@ -9,14 +10,14 @@ import {
   useAuthenticatedSession,
   useConvexSession,
   useListOrganizations,
+  useOrganizationSwitching,
 } from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
 import { IntegrationCallbackToasts } from "./integrations/callback"
-import { Onboarding, OnboardingHandoffStep } from "./onboarding"
-import { readHandoff } from "./onboarding/handoff"
+import { Onboarding } from "./onboarding"
 import { readOnboarded } from "./onboarding/state"
 import { OrganizationContext, useOrganizationId } from "./organization/context"
-import { OrganizationSession } from "./organization/session"
+import { useOrganizationSession } from "./organization/session"
 import { ConsoleShell } from "./shell"
 import { LaunchGate } from "./shell/gate"
 import { PublicConsoleFrame } from "./shell/public"
@@ -63,15 +64,7 @@ function UnframedConsolePage({
   const convex = useConvexSession()
   const active = useActiveOrganization()
   const organizations = useListOrganizations()
-  // Creating an organization remounts the console from here down. The step
-  // that did it stands in for the loader, so the screen never blanks.
-  const handoff = readHandoff()
-  const loader =
-    handoff === undefined ? (
-      (loadingFallback ?? <FullscreenSkeletonLoader />)
-    ) : (
-      <OnboardingHandoffStep handoff={handoff} />
-    )
+  const loader = loadingFallback ?? <FullscreenSkeletonLoader />
 
   if (
     session.isPending ||
@@ -95,9 +88,14 @@ function UnframedConsolePage({
   )
 }
 
-/** Resolves the active organization: renders the console once one is active,
- *  activates the first membership when none is, and otherwise offers
- *  creation alongside any pending invitations. */
+/** Resolves the active organization: renders the console once one is active
+ *  and onboarded, activates the first membership when none is active, and
+ *  otherwise onboards.
+ *
+ *  Onboarding stands in for the console, chrome and page alike: for a person
+ *  with no organization, for one the page says to start, and for an active
+ *  one that has not been through it. It is rendered from this one place, so
+ *  it stays mounted while the organization it is about comes into being. */
 function SignedInConsole({
   active,
   children,
@@ -115,7 +113,9 @@ function SignedInConsole({
   loader: ReactNode
   organizations: ReturnType<typeof useListOrganizations>
 }) {
-  if (convex.isLoading || active.isPending || organizations.isPending) {
+  const switching = useOrganizationSwitching()
+
+  if (isResolving(convex, active, organizations) || switching) {
     return loader
   }
 
@@ -123,87 +123,147 @@ function SignedInConsole({
     return <ConvexSessionError />
   }
 
-  if (active.data !== null && active.data !== undefined) {
-    const organizationId = active.data.id
-
-    return (
-      <OrganizationSession
-        key={organizationId}
-        loader={loader}
-        organizationId={organizationId}
-      >
-        {() => (
-          <OrganizationConsole
-            chrome={chrome}
-            creating={creating}
-            onboarded={readOnboarded(active.data?.metadata)}
-            organizationId={organizationId}
-          >
-            {children}
-          </OrganizationConsole>
-        )}
-      </OrganizationSession>
-    )
-  }
-
+  const organization = active.data ?? undefined
   const firstOrganizationId = organizations.data?.at(0)?.id
 
-  if (firstOrganizationId !== undefined) {
+  if (organization === undefined && firstOrganizationId !== undefined) {
     return <ActivateOrganization organizationId={firstOrganizationId} />
   }
 
-  return <NoOrganization />
+  return (
+    <OrganizationGate
+      chrome={chrome}
+      creating={creating}
+      loader={loader}
+      organization={organization}
+    >
+      {children}
+    </OrganizationGate>
+  )
 }
 
-/** The console for an active organization. Onboarding stands in for it,
- *  chrome and page alike: this organization's until it has been through it,
- *  and then a new one's where the page asks for that. */
-function OrganizationConsole({
+/** Onboarding or the console, for the active organization or for none. The
+ *  member is prepared in the organization once, here above both of its
+ *  views, so going from its onboarding to its console waits for nothing a
+ *  second time. */
+function OrganizationGate({
   children,
   chrome,
   creating,
-  onboarded,
-  organizationId,
+  loader,
+  organization,
 }: {
   children: (organizationId: string) => ReactNode
   chrome: "shell" | "none"
   creating: boolean
-  onboarded: boolean
+  loader: ReactNode
+  organization: { id: string; metadata?: unknown } | undefined
+}) {
+  const session = useOrganizationSession(organization?.id)
+
+  if (session.status === "failed") {
+    return <OrganizationSessionFailure onRetry={session.retry} />
+  }
+
+  const onboarded = readOnboarded(organization?.metadata)
+  const onboards = chrome === "shell" && (creating || !onboarded)
+
+  if (organization === undefined || onboards) {
+    return (
+      <FirstRun
+        isPrepared={session.status === "ready"}
+        organizationId={onboarded ? undefined : organization?.id}
+      />
+    )
+  }
+
+  if (session.status === "pending") {
+    return loader
+  }
+
+  return (
+    <OrganizationConsole chrome={chrome} organizationId={organization.id}>
+      {children}
+    </OrganizationConsole>
+  )
+}
+
+/** The console for a prepared, onboarded organization. */
+function OrganizationConsole({
+  children,
+  chrome,
+  organizationId,
+}: {
+  children: (organizationId: string) => ReactNode
+  chrome: "shell" | "none"
   organizationId: string
 }) {
-  const onboarding = chrome === "shell" && (creating || !onboarded)
   const content = (
     <OrganizationContext.Provider value={organizationId}>
       {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
-      {onboarding ? (
-        <Onboarding organizationId={onboarded ? undefined : organizationId} />
-      ) : (
-        children(organizationId)
-      )}
+      {children(organizationId)}
     </OrganizationContext.Provider>
   )
 
-  return chrome === "shell" && !onboarding ? (
-    <ConsoleShell>{content}</ConsoleShell>
+  return chrome === "shell" ? (
+    // Keyed, so one organization's console never carries into the next.
+    <ConsoleShell key={organizationId}>{content}</ConsoleShell>
   ) : (
     content
   )
 }
 
-/** No organization yet: either this address may open one, or Jori is not open
- *  to it and the useful thing left is the list. */
-function NoOrganization() {
-  const gate = useQuery(api.access.gate.status)
+function isResolving(
+  convex: ReturnType<typeof useConvexSession>,
+  active: ReturnType<typeof useActiveOrganization>,
+  organizations: ReturnType<typeof useListOrganizations>
+) {
+  return convex.isLoading || active.isPending || organizations.isPending
+}
 
-  if (gate === undefined) {
+/** Onboarding, behind the one question that comes before it: a person with
+ *  no organization may open one only if Jori is open to their address, and
+ *  otherwise the useful thing left is the list. Anyone who already has an
+ *  organization is past that. */
+function FirstRun({
+  isPrepared,
+  organizationId,
+}: {
+  isPrepared: boolean
+  organizationId: string | undefined
+}) {
+  const hasOrganization =
+    (useListOrganizations().data?.length ?? 0) > 0 ||
+    organizationId !== undefined
+  const gate = useQuery(api.access.gate.status, hasOrganization ? "skip" : {})
+
+  if (!hasOrganization && gate === undefined) {
     return <FullscreenSkeletonLoader />
   }
 
-  if (!gate.allowed) {
+  if (!hasOrganization && gate?.allowed === false) {
     return <LaunchGate email={gate.email} />
   }
 
-  return <Onboarding />
+  return <Onboarding isPrepared={isPrepared} organizationId={organizationId} />
+}
+
+/** Signed in, but the workspace could not be prepared. */
+function OrganizationSessionFailure({ onRetry }: { onRetry: () => void }) {
+  return (
+    <PublicConsoleFrame isSignedIn>
+      <ConsoleEmptyState
+        title="Couldn't prepare your workspace"
+        description="You're signed in, but workspace setup didn't finish."
+        icon={Building2}
+        action={
+          <Button onClick={onRetry} variant="outline">
+            Try again
+          </Button>
+        }
+      />
+    </PublicConsoleFrame>
+  )
 }
 
 function ConvexSessionError() {

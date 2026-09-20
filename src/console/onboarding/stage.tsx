@@ -1,6 +1,5 @@
 import { type ReactNode } from "react"
 import { Progress } from "@/components/ui/progress"
-import { cn } from "@/lib/utils"
 import { BrandFace, type BrandMood } from "@/shared/brand"
 
 /** Where every onboarding step stands: a narrow column centered in the main
@@ -12,7 +11,6 @@ export function OnboardingStage({
   footer,
   mood,
   position,
-  settled = false,
   stepKey,
   total,
 }: {
@@ -21,8 +19,6 @@ export function OnboardingStage({
   footer?: ReactNode
   mood: BrandMood
   position: number
-  /** Drawn in place with no entrance, for a step already on screen. */
-  settled?: boolean
   stepKey: string
   total: number
 }) {
@@ -40,10 +36,7 @@ export function OnboardingStage({
           />
         </div>
         <div
-          className={cn(
-            !settled &&
-              "motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:animate-in motion-safe:duration-300"
-          )}
+          className="motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:animate-in motion-safe:duration-300"
           key={stepKey}
         >
           {children}

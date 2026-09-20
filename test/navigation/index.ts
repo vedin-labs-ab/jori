@@ -29,6 +29,7 @@ vi.mock("@/shared/session/auth", () => ({
     data: { id: viewer.organizationId, metadata: { onboarded: true } },
     isPending: false,
   }),
+  useOrganizationSwitching: () => false,
   useListOrganizations: () => ({
     data: [{ id: viewer.organizationId }],
     isPending: false,

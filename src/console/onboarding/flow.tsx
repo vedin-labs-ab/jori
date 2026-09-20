@@ -47,9 +47,9 @@ type Props = {
 
 /** The onboarding sequence, one ask per step: the organization's name, its
  *  logo and timezone, its website, Jori reading it, what Jori drafted from
- *  it, then the way into the console. Creating the organization remounts
- *  the flow, so the step shown first is read from what the organization
- *  already has, and a reload never asks twice.
+ *  it, then the way into the console. It stays mounted from the first step
+ *  to the last; the step it opens on is read from what the organization
+ *  already has, so a reload never asks twice.
  *
  *  Props in, callbacks out: the console binds it to the session and Convex. */
 export function OnboardingFlow(props: Props) {
@@ -86,7 +86,10 @@ function SetupStep({
       <NameStep
         name={props.name}
         onCancel={props.onCancel}
-        onCreate={props.onCreate}
+        onCreate={async (organization) => {
+          await props.onCreate(organization)
+          onStep("details")
+        }}
       />
     )
   }

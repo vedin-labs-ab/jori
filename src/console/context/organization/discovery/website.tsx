@@ -140,8 +140,9 @@ export function DiscoveryWorkingStep({
 }: {
   discovery: OrganizationDiscovery | undefined
   layout?: DiscoveryStepLayout
-  /** How this host names moving on: offered while discovery runs, where
-   *  no dialog close does, and once it has ended either way. */
+  /** How this host names moving on once discovery has ended. While it
+   *  runs there is no way past it: a dialog can still be closed, and
+   *  onboarding waits for what it started. */
   leaveLabel?: string
   onClose: () => void
   onReviewProfile?: () => void
@@ -170,13 +171,6 @@ export function DiscoveryWorkingStep({
           {running ? <Loader2 className="animate-spin" /> : null}
           {workingActionLabel({ failed, leaveLabel, ready, reviewable })}
         </Button>
-      }
-      secondary={
-        running && leaveLabel !== undefined ? (
-          <Button onClick={onClose} variant="ghost">
-            {leaveLabel}
-          </Button>
-        ) : undefined
       }
       title={workingTitle({ failed, ready })}
     >
@@ -226,7 +220,7 @@ function workingDescription(discovery: OrganizationDiscovery | undefined) {
     return discovery?.errors[0] ?? "Discovery didn't finish."
   }
 
-  return "This usually takes under a minute, and it keeps going if you leave."
+  return "This usually takes under a minute."
 }
 
 function workingActionLabel({

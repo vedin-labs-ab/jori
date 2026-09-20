@@ -1,51 +1,62 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { beginHandoff, endHandoff } from "./onboarding/handoff"
 import { useOrganizationId } from "./organization/context"
 import { ConsolePage } from "./page"
 
-const { loading, mutate, organization, session } = vi.hoisted(() => ({
-  mutate: vi.fn(async () => undefined),
-  loading: {
-    activeOrganizationQueries: 0,
-    organizationListQueries: 0,
-  },
-  organization: {
-    id: "organization",
-    isResolved: false,
-    onboarded: true,
-  },
-  session: {
-    isPending: false,
-    isSignedIn: true,
-  },
-}))
+const { loading, mutate, onboardingMounts, organization, session } = vi.hoisted(
+  () => ({
+    mutate: vi.fn(async () => undefined),
+    loading: {
+      activeOrganizationQueries: 0,
+      organizationListQueries: 0,
+    },
+    organization: {
+      exists: true,
+      id: "organization",
+      isResolved: false,
+      onboarded: true,
+    },
+    onboardingMounts: { count: 0 },
+    session: {
+      isPending: false,
+      isSignedIn: true,
+    },
+  })
+)
 
 vi.mock("@/shared/session/auth", () => ({
   activateOrganization: vi.fn(),
   useActiveOrganization: () => {
     loading.activeOrganizationQueries += 1
 
-    return organization.isResolved
-      ? {
-          data: {
+    if (!organization.isResolved) {
+      return { data: undefined, isPending: true }
+    }
+
+    return {
+      data: organization.exists
+        ? {
             id: organization.id,
             metadata: { onboarded: organization.onboarded },
-          },
-          isPending: false,
-        }
-      : { data: undefined, isPending: true }
+          }
+        : null,
+      isPending: false,
+    }
   },
   useConvexSession: () =>
     organization.isResolved
       ? { isAuthenticated: true, isLoading: false }
       : { isAuthenticated: false, isLoading: true },
+  useOrganizationSwitching: () => false,
   useListOrganizations: () => {
     loading.organizationListQueries += 1
 
     return organization.isResolved
-      ? { data: [{ id: "organization" }], isPending: false }
+      ? {
+          data: organization.exists ? [{ id: "organization" }] : [],
+          isPending: false,
+        }
       : { data: undefined, isPending: true }
   },
   useAuthenticatedSession: () => ({
@@ -60,19 +71,25 @@ vi.mock("@/shared/loading", () => ({
 
 vi.mock("convex/react", () => ({
   useMutation: () => mutate,
+  useQuery: () => ({ allowed: true, email: null }),
 }))
 vi.mock("@/shared/console/time", async (original) => ({
   ...(await original<typeof import("@/shared/console/time")>()),
   localTimezone: () => "Europe/Stockholm",
 }))
-vi.mock("./onboarding", () => ({
-  Onboarding: ({ organizationId }: { organizationId?: string }) => (
-    <div>Onboarding {organizationId ?? "a new organization"}</div>
-  ),
-  OnboardingHandoffStep: ({ handoff }: { handoff: { name: string } }) => (
-    <div>Creating {handoff.name}</div>
-  ),
-}))
+vi.mock("./onboarding", async () => {
+  const { useEffect } = await import("react")
+
+  return {
+    Onboarding: ({ organizationId }: { organizationId?: string }) => {
+      useEffect(() => {
+        onboardingMounts.count += 1
+      }, [])
+
+      return <div>Onboarding {organizationId ?? "a new organization"}</div>
+    },
+  }
+})
 vi.mock("./integrations/callback", () => ({
   IntegrationCallbackToasts: () => null,
 }))
@@ -91,6 +108,8 @@ beforeEach(() => {
   organization.isResolved = false
   organization.id = "organization"
   organization.onboarded = true
+  organization.exists = true
+  onboardingMounts.count = 0
   session.isPending = false
   session.isSignedIn = true
   window.sessionStorage.clear()
@@ -149,18 +168,21 @@ test("a page that starts a new organization onboards one beside an onboarded one
   expect(screen.queryByText("Console")).toBeNull()
 })
 
-test("creating an organization keeps its step on screen in place of the loader", () => {
-  beginHandoff({ alone: true, name: "Copperline" })
+test("onboarding stays mounted while the organization it names comes into being", async () => {
+  organization.isResolved = true
+  organization.exists = false
+  const view = render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
 
-  try {
-    // The gates are still resolving the organization that was just made.
-    render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+  expect(await screen.findByText("Onboarding a new organization")).toBeDefined()
 
-    expect(screen.getByText("Creating Copperline")).toBeDefined()
-    expect(screen.queryByText("Loading console")).toBeNull()
-  } finally {
-    endHandoff()
-  }
+  // Naming it creates and activates the organization. The flow that asked
+  // carries on about it: nothing is torn down, so nothing flickers.
+  organization.exists = true
+  organization.onboarded = false
+  view.rerender(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
+
+  expect(await screen.findByText("Onboarding organization")).toBeDefined()
+  expect(onboardingMounts.count).toBe(1)
 })
 
 test("a nested page reuses the console chrome and gate queries", async () => {
