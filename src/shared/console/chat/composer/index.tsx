@@ -1,6 +1,7 @@
 import { type ModelSlug } from "@contracts/models/catalog"
 import { type ModelSelection } from "@contracts/models/selection"
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
+
 import {
   type FormEvent,
   type MouseEvent,
@@ -61,16 +62,16 @@ export const ChatComposer = memo(function ChatComposer({
   mentions?: MentionSources
   /** Takes each resource as it is mentioned, so a host with a pane can
    *  show what the person is talking about. */
-  onMention?: (target: MessageContext) => void
+  onMention?: (target: ReferenceTarget) => void
   /** Takes the model and effort the next run uses. */
   onSelect?: (selection: ModelSelection) => void
   /** Takes the text with its mention tokens, and the resources they
    *  name; a promise holds the draft, cleared on resolve, kept on reject. */
-  onSend: (text: string, references: MessageContext[]) => unknown
+  onSend: (text: string, references: ReferenceTarget[]) => unknown
   onStop: () => void
   /** Takes each resource whose chip is deleted, so a host that opened
    *  it on the mention can let it go again. */
-  onUnmention?: (target: MessageContext) => void
+  onUnmention?: (target: ReferenceTarget) => void
   /** What the empty field says; the home types asks into it, as a node
    *  that keeps its ticks to itself. */
   placeholder?: ReactNode

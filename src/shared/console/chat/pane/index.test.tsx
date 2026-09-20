@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { type ReferenceTarget } from "@contracts/replies/references"
 import {
   cleanup,
   fireEvent,
@@ -8,11 +9,7 @@ import {
 } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import {
-  type ReferenceTarget,
-  type ReferenceView,
-  targetKey,
-} from "../../references"
+import { type ReferenceView, targetKey } from "../../references"
 import { ChatPane, type ChatPaneProps } from "."
 
 vi.mock("@tanstack/react-router", async () => ({

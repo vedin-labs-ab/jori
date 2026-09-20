@@ -2,7 +2,8 @@ import {
   defaultSelection,
   type ModelSelection,
 } from "@contracts/models/selection"
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
+
 import { type GenericId } from "convex/values"
 import { useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
@@ -25,7 +26,7 @@ import { useSendMessage } from "../send"
 import { useChatEntry } from "./entry"
 
 /** Ask Jori suggests a home for the chat; its resource is an inline mention. */
-export function ChatHomePage({ context }: { context?: MessageContext }) {
+export function ChatHomePage({ context }: { context?: ReferenceTarget }) {
   return (
     <ConsolePage>
       {(organizationId) => (
@@ -43,7 +44,7 @@ function ChatHomeContent({
   context,
   organizationId,
 }: {
-  context: MessageContext | undefined
+  context: ReferenceTarget | undefined
   organizationId: string
 }) {
   const navigate = useConsoleNavigate()
@@ -58,7 +59,7 @@ function ChatHomeContent({
   // A blocked budget still opens the conversation with the message in it,
   // so the console moves there either way; a failure rejects, and the
   // composer keeps the draft while the toast says why.
-  const start = (text: string, references: MessageContext[] = []) =>
+  const start = (text: string, references: ReferenceTarget[] = []) =>
     send({
       text,
       model: selection,

@@ -1,5 +1,7 @@
-import { type ReferenceTarget } from "../../contracts/replies/parts"
-import { type ReferenceKind } from "../../contracts/replies/references"
+import {
+  type ReferenceKind,
+  type ReferenceTarget,
+} from "../../contracts/replies/references"
 import { type Doc, type Id, type TableNames } from "../_generated/dataModel"
 import { accessibleCollection } from "../collections/access"
 import { findVisibleConsoleConversation } from "../conversations/resolve"

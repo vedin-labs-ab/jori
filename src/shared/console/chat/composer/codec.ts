@@ -1,4 +1,4 @@
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { type JSONContent } from "@tiptap/core"
 import {
   mentionNodeName,
@@ -18,7 +18,7 @@ import { mentionNodeContent } from "../../mentions/suggest/insert"
 
 export type ComposerDraft = {
   /** The resources the text mentions, each once, in the order written. */
-  references: MessageContext[]
+  references: ReferenceTarget[]
   text: string
 }
 
@@ -27,7 +27,7 @@ export type ComposerDraft = {
 export function serializeComposerDocument(
   document: JSONContent
 ): ComposerDraft {
-  const references = new Map<string, MessageContext>()
+  const references = new Map<string, ReferenceTarget>()
   const text = (document.content ?? [])
     .map((paragraph) => serializeInline(paragraph.content ?? [], references))
     .join("\n")
@@ -51,14 +51,14 @@ export function parseComposerLine(
 
 function serializeInline(
   nodes: JSONContent[],
-  references: Map<string, MessageContext>
+  references: Map<string, ReferenceTarget>
 ) {
   return nodes.map((node) => serializeNode(node, references)).join("")
 }
 
 function serializeNode(
   node: JSONContent,
-  references: Map<string, MessageContext>
+  references: Map<string, ReferenceTarget>
 ) {
   if (node.type === "hardBreak") {
     return "\n"

@@ -11,5 +11,9 @@ export const referenceKinds = [
 
 export type ReferenceKind = (typeof referenceKinds)[number]
 
-/** The resource or folder a message was opened about or mentions. */
-export type MessageContext = { kind: ReferenceKind; id: string }
+/** A resource or folder named by a message, reply part, or navigation. */
+export type ReferenceTarget = { kind: ReferenceKind; id: string }
+
+export function isReferenceKind(value: unknown): value is ReferenceKind {
+  return referenceKinds.some((kind) => kind === value)
+}

@@ -1,3 +1,4 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import {
   ContextMenuCheckboxItem,
   ContextMenuContent,
@@ -5,7 +6,7 @@ import {
   ContextMenuSeparator,
 } from "@/components/ui/context-menu"
 import { menuWidth } from "../../menu"
-import { type ReferenceTarget } from "../../references"
+
 import { type PaneSide, type PaneTab } from "./state"
 
 /** What a tab's context menu offers, in the order editors keep: the pin,

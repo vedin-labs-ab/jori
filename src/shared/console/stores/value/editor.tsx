@@ -61,14 +61,9 @@ export function ValueEditorSection({
   const versionRef = useRef(store.version)
   const lastSavedRef = useRef(JSON.stringify(store.value) ?? "")
 
-  const performRef = useRef<() => Promise<ValueSaveOutcome>>(
-    async () => "invalid"
-  )
-
-  performRef.current = () =>
+  const autosave = useValueAutosave(() =>
     saveValue({ editor, lastSavedRef, onWrite, versionRef })
-
-  const autosave = useValueAutosave(() => performRef.current())
+  )
 
   useExternalReseed(store, editor, versionRef, lastSavedRef, autosave.isBusy)
   usePublishedState(onState, {

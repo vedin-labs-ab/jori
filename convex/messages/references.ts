@@ -3,9 +3,8 @@ import {
   readMessageContext,
   readMessageReferences,
 } from "../../contracts/replies/answers"
-import { type ReferenceTarget } from "../../contracts/replies/parts"
 import {
-  type MessageContext,
+  type ReferenceTarget,
   referenceKinds,
 } from "../../contracts/replies/references"
 import { type Id } from "../_generated/dataModel"
@@ -26,12 +25,10 @@ export const referenceTargetValidator = v.object({
   id: v.string(),
 })
 
-export type { ReferenceTarget }
-
 /** A context as the run reads it: the target, its name, and the folder
  *  the run it starts is filed under — the folder itself, or the one a
  *  filed resource is in. */
-export type ResolvedContext = MessageContext & {
+export type ResolvedContext = ReferenceTarget & {
   name: string
   folderId?: Id<"folders">
 }
@@ -118,7 +115,7 @@ export async function resolveConsoleReferences(
   ctx: QueryLikeCtx,
   sight: Sight,
   data: unknown
-): Promise<Array<MessageContext & { name: string | null }>> {
+): Promise<Array<ReferenceTarget & { name: string | null }>> {
   return await Promise.all(
     readMessageReferences(data).map(async (reference) => ({
       ...reference,

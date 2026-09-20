@@ -84,7 +84,8 @@ export function renamedInTitle(
 export function useMaterialBreadcrumb(
   name: string,
   menu?: ReactNode,
-  rename?: Pick<EditItem, "id" | "kind">
+  rename?: Pick<EditItem, "id" | "kind">,
+  saveStatus?: SaveState
 ) {
   const id = rename?.id
   const kind = rename?.kind
@@ -97,12 +98,13 @@ export function useMaterialBreadcrumb(
       () => ({
         name,
         menu,
+        saveStatus,
         renderName:
           id === undefined || kind === undefined
             ? undefined
             : renamedInTitle({ id, kind, name }),
       }),
-      [id, kind, name, menu]
+      [id, kind, name, menu, saveStatus]
     )
   )
 }

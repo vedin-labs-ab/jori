@@ -1,3 +1,4 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { useQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -5,7 +6,6 @@ import { type ChatMessage } from "@/shared/console/chat/types"
 import { referencePresentation } from "@/shared/console/references/presentation"
 import { api } from "../../../convex/_generated/api"
 import {
-  type ReferenceTarget,
   type ReferenceView,
   type ResolveReference,
   targetKey,

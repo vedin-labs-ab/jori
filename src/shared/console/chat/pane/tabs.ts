@@ -1,3 +1,4 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import {
   type Dispatch,
   useCallback,
@@ -7,7 +8,7 @@ import {
 } from "react"
 import { useIsBelow } from "@/hooks/use-mobile"
 import { readStorage, writeStorage } from "@/shared/storage"
-import { type ReferenceTarget } from "../../references"
+
 import {
   initialPaneState,
   type PaneAction,

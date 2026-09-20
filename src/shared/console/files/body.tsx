@@ -1,8 +1,8 @@
-import { type ReactNode, useMemo, useState } from "react"
+import { type ReactNode, useState } from "react"
 import { fileKind, isHtmlFile, previewKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/files/size"
 import { ConsoleEmptyState, ConsoleListEmpty } from "../list/empty"
-import { renamedInTitle, useMaterialTrail } from "../materials/breadcrumb"
+import { useMaterialBreadcrumb } from "../materials/breadcrumb"
 import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
 import { FileDock } from "./dock"
 import {
@@ -50,9 +50,9 @@ function FileContent({
       ? { isHtml: isHtmlFile(file.mimeType, file.name), url: file.url }
       : undefined
 
-  useFileCrumb({
-    file,
-    menu: titleMenu(
+  useMaterialBreadcrumb(
+    file.name,
+    titleMenu(
       <FileLead
         copy={
           text === undefined
@@ -64,8 +64,9 @@ function FileContent({
         view={text?.isHtml ? htmlMode : undefined}
       />
     ),
-    saveStatus: editor?.saveStatus,
-  })
+    { id: file.fileId, kind: "file" },
+    editor?.saveStatus
+  )
 
   if (text !== undefined) {
     return (
@@ -93,34 +94,6 @@ function FileContent({
       isOversizedText={kind === "text"}
       siblings={siblings}
     />
-  )
-}
-
-/** Publishes the file's crumb: its name with the menu hung off it, and
- *  the save state the shell shows in the name while a save is in motion. */
-function useFileCrumb({
-  file,
-  menu,
-  saveStatus,
-}: {
-  file: FileDetail
-  menu: ReactNode
-  saveStatus: FileEditorState["saveStatus"] | undefined
-}) {
-  useMaterialTrail(
-    useMemo(
-      () => ({
-        menu,
-        name: file.name,
-        renderName: renamedInTitle({
-          id: file.fileId,
-          kind: "file",
-          name: file.name,
-        }),
-        saveStatus,
-      }),
-      [file.fileId, file.name, menu, saveStatus]
-    )
   )
 }
 

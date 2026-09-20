@@ -1,4 +1,4 @@
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
 import { type MentionCatalog } from "../../mentions/scan"
@@ -18,13 +18,13 @@ export type SetComposerSuggestion = Dispatch<
 export type ComposerEditorArgs = {
   initialReference?: ReferenceView
   /** Takes each resource as it is put in, however it was picked. */
-  onMention: ((target: MessageContext) => void) | undefined
+  onMention: ((target: ReferenceTarget) => void) | undefined
   /** Takes each resource as its chip leaves the text, by deletion; a
    *  message sent takes its chips with it without a word. */
-  onUnmention: ((target: MessageContext) => void) | undefined
+  onUnmention: ((target: ReferenceTarget) => void) | undefined
   /** Takes the message; answering with a promise holds the draft in the
    *  field until it settles. */
-  onSend: (text: string, references: MessageContext[]) => unknown
+  onSend: (text: string, references: ReferenceTarget[]) => unknown
   resolve: ResolveReference | undefined
   sources: MentionSources
 }
@@ -47,7 +47,7 @@ export type ComposerRefs = {
   names: Map<string, string>
   /** The resources the text holds now, by target key, so a deletion is
    *  seen for the chip it took. */
-  mentioned: Map<string, MessageContext>
+  mentioned: Map<string, ReferenceTarget>
   /** A send the host is still answering, so a second Enter waits. */
   sending: boolean
 }

@@ -1,10 +1,4 @@
-import { type ReferenceKind } from "@contracts/replies/references"
-
-/** What a reference part or a message's context points at. */
-export type ReferenceTarget = {
-  kind: ReferenceKind
-  id: string
-}
+import { type ReferenceTarget } from "@contracts/replies/references"
 
 /** One string per target — `kind:id`, as a resource token carries it —
  *  for keys, tab values, and mention ids. */
@@ -17,9 +11,7 @@ export function isSameTarget(left: ReferenceTarget, right: ReferenceTarget) {
 }
 
 /** A target as the host resolved it, for the card that shows it. */
-export type ReferenceView = {
-  kind: ReferenceKind
-  id: string
+export type ReferenceView = ReferenceTarget & {
   name: string
   /** The resource's containing folder, independently of its reference. */
   folderId?: string

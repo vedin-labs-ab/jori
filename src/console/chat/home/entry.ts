@@ -1,11 +1,11 @@
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { useQuery } from "convex/react"
 import { useChatLocation } from "@/shared/console/chat/draft"
 import { api } from "../../../../convex/_generated/api"
 
 export function useChatEntry(
   organizationId: string,
-  context: MessageContext | undefined
+  context: ReferenceTarget | undefined
 ) {
   const entry = useQuery(
     api.messages.references.resolve,

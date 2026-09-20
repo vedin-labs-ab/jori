@@ -1,6 +1,7 @@
 import { type ChoicesAnswer } from "@contracts/replies/answers"
 import { type ReplyPart } from "@contracts/replies/parts"
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
+
 import { type Visibility } from "@contracts/visibility"
 
 // What the chat views read. The console maps its rows to these and the
@@ -18,7 +19,7 @@ export type ChatMessage = {
   text: string
   parts: ReplyPart[]
   /** The resources a person's text mentions, as `+[kind:id]` tokens. */
-  references?: MessageContext[]
+  references?: ReferenceTarget[]
   /** The reply's questions this message answers. */
   answer?: ChoicesAnswer
   createdAt: number

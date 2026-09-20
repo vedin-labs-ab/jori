@@ -1,6 +1,7 @@
 import { modelSlugs } from "@contracts/models/catalog"
 import { type ModelSelection } from "@contracts/models/selection"
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
+
 import { useCallback, useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { TypedPlaceholder } from "@/shared/console/chat/composer/placeholder"
@@ -26,10 +27,7 @@ import { ActivityTimeline } from "@/shared/console/runs/activity/item"
 import { useConsoleNavigate } from "@/shared/console/shell/location"
 import { conversationDestination } from "@/shared/console/shell/routes"
 import { useNow } from "@/shared/console/time"
-import {
-  type ReferenceTarget,
-  type ResolveReference,
-} from "../../../../shared/console/references"
+import { type ResolveReference } from "../../../../shared/console/references"
 import { chatViews, liveActivity, resolveReference } from "../../derive/chat"
 import { mentionSources } from "../../derive/mentions"
 import {
@@ -51,11 +49,11 @@ const noMessages: ChatMessage[] = []
 /** Where a chat starts, over the workspace: the first message opens a
  *  conversation and the console moves to it. Opened from a resource's
  *  page, its folder is suggested and the resource is mentioned inline. */
-export function ChatHomePage({ context }: { context?: MessageContext }) {
+export function ChatHomePage({ context }: { context?: ReferenceTarget }) {
   return <Home context={context} key={`${context?.kind}:${context?.id}`} />
 }
 
-function Home({ context }: { context?: MessageContext }) {
+function Home({ context }: { context?: ReferenceTarget }) {
   const { actions, state } = useDemoWorkspace()
   const navigate = useConsoleNavigate()
   const now = useNow(60_000)
@@ -66,7 +64,7 @@ function Home({ context }: { context?: MessageContext }) {
     context === undefined ? undefined : resolveReference(state, context)
   const location = useChatLocation(reference)
   const folders = useDemoFolders()
-  const send = (text: string, references: MessageContext[] = []) => {
+  const send = (text: string, references: ReferenceTarget[] = []) => {
     const conversationId = actions.sendChatMessage(text, undefined, {
       folderId:
         location.folderId === null

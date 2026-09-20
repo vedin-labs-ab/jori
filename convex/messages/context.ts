@@ -1,6 +1,7 @@
 import { readMessageContext } from "../../contracts/replies/answers"
 import { resourceToken } from "../../contracts/replies/parts"
-import { type MessageContext } from "../../contracts/replies/references"
+import { type ReferenceTarget } from "../../contracts/replies/references"
+
 import { type Doc } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"
 import { type Sight } from "../visibility/sight"
@@ -43,7 +44,7 @@ export async function messageContextLine(
  *  the way the jori tools take it, so the resource can be read without
  *  guessing. A context that no longer resolves says so, id and all. */
 function consoleContextLine(
-  context: MessageContext,
+  context: ReferenceTarget,
   resolved: ResolvedContext | undefined
 ) {
   const id = referenceIdLabel(context)
@@ -57,7 +58,7 @@ function consoleContextLine(
  *  stands there, what it names, and the id the way the jori tools take
  *  it. A mention that no longer resolves says so, id and all. */
 function consoleReferenceLine(
-  reference: MessageContext & { name: string | null }
+  reference: ReferenceTarget & { name: string | null }
 ) {
   const token = resourceToken(reference)
   const id = referenceIdLabel(reference)
@@ -67,7 +68,7 @@ function consoleReferenceLine(
     : `${token} mentions ${reference.kind} «${reference.name}» (${id})`
 }
 
-function referenceIdLabel(target: MessageContext) {
+function referenceIdLabel(target: ReferenceTarget) {
   const noun = target.kind === "chat" ? "conversation" : target.kind
 
   return `${noun}Id: ${target.id}`

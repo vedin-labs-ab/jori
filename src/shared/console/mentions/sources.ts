@@ -4,7 +4,8 @@ import {
   type ToolSurface,
 } from "@contracts/integrations"
 import { type MentionResource } from "@contracts/replies/answers"
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
+
 import { targetKey } from "../references"
 import { referencePresentation } from "../references/presentation"
 import { type ActiveMention } from "./active"
@@ -48,7 +49,7 @@ export type MentionSuggestion = {
   id: string
   label: string
 } & (
-  | { kind: "resource"; surface?: never; target: MessageContext }
+  | { kind: "resource"; surface?: never; target: ReferenceTarget }
   | {
       kind: NamedMentionKind
       /** The integration whose mark stands for it. */

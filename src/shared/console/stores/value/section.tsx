@@ -1,13 +1,10 @@
 import { Braces, Database, Plus } from "lucide-react"
-import { type ReactNode, useCallback, useMemo, useState } from "react"
+import { type ReactNode, useCallback, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { JsonBlock } from "@/shared/console/code"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { ConsoleListContent } from "@/shared/console/list/frame"
-import {
-  renamedInTitle,
-  useMaterialTrail,
-} from "@/shared/console/materials/breadcrumb"
+import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { StoreMenuItems } from "../menu"
 import { type SchemaWrite, StoreSchemaDialog } from "../schema/dialog"
 import { type StoreDetail } from "../types"
@@ -45,8 +42,9 @@ export function StoreValue({
   const schema = store.archivedAt === undefined ? store.schema : undefined
   const isEditable = schema !== undefined
 
-  useStoreCrumb({
-    menu: titleMenu(
+  useMaterialBreadcrumb(
+    store.name,
+    titleMenu(
       <StoreMenuItems
         onSchema={openSchema}
         onViewChange={editor?.switchView}
@@ -54,9 +52,9 @@ export function StoreValue({
         view={isEditable ? editor?.view : undefined}
       />
     ),
-    saveStatus: isEditable ? editor?.saveStatus : undefined,
-    store,
-  })
+    { id: store.storeId, kind: "store" },
+    isEditable ? editor?.saveStatus : undefined
+  )
 
   return (
     <>
@@ -79,34 +77,6 @@ export function StoreValue({
         store={isSchemaOpen ? store : undefined}
       />
     </>
-  )
-}
-
-/** Publishes the store's crumb: its name with the menu hung off it, and
- *  the save state the shell shows in the name while a save is in motion. */
-function useStoreCrumb({
-  menu,
-  saveStatus,
-  store,
-}: {
-  menu: ReactNode
-  saveStatus: ValueEditorState["saveStatus"] | undefined
-  store: StoreDetail
-}) {
-  useMaterialTrail(
-    useMemo(
-      () => ({
-        menu,
-        name: store.name,
-        renderName: renamedInTitle({
-          id: store.storeId,
-          kind: "store",
-          name: store.name,
-        }),
-        saveStatus,
-      }),
-      [menu, saveStatus, store.name, store.storeId]
-    )
   )
 }
 

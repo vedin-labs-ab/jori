@@ -1,10 +1,11 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { useCallback } from "react"
 import { ChatPaneBody } from "@/shared/console/chat/pane/body"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
 import { type ChatRun } from "@/shared/console/chat/types"
 import { useMaterialBreadcrumb } from "@/shared/console/materials/breadcrumb"
 import { useNow } from "@/shared/console/time"
-import { type ReferenceTarget } from "../../../../../shared/console/references"
+
 import { resolveReference } from "../../../derive/chat"
 import { chatContext } from "../../../fixtures/chat"
 import { useDemoWorkspace } from "../../../workspace"

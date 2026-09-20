@@ -1,6 +1,7 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../dot"
-import { type ReferenceTarget, type ReferenceView } from "../../references"
+import { type ReferenceView } from "../../references"
 import { referencePresentation } from "../../references/presentation"
 import { type OpenTarget } from "../pane/tabs"
 

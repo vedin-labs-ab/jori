@@ -1,5 +1,6 @@
 import { type ChoicesAnswer } from "@contracts/replies/answers"
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
+
 import { type Dispatch } from "react"
 import { demoReply } from "../../fixtures/chat"
 import { type DemoMint } from "../../fixtures/ids"
@@ -15,7 +16,7 @@ export function chatActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
       conversationId?: string,
       carried?: {
         folderId?: string
-        references?: MessageContext[]
+        references?: ReferenceTarget[]
         answer?: ChoicesAnswer
       }
     ) => {

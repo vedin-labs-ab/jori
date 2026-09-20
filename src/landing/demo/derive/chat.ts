@@ -1,10 +1,8 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { type ChatConversation } from "@/shared/console/chat/types"
 import { moveTarget, resourceSubject } from "@/shared/console/folders/types"
 import { type ActivityItem } from "@/shared/console/runs/activity/types"
-import {
-  type ReferenceTarget,
-  type ReferenceView,
-} from "../../../shared/console/references"
+import { type ReferenceView } from "../../../shared/console/references"
 import { type DemoConversation } from "../fixtures/chat"
 import { log } from "../fixtures/runs/steps"
 import { type DemoState } from "../state/types"

@@ -1,14 +1,11 @@
 import { expect, test } from "vitest"
+import { type ReferenceTarget } from "../../contracts/replies/references"
 import { databaseContext, type TestDatabase } from "../../test/convex/database"
 import { tableDoc, testOwner } from "../../test/convex/materials/collections"
 import { fileDoc, folderDoc, jobDoc } from "../../test/convex/materials/folders"
 import { type Id } from "../_generated/dataModel"
 import { createSight } from "../visibility/sight"
-import {
-  type ReferenceTarget,
-  resolveConsoleContext,
-  resolveReferenceTarget,
-} from "./references"
+import { resolveConsoleContext, resolveReferenceTarget } from "./references"
 
 const other = "persons:other" as Id<"persons">
 

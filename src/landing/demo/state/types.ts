@@ -1,5 +1,6 @@
 import { type ChoicesAnswer } from "@contracts/replies/answers"
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
+
 import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { type ChatRun } from "@/shared/console/chat/types"
 import { type FiledResourceType } from "@/shared/console/folders/types"
@@ -164,7 +165,7 @@ type ChatAction =
       runId: string
       text: string
       folderId?: string
-      references?: MessageContext[]
+      references?: ReferenceTarget[]
       answer?: ChoicesAnswer
       reply: DemoReply
     }

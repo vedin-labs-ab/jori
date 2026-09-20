@@ -1,5 +1,6 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { useEffect, useRef } from "react"
-import { type ReferenceTarget } from "../../references"
+
 import { type ChatMessage, lastMessage } from "../types"
 
 /** Opens the first resource a new reply names, once per reply. Only a

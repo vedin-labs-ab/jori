@@ -3,8 +3,8 @@ import {
   resourceTokenPattern,
 } from "@contracts/replies/parts"
 import {
-  type MessageContext,
   type ReferenceKind,
+  type ReferenceTarget,
 } from "@contracts/replies/references"
 import { targetKey } from "../references"
 
@@ -155,7 +155,7 @@ export function sortMentionTokens(tokens: readonly string[]) {
 
 /** The target a resource mention names, or nothing for an id of another
  *  shape. */
-export function parseResourceMention(id: unknown): MessageContext | null {
+export function parseResourceMention(id: unknown): ReferenceTarget | null {
   return typeof id === "string" ? parseResourceToken(`+[${id}]`) : null
 }
 

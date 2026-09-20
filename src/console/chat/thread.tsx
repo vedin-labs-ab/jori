@@ -1,3 +1,4 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { useCallback } from "react"
@@ -8,7 +9,7 @@ import { isLiveRun } from "@/shared/console/chat/types"
 import { MaterialPlaceholder } from "@/shared/console/materials/detail/placeholder"
 import { useDocumentTitle } from "@/shared/console/shell/title"
 import { api } from "../../../convex/_generated/api"
-import { type ReferenceTarget } from "../../shared/console/references"
+
 import { ConsolePage } from "../page"
 import { type LiveConversation, useConversation } from "./conversation"
 import { ConversationFiling } from "./filing"

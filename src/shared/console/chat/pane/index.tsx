@@ -1,3 +1,4 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { memo, type ReactNode, type RefObject, useRef, useState } from "react"
 import {
   ResizableHandle,
@@ -10,11 +11,7 @@ import {
   type MaterialBreadcrumb,
   MaterialBreadcrumbContext,
 } from "../../materials/breadcrumb"
-import {
-  type ReferenceTarget,
-  type ReferenceView,
-  targetKey,
-} from "../../references"
+import { type ReferenceView, targetKey } from "../../references"
 import { referencePresentation } from "../../references/presentation"
 import { PaneHeader } from "./header"
 import { PaneHint } from "./hint"

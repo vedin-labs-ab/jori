@@ -1,5 +1,6 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { expect, test } from "vitest"
-import { type ReferenceTarget } from "../../references"
+
 import { initialPaneState, type PaneState, reducePane } from "./state"
 
 const table: ReferenceTarget = { kind: "table", id: "t1" }

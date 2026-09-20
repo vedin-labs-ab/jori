@@ -1,6 +1,7 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { type ReferenceTarget } from "../../references"
+
 import { ConsoleLink } from "../../shell/link"
 import { chatDestination } from "./context"
 

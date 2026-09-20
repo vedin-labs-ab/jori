@@ -1,14 +1,11 @@
 import { integrationLabel } from "@contracts/integrations"
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { cn } from "@/lib/utils"
 import { MentionChip } from "../mentions/chip"
 import { MentionKindIcon } from "../mentions/icon"
 import { type MentionKind, parseResourceMention } from "../mentions/scan"
 import { mentionTones } from "../mentions/tone"
-import {
-  type ReferenceTarget,
-  type ResolveReference,
-  targetKey,
-} from "../references"
+import { type ResolveReference, targetKey } from "../references"
 import { referencePresentation } from "../references/presentation"
 
 /** One of a chat's mentions as a chip, in the composer and in the thread

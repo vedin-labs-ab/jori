@@ -1,4 +1,4 @@
-import { type MessageContext } from "@contracts/replies/references"
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { createFileRoute, type SearchSchemaInput } from "@tanstack/react-router"
 import { billingSearch } from "@/console/billing/actions/return"
 import { ChatHomePage } from "@/console/chat/home"
@@ -7,11 +7,11 @@ import { consoleDocumentTitle } from "@/shared/console/shell/routes"
 
 // `context` names the resource or folder the chat is opened about, as
 // `<kind>:<id>`; a link spells it that way, and the page reads it as a
-// `MessageContext`. Anything else drops out of the search.
+// `ReferenceTarget`. Anything else drops out of the search.
 export const Route = createFileRoute("/_workspace/chat/")({
   validateSearch: (
     search: { context?: string; billing?: string } & SearchSchemaInput
-  ): { context?: MessageContext } & ReturnType<typeof billingSearch> => {
+  ): { context?: ReferenceTarget } & ReturnType<typeof billingSearch> => {
     const context = parseContextSearch(search.context)
 
     return {

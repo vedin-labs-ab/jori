@@ -1,4 +1,5 @@
-import { isSameTarget, type ReferenceTarget } from "../../references"
+import { type ReferenceTarget } from "@contracts/replies/references"
+import { isSameTarget } from "../../references"
 
 // The pane's tabs work like an editor's: opening a target previews it in
 // an unpinned tab that the next target takes over, and pinning keeps a tab

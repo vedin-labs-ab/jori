@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { DndContext } from "@dnd-kit/core"
 import {
   cleanup,
@@ -13,7 +14,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { ask, reply, table } from "../../../../../test/chat"
 import { type FolderContentsResult } from "../../folders/types"
 import { MaterialBreadcrumbContext } from "../../materials/breadcrumb"
-import { type ReferenceTarget, type ReferenceView } from "../../references"
+import { type ReferenceView } from "../../references"
 import { makeExecution } from "../../runs/fixtures"
 import { type StoreDetail } from "../../stores/types"
 import { ChatPane, type ChatPaneProps } from "."

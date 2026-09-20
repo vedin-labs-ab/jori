@@ -1,3 +1,4 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { PanelRightClose, Pin, X } from "lucide-react"
 import { type RefObject } from "react"
 import { Button } from "@/components/ui/button"
@@ -5,11 +6,7 @@ import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { scrollFadeX } from "@/shared/fade"
-import {
-  type ReferenceTarget,
-  type ResolveReference,
-  targetKey,
-} from "../../references"
+import { type ResolveReference, targetKey } from "../../references"
 import { referencePresentation } from "../../references/presentation"
 import { PaneTabMenu } from "./menu"
 import { type PaneSide, type PaneTab } from "./state"

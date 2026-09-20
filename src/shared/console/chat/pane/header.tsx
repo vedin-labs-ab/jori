@@ -1,3 +1,4 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { ArrowUpRight, MoreHorizontal } from "lucide-react"
 import { type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
@@ -9,7 +10,7 @@ import { cn } from "@/lib/utils"
 import { SeparatorDot } from "../../dot"
 import { type MaterialBreadcrumb } from "../../materials/breadcrumb"
 import { SaveIcon, type SaveState } from "../../materials/save"
-import { type ReferenceTarget, type ReferenceView } from "../../references"
+import { type ReferenceView } from "../../references"
 import {
   referenceDestination,
   referencePresentation,

@@ -1,3 +1,4 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { useMutation } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { type GenericId } from "convex/values"
@@ -7,7 +8,7 @@ import { type ChatRun } from "@/shared/console/chat/types"
 import { showErrorToast } from "@/shared/console/error"
 import { useLatestCallback } from "@/shared/console/retain"
 import { api } from "../../../convex/_generated/api"
-import { type ReferenceTarget } from "../../shared/console/references"
+
 import { useMentionSources } from "./mentions"
 import { useConversationMessages } from "./messages"
 import { useChooseModel } from "./models"

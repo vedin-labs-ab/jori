@@ -1,7 +1,7 @@
+import { type ReferenceTarget } from "@contracts/replies/references"
 import { lazy, type ReactNode, Suspense } from "react"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
 import { ConsoleListLoading } from "@/shared/console/list/loading"
-import { type ReferenceTarget } from "../../../../../shared/console/references"
 
 // Each kind's binding carries its page's hooks — the grid's rows, the
 // job's overview with the brief's markdown codec, the folder's listing —

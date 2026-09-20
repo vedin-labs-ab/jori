@@ -1,5 +1,6 @@
 import { type Infer } from "convex/values"
-import { type MessageContext } from "../../../contracts/replies/references"
+import { type ReferenceTarget } from "../../../contracts/replies/references"
+
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { mark } from "../../discovery/sync/intent"
@@ -64,8 +65,8 @@ function conversationTitle(text: string) {
  *  message is kept. */
 export function normalizeConsoleReference(
   ctx: QueryLikeCtx,
-  context: MessageContext
-): MessageContext | null {
+  context: ReferenceTarget
+): ReferenceTarget | null {
   const id = ctx.db.normalizeId(referenceTable(context.kind), context.id)
 
   return id === null ? null : { kind: context.kind, id }
@@ -78,10 +79,10 @@ export function normalizeConsoleReference(
 export async function normalizeConsoleReferences(
   ctx: QueryLikeCtx,
   sight: Sight,
-  references: MessageContext[]
-): Promise<Array<MessageContext & { name: string }>> {
+  references: ReferenceTarget[]
+): Promise<Array<ReferenceTarget & { name: string }>> {
   const seen = new Set<string>()
-  const normalized: Array<MessageContext & { name: string }> = []
+  const normalized: Array<ReferenceTarget & { name: string }> = []
 
   for (const reference of references) {
     const target = normalizeConsoleReference(ctx, reference)

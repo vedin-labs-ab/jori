@@ -1,9 +1,5 @@
 import { isRecord, readStringArray } from "../json"
-import {
-  type MessageContext,
-  type ReferenceKind,
-  referenceKinds,
-} from "./references"
+import { isReferenceKind, type ReferenceTarget } from "./references"
 
 // What a person's message can carry besides its text: the resource or
 // folder the conversation was opened about, the resources its text
@@ -11,7 +7,7 @@ import {
 // let the console render intent.
 
 /** A resource a message can mention, named for the composer's picker. */
-export type MentionResource = MessageContext & { name: string }
+export type MentionResource = ReferenceTarget & { name: string }
 
 /** How many of a kind the composer's picker is offered; the search
  *  narrows within. A kind at the cap reads as "25+" in the picker. */
@@ -32,19 +28,21 @@ export type ChoicesAnswer = {
   answers: PartAnswer[]
 }
 
-export function readMessageContext(value: unknown): MessageContext | undefined {
+export function readMessageContext(
+  value: unknown
+): ReferenceTarget | undefined {
   return isRecord(value) ? readReferenceTarget(value.context) : undefined
 }
 
 /** The resources a message's text mentions, each once, in the order
  *  kept. Anything that is not a target reads as nothing. */
-export function readMessageReferences(value: unknown): MessageContext[] {
+export function readMessageReferences(value: unknown): ReferenceTarget[] {
   if (!isRecord(value) || !Array.isArray(value.references)) {
     return []
   }
 
   const seen = new Set<string>()
-  const references: MessageContext[] = []
+  const references: ReferenceTarget[] = []
 
   for (const candidate of value.references) {
     const reference = readReferenceTarget(candidate)
@@ -60,7 +58,7 @@ export function readMessageReferences(value: unknown): MessageContext[] {
   return references
 }
 
-function readReferenceTarget(value: unknown): MessageContext | undefined {
+function readReferenceTarget(value: unknown): ReferenceTarget | undefined {
   if (!isRecord(value)) {
     return undefined
   }
@@ -99,8 +97,4 @@ function readPartAnswer(value: unknown): PartAnswer[] {
     Array.isArray(values)
     ? [{ part, values: readStringArray(values) }]
     : []
-}
-
-function isReferenceKind(value: unknown): value is ReferenceKind {
-  return referenceKinds.some((kind) => kind === value)
 }
