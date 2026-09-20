@@ -220,7 +220,9 @@ describe("value editor form and code views", () => {
 
     await act(() => vi.dynamicImportSettled())
     expect(screen.getByText(/"March"/)).toBeDefined()
-    expect(screen.queryByLabelText("Store value JSON")).toBeNull()
+    const json = screen.getByRole("textbox", { name: "Store value JSON" })
+    expect(json.getAttribute("aria-readonly")).toBe("true")
+    expect(json.getAttribute("contenteditable")).toBe("false")
   })
 
   test("editable code with broken JSON refuses the form view", () => {

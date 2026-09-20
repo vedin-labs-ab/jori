@@ -41,6 +41,7 @@ const theme = EditorView.theme({
 })
 
 export function Mirror({
+  ariaLabel,
   mimeType,
   name = "",
   onBlur,
@@ -48,6 +49,7 @@ export function Mirror({
   readOnly = false,
   value,
 }: {
+  ariaLabel?: string
   mimeType: string
   /** The filename, where the code has one: it picks the language ahead of
    *  the mime type. */
@@ -77,7 +79,12 @@ export function Mirror({
       parent: host.current,
       state: EditorState.create({
         doc: value,
-        extensions: extensions(readOnly, change, blur),
+        extensions: [
+          ...extensions(readOnly, change, blur),
+          EditorView.contentAttributes.of({
+            "aria-label": ariaLabel ?? (name === "" ? "Code" : name),
+          }),
+        ],
       }),
     })
 
@@ -91,7 +98,7 @@ export function Mirror({
       isMounted = false
       view.destroy()
     }
-  }, [mimeType, name, readOnly, value])
+  }, [ariaLabel, mimeType, name, readOnly, value])
 
   return (
     <div

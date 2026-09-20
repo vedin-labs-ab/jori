@@ -220,6 +220,7 @@ function ValueBody({
       <div className="flex min-h-0 flex-1 flex-col">
         <Suspense fallback={<ConsoleListLoading />}>
           <Mirror
+            ariaLabel="Store value JSON"
             mimeType="application/json"
             readOnly
             value={editor.state.codeText}

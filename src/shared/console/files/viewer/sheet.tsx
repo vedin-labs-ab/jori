@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from "react"
+import { useEffect, useEffectEvent, useId, useState } from "react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import {
@@ -29,6 +29,7 @@ export function SheetView({
 }) {
   const [workbook, setWorkbook] = useState<Workbook>()
   const [active, setActive] = useState(0)
+  const id = useId()
   const settle = useEffectEvent((loaded: Workbook | undefined) => {
     if (loaded === undefined) {
       onError()
@@ -59,16 +60,22 @@ export function SheetView({
   }
 
   const sheet = workbook.sheets[active]
+  const panel = workbook.sheets.length > 1 ? sheetPanel(id, active) : undefined
 
   return (
     <div className="flex size-full flex-col">
       {workbook.sheets.length > 1 ? (
-        <SheetTabs active={active} onChange={setActive} workbook={workbook} />
+        <SheetTabs
+          active={active}
+          id={id}
+          onChange={setActive}
+          workbook={workbook}
+        />
       ) : null}
       {sheet === undefined ? (
-        <Notice>This workbook has no sheets.</Notice>
+        <Notice panel={panel}>This workbook has no sheets.</Notice>
       ) : (
-        <SheetTable name={name} sheet={sheet} />
+        <SheetTable name={name} panel={panel} sheet={sheet} />
       )}
     </div>
   )
@@ -89,10 +96,12 @@ async function loadWorkbook(url: string) {
 
 function SheetTabs({
   active,
+  id,
   onChange,
   workbook,
 }: {
   active: number
+  id: string
   onChange: (index: number) => void
   workbook: Workbook
 }) {
@@ -104,7 +113,12 @@ function SheetTabs({
     >
       <TabsList aria-label="Sheets" className="h-9 px-2" variant="line">
         {workbook.sheets.map((sheet, index) => (
-          <TabsTrigger key={sheet.name} value={String(index)}>
+          <TabsTrigger
+            aria-controls={`${id}-panel`}
+            id={`${id}-tab-${index}`}
+            key={sheet.name}
+            value={String(index)}
+          >
             {sheet.name}
           </TabsTrigger>
         ))}
@@ -116,16 +130,24 @@ function SheetTabs({
 /** The sheet's cells, the header row and the number gutter staying put
  *  while the rest scrolls under them. Hairlines ride on the cells so they
  *  end where the data ends, the way the tables grid draws them. */
-function SheetTable({ name, sheet }: { name: string; sheet: Sheet }) {
+function SheetTable({
+  name,
+  panel,
+  sheet,
+}: {
+  name: string
+  panel: ReturnType<typeof sheetPanel> | undefined
+  sheet: Sheet
+}) {
   const rows = sheet.rows.slice(0, rowLimit)
   const width = rows[0]?.length ?? 0
 
   if (rows.length === 0 || width === 0) {
-    return <Notice>This sheet is empty.</Notice>
+    return <Notice panel={panel}>This sheet is empty.</Notice>
   }
 
   return (
-    <div className="min-h-0 flex-1 overflow-auto">
+    <div {...panel} className="min-h-0 flex-1 overflow-auto">
       <table
         aria-label={name}
         className="w-max border-separate border-spacing-0 text-xs"
@@ -209,9 +231,27 @@ function columnLabel(index: number) {
   return label
 }
 
-function Notice({ children }: { children: string }) {
+function sheetPanel(id: string, active: number) {
+  return {
+    "aria-labelledby": `${id}-tab-${active}`,
+    id: `${id}-panel`,
+    role: "tabpanel",
+    tabIndex: 0,
+  }
+}
+
+function Notice({
+  children,
+  panel,
+}: {
+  children: string
+  panel: ReturnType<typeof sheetPanel> | undefined
+}) {
   return (
-    <div className="grid flex-1 place-content-center text-muted-foreground text-sm">
+    <div
+      {...panel}
+      className="grid flex-1 place-content-center text-muted-foreground text-sm"
+    >
       {children}
     </div>
   )

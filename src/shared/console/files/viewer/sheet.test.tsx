@@ -93,7 +93,17 @@ test("the sheet tabs switch sheets, and a long sheet says where it stops", async
     "active"
   )
 
+  const forecast = screen.getByRole("tab", { name: "Forecast" })
+  const panel = screen.getByRole("tabpanel", { name: "Forecast" })
+  expect(forecast.getAttribute("aria-controls")).toBe(panel.id)
+  expect(panel.contains(screen.getByRole("table"))).toBe(true)
+
   pickTab("Costs")
+
+  const costs = screen.getByRole("tab", { name: "Costs" })
+  expect(screen.getByRole("tabpanel", { name: "Costs" })).toBe(panel)
+  expect(costs.getAttribute("aria-controls")).toBe(panel.id)
+  expect(panel.contains(screen.getByRole("table"))).toBe(true)
 
   expect(screen.getByText("Row 1")).toBeDefined()
   expect(screen.getByText(`Row ${rowLimit}`)).toBeDefined()
