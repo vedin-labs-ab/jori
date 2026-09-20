@@ -1,5 +1,6 @@
 import { isRecord, readStringArray } from "../json"
-import { type ReferenceKind, referenceKinds } from "./parts"
+import { type ReferenceKind } from "./parts"
+import { referenceKinds } from "./references"
 
 // What a person's message can carry besides its text: the resource or
 // folder the conversation was opened about, the resources its text

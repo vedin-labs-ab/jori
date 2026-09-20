@@ -3,20 +3,11 @@ import {
   type JsonSchemaObject,
   validateJsonSchemaValue,
 } from "../schema/validate"
+import { referenceKinds } from "./references"
 
 // A reply is text plus embedded parts. The contract is surface-agnostic:
 // which kinds a surface accepts follows from its communication
 // capabilities, and a surface renders the kinds it supports.
-
-export const referenceKinds = [
-  "file",
-  "table",
-  "store",
-  "job",
-  "folder",
-  "run",
-  "chat",
-] as const
 
 export type ReferenceKind = (typeof referenceKinds)[number]
 
