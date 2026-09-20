@@ -72,7 +72,7 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
                 }))
               }}
               aria-describedby={fieldErrors.email ? "change-email-error" : undefined}
-                  aria-invalid={!!fieldErrors.email}
+              aria-invalid={!!fieldErrors.email}
             />
           ) : (
             <Skeleton>

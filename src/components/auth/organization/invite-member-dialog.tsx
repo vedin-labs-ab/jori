@@ -151,7 +151,7 @@ export function InviteMemberDialog({
                   setEmailError(msg)
                 }}
                 aria-describedby={emailError ? "invite-member-email-error" : undefined}
-                  aria-invalid={!!emailError}
+                aria-invalid={!!emailError}
               />
 
               <FieldError id="invite-member-email-error">{emailError}</FieldError>

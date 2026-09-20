@@ -101,8 +101,10 @@ export function CreateOrganizationDialog({
                   e.preventDefault()
                   setNameError(localization.auth.fieldRequired)
                 }}
-                aria-describedby={nameError ? "create-organization-name-error" : undefined}
-                  aria-invalid={!!nameError}
+                aria-describedby={
+                  nameError ? "create-organization-name-error" : undefined
+                }
+                aria-invalid={!!nameError}
                 disabled={isCreating}
               />
 

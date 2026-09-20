@@ -210,8 +210,10 @@ function ChangePasswordForm({
                       .validationMessage
                   }))
                 }}
-                aria-describedby={fieldErrors.currentPassword ? "currentPassword-error" : undefined}
-                  aria-invalid={!!fieldErrors.currentPassword}
+                aria-describedby={
+                  fieldErrors.currentPassword ? "currentPassword-error" : undefined
+                }
+                aria-invalid={!!fieldErrors.currentPassword}
               />
             ) : (
               <Skeleton>
@@ -254,7 +256,9 @@ function ChangePasswordForm({
                         .validationMessage
                     }))
                   }}
-                  aria-describedby={fieldErrors.newPassword ? "newPassword-error" : undefined}
+                  aria-describedby={
+                    fieldErrors.newPassword ? "newPassword-error" : undefined
+                  }
                   aria-invalid={!!fieldErrors.newPassword}
                 />
 
@@ -320,8 +324,10 @@ function ChangePasswordForm({
                           .validationMessage
                       }))
                     }}
-                    aria-describedby={fieldErrors.confirmPassword ? "confirmPassword-error" : undefined}
-                  aria-invalid={!!fieldErrors.confirmPassword}
+                    aria-describedby={
+                      fieldErrors.confirmPassword ? "confirmPassword-error" : undefined
+                    }
+                    aria-invalid={!!fieldErrors.confirmPassword}
                   />
 
                   <InputGroupAddon align="inline-end">
