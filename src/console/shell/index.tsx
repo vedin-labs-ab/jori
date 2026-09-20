@@ -11,6 +11,7 @@ import { ConsoleSearch, SidebarSearch } from "../discovery"
 import { ConsoleEditing } from "../edit"
 import { ConsoleFolderDrag } from "../folders/drag/context"
 import { SidebarFolders } from "../folders/section"
+import { loadOnboarding } from "../onboarding/load"
 import { OrganizationVisibilityDirectory } from "../shared/visibility/directory"
 import { SidebarUserButton } from "./account"
 import { ConsolePageBoundary } from "./boundary"
@@ -45,7 +46,13 @@ export function ConsoleShell({ children }: { children: ReactNode }) {
                   account={<SidebarUserButton />}
                   chats={chats}
                   folders={<SidebarFolders pathname={pathname} />}
-                  organization={<SidebarOrganizationSwitcher />}
+                  organization={
+                    // A new organization and an unfinished one both open
+                    // onboarding, so it is fetched while the menu is read.
+                    <SidebarOrganizationSwitcher
+                      onOpen={() => void loadOnboarding()}
+                    />
+                  }
                   pathname={pathname}
                   search={<SidebarSearch />}
                   platform={<PlatformNavigation pathname={pathname} />}

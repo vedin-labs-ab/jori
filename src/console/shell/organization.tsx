@@ -16,7 +16,6 @@ import {
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { readBillingReturn } from "@/console/billing/actions/return"
-import { loadOnboarding } from "@/console/onboarding/load"
 import { readOnboarded } from "@/console/onboarding/state"
 import { BrandIcon } from "@/shared/brand"
 import { RevealArrow } from "@/shared/console/dot"
@@ -36,8 +35,11 @@ import { OrganizationDialog } from "./settings"
  *  behind it is where the person came from, not where they are. */
 export function SidebarOrganizationSwitcher({
   onboarding,
+  onOpen,
 }: {
   onboarding?: "current" | "new"
+  /** Called as the menu opens, for whatever it may lead to next. */
+  onOpen?: () => void
 }) {
   const { isMobile } = useSidebar()
   const navigate = useNavigate()
@@ -80,6 +82,7 @@ export function SidebarOrganizationSwitcher({
         onManage={
           onboarding === undefined ? () => setManaging(true) : undefined
         }
+        onOpen={onOpen}
         onSelect={select}
         organizations={others}
         shown={
@@ -107,6 +110,7 @@ function OrganizationMenu({
   isMobile,
   onCreate,
   onManage,
+  onOpen,
   onSelect,
   organizations,
   shown,
@@ -116,6 +120,7 @@ function OrganizationMenu({
   onCreate?: () => void
   /** Left out where managing this one is not on offer. */
   onManage?: () => void
+  onOpen?: () => void
   onSelect: (organizationId: string) => Promise<void>
   organizations: Organization[]
   /** What the trigger shows; a skeleton until it is known. */
@@ -148,10 +153,8 @@ function OrganizationMenu({
           return
         }
 
-        // A new organization and an unfinished one both open onboarding,
-        // so it is fetched while the person reads the menu.
         if (nextOpen) {
-          void loadOnboarding()
+          onOpen?.()
         }
 
         setOpen(nextOpen)
