@@ -12,8 +12,9 @@ type Discovery = NonNullable<OrganizationDiscovery>
 /** Onboarding with nothing behind it: `onboarding-<step>` stands alone,
  *  `onboarding-<step>-switcher` keeps the sidebar of a person with other
  *  organizations. The steps are name, details, website, working, ready,
- *  failed, profile (a click on from ready), and done (a click on from
- *  failed, or from profile); `-error` refuses whatever the step submits. */
+ *  failed, profile (a click on from ready), plan (a click on from failed,
+ *  or from profile), confirming (back from checkout, paid), and done (back
+ *  from checkout, settled); `-error` refuses whatever the step submits. */
 export function OnboardingState({ state }: { state: string }) {
   const [, step, ...rest] = state.split("-")
   const switcher = rest.includes("switcher")
@@ -52,15 +53,23 @@ export function OnboardingState({ state }: { state: string }) {
           onDeclareTimezone={submit}
           onDiscover={submit}
           onFinish={() => undefined}
+          onSubscribe={submit}
           organization={created ? organization.name : undefined}
+          plan={plans[step] ?? "open"}
           proposal={
             step === "ready" || step === "profile" ? proposal : undefined
           }
+          returned={["plan", "confirming", "done"].includes(step)}
           timezone={step === "details" ? undefined : "Europe/Stockholm"}
         />
       </OnboardingFrame>
     </TooltipProvider>
   )
+}
+
+const plans: Record<string, "confirming" | "settled"> = {
+  confirming: "confirming",
+  done: "settled",
 }
 
 const startedAt = Date.now() - 12_000

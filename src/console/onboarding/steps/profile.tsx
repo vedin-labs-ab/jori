@@ -6,9 +6,9 @@ import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { countLabel } from "@/shared/console/count"
 import { showErrorToast } from "@/shared/console/error"
-import { sourceLabel } from "../context/organization/discovery/url"
-import { type ContextProposal } from "../context/organization/types"
-import { OnboardingStep } from "./step"
+import { sourceLabel } from "../../context/organization/discovery/url"
+import { type ContextProposal } from "../../context/organization/types"
+import { OnboardingStep } from "./layout"
 
 /** What Jori drafted from the website, as plain fields to correct. Nothing
  *  is kept until the person says it is right; skipping leaves the draft

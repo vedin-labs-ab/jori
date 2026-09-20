@@ -5,12 +5,12 @@ import { build } from "vite"
 import { serve } from "../http.ts"
 
 const root = fileURLToPath(new URL("../../../", import.meta.url))
+const origin = "http://localhost:5178"
 
 export async function serveFixture(args: {
   page: string
   outDir: string
   port: number
-  define?: Record<string, string>
 }) {
   await build({
     root,
@@ -18,9 +18,11 @@ export async function serveFixture(args: {
     envDir: false,
     plugins: [tailwindcss(), react()],
     resolve: { tsconfigPaths: true },
+    // What the app reads as it loads. Nothing here is ever reached.
     define: {
       "import.meta.env.VITE_JORI_REGION": JSON.stringify("us"),
-      ...args.define,
+      "import.meta.env.VITE_JORI_PUBLIC_ORIGIN": JSON.stringify(origin),
+      "import.meta.env.VITE_JORI_US_ORIGIN": JSON.stringify(origin),
     },
     build: {
       outDir: args.outDir,

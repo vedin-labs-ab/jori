@@ -14,8 +14,10 @@ import {
 } from "@/shared/session/auth"
 import { mainContentId, SkipToContent } from "@/shared/skip"
 import { api } from "../../../convex/_generated/api"
+import { usePlanCheckout } from "../billing/actions"
 import { SidebarUserButton } from "../shell/account"
 import { SidebarOrganizationSwitcher } from "../shell/organization"
+import { planOf, useCheckoutReturn } from "./checkout"
 import { OnboardingFlow } from "./flow"
 import { OnboardingFrame } from "./frame"
 
@@ -78,13 +80,15 @@ function OnboardingSession({
   const navigate = useNavigate()
   const session = useSession()
   const active = useActiveOrganization()
-  const { discovery, profile, ...actions } = useOnboarding(
+  const { billing, discovery, profile, ...actions } = useOnboarding(
     isPrepared ? organizationId : undefined
   )
+  const checkout = useCheckoutReturn()
   // A flow that opens on an existing organization waits to know where that
   // one stands; one already under way is never taken off the screen.
   const started = useRef(organizationId === undefined)
-  started.current ||= discovery !== undefined && profile !== undefined
+  started.current ||=
+    billing !== undefined && discovery !== undefined && profile !== undefined
 
   if (!started.current) {
     return null
@@ -102,10 +106,13 @@ function OnboardingSession({
       onDeclareTimezone={actions.declareTimezone}
       onDiscover={actions.discover}
       onFinish={actions.finish}
+      onSubscribe={actions.subscribe}
       organization={
         organizationId === undefined ? undefined : active.data?.name
       }
+      plan={planOf(billing, checkout === "subscribed")}
       proposal={profile?.proposed}
+      returned={checkout !== undefined}
       timezone={profile?.declared?.timezone}
     />
   )
@@ -161,6 +168,7 @@ function useOnboarding(organizationId: string | undefined) {
   const complete = useAction(api.organization.onboarding.complete)
   const declareTimezone = useMutation(api.organization.profile.declareTimezone)
   const approve = useMutation(api.organization.profile.approve)
+  const startPlanCheckout = usePlanCheckout()
   const navigate = useNavigate()
   const active = useActiveOrganization()
 
@@ -173,6 +181,7 @@ function useOnboarding(organizationId: string | undefined) {
   }
 
   return {
+    billing: useQuery(api.billing.console.overview, scope),
     discovery: useQuery(api.organization.discovery.get, scope),
     profile: useQuery(api.organization.profile.get, scope),
     approve: async (edits: { name: string; summary: string }) => {
@@ -183,6 +192,11 @@ function useOnboarding(organizationId: string | undefined) {
     },
     discover: async (website: string) => {
       await discover({ organizationId: onboarded(), website })
+    },
+    subscribe: async () => {
+      const { url } = await startPlanCheckout(onboarded())
+
+      window.location.assign(url)
     },
     /** Marks the organization onboarded and leaves for the console. The
      *  page is changed first and the organization read again after, so the

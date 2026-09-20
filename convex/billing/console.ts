@@ -5,7 +5,7 @@ import { mutation, type QueryCtx, query } from "../_generated/server"
 import { requireOrganizationAccess } from "../access"
 import { ensureAccount, getAccount, requireActivePlan } from "./account"
 import { automaticTopUpsAvailable } from "./capabilities"
-import { requirePolarConfiguration } from "./polar/config"
+import { isPolarConfigured, requirePolarConfiguration } from "./polar/config"
 
 const entryPageSize = 30
 
@@ -23,6 +23,8 @@ export const overview = query({
 
     return {
       automaticTopUpsAvailable: automaticTopUpsAvailable(),
+      // An instance that sells no plan has none to ask for.
+      checkoutAvailable: isPolarConfigured(),
       account: account === null ? null : publicAccount(account),
       entries:
         account === null ? [] : await readEntries(ctx, args.organizationId),

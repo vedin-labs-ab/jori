@@ -34,14 +34,16 @@ function renderFlow(props: Partial<Parameters<typeof OnboardingFlow>[0]> = {}) {
     onDeclareTimezone: vi.fn(async () => undefined),
     onDiscover: vi.fn(async () => undefined),
     onFinish: vi.fn(),
+    onSubscribe: vi.fn(async () => undefined),
   }
 
-  render(
+  const view = render(
     <OnboardingFlow
       discovery={null}
       logo={<div>Logo</div>}
       name="Albin"
       organization="Copperline"
+      plan="settled"
       proposal={undefined}
       timezone={undefined}
       {...callbacks}
@@ -49,7 +51,7 @@ function renderFlow(props: Partial<Parameters<typeof OnboardingFlow>[0]> = {}) {
     />
   )
 
-  return callbacks
+  return { ...callbacks, view }
 }
 
 test("a person's first organization is named under their welcome", async () => {
@@ -198,4 +200,61 @@ test("a discovery under way reopens on its step, with no way past it until it en
       .disabled
   ).toBe(true)
   expect(screen.queryByRole("button", { name: "Continue" })).toBeNull()
+})
+
+test("the plan is asked for before the organization is handed over", async () => {
+  const { onSubscribe } = renderFlow({
+    plan: "open",
+    timezone: "Europe/Stockholm",
+  })
+
+  fireEvent.click(screen.getByRole("button", { name: "I'll do this later" }))
+
+  // No way around it, and no checkout before the terms are accepted.
+  expect(screen.getByText("Put Jori to work.")).toBeDefined()
+  expect(screen.queryByText("Copperline is ready.")).toBeNull()
+  const checkout = screen.getByRole("button", { name: "Continue to checkout" })
+  expect((checkout as HTMLButtonElement).disabled).toBe(true)
+
+  fireEvent.click(screen.getByRole("checkbox"))
+  fireEvent.click(checkout)
+
+  await waitFor(() => expect(onSubscribe).toHaveBeenCalledOnce())
+})
+
+test("back from checkout the flow waits for the payment, then moves on by itself", () => {
+  const { view } = renderFlow({
+    discovery: ready,
+    plan: "confirming",
+    returned: true,
+  })
+
+  expect(screen.getByText("Confirming your payment.")).toBeDefined()
+
+  view.rerender(
+    <OnboardingFlow
+      discovery={ready}
+      logo={<div>Logo</div>}
+      name="Albin"
+      onApprove={vi.fn()}
+      onCreate={vi.fn()}
+      onDeclareTimezone={vi.fn()}
+      onDiscover={vi.fn()}
+      onFinish={vi.fn()}
+      onSubscribe={vi.fn()}
+      organization="Copperline"
+      plan="settled"
+      proposal={undefined}
+      returned
+      timezone={undefined}
+    />
+  )
+
+  expect(screen.getByText("Copperline is ready.")).toBeDefined()
+})
+
+test("a checkout that was backed out of reopens on the plan", () => {
+  renderFlow({ discovery: ready, plan: "open", returned: true })
+
+  expect(screen.getByText("Put Jori to work.")).toBeDefined()
 })

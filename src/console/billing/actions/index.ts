@@ -31,9 +31,7 @@ export function billingReturnUrl(reopenSettings = false) {
  */
 export function useBillingCheckout(organizationId: string) {
   const [pending, setPending] = useState<CheckoutFlow | null>(null)
-  const startPlanCheckout = useAction(
-    api.billing.polar.checkout.startPlanCheckout
-  )
+  const startPlanCheckout = usePlanCheckout()
   const startTopUpCheckout = useAction(
     api.billing.polar.checkout.startTopUpCheckout
   )
@@ -62,7 +60,7 @@ export function useBillingCheckout(organizationId: string) {
     subscribe: () =>
       redirect(
         "plan",
-        () => startPlanCheckout({ organizationId, ...purchaseAgreement() }),
+        () => startPlanCheckout(organizationId),
         "Could not open checkout."
       ),
     topUp: (amountUsd: number) =>
@@ -83,6 +81,14 @@ export function useBillingCheckout(organizationId: string) {
         "Could not open the billing portal."
       ),
   }
+}
+
+/** Starts Polar's checkout for the plan, answering with where it is. */
+export function usePlanCheckout() {
+  const start = useAction(api.billing.polar.checkout.startPlanCheckout)
+
+  return (organizationId: string) =>
+    start({ organizationId, ...purchaseAgreement() })
 }
 
 function purchaseAgreement() {

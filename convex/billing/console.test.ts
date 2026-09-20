@@ -23,7 +23,12 @@ test("read-only billing remains available to an organization without Polar", asy
   const caller = t.withIdentity({ org: organizationId })
   expect(
     await caller.query(api.billing.console.overview, { organizationId })
-  ).toEqual({ account: null, entries: [], automaticTopUpsAvailable: false })
+  ).toEqual({
+    account: null,
+    entries: [],
+    automaticTopUpsAvailable: false,
+    checkoutAvailable: false,
+  })
 })
 
 test("enabling auto top-up fails before creating an account when Polar is absent", async () => {

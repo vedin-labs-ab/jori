@@ -1,5 +1,5 @@
 import { type ReactNode } from "react"
-import { type DiscoveryStepLayout } from "../context/organization/discovery/website"
+import { type DiscoveryStepLayout } from "../../context/organization/discovery/website"
 
 /** One onboarding step on the page: what it asks, the fields if any, then
  *  the way forward ahead of the way around. Onboarding has no header, so

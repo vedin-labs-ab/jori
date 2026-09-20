@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { showErrorToast } from "@/shared/console/error"
 import { localTimezone } from "@/shared/console/time"
-import { TimezoneField } from "../organization/timezone"
-import { OnboardingStep } from "./step"
+import { TimezoneField } from "../../organization/timezone"
+import { OnboardingStep } from "./layout"
 
 /** The organization's logo and the zone its days are counted in. Neither
  *  needs an answer: the logo is optional and the zone arrives as the

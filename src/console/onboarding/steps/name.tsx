@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { readErrorMessage } from "@/shared/console/error"
-import { OnboardingStep } from "./step"
+import { OnboardingStep } from "./layout"
 
 /** Where an organization starts: its name. A person's first organization is
  *  also their welcome to Jori; a later one is named and can be backed out of. */

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { ProviderLogo } from "@/shared/logo/provider"
-import { OnboardingStep } from "./step"
+import { OnboardingStep } from "./layout"
 
 /** The tools most teams connect first, as the closing step shows them. */
 const tools = [
