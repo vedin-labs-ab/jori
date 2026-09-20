@@ -169,11 +169,15 @@ function reveal(option: HTMLElement) {
 
   const row = option.getBoundingClientRect()
   const view = list.getBoundingClientRect()
+  // Rects are in screen pixels and scrollTop in the list's own. They differ
+  // inside a scaled frame, the landing page's, where a screen-pixel step
+  // falls short; rounded up, since scrollTop keeps whole pixels.
+  const scale = view.height / list.offsetHeight || 1
 
   if (row.top < view.top) {
-    list.scrollTop -= view.top - row.top
+    list.scrollTop -= Math.ceil((view.top - row.top) / scale)
   } else if (row.bottom > view.bottom) {
-    list.scrollTop += row.bottom - view.bottom
+    list.scrollTop += Math.ceil((row.bottom - view.bottom) / scale)
   }
 }
 

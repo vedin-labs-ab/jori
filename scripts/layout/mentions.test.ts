@@ -187,7 +187,7 @@ test("an open picker follows scrolling and dismisses without taking editor focus
     expect(await field.locator("[data-mention-kind]").count()).toBe(1)
     await field.fill("+")
     await expectPopup(page)
-    await page.getByRole("heading", { name: "New chat" }).click()
+    await page.getByRole("heading", { name: "What needs doing?" }).click()
     await page.getByRole("listbox").waitFor({ state: "hidden" })
     expect(await field.innerText()).toBe("+")
     await field.fill("")
