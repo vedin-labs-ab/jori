@@ -1,4 +1,4 @@
-import { type WaiterWake } from "../../../contracts/runtime/waiters"
+import { type WaiterWake } from "../../runs/execution/waiters/schema"
 import { isParked, park, recordResumed } from "../loop/park"
 import { type AgentRuntime } from "../platform/types"
 import {

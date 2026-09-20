@@ -1,7 +1,3 @@
-import {
-  type RuntimeContext,
-  type RuntimeTool,
-} from "../../../contracts/runtime/context"
 import { holdsTool } from "../../runs/access"
 import { type AgentRuntimeInput } from "../../runs/agent/input"
 import { assemblePrompt } from "../../runs/agent/prompt"
@@ -11,15 +7,14 @@ import {
 } from "../../runs/agent/tools/policy"
 import { createRunToolSnapshot } from "../../runs/agent/tools/snapshot"
 import { type RuntimeSkill } from "../../skills/runtime"
-import { type runLifecycleTools, sandboxTools } from "../native"
+import { runLifecycleTools, sandboxTools } from "../native"
 import { type RuntimePermissions } from "../permissions/index"
 import { visibleNativeToolSnapshots } from "../permissions/native"
+import { type RuntimeContext, type RuntimeTool } from "../platform/types"
 import { type loadActiveSurface } from "../surface"
 import { type LoadedSandbox, type LoadedSession } from "./loaders"
 
 type LoadedActiveSurface = Awaited<ReturnType<typeof loadActiveSurface>>
-
-type LifecycleTools = ReturnType<typeof runLifecycleTools>
 
 export function buildRuntimePrompt(
   input: AgentRuntimeInput,
@@ -43,21 +38,19 @@ export function buildRuntimePrompt(
 export function runtimeToolSnapshot(
   input: AgentRuntimeInput,
   activeSurface: LoadedActiveSurface,
-  lifecycleTools: LifecycleTools,
   permissions: RuntimePermissions
 ) {
   return createRunToolSnapshot({
     activeSurfaceTools: visibleNativeToolSnapshots(activeSurface.tools),
     capabilities: permissions.capabilities,
-    lifecycleTools: visibleNativeToolSnapshots(lifecycleTools),
+    lifecycleTools: visibleNativeToolSnapshots(runLifecycleTools()),
     sandboxTools: visibleNativeToolSnapshots(heldSandboxTools(input)),
   })
 }
 
-export function runtimeResponse(args: {
+export function buildRuntimeContext(args: {
   activeSurface: LoadedActiveSurface
   input: AgentRuntimeInput
-  lifecycleTools: LifecycleTools
   permissions: RuntimePermissions
   sandbox: LoadedSandbox
   session: LoadedSession
@@ -77,23 +70,17 @@ export function runtimeResponse(args: {
         : {
             id: args.session._id,
           },
-    tools: runtimeTools(
-      args.input,
-      args.lifecycleTools,
-      args.activeSurface,
-      args.permissions
-    ),
+    tools: runtimeTools(args.input, args.activeSurface, args.permissions),
   }
 }
 
 export function runtimeTools(
   input: AgentRuntimeInput,
-  lifecycleTools: LifecycleTools,
   activeSurface: LoadedActiveSurface,
   permissions: RuntimePermissions
 ): RuntimeTool[] {
   const tools = [
-    ...lifecycleTools,
+    ...runLifecycleTools(),
     ...activeSurface.tools,
     ...permissions.tools,
     ...heldSandboxTools(input),

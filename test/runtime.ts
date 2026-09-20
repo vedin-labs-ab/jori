@@ -1,12 +1,8 @@
 import { vi } from "vitest"
 import { type MessageSurface } from "../contracts/integrations"
 import { defaultSelection } from "../contracts/models/selection"
-import { type RuntimeContext } from "../contracts/runtime/context"
-import { type RuntimeId } from "../contracts/runtime/ids"
 import { type RuntimePrompt } from "../contracts/runtime/prompt"
 import { maxRunTurns } from "../contracts/runtime/runs"
-import { type RuntimeModelTokens } from "../contracts/runtime/trace"
-import { type WaiterWake } from "../contracts/runtime/waiters"
 import { runAct } from "../convex/runtime/loop/act"
 import { runModelTurn } from "../convex/runtime/loop/model"
 import { isParked } from "../convex/runtime/loop/park"
@@ -17,29 +13,36 @@ import {
 } from "../convex/runtime/model/types"
 import {
   type AgentRuntime,
+  type RuntimeContext,
   type RuntimePlatform,
 } from "../convex/runtime/platform/types"
 import { type SandboxRuntime } from "../convex/runtime/sandbox/types"
 import { executeToolCall } from "../convex/runtime/tools/index"
 import { createPlatform, createSandbox } from "./platform"
 
+type TableNames = import("../convex/_generated/dataModel").TableNames
+type Id<TableName extends TableNames> =
+  import("../convex/_generated/dataModel").Id<TableName>
+type ModelTokens = import("../convex/runs/execution/traces/schema").ModelTokens
+type WaiterWake = import("../convex/runs/execution/waiters/schema").WaiterWake
+
 export type QueuedModelResponse =
   | {
       content: string
       reasoning?: string | null
       type: "stop"
-      tokens?: RuntimeModelTokens
+      tokens?: ModelTokens
     }
   | {
       content: string | null
       reasoning?: string | null
       toolCalls: ModelToolCall[]
       type: "tool_calls"
-      tokens?: RuntimeModelTokens
+      tokens?: ModelTokens
     }
 
-export function runtimeId<TableName extends string>(value: string) {
-  return value as RuntimeId<TableName>
+export function runtimeId<TableName extends TableNames>(value: string) {
+  return value as Id<TableName>
 }
 
 /** A loaded run context with every field at its quiet default. */
@@ -211,7 +214,7 @@ function queuedModelResponse(response: QueuedModelResponse): ModelResponse {
       }
 }
 
-export function emptyTokens(): RuntimeModelTokens {
+export function emptyTokens(): ModelTokens {
   return {
     cacheRead: 0,
     cacheWrite: 0,

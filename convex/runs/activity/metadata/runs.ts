@@ -1,6 +1,6 @@
 import { optionalString } from "../../../shared/input"
+import { type ToolResult } from "../../execution/traces/schema"
 import { item } from "../helpers"
-import { type ToolResult } from "../read"
 import {
   activityFilterLabel,
   countOutcome,

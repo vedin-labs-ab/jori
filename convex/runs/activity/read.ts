@@ -1,14 +1,8 @@
 import { compactRecord } from "../../../contracts/json"
-import {
-  type RuntimeModelUsage,
-  type RuntimeValueSummary,
-} from "../../../contracts/runtime/trace"
 import { optionalNumber, optionalString } from "../../shared/input"
 import { type RunToolSnapshot } from "../agent/tools/snapshot"
+import { type ModelUsage, type ToolResult } from "../execution/traces/schema"
 import { type ToolLabel } from "./types"
-
-export type ToolResult = RuntimeValueSummary
-export type ModelUsage = RuntimeModelUsage
 
 // Trace shapes are validated by the database. These readers only normalize
 // display values: blank text is absent and nonfinite numbers are omitted.

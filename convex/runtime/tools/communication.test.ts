@@ -1,8 +1,7 @@
 import { expect, test, vi } from "vitest"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
 import { createPlatform } from "../../../test/platform"
 import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
-import { type AgentRuntime } from "../platform/types"
+import { type AgentRuntime, type RuntimeTool } from "../platform/types"
 
 test.each([
   [

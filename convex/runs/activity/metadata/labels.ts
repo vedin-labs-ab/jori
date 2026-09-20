@@ -1,6 +1,6 @@
 import { readStringArray } from "../../../../contracts/json"
 import { optionalNumber } from "../../../shared/input"
-import { type ToolResult } from "../read"
+import { type ToolResult } from "../../execution/traces/schema"
 
 export function activityFilterLabel(value: unknown) {
   const filters = readStringArray(value)

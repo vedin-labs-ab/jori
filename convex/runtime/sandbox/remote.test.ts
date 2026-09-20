@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest"
-import { type UploadedFile } from "../../../contracts/runtime/files"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
+import { type UploadedFile } from "../../files/upload"
 import { RemoteSandbox } from "./remote"
 
 test("exports by run and path without transporting file bytes", async () => {

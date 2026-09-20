@@ -1,5 +1,4 @@
 import { expect, test, vi } from "vitest"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
 import {
   createRuntime,
   runTool,
@@ -8,6 +7,7 @@ import {
 } from "../../../test/runtime"
 import { createLocalSandbox } from "../../../test/sandbox"
 import { isParked } from "../loop/park"
+import { type RuntimeTool } from "../platform/types"
 import { executeToolCall } from "./index"
 
 test("bash parks on a slow command and collects it on the wake", async () => {

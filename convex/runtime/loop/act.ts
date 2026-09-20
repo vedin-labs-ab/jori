@@ -4,10 +4,12 @@ import {
   isTerminalRunStatus,
   maxRunTurns,
 } from "../../../contracts/runtime/runs"
-import { type WaiterWake } from "../../../contracts/runtime/waiters"
 import { internalAction } from "../../_generated/server"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
-import { waiterWake } from "../../runs/execution/waiters/schema"
+import {
+  type WaiterWake,
+  waiterWake,
+} from "../../runs/execution/waiters/schema"
 import { loadRuntime } from "../context"
 import { createAgentRuntime } from "../platform"
 import { type AgentRuntime } from "../platform/types"
@@ -248,7 +250,7 @@ async function finalize(
   sequence: number
 ): Promise<ActOutcome> {
   if (kind === "finish") {
-    await recordRuntimeEvent(runtime.platform, runtime.context, {
+    await recordRuntimeEvent(runtime, {
       sequence,
       type: "run.completed",
     })
@@ -279,7 +281,7 @@ function pendingCalls(
 }
 
 async function failRun(runtime: AgentRuntime) {
-  await recordRuntimeEvent(runtime.platform, runtime.context, {
+  await recordRuntimeEvent(runtime, {
     data: { error: maxTurnsError },
     sequence: maxRunTurns * toolSequenceOffset + toolSequenceOffset,
     type: "run.failed",

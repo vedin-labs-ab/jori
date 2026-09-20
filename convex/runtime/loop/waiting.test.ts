@@ -1,6 +1,4 @@
 import { expect, test } from "vitest"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
-import { type RunHandoffs } from "../../../contracts/runtime/handoffs"
 import { createPlatform } from "../../../test/platform"
 import {
   createQueuedModel,
@@ -9,6 +7,8 @@ import {
   runtimeContext,
   runtimeId,
 } from "../../../test/runtime"
+import { type RunHandoffs } from "../../runs/execution/waiters/handoffs"
+import { type RuntimeTool } from "../platform/types"
 
 test("thinks after one handoff resolves before parking on another", async () => {
   const platform = createPlatform({

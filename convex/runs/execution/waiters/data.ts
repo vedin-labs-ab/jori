@@ -4,22 +4,17 @@ import {
   sendEvent,
   type WorkflowId,
 } from "@convex-dev/workflow"
-import { type Infer } from "convex/values"
 import { isTerminalRunStatus } from "../../../../contracts/runtime/runs"
 import { components, internal } from "../../../_generated/api"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import {
-  type waiterCondition,
-  type waiterReason,
-  type waiterSubject,
+  type WaiterCondition,
+  type WaiterReason,
+  type WaiterSubject,
+  type WaiterWake,
   waiterWake,
 } from "./schema"
-
-type WaiterReason = Infer<typeof waiterReason>
-type WaiterSubject = Infer<typeof waiterSubject>
-type WaiterCondition = Infer<typeof waiterCondition>
-type WaiterWake = Infer<typeof waiterWake>
 
 const eventName = "wake"
 

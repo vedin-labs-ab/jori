@@ -1,8 +1,8 @@
-import { type RuntimeId } from "../../../contracts/runtime/ids"
+import { type Id } from "../../_generated/dataModel"
 import {
   type WaiterCondition,
   type WaiterWake,
-} from "../../../contracts/runtime/waiters"
+} from "../../runs/execution/waiters/schema"
 import { type TraceRuntime } from "../platform/types"
 import { recordRuntimeEvent } from "../trace/record"
 import { hasResolvedHandoffs, type PendingHandoff } from "./pending"
@@ -67,7 +67,7 @@ export async function parkHandoffs(
 }
 
 export async function recordResumed(runtime: TraceRuntime, wake: WaiterWake) {
-  await recordRuntimeEvent(runtime.platform, runtime.context, {
+  await recordRuntimeEvent(runtime, {
     data: { waiter: wake.waiter },
     keyId: `${wake.waiter}:${wake.reason}`,
     sequence: 700_001,
@@ -75,11 +75,8 @@ export async function recordResumed(runtime: TraceRuntime, wake: WaiterWake) {
   })
 }
 
-async function recordWaiting(
-  runtime: TraceRuntime,
-  waiterId: RuntimeId<"waiters">
-) {
-  await recordRuntimeEvent(runtime.platform, runtime.context, {
+async function recordWaiting(runtime: TraceRuntime, waiterId: Id<"waiters">) {
+  await recordRuntimeEvent(runtime, {
     data: { waiter: waiterId },
     keyId: waiterId,
     sequence: 700_000,

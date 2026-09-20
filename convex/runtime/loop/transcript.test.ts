@@ -1,8 +1,4 @@
 import { expect, test } from "vitest"
-import {
-  type RuntimeInteraction,
-  type RuntimeMessage,
-} from "../../../contracts/runtime/context"
 import { createPlatform } from "../../../test/platform"
 import {
   createRuntime,
@@ -10,6 +6,8 @@ import {
   runtimeId,
   runtimePrompt,
 } from "../../../test/runtime"
+import { type RuntimeMessage } from "../../integrations/messages/runtime"
+import { type RuntimeInteraction } from "../../reactions/cursor"
 import {
   appendSessionMessages,
   formatSessionInteraction,

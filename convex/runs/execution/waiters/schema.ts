@@ -1,5 +1,5 @@
 import { defineTable } from "convex/server"
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 
 export const waiterReason = v.union(
   v.literal("resolved"),
@@ -27,6 +27,11 @@ export const waiterWake = v.object({
   subject: v.optional(waiterSubject),
   waiter: v.id("waiters"),
 })
+
+export type WaiterReason = Infer<typeof waiterReason>
+export type WaiterSubject = Infer<typeof waiterSubject>
+export type WaiterCondition = Infer<typeof waiterCondition>
+export type WaiterWake = Infer<typeof waiterWake>
 
 const waiterStatus = v.union(
   v.literal("waiting"),

@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
 import { activityData, traceDoc } from "../../../../test/convex/console"
+import { type ToolResult } from "../../execution/traces/schema"
 import { projectActivity } from "../project"
-import { type ToolResult } from "../read"
 
 test.each<ToolResult>([
   { kind: "array", size: Number.NaN },

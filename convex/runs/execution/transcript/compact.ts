@@ -1,7 +1,7 @@
 import { decodeJson } from "../../../../contracts/json"
-import { type RuntimeValueSummary } from "../../../../contracts/runtime/trace"
 import { toolTraceDetails } from "../../../runtime/trace/tool"
 import { type RunCompaction } from "../../schema"
+import { type ToolResult } from "../traces/schema"
 import { type TranscriptMessage } from "./schema"
 
 export type TranscriptRow = { message: TranscriptMessage; order: number }
@@ -92,7 +92,7 @@ function describeResult(content: string) {
   return describeSummary(toolTraceDetails(decodeToolResult(content)).result)
 }
 
-function describeSummary(result: RuntimeValueSummary) {
+function describeSummary(result: ToolResult) {
   switch (result.kind) {
     case "array":
       return `an array of ${result.size} items`
@@ -109,9 +109,7 @@ function describeSummary(result: RuntimeValueSummary) {
   }
 }
 
-function describeObject(
-  result: Extract<RuntimeValueSummary, { kind: "object" }>
-) {
+function describeObject(result: Extract<ToolResult, { kind: "object" }>) {
   const items =
     result.itemKey === undefined
       ? ""

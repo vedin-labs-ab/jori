@@ -1,6 +1,6 @@
-import { type RuntimeContext } from "../../../contracts/runtime/context"
 import { surfaceCommunicationTools } from "../../../contracts/runtime/surface"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
+import { type RuntimeContext } from "../platform/types"
 
 // A run that stops without finishing gets one instruction back: words
 // outside a tool call reach no one, so say it where it lands or finish.

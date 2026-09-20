@@ -1,5 +1,3 @@
-import { type RuntimeContext } from "../../../contracts/runtime/context"
-import { type ParkedCommand } from "../../../contracts/runtime/waiters"
 import { internal } from "../../_generated/api"
 import { type ActionCtx } from "../../_generated/server"
 import { uploadRunFile } from "../../files/upload"
@@ -12,7 +10,7 @@ import {
   fetchRunCloneCredentials,
   requestRunApproval,
 } from "../tools/broker"
-import { type RuntimePlatform } from "./types"
+import { type RuntimeContext, type RuntimePlatform } from "./types"
 
 type PlatformArgs<Name extends keyof RuntimePlatform> = Parameters<
   RuntimePlatform[Name]
@@ -104,10 +102,7 @@ export class ActionPlatform implements RuntimePlatform {
     this.query(internal.runtime.agents.readChildren, args)
 
   readWaiter = (args: PlatformArgs<"readWaiter">) =>
-    this.query(
-      internal.runs.execution.waiters.records.get,
-      args
-    ) as Promise<ParkedCommand | null>
+    this.query(internal.runs.execution.waiters.records.get, args)
 
   recordEvent = async (args: PlatformArgs<"recordEvent">) => {
     await this.mutation(internal.runs.execution.traces.records.record, args)

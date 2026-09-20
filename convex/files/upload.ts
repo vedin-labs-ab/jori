@@ -1,10 +1,16 @@
-import { type UploadedFile } from "../../contracts/runtime/files"
-import { type RuntimeId } from "../../contracts/runtime/ids"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
 import { blobUrl, deleteBlob, storeBlob } from "./blobs"
 import { normalizeFileName } from "./names"
+
+export type UploadedFile = {
+  fileId: Id<"files">
+  mimeType: string
+  name: string
+  size: number
+  url: string | null
+}
 
 /** Store and record in the calling deployment. Failed records leave no blob. */
 export async function uploadRunFile(
@@ -33,7 +39,7 @@ export async function uploadRunFile(
     })
 
     return {
-      fileId: fileId as RuntimeId<"files">,
+      fileId,
       mimeType: args.mimeType,
       name,
       size: args.bytes.byteLength,

@@ -1,6 +1,6 @@
 import { type JsonObject } from "../../../contracts/json"
-import { type RuntimeModelTokens } from "../../../contracts/runtime/trace"
 import { type ChatDelta, type ChatToolCallDelta } from "../../model/stream"
+import { type ModelTokens } from "../../runs/execution/traces/schema"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
 
 // The model sees exactly what the transcript stores. One shape for both keeps
@@ -23,14 +23,14 @@ export type ModelResponse =
   | {
       content: string
       reasoning: string | null
-      tokens: RuntimeModelTokens
+      tokens: ModelTokens
       type: "stop"
     }
   | {
       content: string | null
       reasoning: string | null
       toolCalls: ModelToolCall[]
-      tokens: RuntimeModelTokens
+      tokens: ModelTokens
       type: "tool_calls"
     }
 

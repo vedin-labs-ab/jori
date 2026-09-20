@@ -2,12 +2,12 @@ import { beforeEach, expect, test, vi } from "vitest"
 import {
   fileTooLargeError,
   maxFileBytes,
-  type UploadedFile,
 } from "../../../../contracts/runtime/files"
 import { internal } from "../../../_generated/api"
 import { type Id } from "../../../_generated/dataModel"
 import { type ActionCtx } from "../../../_generated/server"
 import { blobUrl, deleteBlob, storeBlob } from "../../../files/blobs"
+import { type UploadedFile } from "../../../files/upload"
 import { openSandbox } from "../blaxel"
 import { readSandboxFile } from "./client"
 

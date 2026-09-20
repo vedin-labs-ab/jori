@@ -1,9 +1,10 @@
 // @vitest-environment edge-runtime
+
 import { sendEvent } from "@convex-dev/workflow"
 import { afterEach, expect, test, vi } from "vitest"
-import { approvalExecutionTimeoutMs } from "../../contracts/runtime/handoffs"
 import { approvalFixture } from "../../test/approvals"
 import { internal } from "../_generated/api"
+import { approvalExecutionTimeoutMs } from "./execution"
 
 vi.mock("@convex-dev/workflow", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@convex-dev/workflow")>()),

@@ -107,7 +107,6 @@ test("a run gets only the sandbox and agent tools its contract grants", () => {
   const held = (jori: string[]) =>
     runtimeTools(
       jobInput(jori),
-      [],
       { state: null, tools: [] },
       { all: [], capabilities: [], toolModes: new Map(), tools: [] }
     )

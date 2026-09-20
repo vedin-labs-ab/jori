@@ -2,6 +2,7 @@ import { isRecord, readStringArray } from "../../../../contracts/json"
 import { reactionDisplayLabel } from "../../../../contracts/reactions/display"
 import { type Doc } from "../../../_generated/dataModel"
 import { optionalString } from "../../../shared/input"
+import { type ToolResult } from "../../execution/traces/schema"
 import {
   arrayLength,
   channelLabel,
@@ -16,7 +17,6 @@ import {
   repositoryLabel,
   targetObjectLabel,
 } from "../helpers"
-import { type ToolResult } from "../read"
 import { agentWaitMetadata } from "./agents"
 import { materialMetadata } from "./materials"
 import { runIntrospectionMetadata } from "./runs"

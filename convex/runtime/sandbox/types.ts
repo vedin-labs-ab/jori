@@ -1,5 +1,5 @@
-import { type UploadedFile } from "../../../contracts/runtime/files"
-import { type RuntimeId } from "../../../contracts/runtime/ids"
+import { type Id } from "../../_generated/dataModel"
+import { type UploadedFile } from "../../files/upload"
 
 export type SandboxCommandInput = {
   command: string
@@ -45,7 +45,7 @@ export type SandboxWriteFile = {
 
 export type SandboxRuntime = {
   exportFile(input: SandboxExportFileInput): Promise<UploadedFile>
-  importFile(input: { fileId: RuntimeId<"files">; path: string }): Promise<void>
+  importFile(input: { fileId: Id<"files">; path: string }): Promise<void>
   cloneRepository(
     input: SandboxCloneRepositoryInput
   ): Promise<SandboxCloneResult>

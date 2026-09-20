@@ -4,7 +4,6 @@ import { markSandboxCleaned, reserveSandboxCleanup } from "./cleanup"
 import {
   claimReusableSandbox,
   findRetainedSandbox,
-  releaseIdleSandbox,
   upsertSandbox,
 } from "./data"
 
@@ -36,17 +35,6 @@ export const upsert = internalMutation({
   returns: v.boolean(),
   handler: async (ctx, args) => {
     return await upsertSandbox(ctx, args)
-  },
-})
-
-export const release = internalMutation({
-  args: {
-    externalId: v.string(),
-    runId: v.id("runs"),
-  },
-  returns: v.union(v.object({ expiresAt: v.number() }), v.null()),
-  handler: async (ctx, args) => {
-    return await releaseIdleSandbox(ctx, args)
   },
 })
 

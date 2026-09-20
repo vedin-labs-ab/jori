@@ -1,8 +1,8 @@
 import { type ToolSurface } from "../../../contracts/integrations"
 import { type JsonObject } from "../../../contracts/json"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
 import { readFinal } from "../../../contracts/runtime/tools"
 import { validateSchemaValue } from "../../broker/input/validation"
+import { type RuntimeTool } from "../platform/types"
 
 export function validateRuntimeToolInput(tool: RuntimeTool, input: JsonObject) {
   if (tool.mode === "blocked") {

@@ -1,11 +1,11 @@
 import { expect, test } from "vitest"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
 import {
   createQueuedModel,
   createRuntime,
   runLoop,
   runtimeContext,
 } from "../../../test/runtime"
+import { type RuntimeTool } from "../platform/types"
 
 test("active surface stops are repaired back to finish_run", async () => {
   const runtime = surfaceRuntime({

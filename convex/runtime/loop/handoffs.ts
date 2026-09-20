@@ -1,10 +1,10 @@
 import { decodeJson, encodeToolResult } from "../../../contracts/json"
+import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
 import {
   type ApprovalHandoff,
   type OfferHandoff,
   type RunHandoffs,
-} from "../../../contracts/runtime/handoffs"
-import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
+} from "../../runs/execution/waiters/handoffs"
 import { type AgentRuntime } from "../platform/types"
 import { markVisibleCommunication } from "../tools/index"
 import { materializeSandboxResult } from "../tools/results"

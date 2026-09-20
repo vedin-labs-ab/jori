@@ -1,7 +1,6 @@
 import { expect, test } from "vitest"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
 import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
-import { type AgentRuntime } from "../platform/types"
+import { type AgentRuntime, type RuntimeTool } from "../platform/types"
 
 test("finish_run requires a reason when an active surface has no communication", async () => {
   const runtime = finishRuntime()

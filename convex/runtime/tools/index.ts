@@ -1,12 +1,11 @@
 import { type ToolSurface } from "../../../contracts/integrations"
 import { encodeToolResult, type JsonObject } from "../../../contracts/json"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
 import { isVisibleCommunicationTool } from "../../../contracts/runtime/surface"
 import { readFinal } from "../../../contracts/runtime/tools"
-import { type WaiterWake } from "../../../contracts/runtime/waiters"
+import { type WaiterWake } from "../../runs/execution/waiters/schema"
 import { isParked, type Parked } from "../loop/park"
 import { type ModelToolCall } from "../model/types"
-import { type AgentRuntime } from "../platform/types"
+import { type AgentRuntime, type RuntimeTool } from "../platform/types"
 import { recordToolResultActivity } from "../trace/activity"
 import { errorDetails } from "../trace/events"
 import { recordToolEvent, toolTraceDetails } from "../trace/tool"
@@ -80,8 +79,7 @@ async function recordToolSuccess(
 ): Promise<ToolCallResult> {
   try {
     await recordToolResultActivity({
-      platform: args.runtime.platform,
-      context: args.runtime.context,
+      runtime: args.runtime,
       result: result.value,
       sequence: args.sequence,
       toolName: tool.name,
@@ -259,8 +257,7 @@ async function callConvexTool(
 function eventArgs(args: ToolCallArgs) {
   return {
     call: args.call,
-    platform: args.runtime.platform,
-    context: args.runtime.context,
+    runtime: args.runtime,
     sequence: args.sequence,
   }
 }

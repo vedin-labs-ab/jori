@@ -1,8 +1,8 @@
 import { v } from "convex/values"
 import { type RuntimePrompt } from "../../../contracts/runtime/prompt"
 import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
-import { type RuntimeModelUsage } from "../../../contracts/runtime/trace"
 import { internalAction } from "../../_generated/server"
+import { type ModelUsage } from "../../runs/execution/traces/schema"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
 import { loadRuntime } from "../context"
 import { buildRuntimePrompt } from "../context/response"
@@ -116,14 +116,10 @@ export async function completeModelStep(args: {
   // Recorded concurrently with the model call and joined before the outcome
   // trace, so the started trace always lands first and a failed trace write
   // still aborts the step.
-  const startedPending = recordRuntimeEvent(
-    args.runtime.platform,
-    args.runtime.context,
-    {
-      sequence,
-      type: "model.started",
-    }
-  )
+  const startedPending = recordRuntimeEvent(args.runtime, {
+    sequence,
+    type: "model.started",
+  })
 
   let response: ModelResponse
 
@@ -132,7 +128,7 @@ export async function completeModelStep(args: {
   } catch (error) {
     await startedPending.catch(() => undefined)
     await draft?.discard()
-    await recordRuntimeEvent(args.runtime.platform, args.runtime.context, {
+    await recordRuntimeEvent(args.runtime, {
       data: { error: formatError(error) },
       sequence,
       type: "model.failed",
@@ -218,7 +214,7 @@ function recordModelCompleted(
     sequence: number
   }
 ) {
-  return recordRuntimeEvent(runtime.platform, runtime.context, {
+  return recordRuntimeEvent(runtime, {
     data: {
       model: args.model,
       usage: modelUsage(args.response, args.durationMs),
@@ -230,10 +226,7 @@ function recordModelCompleted(
   })
 }
 
-function modelUsage(
-  response: ModelResponse,
-  durationMs: number
-): RuntimeModelUsage {
+function modelUsage(response: ModelResponse, durationMs: number): ModelUsage {
   return {
     durationMs,
     tokens: response.tokens,
@@ -251,7 +244,7 @@ const overflowError =
 /** A prompt the provider rejects as too long is rejected again on every
  *  retry, so the run ends here with a reason a person can read. */
 function failForOverflow(runtime: AgentRuntime, sequence: number) {
-  return recordRuntimeEvent(runtime.platform, runtime.context, {
+  return recordRuntimeEvent(runtime, {
     data: { error: overflowError },
     sequence,
     type: "run.failed",

@@ -1,14 +1,17 @@
 import { vi } from "vitest"
 import { encodeToolResult } from "../contracts/json"
-import { type DrainedSessionBatch } from "../contracts/runtime/context"
-import {
-  type ApprovalExecution,
-  type RunHandoffs,
-} from "../contracts/runtime/handoffs"
 import { type TranscriptMessage } from "../convex/runs/execution/transcript/schema"
 import { type RuntimePlatform } from "../convex/runtime/platform/types"
 import { type SandboxRuntime } from "../convex/runtime/sandbox/types"
 import { runtimeId } from "./runtime"
+
+// Read off the port, so these helpers load none of the modules behind it.
+type Returned<Name extends keyof RuntimePlatform> = Awaited<
+  ReturnType<RuntimePlatform[Name]>
+>
+type ApprovalExecution = Returned<"executeApproval">
+type DrainedSessionBatch = Returned<"drainSession">
+type RunHandoffs = Returned<"loadRunHandoffs">
 
 export type FakePlatform = ReturnType<typeof createPlatform>
 

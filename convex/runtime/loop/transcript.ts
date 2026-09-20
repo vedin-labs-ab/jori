@@ -1,13 +1,11 @@
-import {
-  type DrainedSessionBatch,
-  type RuntimeInteraction,
-  type RuntimeMessage,
-} from "../../../contracts/runtime/context"
 import { type RuntimePrompt } from "../../../contracts/runtime/prompt"
 import { collapseWhitespace } from "../../../contracts/text"
 import { promptTemplates } from "../../../prompts/generated"
 import { renderPromptTemplate } from "../../../prompts/render"
+import { type RuntimeMessage } from "../../integrations/messages/runtime"
+import { type RuntimeInteraction } from "../../reactions/cursor"
 import { type TranscriptMessage } from "../../runs/execution/transcript/schema"
+import { type DrainedSessionBatch } from "../../sessions/drain"
 import { type AgentRuntime } from "../platform/types"
 
 // The prompt prefix every turn starts with: instructions as the system

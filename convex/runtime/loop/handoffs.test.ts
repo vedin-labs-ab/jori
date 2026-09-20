@@ -1,7 +1,7 @@
 import { expect, test } from "vitest"
-import { type RunHandoffs } from "../../../contracts/runtime/handoffs"
 import { createPlatform, type FakePlatform } from "../../../test/platform"
 import { createRuntime, runtimeId } from "../../../test/runtime"
+import { type RunHandoffs } from "../../runs/execution/waiters/handoffs"
 import { reconcileHandoffs } from "./handoffs"
 import { parkHandoffs } from "./park"
 import { hasResolvedHandoffs } from "./pending"

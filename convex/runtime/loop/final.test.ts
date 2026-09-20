@@ -1,6 +1,4 @@
 import { expect, test } from "vitest"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
-import { type RunHandoffs } from "../../../contracts/runtime/handoffs"
 import { createPlatform } from "../../../test/platform"
 import {
   createQueuedModel,
@@ -10,6 +8,8 @@ import {
   runtimeContext,
   runtimeId,
 } from "../../../test/runtime"
+import { type RunHandoffs } from "../../runs/execution/waiters/handoffs"
+import { type RuntimeTool } from "../platform/types"
 
 test("final visible actions think after one of several offers resolves", async () => {
   const platform = createPlatform({ handoffs: offerHandoffSequence() })
@@ -96,7 +96,7 @@ function notionOffer() {
 
 function offerHandoff(
   offerId: string,
-  integration: string,
+  integration: RunHandoffs["offers"][number]["integration"],
   status: "cancelled" | "pending",
   expiresAt: number
 ): RunHandoffs["offers"][number] {

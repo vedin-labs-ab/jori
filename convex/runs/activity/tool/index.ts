@@ -2,9 +2,10 @@ import { isRecord } from "../../../../contracts/json"
 import { type Doc } from "../../../_generated/dataModel"
 import { optionalString } from "../../../shared/input"
 import { humanizeToolName } from "../../../shared/tools/names"
+import { type ToolResult } from "../../execution/traces/schema"
 import { inputDescription, inputDetails } from "../format"
 import { toolMetadata } from "../metadata"
-import { readPreparedTools, readToolResult, type ToolResult } from "../read"
+import { readPreparedTools, readToolResult } from "../read"
 import {
   type ActivityData,
   type ActivityDetail,

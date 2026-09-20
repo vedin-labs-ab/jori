@@ -1,4 +1,3 @@
-import { type Infer } from "convex/values"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { meterModelUsage } from "../../../billing/meter"
@@ -8,10 +7,8 @@ import { recordUsageEnded } from "../../../usage/record"
 import { stopRunChildren } from "../../tree"
 import { clearRunDraft } from "../drafts/data"
 import { wakeParentForTerminalRun } from "../waiters/data"
-import { type traceData } from "./schema"
+import { type TraceData } from "./schema"
 import { recordTrace } from "./write"
-
-type TraceData = Infer<typeof traceData>
 
 export async function recordWorkerTrace(
   ctx: MutationCtx,

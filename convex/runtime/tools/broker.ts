@@ -6,10 +6,10 @@ import {
   type JsonObject,
   type JsonValue,
 } from "../../../contracts/json"
-import { type ApprovalExecution } from "../../../contracts/runtime/handoffs"
 import { internal } from "../../_generated/api"
 import { type Id } from "../../_generated/dataModel"
 import { type ActionCtx } from "../../_generated/server"
+import { type ApprovalExecution } from "../../approvals/execution"
 import { type ApprovalBrokerContext } from "../../broker/approval"
 import { loadRunBrokerContext } from "../../broker/auth"
 import { type GitHubCloneCredentials } from "../platform/types"

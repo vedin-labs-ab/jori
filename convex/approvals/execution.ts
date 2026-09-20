@@ -1,9 +1,14 @@
 import { v } from "convex/values"
 import { encodeToolResult } from "../../contracts/json"
-import { approvalExecutionTimeoutMs } from "../../contracts/runtime/handoffs"
 import { type Doc } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
 import { wakeRun } from "../runs/execution/waiters/data"
+
+export const approvalExecutionTimeoutMs = 5 * 60 * 1000
+
+export type ApprovalExecution =
+  | { state: "done"; result: string }
+  | { state: "executing"; expiresAt: number }
 
 export const claim = internalMutation({
   args: {

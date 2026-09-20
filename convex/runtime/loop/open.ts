@@ -7,6 +7,7 @@ import { appendTranscript } from "../../runs/execution/transcript/data"
 import { toolSnapshot } from "../../runs/schema"
 import { drainSession } from "../../sessions/drain"
 import { loadRuntime } from "../context"
+import { runtimeToolSnapshot } from "../context/response"
 import { syncSessionReactions } from "../sessions"
 import { drainedBatchMessages } from "./transcript"
 
@@ -31,7 +32,11 @@ export const step = internalAction({
     await ctx.runMutation(internal.runtime.loop.open.prepare, {
       runId: args.runId,
       ...(loaded.session === null ? {} : { sessionId: loaded.session._id }),
-      tools: loaded.tools,
+      tools: runtimeToolSnapshot(
+        loaded.input,
+        loaded.activeSurface,
+        loaded.permissions
+      ),
     })
 
     return "opened"

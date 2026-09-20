@@ -1,8 +1,8 @@
 // @vitest-environment edge-runtime
 /// <reference types="vite/client" />
+
 import { getFunctionName } from "convex/server"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
-import { approvalExecutionTimeoutMs } from "../../contracts/runtime/handoffs"
 import {
   approvalFixture as fixture,
   approvalRunFields as runFields,
@@ -10,6 +10,7 @@ import {
 import { internal } from "../_generated/api"
 import * as jori from "../broker/jori"
 import { executeRunApproval } from "../runtime/tools/broker"
+import { approvalExecutionTimeoutMs } from "./execution"
 
 const success = JSON.stringify({ status: "read", text: "Synthetic fixture." })
 

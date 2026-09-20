@@ -1,4 +1,3 @@
-import { type RuntimeMessage } from "../../../contracts/runtime/context"
 import { type Doc } from "../../_generated/dataModel"
 import { getActorDisplayName, getActorKind } from "../../shared/actor"
 import {
@@ -7,10 +6,16 @@ import {
   messageReplyTargetIdentifier,
 } from "./identifiers"
 
+/** A message as the model reads it. */
+export type RuntimeMessage = ReturnType<typeof formatRuntimeMessage> & {
+  /** Resource and folder metadata, resolved for the execution audience. */
+  context?: string
+}
+
 export function formatRuntimeMessage(
   message: Doc<"messages">,
   reactions?: string
-): RuntimeMessage {
+) {
   return {
     actor: getActorDisplayName(message.actor) ?? null,
     actorIds: messageActorIds(message),

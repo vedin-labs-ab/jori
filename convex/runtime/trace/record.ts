@@ -1,12 +1,9 @@
-import { type RuntimeContext } from "../../../contracts/runtime/context"
 import {
-  type RuntimeErrorTraceData,
-  type RuntimeEventInput,
-  type RuntimeEventTraceData,
-  type RuntimeEventType,
-} from "../../../contracts/runtime/events"
-import { type RuntimePlatform } from "../platform/types"
-import { runtimeEvent } from "./events"
+  type RuntimeTraceType,
+  type TraceData,
+} from "../../runs/execution/traces/schema"
+import { type TraceRuntime } from "../platform/types"
+import { type RuntimeEventInput, runtimeEvent } from "./events"
 
 type RuntimeEventBase = Omit<RuntimeEventInput, "data" | "runId" | "type">
 type RuntimeEventArgs =
@@ -14,23 +11,22 @@ type RuntimeEventArgs =
       type: "run.completed"
     })
   | (RuntimeEventBase & {
-      data?: RuntimeErrorTraceData
+      data?: { error: string }
       type: "run.failed"
     })
   | (RuntimeEventBase & {
-      data?: RuntimeEventTraceData
-      type: Exclude<RuntimeEventType, "run.completed" | "run.failed">
+      data?: TraceData
+      type: Exclude<RuntimeTraceType, "run.completed" | "run.failed">
     })
 
 export async function recordRuntimeEvent(
-  platform: RuntimePlatform,
-  context: RuntimeContext,
+  runtime: TraceRuntime,
   input: RuntimeEventArgs
 ) {
-  await platform.recordEvent(
+  await runtime.platform.recordEvent(
     runtimeEvent({
       ...input,
-      runId: context.run.id,
+      runId: runtime.context.run.id,
     })
   )
 }

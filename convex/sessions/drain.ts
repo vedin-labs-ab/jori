@@ -1,14 +1,12 @@
 import { v } from "convex/values"
-import {
-  type DrainedSessionBatch,
-  type RuntimeMessage,
-} from "../../contracts/runtime/context"
 import { isTerminalRunStatus } from "../../contracts/runtime/runs"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { internalMutation, type MutationCtx } from "../_generated/server"
+import { type RuntimeMessage } from "../integrations/messages/runtime"
 import {
   defaultReactionDrainLimit,
   formatRuntimeReaction,
+  type RuntimeInteraction,
   readPendingReactions,
 } from "../reactions/cursor"
 import { boundedNumber } from "../shared/input"
@@ -19,6 +17,13 @@ import { reconcileRunExecution } from "./execution"
 import { formatSessionMessages } from "./messages"
 import { emitRecencyContexts, type RecencyEmission } from "./recency"
 import { runExecutionIsCurrent } from "./scope"
+
+export type DrainedSessionBatch = {
+  contexts?: string[]
+  hasMore: boolean
+  interactions?: RuntimeInteraction[]
+  messages: RuntimeMessage[]
+}
 
 export const messages = internalMutation({
   args: {

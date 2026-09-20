@@ -4,16 +4,13 @@ import {
   durationMilliseconds,
   isDurationUnit,
 } from "../../../contracts/runtime/duration"
-import { type RuntimeId } from "../../../contracts/runtime/ids"
-import {
-  type AgentRunStatus,
-  isTerminalRunStatus,
-} from "../../../contracts/runtime/runs"
+import { isTerminalRunStatus } from "../../../contracts/runtime/runs"
 import { maxAgentWaitRuns } from "../../../contracts/runtime/tools"
-import { type WaiterWake } from "../../../contracts/runtime/waiters"
+import { type Id } from "../../_generated/dataModel"
+import { type WaiterWake } from "../../runs/execution/waiters/schema"
 import { optionalStringArray, requiredString } from "../../shared/input"
 import { isParked, park, recordResumed } from "../loop/park"
-import { type AgentRuntime } from "../platform/types"
+import { type AgentRunStatus, type AgentRuntime } from "../platform/types"
 
 const minTimeoutMs = durationMilliseconds({ unit: "seconds", value: 5 })
 const maxTimeoutMs = durationMilliseconds({ unit: "days", value: 30 })
@@ -50,7 +47,7 @@ export async function executeAgentTool(
   if (args.name === "stop_agent") {
     return await runtime.platform.stopAgentRun({
       parentId: runtime.context.run.id,
-      runId: requiredString(input.runId, "runId") as RuntimeId<"runs">,
+      runId: requiredString(input.runId, "runId") as Id<"runs">,
     })
   }
 
@@ -125,7 +122,7 @@ function readRunIds(value: unknown) {
           typeof runId === "string" && runId.trim() !== ""
       )
     ),
-  ] as RuntimeId<"runs">[]
+  ] as Id<"runs">[]
 
   if (runIds.length === 0 || runIds.length > maxAgentWaitRuns) {
     throw new Error(`Agent waits require 1-${maxAgentWaitRuns} child runs.`)

@@ -1,11 +1,18 @@
-import { type Infer } from "convex/values"
 import { type Doc } from "../../../_generated/dataModel"
 import { type MutationCtx } from "../../../_generated/server"
 import { mark } from "../../../discovery/sync/intent"
 import { isWorkspaceDeleting } from "../../../retention/access"
-import { type traceData } from "./schema"
+import { type TraceData } from "./schema"
 
-type TraceData = Infer<typeof traceData>
+type TraceArgs = {
+  callId?: string
+  data?: TraceData
+  key: string
+  run: Doc<"runs">
+  sequence?: number
+  timestamp?: number
+  type: Doc<"traces">["type"]
+}
 type TraceInsert = WithoutSystemFields<Doc<"traces">>
 type WithoutSystemFields<Row> = Row extends unknown
   ? Omit<Row, "_creationTime" | "_id">
@@ -15,18 +22,7 @@ type WithoutSystemFields<Row> = Row extends unknown
 // with nothing that reacts to the trace. Reactions (status flips, wakes,
 // metering) live in data.ts, which the run tree also depends on, so keeping
 // the bare write here lets the tree record its stop trace without a cycle.
-export async function recordTrace(
-  ctx: MutationCtx,
-  args: {
-    callId?: string
-    data?: TraceData
-    key: string
-    run: Doc<"runs">
-    sequence?: number
-    timestamp?: number
-    type: Doc<"traces">["type"]
-  }
-) {
+export async function recordTrace(ctx: MutationCtx, args: TraceArgs) {
   if (await isWorkspaceDeleting(ctx, args.run.organizationId)) {
     return false
   }
@@ -45,15 +41,7 @@ export async function recordTrace(
   return true
 }
 
-function traceInsert(args: {
-  callId?: string
-  data?: TraceData
-  key: string
-  run: Doc<"runs">
-  sequence?: number
-  timestamp?: number
-  type: Doc<"traces">["type"]
-}): TraceInsert {
+function traceInsert(args: TraceArgs): TraceInsert {
   return {
     organizationId: args.run.organizationId,
     runId: args.run._id,

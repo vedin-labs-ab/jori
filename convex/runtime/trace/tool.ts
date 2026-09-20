@@ -1,15 +1,11 @@
 import { type JsonValue } from "../../../contracts/json"
 import {
-  type RuntimeContext,
-  type RuntimeTool,
-} from "../../../contracts/runtime/context"
-import {
-  type RuntimeToolProviderTrace,
-  type RuntimeToolTraceTool,
-} from "../../../contracts/runtime/events"
-import { type RuntimeValueSummary } from "../../../contracts/runtime/trace"
+  type ToolResult,
+  type TraceProvider,
+  type TraceTool,
+} from "../../runs/execution/traces/schema"
 import { type ModelToolCall } from "../model/types"
-import { type RuntimePlatform } from "../platform/types"
+import { type RuntimeTool, type TraceRuntime } from "../platform/types"
 import { recordRuntimeEvent } from "./record"
 
 const maxToolInputBytes = 32 * 1024
@@ -21,14 +17,14 @@ type ToolEventType =
   | "tool.started"
   | "tool.waiting"
 type RuntimeToolCompletedDetails = {
-  provider: RuntimeToolProviderTrace
-  result: RuntimeValueSummary
+  provider: TraceProvider
+  result: ToolResult
 }
 type RuntimeToolFailedDetails = {
   error: string
 }
 
-function providerTrace(result: unknown): RuntimeToolProviderTrace {
+function providerTrace(result: unknown): TraceProvider {
   if (
     typeof result !== "object" ||
     result === null ||
@@ -84,7 +80,7 @@ export async function recordToolEvent(
   type: ToolEventType,
   details?: RuntimeToolCompletedDetails | RuntimeToolFailedDetails
 ) {
-  await recordRuntimeEvent(args.platform, args.context, {
+  await recordRuntimeEvent(args.runtime, {
     callId: args.call.id,
     data: toolTraceData(tool, type, args.call.args, details),
     sequence: args.sequence,
@@ -156,7 +152,7 @@ function failedDetails(
   return details
 }
 
-function traceTool(tool: RuntimeTool): RuntimeToolTraceTool {
+function traceTool(tool: RuntimeTool): TraceTool {
   return {
     access: tool.access,
     name: tool.name,
@@ -164,7 +160,7 @@ function traceTool(tool: RuntimeTool): RuntimeToolTraceTool {
   }
 }
 
-function summarizeResult(result: unknown): RuntimeValueSummary {
+function summarizeResult(result: unknown): ToolResult {
   if (result === null || result === undefined) {
     return { kind: "null" }
   }
@@ -205,7 +201,7 @@ function resultArray(result: unknown) {
   return Array.isArray(result.results) ? result.results : undefined
 }
 
-function objectSummary(result: object): RuntimeValueSummary {
+function objectSummary(result: object): ToolResult {
   const record = result as Record<string, unknown>
   const itemKey = itemArrayKey(record)
 
@@ -232,7 +228,6 @@ function hasMoreItems(record: Record<string, unknown>) {
 
 type ToolEventArgs = {
   call: ModelToolCall
-  platform: RuntimePlatform
-  context: RuntimeContext
+  runtime: TraceRuntime
   sequence: number
 }

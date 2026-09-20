@@ -1,18 +1,16 @@
 import { isRecord } from "../../../contracts/json"
-import { type RuntimeContext } from "../../../contracts/runtime/context"
-import { type RuntimeEventTraceData } from "../../../contracts/runtime/events"
+import { type Id } from "../../_generated/dataModel"
+import { type TraceData } from "../../runs/execution/traces/schema"
 import {
   type ApprovalHandoff,
   type OfferHandoff,
-} from "../../../contracts/runtime/handoffs"
-import { type RuntimeId } from "../../../contracts/runtime/ids"
+} from "../../runs/execution/waiters/handoffs"
 import { optionalString } from "../../shared/input"
-import { type RuntimePlatform, type TraceRuntime } from "../platform/types"
+import { type TraceRuntime } from "../platform/types"
 import { recordRuntimeEvent } from "./record"
 
 export async function recordToolResultActivity(args: {
-  platform: RuntimePlatform
-  context: RuntimeContext
+  runtime: TraceRuntime
   result: unknown
   sequence: number
   toolName: string
@@ -23,7 +21,7 @@ export async function recordToolResultActivity(args: {
     return
   }
 
-  await recordRuntimeEvent(args.platform, args.context, {
+  await recordRuntimeEvent(args.runtime, {
     data: event.data,
     keyId: event.keyId,
     sequence: args.sequence,
@@ -35,7 +33,7 @@ export async function recordApprovalResolved(
   runtime: TraceRuntime,
   approval: ApprovalHandoff
 ) {
-  await recordRuntimeEvent(runtime.platform, runtime.context, {
+  await recordRuntimeEvent(runtime, {
     data: { approval: approval.id },
     keyId: approval.id,
     sequence: 800_000,
@@ -47,7 +45,7 @@ export async function recordOfferResolved(
   runtime: TraceRuntime,
   offer: OfferHandoff
 ) {
-  await recordRuntimeEvent(runtime.platform, runtime.context, {
+  await recordRuntimeEvent(runtime, {
     data: { offer: offer.id },
     keyId: offer.id,
     sequence: 810_000,
@@ -56,7 +54,7 @@ export async function recordOfferResolved(
 }
 
 type ToolResultEvent = {
-  data: RuntimeEventTraceData
+  data: TraceData
   keyId: string
   type:
     | "agent.started"
@@ -91,7 +89,7 @@ function approvalEvent(
   }
 
   return {
-    data: { approval: approvalId as RuntimeId<"approvals"> },
+    data: { approval: approvalId as Id<"approvals"> },
     keyId: approvalId,
     type: "approval.requested",
   }
@@ -107,7 +105,7 @@ function offerEvent(
   }
 
   return {
-    data: { offer: offerId as RuntimeId<"integrationOffers"> },
+    data: { offer: offerId as Id<"integrationOffers"> },
     keyId: offerId,
     type: "offer.requested",
   }
@@ -124,7 +122,7 @@ function agentEvent(
   }
 
   return {
-    data: { child: runId as RuntimeId<"runs"> },
+    data: { child: runId as Id<"runs"> },
     keyId: runId,
     type: "agent.started",
   }
@@ -140,7 +138,7 @@ function fileEvent(
   }
 
   return {
-    data: { file: fileId as RuntimeId<"files"> },
+    data: { file: fileId as Id<"files"> },
     keyId: fileId,
     type: "file.saved",
   }

@@ -1,10 +1,8 @@
-import {
-  type RuntimeErrorTraceData,
-  type RuntimeEventInput,
-  type RuntimeEventRecord,
-  type RuntimeEventType,
-} from "../../../contracts/runtime/events"
-import { type RuntimeId } from "../../../contracts/runtime/ids"
+import { type RuntimeEventRecord } from "../platform/types"
+
+export type RuntimeEventInput = Omit<RuntimeEventRecord, "key"> & {
+  keyId?: string
+}
 
 export function runtimeEvent(args: RuntimeEventInput): RuntimeEventRecord {
   const { keyId, ...event } = args
@@ -17,20 +15,14 @@ export function runtimeEvent(args: RuntimeEventInput): RuntimeEventRecord {
 
 // One key per event a run can record, so a replayed step writes the row it
 // already wrote instead of a second one.
-function traceKey(args: {
-  callId?: string
-  keyId?: string
-  runId: RuntimeId<"runs">
-  sequence: number
-  type: RuntimeEventType
-}) {
+function traceKey(args: RuntimeEventInput) {
   const keyId = args.keyId ?? args.callId
   const key = keyId === undefined ? "" : `:${keyId}`
 
   return [args.runId, args.sequence.toString(), args.type].join(":") + key
 }
 
-export function errorDetails(error: unknown): RuntimeErrorTraceData {
+export function errorDetails(error: unknown) {
   return {
     error: formatError(error),
   }

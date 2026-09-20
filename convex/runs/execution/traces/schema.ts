@@ -1,5 +1,5 @@
 import { defineTable } from "convex/server"
-import { v } from "convex/values"
+import { type Infer, v } from "convex/values"
 import { toolSnapshot } from "../../schema"
 
 const base = {
@@ -208,6 +208,16 @@ export const traceData = v.union(
   toolWaitingData,
   compactionData
 )
+
+// The runtime records every type but the prepared trace, which the run's own
+// mutation writes.
+export type RuntimeTraceType = Exclude<Infer<typeof traceType>, "run.prepared">
+export type TraceData = Infer<typeof traceData>
+export type TraceTool = Infer<typeof tool>
+export type TraceProvider = Infer<typeof provider>
+export type ToolResult = Infer<typeof result>
+export type ModelUsage = Infer<typeof usage>
+export type ModelTokens = ModelUsage["tokens"]
 
 export const traces = defineTable(v.union(...variants))
   .index("by_run_and_timestamp", ["runId", "timestamp"])

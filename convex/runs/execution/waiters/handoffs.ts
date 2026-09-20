@@ -1,8 +1,4 @@
 import { v } from "convex/values"
-import {
-  approvalExecutionTimeoutMs,
-  type RunHandoffs,
-} from "../../../../contracts/runtime/handoffs"
 import { type Doc, type Id } from "../../../_generated/dataModel"
 import {
   internalMutation,
@@ -10,10 +6,32 @@ import {
   type MutationCtx,
   type QueryCtx,
 } from "../../../_generated/server"
+import { approvalExecutionTimeoutMs } from "../../../approvals/execution"
 import { appendTranscript } from "../transcript/data"
 import { type TranscriptMessage, transcriptMessage } from "../transcript/schema"
 
 const scanLimit = 200
+
+export type ApprovalHandoff = Pick<
+  Doc<"approvals">,
+  "code" | "expiresAt" | "status" | "summary" | "surface" | "tool"
+> & {
+  id: Id<"approvals">
+  executionPendingUntil?: number
+}
+
+export type OfferHandoff = Pick<
+  Doc<"integrationOffers">,
+  "expiresAt" | "integration" | "status"
+> & {
+  id: Id<"integrationOffers">
+  summary: string | null
+}
+
+export type RunHandoffs = {
+  approvals: ApprovalHandoff[]
+  offers: OfferHandoff[]
+}
 
 export const load = internalQuery({
   args: {
@@ -109,7 +127,7 @@ function isUnconsumed(record: { consumedAt?: number }) {
   return record.consumedAt === undefined
 }
 
-function toApprovalHandoff(approval: Doc<"approvals">) {
+function toApprovalHandoff(approval: Doc<"approvals">): ApprovalHandoff {
   return {
     id: approval._id,
     status: approval.status,
@@ -127,7 +145,7 @@ function toApprovalHandoff(approval: Doc<"approvals">) {
   }
 }
 
-function toOfferHandoff(offer: Doc<"integrationOffers">) {
+function toOfferHandoff(offer: Doc<"integrationOffers">): OfferHandoff {
   return {
     id: offer._id,
     integration: offer.integration,

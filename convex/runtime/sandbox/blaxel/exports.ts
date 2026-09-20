@@ -4,11 +4,10 @@ import { v } from "convex/values"
 import {
   fileTooLargeError,
   maxFileBytes,
-  type UploadedFile,
 } from "../../../../contracts/runtime/files"
 import { internal } from "../../../_generated/api"
 import { internalAction } from "../../../_generated/server"
-import { uploadRunFile } from "../../../files/upload"
+import { type UploadedFile, uploadRunFile } from "../../../files/upload"
 import { openSandbox } from "../blaxel"
 import { sandboxFilePath } from "../path"
 import { type BlaxelSandbox, readSandboxFile, sandboxName } from "./client"

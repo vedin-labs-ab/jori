@@ -1,4 +1,3 @@
-import { type RuntimeContext } from "../../contracts/runtime/context"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import { type ActionCtx } from "../_generated/server"
@@ -9,12 +8,12 @@ import {
   loadRuntimeSkills,
   loadSandboxReference,
 } from "./context/loaders"
-import { runtimeResponse, runtimeToolSnapshot } from "./context/response"
-import { runLifecycleTools } from "./native"
+import { buildRuntimeContext } from "./context/response"
 import {
   type RuntimePermissions,
   runtimePermissions,
 } from "./permissions/index"
+import { type RuntimeContext } from "./platform/types"
 import { loadActiveSurface } from "./surface"
 
 // Spelled out rather than inferred: the step actions that call loadRuntime
@@ -24,11 +23,9 @@ export type LoadedRuntime = {
   activeSurface: Awaited<ReturnType<typeof loadActiveSurface>>
   context: RuntimeContext
   input: AgentRuntimeInput
-  lifecycleTools: ReturnType<typeof runLifecycleTools>
   permissions: RuntimePermissions
   session: LoadedSession
   skills: RuntimeSkill[]
-  tools: ReturnType<typeof runtimeToolSnapshot>
 }
 
 /**
@@ -53,29 +50,20 @@ export async function loadRuntime(
       target: session?.target ?? null,
     }),
   ])
-  const lifecycleTools = runLifecycleTools()
 
   return {
     activeSurface,
-    context: runtimeResponse({
+    context: buildRuntimeContext({
       activeSurface,
       input,
-      lifecycleTools,
       permissions,
       sandbox,
       session,
     }),
     input,
-    lifecycleTools,
     permissions,
     session,
     skills,
-    tools: runtimeToolSnapshot(
-      input,
-      activeSurface,
-      lifecycleTools,
-      permissions
-    ),
   }
 }
 

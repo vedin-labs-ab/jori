@@ -1,13 +1,13 @@
 import {
   type ApprovalHandoff,
-  type HandoffSubject,
   type OfferHandoff,
   type RunHandoffs,
-} from "../../../contracts/runtime/handoffs"
+} from "../../runs/execution/waiters/handoffs"
+import { type WaiterSubject } from "../../runs/execution/waiters/schema"
 
 export type PendingHandoff = {
   expiresAt: number
-  subject: HandoffSubject
+  subject: Extract<WaiterSubject, { kind: "approval" | "offer" }>
 }
 
 export function hasResolvedHandoffs(handoffs: RunHandoffs) {

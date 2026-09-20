@@ -1,11 +1,9 @@
 import { type ChatUsage } from "@openrouter/sdk/models"
-import { type RuntimeModelTokens } from "../../../contracts/runtime/trace"
+import { type ModelTokens } from "../../runs/execution/traces/schema"
 
 // OpenRouter reports prompt tokens inclusive of the cached ones, so the
 // uncached count is the remainder.
-export function readModelTokens(
-  usage: ChatUsage | undefined
-): RuntimeModelTokens {
+export function readModelTokens(usage: ChatUsage | undefined): ModelTokens {
   const input = usage?.promptTokens ?? 0
   const cacheRead = usage?.promptTokensDetails?.cachedTokens ?? 0
 

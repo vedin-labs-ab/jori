@@ -1,8 +1,8 @@
 import { expect, test, vi } from "vitest"
 import { type JsonObject, toJsonObject } from "../../../contracts/json"
-import { type RuntimeTool } from "../../../contracts/runtime/context"
 import { createRuntime, runTool, runtimeContext } from "../../../test/runtime"
 import { runLifecycleTools, sandboxTools } from "../native"
+import { type RuntimeTool } from "../platform/types"
 
 const invalidCalls: { name: string; args: JsonObject }[] = [
   { name: "start_agent", args: { task: "Test", title: "Test", tools: 4 } },

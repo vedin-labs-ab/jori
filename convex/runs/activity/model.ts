@@ -1,6 +1,7 @@
 import { type Doc } from "../../_generated/dataModel"
 import { optionalString } from "../../shared/input"
-import { type ModelUsage, readModelUsage } from "./read"
+import { type ModelUsage } from "../execution/traces/schema"
+import { readModelUsage } from "./read"
 import {
   type ActivityDetail,
   type ActivityItem,
