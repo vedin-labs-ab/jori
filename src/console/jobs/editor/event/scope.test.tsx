@@ -112,7 +112,7 @@ describe("job event condition editing", () => {
     ).toBeNull()
   })
 
-  test("removes a condition and clears its match value", () => {
+  test("removes a focused condition, clears its match value, and restores focus", () => {
     const onValuesChange = vi.fn()
 
     renderEventFields(
@@ -124,11 +124,14 @@ describe("job event condition editing", () => {
       onValuesChange
     )
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Remove Team condition" })
-    )
+    const remove = screen.getByRole("button", { name: "Remove Team condition" })
+    remove.focus()
+    fireEvent.click(remove)
 
     expect(screen.queryByLabelText("Team")).toBeNull()
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: "Add condition" })
+    )
     expect(onValuesChange).toHaveBeenCalledWith(
       expect.objectContaining({ eventMatch: {} })
     )

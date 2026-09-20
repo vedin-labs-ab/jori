@@ -3,7 +3,7 @@ import {
   type JobEventParameter,
 } from "@contracts/jobs/events"
 import { Plus, X } from "lucide-react"
-import { useState } from "react"
+import { type Ref, useLayoutEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import {
@@ -36,17 +36,19 @@ export function EventScopeFields({
     conditionKeysWithValues(conditions, values)
   )
 
+  const focus = useConditionFocus(removeCondition)
+
   if (parameters.length === 0) {
     return null
   }
 
-  const visibleConditions = conditions.filter((condition) =>
-    addedKeys.includes(condition.key)
-  )
   const availableConditions = conditions.filter(
     (condition) => !addedKeys.includes(condition.key)
   )
-  const visibleParameters = [...requiredParameters, ...visibleConditions]
+  const visibleParameters = [
+    ...requiredParameters,
+    ...conditions.filter((condition) => addedKeys.includes(condition.key)),
+  ]
 
   function addCondition(key: string) {
     setAddedKeys((keys) => (keys.includes(key) ? keys : [...keys, key]))
@@ -77,7 +79,7 @@ export function EventScopeFields({
               })
             )
           }
-          onRemove={() => removeCondition(parameter.key)}
+          onRemove={() => focus.remove(parameter.key)}
         />
       ))}
       {availableConditions.length > 0 ? (
@@ -88,6 +90,7 @@ export function EventScopeFields({
           <AddConditionMenu
             available={availableConditions}
             onAdd={addCondition}
+            triggerRef={focus.trigger}
           />
         </div>
       ) : null}
@@ -95,17 +98,42 @@ export function EventScopeFields({
   )
 }
 
+/** A removed condition takes its focused remove button with it. Wait for
+ *  the add trigger to mount before handing keyboard focus back to it. */
+function useConditionFocus(onRemove: (key: string) => void) {
+  const trigger = useRef<HTMLButtonElement>(null)
+  const restore = useRef(false)
+
+  useLayoutEffect(() => {
+    if (restore.current) {
+      trigger.current?.focus()
+      restore.current = false
+    }
+  })
+
+  return {
+    trigger,
+    remove(key: string) {
+      restore.current = true
+      onRemove(key)
+    },
+  }
+}
+
 function AddConditionMenu({
   available,
   onAdd,
+  triggerRef,
 }: {
   available: readonly JobEventParameter[]
   onAdd: (key: string) => void
+  triggerRef: Ref<HTMLButtonElement>
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          ref={triggerRef}
           className="w-full justify-start text-muted-foreground hover:text-foreground"
           type="button"
           variant="outline"

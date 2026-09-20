@@ -132,13 +132,14 @@ function RosterMenu({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-56 p-0">
-        <Command filter={rosterFilter}>
+        <Command filter={rosterFilter} label={`Members of ${team.name}`}>
           <CommandInput placeholder="Search members…" />
           <CommandList>
             <CommandEmpty>No matches.</CommandEmpty>
             <CommandGroup>
               {membersData?.members.map((member) => (
                 <CommandItem
+                  aria-label={`${rosterIds.has(member.userId) ? "Remove" : "Add"} ${member.user.name} ${rosterIds.has(member.userId) ? "from" : "to"} ${team.name}`}
                   data-checked={rosterIds.has(member.userId)}
                   disabled={pendingUserId !== undefined}
                   key={member.userId}
