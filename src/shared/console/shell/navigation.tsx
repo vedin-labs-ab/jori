@@ -34,6 +34,7 @@ import {
   conversationPathname,
   isNavigationActive,
 } from "./routes"
+import { SidebarRailExpand, SidebarToggle } from "./toggle"
 
 /** The console's sidebar: the workspace navigation with the person's
  *  chats after its first group, the folder tree, and the platform group
@@ -136,8 +137,9 @@ export function ConsoleSidebarShell({
     <Sidebar collapsible="icon" variant="inset" {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-1">
-          <div className="min-w-0 flex-1">{organization}</div>
+          <SidebarRailExpand>{organization}</SidebarRailExpand>
           {search}
+          <SidebarToggle />
         </div>
       </SidebarHeader>
       {/* The console's way around is a landmark a screen reader can jump

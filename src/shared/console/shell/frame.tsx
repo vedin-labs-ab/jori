@@ -34,8 +34,9 @@ import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"
 const consoleFrame = "w-full px-4 @3xl/inset:px-6"
 
 /** The console's chrome around a page: the sidebar it is handed, and the
- *  header — trigger, the page's name or breadcrumb trail, the actions slot
- *  pages portal into — over the page itself. Where the console is arrives
+ *  header — the page's name or breadcrumb trail, the actions slot pages
+ *  portal into, and on a phone the way into the sidebar — over the page
+ *  itself. Where the console is arrives
  *  as a prop, so the frame reads nothing from the router.
  *
  *  The frame fills the viewport unless a class says otherwise, carries the
@@ -73,7 +74,7 @@ export function ConsoleFrame({
   heading?: "h1" | "h3"
   onSidebarOpenChange?: (open: boolean) => void
   pathname: string
-  /** Left out, the header opens on the title: there is nothing to toggle. */
+  /** Left out, a phone's header opens on the title: there is nothing to open. */
   sidebar?: ReactNode
   sidebarOpen?: boolean
   /** Names the page when no route does. */
@@ -137,11 +138,13 @@ export function ConsoleFrame({
             "flex h-12 shrink-0 items-center gap-2 border-b"
           )}
         >
+          {/* The sidebar folds from its own header. A phone has no sidebar
+              on screen to do that from, so there the way in stays here. */}
           {sidebar === undefined ? null : (
             <>
-              <SidebarTrigger className="-ml-1" />
+              <SidebarTrigger className="-ml-1 md:hidden" />
               <Separator
-                className="mr-2 data-vertical:h-4 data-vertical:self-auto"
+                className="mr-2 data-vertical:h-4 data-vertical:self-auto md:hidden"
                 orientation="vertical"
               />
             </>

@@ -36,7 +36,7 @@ test("one shell and identity sync survive navigation across every workspace sect
   const sidebar = document.querySelector('[data-slot="sidebar"]')
   expect(header).not.toBeNull()
   expect(sidebar).not.toBeNull()
-  fireEvent.click(screen.getAllByRole("button", { name: "Toggle Sidebar" })[0])
+  fireEvent.click(screen.getByRole("button", { name: "Close sidebar" }))
   const sidebarState = sidebar?.getAttribute("data-state")
   for (const path of paths) {
     await act(async () => {
