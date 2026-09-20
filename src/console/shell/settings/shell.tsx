@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useState } from "react"
+import { type CSSProperties, type ReactNode, useId, useState } from "react"
 
 import {
   Dialog,
@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
 import { SettingsMobileNav, SettingsSidebar } from "./nav"
@@ -34,6 +35,8 @@ function SettingsDialog<Value extends string>({
   open,
   views,
 }: SettingsDialogProps<Value>) {
+  const id = useId()
+  const mobile = useIsMobile()
   const [view, setView] = useState(initialView)
   const [wasOpen, setWasOpen] = useState(open)
 
@@ -84,12 +87,21 @@ function SettingsDialog<Value extends string>({
               </DialogDescription>
             </header>
             <SettingsMobileNav
+              id={id}
               label={navigationLabel}
               onViewChange={setView}
               view={view}
               views={views}
             />
             <div
+              {...(mobile
+                ? {
+                    "aria-labelledby": `${id}-${activeView.value}`,
+                    role: "tabpanel",
+                    tabIndex: 0,
+                  }
+                : {})}
+              id={`${id}-panel`}
               className={cn(
                 scrollFade,
                 "min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:p-6"

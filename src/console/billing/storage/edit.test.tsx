@@ -54,7 +54,12 @@ test("capacity reduction requires explicit purchase agreement and sends the recu
 })
 
 test("a blank amount cannot accidentally cancel an existing storage subscription", () => {
-  fireEvent.change(form(), { target: { value: "" } })
+  const input = form()
+  fireEvent.change(input, { target: { value: "" } })
+  expect(
+    document.getElementById(input.getAttribute("aria-describedby") ?? "")
+      ?.textContent
+  ).toContain("Choose")
   fireEvent.click(screen.getByRole("checkbox"))
   expect(
     (

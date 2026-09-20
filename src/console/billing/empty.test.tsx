@@ -92,14 +92,28 @@ test("provider refunds appear as money leaving the wallet", () => {
 test("activity starts newest first and sorts time and signed amounts both ways", () => {
   render(<Activity entries={entries} />)
   expect(labels()).toEqual(["Top-up", "Research", "Monthly allowance"])
+  expect(
+    screen.getByRole("columnheader", { name: "When" }).getAttribute("aria-sort")
+  ).toBe("descending")
 
   fireEvent.click(screen.getByRole("button", { name: "When" }))
   expect(labels()).toEqual(["Monthly allowance", "Research", "Top-up"])
+  expect(
+    screen.getByRole("columnheader", { name: "When" }).getAttribute("aria-sort")
+  ).toBe("ascending")
   fireEvent.click(screen.getByRole("button", { name: "When" }))
   expect(labels()).toEqual(["Top-up", "Research", "Monthly allowance"])
 
   fireEvent.click(screen.getByRole("button", { name: "Amount" }))
   expect(labels()).toEqual(["Research", "Monthly allowance", "Top-up"])
+  expect(
+    screen
+      .getByRole("columnheader", { name: "Amount" })
+      .getAttribute("aria-sort")
+  ).toBe("ascending")
+  expect(
+    screen.getByRole("columnheader", { name: "When" }).getAttribute("aria-sort")
+  ).toBeNull()
   fireEvent.click(screen.getByRole("button", { name: "Amount" }))
   expect(labels()).toEqual(["Top-up", "Monthly allowance", "Research"])
 

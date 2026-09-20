@@ -97,7 +97,16 @@ function ActivityTable({ table }: { table: ActivityTableInstance }) {
               key={headerGroup.id}
             >
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
+                <TableHead
+                  aria-sort={
+                    header.column.getIsSorted() === "asc"
+                      ? "ascending"
+                      : header.column.getIsSorted() === "desc"
+                        ? "descending"
+                        : undefined
+                  }
+                  key={header.id}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(

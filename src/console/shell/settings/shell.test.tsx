@@ -72,3 +72,41 @@ test("closing retains the active view and reopening starts at Account", () => {
   expect(screen.getByText("Profile fields")).toBeDefined()
   expect(screen.queryByText("Sessions")).toBeNull()
 })
+
+test("mobile settings tabs identify the active panel and keyboard changes its label", async () => {
+  const original = window.matchMedia
+  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+    matches: query === "(max-width: 767px)",
+    media: query,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }))
+  try {
+    render(
+      <SettingsDialog
+        description="Manage your account."
+        initialView="account"
+        navigationLabel="Account settings"
+        onOpenChange={() => undefined}
+        open
+        views={views}
+      >
+        {(view) => <p>{view === "account" ? "Profile fields" : "Sessions"}</p>}
+      </SettingsDialog>
+    )
+    const account = screen.getByRole("tab", { name: "Account" })
+    const security = screen.getByRole("tab", { name: "Security" })
+    const panel = screen.getByRole("tabpanel", { name: "Account" })
+    expect(account.getAttribute("aria-controls")).toBe(panel.id)
+    expect(security.getAttribute("aria-controls")).toBe(panel.id)
+    expect(panel.tabIndex).toBe(0)
+    account.focus()
+    fireEvent.keyDown(account, { key: "ArrowRight" })
+    const changed = await screen.findByRole("tabpanel", { name: "Security" })
+    expect(changed.textContent).toBe("Sessions")
+    expect(document.activeElement).toBe(security)
+  } finally {
+    cleanup()
+    window.matchMedia = original
+  }
+})

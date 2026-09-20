@@ -71,7 +71,8 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
                   email: (e.target as HTMLInputElement).validationMessage
                 }))
               }}
-              aria-invalid={!!fieldErrors.email}
+              aria-describedby={fieldErrors.email ? "change-email-error" : undefined}
+                  aria-invalid={!!fieldErrors.email}
             />
           ) : (
             <Skeleton>
@@ -79,7 +80,7 @@ export function ChangeEmail({ className }: ChangeEmailProps) {
             </Skeleton>
           )}
 
-          <FieldError>{fieldErrors.email}</FieldError>
+          <FieldError id="change-email-error">{fieldErrors.email}</FieldError>
         </Field>
 
         <div>

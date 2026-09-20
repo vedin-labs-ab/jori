@@ -518,6 +518,7 @@ function DateInput({ name, field, isPending }: AdditionalFieldProps) {
             type="button"
             id={`${name}-date`}
             data-empty={!date}
+            aria-describedby={error ? `${name}-date-error` : undefined}
             aria-invalid={!!error}
             disabled={isPending || field.readOnly}
             className={cn(
@@ -565,7 +566,7 @@ function DateInput({ name, field, isPending }: AdditionalFieldProps) {
         )}
       </div>
 
-      <FieldError>{error}</FieldError>
+      <FieldError id={`${name}-date-error`}>{error}</FieldError>
     </Field>
   )
 }

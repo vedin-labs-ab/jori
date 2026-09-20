@@ -85,6 +85,7 @@ export function SlugField({
             e.preventDefault()
             setSlugError(authLocalization.auth.fieldRequired)
           }}
+          aria-describedby={error ? `${id}-error` : undefined}
           aria-invalid={!!error}
           placeholder={localization.slugPlaceholder}
           required
@@ -98,7 +99,7 @@ export function SlugField({
         )}
       </InputGroup>
 
-      <FieldError>{error}</FieldError>
+      <FieldError id={`${id}-error`}>{error}</FieldError>
     </Field>
   )
 }

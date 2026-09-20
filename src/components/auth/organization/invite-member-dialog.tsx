@@ -150,10 +150,11 @@ export function InviteMemberDialog({
                     : localization.auth.invalidEmail
                   setEmailError(msg)
                 }}
-                aria-invalid={!!emailError}
+                aria-describedby={emailError ? "invite-member-email-error" : undefined}
+                  aria-invalid={!!emailError}
               />
 
-              <FieldError>{emailError}</FieldError>
+              <FieldError id="invite-member-email-error">{emailError}</FieldError>
             </Field>
 
             <Field>

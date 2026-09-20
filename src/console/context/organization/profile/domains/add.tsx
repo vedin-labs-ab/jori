@@ -1,7 +1,7 @@
 import { parseWebsiteAddress } from "@contracts/website"
 import { useMutation } from "convex/react"
 import { Plus, X } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { FieldError } from "@/components/ui/field"
@@ -34,7 +34,18 @@ export function AddDomainControl({
   const [value, setValue] = useState("")
   const [error, setError] = useState<string | null>(null)
 
+  const trigger = useRef<HTMLButtonElement>(null)
+  const restoreFocus = useRef(false)
+
+  useEffect(() => {
+    if (!open && restoreFocus.current) {
+      restoreFocus.current = false
+      trigger.current?.focus()
+    }
+  }, [open])
+
   const close = () => {
+    restoreFocus.current = true
     setOpen(false)
     setValue("")
     setError(null)
@@ -62,7 +73,12 @@ export function AddDomainControl({
 
   if (!open) {
     return (
-      <Button onClick={() => setOpen(true)} type="button" variant="outline">
+      <Button
+        onClick={() => setOpen(true)}
+        ref={trigger}
+        type="button"
+        variant="outline"
+      >
         <Plus /> Add
       </Button>
     )
@@ -95,6 +111,8 @@ function AddDomainForm({
   onSubmit: () => void
   value: string
 }) {
+  const errorId = useId()
+
   return (
     <form
       className="grid min-w-0 justify-items-end gap-2"
@@ -106,6 +124,7 @@ function AddDomainForm({
       <ButtonGroup className="min-w-0 max-w-full">
         <InputGroup className="w-44 min-w-0 shrink">
           <InputGroupInput
+            aria-describedby={error === null ? undefined : errorId}
             aria-invalid={error !== null}
             aria-label="Domain to add"
             autoFocus
@@ -113,6 +132,8 @@ function AddDomainForm({
             onChange={(event) => onChange(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Escape") {
+                event.preventDefault()
+                event.stopPropagation()
                 onClose()
               }
             }}
@@ -141,7 +162,9 @@ function AddDomainForm({
       {error === null ? null : (
         /* Zero intrinsic width so the column is sized by the button group
            alone: the hint starts at the input's left edge and wraps there. */
-        <FieldError className="w-0 min-w-full">{error}</FieldError>
+        <FieldError className="w-0 min-w-full" id={errorId}>
+          {error}
+        </FieldError>
       )}
     </form>
   )

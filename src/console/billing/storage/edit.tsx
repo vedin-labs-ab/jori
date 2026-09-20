@@ -37,6 +37,7 @@ export function StorageEdit({
         <Label htmlFor={id}>Extra storage in GB</Label>
         <Input
           id={id}
+          aria-describedby={`${id}-capacity`}
           type="number"
           min={overview.hasSubscription ? 0 : storage.minimumExtraGb}
           max={storage.maximumExtraGb}
@@ -46,7 +47,7 @@ export function StorageEdit({
           disabled={form.pending}
         />
       </div>
-      <p className="text-sm">
+      <p className="text-sm" id={`${id}-capacity`}>
         {form.valid
           ? `${(plan.storageGb + form.extraGb).toLocaleString()} GB total for $${extraStorageMonthlyUsd(form.extraGb).toFixed(2)}/month extra, before tax.`
           : `Choose ${storage.minimumExtraGb}–${storage.maximumExtraGb.toLocaleString()} GB${overview.hasSubscription ? ", or 0 to cancel extra storage" : ""}.`}

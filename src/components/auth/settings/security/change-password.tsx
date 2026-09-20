@@ -210,7 +210,8 @@ function ChangePasswordForm({
                       .validationMessage
                   }))
                 }}
-                aria-invalid={!!fieldErrors.currentPassword}
+                aria-describedby={fieldErrors.currentPassword ? "currentPassword-error" : undefined}
+                  aria-invalid={!!fieldErrors.currentPassword}
               />
             ) : (
               <Skeleton>
@@ -218,7 +219,7 @@ function ChangePasswordForm({
               </Skeleton>
             )}
 
-            <FieldError>{fieldErrors.currentPassword}</FieldError>
+            <FieldError id="currentPassword-error">{fieldErrors.currentPassword}</FieldError>
           </Field>
 
           <Field data-invalid={!!fieldErrors.newPassword}>
@@ -253,6 +254,7 @@ function ChangePasswordForm({
                         .validationMessage
                     }))
                   }}
+                  aria-describedby={fieldErrors.newPassword ? "newPassword-error" : undefined}
                   aria-invalid={!!fieldErrors.newPassword}
                 />
 
@@ -279,7 +281,7 @@ function ChangePasswordForm({
               </Skeleton>
             )}
 
-            <FieldError>{fieldErrors.newPassword}</FieldError>
+            <FieldError id="newPassword-error">{fieldErrors.newPassword}</FieldError>
           </Field>
 
           {emailAndPassword.confirmPassword && (
@@ -318,7 +320,8 @@ function ChangePasswordForm({
                           .validationMessage
                       }))
                     }}
-                    aria-invalid={!!fieldErrors.confirmPassword}
+                    aria-describedby={fieldErrors.confirmPassword ? "confirmPassword-error" : undefined}
+                  aria-invalid={!!fieldErrors.confirmPassword}
                   />
 
                   <InputGroupAddon align="inline-end">
@@ -344,7 +347,7 @@ function ChangePasswordForm({
                 </Skeleton>
               )}
 
-              <FieldError>{fieldErrors.confirmPassword}</FieldError>
+              <FieldError id="confirmPassword-error">{fieldErrors.confirmPassword}</FieldError>
             </Field>
           )}
         </FieldGroup>

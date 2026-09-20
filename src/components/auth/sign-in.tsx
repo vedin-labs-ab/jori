@@ -192,10 +192,11 @@ export function SignIn({
                         email: msg
                       }))
                     }}
-                    aria-invalid={!!fieldErrors.email}
+                    aria-describedby={fieldErrors.email ? "sign-in-email-error" : undefined}
+                  aria-invalid={!!fieldErrors.email}
                   />
 
-                  <FieldError>{fieldErrors.email}</FieldError>
+                  <FieldError id="sign-in-email-error">{fieldErrors.email}</FieldError>
                 </Field>
 
                 <Field data-invalid={!!fieldErrors.password}>
@@ -242,10 +243,11 @@ export function SignIn({
                         password: msg
                       }))
                     }}
-                    aria-invalid={!!fieldErrors.password}
+                    aria-describedby={fieldErrors.password ? "sign-in-password-error" : undefined}
+                  aria-invalid={!!fieldErrors.password}
                   />
 
-                  <FieldError>{fieldErrors.password}</FieldError>
+                  <FieldError id="sign-in-password-error">{fieldErrors.password}</FieldError>
                 </Field>
 
                 {emailAndPassword.rememberMe && (

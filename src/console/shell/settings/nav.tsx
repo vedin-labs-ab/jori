@@ -53,11 +53,12 @@ function SettingsSidebar<Value extends string>({
 }
 
 function SettingsMobileNav<Value extends string>({
+  id,
   label,
   onViewChange,
   view,
   views,
-}: SettingsNavigationProps<Value>) {
+}: SettingsNavigationProps<Value> & { id: string }) {
   return (
     <Tabs
       className="shrink-0 p-2 md:hidden"
@@ -66,7 +67,13 @@ function SettingsMobileNav<Value extends string>({
     >
       <TabsList aria-label={label} className="flex w-full">
         {views.map((item) => (
-          <TabsTrigger className="flex-1" key={item.value} value={item.value}>
+          <TabsTrigger
+            aria-controls={`${id}-panel`}
+            className="flex-1"
+            id={`${id}-${item.value}`}
+            key={item.value}
+            value={item.value}
+          >
             <item.icon />
             {item.label}
           </TabsTrigger>

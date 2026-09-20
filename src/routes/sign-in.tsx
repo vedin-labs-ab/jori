@@ -35,9 +35,7 @@ function SignInPage() {
                   />
                 </div>
               }
-              // The card's title slot is a div. This is the page's only
-              // heading, so it says so.
-              title={<h1>Sign in to Jori</h1>}
+              title="Sign in to Jori"
             />
             <div className="mt-8 space-y-4">
               <div className="flex justify-center">
