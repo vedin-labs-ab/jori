@@ -61,7 +61,11 @@ export function ItemName({
             surface === "sidebar" && "px-2 py-1"
           )}
         >
-          <Icon className="mt-1 size-4 shrink-0 text-muted-foreground" />
+          {/* A row's icon gives way to the input with its name, so it is
+              drawn again beside it. A breadcrumb's name has none. */}
+          {surface === "title" ? null : (
+            <Icon className="mt-1 size-4 shrink-0 text-muted-foreground" />
+          )}
           <NameInput
             key={item.id}
             initialName={editing.edit.item.name}
