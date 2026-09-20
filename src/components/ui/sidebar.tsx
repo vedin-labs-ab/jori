@@ -469,7 +469,9 @@ function SidebarGroupAction({
         // top-2.5, not the stock top-3.5: SidebarGroup above trims the
         // stock p-2 to py-1, so the 20px action centers against the h-8
         // label (4px padding + 16px to the label's middle - 10px).
-        "absolute top-2.5 right-3 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground ring-sidebar-ring outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 pointer-fine:after:hidden [&>svg:not([class*='size-'])]:size-3.5 [&>svg]:shrink-0",
+        // Muted until hovered, not the stock foreground: the sidebar's
+        // icon-only actions rest quiet, the way its search trigger does.
+        "absolute top-2.5 right-3 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-muted-foreground ring-sidebar-ring outline-hidden transition-transform group-data-[collapsible=icon]:hidden after:absolute after:-inset-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 pointer-fine:after:hidden [&>svg:not([class*='size-'])]:size-3.5 [&>svg]:shrink-0",
         className
       )}
       {...props}
