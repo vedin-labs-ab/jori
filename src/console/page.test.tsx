@@ -2,7 +2,6 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { useOrganizationId } from "./organization/context"
-import { rememberTimezone } from "./organization/pending"
 import { ConsolePage } from "./page"
 
 const { loading, mutate, organization, session } = vi.hoisted(() => ({
@@ -66,7 +65,9 @@ vi.mock("@/shared/console/time", async (original) => ({
   localTimezone: () => "Europe/Stockholm",
 }))
 vi.mock("./onboarding", () => ({
-  Onboarding: () => <div>Onboarding</div>,
+  Onboarding: ({ organizationId }: { organizationId?: string }) => (
+    <div>Onboarding {organizationId ?? "a new organization"}</div>
+  ),
 }))
 vi.mock("./integrations/callback", () => ({
   IntegrationCallbackToasts: () => null,
@@ -130,8 +131,17 @@ test("onboarding stands in for the console until the organization is through it"
 
   render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
 
-  expect(await screen.findByText("Onboarding")).toBeDefined()
+  expect(await screen.findByText("Onboarding organization")).toBeDefined()
   expect(screen.queryByTestId("shell")).toBeNull()
+  expect(screen.queryByText("Console")).toBeNull()
+})
+
+test("a page that starts a new organization onboards one beside an onboarded one", async () => {
+  organization.isResolved = true
+
+  render(<ConsolePage creating>{() => <div>Console</div>}</ConsolePage>)
+
+  expect(await screen.findByText("Onboarding a new organization")).toBeDefined()
   expect(screen.queryByText("Console")).toBeNull()
 })
 
@@ -172,36 +182,6 @@ test("outside a console there is no organization to read", () => {
   render(<Reader />)
 
   expect(screen.getByText("none")).toBeDefined()
-})
-
-test("the zone chosen at creation is declared on the load that follows", async () => {
-  organization.isResolved = true
-  rememberTimezone("organization", "Asia/Tokyo")
-
-  render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
-
-  // Only now does the session token carry the organization the mutation is
-  // scoped to, which is why the choice waited for this load.
-  await vi.waitFor(() =>
-    expect(mutate).toHaveBeenCalledWith({
-      organizationId: "organization",
-      timezone: "Asia/Tokyo",
-    })
-  )
-})
-
-test("a load with no pending choice declares nothing", async () => {
-  organization.isResolved = true
-
-  render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
-  await screen.findByText("Console")
-
-  // The person sync still runs; the declaration does not.
-  expect(mutate).toHaveBeenCalledTimes(1)
-  expect(mutate).toHaveBeenCalledWith({
-    organizationId: "organization",
-    timezone: "Europe/Stockholm",
-  })
 })
 
 test.each(["shell", "none"] as const)(

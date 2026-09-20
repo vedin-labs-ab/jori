@@ -18,8 +18,8 @@ export function OnboardingFrame({
   account: ReactNode
   children: ReactNode
   contentId?: string
-  /** The organization being set up, by name. */
-  organization: string
+  /** The organization being set up, by name, once it exists. */
+  organization: string | undefined
   pathname: string
   /** The organization switcher, when there is another organization. */
   switcher?: ReactNode
@@ -36,7 +36,11 @@ export function OnboardingFrame({
           <ConsoleSidebarShell account={account} organization={switcher} />
         )
       }
-      title={`Set up ${organization}`}
+      title={
+        organization === undefined
+          ? "New organization"
+          : `Set up ${organization}`
+      }
     >
       {alone ? <ConsoleHeaderActions>{account}</ConsoleHeaderActions> : null}
       {children}

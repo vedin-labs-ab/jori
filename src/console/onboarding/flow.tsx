@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { type ReactNode, useState } from "react"
 import { Progress } from "@/components/ui/progress"
 import { BrandIcon } from "@/shared/brand"
 import { reportWebsiteStartError } from "../context/organization/discovery/url"
@@ -7,37 +7,44 @@ import {
   WebsiteDiscoveryStep,
 } from "../context/organization/discovery/website"
 import { type OrganizationDiscovery } from "../context/organization/types"
+import { DetailsStep } from "./details"
+import { NameStep } from "./name"
 import { OnboardingStep } from "./step"
-import { WelcomeStep } from "./welcome"
 
-const steps = ["welcome", "website", "working"] as const
+const steps = ["name", "details", "website", "working"] as const
 
 type Step = (typeof steps)[number]
 
-/** The onboarding sequence, one ask per step: a welcome, the organization's
- *  website, then Jori reading it. An organization whose discovery already
- *  started opens on the last step, so a reload never asks twice.
- *
- *  Props in, callbacks out: the console binds it to the session and Convex. */
-export function OnboardingFlow({
-  discovery,
-  name,
-  onDiscover,
-  onFinish,
-  organization,
-}: {
+type Props = {
   /** The organization's discovery run, or null before there is one. */
   discovery: OrganizationDiscovery
+  /** Shown under the name step: the other way into Jori, by invitation. */
+  invitations?: ReactNode
+  /** The logo field, bound to the organization being onboarded. */
+  logo: ReactNode
   /** What to call the person, when the session knows. */
   name: string | undefined
+  /** Backs out of a new organization, when there is one to go back to. */
+  onCancel?: () => void
+  onCreate: (organization: string) => Promise<void>
+  onDeclareTimezone: (timezone: string) => Promise<void>
   onDiscover: (website: string) => Promise<void>
   /** Leaves onboarding for the console, at the profile when there is one to review. */
   onFinish: (destination?: "/context") => void
-  organization: string
-}) {
-  const [step, setStep] = useState<Step>(
-    discovery === null ? "welcome" : "working"
-  )
+  /** The organization being onboarded, by name, once it exists. */
+  organization: string | undefined
+  /** The organization's declared zone, once it has one. */
+  timezone: string | undefined
+}
+
+/** The onboarding sequence, one ask per step: the organization's name, its
+ *  logo and timezone, its website, then Jori reading it. Creating the
+ *  organization reloads the page, so the step shown first is read from what
+ *  the organization already has, and a reload never asks twice.
+ *
+ *  Props in, callbacks out: the console binds it to the session and Convex. */
+export function OnboardingFlow(props: Props) {
+  const [step, setStep] = useState<Step>(() => firstStep(props))
   const position = steps.indexOf(step) + 1
 
   return (
@@ -57,34 +64,56 @@ export function OnboardingFlow({
           className="motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:animate-in motion-safe:duration-300"
           key={step}
         >
-          {step === "welcome" ? (
-            <WelcomeStep
-              name={name}
-              onStart={() => setStep("website")}
-              organization={organization}
+          {step === "name" ? (
+            <NameStep
+              name={props.name}
+              onCancel={props.onCancel}
+              onCreate={props.onCreate}
+            />
+          ) : null}
+          {step === "details" ? (
+            <DetailsStep
+              logo={props.logo}
+              onContinue={async (timezone) => {
+                await props.onDeclareTimezone(timezone)
+                setStep("website")
+              }}
             />
           ) : null}
           {step === "website" ? (
             <WebsiteStep
-              onDiscover={onDiscover}
+              onDiscover={props.onDiscover}
               onDone={() => setStep("working")}
-              onSkip={() => onFinish()}
-              organization={organization}
+              onSkip={() => props.onFinish()}
+              organization={props.organization}
             />
           ) : null}
           {step === "working" ? (
             <DiscoveryWorkingStep
-              discovery={discovery}
+              discovery={props.discovery}
               layout={OnboardingStep}
               leaveLabel="Continue to Jori"
-              onClose={() => onFinish()}
-              onReviewProfile={() => onFinish("/context")}
+              onClose={() => props.onFinish()}
+              onReviewProfile={() => props.onFinish("/context")}
             />
           ) : null}
         </div>
+        {step === "name" ? props.invitations : null}
       </div>
     </div>
   )
+}
+
+function firstStep({ discovery, organization, timezone }: Props): Step {
+  if (organization === undefined) {
+    return "name"
+  }
+
+  if (discovery !== null) {
+    return "working"
+  }
+
+  return timezone === undefined ? "details" : "website"
 }
 
 function WebsiteStep({
@@ -96,7 +125,7 @@ function WebsiteStep({
   onDiscover: (website: string) => Promise<void>
   onDone: () => void
   onSkip: () => void
-  organization: string
+  organization: string | undefined
 }) {
   const [website, setWebsite] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -117,7 +146,7 @@ function WebsiteStep({
 
   return (
     <WebsiteDiscoveryStep
-      description="Jori reads only your public pages to learn what you do and how you describe it. Every job they run starts from that."
+      description="Jori reads only your public pages to learn what you do and how you describe it. Every job Jori runs starts from that."
       error={error}
       inputId="onboarding-website"
       isSubmitting={isSubmitting}
@@ -126,7 +155,11 @@ function WebsiteStep({
       onSkip={onSkip}
       onWebsiteChange={setWebsite}
       skipLabel="I'll do this later"
-      title={`What's ${organization}'s website?`}
+      title={
+        organization === undefined
+          ? "What's your website?"
+          : `What's ${organization}'s website?`
+      }
       website={website}
     />
   )

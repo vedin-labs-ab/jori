@@ -51,10 +51,6 @@ vi.mock("@/components/auth/organization/organization-view", () => ({
   ),
 }))
 
-vi.mock("@/console/organization/create", () => ({
-  CreateOrganizationDialog: () => null,
-}))
-
 vi.mock("@/components/ui/sidebar", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/components/ui/sidebar")>()),
   SidebarMenuButton: ({
@@ -128,6 +124,21 @@ test("keeps the switcher open with a stable pending organization row", async () 
     "[data-slot=dropdown-menu-trigger]"
   )
   expect(trigger?.disabled).toBe(true)
+})
+
+test("an organization in onboarding offers only the way to another", async () => {
+  render(<SidebarOrganizationSwitcher switchOnly />)
+
+  fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
+    button: 0,
+    ctrlKey: false,
+  })
+
+  expect(await screen.findByRole("menuitem", { name: /test/ })).toBeDefined()
+  expect(
+    screen.queryByRole("menuitem", { name: /Create organization/ })
+  ).toBeNull()
+  expect(screen.queryByRole("button", { name: /Manage/ })).toBeNull()
 })
 
 test("restores the switcher after a failed organization change", async () => {

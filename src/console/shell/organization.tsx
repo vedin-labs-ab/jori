@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { type Organization } from "better-auth/client"
 import { Plus, Settings } from "lucide-react"
 import { useState } from "react"
@@ -15,7 +16,6 @@ import {
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { billingSearch } from "@/console/billing/actions/return"
-import { CreateOrganizationDialog } from "@/console/organization/create"
 import { SidebarOrganization } from "@/shared/console/shell/organization"
 import {
   activateOrganization,
@@ -32,13 +32,20 @@ function billingSettingsRequested() {
   )
 }
 
-export function SidebarOrganizationSwitcher() {
+/** The organization at the sidebar's head, and the menu it opens: manage
+ *  this one, switch to another, or start a new one. `switchOnly` leaves
+ *  only the switching, for an organization still in onboarding. */
+export function SidebarOrganizationSwitcher({
+  switchOnly = false,
+}: {
+  switchOnly?: boolean
+}) {
   const { isMobile } = useSidebar()
+  const navigate = useNavigate()
   const active = useActiveOrganization()
   const organizations = useListOrganizations()
   const [billingRequested] = useState(billingSettingsRequested)
   const [managing, setManaging] = useState(billingRequested)
-  const [creating, setCreating] = useState(false)
   const others =
     organizations.data?.filter(
       (organization) => organization.id !== active.data?.id
@@ -49,11 +56,11 @@ export function SidebarOrganizationSwitcher() {
       <OrganizationMenu
         active={active.data ?? undefined}
         isMobile={isMobile}
-        onCreate={() => setCreating(true)}
-        onManage={() => setManaging(true)}
+        onCreate={switchOnly ? undefined : () => void navigate({ to: "/new" })}
+        onManage={switchOnly ? undefined : () => setManaging(true)}
         organizations={others}
       />
-      {active.data ? (
+      {active.data && !switchOnly ? (
         <OrganizationDialog
           initialView={billingRequested ? "billing" : "general"}
           onOpenChange={setManaging}
@@ -61,7 +68,6 @@ export function SidebarOrganizationSwitcher() {
           organizationId={active.data.id}
         />
       ) : null}
-      <CreateOrganizationDialog onOpenChange={setCreating} open={creating} />
     </>
   )
 }
@@ -75,8 +81,10 @@ function OrganizationMenu({
 }: {
   active: Organization | undefined
   isMobile: boolean
-  onCreate: () => void
-  onManage: () => void
+  /** Left out where starting a new organization is not on offer. */
+  onCreate?: () => void
+  /** Left out where managing this one is not on offer. */
+  onManage?: () => void
   organizations: Organization[]
 }) {
   const [open, setOpen] = useState(false)
@@ -147,22 +155,24 @@ function OrganizationMenuHeader({
   onManage,
   switching,
 }: {
-  onManage: () => void
+  onManage?: () => void
   switching: boolean
 }) {
   return (
     <DropdownMenuLabel className="p-0 font-normal">
       <div className="flex items-center justify-between gap-3 px-1 py-1.5">
         <OrganizationView className="min-w-0 flex-1" hideRole hideSlug />
-        <Button
-          disabled={switching}
-          onClick={onManage}
-          size="sm"
-          variant="outline"
-        >
-          <Settings className="text-muted-foreground" />
-          Manage
-        </Button>
+        {onManage === undefined ? null : (
+          <Button
+            disabled={switching}
+            onClick={onManage}
+            size="sm"
+            variant="outline"
+          >
+            <Settings className="text-muted-foreground" />
+            Manage
+          </Button>
+        )}
       </div>
     </DropdownMenuLabel>
   )
@@ -174,7 +184,7 @@ function OrganizationOptions({
   organizations,
   switchingId,
 }: {
-  onCreate: () => void
+  onCreate?: () => void
   onSelect: (organizationId: string) => void
   organizations: Organization[]
   switchingId: string | null
@@ -192,11 +202,15 @@ function OrganizationOptions({
           switchingDisabled={switching}
         />
       ))}
-      {organizations.length > 0 ? <DropdownMenuSeparator /> : null}
-      <DropdownMenuItem disabled={switching} onSelect={onCreate}>
-        <Plus />
-        Create organization
-      </DropdownMenuItem>
+      {onCreate === undefined ? null : (
+        <>
+          {organizations.length > 0 ? <DropdownMenuSeparator /> : null}
+          <DropdownMenuItem disabled={switching} onSelect={onCreate}>
+            <Plus />
+            Create organization
+          </DropdownMenuItem>
+        </>
+      )}
     </>
   )
 }

@@ -1,9 +1,6 @@
-import { useMutation, useQuery } from "convex/react"
+import { useQuery } from "convex/react"
 import { ShieldAlert } from "lucide-react"
-import { type ReactNode, useEffect, useState } from "react"
-import { UserInvitations } from "@/components/auth/organization/user-invitations"
-import { Button } from "@/components/ui/button"
-import { showErrorToast } from "@/shared/console/error"
+import { type ReactNode, useEffect } from "react"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
@@ -18,8 +15,6 @@ import { IntegrationCallbackToasts } from "./integrations/callback"
 import { Onboarding } from "./onboarding"
 import { readOnboarded } from "./onboarding/state"
 import { OrganizationContext, useOrganizationId } from "./organization/context"
-import { CreateOrganizationDialog } from "./organization/create"
-import { takeTimezone } from "./organization/pending"
 import { OrganizationSession } from "./organization/session"
 import { ConsoleShell } from "./shell"
 import { LaunchGate } from "./shell/gate"
@@ -34,6 +29,8 @@ import { PublicConsoleFrame } from "./shell/public"
 export function ConsolePage(props: {
   children: (organizationId: string) => ReactNode
   chrome?: "shell" | "none"
+  /** Starts a new organization's onboarding in place of the page. */
+  creating?: boolean
   loadingFallback?: ReactNode
 }) {
   const framedOrganizationId = useOrganizationId()
@@ -53,10 +50,12 @@ export function ConsolePage(props: {
 function UnframedConsolePage({
   children,
   chrome = "shell",
+  creating = false,
   loadingFallback,
 }: {
   children: (organizationId: string) => ReactNode
   chrome?: "shell" | "none"
+  creating?: boolean
   loadingFallback?: ReactNode
 }) {
   const session = useAuthenticatedSession()
@@ -78,6 +77,7 @@ function UnframedConsolePage({
       active={active}
       chrome={chrome}
       convex={convex}
+      creating={creating}
       loader={loader}
       organizations={organizations}
     >
@@ -94,6 +94,7 @@ function SignedInConsole({
   children,
   chrome,
   convex,
+  creating,
   loader,
   organizations,
 }: {
@@ -101,6 +102,7 @@ function SignedInConsole({
   children: (organizationId: string) => ReactNode
   chrome: "shell" | "none"
   convex: ReturnType<typeof useConvexSession>
+  creating: boolean
   loader: ReactNode
   organizations: ReturnType<typeof useListOrganizations>
 }) {
@@ -121,29 +123,16 @@ function SignedInConsole({
         loader={loader}
         organizationId={organizationId}
       >
-        {() => {
-          // Onboarding stands in for the console, chrome and page alike,
-          // until the organization has been through it.
-          const onboarding =
-            chrome === "shell" && !readOnboarded(active.data?.metadata)
-          const content = (
-            <OrganizationContext.Provider value={organizationId}>
-              {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
-              <DeclareTimezone organizationId={organizationId} />
-              {onboarding ? (
-                <Onboarding organizationId={organizationId} />
-              ) : (
-                children(organizationId)
-              )}
-            </OrganizationContext.Provider>
-          )
-
-          return chrome === "shell" && !onboarding ? (
-            <ConsoleShell>{content}</ConsoleShell>
-          ) : (
-            content
-          )
-        }}
+        {() => (
+          <OrganizationConsole
+            chrome={chrome}
+            creating={creating}
+            onboarded={readOnboarded(active.data?.metadata)}
+            organizationId={organizationId}
+          >
+            {children}
+          </OrganizationConsole>
+        )}
       </OrganizationSession>
     )
   }
@@ -155,6 +144,41 @@ function SignedInConsole({
   }
 
   return <NoOrganization />
+}
+
+/** The console for an active organization. Onboarding stands in for it,
+ *  chrome and page alike: this organization's until it has been through it,
+ *  and then a new one's where the page asks for that. */
+function OrganizationConsole({
+  children,
+  chrome,
+  creating,
+  onboarded,
+  organizationId,
+}: {
+  children: (organizationId: string) => ReactNode
+  chrome: "shell" | "none"
+  creating: boolean
+  onboarded: boolean
+  organizationId: string
+}) {
+  const onboarding = chrome === "shell" && (creating || !onboarded)
+  const content = (
+    <OrganizationContext.Provider value={organizationId}>
+      {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
+      {onboarding ? (
+        <Onboarding organizationId={onboarded ? undefined : organizationId} />
+      ) : (
+        children(organizationId)
+      )}
+    </OrganizationContext.Provider>
+  )
+
+  return chrome === "shell" && !onboarding ? (
+    <ConsoleShell>{content}</ConsoleShell>
+  ) : (
+    content
+  )
 }
 
 /** No organization yet: either this address may open one, or Jori is not open
@@ -170,11 +194,7 @@ function NoOrganization() {
     return <LaunchGate email={gate.email} />
   }
 
-  return (
-    <PublicConsoleFrame isSignedIn>
-      <CreateOrganizationView />
-    </PublicConsoleFrame>
-  )
+  return <Onboarding />
 }
 
 function ConvexSessionError() {
@@ -197,58 +217,4 @@ function ActivateOrganization({ organizationId }: { organizationId: string }) {
   }, [organizationId])
 
   return <FullscreenSkeletonLoader />
-}
-
-function CreateOrganizationView() {
-  const [creating, setCreating] = useState(false)
-
-  return (
-    // The frame already bounds the column, and the two paths in and out of
-    // this screen — make one, or wait for one — read as separate blocks.
-    <section className="grid gap-6">
-      <div className="grid gap-4">
-        <div className="grid gap-2">
-          <h1 className="font-medium text-2xl tracking-tight">
-            Create your organization.
-          </h1>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Integrations, jobs, and permissions are shared with your team
-            through an organization.
-          </p>
-        </div>
-        <div>
-          <Button onClick={() => setCreating(true)}>Create organization</Button>
-        </div>
-      </div>
-      <UserInvitations />
-      <CreateOrganizationDialog onOpenChange={setCreating} open={creating} />
-    </section>
-  )
-}
-
-/** Spends the zone chosen while creating this organization. It waits for
- *  this load because only now does the session token carry the claim the
- *  mutation is scoped to; an undeclared organization counts its days in
- *  UTC, so a failure is worth saying but not worth stopping for. */
-function DeclareTimezone({ organizationId }: { organizationId: string }) {
-  const declareTimezone = useMutation(api.organization.profile.declareTimezone)
-
-  useEffect(() => {
-    const timezone = takeTimezone(organizationId)
-
-    if (timezone === null) {
-      return
-    }
-
-    void declareTimezone({ organizationId, timezone }).catch(
-      (error: unknown) => {
-        showErrorToast(
-          error,
-          "Couldn't save your timezone. Set it from the Context page."
-        )
-      }
-    )
-  }, [declareTimezone, organizationId])
-
-  return null
 }

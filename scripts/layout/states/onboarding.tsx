@@ -9,17 +9,27 @@ type Discovery = NonNullable<OrganizationDiscovery>
 
 /** Onboarding with nothing behind it: `onboarding-<step>` stands alone,
  *  `onboarding-<step>-switcher` keeps the sidebar of a person with other
- *  organizations. The steps are welcome, working, ready, and failed; the
- *  website step is one click in from welcome, and `website-error` refuses
- *  the address. */
+ *  organizations. The steps are name, details, website, working, ready, and
+ *  failed; `-error` refuses whatever the step submits. */
 export function OnboardingState({ state }: { state: string }) {
   const [, step, ...rest] = state.split("-")
   const switcher = rest.includes("switcher")
+  const created = step !== "name"
+  const submit = () =>
+    new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        if (rest.includes("error")) {
+          reject(new Error("Layout fixture refused this"))
+        } else {
+          resolve()
+        }
+      }, 1100)
+    })
 
   return (
     <OnboardingFrame
       account={switcher ? null : <Button size="icon" variant="ghost" />}
-      organization={organization.name}
+      organization={created ? organization.name : undefined}
       pathname="/chat"
       switcher={
         switcher ? (
@@ -29,20 +39,15 @@ export function OnboardingState({ state }: { state: string }) {
     >
       <OnboardingFlow
         discovery={discoveries[step] ?? null}
+        logo={<SidebarOrganization organization={organization} />}
         name="Albin"
-        onDiscover={() =>
-          new Promise((resolve, reject) => {
-            setTimeout(() => {
-              if (rest.includes("error")) {
-                reject(new Error("Layout fixture refused the website"))
-              } else {
-                resolve()
-              }
-            }, 1100)
-          })
-        }
+        onCancel={switcher ? () => undefined : undefined}
+        onCreate={submit}
+        onDeclareTimezone={submit}
+        onDiscover={submit}
         onFinish={() => undefined}
-        organization={organization.name}
+        organization={created ? organization.name : undefined}
+        timezone={step === "details" ? undefined : "Europe/Stockholm"}
       />
     </OnboardingFrame>
   )

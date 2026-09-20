@@ -7,7 +7,7 @@ import { TimezonePicker } from "../../../organization/timezone"
 import { ContextSectionTitle } from "../../section"
 
 /**
- * The organization's own day, declared at creation and corrected here.
+ * The organization's own day, declared during onboarding and corrected here.
  * Until one is declared the platform counts in UTC, which is what an
  * undeclared organization should see stated rather than left blank.
  */
