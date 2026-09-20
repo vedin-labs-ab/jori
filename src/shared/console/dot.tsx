@@ -11,17 +11,21 @@ export function SeparatorDot({ className }: { className?: string }) {
 }
 
 /**
- * Suffix arrow that slides in when the nearest `group/reveal` parent is
- * hovered or focused. The parent supplies the layout (inline-flex, gap).
+ * Suffix arrow that opens when the nearest `group/reveal` parent is hovered
+ * or focused. At rest it takes no room at all: its box has no width, and the
+ * space that sets it off from the text is its own, so the parent needs no
+ * gap for it and grows only as the arrow appears.
  */
 export function RevealArrow({ className }: { className?: string }) {
   return (
-    <ArrowUpRight
+    <span
       aria-hidden="true"
       className={cn(
-        "-translate-x-1 size-3 opacity-0 transition-all duration-200 ease-out group-focus-visible/reveal:translate-x-0 group-focus-visible/reveal:opacity-100 group-hover/reveal:translate-x-0 group-hover/reveal:opacity-100",
+        "inline-flex w-0 shrink-0 justify-end overflow-hidden opacity-0 transition-[width,opacity] duration-200 ease-out group-focus-visible/reveal:w-4 group-focus-visible/reveal:opacity-100 group-hover/reveal:w-4 group-hover/reveal:opacity-100 motion-reduce:transition-none",
         className
       )}
-    />
+    >
+      <ArrowUpRight className="size-3 shrink-0" />
+    </span>
   )
 }

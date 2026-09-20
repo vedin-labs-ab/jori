@@ -274,8 +274,8 @@ function OrganizationOption({
       {/* Picking it lands in its onboarding, so the row says so, and shows
           where it leads once the row is under the pointer. */}
       {switching || readOnboarded(organization.metadata) ? null : (
-        <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
-          <CircleDashed aria-hidden className="size-3" />
+        <span className="ml-auto inline-flex shrink-0 items-center text-muted-foreground text-xs">
+          <CircleDashed aria-hidden className="mr-1 size-3" />
           Finish setup
           <RevealArrow />
         </span>
