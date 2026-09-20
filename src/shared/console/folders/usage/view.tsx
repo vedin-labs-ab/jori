@@ -1,6 +1,5 @@
 import { type GenericId } from "convex/values"
 import { CalendarDays, ChartNoAxesColumn } from "lucide-react"
-import { type ReactNode } from "react"
 import { Section, SectionGroup, SectionHeader } from "@/components/ui/section"
 import {
   Select,
@@ -30,14 +29,11 @@ import {
 // as a prop: the console queries them, and anything else hands them in.
 
 export function UsageView({
-  balance,
   days,
   folderId,
   onDaysChange,
   usage,
 }: {
-  /** Current organization credit, separate from the window's spending. */
-  balance?: ReactNode
   days: UsageDays
   /** Absent across the whole organization. */
   folderId?: GenericId<"folders">
@@ -61,7 +57,6 @@ export function UsageView({
           <UsageStats usage={usage} />
         </div>
         <ConsoleListContent>
-          {balance}
           {usage === undefined ? (
             <ConsoleListLoading />
           ) : (

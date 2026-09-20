@@ -3,7 +3,6 @@ import { type GenericId } from "convex/values"
 import { type UsageDays } from "@/shared/console/folders/usage/types"
 import { UsageView } from "@/shared/console/folders/usage/view"
 import { api } from "../../../../convex/_generated/api"
-import { UsageBalance } from "../../billing/usage"
 
 /** The Usage view bound to what its scope spent: the overview the backend
  *  ranks and zero-fills for the window, queried here and handed to the
@@ -28,11 +27,6 @@ export function FolderUsage({
 
   return (
     <UsageView
-      balance={
-        folderId === undefined ? (
-          <UsageBalance organizationId={organizationId} />
-        ) : undefined
-      }
       days={days}
       folderId={folderId}
       onDaysChange={onDaysChange}
