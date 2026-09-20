@@ -51,7 +51,8 @@ export function AccessFields({
         <div className="grid gap-1">
           <Label>Access</Label>
           <p className="text-muted-foreground text-xs">
-            What this job can use. Type @ in the instructions, or add it here.
+            What this job can use. Mention it in the instructions, or add it
+            here.
           </p>
         </div>
         <AddAccess available={available} onAdd={onSurfaceAdd} />

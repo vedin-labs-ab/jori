@@ -52,7 +52,7 @@ export function NewInFolderSub({
   return (
     <MenuSub>
       <MenuSubTrigger>
-        <Plus className="text-muted-foreground" />
+        <Plus />
         New
       </MenuSubTrigger>
       <MenuSubContent>
@@ -110,7 +110,7 @@ function NewResourceItems({
   return (
     <>
       <MenuItem onSelect={onNewFolder}>
-        <FolderPlus className="text-muted-foreground" />
+        <FolderPlus />
         {folderLabel[labels]}
       </MenuItem>
       {resourceEntries.map((entry) => (
@@ -118,7 +118,7 @@ function NewResourceItems({
           key={entry.creation}
           onSelect={() => onCreate(entry.creation)}
         >
-          <entry.icon className="text-muted-foreground" />
+          <entry.icon />
           {labels === "prefixed"
             ? `New ${entry.label.toLowerCase()}`
             : entry.label}

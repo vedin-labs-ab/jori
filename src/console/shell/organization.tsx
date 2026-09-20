@@ -181,7 +181,7 @@ function OrganizationMenuHeader({
   switching: boolean
 }) {
   return (
-    <DropdownMenuLabel className="p-0 font-normal">
+    <DropdownMenuLabel className="p-0 font-normal text-foreground">
       <div className="flex items-center justify-between gap-3 px-1 py-1.5">
         <OrganizationView className="min-w-0 flex-1" hideRole hideSlug />
         <Button
@@ -190,7 +190,7 @@ function OrganizationMenuHeader({
           size="sm"
           variant="outline"
         >
-          <Settings className="text-muted-foreground" />
+          <Settings />
           Manage
         </Button>
       </div>

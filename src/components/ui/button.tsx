@@ -24,11 +24,11 @@ const buttonVariants = cva(
         default:
           "border-transparent bg-primary text-primary-foreground hover:bg-primary/80 [--tactile-edge:color-mix(in_oklch,var(--primary),#000_30%)]",
         outline:
-          "border-border bg-clip-padding hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30 [--tactile-edge:color-mix(in_oklch,var(--border),#000_18%)] [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground",
+          "border-border bg-clip-padding hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:bg-input/30 [--tactile-edge:color-mix(in_oklch,var(--border),#000_18%)] [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground hover:[&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-foreground",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground [--tactile-edge:color-mix(in_oklch,var(--secondary),#000_12%)] [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground",
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground [--tactile-edge:color-mix(in_oklch,var(--secondary),#000_12%)] [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground hover:[&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-foreground",
         ghost:
-          "border-transparent hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground",
+          "border-transparent hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 [&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-muted-foreground hover:[&:not([data-size*='icon'])_svg:not([class*='text-'])]:text-foreground",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80 [--tactile-edge:color-mix(in_oklch,var(--destructive),#000_30%)]",
         link: "border-transparent text-primary underline-offset-4 hover:underline",
