@@ -38,8 +38,13 @@ function CommandDialog({
   className,
   showCloseButton = false,
   contentRef,
+  onOpenAutoFocus,
+  onCloseAutoFocus,
   ...props
-}: React.ComponentProps<typeof Dialog> & {
+}: React.ComponentProps<typeof Dialog> & Pick<
+  React.ComponentProps<typeof DialogContent>,
+  "onOpenAutoFocus" | "onCloseAutoFocus"
+> & {
   title?: string
   description?: string
   className?: string
@@ -50,6 +55,8 @@ function CommandDialog({
     <Dialog {...props}>
       <DialogContent
         ref={contentRef}
+        onOpenAutoFocus={onOpenAutoFocus}
+        onCloseAutoFocus={onCloseAutoFocus}
         className={className}
         desktopClassName="top-1/3 translate-y-0 rounded-xl!"
         bodyClassName="p-0"

@@ -11,12 +11,14 @@ import { useShortcuts } from "@/shared/shortcuts"
 import { useHeldModifiers } from "@/shared/shortcuts/hold"
 import { shortcutLabel } from "@/shared/shortcuts/keys"
 import { pageBindings, pageKeys, resultKeys, searchKeys } from "./bindings"
+import { usePaletteFocus } from "./focus"
 import { PageShortcuts } from "./guide"
 import { Results } from "./list"
 import { type PaletteProps } from "./types"
 
 export function SearchPalette(props: PaletteProps) {
   const scope = useRef<HTMLDivElement>(null)
+  const { actions, ...focus } = usePaletteFocus(props)
   const [pinnedGuide, setPinnedGuide] = useState(false)
   useEffect(() => {
     if (!props.open) {
@@ -29,13 +31,14 @@ export function SearchPalette(props: PaletteProps) {
     allowInInput: true,
   })
   const guide = pinnedGuide || heldGuide
-  usePaletteShortcuts(props, scope, guide)
+  usePaletteShortcuts(actions, scope, guide)
   return (
     <CommandDialog
       className="sm:max-w-xl"
       contentRef={scope}
       description="Search by name or content. Use the arrow keys to choose a result and Enter to open it."
-      onOpenChange={props.onOpenChange}
+      onOpenChange={actions.onOpenChange}
+      {...focus}
       open={props.open}
       title={
         props.organizationName
@@ -67,7 +70,7 @@ export function SearchPalette(props: PaletteProps) {
               <PageShortcuts held={!pinnedGuide} available={props.pages} />
             </div>
           ) : (
-            <Results {...props} />
+            <Results {...actions} />
           )}
         </CommandList>
         <Footer
