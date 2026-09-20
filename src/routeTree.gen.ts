@@ -26,6 +26,7 @@ import { Route as WorkspaceFilesRouteImport } from './routes/_workspace/files'
 import { Route as WorkspaceFoldersRouteImport } from './routes/_workspace/folders'
 import { Route as WorkspaceIntegrationsRouteImport } from './routes/_workspace/integrations'
 import { Route as WorkspaceNewRouteImport } from './routes/_workspace/new'
+import { Route as WorkspaceOnboardingRouteImport } from './routes/_workspace/onboarding'
 import { Route as WorkspaceRunsRouteImport } from './routes/_workspace/runs'
 import { Route as WorkspaceSkillsRouteImport } from './routes/_workspace/skills'
 import { Route as WorkspaceStoresRouteImport } from './routes/_workspace/stores'
@@ -134,6 +135,11 @@ const WorkspaceIntegrationsRoute = WorkspaceIntegrationsRouteImport.update({
 const WorkspaceNewRoute = WorkspaceNewRouteImport.update({
   id: '/new',
   path: '/new',
+  getParentRoute: () => WorkspaceRoute,
+} as any)
+const WorkspaceOnboardingRoute = WorkspaceOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => WorkspaceRoute,
 } as any)
 const WorkspaceRunsRoute = WorkspaceRunsRouteImport.update({
@@ -287,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/folders': typeof WorkspaceFoldersRouteWithChildren
   '/integrations': typeof WorkspaceIntegrationsRouteWithChildren
   '/new': typeof WorkspaceNewRoute
+  '/onboarding': typeof WorkspaceOnboardingRoute
   '/runs': typeof WorkspaceRunsRoute
   '/skills': typeof WorkspaceSkillsRoute
   '/stores': typeof WorkspaceStoresRouteWithChildren
@@ -325,6 +332,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/new': typeof WorkspaceNewRoute
+  '/onboarding': typeof WorkspaceOnboardingRoute
   '/runs': typeof WorkspaceRunsRoute
   '/skills': typeof WorkspaceSkillsRoute
   '/context/places': typeof WorkspaceContextPlacesRoute
@@ -368,6 +376,7 @@ export interface FileRoutesById {
   '/_workspace/folders': typeof WorkspaceFoldersRouteWithChildren
   '/_workspace/integrations': typeof WorkspaceIntegrationsRouteWithChildren
   '/_workspace/new': typeof WorkspaceNewRoute
+  '/_workspace/onboarding': typeof WorkspaceOnboardingRoute
   '/_workspace/runs': typeof WorkspaceRunsRoute
   '/_workspace/skills': typeof WorkspaceSkillsRoute
   '/_workspace/stores': typeof WorkspaceStoresRouteWithChildren
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/folders'
     | '/integrations'
     | '/new'
+    | '/onboarding'
     | '/runs'
     | '/skills'
     | '/stores'
@@ -451,6 +461,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/trust'
     | '/new'
+    | '/onboarding'
     | '/runs'
     | '/skills'
     | '/context/places'
@@ -493,6 +504,7 @@ export interface FileRouteTypes {
     | '/_workspace/folders'
     | '/_workspace/integrations'
     | '/_workspace/new'
+    | '/_workspace/onboarding'
     | '/_workspace/runs'
     | '/_workspace/skills'
     | '/_workspace/stores'
@@ -656,6 +668,13 @@ declare module '@tanstack/react-router' {
       path: '/new'
       fullPath: '/new'
       preLoaderRoute: typeof WorkspaceNewRouteImport
+      parentRoute: typeof WorkspaceRoute
+    }
+    '/_workspace/onboarding': {
+      id: '/_workspace/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof WorkspaceOnboardingRouteImport
       parentRoute: typeof WorkspaceRoute
     }
     '/_workspace/runs': {
@@ -944,6 +963,7 @@ interface WorkspaceRouteChildren {
   WorkspaceFoldersRoute: typeof WorkspaceFoldersRouteWithChildren
   WorkspaceIntegrationsRoute: typeof WorkspaceIntegrationsRouteWithChildren
   WorkspaceNewRoute: typeof WorkspaceNewRoute
+  WorkspaceOnboardingRoute: typeof WorkspaceOnboardingRoute
   WorkspaceRunsRoute: typeof WorkspaceRunsRoute
   WorkspaceSkillsRoute: typeof WorkspaceSkillsRoute
   WorkspaceStoresRoute: typeof WorkspaceStoresRouteWithChildren
@@ -959,6 +979,7 @@ const WorkspaceRouteChildren: WorkspaceRouteChildren = {
   WorkspaceFoldersRoute: WorkspaceFoldersRouteWithChildren,
   WorkspaceIntegrationsRoute: WorkspaceIntegrationsRouteWithChildren,
   WorkspaceNewRoute: WorkspaceNewRoute,
+  WorkspaceOnboardingRoute: WorkspaceOnboardingRoute,
   WorkspaceRunsRoute: WorkspaceRunsRoute,
   WorkspaceSkillsRoute: WorkspaceSkillsRoute,
   WorkspaceStoresRoute: WorkspaceStoresRouteWithChildren,

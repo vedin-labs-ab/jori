@@ -17,6 +17,7 @@ import { api } from "../../../convex/_generated/api"
 import { usePlanCheckout } from "../billing/actions"
 import { SidebarUserButton } from "../shell/account"
 import { SidebarOrganizationSwitcher } from "../shell/organization"
+import { onboardingPath, useOnboardingAddress } from "./address"
 import { planOf, useCheckoutReturn } from "./checkout"
 import { OnboardingFlow } from "./flow"
 import { OnboardingFrame } from "./frame"
@@ -80,9 +81,10 @@ function OnboardingSession({
   const navigate = useNavigate()
   const session = useSession()
   const active = useActiveOrganization()
-  const { billing, discovery, profile, ...actions } = useOnboarding(
+  const { billing, discovery, isLeaving, profile, ...actions } = useOnboarding(
     isPrepared ? organizationId : undefined
   )
+  useOnboardingAddress(organizationId, isLeaving)
   const checkout = useCheckoutReturn()
   // A flow that opens on an existing organization waits to know where that
   // one stands; one already under way is never taken off the screen.
@@ -171,6 +173,7 @@ function useOnboarding(organizationId: string | undefined) {
   const startPlanCheckout = usePlanCheckout()
   const navigate = useNavigate()
   const active = useActiveOrganization()
+  const [isLeaving, setIsLeaving] = useState(false)
 
   const onboarded = () => {
     if (organizationId === undefined) {
@@ -181,6 +184,7 @@ function useOnboarding(organizationId: string | undefined) {
   }
 
   return {
+    isLeaving,
     billing: useQuery(api.billing.console.overview, scope),
     discovery: useQuery(api.organization.discovery.get, scope),
     profile: useQuery(api.organization.profile.get, scope),
@@ -194,20 +198,27 @@ function useOnboarding(organizationId: string | undefined) {
       await discover({ organizationId: onboarded(), website })
     },
     subscribe: async () => {
-      const { url } = await startPlanCheckout(onboarded())
+      const { url } = await startPlanCheckout(
+        onboarded(),
+        new URL(onboardingPath, window.location.origin).toString()
+      )
 
       window.location.assign(url)
     },
     /** Marks the organization onboarded and leaves for the console. The
      *  page is changed first and the organization read again after, so the
-     *  closing step stays up until the console takes its place, once. */
+     *  closing step stays up until the console takes its place, once. The
+     *  address is let go of first, or it would be led back here. */
     finish: async (destination: "/chat" | "/integrations" = "/chat") => {
+      setIsLeaving(true)
+
       try {
         await complete({ organizationId: onboarded() })
-        await navigate({ to: destination })
+        await navigate({ replace: true, to: destination })
         await active.refetch()
       } catch (caught) {
         showErrorToast(caught, "Couldn't finish setting up. Try again.")
+        setIsLeaving(false)
       }
     },
   }

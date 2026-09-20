@@ -83,17 +83,18 @@ export function useBillingCheckout(organizationId: string) {
   }
 }
 
-/** Starts Polar's checkout for the plan, answering with where it is. */
+/** Starts Polar's checkout for the plan, answering with where it is.
+ *  Checkout comes back to the console unless told where else. */
 export function usePlanCheckout() {
   const start = useAction(api.billing.polar.checkout.startPlanCheckout)
 
-  return (organizationId: string) =>
-    start({ organizationId, ...purchaseAgreement() })
+  return (organizationId: string, returnUrl?: string) =>
+    start({ organizationId, ...purchaseAgreement(returnUrl) })
 }
 
-function purchaseAgreement() {
+function purchaseAgreement(returnUrl = billingReturnUrl()) {
   return {
-    returnUrl: billingReturnUrl(),
+    returnUrl,
     businessPurchase: true,
     termsVersion,
   } as const
