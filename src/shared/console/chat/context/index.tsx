@@ -24,7 +24,7 @@ import {
 const toneClassName: Record<ContextTone, string> = {
   calm: "text-muted-foreground",
   critical: "text-destructive",
-  warm: "text-amber-600 dark:text-amber-500",
+  warm: "text-warning",
 }
 
 /** How much of the model's window the run is using: a ring with the share

@@ -52,7 +52,10 @@ export function Hero() {
           wrapper keeps room under the console for the part that hangs
           below it. Narrow, the thread docks under the console instead. */}
       <div className="relative mt-14 min-w-0 md:mt-16 md:pb-16" id="demo">
-        <DemoConsole className="h-[36rem]" navigation={console} />
+        <DemoConsole
+          className="h-[min(36rem,85svh)] md:h-[36rem]"
+          navigation={console}
+        />
         <RenewalsThread
           className="mt-4 md:absolute md:right-6 md:bottom-0 md:mt-0 md:w-[22rem]"
           onOpenJob={() =>

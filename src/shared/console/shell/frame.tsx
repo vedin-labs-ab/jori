@@ -68,7 +68,8 @@ export function ConsoleFrame({
   contentId?: string
   /** Where the filter panel's open state is kept; left out, it is not. */
   filterStorageKey?: string
-  /** Embedded consoles sit under their host section's heading. */
+  /** Embedded consoles sit under their host section's heading, and as a
+   *  section of its page rather than a second main landmark. */
   heading?: "h1" | "h3"
   onSidebarOpenChange?: (open: boolean) => void
   pathname: string
@@ -95,6 +96,8 @@ export function ConsoleFrame({
   return (
     <SidebarProvider
       className={cn("h-svh overflow-hidden", card && "bg-sidebar", className)}
+      // An embedded console is one of several on its page.
+      keyboardShortcut={heading === "h1"}
       onOpenChange={onSidebarOpenChange}
       open={sidebarOpen}
     >
@@ -116,6 +119,8 @@ export function ConsoleFrame({
           phone-sized box on the landing page, so the header and the page
           gutters ask the inset how wide it is. */}
       <SidebarInset
+        aria-label={heading === "h1" ? undefined : "Jori console"}
+        as={heading === "h1" ? "main" : "section"}
         className={cn(
           "@container/inset isolate min-h-0 min-w-0 overflow-hidden outline-none md:peer-data-[variant=inset]:border",
           card && "md:m-2 md:rounded-xl md:border md:shadow-sm"

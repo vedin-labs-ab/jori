@@ -22,7 +22,7 @@ export function Dock({
   label: string
 }) {
   return (
-    <div className="@container/dock pointer-events-none absolute inset-x-4 bottom-4 z-20 flex justify-center">
+    <div className="@container/dock pointer-events-none absolute inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex justify-center">
       <div
         aria-label={label}
         className={cn(

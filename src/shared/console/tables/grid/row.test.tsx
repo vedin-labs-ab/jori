@@ -57,7 +57,7 @@ function renderRow(fields = columns) {
 }
 
 function openMenu() {
-  fireEvent.contextMenu(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.contextMenu(screen.getByRole("button", { name: /Edit Title$/ }))
 }
 
 test("the menu inserts rows anchored to this row, not a plain new row", () => {
@@ -76,7 +76,7 @@ test("the menu inserts rows anchored to this row, not a plain new row", () => {
 
 test("Tab commits the draft and opens the next text-like cell", async () => {
   renderRow()
-  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
 
   const editor = screen.getByRole("textbox", { name: "Title value" })
 
@@ -96,7 +96,7 @@ test("an invalid cell keeps its draft and focus with feedback outside the grid",
       column.id === "title" ? { ...column, required: true } : column
     )
   )
-  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
 
   const editor = screen.getByRole("textbox", { name: "Title value" })
 
@@ -129,7 +129,7 @@ test("an invalid cell keeps its draft and focus with feedback outside the grid",
 test("an editor unmounting mid-edit commits its draft like a blur", () => {
   const view = renderRow()
 
-  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
   fireEvent.change(screen.getByRole("textbox", { name: "Title value" }), {
     target: { value: "Call Grace" },
   })
@@ -141,7 +141,7 @@ test("an editor unmounting mid-edit commits its draft like a blur", () => {
 test("an unmount after Escape or with an untouched draft commits nothing", () => {
   const escaped = renderRow()
 
-  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
   fireEvent.change(screen.getByRole("textbox", { name: "Title value" }), {
     target: { value: "Call Grace" },
   })
@@ -152,7 +152,7 @@ test("an unmount after Escape or with an untouched draft commits nothing", () =>
 
   const untouched = renderRow()
 
-  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
   untouched.unmount()
 
   expect(onCommit).not.toHaveBeenCalled()
@@ -160,7 +160,7 @@ test("an unmount after Escape or with an untouched draft commits nothing", () =>
 
 test("Shift+Tab at the row's first text cell just commits and closes", async () => {
   renderRow()
-  fireEvent.click(screen.getByRole("button", { name: "Edit Title" }))
+  fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
 
   const editor = screen.getByRole("textbox", { name: "Title value" })
 

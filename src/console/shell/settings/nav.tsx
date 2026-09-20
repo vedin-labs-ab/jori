@@ -34,6 +34,7 @@ function SettingsSidebar<Value extends string>({
               {views.map((item) => (
                 <SidebarMenuItem key={item.value}>
                   <SidebarMenuButton
+                    aria-current={view === item.value ? "page" : undefined}
                     isActive={view === item.value}
                     onClick={() => onViewChange(item.value)}
                     type="button"

@@ -189,7 +189,9 @@ function FilterMark({
       />
       {isActive && count > 0 ? (
         <span className="text-[0.625rem] text-muted-foreground tabular-nums">
+          <span className="sr-only">, filtered, </span>
           {count}
+          <span className="sr-only"> selected</span>
         </span>
       ) : null}
     </>

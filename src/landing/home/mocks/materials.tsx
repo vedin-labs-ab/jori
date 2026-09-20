@@ -73,6 +73,7 @@ export function Materials() {
         </TabsList>
       </Tabs>
       <DemoConsole
+        lazy
         className="mt-4 h-[26rem]"
         navigation={console}
         sidebar={false}

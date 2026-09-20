@@ -19,7 +19,7 @@ export function CodeBlock({
         </code>
       </pre>
       <CopyButton
-        className="absolute top-1 right-1 bg-background/80 opacity-0 transition-opacity focus-visible:opacity-100 group-hover/code:opacity-100"
+        className="absolute top-1 right-1 bg-background/80 opacity-0 transition-opacity focus-visible:opacity-100 group-hover/code:opacity-100 pointer-coarse:opacity-100"
         label="code"
         value={code}
       />

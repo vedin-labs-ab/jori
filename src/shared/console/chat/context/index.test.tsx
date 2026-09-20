@@ -30,7 +30,7 @@ test("the ring names the share and the tokens, and opens the last turn's receipt
 test("the tone warms at 70% and turns to the destructive color at 85%", () => {
   const { rerender } = render(indicator({ usedTokens: 140_000 }))
 
-  expect(screen.getByRole("button").className).toContain("text-amber-600")
+  expect(screen.getByRole("button").className).toContain("text-warning")
 
   rerender(indicator({ usedTokens: 170_000 }))
 

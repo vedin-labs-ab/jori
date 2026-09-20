@@ -39,7 +39,7 @@ test("search previews fixture content and opens a result inside its demo", async
   )
   expect(screen.queryByRole("dialog")).toBeNull()
   expect(
-    await screen.findByRole("button", { name: "Customer column details" })
+    await screen.findByRole("button", { name: /^Customer, .*column details$/ })
   ).toBeTruthy()
 })
 

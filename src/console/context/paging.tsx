@@ -57,7 +57,7 @@ function PagingButton({
 }) {
   return (
     <button
-      className="flex w-fit cursor-pointer select-none items-center gap-1 rounded-sm py-0.5 font-medium text-primary text-xs outline-none transition hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-ring/30"
+      className="flex w-fit cursor-pointer select-none items-center gap-1 rounded-sm py-0.5 font-medium text-primary text-xs outline-none transition hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-ring"
       onClick={onClick}
       type="button"
     >

@@ -13,7 +13,7 @@ import { codeTokenClassName } from "./tokens"
 type Composite = Record<string, unknown> | readonly unknown[]
 
 const toggleClassName =
-  "-mx-0.5 cursor-pointer rounded-sm px-0.5 outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring/30"
+  "-mx-0.5 cursor-pointer rounded-sm px-0.5 outline-none transition-colors hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-ring"
 
 /** Terminal-style JSON dialog: a slim header — caller-supplied left side,
  *  copy control right — over a folding JsonView. No chrome beyond that;

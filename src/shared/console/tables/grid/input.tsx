@@ -27,7 +27,7 @@ export function CellInput({
           {...attributes}
           autoFocus
           aria-label={label}
-          className="h-full min-w-24 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent"
+          className="h-full min-w-24 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent"
           onBlur={(event) => void onCommit(event.target.value)}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) =>

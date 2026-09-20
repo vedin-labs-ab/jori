@@ -32,7 +32,7 @@ const keyCellClassName =
 
 /** Ghost affordance filling a value cell, in the grid's New-row idiom. */
 const ghostCellClassName =
-  "flex h-9 w-full items-center gap-1.5 px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset"
+  "flex h-9 w-full items-center gap-1.5 px-3 text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
 
 /** The quiet at-a-glance type cue for a field: a muted glyph in the key
  *  cell (the table grid's header language) plus a hover title. */
@@ -216,7 +216,7 @@ export function RemoveButton({
   return (
     <button
       aria-label={label}
-      className="mr-1.5 ml-auto flex size-6 shrink-0 items-center justify-center self-center rounded-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="mr-1.5 ml-auto flex size-6 shrink-0 items-center justify-center self-center rounded-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
       onClick={onClick}
       type="button"
     >

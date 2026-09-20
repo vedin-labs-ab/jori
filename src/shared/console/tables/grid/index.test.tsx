@@ -61,7 +61,7 @@ function renderGrid(rows: TableRow[], options?: { isExhausted?: boolean }) {
 test("a fully loaded table mounts only a small window and requests no more rows", () => {
   renderGrid(buildRows(10_000))
 
-  const mounted = screen.getAllByRole("button", { name: "Edit Title" })
+  const mounted = screen.getAllByRole("button", { name: /Edit Title$/ })
 
   expect(mounted.length).toBeGreaterThan(0)
   expect(mounted.length).toBeLessThan(50)

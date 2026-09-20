@@ -34,7 +34,8 @@ export function Usage() {
         </Definition>
       </dl>
       <DemoConsole
-        className="mt-12 h-[44rem]"
+        lazy
+        className="mt-12 h-[min(44rem,85svh)] md:h-[44rem]"
         navigation={console}
         sidebar={false}
       />

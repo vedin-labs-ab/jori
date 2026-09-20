@@ -250,7 +250,7 @@ function CodeEditor({
     <>
       <Textarea
         aria-label="Store value JSON"
-        className="min-h-0 flex-1 resize-none rounded-none border-0 px-4 py-3 font-mono text-xs shadow-none ring-inset focus-visible:ring-2 focus-visible:ring-ring/50 @3xl/inset:px-6"
+        className="min-h-0 flex-1 resize-none rounded-none border-0 px-4 py-3 font-mono text-xs shadow-none ring-inset focus-visible:ring-2 focus-visible:ring-ring @3xl/inset:px-6"
         onChange={(event) => {
           editor.setCodeText(event.target.value)
           onEdit()

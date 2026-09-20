@@ -220,42 +220,42 @@ function draw<Row>(read: Read<Row>, sweep: Sweep) {
     return
   }
 
+  // Every measurement first, then every write: a write between two reads
+  // makes the browser lay the list out again for each row.
+  const bounds = list.getBoundingClientRect()
+  const scroll = { x: list.scrollLeft, y: list.scrollTop }
   const end = toContent(list, clamp(list, sweep.pointer))
   const left = Math.min(sweep.start.x, end.x)
   const right = Math.max(sweep.start.x, end.x)
   const top = Math.min(sweep.start.y, end.y)
   const bottom = Math.max(sweep.start.y, end.y)
-  const bounds = list.getBoundingClientRect()
-  const onScreen = (x: number, y: number) => ({
-    x: x - list.scrollLeft + bounds.left,
-    y: y - list.scrollTop + bounds.top,
-  })
+  const ids = new Set(sweep.base)
 
-  element.style.display = "block"
-  element.style.transform = `translate(${left}px, ${top}px)`
-  element.style.width = `${right - left}px`
-  element.style.height = `${bottom - top}px`
-  element.style.borderRadius = boxRadius(
+  for (const row of list.querySelectorAll<HTMLElement>(rowSelector)) {
+    const rowBounds = row.getBoundingClientRect()
+    const rowTop = rowBounds.top - bounds.top + scroll.y
+
+    if (rowTop < bottom && rowTop + rowBounds.height > top) {
+      ids.add(row.dataset.rowId ?? "")
+    }
+  }
+
+  const radius = boxRadius(
     {
-      bottom: onScreen(right, bottom).y,
-      left: onScreen(left, top).x,
-      right: onScreen(right, bottom).x,
-      top: onScreen(left, top).y,
+      bottom: bottom - scroll.y + bounds.top,
+      left: left - scroll.x + bounds.left,
+      right: right - scroll.x + bounds.left,
+      top: top - scroll.y + bounds.top,
     },
     sweep.clip,
     restingRadius
   )
 
-  const ids = new Set(sweep.base)
-
-  for (const row of list.querySelectorAll<HTMLElement>(rowSelector)) {
-    const bounds = row.getBoundingClientRect()
-    const rowTop = toContent(list, { x: bounds.left, y: bounds.top }).y
-
-    if (rowTop < bottom && rowTop + bounds.height > top) {
-      ids.add(row.dataset.rowId ?? "")
-    }
-  }
+  element.style.display = "block"
+  element.style.transform = `translate(${left}px, ${top}px)`
+  element.style.width = `${right - left}px`
+  element.style.height = `${bottom - top}px`
+  element.style.borderRadius = radius
 
   const key = [...ids].sort().join("\n")
 

@@ -44,7 +44,7 @@ test("shows the renewals under Tables and keeps a corrected cell", async () => {
   expect(screen.getByRole("link", { name: "Tables" })).toBeDefined()
 
   fireEvent.click(
-    first(screen.getAllByRole("button", { name: "Edit Customer" }))
+    first(screen.getAllByRole("button", { name: /Edit Customer$/ }))
   )
 
   const editor = screen.getByRole("textbox", { name: "Customer value" })

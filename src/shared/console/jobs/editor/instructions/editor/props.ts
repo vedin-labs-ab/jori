@@ -33,6 +33,8 @@ export function createEditorProps({
         ? {}
         : { "aria-describedby": errorId, "aria-invalid": "true" }),
       "aria-expanded": "false",
+      // The field's label carries this id; a `for` cannot name a div.
+      "aria-labelledby": `${id}-label`,
       "aria-multiline": "true",
       class: editorContentClassName,
       id,

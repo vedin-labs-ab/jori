@@ -31,7 +31,7 @@ export function FieldHelp({
         <TooltipTrigger asChild>
           <button
             aria-label={label}
-            className='relative inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors after:absolute after:-inset-1.5 after:content-[""] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30'
+            className='relative inline-flex size-3 items-center justify-center rounded-sm text-muted-foreground transition-colors after:absolute after:-inset-1.5 after:content-[""] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
             type="button"
           >
             <Icon className="size-3" />

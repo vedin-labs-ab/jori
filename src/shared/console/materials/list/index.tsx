@@ -111,7 +111,11 @@ function MaterialTable<Row extends MaterialListRow>({
   }
 
   return (
-    <ConsoleListTable fill={rows.length > 0 || !!created} selection={selection}>
+    <ConsoleListTable
+      aria-label={kind.noun.plural}
+      fill={rows.length > 0 || !!created}
+      selection={selection}
+    >
       <MaterialListHead
         columns={kind.columns}
         config={config}

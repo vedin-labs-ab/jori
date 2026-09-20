@@ -15,7 +15,9 @@ import { cn } from "@/lib/utils"
 // the padding box: its border is translucent in dark mode and would read
 // denser stacked over a background.
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-md border text-xs/relaxed font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 shadow-[0_var(--tactile-depth)_0_0_var(--tactile-edge,transparent)] not-aria-disabled:active:not-aria-[haspopup]:translate-y-[var(--tactile-depth)] not-aria-disabled:active:not-aria-[haspopup]:shadow-[0_0_0_0_var(--tactile-edge,transparent)] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  // A finger gets at least 40px of target around every button, as an
+  // invisible box: the control keeps its size and the layout does not move.
+  "group/button relative inline-flex shrink-0 pointer-coarse:after:absolute pointer-coarse:after:-inset-y-2 items-center justify-center rounded-md border text-xs/relaxed font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 shadow-[0_var(--tactile-depth)_0_0_var(--tactile-edge,transparent)] not-aria-disabled:active:not-aria-[haspopup]:translate-y-[var(--tactile-depth)] not-aria-disabled:active:not-aria-[haspopup]:shadow-[0_0_0_0_var(--tactile-edge,transparent)] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -38,10 +40,11 @@ const buttonVariants = cva(
         sm: "h-6 gap-1 px-2 text-xs/relaxed has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
         lg: "h-8 gap-1 px-2.5 text-xs/relaxed has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 [&_svg:not([class*='size-'])]:size-4",
         xl: "h-10 gap-2 px-4 text-sm has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5 [&_svg:not([class*='size-'])]:size-4",
-        icon: "size-7 [&_svg:not([class*='size-'])]:size-3.5",
-        "icon-xs": "size-5 rounded-sm [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-6 [&_svg:not([class*='size-'])]:size-3",
-        "icon-lg": "size-8 [&_svg:not([class*='size-'])]:size-4",
+        icon: "size-7 pointer-coarse:after:-inset-x-2 [&_svg:not([class*='size-'])]:size-3.5",
+        "icon-xs":
+          "size-5 rounded-sm pointer-coarse:after:-inset-3 [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-6 pointer-coarse:after:-inset-2.5 [&_svg:not([class*='size-'])]:size-3",
+        "icon-lg": "size-8 pointer-coarse:after:-inset-x-1.5 [&_svg:not([class*='size-'])]:size-4",
       },
       // Flush with the text grid at rest: no horizontal padding, so the
       // label lines up with static siblings, and hovering, focusing, or

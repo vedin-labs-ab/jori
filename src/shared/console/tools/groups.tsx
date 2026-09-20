@@ -74,7 +74,7 @@ function ToolGroupButton({
   return (
     <button
       aria-label={`Open ${group.label} tools`}
-      className="group/tool-row inline-flex h-7 min-w-0 items-center gap-1.5 rounded-md border border-border/70 px-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="group/tool-row inline-flex h-7 min-w-0 items-center gap-1.5 rounded-md border border-border/70 px-2 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={onClick}
       type="button"
     >

@@ -69,6 +69,12 @@ export function ConsoleListTable<Row>({
     <div
       className={cn(
         "relative min-h-0 overflow-auto outline-none [&>[data-slot=table-container]]:overflow-visible",
+        // The selection's dock floats over the foot of the list, so the
+        // last rows get room to scroll clear of it: more where the dock
+        // stacks into two rows on a narrow list.
+        selection !== undefined &&
+          selection.count > 0 &&
+          "pb-24 @xl/list:pb-16",
         fill ? "flex-1" : "shrink-0"
       )}
       onPointerDown={marquee.onPointerDown}

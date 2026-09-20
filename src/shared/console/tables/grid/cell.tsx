@@ -216,16 +216,26 @@ function CellButton({
   text: string
 }) {
   return (
+    // Named by its value, then what pressing it does. A label alone made
+    // every cell in a column announce the same words and no data.
     <button
-      aria-label={label}
-      className="flex h-full w-full min-w-24 cursor-text items-center px-3 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-inset disabled:cursor-default disabled:hover:bg-transparent"
+      className="flex h-full w-full min-w-24 cursor-text items-center px-3 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:cursor-default disabled:hover:bg-transparent"
       disabled={disabled}
       onClick={onClick}
       title={text}
       type="button"
     >
       <span className="max-w-56 truncate">
-        {text === "" ? <span className="text-muted-foreground">—</span> : text}
+        {text === "" ? (
+          <span aria-hidden className="text-muted-foreground">
+            —
+          </span>
+        ) : (
+          text
+        )}
+      </span>
+      <span className="sr-only">
+        {text === "" ? "Empty" : ""}, {label}
       </span>
     </button>
   )

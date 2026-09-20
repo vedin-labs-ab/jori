@@ -140,7 +140,11 @@ export function ConsoleSidebarShell({
           {search}
         </div>
       </SidebarHeader>
-      <SidebarContent>{children}</SidebarContent>
+      {/* The console's way around is a landmark a screen reader can jump
+          to, laid out as the content it wraps. */}
+      <nav aria-label="Console" className="flex min-h-0 flex-1 flex-col">
+        <SidebarContent>{children}</SidebarContent>
+      </nav>
       <SidebarFooter>{account}</SidebarFooter>
     </Sidebar>
   )

@@ -28,7 +28,14 @@ export function JobInstructionsSection({
   return (
     <div className="grid gap-2">
       <div className="flex items-center gap-1.5">
-        <Label htmlFor="job-description">Instructions</Label>
+        {/* A label's `for` names form controls only, and the editor is a
+            div, so it takes the label by id instead. */}
+        <Label
+          id="job-description-label"
+          onClick={() => document.getElementById("job-description")?.focus()}
+        >
+          Instructions
+        </Label>
         <InstructionsHelp />
       </div>
       <JobInstructionsField

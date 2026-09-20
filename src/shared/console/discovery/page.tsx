@@ -27,7 +27,7 @@ export function PageResult({
           ? shortcutAria(pageKeys(page.shortcut))
           : undefined
       }
-      className="focus-visible:ring-2 focus-visible:ring-ring/30 data-[disabled=true]:pointer-events-auto"
+      className="focus-visible:ring-2 focus-visible:ring-ring data-[disabled=true]:pointer-events-auto"
       disabled={disabled}
       onSelect={() => onNavigate({ to: page.to })}
       onKeyDown={(event) => {

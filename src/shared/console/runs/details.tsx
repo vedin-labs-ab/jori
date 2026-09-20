@@ -182,7 +182,7 @@ export function DetailLink({
         "group/detail-link inline-flex min-w-0 max-w-full items-center gap-1.5",
         "rounded-sm font-medium text-foreground underline-offset-4",
         "transition-colors hover:underline focus-visible:outline-none",
-        "focus-visible:ring-2 focus-visible:ring-ring/50"
+        "focus-visible:ring-2 focus-visible:ring-ring"
       )}
       href={href}
       rel="noreferrer"

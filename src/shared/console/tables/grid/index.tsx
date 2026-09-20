@@ -252,8 +252,8 @@ function HeadCell({
       title={`${column.type}${isRequired ? " · required" : ""}`}
     >
       <button
-        aria-label={`${name} column details`}
-        className="group/head flex h-full w-full items-center gap-1.5 px-2 text-left outline-none hover:bg-muted/50 focus-visible:bg-muted/50"
+        aria-label={`${name}, ${column.type}${isRequired ? ", required" : ""}, column details`}
+        className="group/head flex h-full w-full items-center gap-1.5 px-2 text-left outline-none hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         onClick={onInspect}
         type="button"
       >

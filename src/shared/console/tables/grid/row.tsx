@@ -333,7 +333,12 @@ function GutterCell({
       <span
         className={cn(
           "text-muted-foreground tabular-nums",
-          isActive ? "hidden" : "group-hover/row:hidden"
+          // Neither a touch nor the keyboard has a hover to find the
+          // checkbox with: a touch gets it outright, the keyboard once its
+          // focus is in the row.
+          isActive
+            ? "hidden"
+            : "group-has-[:focus-visible]/row:hidden group-hover/row:hidden pointer-coarse:hidden"
         )}
       >
         {number}
@@ -341,7 +346,10 @@ function GutterCell({
       <Checkbox
         aria-label={`Select row ${number}`}
         checked={selection.isSelected(row)}
-        className={cn(!isActive && "hidden group-hover/row:inline-flex")}
+        className={cn(
+          !isActive &&
+            "hidden group-has-[:focus-visible]/row:inline-flex group-hover/row:inline-flex pointer-coarse:inline-flex"
+        )}
         onCheckedChange={() => selection.toggle(row)}
       />
     </div>

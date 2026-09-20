@@ -73,7 +73,7 @@ function ExpandableText({
           aria-expanded={expanded}
           className={cn(
             "cursor-pointer rounded-sm p-2 outline-none transition select-none",
-            "focus-visible:ring-2 focus-visible:ring-ring/30",
+            "focus-visible:ring-2 focus-visible:ring-ring",
             expanded
               ? "-mx-2 -mb-2 -mt-1 text-primary hover:text-primary/80"
               : cn(

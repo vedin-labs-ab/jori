@@ -43,6 +43,12 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  /* Text reads a colour of its own where the fill cannot serve both: see
+     the `-text` tokens in the dark scheme. Fills, borders, and strokes keep
+     the colour above. */
+  --text-color-destructive: var(--destructive-text);
+  --text-color-success: var(--success-text);
+  --text-color-primary: var(--primary-text);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
@@ -86,6 +92,10 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.535 0.051 153.5);
   --primary-foreground: oklch(0.985 0 0);
+  /* On a light ground the fills already clear 4.5:1 as text. */
+  --primary-text: var(--primary);
+  --destructive-text: var(--destructive);
+  --success-text: var(--success);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -148,7 +158,9 @@
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Follows `--ring`, for the reason given there: at 0.708 the sidebar's
+     focus ring was 2.48 against the sidebar. */
+  --sidebar-ring: oklch(0.647 0 0);
 }
 
 /* `inverted` takes the opposite theme of the page it sits on. It does not
@@ -163,13 +175,22 @@
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.535 0.051 153.5);
   --primary-foreground: oklch(0.985 0 0);
+  /* The fills are set to carry white text, which keeps them too dark to be
+     read as text on a dark ground: primary was 3.55:1 on a popover,
+     destructive 3.88, success 2.31. One fill cannot do both jobs, so text
+     takes the same hue at 0.70, beside the dark `--warning`. On `--muted`,
+     the darkest ground text lands on, that is 5.79, 5.39, and 5.89. */
+  --primary-text: oklch(0.7 0.051 153.5);
+  --destructive-text: oklch(0.7 0.121 33.2);
+  --success-text: oklch(0.7 0.086 167);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.575 0.121 33.2);
+  /* 0.565 as in the light scheme: at 0.575 white text on it was 4.42:1. */
+  --destructive: oklch(0.565 0.121 33.2);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.43 0.086 167);
   --success-foreground: oklch(0.985 0 0);

@@ -67,7 +67,7 @@ test("a reference card opens its table beside the chat, with the way to its page
   // The grid arrives with its own chunk once the tab is open.
   expect(
     await within(pane).findByRole("button", {
-      name: "Customer column details",
+      name: /^Customer, .*column details$/,
     })
   ).toBeDefined()
   expect(within(pane).getByText("4 rows")).toBeDefined()

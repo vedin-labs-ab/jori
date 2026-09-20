@@ -55,7 +55,7 @@ export function ToolSchemaButton({
   return (
     <Button
       aria-label={`View the ${toolLabel} schema`}
-      className="opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/tool-row:opacity-100 [@media(pointer:coarse)]:opacity-100"
+      className="opacity-0 transition-opacity duration-150 focus-visible:opacity-100 group-hover/tool-row:opacity-100 pointer-coarse:opacity-100"
       disabled={pending}
       onClick={onClick}
       onFocus={onWarm}

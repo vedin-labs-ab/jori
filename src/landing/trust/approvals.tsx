@@ -71,7 +71,8 @@ function ActivityRecord() {
 
   return (
     <DemoConsole
-      className="h-[40rem]"
+      lazy
+      className="h-[min(40rem,85svh)] md:h-[40rem]"
       navigation={console}
       openRunId={chaseRunId}
       sidebar={false}

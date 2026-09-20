@@ -29,7 +29,7 @@ import {
 } from "./types"
 
 const contentClassName =
-  "max-h-48 min-h-9 w-full overflow-y-auto whitespace-pre-wrap break-words px-2 py-2 text-foreground text-sm outline-none [overflow-wrap:anywhere]"
+  "max-h-48 min-h-9 w-full overflow-y-auto whitespace-pre-wrap break-words px-2 py-2 text-foreground text-sm pointer-coarse:text-base outline-none [overflow-wrap:anywhere]"
 
 /** The composer's editor: plain text with mention chips, a listbox under
  *  a sigil, Enter to send and Shift+Enter for a line, paste as text. */

@@ -69,7 +69,11 @@ export function FolderListTable({
   selection: RowSelection<FolderListEntry>
 }) {
   return (
-    <ConsoleListTable className="[&_td]:h-10" selection={selection}>
+    <ConsoleListTable
+      aria-label="Folder contents"
+      className="[&_td]:h-10"
+      selection={selection}
+    >
       <TableHeader>
         <TableRow>
           <SelectionHeadCell selection={selection} />

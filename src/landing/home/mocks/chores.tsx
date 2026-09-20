@@ -21,7 +21,12 @@ export function Chores() {
       support
       title="Hand over the work nobody wants"
     >
-      <DemoConsole className="h-[40rem]" navigation={console} sidebar={false} />
+      <DemoConsole
+        lazy
+        className="h-[min(40rem,85svh)] md:h-[40rem]"
+        navigation={console}
+        sidebar={false}
+      />
     </Section>
   )
 }

@@ -103,7 +103,7 @@ function PeopleCount({ people }: { people: ResolvedAudience["people"] }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <button
-          className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           type="button"
         >
           {people.length} {people.length === 1 ? "person" : "people"}

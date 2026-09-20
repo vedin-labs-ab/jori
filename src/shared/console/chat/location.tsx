@@ -68,7 +68,8 @@ function FolderControl({
           <Icon
             className={cn(
               "size-3.5 shrink-0",
-              selected && "group-hover/location:invisible"
+              selected &&
+                "group-focus-within/location:invisible group-hover/location:invisible pointer-coarse:invisible"
             )}
           />
           <span className="truncate">{name}</span>
@@ -78,7 +79,7 @@ function FolderControl({
       {selected ? (
         <Button
           aria-label="Remove folder"
-          className="invisible absolute top-0.5 left-1 size-6 rounded-sm text-muted-foreground transition-colors group-hover/location:visible"
+          className="invisible absolute top-0.5 left-1 size-6 rounded-sm text-muted-foreground transition-colors group-focus-within/location:visible group-hover/location:visible pointer-coarse:visible"
           disabled={disabled}
           onClick={() => {
             onChange(null)

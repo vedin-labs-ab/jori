@@ -1,19 +1,72 @@
-import { useEffect, useState } from "react"
+import { useCallback, useSyncExternalStore } from "react"
 
 export function localTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
 }
 
+// One clock per period, shared by everything that reads it. A list tells
+// its times a row at a time, and with a timer in every row a long folder
+// woke a thousand of them every half minute.
+type Clock = {
+  listeners: Set<() => void>
+  now: number
+  timer: ReturnType<typeof setInterval> | undefined
+}
+
+const clocks = new Map<number, Clock>()
+
+function clockFor(intervalMs: number) {
+  let clock = clocks.get(intervalMs)
+
+  if (clock === undefined) {
+    clock = { listeners: new Set(), now: Date.now(), timer: undefined }
+    clocks.set(intervalMs, clock)
+  }
+
+  return clock
+}
+
+function subscribe(intervalMs: number, listener: () => void) {
+  const clock = clockFor(intervalMs)
+
+  // A clock read in a render that never mounted has had no one to tick it.
+  if (clock.timer === undefined && Date.now() - clock.now > 1000) {
+    clock.now = Date.now()
+  }
+
+  clock.listeners.add(listener)
+  clock.timer ??= setInterval(() => {
+    clock.now = Date.now()
+
+    for (const notify of clock.listeners) {
+      notify()
+    }
+  }, intervalMs)
+
+  return () => {
+    clock.listeners.delete(listener)
+
+    // The last reader takes the clock with it, so the next one starts
+    // from the present rather than from when this one stopped.
+    if (clock.listeners.size === 0) {
+      clearInterval(clock.timer)
+      clocks.delete(intervalMs)
+    }
+  }
+}
+
+/** The present, refreshed every `intervalMs`. */
 export function useNow(intervalMs: number) {
-  const [now, setNow] = useState(() => Date.now())
-
-  useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), intervalMs)
-
-    return () => window.clearInterval(interval)
-  }, [intervalMs])
-
-  return now
+  return useSyncExternalStore(
+    useCallback(
+      (listener: () => void) => subscribe(intervalMs, listener),
+      [intervalMs]
+    ),
+    () => clockFor(intervalMs).now,
+    // A server has no readers to tick a clock, so it tells the time fresh,
+    // held still for the length of a render by rounding to the period.
+    () => Math.floor(Date.now() / intervalMs) * intervalMs
+  )
 }
 
 export function formatDuration(milliseconds: number) {

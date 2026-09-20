@@ -55,7 +55,7 @@ export function LogoStack<T extends string>({
             <button
               aria-label={`Show ${hiddenItems.length} more integrations: ${hiddenItems.map(label).join(", ")}`}
               className={cn(
-                "ml-1 inline-flex items-center justify-center rounded-sm px-1 text-muted-foreground leading-none outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/35",
+                "ml-1 inline-flex items-center justify-center rounded-sm px-1 text-muted-foreground leading-none outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
                 size === "md"
                   ? "h-5 min-w-5 text-[0.6875rem]"
                   : "h-4 min-w-4 text-[0.625rem]"

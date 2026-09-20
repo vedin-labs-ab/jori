@@ -173,8 +173,11 @@ export function SelectionActionsBar({
         >
           <X />
         </Button>
-        <span className="pr-2 font-medium text-xs tabular-nums">
+        {/* The dock sits after the list, far from the row just picked,
+            so the count is announced along with where the actions are. */}
+        <span className="pr-2 font-medium text-xs tabular-nums" role="status">
           {count} selected
+          <span className="sr-only">. Selection actions are available.</span>
         </span>
       </DockGroup>
       <DockDivider />

@@ -161,7 +161,7 @@ function IntegrationStatusLine({
         <span>{label}</span>
       ) : (
         <a
-          className="group/reveal inline-flex items-center gap-0.5 rounded-sm transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          className="group/reveal inline-flex items-center gap-0.5 rounded-sm transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           href={href}
           rel="noreferrer"
           target="_blank"

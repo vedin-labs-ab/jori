@@ -23,7 +23,8 @@ export function Record() {
     >
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)] lg:gap-16">
         <DemoConsole
-          className="h-[46rem]"
+          lazy
+          className="h-[min(46rem,85svh)] md:h-[46rem]"
           navigation={console}
           openRunId={chaseRunId}
           sidebar={false}

@@ -18,12 +18,12 @@ import { type ValueField, type ValueOption } from "./model"
 const cellInputClassName =
   // Square throughout: the grid is full-bleed and has no curved frame, so
   // a rounded ring would draw corners nothing else follows.
-  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent"
+  "h-9 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent"
 
 /** The same recipe over the select trigger, which also sheds its tactile
  *  depth so it sits flush like every other cell. */
 const cellSelectClassName =
-  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring/50 aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent dark:hover:bg-muted/50"
+  "h-9 w-full rounded-none border-0 bg-transparent px-3 shadow-none ring-inset transition-colors not-aria-disabled:active:translate-y-0 not-aria-disabled:active:shadow-none data-[size=default]:h-9 data-[state=open]:translate-y-0 data-[state=open]:shadow-none hover:bg-muted/50 focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent dark:hover:bg-muted/50"
 
 /** How every widget reports edits: the replacement state for its node and
  *  the value path that changed, so the editor can clear that path's error. */

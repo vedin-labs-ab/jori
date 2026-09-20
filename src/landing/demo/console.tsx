@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils"
 import { ConsoleHeaderActions } from "@/shared/console/layout"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
+import { NearViewport } from "../viewport"
 import { DemoVisibilityDirectory } from "./directory"
 import { DemoSearch } from "./discovery"
 import { DemoDragProvider } from "./drag"
@@ -29,11 +30,31 @@ const frameClassName = cn(
  *  console renders, under the navigation its host holds, so every link
  *  inside moves this box and nothing else. */
 export function DemoConsole({
-  className,
-  navigation: { location, navigation },
-  openRunId,
-  sidebar = true,
-}: {
+  lazy = false,
+  ...props
+}: DemoConsoleProps & {
+  /** For a console down the page: a whole console is a lot to render and
+   *  hydrate, so it waits, as an empty box of its own size, until the
+   *  reader is within a screen of it. */
+  lazy?: boolean
+}) {
+  return lazy ? (
+    <NearViewport
+      fallback={
+        <div
+          className={cn(frameClassName, props.className)}
+          id={props.navigation.navigation.anchor}
+        />
+      }
+    >
+      <MountedConsole {...props} />
+    </NearViewport>
+  ) : (
+    <MountedConsole {...props} />
+  )
+}
+
+type DemoConsoleProps = {
   /** The box's size; the frame fills whatever it is given. */
   className?: string
   /** Where the console is and how it moves, from `useDemoNavigation`. */
@@ -42,7 +63,14 @@ export function DemoConsole({
   openRunId?: string
   /** Left out, the header opens on the title and the pages fill the box. */
   sidebar?: boolean
-}) {
+}
+
+function MountedConsole({
+  className,
+  navigation: { location, navigation },
+  openRunId,
+  sidebar = true,
+}: DemoConsoleProps) {
   const scope = useRef<HTMLDivElement>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
