@@ -30,8 +30,10 @@ function renderRow(editing?: Editing, isSelected = false) {
     onSecondary: vi.fn((event: MouseEvent) => event.preventDefault()),
     selection: {
       ...emptySelection<typeof row>(),
+      identify: (picked: typeof row) => picked.id,
       isSelected: () => isSelected,
       pick: vi.fn(),
+      pickId: vi.fn(),
     },
   }
 
@@ -59,6 +61,9 @@ function tableFixture(handlers: Handlers) {
         <table>
           <TableBody>
             <Row />
+            <tr data-row-id="next" tabIndex={-1}>
+              <td>Next row</td>
+            </tr>
           </TableBody>
         </table>
       </DndContext>
@@ -271,4 +276,42 @@ test("inline editing suspends dragging without disabling the row's controls", ()
   expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe(
     "Contracts"
   )
+})
+
+test("a focused row opens on Enter and toggles on Space", () => {
+  const { onOpen, selection } = renderRow()
+  const leads = screen.getAllByRole("row")[0] as HTMLElement
+
+  fireEvent.keyDown(leads, { key: "Enter" })
+  expect(onOpen).toHaveBeenCalledOnce()
+
+  fireEvent.keyDown(leads, { key: " " })
+  expect(selection.pickId).toHaveBeenCalledWith("leads", "toggle")
+})
+
+test("the arrows move focus to the next row and pick it, running the range with Shift", () => {
+  const { selection } = renderRow()
+  const [leads, next] = screen.getAllByRole("row") as HTMLElement[]
+
+  fireEvent.keyDown(leads as HTMLElement, { key: "ArrowDown" })
+  expect(document.activeElement).toBe(next)
+  expect(selection.pickId).toHaveBeenLastCalledWith("next", "alone")
+
+  // From the name link too, where Tab lands a keyboard user.
+  fireEvent.keyDown(screen.getByText("Leads"), {
+    key: "ArrowDown",
+    shiftKey: true,
+  })
+  expect(selection.pickId).toHaveBeenLastCalledWith("next", "range")
+})
+
+test("a row's own controls keep their keys", () => {
+  const { onOpen, selection } = renderRow()
+
+  fireEvent.keyDown(screen.getByRole("checkbox"), { key: " " })
+  fireEvent.keyDown(screen.getByRole("textbox"), { key: "Enter" })
+  fireEvent.keyDown(screen.getByText("Actions"), { key: "ArrowDown" })
+
+  expect(onOpen).not.toHaveBeenCalled()
+  expect(selection.pickId).not.toHaveBeenCalled()
 })

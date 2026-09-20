@@ -1,5 +1,6 @@
 import {
   type ComponentProps,
+  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
   type SyntheticEvent,
@@ -11,7 +12,7 @@ import { useEditing } from "../../edit/state"
 import { type RowDrag, rowDragClasses } from "../../folders/drag/style"
 import { RowMenuArea } from "../../menu/row"
 import { type RowSelection } from "../selection"
-import { interactiveSelector, rowLinkSelector } from "./targets"
+import { interactiveSelector, rowLinkSelector, rowSelector } from "./targets"
 
 /** A list row under a pointer, as a file manager's list reads it. A click
  *  picks the row, with ⌘/Ctrl adding to the selection and Shift running
@@ -20,7 +21,12 @@ import { interactiveSelector, rowLinkSelector } from "./targets"
  *  press anywhere else free to sweep a marquee. Checkboxes, menus, and
  *  other links keep their own actions, and the name stays a link for the
  *  keyboard, a touch, and a middle-click. Mark the name cell with
- *  `data-row-link`. */
+ *  `data-row-link`.
+ *
+ *  A pick also gives the row focus, which only ever rests on one row
+ *  however many are selected. From there Enter opens it, Space toggles it,
+ *  and the arrows move to the next row and pick it, running the range
+ *  with Shift. */
 export function ListRow<Row>({
   className,
   drag,
@@ -64,6 +70,11 @@ export function ListRow<Row>({
             selection.pick(row, pickMode(event))
           }
         }}
+        onKeyDown={(event) => {
+          if (isRowKey(event)) {
+            rowKeyDown(event, selection)
+          }
+        }}
         onClickCapture={(event) => {
           drag.onClickCapture(event)
 
@@ -90,6 +101,7 @@ export function ListRow<Row>({
           }
         }}
         onPointerDownCapture={drag.onPointerDownCapture}
+        tabIndex={-1}
         ref={(node) => {
           element.current = node
           drag.setNodeRef(node)
@@ -99,10 +111,13 @@ export function ListRow<Row>({
   )
 }
 
-// Keep the anchor as the keyboard target, but show its focus on the whole
-// row. Other controls, including inline editors, focus themselves.
+// One inset ring for the row, whether focus is on the row itself or on its
+// name link. It shows for the keyboard only, since a pointer's pick already
+// has the selected highlight. Other controls, including inline editors,
+// focus themselves. The scroll margin keeps a row the arrows reach clear
+// of the sticky header.
 const rowFocusClasses =
-  "has-[[data-row-link]_a:focus-visible]:outline-2 has-[[data-row-link]_a:focus-visible]:-outline-offset-2 has-[[data-row-link]_a:focus-visible]:outline-ring [&_[data-row-link]_a:focus-visible]:outline-none"
+  "scroll-mt-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring has-[[data-row-link]_a:focus-visible]:outline-2 has-[[data-row-link]_a:focus-visible]:-outline-offset-2 has-[[data-row-link]_a:focus-visible]:outline-ring [&_[data-row-link]_a:focus-visible]:outline-none"
 
 function rowTarget(event: SyntheticEvent<HTMLTableRowElement>) {
   const target = event.target
@@ -128,6 +143,49 @@ function isRowSurface(event: SyntheticEvent<HTMLTableRowElement>) {
     target !== null &&
     (isOnRowLink(event) || target.closest(interactiveSelector) === null)
   )
+}
+
+/** Keys pressed on the row or its name link. A checkbox, a menu button,
+ *  or a name being typed keeps its own. */
+function isRowKey(event: KeyboardEvent<HTMLTableRowElement>) {
+  return (
+    event.target === event.currentTarget ||
+    (isOnRowLink(event) && event.key !== "Enter" && event.key !== " ")
+  )
+}
+
+function rowKeyDown<Row>(
+  event: KeyboardEvent<HTMLTableRowElement>,
+  selection: RowSelection<Row>
+) {
+  const row = event.currentTarget
+
+  if (event.key === "Enter") {
+    openRowLink(row)
+  } else if (event.key === " ") {
+    event.preventDefault()
+    selection.pickId(row.dataset.rowId ?? "", "toggle")
+  } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    const next = neighbor(row, event.key === "ArrowDown")
+
+    event.preventDefault()
+    next?.focus()
+    selection.pickId(
+      next?.dataset.rowId ?? "",
+      event.shiftKey ? "range" : "alone"
+    )
+  }
+}
+
+/** The next selectable row in the list, skipping any that is not. */
+function neighbor(row: HTMLTableRowElement, forward: boolean) {
+  let next = forward ? row.nextElementSibling : row.previousElementSibling
+
+  while (next !== null && !next.matches(rowSelector)) {
+    next = forward ? next.nextElementSibling : next.previousElementSibling
+  }
+
+  return next as HTMLTableRowElement | null
 }
 
 function isTouch(event: MouseEvent) {

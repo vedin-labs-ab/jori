@@ -15,6 +15,7 @@ export function emptySelection<Row>(): RowSelection<Row> {
     identify: String,
     isSelected: () => false,
     pick: () => undefined,
+    pickId: () => undefined,
     replace: () => undefined,
     selected: [],
     toggle: () => undefined,

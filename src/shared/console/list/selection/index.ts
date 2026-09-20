@@ -4,6 +4,8 @@ import { type RefObject, useEffect, useRef, useState } from "react"
  *  matched against the rows on every render, so rows that disappear —
  *  deleted, filtered away, or paged out — drop out of the selection on
  *  their own. */
+type PickMode = "alone" | "toggle" | "range"
+
 export type RowSelection<Row> = {
   clear: () => void
   count: number
@@ -12,7 +14,10 @@ export type RowSelection<Row> = {
   isSelected: (row: Row) => boolean
   /** A pointer's pick, as a file manager reads it: the row alone, toggled
    *  into the selection, or the run from the last pick through this row. */
-  pick: (row: Row, how?: "alone" | "toggle" | "range") => void
+  pick: (row: Row, how?: PickMode) => void
+  /** The same pick for a row known only by its id, as the keyboard knows
+   *  the row it has moved focus to. */
+  pickId: (id: string, how?: PickMode) => void
   /** Swaps the whole selection, as a marquee does while it sweeps. */
   replace: (ids: Iterable<string>) => void
   selected: Row[]
@@ -37,12 +42,11 @@ export function useRowSelection<Row>({
   const selected = rows.filter((row) => ids.has(identify(row)))
   const allSelected = rows.length > 0 && selected.length === rows.length
 
-  const pick: RowSelection<Row>["pick"] = (row, how = "alone") => {
-    if (disabled?.(row)) {
+  // `rows` holds only what can be selected, so an id found in it may be.
+  const pickId: RowSelection<Row>["pickId"] = (id, how = "alone") => {
+    if (!rows.some((row) => identify(row) === id)) {
       return
     }
-
-    const id = identify(row)
 
     if (how === "range") {
       setIds(new Set(runBetween(rows.map(identify), anchor.current, id)))
@@ -59,10 +63,11 @@ export function useRowSelection<Row>({
     count: selected.length,
     identify,
     isSelected: (row) => !disabled?.(row) && ids.has(identify(row)),
-    pick,
+    pick: (row, how) => pickId(identify(row), how),
+    pickId,
     replace: (next) => setIds(new Set(next)),
     selected,
-    toggle: (row) => pick(row, "toggle"),
+    toggle: (row) => pickId(identify(row), "toggle"),
     toggleAll: () =>
       setIds(allSelected ? new Set() : new Set(rows.map(identify))),
   }
