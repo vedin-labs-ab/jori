@@ -1,7 +1,6 @@
 import { type Integration, integrationLabel } from "@contracts/integrations"
 import { ArrowDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 import { brandHeadline } from "@/shared/brand/content"
 import { IntegrationLogo } from "@/shared/logo/integration"
 import { GetStarted } from "../../cta"
@@ -13,19 +12,7 @@ import { useDemoNavigation } from "../../demo/navigation"
 import { Jori, Mention } from "../../section"
 import { RenewalsThread } from "./thread"
 
-/** The console opens on the folder the thread files into, and the row the
- *  thread names dips once after Jori's reply has landed: a reverse-first
- *  alternate of the entrance fade, so it settles where it started. All of
- *  it is CSS, so the server's markup is the client's, and none of it runs
- *  where the reader has asked for less motion. */
-const consoleClassName = cn(
-  "h-[36rem]",
-  "motion-safe:[&_tr:has(a[data-console-href$=renewals])]:animate-in motion-safe:[&_tr:has(a[data-console-href$=renewals])]:fade-in-40",
-  "motion-safe:[&_tr:has(a[data-console-href$=renewals])]:direction-alternate-reverse motion-safe:[&_tr:has(a[data-console-href$=renewals])]:repeat-2",
-  "motion-safe:[&_tr:has(a[data-console-href$=renewals])]:animation-duration-400 motion-safe:[&_tr:has(a[data-console-href$=renewals])]:delay-[1900ms]",
-  "motion-safe:[&_tr:has(a[data-console-href$=renewals])]:fill-mode-both"
-)
-
+/** The console opens on the folder the thread beside it files into. */
 export function Hero() {
   const console = useDemoNavigation(`/folders/${folderId("renewals")}`)
 
@@ -65,7 +52,7 @@ export function Hero() {
           wrapper keeps room under the console for the part that hangs
           below it. Narrow, the thread docks under the console instead. */}
       <div className="relative mt-14 min-w-0 md:mt-16 md:pb-16" id="demo">
-        <DemoConsole className={consoleClassName} navigation={console} />
+        <DemoConsole className="h-[36rem]" navigation={console} />
         <RenewalsThread
           className="mt-4 md:absolute md:right-6 md:bottom-0 md:mt-0 md:w-[22rem]"
           onOpenJob={() =>

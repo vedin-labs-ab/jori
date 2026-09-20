@@ -2,7 +2,7 @@ import { type ComponentProps } from "react"
 import { Table } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import { useMarquee } from "./pointer/marquee"
-import { type RowSelection } from "./selection"
+import { type RowSelection, useSelectionKeys } from "./selection"
 
 // Full-bleed list surface: the table is the page content. Rows run
 // edge-to-edge under a sticky header, with the page's horizontal padding
@@ -48,7 +48,8 @@ export function ConsoleListContent({
  *  cells pinned to its top. The sticky header draws its own hairline (a tr
  *  border would scroll away with the rows), and the shadcn table wrapper
  *  stops scrolling so this container stays the only scrollport. Given the
- *  list's selection, a drag across it sweeps a marquee over the rows. */
+ *  list's selection, a drag across it sweeps a marquee over the rows, and
+ *  a click inside it gives it focus, so the selection's keys reach it. */
 export function ConsoleListTable<Row>({
   className,
   fill = true,
@@ -62,14 +63,17 @@ export function ConsoleListTable<Row>({
 }) {
   const marquee = useMarquee(selection)
 
+  useSelectionKeys(marquee.ref, selection)
+
   return (
     <div
       className={cn(
-        "relative min-h-0 overflow-auto [&>[data-slot=table-container]]:overflow-visible",
+        "relative min-h-0 overflow-auto outline-none [&>[data-slot=table-container]]:overflow-visible",
         fill ? "flex-1" : "shrink-0"
       )}
       onPointerDown={marquee.onPointerDown}
       ref={marquee.ref}
+      tabIndex={selection ? -1 : undefined}
     >
       {marquee.box}
       <Table

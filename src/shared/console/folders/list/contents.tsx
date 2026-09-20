@@ -1,6 +1,6 @@
 import { Folder } from "lucide-react"
 import { type ReactNode } from "react"
-import { useCreatedItem, useEditMenuFocus } from "../../edit/state"
+import { useCreatedItem } from "../../edit/state"
 import {
   ConsoleEmptyState,
   ConsoleListEmpty,
@@ -43,8 +43,6 @@ import {
  *  the folder itself can be asked: something new in it, and its usage. */
 export function FolderContents(props: FolderContentsProps) {
   const { folderId, onCreate, onNewFolder } = props
-  const onCloseAutoFocus = useEditMenuFocus()
-
   return (
     <MenuArea
       disabled={props.contents?.status !== "ready"}
@@ -59,7 +57,6 @@ export function FolderContents(props: FolderContentsProps) {
           <FolderUsageItem folderId={folderId} />
         </>
       }
-      onCloseAutoFocus={onCloseAutoFocus}
     >
       {/* Boxless, so the listing's regions still lay out in the page. */}
       <div className="contents">

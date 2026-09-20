@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, expect, test, vi } from "vitest"
 import { MenuItem } from "./items"
 import { MenuArea, RowMenu, RowMenuArea } from "./row"
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
 
 function renderRow(selectionMenu?: React.ReactNode) {
   const onRename = vi.fn()
@@ -58,4 +61,39 @@ test("a right-click on the background offers the list's own items", () => {
 
   expect(screen.getByRole("menuitem", { name: "New table" })).toBeTruthy()
   expect(screen.queryByRole("menuitem", { name: "Rename…" })).toBeNull()
+})
+
+// Each target times a held touch for itself, so without the row stopping
+// the press the list's menu would open over the row's.
+test("a touch held on a row opens the row's menu alone", () => {
+  vi.useFakeTimers()
+  renderRow()
+
+  fireEvent.pointerDown(screen.getByText("Leads"), { pointerType: "touch" })
+  act(() => vi.advanceTimersByTime(800))
+
+  expect(screen.getAllByRole("menu")).toHaveLength(1)
+  expect(screen.getByRole("menuitem", { name: "Rename…" })).toBeTruthy()
+})
+
+test("a row that can be opened says so first, in both forms of its menu", () => {
+  const onEnter = vi.fn()
+
+  render(
+    <RowMenuArea onEnter={onEnter}>
+      <div>
+        Leads
+        <RowMenu name="Leads">
+          <MenuItem>Rename…</MenuItem>
+        </RowMenu>
+      </div>
+    </RowMenuArea>
+  )
+  fireEvent.contextMenu(screen.getByText("Leads"))
+
+  const items = screen.getAllByRole("menuitem")
+
+  expect(items.map((item) => item.textContent)).toEqual(["Open", "Rename…"])
+  fireEvent.click(items[0] as HTMLElement)
+  expect(onEnter).toHaveBeenCalledOnce()
 })

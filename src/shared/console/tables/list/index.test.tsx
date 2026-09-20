@@ -137,5 +137,5 @@ test("a row offers the table's whole menu, the way its page does", () => {
 
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Rename…", "Audience…", "Move to folder…", "Archive"])
+  ).toEqual(["Open", "Rename…", "Audience…", "Move to folder…", "Archive"])
 })

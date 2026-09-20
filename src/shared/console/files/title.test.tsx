@@ -53,7 +53,7 @@ test("leaves the links to the header the detail page already has", () => {
   renderTitleMenu()
 
   expect(screen.queryByRole("menuitem", { name: "Download" })).toBeNull()
-  expect(screen.queryByRole("menuitem", { name: "Open" })).toBeNull()
+  expect(screen.queryByRole("menuitem", { name: "Open in new tab" })).toBeNull()
 })
 
 test("opens the page's dialogs and confirms a delete before it happens", () => {

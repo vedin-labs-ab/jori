@@ -116,9 +116,8 @@ export function FolderRowMenu({
   folder: ManagedFolder
   onDialog: (request: FolderDialogRequest) => void
 }) {
-  const onCloseAutoFocus = useEditMenuFocus()
   return (
-    <RowMenu name={folder.name} onCloseAutoFocus={onCloseAutoFocus}>
+    <RowMenu name={folder.name}>
       <FolderMenuItems folder={folder} onDialog={onDialog} />
     </RowMenu>
   )

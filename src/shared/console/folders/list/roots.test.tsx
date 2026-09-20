@@ -136,7 +136,14 @@ test("a root folder row opens the folder's own menu", () => {
 
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Usage", "Rename", "Audience…", "Move to folder…", "Delete"])
+  ).toEqual([
+    "Open",
+    "Usage",
+    "Rename",
+    "Audience…",
+    "Move to folder…",
+    "Delete",
+  ])
 
   fireEvent.click(screen.getByRole("menuitem", { name: "Rename" }))
 

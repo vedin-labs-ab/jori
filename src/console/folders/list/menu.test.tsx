@@ -34,6 +34,7 @@ test("a filed table offers the menu its own list row offers, plus unfiling", () 
   openActions("Leads")
 
   expect(itemLabels()).toEqual([
+    "Open",
     "Rename…",
     "Audience…",
     "Move to folder…",
@@ -53,6 +54,7 @@ test("a subfolder row opens the folder's own menu", () => {
   openActions("Guides")
 
   expect(itemLabels()).toEqual([
+    "Open",
     "Usage",
     "Rename",
     "Audience…",
@@ -75,6 +77,7 @@ test("a filed file offers its own menu; the links resolve on demand", () => {
   // Open and Download wait on the file's URL, which a listing row does not
   // carry; everything the row already knows is there at once.
   expect(itemLabels()).toEqual([
+    "Open",
     "Rename…",
     "Audience…",
     "Move to folder…",
@@ -98,6 +101,7 @@ test("a filed job offers the menu its own page offers", () => {
   openActions("Digest")
 
   expect(itemLabels()).toEqual([
+    "Open",
     "Edit",
     "Move to folder…",
     "Remove from folder",
@@ -110,7 +114,11 @@ test("a job still being resolved offers only what the filing knows", () => {
   renderRows({ resources: [jobResource] })
   openActions("Digest")
 
-  expect(itemLabels()).toEqual(["Move to folder…", "Remove from folder"])
+  expect(itemLabels()).toEqual([
+    "Open",
+    "Move to folder…",
+    "Remove from folder",
+  ])
 })
 
 test("a filed chat opens its conversation and can move without deleting its history", () => {
@@ -130,6 +138,7 @@ test("a filed chat opens its conversation and can move without deleting its hist
   ).toBe("/chat/chat-1")
   openActions("Renewals at risk")
   expect(itemLabels()).toEqual([
+    "Open",
     "Audience…",
     "Move to folder…",
     "Remove from folder",

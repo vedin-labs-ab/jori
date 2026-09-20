@@ -58,6 +58,14 @@ export function SelectionRowCell<Row>({
         aria-label={label}
         checked={selection.isSelected(row)}
         onCheckedChange={() => selection.toggle(row)}
+        // Shift runs from the last row ticked or picked, as it does on
+        // the row itself; claiming the click keeps the box from toggling.
+        onClick={(event) => {
+          if (event.shiftKey) {
+            event.preventDefault()
+            selection.pick(row, "range")
+          }
+        }}
       />
     </TableCell>
   )

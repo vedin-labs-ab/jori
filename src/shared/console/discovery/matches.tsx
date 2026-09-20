@@ -17,10 +17,7 @@ export function Matches({ text, query }: { text: string; query: string }) {
   for (const match of text.matchAll(pattern)) {
     parts.push(text.slice(start, match.index))
     parts.push(
-      <mark
-        className="bg-transparent font-semibold text-foreground"
-        key={match.index}
-      >
+      <mark className="bg-transparent text-primary" key={match.index}>
         {match[0]}
       </mark>
     )

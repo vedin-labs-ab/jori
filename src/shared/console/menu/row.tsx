@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react"
 import {
   type ComponentProps,
   createContext,
@@ -15,8 +16,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu"
+import { useEditMenuFocus } from "../edit/state"
 import { menuWidth, RowMenuTrigger } from "."
-import { ContextMenuItems } from "./items"
+import { ContextMenuItems, MenuItem, MenuSeparator } from "./items"
 
 // One menu per row, two ways in. The row is the context menu's trigger and
 // the row's menu, down in its last cell, supplies the content for both
@@ -24,6 +26,11 @@ import { ContextMenuItems } from "./items"
 // same items from the same component.
 
 type AreaMenus = {
+  /** Opens the row. Where a double-click is what opens one, its menu says
+   *  so first, for anyone who has not found that out. */
+  onEnter?: () => void
+  /** Ran as the menu opens, by a right-click or a touch held in place. */
+  onOpen?: () => void
   /** Items that stand in for the row's own on a right-click, when the row
    *  is one of several selected and the menu speaks for all of them. */
   selectionMenu?: ReactNode
@@ -36,17 +43,35 @@ type MenuAreaProps = Pick<
   "children" | "disabled"
 >
 
+type MenuTargetProps = MenuAreaProps &
+  Pick<ComponentProps<typeof ContextMenuTrigger>, "onPointerDown">
+
 /** Makes its one child element the right-click target for the `RowMenu`
  *  rendered inside it. Disabled, the browser's own menu comes back. */
 export function RowMenuArea({
   children,
   disabled,
+  onEnter,
+  onOpen,
   selectionMenu,
 }: MenuAreaProps & AreaMenus) {
   return (
-    <ContextMenu>
-      <RowMenuAreaContext value={{ selectionMenu }}>
-        <MenuTarget disabled={disabled}>{children}</MenuTarget>
+    <ContextMenu onOpenChange={(open) => (open ? onOpen?.() : undefined)}>
+      <RowMenuAreaContext value={{ onEnter, selectionMenu }}>
+        <MenuTarget
+          disabled={disabled}
+          // A touch held in place opens the menu from a timer each target
+          // starts for itself, so one on a row would also open the list's
+          // behind it. The press stops here; a mouse's goes on to the
+          // marquee.
+          onPointerDown={(event) => {
+            if (event.pointerType !== "mouse") {
+              event.stopPropagation()
+            }
+          }}
+        >
+          {children}
+        </MenuTarget>
       </RowMenuAreaContext>
     </ContextMenu>
   )
@@ -59,22 +84,16 @@ export function MenuArea({
   children,
   disabled,
   menu,
-  onCloseAutoFocus,
-}: MenuAreaProps &
-  Pick<ComponentProps<typeof ContextMenuContent>, "onCloseAutoFocus"> & {
-    menu: ReactNode
-  }) {
+}: MenuAreaProps & { menu: ReactNode }) {
   return (
     <ContextMenu>
       <MenuTarget disabled={disabled}>{children}</MenuTarget>
-      <ContextContent onCloseAutoFocus={onCloseAutoFocus}>
-        {menu}
-      </ContextContent>
+      <ContextContent>{menu}</ContextContent>
     </ContextMenu>
   )
 }
 
-function MenuTarget(props: MenuAreaProps) {
+function MenuTarget(props: MenuTargetProps) {
   return (
     <ContextMenuTrigger
       asChild
@@ -93,15 +112,18 @@ function MenuTarget(props: MenuAreaProps) {
   )
 }
 
-function ContextContent({
-  children,
-  ...props
-}: Pick<
-  ComponentProps<typeof ContextMenuContent>,
-  "children" | "onCloseAutoFocus"
->) {
+/** An item may start naming something in place, as "New table" does. A
+ *  closing menu hands focus back to where it opened from, which would
+ *  blur that input and end the naming at once, so every menu here lets
+ *  the input keep it. */
+function ContextContent({ children }: { children: ReactNode }) {
+  const onCloseAutoFocus = useEditMenuFocus()
+
   return (
-    <ContextMenuContent className={menuWidth} {...props}>
+    <ContextMenuContent
+      className={menuWidth}
+      onCloseAutoFocus={onCloseAutoFocus}
+    >
       <ContextMenuItems>{children}</ContextMenuItems>
     </ContextMenuContent>
   )
@@ -113,13 +135,12 @@ export function RowMenu({
   align = "end",
   children,
   name,
-  onCloseAutoFocus,
   onOpenChange,
   side,
   trigger,
 }: Pick<
   ComponentProps<typeof DropdownMenuContent>,
-  "align" | "children" | "onCloseAutoFocus" | "side"
+  "align" | "children" | "side"
 > & {
   /** Whose actions these are, for the "…" button's label. */
   name: string
@@ -129,6 +150,21 @@ export function RowMenu({
   trigger?: ReactNode
 }) {
   const area = useContext(RowMenuAreaContext)
+  const onCloseAutoFocus = useEditMenuFocus()
+  const items = (
+    <>
+      {area?.onEnter === undefined ? null : (
+        <>
+          <MenuItem onSelect={area.onEnter}>
+            <ArrowRight />
+            Open
+          </MenuItem>
+          <MenuSeparator />
+        </>
+      )}
+      {children}
+    </>
+  )
 
   return (
     <>
@@ -140,15 +176,15 @@ export function RowMenu({
           onCloseAutoFocus={onCloseAutoFocus}
           side={side}
         >
-          {children}
+          {items}
         </DropdownMenuContent>
       </DropdownMenu>
       {area === null ? null : (
-        <ContextContent onCloseAutoFocus={onCloseAutoFocus}>
+        <ContextContent>
           {onOpenChange === undefined ? null : (
             <OpenSignal onOpenChange={onOpenChange} />
           )}
-          {area.selectionMenu ?? children}
+          {area.selectionMenu ?? items}
         </ContextContent>
       )}
     </>

@@ -197,7 +197,7 @@ function FileLinkItems({
       <MenuItem asChild>
         <a href={file.url} rel="noreferrer" target="_blank">
           <ExternalLink />
-          Open
+          Open in new tab
         </a>
       </MenuItem>
       <MenuItem

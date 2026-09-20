@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { type RefObject, useEffect, useRef, useState } from "react"
 
 /** Row selection over the currently visible rows of a list page. Ids are
  *  matched against the rows on every render, so rows that disappear —
@@ -87,6 +87,52 @@ function withToggled(ids: ReadonlySet<string>, id: string) {
   }
 
   return next
+}
+
+/** The keys a list answers while focus is inside it, where a click on a
+ *  row puts it: Escape lets go of the selection and ⌘/Ctrl+A takes every
+ *  row. A field inside the list, such as a name being typed, keeps its
+ *  own keys. */
+export function useSelectionKeys<Row>(
+  list: RefObject<HTMLElement | null>,
+  selection: RowSelection<Row> | undefined
+) {
+  const latest = useRef(selection)
+
+  useEffect(() => {
+    latest.current = selection
+  })
+  useEffect(() => {
+    const element = list.current
+    const onKeyDown = (event: KeyboardEvent) =>
+      latest.current ? selectionKeyDown(event, latest.current) : undefined
+
+    element?.addEventListener("keydown", onKeyDown)
+
+    return () => element?.removeEventListener("keydown", onKeyDown)
+  }, [list])
+}
+
+function selectionKeyDown<Row>(
+  event: KeyboardEvent,
+  selection: RowSelection<Row>
+) {
+  if (
+    event.target instanceof Element &&
+    event.target.closest("input,textarea,select,[contenteditable]") !== null
+  ) {
+    return
+  }
+
+  if (event.key === "Escape" && selection.count > 0) {
+    selection.clear()
+  } else if (event.key === "a" && (event.metaKey || event.ctrlKey)) {
+    event.preventDefault()
+
+    if (!selection.allSelected) {
+      selection.toggleAll()
+    }
+  }
 }
 
 /** The select-all checkbox's tri-state for a selection: all, some

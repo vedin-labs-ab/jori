@@ -188,7 +188,7 @@ test("a row offers the job's whole menu and confirms its delete", () => {
 
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Edit", "Move to folder…", "Pause", "Delete"])
+  ).toEqual(["Open", "Edit", "Move to folder…", "Pause", "Delete"])
 
   fireEvent.click(screen.getByRole("menuitem", { name: "Pause" }))
 

@@ -28,7 +28,9 @@ export function Result({
     >
       <Icon />
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className="truncate" title={hit.title}>
+        {/* A name, weighted as names are in the lists; a match takes the
+            weight of the line it is found in. */}
+        <span className="truncate font-medium" title={hit.title}>
           <Matches text={hit.title || "Untitled"} query={query} />
         </span>
         {detail ? (

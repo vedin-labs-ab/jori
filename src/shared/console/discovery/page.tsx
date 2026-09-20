@@ -40,7 +40,7 @@ export function PageResult({
       value={`page:${page.to}`}
     >
       <page.icon />
-      <span>
+      <span className="font-medium">
         <Matches text={page.label} query={query} />
       </span>
       <CommandShortcut className="tracking-normal">

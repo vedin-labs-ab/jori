@@ -5,6 +5,7 @@ import {
   useRef,
 } from "react"
 import { type RowSelection } from "../selection"
+import { boxRadius, type Clip, findClip } from "./corners"
 import { interactiveSelector, rowSelector } from "./targets"
 
 // The box a desktop draws when a press on empty space turns into a drag:
@@ -22,6 +23,9 @@ const threshold = 4
 const scrollBand = 40
 const scrollSpeed = 18
 
+/** The box's own corner, in px, away from any curve of the frame. */
+const restingRadius = 2
+
 type Point = { x: number; y: number }
 
 type Sweep = {
@@ -29,6 +33,8 @@ type Sweep = {
   base: ReadonlySet<string>
   /** Whether a press that never moves was a click on the background. */
   clearsOnClick: boolean
+  /** The rounded frame around the list, whose corners the box follows. */
+  clip: Clip | undefined
   frame: number | undefined
   isActive: boolean
   /** The last selection handed over, so a still pointer asks for nothing. */
@@ -68,7 +74,7 @@ export function useMarquee<Row>(selection: RowSelection<Row> | undefined) {
     box: (
       <div
         aria-hidden
-        className="pointer-events-none absolute top-0 left-0 z-[5] hidden rounded-xs border border-ring/60 bg-ring/15"
+        className="pointer-events-none absolute top-0 left-0 z-[5] hidden border border-ring/60 bg-ring/15"
         ref={box}
       />
     ),
@@ -194,6 +200,7 @@ function pressed<Row>(
     // A press on a row leaves its click to pick the row.
     clearsOnClick:
       !isAdding && (event.target as Element).closest(rowSelector) === null,
+    clip: findClip(list),
     frame: undefined,
     isActive: false,
     key: "unswept",
@@ -214,13 +221,30 @@ function draw<Row>(read: Read<Row>, sweep: Sweep) {
   }
 
   const end = toContent(list, clamp(list, sweep.pointer))
+  const left = Math.min(sweep.start.x, end.x)
+  const right = Math.max(sweep.start.x, end.x)
   const top = Math.min(sweep.start.y, end.y)
   const bottom = Math.max(sweep.start.y, end.y)
+  const bounds = list.getBoundingClientRect()
+  const onScreen = (x: number, y: number) => ({
+    x: x - list.scrollLeft + bounds.left,
+    y: y - list.scrollTop + bounds.top,
+  })
 
   element.style.display = "block"
-  element.style.transform = `translate(${Math.min(sweep.start.x, end.x)}px, ${top}px)`
-  element.style.width = `${Math.abs(sweep.start.x - end.x)}px`
+  element.style.transform = `translate(${left}px, ${top}px)`
+  element.style.width = `${right - left}px`
   element.style.height = `${bottom - top}px`
+  element.style.borderRadius = boxRadius(
+    {
+      bottom: onScreen(right, bottom).y,
+      left: onScreen(left, top).x,
+      right: onScreen(right, bottom).x,
+      top: onScreen(left, top).y,
+    },
+    sweep.clip,
+    restingRadius
+  )
 
   const ids = new Set(sweep.base)
 
@@ -277,22 +301,12 @@ function toContent(list: HTMLElement, point: Point): Point {
   }
 }
 
-/** Holds the box this far inside the list: the main view clips to rounded
- *  corners, and a square corner pushed into one would lose its border. */
-const edgeInset = 4
-
 function clamp(list: HTMLElement, point: Point): Point {
   const bounds = list.getBoundingClientRect()
 
   return {
-    x: Math.min(
-      Math.max(point.x, bounds.left + edgeInset),
-      bounds.right - edgeInset
-    ),
-    y: Math.min(
-      Math.max(point.y, bounds.top + edgeInset),
-      bounds.bottom - edgeInset
-    ),
+    x: Math.min(Math.max(point.x, bounds.left), bounds.right),
+    y: Math.min(Math.max(point.y, bounds.top), bounds.bottom),
   }
 }
 

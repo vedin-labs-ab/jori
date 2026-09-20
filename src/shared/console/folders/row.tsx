@@ -7,7 +7,7 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
-import { useEditing, useEditMenuFocus } from "../edit/state"
+import { useEditing } from "../edit/state"
 import { MenuSeparator } from "../menu/items"
 import { RowMenu, RowMenuArea } from "../menu/row"
 import { ConsoleLink } from "../shell/link"
@@ -254,12 +254,10 @@ function FolderTreeMenu({
   onCreate: (request: CreationRequest) => void
   onDialog: (request: FolderDialogRequest) => void
 }) {
-  const onCloseAutoFocus = useEditMenuFocus()
   return (
     <RowMenu
       align="start"
       name={folder.name}
-      onCloseAutoFocus={onCloseAutoFocus}
       side="right"
       trigger={
         <DropdownMenuTrigger asChild>

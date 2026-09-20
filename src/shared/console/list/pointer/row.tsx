@@ -3,6 +3,7 @@ import {
   type MouseEvent,
   type ReactNode,
   type SyntheticEvent,
+  useRef,
 } from "react"
 import { TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
@@ -36,10 +37,15 @@ export function ListRow<Row>({
 }) {
   const isEditing = useEditing()?.edit !== undefined
   const isSelected = selection.isSelected(row)
+  const element = useRef<HTMLTableRowElement | null>(null)
 
   return (
     <RowMenuArea
       disabled={isEditing}
+      onEnter={() => (element.current ? openRowLink(element.current) : null)}
+      // The menu speaks for the row it opened on, so that row is picked
+      // first unless it is already part of the selection.
+      onOpen={() => (isSelected ? undefined : selection.pick(row))}
       selectionMenu={
         isSelected && selection.count > 1 ? selectionMenu : undefined
       }
@@ -70,13 +76,11 @@ export function ListRow<Row>({
           if (isEditing) {
             // The editor's own menu, not the list's behind it.
             event.stopPropagation()
-          } else if (!isSelected && rowTarget(event) !== null) {
-            selection.pick(row)
           }
         }}
         onDoubleClick={(event) => {
           if (isRowSurface(event)) {
-            openRowLink(event)
+            openRowLink(event.currentTarget)
           }
         }}
         onPointerDown={(event) => {
@@ -85,7 +89,10 @@ export function ListRow<Row>({
           }
         }}
         onPointerDownCapture={drag.onPointerDownCapture}
-        ref={drag.setNodeRef}
+        ref={(node) => {
+          element.current = node
+          drag.setNodeRef(node)
+        }}
       />
     </RowMenuArea>
   )
@@ -142,14 +149,14 @@ function followRowLink(event: MouseEvent<HTMLTableRowElement>) {
     event.button === 0 &&
     rowTarget(event)?.closest(interactiveSelector) === null
   ) {
-    openRowLink(event)
+    openRowLink(event.currentTarget)
   }
 }
 
 /** Clicks the name link as the keyboard would, so the router and the
  *  demo's local navigation open the row the same way. */
-function openRowLink(event: MouseEvent<HTMLTableRowElement>) {
-  event.currentTarget
+function openRowLink(row: HTMLTableRowElement) {
+  row
     .querySelector(`${rowLinkSelector}[href]`)
     ?.dispatchEvent(
       new window.MouseEvent("click", { bubbles: true, cancelable: true })
