@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router"
 import { type Organization } from "better-auth/client"
 import { CircleDashed, Plus, Settings } from "lucide-react"
+import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui"
 import { type ComponentProps, useState } from "react"
 import { toast } from "sonner"
 import { OrganizationView } from "@/components/auth/organization/organization-view"
@@ -213,15 +214,21 @@ function OrganizationMenuHeader({
     <DropdownMenuLabel className="p-0 font-normal text-foreground">
       <div className="flex items-center justify-between gap-3 px-1 py-1.5">
         <OrganizationView className="min-w-0 flex-1" hideRole hideSlug />
-        <Button
+        {/* Keep the header button's styling while joining the menu's
+            keyboard collection and selection handling. */}
+        <DropdownMenuPrimitive.Item
+          asChild
           disabled={switching}
-          onClick={onManage}
-          size="sm"
-          variant="outline"
+          onSelect={(event) => {
+            event.preventDefault()
+            onManage()
+          }}
         >
-          <Settings />
-          Manage
-        </Button>
+          <Button disabled={switching} size="sm" variant="outline">
+            <Settings />
+            Manage
+          </Button>
+        </DropdownMenuPrimitive.Item>
       </div>
     </DropdownMenuLabel>
   )

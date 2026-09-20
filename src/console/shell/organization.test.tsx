@@ -135,7 +135,7 @@ test("keeps the switcher open with a stable pending organization row", async () 
       .getAttribute("aria-disabled")
   ).toBe("true")
   expect(
-    (screen.getByRole("button", { name: /Manage/ }) as HTMLButtonElement)
+    (screen.getByRole("menuitem", { name: /Manage/ }) as HTMLButtonElement)
       .disabled
   ).toBe(true)
   const trigger = document.querySelector<HTMLButtonElement>(
@@ -153,7 +153,7 @@ test("an organization in onboarding offers only the way to another", async () =>
   expect(
     screen.queryByRole("menuitem", { name: /Create organization/ })
   ).toBeNull()
-  expect(screen.queryByRole("button", { name: /Manage/ })).toBeNull()
+  expect(screen.queryByRole("menuitem", { name: /Manage/ })).toBeNull()
 })
 
 test("a new organization shows none as chosen, and going back needs no activating", async () => {
@@ -219,7 +219,7 @@ test("restores the switcher after a failed organization change", async () => {
   expect(screen.queryByRole("status", { name: "Switching to test" })).toBeNull()
   expect(screen.getByRole("menuitem", { name: /test/ })).toBeDefined()
   expect(
-    (screen.getByRole("button", { name: /Manage/ }) as HTMLButtonElement)
+    (screen.getByRole("menuitem", { name: /Manage/ }) as HTMLButtonElement)
       .disabled
   ).toBe(false)
 })
