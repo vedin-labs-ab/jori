@@ -214,24 +214,40 @@ function startDrag(target: Element) {
   })
 }
 
-test("a drag starts from the name, and releasing it neither opens nor picks", () => {
+test("a drag starts from the name and picks its row, and releasing it neither opens nor picks again", () => {
   vi.useFakeTimers()
   const { onDragStart, onOpen, selection } = renderRow()
 
   startDrag(screen.getByText("Leads"))
   expect(onDragStart).toHaveBeenCalledOnce()
+  // Started outside the selection, the drag carries this row alone, so it
+  // becomes the selection: what is lit is what is moving.
+  expect(selection.pick).toHaveBeenCalledExactlyOnceWith(row)
   fireEvent.pointerUp(document, { pointerId: 1 })
   // dnd-kit temporarily blocks document clicks; the row must still
   // reject a trailing click after those listeners have been removed.
   act(() => vi.advanceTimersByTime(50))
   fireEvent.click(screen.getByText("Leads"), { detail: 1 })
   expect(onOpen).not.toHaveBeenCalled()
-  expect(selection.pick).not.toHaveBeenCalled()
+  expect(selection.pick).toHaveBeenCalledOnce()
 
   // A later deliberate click picks the row again.
   fireEvent.pointerDown(screen.getByText("Leads"), { button: 0 })
   fireEvent.click(screen.getByText("Leads"), { detail: 1 })
-  expect(selection.pick).toHaveBeenCalledOnce()
+  expect(selection.pick).toHaveBeenCalledTimes(2)
+})
+
+test("a drag from inside the selection leaves the selection as it is", () => {
+  vi.useFakeTimers()
+  const { onDragStart, selection } = renderRow(undefined, true)
+
+  startDrag(screen.getByText("Leads"))
+
+  expect(onDragStart).toHaveBeenCalledOnce()
+  expect(selection.pick).not.toHaveBeenCalled()
+  fireEvent.pointerUp(document, { pointerId: 1 })
+  // Let the drag's guard against a trailing click run out.
+  act(() => vi.advanceTimersByTime(50))
 })
 
 // Everything but the name is left for the marquee and the row's controls.

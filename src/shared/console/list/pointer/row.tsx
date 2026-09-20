@@ -4,6 +4,7 @@ import {
   type MouseEvent,
   type ReactNode,
   type SyntheticEvent,
+  useEffect,
   useRef,
 } from "react"
 import { TableRow } from "@/components/ui/table"
@@ -18,7 +19,8 @@ import { interactiveSelector, rowLinkSelector, rowSelector } from "./targets"
  *  picks the row, with ⌘/Ctrl adding to the selection and Shift running
  *  from the last pick; a double-click opens it; a right-click opens its
  *  menu. The name is the handle a drag moves the row by, which leaves a
- *  press anywhere else free to sweep a marquee. Checkboxes, menus, and
+ *  press anywhere else free to sweep a marquee; a drag from outside the
+ *  selection picks its row first. Checkboxes, menus, and
  *  other links keep their own actions, and the name stays a link for the
  *  keyboard, a touch, and a middle-click. Mark the name cell with
  *  `data-row-link`.
@@ -44,6 +46,15 @@ export function ListRow<Row>({
   const isEditing = useEditing()?.edit !== undefined
   const isSelected = selection.isSelected(row)
   const element = useRef<HTMLTableRowElement | null>(null)
+
+  // A drag speaks for the row it starts on, the way its menu does. Started
+  // on a row outside the selection it carries that row alone, so that row
+  // becomes the selection: what is lit is what is moving.
+  useEffect(() => {
+    if (drag.isDragSource && !isSelected) {
+      selection.pick(row)
+    }
+  }, [drag.isDragSource, isSelected, row, selection])
 
   return (
     <RowMenuArea
