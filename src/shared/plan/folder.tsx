@@ -76,6 +76,9 @@ export function FolderTab({
       className={cn(
         "relative inline-flex h-11 items-center rounded-t-xl border bg-muted px-5 font-medium text-muted-foreground text-sm transition-colors outline-none",
         "hover:text-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
+        // A span's text asks for the I-beam. As a tab it is a control, the
+        // open one included, so its whole face takes the pointer.
+        "[&[role=tab]]:cursor-pointer [&[role=tab]]:select-none",
         "data-[state=active]:h-12 data-[state=active]:border-b-transparent data-[state=active]:text-foreground",
         "data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:-bottom-0.5 data-[state=active]:after:h-1 data-[state=active]:after:content-['']",
         covers[tone],
