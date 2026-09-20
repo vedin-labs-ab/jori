@@ -44,6 +44,7 @@ test("a page about one organization's thing gives way to its list when the organ
   expect(organizationNeutralPath("/tables/abc123")).toBe("/tables")
   expect(organizationNeutralPath("/folders/abc123/usage")).toBe("/folders")
   expect(organizationNeutralPath("/chat/abc123")).toBe("/chat")
+  expect(organizationNeutralPath("/new")).toBe("/chat")
   // Every other page reads the same in the next organization.
   expect(organizationNeutralPath("/tables")).toBe("/tables")
   expect(organizationNeutralPath("/integrations/personal/")).toBe(

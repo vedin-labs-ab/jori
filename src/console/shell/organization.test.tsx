@@ -155,6 +155,7 @@ test("an organization in onboarding offers only the way to another", async () =>
 })
 
 test("a new organization shows none as chosen, and going back needs no activating", async () => {
+  window.history.replaceState(null, "", "/new")
   render(<SidebarOrganizationSwitcher onboarding="new" />)
 
   // The organization still active behind the new one is one to go back to,
@@ -184,6 +185,31 @@ test("an organization left mid-onboarding says so, and only that one does", asyn
   expect(
     screen.getByRole("menuitem", { name: /test/ }).textContent
   ).not.toContain("Finish setup")
+})
+
+test("a finished switch puts the menu away and leaves it usable", async () => {
+  auth.activateOrganization.mockResolvedValue(undefined)
+  render(<SidebarOrganizationSwitcher />)
+  const open = () =>
+    fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
+      button: 0,
+      ctrlKey: false,
+    })
+
+  open()
+  fireEvent.click(await screen.findByRole("menuitem", { name: /test/ }))
+
+  // The console stays mounted across a switch, this menu with it, so
+  // nothing but the switch ending can clear its state.
+  await waitFor(() => expect(screen.queryByRole("menu")).toBeNull())
+
+  open()
+  expect(
+    (await screen.findByRole("menuitem", { name: /test/ })).getAttribute(
+      "aria-disabled"
+    )
+  ).toBeNull()
+  expect(screen.queryByRole("status", { name: /Switching/ })).toBeNull()
 })
 
 test("restores the switcher after a failed organization change", async () => {

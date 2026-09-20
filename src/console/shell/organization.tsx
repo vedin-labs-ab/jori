@@ -58,17 +58,15 @@ export function SidebarOrganizationSwitcher({
       (organization) => organization.id !== shown?.id
     ) ?? []
 
-  // A new organization is left for the console, whichever organization is
-  // picked; the one still active needs no activating to go back to.
+  // The page goes first, so the next organization never opens on a page
+  // about something of this one's. The one still active behind a new
+  // organization needs no activating to go back to.
   async function select(organizationId: string) {
-    // The page goes first, so the next organization never opens on a page
-    // about something of this one's.
-    const path = organizationNeutralPath(window.location.pathname)
+    const from = window.location.pathname.replace(/\/$/, "")
+    const to = organizationNeutralPath(from)
 
-    if (onboarding === "new") {
-      await navigate({ to: "/chat" })
-    } else if (path !== window.location.pathname.replace(/\/$/, "")) {
-      await navigate({ to: path })
+    if (to !== from) {
+      await navigate({ to })
     }
 
     if (organizationId !== active.data?.id) {
@@ -136,11 +134,15 @@ function OrganizationMenu({
   async function switchOrganization(organizationId: string) {
     setSwitchingId(organizationId)
 
+    // The console stays where it is across a switch, this menu with it, so
+    // the switch is put away when it ends, however it ends.
     try {
       await onSelect(organizationId)
+      setOpen(false)
     } catch {
-      setSwitchingId(null)
       toast.error("Couldn't switch organization. Try again.")
+    } finally {
+      setSwitchingId(null)
     }
   }
 

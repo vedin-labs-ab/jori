@@ -162,11 +162,16 @@ export function isHeaderless(pathname: string) {
 }
 
 /** Where a page leads once its organization is left behind. A page about
- *  one thing, a table, a folder, a conversation, belongs to the
- *  organization that holds it, so it gives way to the list it came from;
+ *  one thing, a table, a folder, a conversation, a new organization,
+ *  belongs to the organization it is about, so it gives way to a list;
  *  every other page reads the same in the next organization. */
 export function organizationNeutralPath(pathname: string) {
   const path = pathname.replace(/\/$/, "")
+
+  // A new organization's page is about the one being made.
+  if (path === "/new") {
+    return "/chat"
+  }
 
   if (!isMaterialPage(path)) {
     return path

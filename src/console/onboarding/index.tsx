@@ -1,6 +1,6 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router"
 import { useAction, useMutation, useQuery } from "convex/react"
-import { type ReactNode, useRef } from "react"
+import { type ReactNode, useRef, useState } from "react"
 import { ChangeOrganizationLogo } from "@/components/auth/organization/change-organization-logo"
 import { UserInvitations } from "@/components/auth/organization/user-invitations"
 import { UserButton } from "@/components/auth/user/user-button"
@@ -21,9 +21,12 @@ import { OnboardingFrame } from "./frame"
 
 /** Onboarding bound to the session and Convex: for the organization named,
  *  which has not been through it, or with none named, for one about to be
- *  created. It is one mounted thing from the first step to the last: naming
- *  the organization creates and activates it in place, and the same flow
- *  carries on about it. */
+ *  created.
+ *
+ *  A flow is about one organization. It stays mounted while the one it
+ *  creates comes into being, naming it, activating it in place, and
+ *  carrying on about it; pointed at any other organization, it starts over
+ *  from where that one stands. */
 export function Onboarding({
   isPrepared,
   organizationId,
@@ -33,45 +36,78 @@ export function Onboarding({
   isPrepared: boolean
   organizationId?: string
 }) {
-  const navigate = useNavigate()
-  const session = useSession()
-  const active = useActiveOrganization()
   const organizations = useListOrganizations()
-  const { discovery, profile, ...actions } = useOnboarding(
-    isPrepared ? organizationId : undefined
-  )
+  const [created, setCreated] = useState<string>()
   const alone =
     (organizations.data ?? []).filter(({ id }) => id !== organizationId)
       .length === 0
-  // A flow that opens on an existing organization waits to know where that
-  // one stands; one already under way is never taken off the screen.
-  const started = useRef(false)
-  started.current ||=
-    organizationId === undefined ||
-    (discovery !== undefined && profile !== undefined)
+  const isOwn = organizationId === undefined || organizationId === created
 
   return (
     <OnboardingChrome alone={alone} fresh={organizationId === undefined}>
-      {started.current ? (
-        <OnboardingFlow
-          discovery={discovery ?? null}
-          invitations={alone ? <UserInvitations /> : undefined}
-          logo={<ChangeOrganizationLogo />}
-          name={session.data?.user.name.trim().split(/\s+/)[0] || undefined}
-          onApprove={actions.approve}
-          onCancel={alone ? undefined : () => void navigate({ to: "/chat" })}
-          onCreate={createOrganization}
-          onDeclareTimezone={actions.declareTimezone}
-          onDiscover={actions.discover}
-          onFinish={actions.finish}
-          organization={
-            organizationId === undefined ? undefined : active.data?.name
-          }
-          proposal={profile?.proposed}
-          timezone={profile?.declared?.timezone}
-        />
-      ) : null}
+      <OnboardingSession
+        alone={alone}
+        key={isOwn ? "own" : organizationId}
+        onCreate={async (name) => {
+          const id = await createOrganization(name)
+
+          // Known before it is active, so the flow is still this one when
+          // the organization reads as the active one.
+          setCreated(id)
+          await activateOrganization(id)
+        }}
+        isPrepared={isPrepared}
+        organizationId={organizationId}
+      />
     </OnboardingChrome>
+  )
+}
+
+/** One flow, with what it reads and writes for its organization. */
+function OnboardingSession({
+  alone,
+  isPrepared,
+  onCreate,
+  organizationId,
+}: {
+  alone: boolean
+  isPrepared: boolean
+  onCreate: (name: string) => Promise<void>
+  organizationId: string | undefined
+}) {
+  const navigate = useNavigate()
+  const session = useSession()
+  const active = useActiveOrganization()
+  const { discovery, profile, ...actions } = useOnboarding(
+    isPrepared ? organizationId : undefined
+  )
+  // A flow that opens on an existing organization waits to know where that
+  // one stands; one already under way is never taken off the screen.
+  const started = useRef(organizationId === undefined)
+  started.current ||= discovery !== undefined && profile !== undefined
+
+  if (!started.current) {
+    return null
+  }
+
+  return (
+    <OnboardingFlow
+      discovery={discovery ?? null}
+      invitations={alone ? <UserInvitations /> : undefined}
+      logo={<ChangeOrganizationLogo />}
+      name={session.data?.user.name.trim().split(/\s+/)[0] || undefined}
+      onApprove={actions.approve}
+      onCancel={alone ? undefined : () => void navigate({ to: "/chat" })}
+      onCreate={onCreate}
+      onDeclareTimezone={actions.declareTimezone}
+      onDiscover={actions.discover}
+      onFinish={actions.finish}
+      organization={
+        organizationId === undefined ? undefined : active.data?.name
+      }
+      proposal={profile?.proposed}
+      timezone={profile?.declared?.timezone}
+    />
   )
 }
 
@@ -163,8 +199,7 @@ function useOnboarding(organizationId: string | undefined) {
   }
 }
 
-/** Creates the organization and activates it, with onboarding on screen
- *  throughout. */
+/** Creates the organization, answering with its id. */
 async function createOrganization(name: string) {
   // Better Auth requires a unique slug; Jori never shows one, so it is
   // generated rather than asked for.
@@ -177,5 +212,5 @@ async function createOrganization(name: string) {
     throw new Error(error?.message ?? "Couldn't create the organization.")
   }
 
-  await activateOrganization(data.id)
+  return data.id
 }

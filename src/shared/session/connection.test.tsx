@@ -167,6 +167,31 @@ test("an organization is entered before its token is: member prepared, page move
   expect(unmount).not.toHaveBeenCalled()
 })
 
+test("a switch overtaken by another still settles, and the later organization is the one entered", async () => {
+  state.token.mockResolvedValue(tokenFor("first"))
+  await openWorkspace()
+  vi.spyOn(authQueryClient, "refetchQueries").mockResolvedValue(undefined)
+  // Convex drops a setAuth that a newer one overtakes and never reports on
+  // it, so nothing here may wait on that report.
+  state.setAuth.mockImplementation((fetchToken) => {
+    void fetchToken({ forceRefreshToken: false })
+  })
+  state.token
+    .mockResolvedValueOnce(tokenFor("second"))
+    .mockResolvedValueOnce(tokenFor("third"))
+
+  await act(async () => {
+    const both = Promise.all([
+      activateOrganization("second"),
+      activateOrganization("third"),
+    ])
+    await vi.advanceTimersByTimeAsync(0)
+    await both
+  })
+
+  expect(state.prepare).toHaveBeenLastCalledWith(expect.any(String), "third")
+})
+
 test("a member who cannot be prepared closes the console without closing the session", async () => {
   state.prepare.mockRejectedValueOnce(new Error("Identity transaction failed"))
   state.token.mockResolvedValue(tokenFor("first"))

@@ -46,6 +46,8 @@ type Session = {
 let session: Session | undefined
 let cached: string | null = null
 let pending: Promise<string | null> | undefined
+/** Counts the mints, so one that a newer mint has overtaken changes nothing. */
+let mints = 0
 /** The organization the socket's token names; null before there is one. */
 let entered: string | undefined | null = null
 
@@ -58,16 +60,31 @@ async function fetchToken({
     return cached
   }
 
-  pending ??= mintAndEnter().finally(() => {
-    pending = undefined
-  })
-
-  return await pending
+  return await (pending ?? mint())
 }
 
-async function mintAndEnter() {
+/** Starts a mint, which every caller shares until it lands. */
+function mint() {
+  mints += 1
+  const minting = mintAndEnter(mints).finally(() => {
+    if (pending === minting) {
+      pending = undefined
+    }
+  })
+  pending = minting
+
+  return minting
+}
+
+async function mintAndEnter(mine: number) {
   const current = session
   const token = (await current?.mint().catch(() => null)) ?? null
+
+  // Overtaken: the newer mint is of the session as it now stands, and it
+  // decides what is cached and which organization is entered.
+  if (mine !== mints) {
+    return token
+  }
 
   if (current !== undefined && token !== null) {
     await enter(current, token)
@@ -140,20 +157,23 @@ export function disconnectConvex() {
 }
 
 /** Swaps the token for one minted from the session as it is now, resolving
- *  once Convex has accepted it. This is how an organization is activated:
- *  the session changes, and the token that follows brings everything else. */
-export function refreshConvexToken() {
+ *  once the organization it names has been entered. This is how an
+ *  organization is activated: the session changes, and the token that
+ *  follows brings everything else.
+ *
+ *  It always mints anew, since a mint already under way is of the session
+ *  as it was. And it answers from its own mint, not from what Convex later
+ *  reports: Convex drops a `setAuth` that a newer one overtakes without a
+ *  word, and a promise tied to that report would never settle. */
+export async function refreshConvexToken() {
   cached = null
+  const minting = mint()
 
-  return new Promise<void>((resolve, reject) => {
-    convex.setAuth(fetchToken, (isAuthenticated) => {
-      session?.onChange(isAuthenticated)
+  convex.setAuth(fetchToken, (isAuthenticated) =>
+    session?.onChange(isAuthenticated)
+  )
 
-      if (isAuthenticated) {
-        resolve()
-      } else {
-        reject(new Error("Convex refused the refreshed session."))
-      }
-    })
-  })
+  if ((await minting) === null) {
+    throw new Error("The session could not be refreshed.")
+  }
 }
