@@ -7,7 +7,11 @@ import { SectionGroup } from "@/components/ui/section"
 import { Skeleton } from "@/components/ui/skeleton"
 import { api } from "../../../convex/_generated/api"
 import { type BillingAccount } from "./actions"
-import { billingReturnToasts, billingSearch } from "./actions/return"
+import {
+  billingReturnToasts,
+  clearBillingReturn,
+  readBillingReturn,
+} from "./actions/return"
 import { Activity } from "./activity"
 import { AutoTopUpRow } from "./autotopup"
 import { StorageSettings } from "./storage"
@@ -79,10 +83,7 @@ function StateAlert({ account }: { account: BillingAccount | null }) {
 
 function useBillingReturnToasts() {
   useEffect(() => {
-    const url = new URL(window.location.href)
-    const { billing: status } = billingSearch({
-      billing: url.searchParams.get("billing"),
-    })
+    const status = readBillingReturn()
 
     if (status === undefined) {
       return
@@ -97,7 +98,6 @@ function useBillingReturnToasts() {
       toast.info(message, { id: `billing-${status}` })
     }
 
-    url.searchParams.delete("billing")
-    window.history.replaceState(window.history.state, "", url)
+    clearBillingReturn()
   }, [])
 }

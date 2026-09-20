@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
-import { billingSearch } from "@/console/billing/actions/return"
+import { readBillingReturn } from "@/console/billing/actions/return"
 import { readOnboarded } from "@/console/onboarding/state"
 import { BrandIcon } from "@/shared/brand"
 import { RevealArrow } from "@/shared/console/dot"
@@ -27,14 +27,6 @@ import {
   useListOrganizations,
 } from "@/shared/session/auth"
 import { OrganizationDialog } from "./settings"
-
-function billingSettingsRequested() {
-  return (
-    billingSearch({
-      billing: new URL(window.location.href).searchParams.get("billing"),
-    }).billing !== undefined
-  )
-}
 
 /** The organization at the sidebar's head, and the menu it opens: manage
  *  this one, switch to another, or start a new one. Onboarding leaves only
@@ -50,7 +42,8 @@ export function SidebarOrganizationSwitcher({
   const navigate = useNavigate()
   const active = useActiveOrganization()
   const organizations = useListOrganizations()
-  const [billingRequested] = useState(billingSettingsRequested)
+  // A return from one of Polar's pages reopens Billing settings.
+  const [billingRequested] = useState(() => readBillingReturn() !== undefined)
   const [managing, setManaging] = useState(billingRequested)
   const shown = onboarding === "new" ? undefined : (active.data ?? undefined)
   const others =

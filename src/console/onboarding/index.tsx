@@ -81,10 +81,10 @@ function OnboardingSession({
   const navigate = useNavigate()
   const session = useSession()
   const active = useActiveOrganization()
-  const { billing, discovery, isLeaving, profile, ...actions } = useOnboarding(
+  const { billing, discovery, profile, ...actions } = useOnboarding(
     isPrepared ? organizationId : undefined
   )
-  useOnboardingAddress(organizationId, isLeaving)
+  useOnboardingAddress(organizationId)
   const checkout = useCheckoutReturn()
   // A flow that opens on an existing organization waits to know where that
   // one stands; one already under way is never taken off the screen.
@@ -173,8 +173,6 @@ function useOnboarding(organizationId: string | undefined) {
   const startPlanCheckout = usePlanCheckout()
   const navigate = useNavigate()
   const active = useActiveOrganization()
-  const [isLeaving, setIsLeaving] = useState(false)
-
   const onboarded = () => {
     if (organizationId === undefined) {
       throw new Error("No organization is being onboarded.")
@@ -184,7 +182,6 @@ function useOnboarding(organizationId: string | undefined) {
   }
 
   return {
-    isLeaving,
     billing: useQuery(api.billing.console.overview, scope),
     discovery: useQuery(api.organization.discovery.get, scope),
     profile: useQuery(api.organization.profile.get, scope),
@@ -207,18 +204,14 @@ function useOnboarding(organizationId: string | undefined) {
     },
     /** Marks the organization onboarded and leaves for the console. The
      *  page is changed first and the organization read again after, so the
-     *  closing step stays up until the console takes its place, once. The
-     *  address is let go of first, or it would be led back here. */
+     *  closing step stays up until the console takes its place, once. */
     finish: async (destination: "/chat" | "/integrations" = "/chat") => {
-      setIsLeaving(true)
-
       try {
         await complete({ organizationId: onboarded() })
         await navigate({ replace: true, to: destination })
         await active.refetch()
       } catch (caught) {
         showErrorToast(caught, "Couldn't finish setting up. Try again.")
-        setIsLeaving(false)
       }
     },
   }

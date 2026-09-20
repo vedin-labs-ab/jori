@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
 import { type BillingOverview } from "../billing/actions"
-import { billingSearch } from "../billing/actions/return"
+import {
+  clearBillingReturn,
+  readBillingReturn,
+} from "../billing/actions/return"
 
 /** Where the plan stands. Until billing is read it counts as still to be
  *  bought; the flow moves on by itself should it turn out otherwise. */
@@ -21,9 +24,7 @@ export function planOf(billing: BillingOverview | undefined, paid: boolean) {
  *  the console takes it for a request to open Billing settings. */
 export function useCheckoutReturn() {
   const [checkout] = useState(() => {
-    const { billing } = billingSearch({
-      billing: new URL(window.location.href).searchParams.get("billing"),
-    })
+    const billing = readBillingReturn()
 
     return billing === "subscribed" || billing === "canceled"
       ? billing
@@ -31,14 +32,9 @@ export function useCheckoutReturn() {
   })
 
   useEffect(() => {
-    if (checkout === undefined) {
-      return
+    if (checkout !== undefined) {
+      clearBillingReturn()
     }
-
-    const url = new URL(window.location.href)
-
-    url.searchParams.delete("billing")
-    window.history.replaceState(window.history.state, "", url)
   }, [checkout])
 
   return checkout
