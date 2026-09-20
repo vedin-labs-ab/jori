@@ -1,4 +1,4 @@
-import { type MessageContext } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { createFileRoute, type SearchSchemaInput } from "@tanstack/react-router"
 import { billingSearch } from "@/console/billing/actions/return"
 import { ChatHomePage } from "@/console/chat/home"

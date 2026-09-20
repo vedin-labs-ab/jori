@@ -1,8 +1,6 @@
-import {
-  type ChoicesAnswer,
-  type MessageContext,
-} from "@contracts/replies/answers"
+import { type ChoicesAnswer } from "@contracts/replies/answers"
 import { type ReplyPart } from "@contracts/replies/parts"
+import { type MessageContext } from "@contracts/replies/references"
 import { type Visibility } from "@contracts/visibility"
 
 // What the chat views read. The console maps its rows to these and the

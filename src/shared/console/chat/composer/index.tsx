@@ -1,6 +1,6 @@
 import { type ModelSlug } from "@contracts/models/catalog"
 import { type ModelSelection } from "@contracts/models/selection"
-import { type MessageContext } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import {
   type FormEvent,
   type MouseEvent,

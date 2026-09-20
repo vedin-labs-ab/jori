@@ -1,4 +1,4 @@
-import { type MessageContext } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { useQuery } from "convex/react"
 import { useChatLocation } from "@/shared/console/chat/draft"
 import { api } from "../../../../convex/_generated/api"

@@ -1,7 +1,5 @@
-import {
-  type ChoicesAnswer,
-  type MessageContext,
-} from "@contracts/replies/answers"
+import { type ChoicesAnswer } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { type JsonSchemaObject } from "@contracts/schema/validate"
 import { type ChatRun } from "@/shared/console/chat/types"
 import { type FiledResourceType } from "@/shared/console/folders/types"

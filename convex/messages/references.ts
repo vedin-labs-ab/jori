@@ -1,11 +1,13 @@
 import { v } from "convex/values"
 import {
-  type MessageContext,
   readMessageContext,
   readMessageReferences,
 } from "../../contracts/replies/answers"
 import { type ReferenceTarget } from "../../contracts/replies/parts"
-import { referenceKinds } from "../../contracts/replies/references"
+import {
+  type MessageContext,
+  referenceKinds,
+} from "../../contracts/replies/references"
 import { type Id } from "../_generated/dataModel"
 import { query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"

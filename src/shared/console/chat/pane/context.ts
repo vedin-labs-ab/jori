@@ -1,6 +1,8 @@
-import { type MessageContext } from "@contracts/replies/answers"
-import { type ReferenceKind } from "@contracts/replies/parts"
-import { referenceKinds } from "@contracts/replies/references"
+import {
+  type MessageContext,
+  type ReferenceKind,
+  referenceKinds,
+} from "@contracts/replies/references"
 
 // A chat opened from a resource's page carries that resource as its
 // context, in the search: `/chat?context=<kind>:<id>`. The route's search

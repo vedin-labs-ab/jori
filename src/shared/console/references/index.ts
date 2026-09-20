@@ -1,4 +1,4 @@
-import { type ReferenceKind } from "@contracts/replies/parts"
+import { type ReferenceKind } from "@contracts/replies/references"
 
 /** What a reference part or a message's context points at. */
 export type ReferenceTarget = {

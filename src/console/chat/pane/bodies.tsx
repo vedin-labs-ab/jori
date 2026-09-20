@@ -1,4 +1,4 @@
-import { type ReferenceKind } from "@contracts/replies/parts"
+import { type ReferenceKind } from "@contracts/replies/references"
 import { type ComponentType, lazy, type ReactNode, Suspense } from "react"
 import { type OpenTarget } from "@/shared/console/chat/pane/tabs"
 import { ConsoleListLoading } from "@/shared/console/list/loading"

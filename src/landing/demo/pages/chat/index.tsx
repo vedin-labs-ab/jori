@@ -1,6 +1,6 @@
 import { modelSlugs } from "@contracts/models/catalog"
 import { type ModelSelection } from "@contracts/models/selection"
-import { type MessageContext } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { useCallback, useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"
 import { TypedPlaceholder } from "@/shared/console/chat/composer/placeholder"

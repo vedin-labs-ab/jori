@@ -1,5 +1,5 @@
 import { type Infer } from "convex/values"
-import { type MessageContext } from "../../../contracts/replies/answers"
+import { type MessageContext } from "../../../contracts/replies/references"
 import { type Id } from "../../_generated/dataModel"
 import { type MutationCtx } from "../../_generated/server"
 import { mark } from "../../discovery/sync/intent"

@@ -3,7 +3,7 @@ import {
   type MentionResource,
   mentionsPerKind,
 } from "../../contracts/replies/answers"
-import { type ReferenceKind } from "../../contracts/replies/parts"
+import { type ReferenceKind } from "../../contracts/replies/references"
 import { type Doc, type Id } from "../_generated/dataModel"
 import { type QueryCtx, query } from "../_generated/server"
 import { checkOrganizationAccess } from "../access"

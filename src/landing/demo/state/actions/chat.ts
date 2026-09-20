@@ -1,7 +1,5 @@
-import {
-  type ChoicesAnswer,
-  type MessageContext,
-} from "@contracts/replies/answers"
+import { type ChoicesAnswer } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { type Dispatch } from "react"
 import { demoReply } from "../../fixtures/chat"
 import { type DemoMint } from "../../fixtures/ids"

@@ -3,10 +3,8 @@ import {
   integrationLabel,
   type ToolSurface,
 } from "@contracts/integrations"
-import {
-  type MentionResource,
-  type MessageContext,
-} from "@contracts/replies/answers"
+import { type MentionResource } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { targetKey } from "../references"
 import { referencePresentation } from "../references/presentation"
 import { type ActiveMention } from "./active"

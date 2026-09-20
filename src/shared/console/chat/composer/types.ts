@@ -1,4 +1,4 @@
-import { type MessageContext } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { type Editor } from "@tiptap/react"
 import { type Dispatch, type SetStateAction } from "react"
 import { type MentionCatalog } from "../../mentions/scan"

@@ -1,13 +1,14 @@
 import { isRecord, readStringArray } from "../json"
-import { type ReferenceKind } from "./parts"
-import { referenceKinds } from "./references"
+import {
+  type MessageContext,
+  type ReferenceKind,
+  referenceKinds,
+} from "./references"
 
 // What a person's message can carry besides its text: the resource or
 // folder the conversation was opened about, the resources its text
 // mentions, and the questions it answers. The run reads the text; these
 // let the console render intent.
-
-export type MessageContext = { kind: ReferenceKind; id: string }
 
 /** A resource a message can mention, named for the composer's picker. */
 export type MentionResource = MessageContext & { name: string }

@@ -1,4 +1,4 @@
-import { type MessageContext } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { type JSONContent } from "@tiptap/core"
 import {
   mentionNodeName,

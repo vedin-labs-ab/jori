@@ -2,7 +2,7 @@ import {
   defaultSelection,
   type ModelSelection,
 } from "@contracts/models/selection"
-import { type MessageContext } from "@contracts/replies/answers"
+import { type MessageContext } from "@contracts/replies/references"
 import { type GenericId } from "convex/values"
 import { useMemo, useState } from "react"
 import { ChatComposer } from "@/shared/console/chat/composer"

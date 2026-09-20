@@ -1,5 +1,5 @@
 import { mentionsPerKind } from "@contracts/replies/answers"
-import { type ReferenceKind } from "@contracts/replies/parts"
+import { type ReferenceKind } from "@contracts/replies/references"
 import { ArrowLeft, Plus } from "lucide-react"
 import { useState } from "react"
 import {
