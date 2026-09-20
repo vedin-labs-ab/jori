@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { Building2, ShieldAlert } from "lucide-react"
-import { Fragment, lazy, type ReactNode, Suspense, useEffect } from "react"
+import { Fragment, type ReactNode, Suspense, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
@@ -14,7 +14,7 @@ import {
 } from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
 import { IntegrationCallbackToasts } from "./integrations/callback"
-import { loadOnboarding } from "./onboarding/load"
+import { onboardingComponent } from "./onboarding/load"
 import { readOnboarded } from "./onboarding/state"
 import { OrganizationContext, useOrganizationId } from "./organization/context"
 import { ConsoleShell } from "./shell"
@@ -211,10 +211,6 @@ function OrganizationConsole({
   return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content
 }
 
-const Onboarding = lazy(async () => ({
-  default: (await loadOnboarding()).Onboarding,
-}))
-
 function isResolving(
   convex: ReturnType<typeof useConvexSession>,
   active: ReturnType<typeof useActiveOrganization>,
@@ -238,6 +234,7 @@ function FirstRun({
     (useListOrganizations().data?.length ?? 0) > 0 ||
     organizationId !== undefined
   const gate = useQuery(api.access.gate.status, hasOrganization ? "skip" : {})
+  const [Onboarding] = useState(onboardingComponent)
 
   if (!hasOrganization && gate === undefined) {
     return <FullscreenSkeletonLoader />
