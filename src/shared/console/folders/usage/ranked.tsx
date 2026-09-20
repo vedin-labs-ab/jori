@@ -124,11 +124,13 @@ function RankedRow({
   caption,
   entry,
   leader,
+  label,
   total,
 }: {
   caption: ReactNode
   entry: RankedEntry
   leader: number
+  label: string
   total: number
 }) {
   const cost = usageCostPerRun(entry.micros, entry.ended)
@@ -154,7 +156,11 @@ function RankedRow({
       <TableCell>
         <div className="flex items-center justify-end gap-2 tabular-nums">
           <span>{usagePercent(entry.micros, total) ?? "—"}</span>
-          <Progress className="w-16" value={usageShare(entry.micros, leader)} />
+          <Progress
+            aria-label={`${label} spend relative to the largest row`}
+            className="w-16"
+            value={usageShare(entry.micros, leader)}
+          />
         </div>
       </TableCell>
     </TableRow>
@@ -195,6 +201,7 @@ export function UsageContributors({
           entry={entry}
           key={entry.id ?? entry.label}
           leader={leader}
+          label={entry.label}
           total={total}
         />
       ))}
@@ -242,6 +249,7 @@ export function UsageFolders({
           entry={segment}
           key={segment.key}
           leader={leader}
+          label={segment.label}
           total={total}
         />
       ))}

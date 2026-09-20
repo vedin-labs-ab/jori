@@ -81,6 +81,13 @@ test("a source row reads its runs, its money, and its share of the window", () =
     "18%",
   ])
   expect(screen.getByRole("link", { name: "Morning digest" })).toBeDefined()
+  expect(
+    screen
+      .getByRole("progressbar", {
+        name: "Morning digest spend relative to the largest row",
+      })
+      .getAttribute("aria-valuenow")
+  ).toBe("100")
   expect(screen.getByText("2").className).toContain("text-destructive")
 })
 
