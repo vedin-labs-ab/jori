@@ -5,22 +5,23 @@ import { AccessFields } from "./access"
 
 afterEach(cleanup)
 
-test("marks personal additional access invalid for organization sharing", () => {
+test("marks personal access invalid for organization sharing", () => {
   render(
     <AccessFields
-      additionalSurfaces={[{ integration: "gmail", tools: ["gmail_search"] }]}
       available={[]}
-      onAdditionalSurfaceAdd={vi.fn()}
-      onAdditionalSurfaceChange={vi.fn()}
-      onAdditionalSurfaceRemove={vi.fn()}
+      named={new Set()}
+      onSurfaceAdd={vi.fn()}
+      onSurfaceChange={vi.fn()}
+      onSurfaceRemove={vi.fn()}
       permissions={undefined}
       scope="organization"
+      surfaces={[{ integration: "gmail", tools: ["gmail_search"] }]}
     />
   )
 
   expect(
     screen
-      .getByRole("button", { name: /Gmail additional access/ })
+      .getByRole("button", { name: /Gmail access:/ })
       .getAttribute("aria-invalid")
   ).toBe("true")
   expect(screen.getByTitle("Gmail requires Personal sharing.")).toBeDefined()

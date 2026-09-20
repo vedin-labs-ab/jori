@@ -62,6 +62,7 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
     additionalSurfaces,
     available,
     instructionsError,
+    named,
     nameError,
   } = useFieldState(props)
 
@@ -84,13 +85,14 @@ export function JobEditorFields(props: JobEditorFieldsProps) {
         values={values}
       />
       <AccessFields
-        additionalSurfaces={additionalSurfaces}
         available={available}
-        onAdditionalSurfaceAdd={actions.addAdditionalSurface}
-        onAdditionalSurfaceChange={actions.updateAdditionalSurface}
-        onAdditionalSurfaceRemove={actions.removeAdditionalSurface}
+        named={named}
+        onSurfaceAdd={actions.addSurface}
+        onSurfaceChange={actions.updateSurface}
+        onSurfaceRemove={actions.removeSurface}
         permissions={props.permissions}
         scope={values.scope}
+        surfaces={values.surfaces}
       />
       <JobTiming
         eventFields={props.eventFields}
@@ -151,6 +153,16 @@ function useFieldState({
             (surface) => surface.integration === integration
           )
       ),
+    named: new Set(
+      values.surfaces
+        .map((surface) => surface.integration)
+        .filter(
+          (integration) =>
+            !additionalSurfaces.some(
+              (surface) => surface.integration === integration
+            )
+        )
+    ),
     instructionsError:
       scopeConflict?.message ??
       readJobInstructionsError(error, values.instructions),
@@ -168,7 +180,7 @@ function createFieldActions(
   }
 
   return {
-    addAdditionalSurface: (integration: JobSurfaceIntegration) =>
+    addSurface: (integration: JobSurfaceIntegration) =>
       updateValues({
         surfaces: [
           ...values.surfaces,
@@ -178,7 +190,7 @@ function createFieldActions(
           },
         ],
       }),
-    removeAdditionalSurface: (
+    removeSurface: (
       integration: JobFormValues["surfaces"][number]["integration"]
     ) =>
       updateValues({
@@ -186,7 +198,7 @@ function createFieldActions(
           (surface) => surface.integration !== integration
         ),
       }),
-    updateAdditionalSurface: (nextSurface: JobFormValues["surfaces"][number]) =>
+    updateSurface: (nextSurface: JobFormValues["surfaces"][number]) =>
       updateValues({
         surfaces: values.surfaces.map((surface) =>
           surface.integration === nextSurface.integration

@@ -20,39 +20,51 @@ import {
 import { type JobPolicyPermissions } from "../../access/policy"
 import { JobSurfaceToolsDialog } from "../instructions/access/tools"
 
-/** Access a job holds that its instructions do not name with an `@`: what
- *  it holds that way, and a menu to add what it does not hold at all. */
+/** Everything a job can use, in one place to scan: what its instructions
+ *  name with an `@` and what was added here. Either kind opens its tools;
+ *  only what was added here is removed here, since a named one goes with
+ *  its mention. */
 export function AccessFields({
-  additionalSurfaces,
   available,
-  onAdditionalSurfaceAdd,
-  onAdditionalSurfaceChange,
-  onAdditionalSurfaceRemove,
+  named,
+  onSurfaceAdd,
+  onSurfaceChange,
+  onSurfaceRemove,
   permissions,
   scope,
+  surfaces,
 }: {
-  additionalSurfaces: JobSurfaceFormValue[]
   /** The integrations the job holds no access to yet. */
   available: readonly JobSurfaceIntegration[]
-  onAdditionalSurfaceAdd: (integration: JobSurfaceIntegration) => void
-  onAdditionalSurfaceChange: (surface: JobSurfaceFormValue) => void
-  onAdditionalSurfaceRemove: (integration: JobSurfaceIntegration) => void
+  /** The integrations the instructions name. */
+  named: ReadonlySet<JobSurfaceIntegration>
+  onSurfaceAdd: (integration: JobSurfaceIntegration) => void
+  onSurfaceChange: (surface: JobSurfaceFormValue) => void
+  onSurfaceRemove: (integration: JobSurfaceIntegration) => void
   permissions: JobPolicyPermissions
   scope: JobScope
+  surfaces: JobSurfaceFormValue[]
 }) {
   return (
     <div className="grid gap-1.5">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="font-normal text-xs">Additional access</Label>
-        <AddAccess available={available} onAdd={onAdditionalSurfaceAdd} />
+      <div className="flex items-start justify-between gap-2">
+        <div className="grid gap-1">
+          <Label>Access</Label>
+          <p className="text-muted-foreground text-xs">
+            What this job can use. Type @ in the instructions, or add it here.
+          </p>
+        </div>
+        <AddAccess available={available} onAdd={onSurfaceAdd} />
       </div>
-      {additionalSurfaces.length === 0 ? null : (
+      {surfaces.length === 0 ? null : (
         <div className="flex flex-wrap gap-1.5">
-          {additionalSurfaces.map((surface) => (
-            <AdditionalSurface
+          {surfaces.map((surface) => (
+            <AccessSurface
               key={surface.integration}
-              onChange={onAdditionalSurfaceChange}
-              onRemove={onAdditionalSurfaceRemove}
+              onChange={onSurfaceChange}
+              onRemove={
+                named.has(surface.integration) ? undefined : onSurfaceRemove
+              }
               permissions={permissions}
               scope={scope}
               surface={surface}
@@ -99,7 +111,7 @@ function AddAccess({
   )
 }
 
-function AdditionalSurface({
+function AccessSurface({
   onChange,
   onRemove,
   permissions,
@@ -107,7 +119,8 @@ function AdditionalSurface({
   surface,
 }: {
   onChange: (surface: JobSurfaceFormValue) => void
-  onRemove: (integration: JobSurfaceIntegration) => void
+  /** Left out for access the instructions name, which goes with its mention. */
+  onRemove?: (integration: JobSurfaceIntegration) => void
   permissions: JobPolicyPermissions
   scope: JobScope
   surface: JobSurfaceFormValue
@@ -118,6 +131,9 @@ function AdditionalSurface({
     surface.tools.length === 1 ? "" : "s"
   }`
   const issue = getJobSurfaceScopeIssue(scope, surface.integration)
+  const invalid =
+    issue !== undefined &&
+    "border-destructive/60 bg-destructive/5 text-destructive"
 
   return (
     <div
@@ -125,15 +141,20 @@ function AdditionalSurface({
         "inline-flex rounded-md",
         issue !== undefined && "ring-2 ring-destructive/20"
       )}
-      title={issue}
+      title={
+        issue ??
+        (onRemove === undefined
+          ? "Named in the instructions. Remove it there."
+          : undefined)
+      }
     >
       <Button
         aria-invalid={issue === undefined ? undefined : true}
-        aria-label={`${label} additional access: ${toolCount} enabled. Configure tools.`}
+        aria-label={`${label} access: ${toolCount} enabled. Configure tools.`}
         className={cn(
-          "gap-1.5 rounded-r-none",
-          issue !== undefined &&
-            "border-destructive/60 bg-destructive/5 text-destructive"
+          "gap-1.5",
+          onRemove !== undefined && "rounded-r-none",
+          invalid
         )}
         onClick={() => setOpen(true)}
         type="button"
@@ -145,21 +166,19 @@ function AdditionalSurface({
           {surface.tools.length}
         </span>
       </Button>
-      <Button
-        aria-invalid={issue === undefined ? undefined : true}
-        aria-label={`Remove additional ${label} access`}
-        className={cn(
-          "rounded-l-none border-l-0",
-          issue !== undefined &&
-            "border-destructive/60 bg-destructive/5 text-destructive"
-        )}
-        onClick={() => onRemove(surface.integration)}
-        size="icon"
-        type="button"
-        variant="outline"
-      >
-        <X aria-hidden="true" className="size-3" />
-      </Button>
+      {onRemove === undefined ? null : (
+        <Button
+          aria-invalid={issue === undefined ? undefined : true}
+          aria-label={`Remove ${label} access`}
+          className={cn("rounded-l-none border-l-0", invalid)}
+          onClick={() => onRemove(surface.integration)}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <X aria-hidden="true" className="size-3" />
+        </Button>
+      )}
       <JobSurfaceToolsDialog
         integration={surface.integration}
         onOpenChange={setOpen}

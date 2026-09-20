@@ -1,4 +1,5 @@
 import { lazy, type ReactNode, Suspense } from "react"
+import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { localTimezone } from "@/shared/console/time"
 import { type JobFormValues } from "../../types"
@@ -22,6 +23,26 @@ export function JobTiming({
   values: JobFormValues
 }) {
   return (
+    <div className="grid gap-2">
+      {/* The word the job's page and the jobs list already use for it. */}
+      <Label id="job-trigger-label">Trigger</Label>
+      <JobTimingTabs
+        eventFields={eventFields}
+        onValuesChange={onValuesChange}
+        showRunPreview={showRunPreview}
+        values={values}
+      />
+    </div>
+  )
+}
+
+function JobTimingTabs({
+  eventFields,
+  showRunPreview,
+  onValuesChange,
+  values,
+}: Parameters<typeof JobTiming>[0]) {
+  return (
     <Tabs
       value={values.type}
       onValueChange={(type) =>
@@ -32,7 +53,7 @@ export function JobTiming({
       }
       className="gap-3"
     >
-      <TabsList className="w-full">
+      <TabsList aria-labelledby="job-trigger-label" className="w-full">
         <TabsTrigger value="cron">Recurring</TabsTrigger>
         <TabsTrigger value="once">One-time</TabsTrigger>
         <TabsTrigger value="event">Event</TabsTrigger>

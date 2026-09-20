@@ -130,7 +130,7 @@ describe("job dialog sharing validation", () => {
 })
 
 describe("job dialog access controls", () => {
-  test("lists no additional access while the instructions name every grant", async () => {
+  test("lists access the instructions name, removable only from its mention", async () => {
     renderJobDialog({
       error: undefined,
       values: {
@@ -143,12 +143,17 @@ describe("job dialog access controls", () => {
 
     expect(await findInstructionsTextbox()).toBeDefined()
     expect(
-      screen.queryByRole("button", { name: /GitHub additional access/ })
+      screen.getByRole("button", {
+        name: "GitHub access: 1 tool enabled. Configure tools.",
+      })
+    ).toBeDefined()
+    expect(
+      screen.queryByRole("button", { name: "Remove GitHub access" })
     ).toBeNull()
     expect(screen.queryByRole("checkbox")).toBeNull()
   })
 
-  test("shows explicit access that has no matching instruction reference", async () => {
+  test("lists access added outside the instructions, removable in place", async () => {
     renderJobDialog({
       error: undefined,
       values: {
@@ -160,14 +165,18 @@ describe("job dialog access controls", () => {
     })
 
     expect(await findInstructionsTextbox()).toBeDefined()
-    expect(screen.getByText("Additional access")).toBeDefined()
     expect(
       screen.getByRole("button", {
-        name: "GitHub additional access: 1 tool enabled. Configure tools.",
+        name: "GitHub access: 1 tool enabled. Configure tools.",
       })
     ).toBeDefined()
+    expect(
+      screen.getByRole("button", { name: "Remove GitHub access" })
+    ).toBeDefined()
   })
+})
 
+describe("job dialog adding access", () => {
   test("adds access the instructions do not name, leaving out what the job holds", async () => {
     const onValuesChange = vi.fn()
     renderJobDialog({
