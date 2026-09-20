@@ -2,10 +2,10 @@ import { contractProperties, pages } from "./events"
 
 type BeforeSend = import("posthog-js").BeforeSendFn
 
-/** Takes a router definition, never a browser pathname. Dynamic parameters
+/** Takes a router fullPath definition, never a browser pathname. Dynamic parameters
  * are discarded along with deeper routes, including invitation tokens. */
-export function analyticsPage(routeId: string | undefined) {
-  const page = routeId === "/" ? "home" : routeId?.split("/")[1]
+export function analyticsPage(routePath: string | undefined) {
+  const page = routePath === "/" ? "home" : routePath?.split("/")[1]
   return pages.find((known) => known === page)
 }
 

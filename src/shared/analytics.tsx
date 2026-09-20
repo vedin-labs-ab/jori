@@ -128,8 +128,8 @@ function EventAnalytics({
 
 function usePageviews(current: RefObject<Current>) {
   const { instance, privacy } = current.current
-  const routeId = useRouterState({
-    select: (state) => state.matches.at(-1)?.routeId,
+  const routePath = useRouterState({
+    select: (state) => state.matches.at(-1)?.fullPath,
   })
   const lastRoute = useRef<string | undefined>(undefined)
   useEffect(() => {
@@ -148,21 +148,21 @@ function usePageviews(current: RefObject<Current>) {
       }
       return
     }
-    const page = analyticsPage(routeId)
+    const page = analyticsPage(routePath)
     if (page === undefined) {
       lastRoute.current = undefined
       return
     }
-    if (lastRoute.current === routeId) {
+    if (lastRoute.current === routePath) {
       return
     }
     // Claimed before the SDK loads, so strict mode's second pass and later
     // renders of the same route do not count the page twice.
-    lastRoute.current = routeId
+    lastRoute.current = routePath
     void send(current, "$pageview", { page }).then((sent) => {
-      if (!sent && lastRoute.current === routeId) {
+      if (!sent && lastRoute.current === routePath) {
         lastRoute.current = undefined
       }
     })
-  }, [routeId, privacy, instance, current])
+  }, [routePath, privacy, instance, current])
 }

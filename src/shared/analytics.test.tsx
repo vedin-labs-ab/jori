@@ -12,7 +12,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { saveConsent } from "./analytics/consent"
 
 const state = vi.hoisted(() => ({
-  routeId: "/folders/$folderId/",
+  routePath: "/folders/$folderId/",
   capture: vi.fn(),
   init: vi.fn(),
   optIn: vi.fn(),
@@ -21,7 +21,16 @@ const state = vi.hoisted(() => ({
 }))
 
 vi.mock("@tanstack/react-router", () => ({
-  useRouterState: () => state.routeId,
+  useRouterState: ({ select }: { select: (state: unknown) => unknown }) =>
+    select({
+      matches: [
+        {
+          routeId: `/_workspace${state.routePath}`,
+          fullPath: state.routePath,
+          pathname: "/folders/private-id",
+        },
+      ],
+    }),
 }))
 vi.mock("./analytics/config", () => ({
   analyticsConfig: () => ({ eu: { key: "phc_public", options: {} } }),
@@ -55,11 +64,11 @@ beforeEach(() => {
     // biome-ignore lint/suspicious/noDocumentCookie: Reset the cookies a test may leave.
     document.cookie = `${name}=; Max-Age=0; Path=/`
   }
-  state.routeId = "/folders/$folderId/"
+  state.routePath = "/folders/$folderId/"
   state.loading = undefined
 })
 
-test("explicit pageviews survive navigation without DOM content or duplicate strict-mode events", async () => {
+test("workspace pageviews use path definitions without layout IDs, private parameters or strict-mode duplicates", async () => {
   saveConsent("eu", "accepted")
   const { Analytics } = await import("./analytics")
   window.history.replaceState(
@@ -78,7 +87,7 @@ test("explicit pageviews survive navigation without DOM content or duplicate str
     page: "folders",
   })
 
-  state.routeId = "/chat/$conversationId/"
+  state.routePath = "/chat/$conversationId/"
   view.rerender(
     <StrictMode>
       <Analytics>Private chat text</Analytics>
@@ -105,7 +114,7 @@ test("analytics starts only after acceptance and stops when consent is withdrawn
   expect(state.capture).not.toHaveBeenCalled()
 
   fireEvent.click(screen.getByRole("button", { name: "Decline" }))
-  state.routeId = "/chat/$conversationId/"
+  state.routePath = "/chat/$conversationId/"
   view.rerender(
     <Analytics>
       <PrivacyChoices />
@@ -138,7 +147,7 @@ test("analytics starts only after acceptance and stops when consent is withdrawn
   expect(localStorage.getItem("ph_phc_public_posthog")).toBeNull()
   expect(document.cookie).not.toContain("ph_phc_public_posthog=")
   expect(localStorage.getItem("auth-session")).toBe("keep")
-  state.routeId = "/files/"
+  state.routePath = "/files/"
   view.rerender(
     <Analytics>
       <PrivacyChoices />
@@ -214,7 +223,7 @@ test("withdrawing while the SDK loads prevents initialization and capture", asyn
 })
 
 test("a captured event waits for acceptance and never loads the SDK before it", async () => {
-  state.routeId = "/unknown/"
+  state.routePath = "/unknown/"
   const { Analytics } = await import("./analytics")
   const { useCapture } = await import("./analytics/context")
   function Feature() {
