@@ -105,19 +105,33 @@ test("four chats show; the rest are a search away", () => {
   expect(navigate).toHaveBeenCalledWith("/chat/conversations_f")
 })
 
-test("while the conversations are on their way, their block keeps its room", () => {
-  const { container } = render(
+test("while the conversations are on their way nothing stands in for them, and they open into place", () => {
+  const props = { composer: null, now, onSuggestion: vi.fn(), suggestions: [] }
+  const { container, rerender } = render(
+    <ChatHome {...props} recent={undefined} />
+  )
+
+  expect(container.querySelectorAll("[data-slot=skeleton]").length).toBe(0)
+  expect(screen.queryByText("Recent")).toBeNull()
+  // The section is there at no height, so it can ease open.
+  expect(container.querySelector(".grid-rows-\\[0fr\\]")).not.toBeNull()
+
+  rerender(
     <ChatHome
-      composer={null}
-      now={now}
-      onSuggestion={vi.fn()}
-      recent={undefined}
-      suggestions={[]}
+      {...props}
+      recent={[
+        {
+          id: "conversations_renewals",
+          title: "Renewals at risk",
+          visibility: { mode: "organization" },
+          updatedAt: now - 3_600_000,
+        },
+      ]}
     />
   )
 
-  expect(container.querySelectorAll("[data-slot=skeleton]").length).toBe(5)
-  expect(screen.queryByText("Recent")).toBeNull()
+  expect(screen.getByText("Recent")).toBeDefined()
+  expect(container.querySelector(".grid-rows-\\[1fr\\]")).not.toBeNull()
 })
 
 test("a suggestion on its way holds the pills, and lets go once it lands", async () => {

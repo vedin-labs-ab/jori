@@ -1,7 +1,6 @@
 import { ArrowRight, ChevronRight } from "lucide-react"
 import { type ReactNode, useLayoutEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Suggestion } from "@/components/ui/suggestion"
 import { cn } from "@/lib/utils"
@@ -18,18 +17,13 @@ import { type ChatConversation } from "./types"
 /** How many recent chats the home lists before the rest fold into the
  *  searchable list. */
 const shownRecent = 4
-/** The rows the recent block's placeholder stands in for, by name. */
-const placeholderRows = Array.from(
-  { length: shownRecent },
-  (_, index) => `row-${index + 1}`
-)
 
 /** Where a chat starts: the ask, a few things worth asking, and the
  *  conversations already had, when there are any. The group sits in the
  *  middle of the frame while it fits and scrolls once it does not; each
  *  block reads in the chat's column, the composer bringing its own. The
- *  recent block keeps its room while the host is still reading the
- *  list, so the composer does not jump when it lands. */
+ *  recent block opens from nothing once the host has read the list, so
+ *  the composer glides to its place when it lands. */
 export function ChatHome({
   composer,
   now,
@@ -62,13 +56,12 @@ export function ChatHome({
         {suggestions.length === 0 ? null : (
           <Suggestions onSuggestion={onSuggestion} suggestions={suggestions} />
         )}
-        <div className={chatColumnClassName}>
-          {recent === undefined ? (
-            <RecentPlaceholder />
-          ) : recent.length === 0 ? null : (
-            <RecentConversations now={now} recent={recent} />
-          )}
-        </div>
+        <RecentReveal
+          recent={
+            recent === undefined || recent.length === 0 ? undefined : recent
+          }
+          now={now}
+        />
       </div>
     </div>
   )
@@ -167,21 +160,32 @@ function useFittingSuggestions(suggestions: readonly ChatSuggestion[]) {
   return { listRef, visibleCount }
 }
 
-/** The recent block's room while the list is on its way: its heading's
- *  line and the rows it shows, as skeletons. */
-function RecentPlaceholder() {
+/** The recent chats, shown once there are some to show. Nothing stands in
+ *  for them while they load: the section opens from nothing, its height and
+ *  opacity easing in together, so the question and the composer above it
+ *  glide to their place instead of jumping to it. */
+function RecentReveal({
+  now,
+  recent,
+}: {
+  now: number
+  recent: ChatConversation[] | undefined
+}) {
   return (
-    <div aria-busy aria-hidden className="grid grid-cols-1 gap-1">
-      <div className="flex h-7 items-center">
-        <Skeleton className="h-3 w-12" />
+    <div
+      className={cn(
+        chatColumnClassName,
+        "grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none",
+        recent === undefined
+          ? "grid-rows-[0fr] opacity-0"
+          : "grid-rows-[1fr] opacity-100"
+      )}
+    >
+      <div className="min-h-0 overflow-hidden">
+        {recent === undefined ? null : (
+          <RecentConversations now={now} recent={recent} />
+        )}
       </div>
-      <ul className="divide-y">
-        {placeholderRows.map((row) => (
-          <li className="flex h-10 items-center" key={row}>
-            <Skeleton className="h-4 w-1/2" />
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }

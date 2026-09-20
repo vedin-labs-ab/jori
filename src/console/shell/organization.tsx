@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router"
 import { type Organization } from "better-auth/client"
-import { Plus, Settings } from "lucide-react"
+import { CircleDashed, Plus, Settings } from "lucide-react"
 import { type ComponentProps, useState } from "react"
 import { toast } from "sonner"
 import { OrganizationView } from "@/components/auth/organization/organization-view"
@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
@@ -19,6 +18,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { billingSearch } from "@/console/billing/actions/return"
 import { readOnboarded } from "@/console/onboarding/state"
 import { BrandIcon } from "@/shared/brand"
+import { RevealArrow } from "@/shared/console/dot"
 import { SidebarOrganization } from "@/shared/console/shell/organization"
 import { organizationNeutralPath } from "@/shared/console/shell/routes"
 import {
@@ -257,6 +257,7 @@ function OrganizationOption({
 }) {
   return (
     <DropdownMenuItem
+      className="group/reveal"
       disabled={switchingDisabled}
       onSelect={(event) => {
         event.preventDefault()
@@ -270,11 +271,14 @@ function OrganizationOption({
         organization={organization}
         size="sm"
       />
-      {/* Picking it lands in its onboarding, so the row says so. */}
+      {/* Picking it lands in its onboarding, so the row says so, and shows
+          where it leads once the row is under the pointer. */}
       {switching || readOnboarded(organization.metadata) ? null : (
-        <DropdownMenuShortcut className="tracking-normal">
+        <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
+          <CircleDashed aria-hidden className="size-3" />
           Finish setup
-        </DropdownMenuShortcut>
+          <RevealArrow />
+        </span>
       )}
       {switching ? (
         <Spinner

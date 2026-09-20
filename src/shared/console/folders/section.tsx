@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
@@ -79,32 +78,38 @@ export function FolderTree({
           the height the navigation above and below it leaves, and scrolls
           on its own, so a long tree never pushes the platform group away. */}
       <SidebarGroup className="min-h-28 flex-1 group-data-[collapsible=icon]:hidden">
-        <FoldersLabel />
-        {/* The "+" creates at the top level: a root folder, or a resource
-            created in the root listing. */}
-        <NewInFolderMenu
-          onCreate={(creation) => onCreate({ creation })}
-          onNewFolder={onNewFolder}
-        >
-          <SidebarGroupAction aria-label="New" title="New">
-            <Plus />
-          </SidebarGroupAction>
-        </NewInFolderMenu>
-        {/* The label and the "+" stay put; only the rows scroll. */}
-        <SidebarGroupContent
-          className={cn("min-h-0 flex-1 overflow-y-auto", scrollFade)}
-        >
-          <SidebarMenu>
-            <FolderTreeItems
-              expansion={expansion}
-              folders={folders}
-              onCreate={onCreate}
-              onDialog={onDialog}
+        {/* Nothing until the folders are known: the group keeps its place
+            in the sidebar, and its contents arrive together. */}
+        {folders === undefined ? null : (
+          <div className="flex min-h-0 flex-1 flex-col motion-safe:fade-in-0 motion-safe:animate-in motion-safe:duration-300">
+            <FoldersLabel />
+            {/* The "+" creates at the top level: a root folder, or a
+                resource created in the root listing. */}
+            <NewInFolderMenu
+              onCreate={(creation) => onCreate({ creation })}
               onNewFolder={onNewFolder}
-              pathname={pathname}
-            />
-          </SidebarMenu>
-        </SidebarGroupContent>
+            >
+              <SidebarGroupAction aria-label="New" title="New">
+                <Plus />
+              </SidebarGroupAction>
+            </NewInFolderMenu>
+            {/* The label and the "+" stay put; only the rows scroll. */}
+            <SidebarGroupContent
+              className={cn("min-h-0 flex-1 overflow-y-auto", scrollFade)}
+            >
+              <SidebarMenu>
+                <FolderTreeItems
+                  expansion={expansion}
+                  folders={folders}
+                  onCreate={onCreate}
+                  onDialog={onDialog}
+                  onNewFolder={onNewFolder}
+                  pathname={pathname}
+                />
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </div>
+        )}
       </SidebarGroup>
       <SidebarGroup className="hidden group-data-[collapsible=icon]:block">
         <SidebarGroupContent>
@@ -180,27 +185,14 @@ function FolderTreeItems({
   pathname,
 }: {
   expansion: FolderExpansion
-  folders: FolderRow[] | undefined
+  folders: FolderRow[]
   onCreate: (request: CreationRequest) => void
   onDialog: (request: FolderDialogRequest) => void
   onNewFolder: () => void
   pathname: string
 }) {
   const pending = usePendingFolder(undefined, "sidebar")
-  const nodes = useMemo(() => buildFolderTree(folders ?? []), [folders])
-
-  if (folders === undefined) {
-    return (
-      <>
-        <SidebarMenuItem>
-          <SidebarMenuSkeleton showIcon />
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuSkeleton showIcon />
-        </SidebarMenuItem>
-      </>
-    )
-  }
+  const nodes = useMemo(() => buildFolderTree(folders), [folders])
 
   if (nodes.length === 0 && !pending) {
     return (
