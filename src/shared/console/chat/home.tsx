@@ -62,7 +62,7 @@ export function ChatHome({
         {suggestions.length === 0 ? null : (
           <Suggestions onSuggestion={onSuggestion} suggestions={suggestions} />
         )}
-        <div className={cn(chatColumnClassName, "min-h-[12.1875rem]")}>
+        <div className={chatColumnClassName}>
           {recent === undefined ? (
             <RecentPlaceholder />
           ) : recent.length === 0 ? null : (
