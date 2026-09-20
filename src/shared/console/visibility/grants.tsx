@@ -68,7 +68,7 @@ export function GrantPicker({
               ? emptyLabel
               : names.join(", ")}
           </span>
-          <ChevronsUpDown className="text-muted-foreground" />
+          <ChevronsUpDown />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-64 p-0" collisionPadding={8}>

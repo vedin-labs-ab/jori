@@ -46,7 +46,7 @@ export function FolderPickerField({
               <span className="truncate">{selected.name}</span>
             </span>
           )}
-          <ChevronsUpDown className="text-muted-foreground" />
+          <ChevronsUpDown />
         </Button>
       </FolderSelect>
     </div>

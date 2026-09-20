@@ -366,10 +366,7 @@ function MaterialNameContent({ material }: { material: MaterialBreadcrumb }) {
           </span>
           {material.saveStatus === undefined ||
           material.saveStatus === "idle" ? (
-            <ChevronDown
-              aria-hidden
-              className="size-3! shrink-0 text-muted-foreground"
-            />
+            <ChevronDown aria-hidden className="size-3! shrink-0" />
           ) : (
             <span aria-hidden className="flex shrink-0 [&_svg]:size-3!">
               <SaveIcon saveStatus={material.saveStatus} />
