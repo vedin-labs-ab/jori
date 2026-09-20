@@ -1,44 +1,29 @@
 import { Search } from "lucide-react"
 import { type ComponentProps } from "react"
-import { Button } from "@/components/ui/button"
-import { Kbd } from "@/components/ui/kbd"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-
-import { shortcutAria, shortcutLabel } from "@/shared/shortcuts/keys"
+import { ShortcutButton } from "@/shared/shortcuts/button"
 import { searchKeys } from "./bindings"
 
 /** An icon button that opens search; hidden in the rail, where the
- *  organization's own square is all the header has room for. */
+ *  organization's own square is all the header has room for. It sits in a
+ *  row, so its tooltip opens below it, clear of the button beside it. */
 export function SearchTrigger({
   className,
   ...props
-}: Omit<ComponentProps<typeof Button>, "children" | "size" | "variant">) {
+}: Pick<ComponentProps<typeof ShortcutButton>, "className" | "onClick">) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          aria-keyshortcuts={shortcutAria(searchKeys)}
-          aria-label="Search workspace"
-          className={cn(
-            "size-8 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden",
-            className
-          )}
-          size="icon"
-          variant="ghost"
-          {...props}
-        >
-          <Search />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent className="flex items-center gap-1.5" side="right">
-        Search
-        <Kbd>{shortcutLabel(searchKeys)}</Kbd>
-      </TooltipContent>
-    </Tooltip>
+    <ShortcutButton
+      className={cn(
+        "size-8 shrink-0 text-muted-foreground group-data-[collapsible=icon]:hidden",
+        className
+      )}
+      keys={searchKeys}
+      label="Search workspace"
+      side="bottom"
+      tooltip="Search"
+      {...props}
+    >
+      <Search />
+    </ShortcutButton>
   )
 }

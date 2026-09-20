@@ -7,15 +7,18 @@ import { serve } from "../http.ts"
 const root = fileURLToPath(new URL("../../../", import.meta.url))
 const origin = "http://localhost:5178"
 
-export async function serveFixture(args: {
+/** Builds one of the fixture pages into a directory. */
+export async function buildFixture(args: {
   page: string
+  /** Where the build goes, as an absolute path. */
   outDir: string
-  port: number
+  silent?: boolean
 }) {
   await build({
     root,
     configFile: false,
     envDir: false,
+    logLevel: args.silent ? "silent" : undefined,
     plugins: [tailwindcss(), react()],
     resolve: { tsconfigPaths: true },
     // What the app reads as it loads. Nothing here is ever reached.
@@ -26,8 +29,19 @@ export async function serveFixture(args: {
     },
     build: {
       outDir: args.outDir,
+      emptyOutDir: true,
       rolldownOptions: { input: `${root}scripts/layout/${args.page}` },
     },
   })
-  serve(`${root}${args.outDir}`, args.port)
+}
+
+export async function serveFixture(args: {
+  page: string
+  outDir: string
+  port: number
+}) {
+  const outDir = `${root}${args.outDir}`
+
+  await buildFixture({ page: args.page, outDir })
+  serve(outDir, args.port)
 }

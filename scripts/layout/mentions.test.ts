@@ -1,52 +1,16 @@
-import { once } from "node:events"
-import { mkdtemp, rm } from "node:fs/promises"
-import { type Server } from "node:http"
-import { tmpdir } from "node:os"
-import path from "node:path"
-import tailwindcss from "@tailwindcss/vite"
-import react from "@vitejs/plugin-react"
-import { type Browser, chromium, type Page } from "playwright"
-import { build } from "vite"
+import { type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, expect, test } from "vitest"
-import { serve } from "./http.ts"
+import { openFixture } from "./fixture/browser.ts"
 
+let fixture: Awaited<ReturnType<typeof openFixture>>
 let browser: Browser
-let server: Server
-let directory: string
 let url: string
 beforeAll(async () => {
-  directory = await mkdtemp(path.join(tmpdir(), "jori-mentions-"))
-  await build({
-    configFile: false,
-    envDir: false,
-    logLevel: "silent",
-    define: { "import.meta.env.VITE_JORI_REGION": JSON.stringify("us") },
-    plugins: [tailwindcss(), react()],
-    resolve: { tsconfigPaths: true },
-    build: {
-      outDir: directory,
-      emptyOutDir: true,
-      rolldownOptions: { input: path.join(import.meta.dirname, "page.html") },
-    },
-  })
-  server = serve(directory, 0)
-  await once(server, "listening")
-  const address = server.address()
-  if (!address || typeof address === "string") {
-    throw new Error("Missing fixture port")
-  }
-  url = `http://127.0.0.1:${address.port}/scripts/layout/page.html`
-  browser = await chromium.launch()
+  fixture = await openFixture("page.html")
+  browser = fixture.browser
+  url = fixture.url
 }, 30000)
-afterAll(async () => {
-  await browser?.close()
-  if (server) {
-    await new Promise<void>((resolve) => server.close(() => resolve()))
-  }
-  if (directory) {
-    await rm(directory, { recursive: true, force: true })
-  }
-})
+afterAll(() => fixture?.close())
 
 // The real demo renders the shared console pages. Exercise its clipped,
 // transformed landing frame as well as the full-window console layout.
