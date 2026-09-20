@@ -39,6 +39,9 @@ test("opens the console on the folder the thread files into", () => {
   expect(
     screen.getAllByRole("link", { name: /Customer renewals/ }).length
   ).toBeGreaterThan(0)
+  expect(
+    screen.getByRole("heading", { level: 2, name: "Renewals" })
+  ).toBeDefined()
   expect(screen.getByText("Chase overdue invoices")).toBeDefined()
   expect(
     screen.getByText("will keep it current.", { exact: false })

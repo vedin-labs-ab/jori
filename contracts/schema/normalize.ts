@@ -1,6 +1,6 @@
 import { isRecord } from "../json"
 import { schemaPatternIssue } from "./pattern"
-import { type JsonSchemaObject, type SchemaValidationIssue } from "./validate"
+import { type JsonSchemaObject, type SchemaValidationIssue } from "./types"
 
 // The supported JSON Schema subset: fully inlined object schemas using the
 // primitive types below plus anyOf, const, and enum. No $ref, so a schema

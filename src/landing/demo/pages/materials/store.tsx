@@ -1,7 +1,5 @@
-import {
-  type JsonSchemaObject,
-  validateJsonSchemaValue,
-} from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
+import { validateJsonSchemaValue } from "@contracts/schema/validate"
 import { ClientOnly } from "@tanstack/react-router"
 import { type ReactNode, useMemo, useState } from "react"
 import { AskJoriAction } from "@/shared/console/chat/pane/ask"

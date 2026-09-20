@@ -55,6 +55,7 @@ export function Hero() {
       <div className="relative mt-14 min-w-0 md:mt-16 md:pb-16" id="demo">
         <DemoConsole
           className="h-[min(36rem,85svh)] md:h-[36rem]"
+          heading="h2"
           navigation={console}
         />
         <RenewalsThread

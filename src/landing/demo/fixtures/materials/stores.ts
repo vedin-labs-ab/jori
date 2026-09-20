@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
 import { day, hour } from "../clock"
 import { folderId } from "../folders"
 import { demoId } from "../ids"

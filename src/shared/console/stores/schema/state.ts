@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
 import { useState } from "react"
 import { fieldsToSchema, schemaToFields } from "./convert"
 import { collectFieldErrors, type SchemaField } from "./model"

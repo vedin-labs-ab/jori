@@ -1,5 +1,5 @@
 import { isRecord } from "../json"
-import { type JsonSchemaObject } from "./validate"
+import { type JsonSchemaObject } from "./types"
 
 /** How many leaf properties the schema declares — the actual writable
  *  value slots. Objects are structure and don't count themselves; arrays

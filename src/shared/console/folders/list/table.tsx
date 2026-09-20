@@ -29,7 +29,6 @@ import {
 } from "../../materials/cells/owner"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
-import { absoluteTime, relativeTime, useNow } from "../../time"
 import {
   VisibilityCell,
   VisibilityHead,
@@ -42,6 +41,7 @@ import { FolderRowMenu } from "../menu"
 import { type FolderDialogRequest, type ListedFolder } from "../types"
 import { type FolderListEntry } from "./controls"
 import { nameLinkClassName } from "./style"
+import { UpdatedCell } from "./updated"
 
 /** How many columns the table spans, for a row that stands in for all. */
 export const folderTableColumns = 8
@@ -197,7 +197,6 @@ function FolderCells({
   parentId?: string
   inert?: boolean
 }) {
-  const now = useNow(30_000)
   return (
     <>
       <VisibilityCell
@@ -220,12 +219,7 @@ function FolderCells({
       ) : (
         <TableCell className={columnTier["2xl"]}>—</TableCell>
       )}
-      <TableCell
-        className={cn("text-muted-foreground", columnTier.sm)}
-        title={folder ? absoluteTime(folder.updatedAt) : undefined}
-      >
-        {folder ? relativeTime(Math.min(folder.updatedAt, now), now) : "—"}
-      </TableCell>
+      <UpdatedCell at={folder?.updatedAt} />
     </>
   )
 }

@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
-import { type JsonSchemaObject } from "../../contracts/schema/validate"
+import { type JsonSchemaObject } from "../../contracts/schema/types"
 import { internal } from "../_generated/api"
 import { type Id } from "../_generated/dataModel"
 import {

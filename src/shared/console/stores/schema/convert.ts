@@ -1,5 +1,5 @@
 import { isRecord } from "@contracts/json"
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
 import { createField, type FieldItemType, type SchemaField } from "./model"
 
 // Field model <-> JSON Schema. The builder covers the plain-shape subset of

@@ -1,16 +1,10 @@
 import { isRecord, readStringArray } from "../json"
 import { compileSchemaPattern } from "./pattern"
+import { type JsonSchemaObject, type SchemaValidationIssue } from "./types"
 
 // Validates JSON values against the supported JSON Schema subset described
 // in ./normalize.ts. Runtime-neutral: usable from Convex, workers, and app
 // code alike.
-
-export type JsonSchemaObject = Record<string, unknown>
-
-export type SchemaValidationIssue = {
-  path: string
-  message: string
-}
 
 const anyObjectSchema: JsonSchemaObject = { type: "object" }
 

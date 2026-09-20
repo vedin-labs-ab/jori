@@ -1,4 +1,12 @@
-import { useCallback, useSyncExternalStore } from "react"
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useSyncExternalStore,
+} from "react"
+
+/** The anchor for relative times in server-rendered fixtures. */
+export const InitialTimeContext = createContext<number | undefined>(undefined)
 
 export function localTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -57,6 +65,7 @@ function subscribe(intervalMs: number, listener: () => void) {
 
 /** The present, refreshed every `intervalMs`. */
 export function useNow(intervalMs: number) {
+  const initialNow = useContext(InitialTimeContext)
   return useSyncExternalStore(
     useCallback(
       (listener: () => void) => subscribe(intervalMs, listener),
@@ -65,7 +74,7 @@ export function useNow(intervalMs: number) {
     () => clockFor(intervalMs).now,
     // A server has no readers to tick a clock, so it tells the time fresh,
     // held still for the length of a render by rounding to the period.
-    () => Math.floor(Date.now() / intervalMs) * intervalMs
+    () => initialNow ?? Math.floor(Date.now() / intervalMs) * intervalMs
   )
 }
 

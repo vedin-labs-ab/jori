@@ -2,7 +2,7 @@ import {
   readChoicesAnswer,
   readMessageReferences,
 } from "@contracts/replies/answers"
-import { parseReplyParts } from "@contracts/replies/parts"
+import { parseReplyParts } from "@contracts/replies/validate"
 import { usePaginatedQuery } from "convex/react"
 import { type FunctionReturnType } from "convex/server"
 import { type GenericId } from "convex/values"

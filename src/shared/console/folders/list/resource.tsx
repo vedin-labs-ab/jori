@@ -16,7 +16,6 @@ import {
 } from "../../materials/cells/owner"
 import { materialOwner } from "../../materials/owners"
 import { ConsoleLink } from "../../shell/link"
-import { absoluteTime, relativeTime, useNow } from "../../time"
 import { VisibilityCell, VisibilityNameMark } from "../../visibility/table"
 import { type DragPayload } from "../drag/plan"
 import { useResourceRowDrag } from "../drag/state"
@@ -28,6 +27,7 @@ import {
 } from "../types"
 import { type FolderListEntry, resourceDragItem } from "./controls"
 import { nameLinkClassName } from "./style"
+import { UpdatedCell } from "./updated"
 
 /** One filed resource in a folder's listing, opening its own surface.
  *  The row drags by its name: resources file onto any folder row or unfile onto the
@@ -153,7 +153,6 @@ function ResourceCells({
   folderId: string | undefined
   inert?: boolean
 }) {
-  const now = useNow(30_000)
   return (
     <>
       <VisibilityCell
@@ -181,12 +180,7 @@ function ResourceCells({
       <TableCell className={cn("text-muted-foreground/60", columnTier["2xl"])}>
         &mdash;
       </TableCell>
-      <TableCell
-        className={cn("text-muted-foreground", columnTier.sm)}
-        title={resource ? absoluteTime(resource.updatedAt) : undefined}
-      >
-        {resource ? relativeTime(Math.min(resource.updatedAt, now), now) : "—"}
-      </TableCell>
+      <UpdatedCell at={resource?.updatedAt} />
     </>
   )
 }

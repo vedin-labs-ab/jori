@@ -1,5 +1,5 @@
 import { isRecord } from "@contracts/json"
-import { type SchemaValidationIssue } from "@contracts/schema/validate"
+import { type SchemaValidationIssue } from "@contracts/schema/types"
 import { type ValueField, type ValueProperty } from "./model"
 
 // Form state <-> JSON value, walked in parallel with the field model. An

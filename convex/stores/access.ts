@@ -1,5 +1,5 @@
 import { countLeafProperties } from "../../contracts/schema/count"
-import { type JsonSchemaObject } from "../../contracts/schema/validate"
+import { type JsonSchemaObject } from "../../contracts/schema/types"
 import { type Doc, type Id } from "../_generated/dataModel"
 import {
   findAccessibleCollection,

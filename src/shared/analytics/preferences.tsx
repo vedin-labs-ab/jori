@@ -111,7 +111,7 @@ function ConsentPanel({
       aria-labelledby="analytics-choice-title"
       className={cn(
         "fixed inset-x-4 bottom-4 z-50 max-h-[calc(100svh-2rem)] overflow-y-auto rounded-lg border bg-background p-5 shadow-lg sm:right-auto sm:w-96",
-        "motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:fill-mode-both motion-safe:animate-in motion-safe:duration-300"
+        "motion-safe:animate-[entrance_300ms_ease_both] [--entrance-distance:--spacing(2)]"
       )}
       onKeyDown={(event) => {
         if (event.key === "Escape" && onClose !== undefined) {
@@ -148,7 +148,7 @@ function ConsentPanel({
         us what to improve. The record goes to PostHog and never includes your
         chats, files, or name. Either way, Jori works the same.
       </p>
-      <p className="mt-2 text-muted-foreground/80 text-xs/relaxed">
+      <p className="mt-2 text-muted-foreground text-xs/relaxed">
         Change your answer any time under Privacy choices. Details in the{" "}
         <a
           className="underline underline-offset-2"

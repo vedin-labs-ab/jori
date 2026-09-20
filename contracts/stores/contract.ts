@@ -4,7 +4,7 @@ import {
   assertSupportedJsonSchema,
   normalizeJsonSchema,
 } from "../schema/normalize"
-import { type JsonSchemaObject } from "../schema/validate"
+import { type JsonSchemaObject } from "../schema/types"
 
 // A store is one named JSON document: a single versioned value, optionally
 // constrained by an authored JSON Schema that every write must satisfy.

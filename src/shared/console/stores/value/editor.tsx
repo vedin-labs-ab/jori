@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
 import { lazy, Suspense, useCallback, useEffect, useRef } from "react"
 import { toast } from "sonner"
 import { FieldError } from "@/components/ui/field"

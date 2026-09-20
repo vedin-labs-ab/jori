@@ -9,7 +9,7 @@ import { Mention, Prop } from "../../section"
 /** Each message enters once, the reply after the ask, and neither moves
  *  for a reader who has asked for less motion. */
 const entrance =
-  "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 motion-safe:fill-mode-both motion-safe:animation-duration-500"
+  "motion-safe:animate-[entrance_500ms_ease_both] [--entrance-distance:--spacing(1)]"
 
 /** Where a row comes from: someone asks in the thread, and Jori files the
  *  answer in the folder, with a link back to it. */
@@ -38,7 +38,7 @@ export function RenewalsThread({
       <div className="space-y-4 px-5 py-4">
         <ThreadMessage
           author="Maya Lund"
-          className={cn(entrance, "motion-safe:delay-500")}
+          className={cn(entrance, "motion-safe:[animation-delay:500ms]")}
           initials="ML"
           time="09:12"
         >
@@ -47,7 +47,7 @@ export function RenewalsThread({
         </ThreadMessage>
         <ThreadMessage
           author="Jori"
-          className={cn(entrance, "motion-safe:delay-[1300ms]")}
+          className={cn(entrance, "motion-safe:[animation-delay:1300ms]")}
           isJori
           time="09:12"
         >

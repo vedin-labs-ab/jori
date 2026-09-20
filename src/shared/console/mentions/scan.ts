@@ -1,11 +1,11 @@
 import {
-  parseResourceToken,
-  resourceTokenPattern,
-} from "@contracts/replies/parts"
-import {
   type ReferenceKind,
   type ReferenceTarget,
 } from "@contracts/replies/references"
+import {
+  parseResourceToken,
+  resourceTokenPattern,
+} from "@contracts/replies/tokens"
 import { targetKey } from "../references"
 
 // Mentions are explicit, sigil-prefixed tokens — `@Gmail`, `/meeting-prep`,

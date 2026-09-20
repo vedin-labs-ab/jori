@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
 import { shareFragment } from "@contracts/shares/fragment"
 import { type Visibility } from "@contracts/visibility"
 import { type Dispatch } from "react"

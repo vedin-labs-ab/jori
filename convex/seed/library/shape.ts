@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "../../../contracts/schema/validate"
+import { type JsonSchemaObject } from "../../../contracts/schema/types"
 import { type TableColumnType } from "../../../contracts/tables/columns"
 
 // What a seeded collection looks like before it is written. Tables author

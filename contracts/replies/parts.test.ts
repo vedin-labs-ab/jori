@@ -1,10 +1,6 @@
 import { expect, test } from "vitest"
-import {
-  parseReplyParts,
-  readReplyParts,
-  replyPartKinds,
-  replyPartLimits,
-} from "./parts"
+import { replyPartKinds, replyPartLimits } from "./parts"
+import { parseReplyParts, readReplyParts } from "./validate"
 
 const reference = {
   kind: "reference",

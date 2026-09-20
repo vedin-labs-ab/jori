@@ -2,6 +2,18 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* Entrances that only fade and slide need no filter animation. */
+@keyframes entrance {
+  from {
+    opacity: 0;
+    transform: translateY(var(--entrance-distance));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @font-face {
   font-family: "Geist Variable";
   font-style: normal;

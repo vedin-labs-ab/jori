@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "../../contracts/schema/validate"
+import { type JsonSchemaObject } from "../../contracts/schema/types"
 import { type TableColumn } from "../../contracts/tables/columns"
 import { type Doc } from "../_generated/dataModel"
 

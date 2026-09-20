@@ -1,6 +1,6 @@
 import { readMessageContext } from "../../contracts/replies/answers"
-import { resourceToken } from "../../contracts/replies/parts"
 import { type ReferenceTarget } from "../../contracts/replies/references"
+import { resourceToken } from "../../contracts/replies/tokens"
 
 import { type Doc } from "../_generated/dataModel"
 import { type QueryLikeCtx } from "../shared/context"

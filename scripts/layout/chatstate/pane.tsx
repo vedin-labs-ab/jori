@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
 import { type ReactNode, useCallback, useEffect, useMemo } from "react"
 import { resolveReference } from "@/landing/demo/derive/chat"
 import {

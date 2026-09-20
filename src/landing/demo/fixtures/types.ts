@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
 import { type GenericId } from "convex/values"
 import { type FolderRow } from "@/shared/console/folders/types"
 import { type ExecutionItem } from "@/shared/console/runs/types"

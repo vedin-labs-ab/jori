@@ -1,5 +1,5 @@
 import { type JsonObject } from "../../../contracts/json"
-import { readReplyParts } from "../../../contracts/replies/parts"
+import { readReplyParts } from "../../../contracts/replies/validate"
 import { type SurfaceReactionTarget } from "../../../contracts/runtime/surface"
 import { readFinal } from "../../../contracts/runtime/tools"
 import {

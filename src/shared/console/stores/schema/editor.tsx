@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "@contracts/schema/validate"
+import { type JsonSchemaObject } from "@contracts/schema/types"
 import { FieldError } from "@/components/ui/field"
 import { JsonBlock } from "@/shared/console/code"
 import { SchemaFieldList } from "./fields"

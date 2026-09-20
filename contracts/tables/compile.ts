@@ -1,4 +1,4 @@
-import { type JsonSchemaObject } from "../schema/validate"
+import { type JsonSchemaObject } from "../schema/types"
 import { type TableColumn, type TableColumnType } from "./columns"
 
 // Columns are the table-native way to author a schema; documents are

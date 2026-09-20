@@ -1,5 +1,5 @@
 import { type JsonObject, toJsonObject } from "../../../contracts/json"
-import { replyPartsSchema } from "../../../contracts/replies/parts"
+import { replyPartsSchema } from "../../../contracts/replies/validate"
 import { finalProperty } from "../../../contracts/runtime/tools"
 import { withOptionalFieldGuidance } from "../../../contracts/tools"
 import { githubReactionContentProperty } from "../../../contracts/tools/fragments/reactions"

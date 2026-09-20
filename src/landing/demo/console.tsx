@@ -57,6 +57,7 @@ export function DemoConsole({
 type DemoConsoleProps = {
   /** The box's size; the frame fills whatever it is given. */
   className?: string
+  heading?: "h2" | "h3"
   /** Where the console is and how it moves, from `useDemoNavigation`. */
   navigation: DemoNavigation
   /** The run the Activity page shows open from the start. */
@@ -67,6 +68,7 @@ type DemoConsoleProps = {
 
 function MountedConsole({
   className,
+  heading = "h3",
   navigation: { location, navigation },
   openRunId,
   sidebar = true,
@@ -88,7 +90,7 @@ function MountedConsole({
                 <DemoDragProvider>
                   <ConsoleFrame
                     className="h-full min-h-0"
-                    heading="h3"
+                    heading={heading}
                     onSidebarOpenChange={setSidebarOpen}
                     pathname={location.pathname}
                     sidebar={

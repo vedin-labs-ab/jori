@@ -79,7 +79,7 @@ export function ConsoleFrame({
   header?: boolean
   /** Embedded consoles sit under their host section's heading, and as a
    *  section of its page rather than a second main landmark. */
-  heading?: "h1" | "h3"
+  heading?: "h1" | "h2" | "h3"
   onSidebarOpenChange?: (open: boolean) => void
   pathname: string
   /** Left out, a phone's header opens on the title: there is nothing to open. */
@@ -171,7 +171,7 @@ function ConsoleHeader({
 }: {
   hasSidebar: boolean
   header: boolean | undefined
-  heading: "h1" | "h3"
+  heading: "h1" | "h2" | "h3"
   material: MaterialBreadcrumb | undefined
   onSlot: (slot: HTMLElement | null) => void
   pathname: string
@@ -231,7 +231,7 @@ function ConsoleHeaderTitle({
   material,
   pathname,
 }: {
-  heading: "h1" | "h3"
+  heading: "h1" | "h2" | "h3"
   material: MaterialBreadcrumb | undefined
   pathname: string
 }) {
@@ -285,7 +285,7 @@ function MaterialTrail({
   material,
   trail,
 }: {
-  heading: "h1" | "h3"
+  heading: "h1" | "h2" | "h3"
   material: MaterialBreadcrumb
   trail: MaterialBreadcrumbSegment[]
 }) {
