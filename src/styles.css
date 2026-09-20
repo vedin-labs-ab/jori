@@ -99,11 +99,12 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  /* Darkened from 0.556 to 0.547. Secondary text already cleared 4.5:1 on the
+  /* Darkened from 0.556 to 0.543. Secondary text already cleared 4.5:1 on the
      page, but it is read just as often on `--muted` and `--accent`: hovered
      rows, badges, table headers, filter chips. On that 0.97 ground it was
-     4.34. It is now 4.51 there and 4.91 on the page. */
-  --muted-foreground: oklch(0.547 0 0);
+     4.34. At 0.547 it cleared 4.5 on paper and rounded to 113 on 245 on
+     screen, which is 4.48. It now paints 111: 4.61 there, 5.03 on the page. */
+  --muted-foreground: oklch(0.543 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   /* Darkened from 0.575 to 0.565. It carries white text on the forty

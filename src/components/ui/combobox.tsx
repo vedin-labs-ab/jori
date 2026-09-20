@@ -99,7 +99,8 @@ function ComboboxInput({
             className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
             disabled={disabled}
           >
-            <ComboboxTrigger />
+            {/* The chevron is all it shows, so it says what it does. */}
+            <ComboboxTrigger aria-label="Show options" />
           </InputGroupButton>
         )}
         {showClear && (

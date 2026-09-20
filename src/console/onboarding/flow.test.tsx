@@ -210,8 +210,11 @@ test("the plan is asked for before the organization is handed over", async () =>
 
   fireEvent.click(screen.getByRole("button", { name: "I'll do this later" }))
 
-  // No way around it, and no checkout before the terms are accepted.
-  expect(screen.getByText("Put Jori to work.")).toBeDefined()
+  // No way around it, and no checkout before the terms are accepted. The
+  // step before it took its button with it, so the keyboard follows to the
+  // new step's heading.
+  const heading = screen.getByRole("heading", { name: "Put Jori to work." })
+  await waitFor(() => expect(document.activeElement).toBe(heading))
   expect(screen.queryByText("Copperline is ready.")).toBeNull()
   const checkout = screen.getByRole("button", { name: "Continue to checkout" })
   expect((checkout as HTMLButtonElement).disabled).toBe(true)
