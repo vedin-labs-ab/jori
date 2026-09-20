@@ -8,6 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import { shortcutAria, shortcutLabel } from "@/shared/shortcuts/keys"
 
 /** The sidebar's own shortcut, as `components/ui/sidebar` binds it. */
@@ -33,11 +34,22 @@ export function SidebarRailExpand({ children }: { children: ReactNode }) {
   const rail = state === "collapsed" && !isMobile
 
   return (
-    <div className="relative min-w-0 flex-1">
-      <div inert={rail}>{children}</div>
+    <div className="group/expand relative min-w-0 flex-1">
+      {/* The square steps aside for the button instead of sitting under
+          it: a ghost button's hover is translucent, so anything beneath
+          would show through. */}
+      <div
+        className={cn(
+          rail &&
+            "group-focus-within/expand:opacity-0 group-hover/expand:opacity-0"
+        )}
+        inert={rail}
+      >
+        {children}
+      </div>
       {rail ? (
         <ToggleButton
-          className="absolute inset-0 size-full bg-sidebar opacity-0 hover:bg-sidebar-accent hover:opacity-100 focus-visible:opacity-100"
+          className="absolute inset-0 size-full opacity-0 hover:opacity-100 focus-visible:opacity-100"
           label="Open sidebar"
         />
       ) : null}
