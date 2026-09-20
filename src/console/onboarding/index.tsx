@@ -18,7 +18,12 @@ import { SidebarUserButton } from "../shell/account"
 import { SidebarOrganizationSwitcher } from "../shell/organization"
 import { OnboardingFlow } from "./flow"
 import { OnboardingFrame } from "./frame"
-import { beginHandoff, endHandoff, type OnboardingHandoff } from "./handoff"
+import {
+  beginHandoff,
+  endHandoff,
+  type OnboardingHandoff,
+  readHandoff,
+} from "./handoff"
 import { NameStep } from "./name"
 import { OnboardingStage } from "./stage"
 import { onboardingSteps } from "./steps"
@@ -42,12 +47,23 @@ export function Onboarding({ organizationId }: { organizationId?: string }) {
     organizationId !== undefined &&
     (discovery === undefined || profile === undefined)
 
-  // The step that waited out the remount has done its job.
-  useEffect(endHandoff, [])
+  // The step that waited out the remount stays until there is a next one
+  // to show: the new organization's own data is the last thing to arrive.
+  const handoff = loading ? readHandoff() : undefined
+
+  useEffect(() => {
+    if (!loading) {
+      endHandoff()
+    }
+  }, [loading])
 
   return (
     <OnboardingChrome alone={alone} fresh={organizationId === undefined}>
-      {loading ? null : (
+      {loading ? (
+        handoff === undefined ? null : (
+          <HandoffStage handoff={handoff} />
+        )
+      ) : (
         <OnboardingFlow
           discovery={discovery ?? null}
           invitations={alone ? <UserInvitations /> : undefined}
@@ -78,21 +94,28 @@ export function OnboardingHandoffStep({
 }) {
   return (
     <OnboardingChrome alone={handoff.alone} fresh>
-      <OnboardingStage
-        mood="working"
-        position={1}
-        settled
-        stepKey="name"
-        total={onboardingSteps.length}
-      >
-        <NameStep
-          name={undefined}
-          onCancel={handoff.alone ? undefined : () => undefined}
-          onCreate={async () => undefined}
-          pending={handoff.name}
-        />
-      </OnboardingStage>
+      <HandoffStage handoff={handoff} />
     </OnboardingChrome>
+  )
+}
+
+/** The name step, busy, exactly as it was left. */
+function HandoffStage({ handoff }: { handoff: OnboardingHandoff }) {
+  return (
+    <OnboardingStage
+      mood="working"
+      position={1}
+      settled
+      stepKey="name"
+      total={onboardingSteps.length}
+    >
+      <NameStep
+        name={undefined}
+        onCancel={handoff.alone ? undefined : () => undefined}
+        onCreate={async () => undefined}
+        pending={handoff.name}
+      />
+    </OnboardingStage>
   )
 }
 
