@@ -70,6 +70,74 @@ async function center(page: Page, name: string) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
+test("the Folders action stays aligned throughout its entrance animation", async () => {
+  const page = await fixture.browser.newPage({
+    viewport: { width: 1280, height: 800 },
+    reducedMotion: "no-preference",
+  })
+
+  try {
+    // Pause at first paint, so even a busy test worker can inspect the
+    // entrance before it ends. Advance the real CSS animation explicitly.
+    await page.route("**/page.html?*", async (route) => {
+      const response = await route.fetch()
+      await route.fulfill({
+        response,
+        body: (await response.text()).replace(
+          "</head>",
+          "<style>[data-sidebar=group], [data-sidebar=group] * { animation-play-state: paused !important; }</style></head>"
+        ),
+      })
+    })
+    await page.goto(`${fixture.url}?path=/chat`)
+    const action = page.locator("[data-sidebar=group-action]")
+    await action.waitFor()
+    const frames = await action.evaluate((button) => {
+      const group = button.closest("[data-sidebar=group]")
+      const label = group?.querySelector("[data-sidebar=group-label]")
+      if (!group || !label) {
+        throw new Error("Missing folder group or label")
+      }
+      const animations = group
+        .getAnimations({ subtree: true })
+        .filter(
+          (animation) =>
+            animation instanceof CSSAnimation &&
+            animation.animationName === "enter"
+        )
+      if (animations.length === 0) {
+        throw new Error("Missing folder entrance animation")
+      }
+      const measure = () => {
+        const actionBox = button.getBoundingClientRect()
+        const labelBox = label.getBoundingClientRect()
+        return {
+          right: labelBox.right - actionBox.right,
+          center:
+            actionBox.y +
+            actionBox.height / 2 -
+            (labelBox.y + labelBox.height / 2),
+        }
+      }
+      return [0, 0.5, 1].map((progress) => {
+        for (const animation of animations) {
+          animation.currentTime =
+            Number(animation.effect?.getComputedTiming().endTime) * progress
+        }
+        return measure()
+      })
+    })
+
+    expect(frames).toEqual([
+      { right: 4, center: 0 },
+      { right: 4, center: 0 },
+      { right: 4, center: 0 },
+    ])
+  } finally {
+    await page.close()
+  }
+})
+
 test("closing the sidebar under a resting pointer leaves its head alone", async () => {
   const page = await openConsole()
 

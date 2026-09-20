@@ -76,12 +76,20 @@ export function FolderTree({
           icon-collapsed mode swaps the whole group for one Folders entry
           and navigation continues on the /folders page. The group takes
           the height the navigation above and below it leaves, and scrolls
-          on its own, so a long tree never pushes the platform group away. */}
-      <SidebarGroup className="min-h-28 flex-1 group-data-[collapsible=icon]:hidden">
+          on its own, so a long tree never pushes the platform group away.
+          Animate the positioned group itself so the action keeps the same
+          containing block throughout the entrance. */}
+      <SidebarGroup
+        className={cn(
+          "min-h-28 flex-1 group-data-[collapsible=icon]:hidden",
+          folders !== undefined &&
+            "motion-safe:fade-in-0 motion-safe:animate-in motion-safe:duration-300"
+        )}
+      >
         {/* Nothing until the folders are known: the group keeps its place
             in the sidebar, and its contents arrive together. */}
         {folders === undefined ? null : (
-          <div className="flex min-h-0 flex-1 flex-col motion-safe:fade-in-0 motion-safe:animate-in motion-safe:duration-300">
+          <>
             <FoldersLabel />
             {/* The "+" creates at the top level: a root folder, or a
                 resource created in the root listing. */}
@@ -108,7 +116,7 @@ export function FolderTree({
                 />
               </SidebarMenu>
             </SidebarGroupContent>
-          </div>
+          </>
         )}
       </SidebarGroup>
       <SidebarGroup className="hidden group-data-[collapsible=icon]:block">
