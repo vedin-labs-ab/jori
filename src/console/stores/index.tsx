@@ -16,7 +16,6 @@ import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { useMaterialListPage } from "../shared/materials/list"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
-import { EditStoreDialog } from "./edit"
 import { useStoreBulk, useStoreRemoval } from "./manage"
 
 export function StoresPage() {
@@ -47,7 +46,7 @@ function useStoresPage(organizationId: string) {
 function StoresView({ organizationId }: { organizationId: string }) {
   const page = useStoresPage(organizationId)
   const editing = useEditing()
-  const openCreate = () => editing?.create("store", undefined, "store")
+  const openCreate = () => editing?.create("store", undefined, "list")
 
   return (
     <ConsoleListLayout>
@@ -67,7 +66,6 @@ function StoresView({ organizationId }: { organizationId: string }) {
           hasFilters={page.hasFilters}
           onAccess={page.setSharing}
           onCreate={openCreate}
-          onEdit={page.setEditing}
           onMoveToFolder={(store) => page.setMoving([toMoveTarget(store)])}
           removal={page.removal}
           selection={page.selection}
@@ -100,7 +98,7 @@ function StoresView({ organizationId }: { organizationId: string }) {
   )
 }
 
-/** What a row's Rename… and Sharing… open, hosted once for the list. */
+/** What a row's Audience… opens, hosted once for the list. */
 function StoreRowDialogs({
   organizationId,
   page,
@@ -110,11 +108,6 @@ function StoreRowDialogs({
 }) {
   return (
     <>
-      <EditStoreDialog
-        onOpenChange={closeOnDismiss(() => page.setEditing(undefined))}
-        organizationId={organizationId}
-        store={page.editing}
-      />
       {page.sharing === undefined ? null : (
         <OrganizationVisibilityDialog
           noun="store"

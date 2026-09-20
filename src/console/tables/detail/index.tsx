@@ -121,10 +121,14 @@ function TableReadyView({
       noun="table"
       onAccess={() => setDialog("access")}
       onDelete={removeAndLeaveWhenDeleted}
-      onEdit={() => setDialog("edit")}
       onMoveToFolder={() => setDialog("move")}
       onRestore={() => void removal.restoreMaterial(table)}
-    />
+      rename={{
+        item: { id: table.tableId, kind: "table", name: table.name },
+        surface: "title",
+      }}
+    />,
+    { id: table.tableId, kind: "table" }
   )
 
   return (

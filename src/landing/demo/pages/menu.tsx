@@ -10,7 +10,7 @@ import { RowMenu } from "@/shared/console/menu/row"
 import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { jobMoveSubject } from "../derive/jobs"
-import { materialOf } from "../derive/materials"
+import { materialOf, materialRename } from "../derive/materials"
 import { useDemoChatMenu } from "../dialogs/chat"
 import { MaterialDialogs, type MaterialRequest } from "../dialogs/materials"
 import { DemoMoveDialog } from "../dialogs/move"
@@ -85,9 +85,9 @@ function MaterialResourceMenu({ material }: { material: DemoMaterial }) {
         noun={isTable ? "table" : "store"}
         onAccess={() => setRequest({ kind: "access", material })}
         onDelete={() => actions.removeMaterial(material.id)}
-        onEdit={() => setRequest({ kind: "edit", material })}
         onMoveToFolder={() => setRequest({ kind: "move", material })}
         onRestore={() => undefined}
+        rename={materialRename(material, "contents")}
         onUnfile={
           material.folderId === undefined
             ? undefined
@@ -114,9 +114,9 @@ function FileResourceMenu({ material }: { material: DemoMaterial }) {
           file={{ name: material.name, url: null }}
           isPending={false}
           onAccess={() => setRequest({ kind: "access", material })}
-          onEdit={() => setRequest({ kind: "edit", material })}
           onMoveToFolder={() => setRequest({ kind: "move", material })}
           onRemove={() => setIsDeleteOpen(true)}
+          rename={materialRename(material, "contents")}
           onUnfile={
             material.folderId === undefined
               ? undefined

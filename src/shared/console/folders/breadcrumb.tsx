@@ -2,8 +2,8 @@ import { type ReactNode } from "react"
 import {
   type MaterialBreadcrumb,
   type MaterialBreadcrumbSegment,
+  renamedInTitle,
 } from "../materials/breadcrumb"
-import { FolderName } from "./edit/name"
 import { FolderTitleMenu } from "./menu"
 import { type FolderDetail, type FolderDialogRequest } from "./types"
 
@@ -46,11 +46,12 @@ export function folderBreadcrumb({
 
   return {
     aside,
-    renderName: (name) => (
-      <FolderName folder={folder} surface="title">
-        {name}
-      </FolderName>
-    ),
+    renderName: renamedInTitle({
+      id: folder.folderId,
+      kind: "folder",
+      name: folder.name,
+      parentId: folder.parentId,
+    }),
     menu: <FolderTitleMenu folder={folder} onDialog={onDialog} />,
     name: folder.name,
     trail: ancestors,

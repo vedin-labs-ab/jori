@@ -1,6 +1,7 @@
 import { type ReactNode } from "react"
 import { TableCell } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { ItemName } from "../../edit/name"
 import { type DragPayload } from "../../folders/drag/plan"
 import { useResourceRowDrag } from "../../folders/drag/state"
 import { columnTier, nameColumnClassName } from "../../list/controls"
@@ -43,7 +44,21 @@ export function MaterialRow<Row extends MaterialListRow>({
         selection={selection}
       />
       <TableCell data-row-link className={nameColumnClassName}>
-        {kind.nameCell(row)}
+        {kind.editKind === undefined ? (
+          kind.nameCell(row)
+        ) : (
+          <ItemName
+            icon={kind.rowIcon?.(row) ?? kind.icon}
+            item={{
+              id: kind.identify(row),
+              kind: kind.editKind,
+              name: row.name,
+            }}
+            surface="list"
+          >
+            {kind.nameCell(row)}
+          </ItemName>
+        )}
       </TableCell>
       <MaterialCells kind={kind} row={row} folders={folders} />
       <TableCell className="text-right">{kind.menu(row)}</TableCell>

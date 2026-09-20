@@ -49,7 +49,13 @@ function MaterialListRegions<Row extends MaterialListRow>(
   props: MaterialListProps<Row>
 ) {
   const { hasFilters, kind, rows, selection } = props
-  const created = useCreatedItem(kind.creationKind ?? "title")
+  const listed = useCreatedItem("list")
+  // Every kind's page is the "list" surface, so the row being named is
+  // shown only on the page of its own kind.
+  const created =
+    listed !== undefined && listed.item.kind === kind.editKind
+      ? listed
+      : undefined
   const selectionActions = useSelectionActions(
     selection,
     props.selectionActions

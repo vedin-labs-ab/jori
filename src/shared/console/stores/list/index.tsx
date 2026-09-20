@@ -73,7 +73,6 @@ const columns = materialColumns<StoreSummary>([
 export function StoreList({
   onAccess,
   onCreate,
-  onEdit,
   onMoveToFolder,
   removal,
   stores,
@@ -87,7 +86,7 @@ export function StoreList({
     <MaterialList
       {...props}
       kind={{
-        creationKind: "store",
+        editKind: "store",
         createdRow: (item) => item.store,
         columns,
         creates: [{ icon: Plus, label: "New store", onSelect: onCreate }],
@@ -99,10 +98,11 @@ export function StoreList({
         menu: materialRowMenu(
           {
             deleteDescription: storeDeleteDescription,
+            editKind: "store",
             identify,
             noun: storeNoun.singular,
           },
-          { onAccess, onEdit, onMoveToFolder, removal }
+          { onAccess, onMoveToFolder, removal }
         ),
         nameCell: (store) => <StoreNameCell store={store} />,
         noun: storeNoun,

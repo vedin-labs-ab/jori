@@ -92,7 +92,6 @@ function FileReadyView({
   const [dialog, setDialog] = useState<FileDialog>()
   const actions = useFileActions(organizationId, {
     onDeleted: () => void navigate({ to: "/files" }),
-    onSaved: () => setDialog(undefined),
   })
   const isPending = actions.pendingFileId === file.fileId
 
@@ -131,9 +130,7 @@ function FileReadyView({
       <FileDialogs
         dialog={dialog}
         file={file}
-        isSaving={isPending}
         onClose={() => setDialog(undefined)}
-        onSave={actions.saveFile}
         organizationId={organizationId}
       />
     </ConsoleListLayout>

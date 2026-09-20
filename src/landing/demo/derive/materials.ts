@@ -1,4 +1,5 @@
 import { countLeafProperties } from "@contracts/schema/count"
+import { type EditSurface, type EditTarget } from "@/shared/console/edit/state"
 import {
   type FileSiblings,
   fileSiblings,
@@ -169,4 +170,20 @@ export function materialMoveTarget(material: DemoMaterial): MoveResourceTarget {
 /** A material on its own as the move dialog's subject. */
 export function materialMoveSubject(material: DemoMaterial): MoveSubject {
   return resourceSubject([materialMoveTarget(material)])
+}
+
+/** A material as the editing session renames it, in one view of it. */
+export function materialRename(
+  material: DemoMaterial,
+  surface: EditSurface
+): EditTarget {
+  return {
+    item: {
+      id: material.id,
+      kind: material.kind,
+      name: material.name,
+      parentId: material.folderId,
+    },
+    surface,
+  }
 }

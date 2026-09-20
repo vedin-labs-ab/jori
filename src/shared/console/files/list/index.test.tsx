@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { type ComponentProps } from "react"
 import { afterEach, expect, test, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { type Editing, EditingContext } from "@/shared/console/edit/state"
 import { absoluteTime } from "@/shared/console/time"
 import { listControls } from "../../../../../test/list/controls"
 import {
@@ -38,6 +39,16 @@ function fileRow(overrides: Partial<FileRow> = {}) {
   } as FileRow
 }
 
+const editing = {
+  begin: vi.fn(),
+  claim: vi.fn(),
+  close: vi.fn(),
+  create: vi.fn(),
+  edit: undefined,
+  register: vi.fn(),
+  save: vi.fn(),
+} satisfies Editing
+
 function renderTable(
   files: FileRow[],
   {
@@ -47,25 +58,26 @@ function renderTable(
   }: Partial<ComponentProps<typeof FileTable>> = {}
 ) {
   render(
-    <TooltipProvider>
-      <FileTable
-        onAccess={vi.fn()}
-        config={fileListConfig(undefined, files)}
-        controls={controls}
-        files={files}
-        folders={undefined}
-        hasFilters={hasFilters}
-        isLoading={false}
-        onDelete={() => undefined}
-        onEdit={() => undefined}
-        onMoveToFolder={() => undefined}
-        onUpload={() => undefined}
-        pendingFileId={undefined}
-        selection={emptySelection()}
-        selectionActions={idleSelectionActions}
-        {...props}
-      />
-    </TooltipProvider>
+    <EditingContext value={editing}>
+      <TooltipProvider>
+        <FileTable
+          onAccess={vi.fn()}
+          config={fileListConfig(undefined, files)}
+          controls={controls}
+          files={files}
+          folders={undefined}
+          hasFilters={hasFilters}
+          isLoading={false}
+          onDelete={() => undefined}
+          onMoveToFolder={() => undefined}
+          onUpload={() => undefined}
+          pendingFileId={undefined}
+          selection={emptySelection()}
+          selectionActions={idleSelectionActions}
+          {...props}
+        />
+      </TooltipProvider>
+    </EditingContext>
   )
 }
 
@@ -133,18 +145,22 @@ test("loading hides stale rows and upload actions", () => {
 
 test("row actions target their file and disable mutations while pending", () => {
   const file = fileRow()
-  const onEdit = vi.fn()
-  renderTable([file], { onEdit })
+  renderTable([file])
 
+  // Rename opens nothing: it hands the row to the editing session, which
+  // turns the name into its input where the row is read.
   openMenu(file)
-  fireEvent.click(screen.getByRole("menuitem", { name: "Rename…" }))
-  expect(onEdit.mock.calls).toEqual([[file]])
+  fireEvent.click(screen.getByRole("menuitem", { name: "Rename" }))
+  expect(editing.begin).toHaveBeenCalledExactlyOnceWith(
+    { id: file.fileId, kind: "file", name: file.name },
+    "list"
+  )
 
   cleanup()
   renderTable([file], { pendingFileId: file.fileId })
   openMenu(file)
 
-  for (const name of ["Rename…", "Audience…", "Move to folder…", "Delete"]) {
+  for (const name of ["Rename", "Audience…", "Move to folder…", "Delete"]) {
     expect(
       screen.getByRole("menuitem", { name }).getAttribute("aria-disabled")
     ).toBe("true")

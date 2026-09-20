@@ -18,11 +18,10 @@ import { MoveResourceDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { MaterialLinksDialog } from "../shared/materials/links"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
-import { EditStoreDialog } from "./edit"
 import { useStoreRemoval } from "./manage"
 import { StoreValue } from "./value"
 
-type StoreDialog = "access" | "edit" | "move" | "share"
+type StoreDialog = "access" | "move" | "share"
 
 /** Member view of one store. The share fork wraps exactly this component,
  *  so it owns everything inside the console chrome. A visitor holding a
@@ -119,9 +118,12 @@ function StoreReadyView({
       noun="store"
       onAccess={() => setDialog("access")}
       onDelete={removeAndLeaveWhenDeleted}
-      onEdit={() => setDialog("edit")}
       onMoveToFolder={() => setDialog("move")}
       onRestore={() => void removal.restoreMaterial(store)}
+      rename={{
+        item: { id: store.storeId, kind: "store", name: store.name },
+        surface: "title",
+      }}
     />
   )
 
@@ -164,11 +166,6 @@ function StoreDialogs({
 
   return (
     <>
-      <EditStoreDialog
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-        store={dialog === "edit" ? store : undefined}
-      />
       <OrganizationVisibilityDialog
         noun="store"
         onOpenChange={closeWhenDismissed}

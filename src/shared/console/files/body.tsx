@@ -2,7 +2,7 @@ import { type ReactNode, useMemo, useState } from "react"
 import { fileKind, isHtmlFile, previewKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/files/size"
 import { ConsoleEmptyState, ConsoleListEmpty } from "../list/empty"
-import { useMaterialTrail } from "../materials/breadcrumb"
+import { renamedInTitle, useMaterialTrail } from "../materials/breadcrumb"
 import { textSizeLimit, usePreloadSiblings } from "./cache/preload"
 import { FileDock } from "./dock"
 import {
@@ -109,8 +109,17 @@ function useFileCrumb({
 }) {
   useMaterialTrail(
     useMemo(
-      () => ({ menu, name: file.name, saveStatus }),
-      [file.name, menu, saveStatus]
+      () => ({
+        menu,
+        name: file.name,
+        renderName: renamedInTitle({
+          id: file.fileId,
+          kind: "file",
+          name: file.name,
+        }),
+        saveStatus,
+      }),
+      [file.fileId, file.name, menu, saveStatus]
     )
   )
 }

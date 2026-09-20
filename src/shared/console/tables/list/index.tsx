@@ -82,7 +82,6 @@ const columns = materialColumns<TableSummary>([
 export function TableList({
   onAccess,
   onCreate,
-  onEdit,
   onImport,
   onMoveToFolder,
   removal,
@@ -98,7 +97,7 @@ export function TableList({
     <MaterialList
       {...props}
       kind={{
-        creationKind: "table",
+        editKind: "table",
         createdRow: (item) => item.table,
         columns,
         creates: [
@@ -113,10 +112,11 @@ export function TableList({
         menu: materialRowMenu(
           {
             deleteDescription: tableDeleteDescription,
+            editKind: "table",
             identify,
             noun: tableNoun.singular,
           },
-          { onAccess, onEdit, onMoveToFolder, removal }
+          { onAccess, onMoveToFolder, removal }
         ),
         nameCell: (table) => <TableNameCell table={table} />,
         noun: tableNoun,

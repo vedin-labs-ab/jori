@@ -60,7 +60,7 @@ function setup(kind: CreateKind, parentId?: string, sidebar = false) {
             editing?.create(
               kind,
               parentId,
-              sidebar ? "sidebar" : kind === "folder" ? "contents" : kind
+              sidebar ? "sidebar" : kind === "folder" ? "contents" : "list"
             )
           }
         >

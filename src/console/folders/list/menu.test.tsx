@@ -201,10 +201,9 @@ function stubActions(
     files: {
       deleteFile: () => undefined,
       pendingFileId: undefined,
-      saveFile: () => undefined,
     },
     onAccess: vi.fn(),
-    onRename: vi.fn(),
+    folderId: "finance",
     onMove: vi.fn(),
     onUnfile: vi.fn(),
     organizationId: "org-1",

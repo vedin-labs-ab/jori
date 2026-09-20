@@ -2,13 +2,11 @@ import { useMutation, useQuery } from "convex/react"
 import { type GenericId } from "convex/values"
 import { type ReactNode, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { useEditing } from "@/shared/console/edit/state"
 import { showErrorToast } from "@/shared/console/error"
 import {
   type FolderContentsResult,
   type FolderDetail,
   type FolderResource,
-  isRenamedInPlace,
   moveTarget,
   toFiledType,
 } from "@/shared/console/folders/types"
@@ -33,8 +31,8 @@ export type FolderResourceActions = {
   editor: ReturnType<typeof useJobEditorHost>["editor"]
   files: ReturnType<typeof useFileActions>
   onAccess: (resource: FolderResource) => void
-  /** Renames the row where it is read, the way a folder is renamed. */
-  onRename: (resource: FolderResource) => void
+  /** The folder whose listing this is, or none at the root. */
+  folderId: string | undefined
   onMove: (resource: FolderResource) => void
   onUnfile: ((resource: FolderResource) => void) | undefined
   organizationId: string
@@ -67,7 +65,6 @@ export function useFolderResourceActions({
   const files = useFileActions(organizationId)
   const removal = useMaterialResourceRemoval(organizationId)
   const unfile = useUnfileResource(organizationId, folder)
-  const editing = useEditing()
 
   return {
     actions: {
@@ -75,19 +72,7 @@ export function useFolderResourceActions({
       editor: host.editor,
       files,
       onAccess: (resource) => setRequest({ resource }),
-      onRename: (resource) => {
-        if (isRenamedInPlace(resource)) {
-          editing?.begin(
-            {
-              id: resource.id,
-              kind: resource.type,
-              name: resource.name,
-              parentId: folder?.folderId,
-            },
-            "contents"
-          )
-        }
-      },
+      folderId: folder?.folderId,
       onMove: setMoving,
       onUnfile: folder === undefined ? undefined : unfile.request,
       organizationId,

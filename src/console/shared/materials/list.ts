@@ -37,7 +37,6 @@ export function useMaterialListPage<Row, Result extends { status: string }>({
   rowsOf: (result: Result) => Row[]
 }) {
   const [query, setQuery] = useState("")
-  const [editing, setEditing] = useState<Row>()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
   const [sharing, setSharing] = useState<Row>()
   const folders = useFolderNames(organizationId)
@@ -61,12 +60,10 @@ export function useMaterialListPage<Row, Result extends { status: string }>({
 
   return {
     ...listing,
-    editing,
     folders,
     list,
     moving,
     query,
-    setEditing,
     setMoving,
     setQueryAndReset: useResettingSetter(setQuery, listing.pagination.reset),
     setSharing,

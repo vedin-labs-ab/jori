@@ -1,17 +1,13 @@
-import { EditFileDialog } from "@/shared/console/files/edit"
-import { EditMaterialDialog } from "@/shared/console/materials/dialogs/edit"
 import { closeOnDismiss, useRetained } from "@/shared/console/retain"
-import { storeEditBlurb } from "@/shared/console/stores/list/config"
-import { tableEditBlurb } from "@/shared/console/tables/list/config"
-import { fileRowOf, materialMoveSubject } from "../derive/materials"
+import { materialMoveSubject } from "../derive/materials"
 import { type DemoMaterial } from "../fixtures/types"
-import { useDemoWorkspace } from "../workspace"
 import { DemoMoveDialog } from "./move"
 import { DemoVisibilityDialog } from "./visibility"
 
-/** What a material's menu can open: its details, its sharing, or a move. */
+/** What a material's menu can open: its sharing, or a move. Renaming opens
+ *  nothing: the name is edited in place. */
 export type MaterialRequest = {
-  kind: "access" | "edit" | "move"
+  kind: "access" | "move"
   material: DemoMaterial
 }
 
@@ -35,12 +31,6 @@ export function MaterialDialogs({
 
   return (
     <>
-      <MaterialEditDialog
-        material={material}
-        onClose={onClose}
-        onOpenChange={closeWhenDismissed}
-        open={request?.kind === "edit"}
-      />
       <DemoVisibilityDialog
         noun={material.kind}
         onOpenChange={closeWhenDismissed}
@@ -55,48 +45,5 @@ export function MaterialDialogs({
         }
       />
     </>
-  )
-}
-
-/** A file's details are its own dialog; a table's and a store's share one. */
-function MaterialEditDialog({
-  material,
-  onClose,
-  onOpenChange,
-  open,
-}: {
-  material: DemoMaterial
-  onClose: () => void
-  onOpenChange: (open: boolean) => void
-  open: boolean
-}) {
-  const { actions } = useDemoWorkspace()
-
-  if (material.kind === "file") {
-    return (
-      <EditFileDialog
-        file={open ? fileRowOf(material) : undefined}
-        isSaving={false}
-        onOpenChange={onOpenChange}
-        onSave={(file, values) => {
-          actions.updateMaterial(file.fileId, values)
-          onClose()
-        }}
-      />
-    )
-  }
-
-  return (
-    <EditMaterialDialog
-      blurb={material.kind === "table" ? tableEditBlurb : storeEditBlurb}
-      isSaving={false}
-      material={open ? material : undefined}
-      noun={material.kind}
-      onOpenChange={onOpenChange}
-      onSave={(values) => {
-        actions.updateMaterial(material.id, values)
-        onClose()
-      }}
-    />
   )
 }

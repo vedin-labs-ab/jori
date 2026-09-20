@@ -103,7 +103,6 @@ export function ListStates({ state }: { state: string }) {
           hasFilters={listing.hasFilters}
           onAccess={ignore}
           onCreate={ignore}
-          onEdit={ignore}
           onImport={ignore}
           onMoveToFolder={ignore}
           removal={removal}

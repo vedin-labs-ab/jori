@@ -6,7 +6,9 @@ import { type TableSummary } from "../tables/types"
 export type CreateKind = "folder" | "table" | "store"
 /** What is renamed in place: those, and a file, which arrives by upload. */
 export type EditKind = CreateKind | "file"
-export type EditSurface = "sidebar" | "contents" | "title" | "table" | "store"
+/** Where a name is edited: the sidebar's tree, a folder's listing, a kind's
+ *  own list page, or the breadcrumb over a detail page. */
+export type EditSurface = "sidebar" | "contents" | "list" | "title"
 export type EditItem = {
   id: string
   kind: EditKind
@@ -15,6 +17,8 @@ export type EditItem = {
   table?: TableSummary
   store?: StoreSummary
 }
+/** What a Rename item starts: the item, and the view of it to edit in. */
+export type EditTarget = { item: EditItem; surface: EditSurface }
 export type Edit = {
   item: EditItem
   surface: EditSurface

@@ -1,10 +1,8 @@
 import { useQuery } from "convex/react"
-import { EditFileDialog } from "@/shared/console/files/edit"
 import { type FileDialog } from "@/shared/console/files/menu"
 import { type FileRow } from "@/shared/console/files/types"
 import { UploadFileDialog as UploadDialog } from "@/shared/console/files/upload"
 import { moveTarget } from "@/shared/console/folders/types"
-import { type MaterialEdit } from "@/shared/console/materials/dialogs/edit"
 import { closeOnDismiss } from "@/shared/console/retain"
 import { api } from "../../../convex/_generated/api"
 import { MoveResourceDialog } from "../folders/move"
@@ -44,28 +42,18 @@ export function UploadFileDialog({
 export function FileDialogs({
   dialog,
   file,
-  isSaving,
   onClose,
-  onSave,
   organizationId,
 }: {
   dialog: FileDialog | undefined
   file: FileRow
-  isSaving: boolean
   onClose: () => void
-  onSave: (file: FileRow, values: MaterialEdit) => void
   organizationId: string
 }) {
   const closeWhenDismissed = closeOnDismiss(onClose)
 
   return (
     <>
-      <EditFileDialog
-        file={dialog === "edit" ? file : undefined}
-        isSaving={isSaving}
-        onOpenChange={closeWhenDismissed}
-        onSave={onSave}
-      />
       <OrganizationVisibilityDialog
         noun="file"
         onOpenChange={closeWhenDismissed}

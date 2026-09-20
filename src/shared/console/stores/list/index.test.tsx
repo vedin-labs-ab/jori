@@ -61,7 +61,6 @@ function renderList(
         hasFilters={hasFilters}
         onAccess={() => undefined}
         onCreate={() => undefined}
-        onEdit={() => undefined}
         onMoveToFolder={() => undefined}
         removal={removal}
         selection={emptySelection()}
@@ -147,5 +146,5 @@ test("a row offers the store's whole menu, the way its page does", () => {
 
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Open", "Rename…", "Audience…", "Move to folder…", "Archive"])
+  ).toEqual(["Open", "Rename", "Audience…", "Move to folder…", "Archive"])
 })

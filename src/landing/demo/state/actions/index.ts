@@ -4,7 +4,6 @@ import { type Visibility } from "@contracts/visibility"
 import { type Dispatch } from "react"
 import { type FiledResourceType } from "@/shared/console/folders/types"
 import { type Job, type JobFormValues } from "@/shared/console/jobs/types"
-import { type MaterialEdit } from "@/shared/console/materials/dialogs/edit"
 import { type MintedLink } from "@/shared/console/materials/links"
 import {
   type RowInsertAnchor,
@@ -98,7 +97,7 @@ function materialActions(dispatch: Dispatch<DemoAction>, mint: DemoMint) {
       dispatch({ type: "createMaterial", material })
       return material
     },
-    updateMaterial: (id: string, values: MaterialEdit) =>
+    updateMaterial: (id: string, values: { name: string }) =>
       dispatch({ type: "updateMaterial", at: Date.now(), id, ...values }),
     removeMaterial: (id: string) => dispatch({ type: "removeMaterial", id }),
     writeStoreValue: (storeId: string, value: unknown) =>

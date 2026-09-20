@@ -17,7 +17,6 @@ import { MoveResourcesDialog } from "../folders/move"
 import { ConsolePage } from "../page"
 import { useMaterialListPage } from "../shared/materials/list"
 import { OrganizationVisibilityDialog } from "../shared/visibility/dialog"
-import { EditTableDialog } from "./edit"
 import { ImportTableDialog } from "./import/dialog"
 import { useTableBulk, useTableRemoval } from "./manage"
 
@@ -52,7 +51,7 @@ function useTablesPage(organizationId: string) {
 function TablesView({ organizationId }: { organizationId: string }) {
   const page = useTablesPage(organizationId)
   const editing = useEditing()
-  const openCreate = () => editing?.create("table", undefined, "table")
+  const openCreate = () => editing?.create("table", undefined, "list")
   const openImport = () => page.setDialog("import")
 
   return (
@@ -74,7 +73,6 @@ function TablesView({ organizationId }: { organizationId: string }) {
           hasFilters={page.hasFilters}
           onAccess={page.setSharing}
           onCreate={openCreate}
-          onEdit={page.setEditing}
           onImport={openImport}
           onMoveToFolder={(table) => page.setMoving([toMoveTarget(table)])}
           removal={page.removal}
@@ -128,7 +126,7 @@ function TablesOverlays({
   )
 }
 
-/** What a row's Rename… and Sharing… open, hosted once for the list. */
+/** What a row's Audience… opens, hosted once for the list. */
 function TableRowDialogs({
   organizationId,
   page,
@@ -138,11 +136,6 @@ function TableRowDialogs({
 }) {
   return (
     <>
-      <EditTableDialog
-        onOpenChange={closeOnDismiss(() => page.setEditing(undefined))}
-        organizationId={organizationId}
-        table={page.editing}
-      />
       {page.sharing === undefined ? null : (
         <OrganizationVisibilityDialog
           noun="table"

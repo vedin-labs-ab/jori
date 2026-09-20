@@ -7,7 +7,6 @@ import { MaterialRowMenu } from "./menu"
 /** What a table or store list's rows can ask of the page. */
 export type MaterialListActions<Row> = {
   onAccess: (row: Row) => void
-  onEdit: (row: Row) => void
   onMoveToFolder: (row: Row) => void
   removal: MaterialRemoval<Row>
 }
@@ -18,6 +17,7 @@ export function materialRowMenu<
 >(
   kind: {
     deleteDescription: string
+    editKind: "table" | "store"
     identify: (row: Row) => string
     noun: string
   },
@@ -35,9 +35,12 @@ export function materialRowMenu<
         noun={kind.noun}
         onAccess={() => actions.onAccess(row)}
         onDelete={() => void actions.removal.removeMaterial(row)}
-        onEdit={() => actions.onEdit(row)}
         onMoveToFolder={() => actions.onMoveToFolder(row)}
         onRestore={() => void actions.removal.restoreMaterial(row)}
+        rename={{
+          item: { id, kind: kind.editKind, name: row.name },
+          surface: "list",
+        }}
       />
     )
   }

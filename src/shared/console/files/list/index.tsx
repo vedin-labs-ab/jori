@@ -18,6 +18,7 @@ import {
 } from "@/shared/console/materials/list"
 import { fileOwner } from "@/shared/console/materials/owners"
 import { absoluteTime, relativeTime } from "@/shared/console/time"
+import { fileKind } from "@/shared/files/kind"
 import { formatFileSize } from "@/shared/files/size"
 import { FileRowMenu } from "../menu"
 import { type FileRow } from "../types"
@@ -67,7 +68,6 @@ export function FileTable({
   isLoading,
   onAccess,
   onDelete,
-  onEdit,
   onMoveToFolder,
   onUpload,
   pendingFileId,
@@ -82,7 +82,6 @@ export function FileTable({
   isLoading: boolean
   onAccess: (file: FileRow) => void
   onDelete: (file: FileRow) => void
-  onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
   onUpload: () => void
   pendingFileId: FileRow["fileId"] | undefined
@@ -105,6 +104,7 @@ export function FileTable({
         description:
           "Files Jori saves during runs and uploads from your team appear here.",
         drag: fileDragItem,
+        editKind: "file",
         icon: Files,
         identify: (file) => file.fileId,
         menu: (file) => (
@@ -113,12 +113,12 @@ export function FileTable({
             isPending={pendingFileId === file.fileId}
             onAccess={onAccess}
             onDelete={onDelete}
-            onEdit={onEdit}
             onMoveToFolder={onMoveToFolder}
           />
         ),
         nameCell: (file) => <FileNameCell file={file} />,
         noun: fileNoun,
+        rowIcon: (file) => fileKind(file.mimeType, file.name).icon,
       }}
       rows={files}
       selection={selection}

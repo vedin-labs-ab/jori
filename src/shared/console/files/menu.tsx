@@ -17,6 +17,7 @@ import { MenuProvenance } from "@/shared/console/menu/provenance"
 import { RowMenu } from "@/shared/console/menu/row"
 import { downloadUrl } from "@/shared/files/download"
 import { formatFileSize } from "@/shared/files/size"
+import { type EditSurface, type EditTarget } from "../edit/state"
 import { showErrorToast } from "../error"
 import { fileBlobCache } from "./cache/blob"
 import { DeleteFileDialog } from "./delete"
@@ -108,23 +109,21 @@ export function FileMenuItems({
   file,
   isPending,
   onAccess,
-  onEdit,
   onMoveToFolder,
   onRemove,
   onUnfile,
-  renamesInPlace,
+  rename,
   withLinks,
 }: {
   file: { name: string; url: string | null }
   isPending: boolean
   onAccess: () => void
-  onEdit: () => void
   onMoveToFolder: () => void
   onRemove: () => void
   /** Folder listings only: unfiling acts on the filing, not on the file. */
   onUnfile?: () => void
-  /** Folder listings only: the name is edited where it is read. */
-  renamesInPlace?: boolean
+  /** The file as it is renamed, and the view of it to rename in. */
+  rename: EditTarget
   /** Whether to lead with Open and Download. */
   withLinks: boolean
 }) {
@@ -134,10 +133,9 @@ export function FileMenuItems({
       <MaterialCoreItems
         isPending={isPending}
         onAccess={onAccess}
-        onEdit={onEdit}
         onMoveToFolder={onMoveToFolder}
         onUnfile={onUnfile}
-        renamesInPlace={renamesInPlace}
+        rename={rename}
       />
       <MenuItem disabled={isPending} onSelect={onRemove} variant="destructive">
         <Trash2 />
@@ -153,14 +151,12 @@ export function FileRowMenu({
   isPending,
   onAccess,
   onDelete,
-  onEdit,
   onMoveToFolder,
 }: {
   file: FileRow
   isPending: boolean
   onAccess: (file: FileRow) => void
   onDelete: (file: FileRow) => void
-  onEdit: (file: FileRow) => void
   onMoveToFolder: (file: FileRow) => void
 }) {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
@@ -172,9 +168,9 @@ export function FileRowMenu({
           file={file}
           isPending={isPending}
           onAccess={() => onAccess(file)}
-          onEdit={() => onEdit(file)}
           onMoveToFolder={() => onMoveToFolder(file)}
           onRemove={() => setIsDeleteOpen(true)}
+          rename={fileRename(file, "list")}
           withLinks
         />
       </RowMenu>
@@ -221,7 +217,15 @@ function FileLinkItems({
   )
 }
 
-export type FileDialog = "access" | "edit" | "move"
+export type FileDialog = "access" | "move"
+
+/** The file as the editing session renames it, in one view of it. */
+function fileRename(
+  file: Pick<FileRow, "fileId" | "name">,
+  surface: EditSurface
+): EditTarget {
+  return { item: { id: file.fileId, kind: "file", name: file.name }, surface }
+}
 
 /** The file's actions hung off its name in the breadcrumb — the shell owns
  *  that trigger and the view publishes the crumb, so this is only the
@@ -251,9 +255,9 @@ export function FileTitleMenu({
           file={file}
           isPending={isPending}
           onAccess={() => onOpen("access")}
-          onEdit={() => onOpen("edit")}
           onMoveToFolder={() => onOpen("move")}
           onRemove={() => setIsDeleteOpen(true)}
+          rename={fileRename(file, "title")}
           withLinks={false}
         />
       </TitleMenuContent>

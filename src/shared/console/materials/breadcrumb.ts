@@ -1,10 +1,13 @@
 import {
   createContext,
+  createElement,
   type ReactNode,
   useContext,
   useEffect,
   useMemo,
 } from "react"
+import { ItemName } from "../edit/name"
+import { type EditItem } from "../edit/state"
 import { type SaveState } from "./save"
 
 // Material detail pages are headed by a breadcrumb trail. The console shell
@@ -65,11 +68,41 @@ export function useMaterialTrail(material: MaterialBreadcrumb | undefined) {
   }, [material, publish])
 }
 
+/** The crumb's name as the place its material is renamed: the name turns
+ *  into its own input, the way a row's does in a list, and Rename in the
+ *  crumb's menu is what starts it. */
+export function renamedInTitle(
+  item: EditItem
+): NonNullable<MaterialBreadcrumb["renderName"]> {
+  return (children) =>
+    createElement(ItemName, { children, item, surface: "title" })
+}
+
 /** Publish the material's display name to the console header breadcrumb
- *  for as long as the calling detail view is mounted. */
-export function useMaterialBreadcrumb(name: string, menu?: ReactNode) {
+ *  for as long as the calling detail view is mounted. Given what the
+ *  material is, the name is renamed in place. */
+export function useMaterialBreadcrumb(
+  name: string,
+  menu?: ReactNode,
+  rename?: Pick<EditItem, "id" | "kind">
+) {
+  const id = rename?.id
+  const kind = rename?.kind
+
   // A menu element gets a fresh identity per caller render, so it triggers
   // a republish each time — harmless, because the shell's children keep
   // their element identity and bail out of the re-render.
-  useMaterialTrail(useMemo(() => ({ name, menu }), [name, menu]))
+  useMaterialTrail(
+    useMemo(
+      () => ({
+        name,
+        menu,
+        renderName:
+          id === undefined || kind === undefined
+            ? undefined
+            : renamedInTitle({ id, kind, name }),
+      }),
+      [id, kind, name, menu]
+    )
+  )
 }

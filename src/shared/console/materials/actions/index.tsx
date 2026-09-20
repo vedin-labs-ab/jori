@@ -6,6 +6,7 @@ import {
   Pencil,
   RotateCcw,
 } from "lucide-react"
+import { type EditTarget, useEditing } from "../../edit/state"
 import { MenuItem, MenuSeparator } from "../../menu/items"
 import { type MaterialActionTarget, RemoveMenuItem } from "./confirm"
 
@@ -19,15 +20,13 @@ export type MaterialMenuActions = {
   isRestoring: boolean
   material: MaterialActionTarget
   onAccess: () => void
-  onEdit: () => void
   onMoveToFolder: () => void
   onRestore: () => void
   /** Folder listings only: leaving a folder acts on the filing, not on the
    *  material, so it belongs where the filing is on show. */
   onUnfile?: () => void
-  /** Folder listings only: the name is edited where it is read, so the
-   *  item opens nothing and drops its ellipsis. */
-  renamesInPlace?: boolean
+  /** The material as it is renamed, and the view of it to rename in. */
+  rename: EditTarget
 }
 
 export function MaterialMenuItems({
@@ -35,12 +34,11 @@ export function MaterialMenuItems({
   isRestoring,
   material,
   onAccess,
-  onEdit,
   onMoveToFolder,
   onRemove,
   onRestore,
   onUnfile,
-  renamesInPlace,
+  rename,
 }: MaterialMenuActions & { onRemove: () => void }) {
   const isArchived = material.archivedAt !== undefined
   const isPending = isDeleting || isRestoring
@@ -50,10 +48,9 @@ export function MaterialMenuItems({
       <MaterialCoreItems
         isPending={isPending}
         onAccess={onAccess}
-        onEdit={onEdit}
         onMoveToFolder={onMoveToFolder}
         onUnfile={onUnfile}
-        renamesInPlace={renamesInPlace}
+        rename={rename}
       />
       {isArchived ? (
         <MenuItem disabled={isPending} onSelect={onRestore}>
@@ -76,23 +73,28 @@ export function MaterialMenuItems({
 export function MaterialCoreItems({
   isPending,
   onAccess,
-  onEdit,
   onMoveToFolder,
   onUnfile,
-  renamesInPlace = false,
+  rename,
 }: {
   isPending: boolean
   onAccess: () => void
-  onEdit: () => void
   onMoveToFolder: () => void
   onUnfile?: () => void
-  renamesInPlace?: boolean
+  rename: EditTarget
 }) {
+  const editing = useEditing()
+
   return (
     <>
-      <MenuItem disabled={isPending} onSelect={onEdit}>
+      {/* No ellipsis: nothing opens. The name turns into its own input,
+          wherever it is being read. */}
+      <MenuItem
+        disabled={isPending}
+        onSelect={() => editing?.begin(rename.item, rename.surface)}
+      >
         <Pencil />
-        {renamesInPlace ? "Rename" : "Rename…"}
+        Rename
       </MenuItem>
       <MaterialFilingItems
         isPending={isPending}

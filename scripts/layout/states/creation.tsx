@@ -34,10 +34,10 @@ export function CreationState({ state }: { state: string }) {
 
 function CreationControls() {
   const editing = useEditing()
-  const created = useCreatedItem("table")
+  const created = useCreatedItem("list")
   return (
     <div className="grid gap-4 p-6">
-      <Button onClick={() => editing?.create("table", undefined, "table")}>
+      <Button onClick={() => editing?.create("table", undefined, "list")}>
         New table
       </Button>
       <Table>

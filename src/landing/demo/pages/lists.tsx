@@ -60,7 +60,7 @@ export function TablesPage() {
   const editing = useEditing()
   const requestFor = (kind: MaterialRequest["kind"]) => (table: TableSummary) =>
     setRequest(withMaterial(kind, materialOf(state, table.tableId)))
-  const create = () => editing?.create("table", undefined, "table")
+  const create = () => editing?.create("table", undefined, "list")
   const list = useMaterialListOverlays({
     create: null,
     deleteDescription: tableDeleteDescription,
@@ -88,7 +88,6 @@ export function TablesPage() {
         hasFilters={listing.hasFilters}
         onAccess={requestFor("access")}
         onCreate={create}
-        onEdit={requestFor("edit")}
         onImport={() => toast("Import a CSV from the console.")}
         onMoveToFolder={requestFor("move")}
         removal={removal(actions.removeMaterial, (table) => table.tableId)}
@@ -116,7 +115,7 @@ export function StoresPage() {
   const editing = useEditing()
   const requestFor = (kind: MaterialRequest["kind"]) => (store: StoreSummary) =>
     setRequest(withMaterial(kind, materialOf(state, store.storeId)))
-  const create = () => editing?.create("store", undefined, "store")
+  const create = () => editing?.create("store", undefined, "list")
   const list = useMaterialListOverlays({
     create: null,
     deleteDescription: storeDeleteDescription,
@@ -143,7 +142,6 @@ export function StoresPage() {
         hasFilters={listing.hasFilters}
         onAccess={requestFor("access")}
         onCreate={create}
-        onEdit={requestFor("edit")}
         onMoveToFolder={requestFor("move")}
         removal={removal(actions.removeMaterial, (store) => store.storeId)}
         selection={listing.selection}
@@ -203,7 +201,6 @@ export function FilesPage() {
         isLoading={false}
         onAccess={requestFor("access")}
         onDelete={(file) => actions.removeMaterial(file.fileId)}
-        onEdit={requestFor("edit")}
         onMoveToFolder={requestFor("move")}
         onUpload={upload}
         pendingFileId={undefined}

@@ -1,7 +1,6 @@
 import { Upload } from "lucide-react"
 import { useState } from "react"
 import { useFolderNames } from "@/console/shared/materials/names"
-import { EditFileDialog } from "@/shared/console/files/edit"
 import { FileTable } from "@/shared/console/files/list"
 import {
   fileDeleteDescription,
@@ -60,23 +59,18 @@ function useFileList(organizationId: string) {
 function useFilesPage(organizationId: string) {
   const list = useFileList(organizationId)
   const [isUploadOpen, setIsUploadOpen] = useState(false)
-  const [editFile, setEditFile] = useState<FileRow>()
   const [accessFile, setAccessFile] = useState<FileRow>()
   const [moving, setMoving] = useState<MoveResourceTarget[]>()
-  const actions = useFileActions(organizationId, {
-    onSaved: () => setEditFile(undefined),
-  })
+  const actions = useFileActions(organizationId)
 
   return {
     ...list,
     accessFile,
     actions,
     bulk: useFileBulk(organizationId, list.selection),
-    editFile,
     isUploadOpen,
     moving,
     setAccessFile,
-    setEditFile,
     setIsUploadOpen,
     setMoving,
   }
@@ -105,7 +99,6 @@ function FilesView({ organizationId }: { organizationId: string }) {
         isLoading={page.isLoading}
         onAccess={page.setAccessFile}
         onDelete={page.actions.deleteFile}
-        onEdit={page.setEditFile}
         onMoveToFolder={(file) => page.setMoving([toMoveTarget(file)])}
         onUpload={() => page.setIsUploadOpen(true)}
         pendingFileId={page.actions.pendingFileId}
@@ -148,15 +141,6 @@ function FilesOverlays({
         isOpen={page.isUploadOpen}
         onOpenChange={page.setIsUploadOpen}
         organizationId={organizationId}
-      />
-      <EditFileDialog
-        file={page.editFile}
-        isSaving={
-          page.editFile !== undefined &&
-          page.actions.pendingFileId === page.editFile.fileId
-        }
-        onOpenChange={closeOnDismiss(() => page.setEditFile(undefined))}
-        onSave={page.actions.saveFile}
       />
       {page.accessFile === undefined ? null : (
         <OrganizationVisibilityDialog

@@ -13,7 +13,6 @@ import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleNavigationContext } from "@/shared/console/shell/location"
 import { AccessState } from "./access"
 import { CreationState } from "./creation"
-import { PendingDialog } from "./dialog"
 import { GridStates } from "./grid"
 import { JobState } from "./jobs"
 import { ListStates } from "./lists"
@@ -42,7 +41,6 @@ export function StatePage() {
             ) : (
               <ListStates state={state} />
             )}
-            {state.startsWith("save-") ? <PendingDialog state={state} /> : null}
             {state.startsWith("create-") ? (
               <CreationState state={state} />
             ) : null}

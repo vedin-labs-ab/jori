@@ -3,6 +3,7 @@ import { FolderInput, FolderMinus } from "lucide-react"
 import { useState } from "react"
 import { AlertDialog } from "@/components/ui/alert-dialog"
 import { useFile } from "@/console/files/query"
+import { type EditTarget } from "@/shared/console/edit/state"
 import { DeleteFileDialog } from "@/shared/console/files/delete"
 import { FileMenuItems } from "@/shared/console/files/menu"
 import { type FolderResource } from "@/shared/console/folders/types"
@@ -58,6 +59,23 @@ function ChatResourceMenu({ actions, resource }: ResourceMenu) {
   )
 }
 
+/** The row as the editing session renames it, where the listing shows it. */
+function contentsRename(
+  actions: FolderResourceActions,
+  resource: FolderResource,
+  kind: "table" | "store" | "file"
+): EditTarget {
+  return {
+    item: {
+      id: resource.id,
+      kind,
+      name: resource.name,
+      parentId: actions.folderId,
+    },
+    surface: "contents",
+  }
+}
+
 /** Tables and stores share one lifecycle, so they share one branch. Nothing
  *  archived is ever listed in a folder, so these rows only ever archive. */
 function MaterialResourceMenu({ actions, resource }: ResourceMenu) {
@@ -74,10 +92,9 @@ function MaterialResourceMenu({ actions, resource }: ResourceMenu) {
       noun={isTable ? "table" : "store"}
       onAccess={() => actions.onAccess(resource)}
       onDelete={() => actions.removal.remove(resource)}
-      onEdit={() => actions.onRename(resource)}
       onMoveToFolder={() => actions.onMove(resource)}
       onRestore={() => actions.removal.restore(resource)}
-      renamesInPlace
+      rename={contentsRename(actions, resource, isTable ? "table" : "store")}
       onUnfile={
         actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
       }
@@ -107,10 +124,9 @@ function FileResourceMenu({ actions, resource }: ResourceMenu) {
           file={{ name: resource.name, url }}
           isPending={actions.files.pendingFileId === resource.id}
           onAccess={() => actions.onAccess(resource)}
-          onEdit={() => actions.onRename(resource)}
           onMoveToFolder={() => actions.onMove(resource)}
           onRemove={() => setIsDeleteOpen(true)}
-          renamesInPlace
+          rename={contentsRename(actions, resource, "file")}
           onUnfile={
             actions.onUnfile ? () => actions.onUnfile?.(resource) : undefined
           }

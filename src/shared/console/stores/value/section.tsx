@@ -4,7 +4,10 @@ import { Button } from "@/components/ui/button"
 import { JsonBlock } from "@/shared/console/code"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { ConsoleListContent } from "@/shared/console/list/frame"
-import { useMaterialTrail } from "@/shared/console/materials/breadcrumb"
+import {
+  renamedInTitle,
+  useMaterialTrail,
+} from "@/shared/console/materials/breadcrumb"
 import { StoreMenuItems } from "../menu"
 import { type SchemaWrite, StoreSchemaDialog } from "../schema/dialog"
 import { type StoreDetail } from "../types"
@@ -92,8 +95,17 @@ function useStoreCrumb({
 }) {
   useMaterialTrail(
     useMemo(
-      () => ({ menu, name: store.name, saveStatus }),
-      [menu, saveStatus, store.name]
+      () => ({
+        menu,
+        name: store.name,
+        renderName: renamedInTitle({
+          id: store.storeId,
+          kind: "store",
+          name: store.name,
+        }),
+        saveStatus,
+      }),
+      [menu, saveStatus, store.name, store.storeId]
     )
   )
 }

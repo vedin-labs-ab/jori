@@ -27,7 +27,7 @@ test("an active material's menu offers archive and confirms before calling back"
   openMenu()
   expect(
     screen.getAllByRole("menuitem").map((item) => item.textContent)
-  ).toEqual(["Rename…", "Audience…", "Move to folder…", "Archive"])
+  ).toEqual(["Rename", "Audience…", "Move to folder…", "Archive"])
 
   fireEvent.click(screen.getByRole("menuitem", { name: "Archive" }))
 
@@ -47,7 +47,7 @@ test("a folder listing adds unfiling right after the move", () => {
   const labels = screen.getAllByRole("menuitem").map((item) => item.textContent)
 
   expect(labels).toEqual([
-    "Rename…",
+    "Rename",
     "Audience…",
     "Move to folder…",
     "Remove from folder",
@@ -79,7 +79,10 @@ function renderMenu({
       noun="table"
       onAccess={() => undefined}
       onDelete={onDelete}
-      onEdit={() => undefined}
+      rename={{
+        item: { id: "table-1", kind: "table", name: "Leads" },
+        surface: "list",
+      }}
       onMoveToFolder={() => undefined}
       onRestore={onRestore}
       onUnfile={onUnfile}

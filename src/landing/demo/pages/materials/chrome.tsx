@@ -7,7 +7,7 @@ import { storeDeleteDescription } from "@/shared/console/stores/list/config"
 import { tableDeleteDescription } from "@/shared/console/tables/list/config"
 import { TableLead } from "@/shared/console/tables/menu"
 import { type TableDetail } from "@/shared/console/tables/types"
-import { fileRowOf } from "../../derive/materials"
+import { fileRowOf, materialRename } from "../../derive/materials"
 import { MaterialDialogs, type MaterialRequest } from "../../dialogs/materials"
 import {
   type DemoFile,
@@ -40,7 +40,8 @@ export function CollectionTitle({
         />
       ),
       [material, table]
-    )
+    ),
+    { id: material.id, kind: "table" }
   )
 
   return (
@@ -78,9 +79,9 @@ export function CollectionMenu({
         actions.removeMaterial(material.id)
         navigation?.navigate(isTable ? "/tables" : "/stores")
       }}
-      onEdit={() => onRequest({ kind: "edit", material })}
       onMoveToFolder={() => onRequest({ kind: "move", material })}
       onRestore={() => undefined}
+      rename={materialRename(material, "title")}
     />
   )
 }

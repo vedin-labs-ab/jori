@@ -1,7 +1,7 @@
 import { type LucideIcon } from "lucide-react"
 import { type ReactNode } from "react"
 import { type CountedNoun } from "../../count"
-import { type CreateKind, type EditItem } from "../../edit/state"
+import { type EditItem, type EditKind } from "../../edit/state"
 import { type ResourceDragItem } from "../../folders/drag/plan"
 import {
   type ColumnTier,
@@ -44,7 +44,7 @@ export type MaterialCreate = {
 
 /** What tells one material list from another. */
 export type MaterialListKind<Row> = {
-  creationKind?: Exclude<CreateKind, "folder">
+  /** A row still being named, for the kinds that are made in place. */
   createdRow?: (item: EditItem) => Row | undefined
   columns: readonly MaterialColumn<Row>[]
   /** The page's create actions, the primary one first. */
@@ -52,12 +52,17 @@ export type MaterialListKind<Row> = {
   description: string
   /** The row as a drag carries it. */
   drag: (row: Row) => ResourceDragItem
+  /** What a row is, to the session that renames it in place. Left out by
+   *  a kind that is edited whole, as a job is. */
+  editKind?: Exclude<EditKind, "folder">
   icon: LucideIcon
   identify: (row: Row) => string
   /** The row's menu, trigger and all. */
   menu: (row: Row) => ReactNode
   nameCell: (row: Row) => ReactNode
   noun: CountedNoun
+  /** The row's own icon, where the kind alone does not decide it. */
+  rowIcon?: (row: Row) => LucideIcon
 }
 
 export type MaterialListProps<Row> = {

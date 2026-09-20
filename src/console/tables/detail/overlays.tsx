@@ -4,9 +4,8 @@ import { type TableDetail } from "@/shared/console/tables/types"
 import { MoveResourceDialog } from "../../folders/move"
 import { MaterialLinksDialog } from "../../shared/materials/links"
 import { OrganizationVisibilityDialog } from "../../shared/visibility/dialog"
-import { EditTableDialog } from "../edit"
 
-export type TableDialog = "access" | "edit" | "move" | "share"
+export type TableDialog = "access" | "move" | "share"
 
 /** The page's dialogs: what its crumb's menu and header actions open,
  *  about the table itself. The grid's own overlays come with the grid. */
@@ -25,11 +24,6 @@ export function TableDialogs({
 
   return (
     <>
-      <EditTableDialog
-        onOpenChange={closeWhenDismissed}
-        organizationId={organizationId}
-        table={dialog === "edit" ? table : undefined}
-      />
       <OrganizationVisibilityDialog
         noun="table"
         onOpenChange={closeWhenDismissed}

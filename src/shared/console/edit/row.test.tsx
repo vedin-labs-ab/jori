@@ -38,7 +38,7 @@ function example({
     return (
       <button
         type="button"
-        onClick={() => editing?.create("table", undefined, "table")}
+        onClick={() => editing?.create("table", undefined, "list")}
       >
         New table
       </button>
@@ -62,7 +62,7 @@ function example({
           selectionActions={idleSelectionActions}
           unauthorizedMessage={undefined}
           kind={{
-            creationKind: "table",
+            editKind: "table",
             createdRow: () => row,
             columns: [
               {
