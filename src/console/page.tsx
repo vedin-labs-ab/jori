@@ -1,6 +1,6 @@
 import { useQuery } from "convex/react"
 import { Building2, ShieldAlert } from "lucide-react"
-import { Fragment, type ReactNode, useEffect } from "react"
+import { Fragment, lazy, type ReactNode, Suspense, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
@@ -14,7 +14,7 @@ import {
 } from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
 import { IntegrationCallbackToasts } from "./integrations/callback"
-import { Onboarding } from "./onboarding"
+import { loadOnboarding } from "./onboarding/load"
 import { readOnboarded } from "./onboarding/state"
 import { OrganizationContext, useOrganizationId } from "./organization/context"
 import { ConsoleShell } from "./shell"
@@ -211,6 +211,10 @@ function OrganizationConsole({
   return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content
 }
 
+const Onboarding = lazy(async () => ({
+  default: (await loadOnboarding()).Onboarding,
+}))
+
 function isResolving(
   convex: ReturnType<typeof useConvexSession>,
   active: ReturnType<typeof useActiveOrganization>,
@@ -243,7 +247,13 @@ function FirstRun({
     return <LaunchGate email={gate.email} />
   }
 
-  return <Onboarding isPrepared={isPrepared} organizationId={organizationId} />
+  // The loader is the one the gate above shows while it resolves, so a first
+  // run waits behind one screen, not two.
+  return (
+    <Suspense fallback={<FullscreenSkeletonLoader />}>
+      <Onboarding isPrepared={isPrepared} organizationId={organizationId} />
+    </Suspense>
+  )
 }
 
 /** Signed in, but the workspace could not be prepared. Trying again mints

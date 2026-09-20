@@ -16,6 +16,7 @@ import {
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { readBillingReturn } from "@/console/billing/actions/return"
+import { loadOnboarding } from "@/console/onboarding/load"
 import { readOnboarded } from "@/console/onboarding/state"
 import { BrandIcon } from "@/shared/brand"
 import { RevealArrow } from "@/shared/console/dot"
@@ -142,7 +143,19 @@ function OrganizationMenu({
   return (
     <DropdownMenu
       open={open}
-      onOpenChange={(nextOpen) => !switching && setOpen(nextOpen)}
+      onOpenChange={(nextOpen) => {
+        if (switching) {
+          return
+        }
+
+        // A new organization and an unfinished one both open onboarding,
+        // so it is fetched while the person reads the menu.
+        if (nextOpen) {
+          void loadOnboarding()
+        }
+
+        setOpen(nextOpen)
+      }}
     >
       <DropdownMenuTrigger asChild>
         <SidebarOrganization
