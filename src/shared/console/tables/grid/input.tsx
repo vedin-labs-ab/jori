@@ -1,4 +1,4 @@
-import { type KeyboardEvent } from "react"
+import { type KeyboardEvent, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { CellError } from "@/shared/cell"
 
@@ -10,6 +10,7 @@ export function CellInput({
   onChange,
   onClose,
   onCommit,
+  onRestoreFocus,
   value,
 }: {
   label: string
@@ -18,8 +19,11 @@ export function CellInput({
   onChange: (text: string) => void
   onClose: () => void
   onCommit: (text: string) => Promise<boolean>
+  onRestoreFocus: () => void
   value: string
 }) {
+  const left = useRef(false)
+
   return (
     <CellError className="h-full min-w-0" message={message}>
       {(attributes) => (
@@ -28,11 +32,19 @@ export function CellInput({
           autoFocus
           aria-label={label}
           className="h-full min-w-24 rounded-none border-0 bg-transparent px-3 text-xs shadow-none ring-inset focus-visible:border-0 focus-visible:ring-2 focus-visible:ring-ring aria-invalid:focus-visible:ring-destructive/20 dark:bg-transparent"
-          onBlur={(event) => void onCommit(event.target.value)}
+          onBlur={(event) => {
+            left.current = true
+            void onCommit(event.target.value)
+          }}
+          onFocus={() => {
+            left.current = false
+          }}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) =>
             handleEditorKey(event, {
               close: onClose,
+              left,
+              restore: onRestoreFocus,
               commit: onCommit,
               onAdvance,
             })
@@ -51,18 +63,27 @@ function handleEditorKey(
   event: KeyboardEvent<HTMLInputElement>,
   editor: {
     close: () => void
+    left: { current: boolean }
+    restore: () => void
     commit: (text: string) => Promise<boolean>
     onAdvance: ((direction: 1 | -1) => void) | undefined
   }
 ) {
-  const draft = event.currentTarget.value
+  const input = event.currentTarget
+  const draft = input.value
+  const restore = () => restoreCellFocus(input, editor)
 
   if (event.key === "Enter") {
-    void editor.commit(draft)
+    void editor.commit(draft).then((committed) => {
+      if (committed) {
+        restore()
+      }
+    })
   }
 
   if (event.key === "Escape") {
     editor.close()
+    restore()
   }
 
   if (event.key === "Tab") {
@@ -71,9 +92,31 @@ function handleEditorKey(
     const direction = event.shiftKey ? -1 : 1
 
     void editor.commit(draft).then((committed) => {
-      if (committed) {
+      if (committed && !editor.left.current) {
         editor.onAdvance?.(direction)
+        restore()
       }
     })
   }
+}
+
+/** Wait for the editor to be replaced by its cell button. An advancing
+ *  editor owns its autofocus, and a blur keeps its chosen destination. */
+function restoreCellFocus(
+  input: HTMLInputElement,
+  editor: { left: { current: boolean }; restore: () => void }
+) {
+  if (editor.left.current) {
+    return
+  }
+
+  requestAnimationFrame(() => {
+    if (
+      !editor.left.current &&
+      !input.isConnected &&
+      input.ownerDocument.activeElement === input.ownerDocument.body
+    ) {
+      editor.restore()
+    }
+  })
 }

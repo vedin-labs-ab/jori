@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { type Ref, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { displayCellText, formatCellText, parseCellText } from "../cells"
@@ -82,17 +82,9 @@ function TextCell({
   spotlight: boolean
   value: unknown
 }) {
-  const [draft, setDraft] = useState<string | undefined>(() =>
-    spotlight && !disabled ? formatCellText(column, value) : undefined
-  )
+  const [draft, setDraft] = useCellDraft(column, value, spotlight, disabled)
   const [error, setError] = useState<string>()
-
-  // The row menu also spotlights editors after they have mounted.
-  useEffect(() => {
-    if (spotlight && !disabled) {
-      setDraft((current) => current ?? formatCellText(column, value))
-    }
-  }, [column, disabled, spotlight, value])
+  const button = useRef<HTMLButtonElement>(null)
 
   const committing = useRef<string>(undefined)
 
@@ -137,6 +129,7 @@ function TextCell({
   if (draft === undefined) {
     return (
       <CellButton
+        buttonRef={button}
         disabled={disabled}
         label={`Edit ${column.name}`}
         onClick={() => setDraft(formatCellText(column, value))}
@@ -155,10 +148,32 @@ function TextCell({
         setDraft(text)
       }}
       onClose={close}
+      onRestoreFocus={() => button.current?.focus({ preventScroll: true })}
       onCommit={commit}
       value={draft}
     />
   )
+}
+
+/** The row menu can spotlight an already mounted cell as well as a new row. */
+function useCellDraft(
+  column: TableColumn,
+  value: unknown,
+  spotlight: boolean,
+  disabled: boolean
+) {
+  const state = useState<string | undefined>(() =>
+    spotlight && !disabled ? formatCellText(column, value) : undefined
+  )
+  const [, setDraft] = state
+
+  useEffect(() => {
+    if (spotlight && !disabled) {
+      setDraft((current) => current ?? formatCellText(column, value))
+    }
+  }, [column, disabled, spotlight, value])
+
+  return state
 }
 
 /** An editor that unmounts mid-edit — the virtual window scrolled on, or
@@ -205,11 +220,13 @@ function useUnmountCommit(state: {
 }
 
 function CellButton({
+  buttonRef,
   disabled,
   label,
   onClick,
   text,
 }: {
+  buttonRef: Ref<HTMLButtonElement>
   disabled: boolean
   label: string
   onClick: () => void
@@ -219,6 +236,7 @@ function CellButton({
     // Named by its value, then what pressing it does. A label alone made
     // every cell in a column announce the same words and no data.
     <button
+      ref={buttonRef}
       className="flex h-full w-full min-w-24 cursor-text items-center px-3 text-left outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:cursor-default disabled:hover:bg-transparent"
       disabled={disabled}
       onClick={onClick}

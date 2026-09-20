@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -85,7 +86,9 @@ test("Tab commits the draft and opens the next text-like cell", async () => {
 
   await waitFor(() => {
     // The boolean column in between is skipped.
-    expect(screen.getByRole("textbox", { name: "Stage value" })).toBeTruthy()
+    expect(document.activeElement).toBe(
+      screen.getByRole("textbox", { name: "Stage value" })
+    )
   })
   expect(onCommit).toHaveBeenCalledWith(row, "title", "Call Grace")
 })
@@ -138,7 +141,7 @@ test("an editor unmounting mid-edit commits its draft like a blur", () => {
   expect(onCommit).toHaveBeenCalledWith(row, "title", "Call Grace")
 })
 
-test("an unmount after Escape or with an untouched draft commits nothing", () => {
+test("an unmount after Escape or with an untouched draft commits nothing", async () => {
   const escaped = renderRow()
 
   fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
@@ -147,6 +150,11 @@ test("an unmount after Escape or with an untouched draft commits nothing", () =>
   })
   fireEvent.keyDown(screen.getByRole("textbox", { name: "Title value" }), {
     key: "Escape",
+  })
+  await waitFor(() => {
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: /Edit Title$/ })
+    )
   })
   escaped.unmount()
 
@@ -158,16 +166,62 @@ test("an unmount after Escape or with an untouched draft commits nothing", () =>
   expect(onCommit).not.toHaveBeenCalled()
 })
 
-test("Shift+Tab at the row's first text cell just commits and closes", async () => {
+test.each([
+  { column: "Title", shiftKey: true },
+  { column: "Stage", shiftKey: false },
+])(
+  "Tab at the $column boundary closes and returns focus to its cell",
+  async ({ column, shiftKey }) => {
+    renderRow()
+    const name = new RegExp(`Edit ${column}$`)
+    fireEvent.click(screen.getByRole("button", { name }))
+    const editor = screen.getByRole("textbox", { name: `${column} value` })
+
+    fireEvent.keyDown(editor, { key: "Tab", shiftKey })
+
+    await waitFor(() => {
+      expect(screen.queryByRole("textbox")).toBeNull()
+      expect(document.activeElement).toBe(screen.getByRole("button", { name }))
+    })
+    expect(onCommit).not.toHaveBeenCalled()
+  }
+)
+
+test("Enter returns focus to the saved cell", async () => {
   renderRow()
   fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
-
   const editor = screen.getByRole("textbox", { name: "Title value" })
-
-  fireEvent.keyDown(editor, { key: "Tab", shiftKey: true })
+  fireEvent.change(editor, { target: { value: "Call Grace" } })
+  fireEvent.keyDown(editor, { key: "Enter" })
 
   await waitFor(() => {
-    expect(screen.queryByRole("textbox")).toBeNull()
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: /Edit Title$/ })
+    )
   })
-  expect(onCommit).not.toHaveBeenCalled()
+  expect(onCommit).toHaveBeenCalledWith(row, "title", "Call Grace")
 })
+
+test.each(["Enter", "Tab"])(
+  "a slow %s save keeps focus where the person moved it",
+  async (key) => {
+    let resolveCommit: (committed: boolean) => void = () => undefined
+    const pending = new Promise<boolean>((resolve) => {
+      resolveCommit = resolve
+    })
+    onCommit.mockReturnValue(pending)
+    renderRow()
+    fireEvent.click(screen.getByRole("button", { name: /Edit Title$/ }))
+    const editor = screen.getByRole("textbox", { name: "Title value" })
+    fireEvent.change(editor, { target: { value: "Call Grace" } })
+    fireEvent.keyDown(editor, { key })
+    const destination = screen.getByRole("checkbox", {
+      name: "Done for this row",
+    })
+    destination.focus()
+
+    await act(async () => resolveCommit(true))
+    await waitFor(() => expect(screen.queryByRole("textbox")).toBeNull())
+    expect(document.activeElement).toBe(destination)
+  }
+)
