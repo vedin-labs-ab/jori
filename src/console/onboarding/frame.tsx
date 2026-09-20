@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useState } from "react"
-import { SidebarTrigger, storedSidebarOpen } from "@/components/ui/sidebar"
+import { storedSidebarOpen } from "@/components/ui/sidebar"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleSidebarShell } from "@/shared/console/shell/navigation"
 
@@ -7,8 +7,7 @@ import { ConsoleSidebarShell } from "@/shared/console/shell/navigation"
  *  is no page to name and nowhere to navigate. With no other organization to
  *  go to it stands alone, the account in its corner. With others, the
  *  sidebar stays for its switcher and account and carries nothing else, so
- *  the one way out of onboarding is another organization; a phone, whose
- *  sidebar is a sheet, gets the way into it in the same corner. */
+ *  the one way out of onboarding is another organization. */
 export function OnboardingFrame({
   account,
   children,
@@ -51,11 +50,7 @@ export function OnboardingFrame({
         )
       }
     >
-      {alone ? (
-        <div className="absolute top-3 right-3">{account}</div>
-      ) : (
-        <SidebarTrigger className="absolute top-3 left-3 md:hidden" />
-      )}
+      {alone ? <div className="absolute top-3 right-3">{account}</div> : null}
       {children}
     </ConsoleFrame>
   )

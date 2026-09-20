@@ -29,7 +29,12 @@ import {
 } from "../materials/breadcrumb"
 import { SaveIcon, type SaveState } from "../materials/save"
 import { ConsoleLink } from "./link"
-import { getMaterialSurface, getPageTitle, isMaterialPage } from "./routes"
+import {
+  getMaterialSurface,
+  getPageTitle,
+  isHeaderless,
+  isMaterialPage,
+} from "./routes"
 
 const consoleFrame = "w-full px-4 @3xl/inset:px-6"
 
@@ -53,7 +58,7 @@ export function ConsoleFrame({
   className,
   contentId,
   filterStorageKey,
-  header = true,
+  header,
   heading = "h1",
   onSidebarOpenChange,
   pathname,
@@ -69,7 +74,8 @@ export function ConsoleFrame({
   contentId?: string
   /** Where the filter panel's open state is kept; left out, it is not. */
   filterStorageKey?: string
-  /** Left off, the page has the inset to itself, top to bottom. */
+  /** Left off, the page has the inset to itself, top to bottom, and names
+   *  itself. Left out, the route decides. */
   header?: boolean
   /** Embedded consoles sit under their host section's heading, and as a
    *  section of its page rather than a second main landmark. */
@@ -129,38 +135,14 @@ export function ConsoleFrame({
         id={contentId}
         tabIndex={-1}
       >
-        {/* Constant compact height in the shadcn dashboard-block style;
-            the sidebar-block h-16→h-12 dance made the chrome feel tall
-            and shift with sidebar state. */}
-        {header ? (
-          <header
-            className={cn(
-              consoleFrame,
-              "flex h-12 shrink-0 items-center gap-2 border-b"
-            )}
-          >
-            {/* The sidebar folds from its own header. A phone has no sidebar
-                on screen to do that from, so there the way in stays here. */}
-            {sidebar === undefined ? null : (
-              <>
-                <SidebarTrigger className="-ml-1 md:hidden" />
-                <Separator
-                  className="mr-2 data-vertical:h-4 data-vertical:self-auto md:hidden"
-                  orientation="vertical"
-                />
-              </>
-            )}
-            <ConsoleHeaderTitle
-              heading={heading}
-              material={material}
-              pathname={pathname}
-            />
-            <div
-              className="ml-auto flex shrink-0 items-center gap-2"
-              ref={setHeaderSlot}
-            />
-          </header>
-        ) : null}
+        <ConsoleHeader
+          hasSidebar={sidebar !== undefined}
+          header={header}
+          heading={heading}
+          material={material}
+          onSlot={setHeaderSlot}
+          pathname={pathname}
+        />
         <MaterialBreadcrumbContext.Provider value={setMaterial}>
           <ConsoleHeaderActionsProvider slot={headerSlot}>
             <ConsoleFiltersProvider storageKey={filterStorageKey}>
@@ -172,6 +154,69 @@ export function ConsoleFrame({
         </MaterialBreadcrumbContext.Provider>
       </SidebarInset>
     </SidebarProvider>
+  )
+}
+
+/** The header over a page, or what stands in for it. Left out, the route
+ *  decides, and a page it leaves without a header is still named for those
+ *  who cannot see that it is missing. Either way a phone, whose sidebar is a
+ *  sheet, keeps its way into it. */
+function ConsoleHeader({
+  hasSidebar,
+  header,
+  heading: Heading,
+  material,
+  onSlot,
+  pathname,
+}: {
+  hasSidebar: boolean
+  header: boolean | undefined
+  heading: "h1" | "h3"
+  material: MaterialBreadcrumb | undefined
+  onSlot: (slot: HTMLElement | null) => void
+  pathname: string
+}) {
+  if (!(header ?? !isHeaderless(pathname))) {
+    return (
+      <>
+        {hasSidebar ? (
+          <SidebarTrigger className="absolute top-3 left-3 z-10 md:hidden" />
+        ) : null}
+        {header === undefined ? (
+          <Heading className="sr-only">{getPageTitle(pathname)}</Heading>
+        ) : null}
+      </>
+    )
+  }
+
+  return (
+    // Constant compact height in the shadcn dashboard-block style; the
+    // sidebar-block h-16→h-12 dance made the chrome feel tall and shift
+    // with sidebar state.
+    <header
+      className={cn(
+        consoleFrame,
+        "flex h-12 shrink-0 items-center gap-2 border-b"
+      )}
+    >
+      {/* The sidebar folds from its own header. A phone has no sidebar on
+          screen to do that from, so there the way in stays here. */}
+      {hasSidebar ? (
+        <>
+          <SidebarTrigger className="-ml-1 md:hidden" />
+          <Separator
+            className="mr-2 data-vertical:h-4 data-vertical:self-auto md:hidden"
+            orientation="vertical"
+          />
+        </>
+      ) : null}
+      <ConsoleHeaderTitle
+        heading={Heading}
+        material={material}
+        pathname={pathname}
+      />
+      <div className="ml-auto flex shrink-0 items-center gap-2" ref={onSlot} />
+    </header>
   )
 }
 

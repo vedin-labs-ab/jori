@@ -154,6 +154,13 @@ export function getMaterialSurface(pathname: string) {
 /** Pages whose header crumb is published by the view once its data loads:
  *  the material detail pages, folder pages, whose whole ancestry is data,
  *  and a conversation's page, named by its title. */
+/** New chat is one ask on an otherwise empty page, and a header over it
+ *  would only repeat what the sidebar already marks. A conversation keeps
+ *  its header: it has a name, and a trail back. */
+export function isHeaderless(pathname: string) {
+  return pathname.replace(/\/$/, "") === "/chat"
+}
+
 export function isMaterialPage(pathname: string) {
   const path = pathname.replace(/\/$/, "")
   return (

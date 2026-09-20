@@ -17,15 +17,15 @@ test.each([
   const router = setup()
   render(<RouterProvider router={router} />)
   await screen.findByTestId("page")
-  const header = document.querySelector("header")
+  const frame = document.querySelector('[data-slot="sidebar-inset"]')
   await act(async () => {
     await router.navigate({ href: `/${section}/missing/unknown` })
   })
   expect(await screen.findByText("Page not found")).toBeDefined()
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   fireEvent.click(screen.getByRole("link", { name: "Activity" }))
   expect(await screen.findByTestId("page")).toBeDefined()
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   expect(sync).toHaveBeenCalledTimes(1)
 })
 
@@ -47,7 +47,7 @@ test.each(["search", "reload"])(
     render(<RouterProvider router={router} />, { onCaughtError })
     await screen.findByText("This page didn't load")
     expect(onCaughtError.mock.calls.map(([caught]) => caught)).toEqual([error])
-    const header = document.querySelector("header")
+    const frame = document.querySelector('[data-slot="sidebar-inset"]')
     fails = false
     await act(async () => {
       if (navigation === "search") {
@@ -57,11 +57,11 @@ test.each(["search", "reload"])(
       }
     })
     expect(await screen.findByText("Recovered page")).toBeDefined()
-    expect(document.querySelector("header")).toBe(header)
+    expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   }
 )
 
-test("the mobile sidebar closes after navigation while the header stays mounted", async () => {
+test("the mobile sidebar closes after navigation while the frame stays mounted", async () => {
   vi.mocked(window.matchMedia).mockReturnValue({
     matches: true,
     addEventListener: vi.fn(),
@@ -70,12 +70,12 @@ test("the mobile sidebar closes after navigation while the header stays mounted"
   const router = setup()
   render(<RouterProvider router={router} />)
   await screen.findByTestId("page")
-  const header = document.querySelector("header")
+  const frame = document.querySelector('[data-slot="sidebar-inset"]')
   fireEvent.click(screen.getByRole("button", { name: "Toggle Sidebar" }))
   expect(await screen.findByRole("dialog")).toBeDefined()
   fireEvent.click(screen.getByRole("link", { name: "Activity" }))
   await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   expect(sync).toHaveBeenCalledTimes(1)
 })
 

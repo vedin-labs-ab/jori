@@ -83,6 +83,20 @@ test("names the page with a heading rather than a one-item breadcrumb", () => {
   expect(screen.queryByRole("navigation", { name: "breadcrumb" })).toBeNull()
 })
 
+test("New chat has no header, stays named, and a conversation gets its header back", () => {
+  const { setPathname } = renderFrame("/chat")
+
+  expect(document.querySelector("header")).toBeNull()
+  // Still the page's heading for those who cannot see the header is gone,
+  // and a phone still has its way into the sidebar's sheet.
+  expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("New chat")
+  expect(screen.getByRole("button", { name: "Toggle sidebar" })).toBeDefined()
+
+  setPathname("/chat/conversation")
+
+  expect(document.querySelector("header")).not.toBeNull()
+})
+
 test("lets the content pane shrink below its content's width", () => {
   renderFrame("/runs")
 

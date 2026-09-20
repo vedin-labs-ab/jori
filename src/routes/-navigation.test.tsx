@@ -32,9 +32,9 @@ test("one shell and identity sync survive navigation across every workspace sect
   const router = setup()
   render(<RouterProvider router={router} />)
   await screen.findByTestId("page")
-  const header = document.querySelector("header")
+  const frame = document.querySelector('[data-slot="sidebar-inset"]')
   const sidebar = document.querySelector('[data-slot="sidebar"]')
-  expect(header).not.toBeNull()
+  expect(frame).not.toBeNull()
   expect(sidebar).not.toBeNull()
   fireEvent.click(screen.getByRole("button", { name: "Close sidebar" }))
   const sidebarState = sidebar?.getAttribute("data-state")
@@ -43,12 +43,13 @@ test("one shell and identity sync survive navigation across every workspace sect
       await router.navigate({ to: path })
     })
     expect(screen.getByTestId("page")).toBeDefined()
-    expect(document.querySelector("header")).toBe(header)
+    expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
     expect(document.querySelector('[data-slot="sidebar"]')).toBe(sidebar)
     expect(sidebar?.getAttribute("data-state")).toBe(sidebarState)
-    expect(screen.getAllByRole("button", { name: "Page action" })).toHaveLength(
-      1
-    )
+    // One header slot, so one action; New chat has no header to hold one.
+    expect(
+      screen.queryAllByRole("button", { name: "Page action" })
+    ).toHaveLength(path === "/chat" ? 0 : 1)
     expect(sync).toHaveBeenCalledTimes(1)
   }
   await act(async () => {
@@ -63,7 +64,7 @@ test("one shell and identity sync survive navigation across every workspace sect
   await vi.waitFor(() =>
     expect(router.state.location.pathname).toBe("/integrations/personal")
   )
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   expect(sync).toHaveBeenCalledTimes(1)
   await vi.waitFor(() =>
     expect(screen.queryByRole("status", { name: "Loading" })).toBeNull()
@@ -84,14 +85,14 @@ test("a cold page chunk loads inside the shell and can be abandoned", async () =
   await vi.waitFor(() =>
     expect(screen.queryByRole("status", { name: "Loading" })).toBeNull()
   )
-  const header = document.querySelector("header")
+  const frame = document.querySelector('[data-slot="sidebar-inset"]')
   await act(async () => {
     await router.navigate({ to: "/skills" })
   })
   expect(
     await screen.findByRole("status", { name: "Loading page" })
   ).toBeDefined()
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   expect(screen.queryByRole("status", { name: "Loading" })).toBeNull()
   expect(screen.queryByRole("button", { name: "Page action" })).toBeNull()
   await act(async () => {
@@ -101,7 +102,7 @@ test("a cold page chunk loads inside the shell and can be abandoned", async () =
   await act(async () => {
     finish({ default: () => null })
   })
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   expect(sync).toHaveBeenCalledTimes(1)
 })
 
@@ -116,17 +117,17 @@ test("page errors leave navigation usable and clear on the next route", async ()
   })
   render(<RouterProvider router={router} />, { onCaughtError })
   await screen.findByTestId("page")
-  const header = document.querySelector("header")
+  const frame = document.querySelector('[data-slot="sidebar-inset"]')
   await act(async () => {
     await router.navigate({ to: "/skills" })
   })
   expect(await screen.findByText("This page didn't load")).toBeDefined()
   expect(onCaughtError.mock.calls.map(([caught]) => caught)).toEqual([error])
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   fireEvent.click(screen.getByRole("link", { name: "Activity" }))
   expect(await screen.findByTestId("page")).toBeDefined()
   expect(screen.queryByText("This page didn't load")).toBeNull()
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
 })
 
 test("a slow route loader keeps the shell usable until it resolves", async () => {
@@ -143,34 +144,34 @@ test("a slow route loader keeps the shell usable until it resolves", async () =>
   await vi.waitFor(() =>
     expect(screen.queryByRole("status", { name: "Loading" })).toBeNull()
   )
-  const header = document.querySelector("header")
+  const frame = document.querySelector('[data-slot="sidebar-inset"]')
   let navigation: Promise<void> | undefined
   await act(async () => {
     navigation = router.navigate({ to: "/skills" })
   })
   expect(router.state.isLoading).toBe(true)
   expect(screen.getByTestId("page")).toBeDefined()
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   expect(screen.queryByRole("status", { name: "Loading" })).toBeNull()
   await act(async () => {
     finish()
     await navigation
   })
   expect(await screen.findByTestId("page")).toBeDefined()
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
 })
 
 test("search-only navigation keeps the page and shell mounted", async () => {
   const router = setup("/runs")
   render(<RouterProvider router={router} />)
   await screen.findByTestId("page")
-  const header = document.querySelector("header")
+  const frame = document.querySelector('[data-slot="sidebar-inset"]')
   const page = screen.getByTestId("page")
   await act(async () => {
     await router.navigate({ to: "/runs", search: { page: 2, run: "run-id" } })
   })
   expect(screen.getByTestId("page")).toBe(page)
-  expect(document.querySelector("header")).toBe(header)
+  expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
   expect(sync).toHaveBeenCalledTimes(1)
 })
 
