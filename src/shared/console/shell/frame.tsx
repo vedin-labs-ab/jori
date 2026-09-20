@@ -206,6 +206,7 @@ function ConsoleHeaderTitle({
   return (
     <>
       <MaterialTrail
+        heading={Heading}
         material={shown.material}
         trail={
           shown.material.trail ??
@@ -233,9 +234,11 @@ function ConsoleHeaderTitle({
  *  only fits truncated. The separators go with the ancestors they follow,
  *  so what is left reads as a trail either way. */
 function MaterialTrail({
+  heading: Heading,
   material,
   trail,
 }: {
+  heading: "h1" | "h3"
   material: MaterialBreadcrumb
   trail: MaterialBreadcrumbSegment[]
 }) {
@@ -267,7 +270,12 @@ function MaterialTrail({
           <BreadcrumbSeparator className="@max-lg/inset:hidden" />
         )}
         <BreadcrumbItem className="min-w-0">
-          <MaterialName material={material} />
+          {/* The current crumb is the page's name, so it is the page's
+              heading too, as the plain title is where there is no trail.
+              Boxless, so the crumb lays out exactly as it did. */}
+          <Heading className="contents">
+            <MaterialName material={material} />
+          </Heading>
           {material.suffix}
         </BreadcrumbItem>
       </BreadcrumbList>

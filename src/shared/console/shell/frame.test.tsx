@@ -181,10 +181,11 @@ test("hangs the page's menu off its name when the view publishes one", () => {
   )
 
   // Even a surface with no trail above it: the name becomes the trigger,
-  // so the heading it would otherwise be is gone.
-  expect(screen.getByRole("button", { name: "Folders" })).toBeDefined()
+  // and stays the page's heading, which now holds that trigger.
+  const name = screen.getByRole("button", { name: "Folders" })
+
   expect(screen.queryByRole("button", { name: /^Audience:/ })).toBeNull()
-  expect(screen.queryByRole("heading", { level: 1 })).toBeNull()
+  expect(screen.getByRole("heading", { level: 1 }).contains(name)).toBe(true)
 })
 
 test("hangs a published aside off the trail, outside its navigation", () => {

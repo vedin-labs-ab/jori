@@ -80,3 +80,27 @@ test("nearing the end of the loaded rows requests the next page", () => {
   expect(screen.queryByText("New row")).toBeNull()
   expect(screen.getByText("Loading more rows…")).toBeTruthy()
 })
+
+// The grid is divs placed by hand, so its roles are all a screen reader
+// has to tell a table from a run of buttons.
+test("reads as a table whose counts cover the rows that are not mounted", () => {
+  renderGrid(buildRows(10_000))
+
+  const table = screen.getByRole("table", { name: "Rows" })
+  const [head, first] = screen.getAllByRole("row")
+
+  // The header and the gutter each count for one.
+  expect(table.getAttribute("aria-rowcount")).toBe("10001")
+  expect(table.getAttribute("aria-colcount")).toBe("2")
+  expect(head?.getAttribute("aria-rowindex")).toBe("1")
+  expect(first?.getAttribute("aria-rowindex")).toBe("2")
+  // Named by the column alone, which is what each cell is read under.
+  expect(screen.getByRole("columnheader", { name: "Title" })).toBeTruthy()
+  expect(screen.getAllByRole("cell").length).toBeGreaterThan(0)
+})
+
+test("says the row count is unknown while more rows remain to load", () => {
+  renderGrid(buildRows(30), { isExhausted: false })
+
+  expect(screen.getByRole("table").getAttribute("aria-rowcount")).toBe("-1")
+})

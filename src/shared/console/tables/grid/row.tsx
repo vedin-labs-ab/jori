@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/useSemanticElements: the rows are placed by hand and windowed, which table elements cannot be, so the divs say in roles what a table would.
+// biome-ignore-all lint/a11y/useFocusableInteractive: these are a static table's rows and headers, read but not operated; the controls inside them take the focus.
 import {
   ArrowDown,
   ArrowUp,
@@ -60,6 +62,7 @@ export function GridRow({
   disabled: boolean
   isFresh: boolean
   isPending: boolean
+  /** Counted from one; the table's own index adds the header's row. */
   number: number
   onCommit: CommitCell
   onDelete: (row: TableRowData) => void
@@ -74,18 +77,11 @@ export function GridRow({
   const [editId, setEditId] = useState<string>()
   const [menuId, setMenuId] = useState<string>()
 
-  function settle() {
-    setEditId(undefined)
-    onFreshSettled()
-  }
-
-  function advance(fromId: string, direction: 1 | -1) {
-    setEditId(nextEditId(columns, fromId, direction))
-  }
-
   const cells = (
     <div
+      aria-rowindex={number + 1}
       className="group/row absolute top-0 left-0 flex h-9 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+      role="row"
       data-state={selection.isSelected(row) ? "selected" : undefined}
       style={{ transform: `translateY(${top}px)` }}
     >
@@ -96,18 +92,24 @@ export function GridRow({
         selection={selection}
       />
       {columns.map((column) => (
-        // biome-ignore lint/a11y/noStaticElementInteractions: only remembers which cell the row's context menu targets — the menu itself stays the accessible path.
+        // Remembers which cell the context menu targets, nothing more.
         <div
           className="w-56 shrink-0 border-r border-b"
+          role="cell"
           key={column.id}
           onContextMenu={() => setMenuId(column.id)}
         >
           <RowCell
             column={column}
             disabled={disabled || isPending}
-            onAdvance={(direction) => advance(column.id, direction)}
+            onAdvance={(direction) =>
+              setEditId(nextEditId(columns, column.id, direction))
+            }
             onCommit={onCommit}
-            onSettle={settle}
+            onSettle={() => {
+              setEditId(undefined)
+              onFreshSettled()
+            }}
             row={row}
             spotlight={
               (isFresh && column.id === spotlightId) || editId === column.id
@@ -318,40 +320,38 @@ function GutterCell({
   row: TableRowData
   selection: RowSelection<TableRowData>
 }) {
-  if (disabled) {
-    return (
-      <div className="flex w-12 shrink-0 select-none items-center justify-center border-r border-b text-muted-foreground tabular-nums">
-        {number}
-      </div>
-    )
-  }
-
+  // Neither a touch nor the keyboard has a hover to find the checkbox
+  // with: a touch gets it outright, the keyboard once its focus is in the
+  // row. A table that cannot be changed has only the number.
   const isActive = selection.count > 0
+  const swapsOnHover = !(disabled || isActive)
 
   return (
-    <div className="flex w-12 shrink-0 select-none items-center justify-center border-r border-b">
+    <div
+      className="flex w-12 shrink-0 select-none items-center justify-center border-r border-b"
+      role="rowheader"
+    >
       <span
         className={cn(
           "text-muted-foreground tabular-nums",
-          // Neither a touch nor the keyboard has a hover to find the
-          // checkbox with: a touch gets it outright, the keyboard once its
-          // focus is in the row.
-          isActive
-            ? "hidden"
-            : "group-has-[:focus-visible]/row:hidden group-hover/row:hidden pointer-coarse:hidden"
+          isActive && !disabled && "hidden",
+          swapsOnHover &&
+            "group-has-[:focus-visible]/row:hidden group-hover/row:hidden pointer-coarse:hidden"
         )}
       >
         {number}
       </span>
-      <Checkbox
-        aria-label={`Select row ${number}`}
-        checked={selection.isSelected(row)}
-        className={cn(
-          !isActive &&
-            "hidden group-has-[:focus-visible]/row:inline-flex group-hover/row:inline-flex pointer-coarse:inline-flex"
-        )}
-        onCheckedChange={() => selection.toggle(row)}
-      />
+      {disabled ? null : (
+        <Checkbox
+          aria-label={`Select row ${number}`}
+          checked={selection.isSelected(row)}
+          className={cn(
+            swapsOnHover &&
+              "hidden group-has-[:focus-visible]/row:inline-flex group-hover/row:inline-flex pointer-coarse:inline-flex"
+          )}
+          onCheckedChange={() => selection.toggle(row)}
+        />
+      )}
     </div>
   )
 }

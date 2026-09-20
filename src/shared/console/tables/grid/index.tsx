@@ -1,4 +1,7 @@
+// biome-ignore-all lint/a11y/useSemanticElements: the rows are placed by hand and windowed, which table elements cannot be, so the divs say in roles what a table would.
+// biome-ignore-all lint/a11y/useFocusableInteractive: these are a static table's rows and headers, read but not operated; the controls inside them take the focus.
 import { ChevronDown, Plus } from "lucide-react"
+import { type ComponentProps, type ReactNode } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { scrollFade } from "@/shared/fade"
@@ -87,14 +90,11 @@ export function RowGrid({
       ref={virtual.scrollRef}
     >
       <div className="w-max text-xs">
-        <HeadRow
-          columns={columns}
-          disabled={disabled}
-          onAddColumn={onAddColumn}
-          onInspectColumn={onInspectColumn}
-          selection={selection}
-        />
-        <div className="relative" style={{ height: virtual.totalSize }}>
+        <GridTable
+          head={{ columns, disabled, onAddColumn, onInspectColumn, selection }}
+          height={virtual.totalSize}
+          rowCount={isExhausted ? rows.length : undefined}
+        >
           {virtual.items.map((item) => {
             const row = rows[item.index]
 
@@ -117,13 +117,46 @@ export function RowGrid({
               />
             )
           })}
-        </div>
+        </GridTable>
         <GridFoot
           columns={columns}
           disabled={disabled}
           isExhausted={isExhausted}
           onAddRow={onAddRow}
         />
+      </div>
+    </div>
+  )
+}
+
+/** The grid as a table, for a reader who hears it: rows, columns, and
+ *  headers rather than a run of buttons. Only a window of rows is mounted,
+ *  so the counts say how many there are, or that more remain to load. The
+ *  header and the gutter each count for one. */
+function GridTable({
+  children,
+  head,
+  height,
+  rowCount,
+}: {
+  /** The mounted rows, which place themselves on the body's canvas. */
+  children: ReactNode
+  head: ComponentProps<typeof HeadRow>
+  /** The height of every row, mounted or not. */
+  height: number
+  /** Left out while rows beyond the loaded ones remain. */
+  rowCount: number | undefined
+}) {
+  return (
+    <div
+      aria-colcount={head.columns.length + 1}
+      aria-label="Rows"
+      aria-rowcount={rowCount === undefined ? -1 : rowCount + 1}
+      role="table"
+    >
+      <HeadRow {...head} />
+      <div className="relative" role="rowgroup" style={{ height }}>
+        {children}
       </div>
     </div>
   )
@@ -200,8 +233,11 @@ function HeadRow({
   // way the data rows do. A cell that sizes itself instead lands its
   // hairline a border-width off from its neighbors'.
   return (
-    <div className="sticky top-0 z-10 flex h-10">
-      <div className="flex w-12 shrink-0 items-center justify-center border-r border-b bg-background">
+    <div aria-rowindex={1} className="sticky top-0 z-10 flex h-10" role="row">
+      <div
+        className="flex w-12 shrink-0 items-center justify-center border-r border-b bg-background"
+        role="columnheader"
+      >
         {disabled ? (
           <span className="sr-only">Row number</span>
         ) : (
@@ -219,7 +255,7 @@ function HeadRow({
           onInspect={() => onInspectColumn(column)}
         />
       ))}
-      <div className="border-r border-b bg-background">
+      <div className="border-r border-b bg-background" role="columnheader">
         <button
           className="flex h-full w-fit items-center gap-1.5 whitespace-nowrap px-3 font-normal text-muted-foreground text-xs outline-none hover:text-foreground focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:opacity-50"
           disabled={disabled}
@@ -249,6 +285,7 @@ function HeadCell({
   return (
     <div
       className="w-56 shrink-0 border-r border-b bg-background font-medium"
+      role="columnheader"
       title={`${column.type}${isRequired ? " · required" : ""}`}
     >
       <button
