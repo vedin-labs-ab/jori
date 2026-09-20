@@ -1,4 +1,5 @@
 import { sessionOptions } from "@better-auth-ui/react"
+import { ConvexHttpClient } from "convex/browser"
 import { ConvexProvider } from "convex/react"
 import {
   type ReactNode,
@@ -7,9 +8,12 @@ import {
   useMemo,
   useState,
 } from "react"
+import { api } from "../../../convex/_generated/api"
+import { localTimezone } from "../console/time"
 import { authClient, authQueryClient } from "./auth"
-import { convex } from "./client"
+import { convex, convexUrl } from "./client"
 import {
+  type ConvexConnection,
   ConvexConnectionContext,
   connectConvex,
   disconnectConvex,
@@ -20,6 +24,29 @@ const mintToken = async () =>
   (await authClient.convex.token({ fetchOptions: { throw: false } })).data
     ?.token ?? null
 
+/** Commits the member's person and identity links in the organization. It
+ *  goes over HTTP with the new token, since the socket is held until the
+ *  organization has been entered. */
+async function prepareMember(token: string, organizationId: string) {
+  const http = new ConvexHttpClient(convexUrl)
+
+  http.setAuth(token)
+  await http.mutation(api.persons.account.sync, {
+    organizationId,
+    timezone: localTimezone(),
+  })
+}
+
+/** Reads the organization again, and waits for the page to have taken it
+ *  in: the query cache tells its observers on a timer, and React commits in
+ *  the turn after that. */
+async function followOrganization() {
+  await authQueryClient.refetchQueries({
+    predicate: (query) => query.queryKey.includes("organization"),
+  })
+  await new Promise((resolve) => setTimeout(resolve, 0))
+}
+
 /** Connects Convex to the Better Auth session, and says whether it holds.
  *  A failed token fetch stops Convex's refresh loop, so a lost connection
  *  is started again, backing off, for as long as Better Auth still has a
@@ -29,10 +56,19 @@ export function SessionConnection({ children }: { children: ReactNode }) {
   const sessionId = session?.session.id
   // Null until Convex has answered for this session.
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [preparation, setPreparation] =
+    useState<ConvexConnection["preparation"]>("pending")
   const [failures, setFailures] = useState(0)
   const connect = useCallback(() => {
     setIsAuthenticated(null)
-    connectConvex(mintToken, setIsAuthenticated)
+    setPreparation("pending")
+    connectConvex({
+      follow: followOrganization,
+      mint: mintToken,
+      onChange: setIsAuthenticated,
+      onPreparation: setPreparation,
+      prepare: prepareMember,
+    })
   }, [])
   const retry = useCallback(() => {
     setFailures((value) => value + 1)
@@ -61,8 +97,9 @@ export function SessionConnection({ children }: { children: ReactNode }) {
     () => ({
       isAuthenticated: isAuthenticated === true,
       isLoading: isAuthenticated === null,
+      preparation,
     }),
-    [isAuthenticated]
+    [isAuthenticated, preparation]
   )
 
   return (

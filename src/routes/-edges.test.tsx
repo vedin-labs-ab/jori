@@ -3,7 +3,7 @@ import { RouterProvider } from "@tanstack/react-router"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { expect, test, vi } from "vitest"
 import { useMaterialMode } from "@/console/frame/mode"
-import { setup, sync, viewer } from "../../test/navigation"
+import { setup, viewer } from "../../test/navigation"
 
 test.each([
   "chat",
@@ -26,7 +26,6 @@ test.each([
   fireEvent.click(screen.getByRole("link", { name: "Activity" }))
   expect(await screen.findByTestId("page")).toBeDefined()
   expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
-  expect(sync).toHaveBeenCalledTimes(1)
 })
 
 test.each(["search", "reload"])(
@@ -76,10 +75,9 @@ test("the mobile sidebar closes after navigation while the frame stays mounted",
   fireEvent.click(screen.getByRole("link", { name: "Activity" }))
   await vi.waitFor(() => expect(screen.queryByRole("dialog")).toBeNull())
   expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
-  expect(sync).toHaveBeenCalledTimes(1)
 })
 
-test("anonymous material visits skip workspace initialization, but protected pages still gate", async () => {
+test("anonymous material visits open without the console, but protected pages still gate", async () => {
   viewer.signedIn = false
   const router = setup("/tables/shared-table")
   function SharedPage() {
@@ -91,12 +89,10 @@ test("anonymous material visits skip workspace initialization, but protected pag
   render(<RouterProvider router={router} />)
   expect(await screen.findByText("share access")).toBeDefined()
   expect(document.querySelector('[data-slot="sidebar"]')).toBeNull()
-  expect(sync).not.toHaveBeenCalled()
   await act(async () => {
     await router.navigate({ to: "/jobs" })
   })
   expect(await screen.findByRole("status", { name: "Loading" })).toBeDefined()
   expect(screen.queryByTestId("page")).toBeNull()
   expect(screen.queryByText("share access")).toBeNull()
-  expect(sync).not.toHaveBeenCalled()
 })

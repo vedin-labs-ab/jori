@@ -24,12 +24,12 @@ vi.mock("@/shared/session/auth", () => ({
   useConvexSession: () => ({
     isAuthenticated: viewer.signedIn,
     isLoading: false,
+    preparation: "ready",
   }),
   useActiveOrganization: () => ({
     data: { id: viewer.organizationId, metadata: { onboarded: true } },
     isPending: false,
   }),
-  useOrganizationSwitching: () => false,
   useListOrganizations: () => ({
     data: [{ id: viewer.organizationId }],
     isPending: false,

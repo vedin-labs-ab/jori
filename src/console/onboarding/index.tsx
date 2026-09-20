@@ -163,8 +163,8 @@ function useOnboarding(organizationId: string | undefined) {
   }
 }
 
-/** Creates the organization and activates it in place: onboarding stays on
- *  screen and has nothing scoped to the organization it came from. */
+/** Creates the organization and activates it, with onboarding on screen
+ *  throughout. */
 async function createOrganization(name: string) {
   // Better Auth requires a unique slug; Jori never shows one, so it is
   // generated rather than asked for.
@@ -177,5 +177,5 @@ async function createOrganization(name: string) {
     throw new Error(error?.message ?? "Couldn't create the organization.")
   }
 
-  await activateOrganization(data.id, { inPlace: true })
+  await activateOrganization(data.id)
 }

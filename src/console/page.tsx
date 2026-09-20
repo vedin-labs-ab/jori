@@ -1,23 +1,22 @@
 import { useQuery } from "convex/react"
 import { Building2, ShieldAlert } from "lucide-react"
-import { type ReactNode, useEffect } from "react"
+import { Fragment, type ReactNode, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ConsoleEmptyState } from "@/shared/console/list/empty"
 import { FullscreenSkeletonLoader } from "@/shared/loading"
 import {
   activateOrganization,
+  retryOrganizationPreparation,
   useActiveOrganization,
   useAuthenticatedSession,
   useConvexSession,
   useListOrganizations,
-  useOrganizationSwitching,
 } from "@/shared/session/auth"
 import { api } from "../../convex/_generated/api"
 import { IntegrationCallbackToasts } from "./integrations/callback"
 import { Onboarding } from "./onboarding"
 import { readOnboarded } from "./onboarding/state"
 import { OrganizationContext, useOrganizationId } from "./organization/context"
-import { useOrganizationSession } from "./organization/session"
 import { ConsoleShell } from "./shell"
 import { LaunchGate } from "./shell/gate"
 import { PublicConsoleFrame } from "./shell/public"
@@ -113,9 +112,7 @@ function SignedInConsole({
   loader: ReactNode
   organizations: ReturnType<typeof useListOrganizations>
 }) {
-  const switching = useOrganizationSwitching()
-
-  if (isResolving(convex, active, organizations) || switching) {
+  if (isResolving(convex, active, organizations)) {
     return loader
   }
 
@@ -136,6 +133,7 @@ function SignedInConsole({
       creating={creating}
       loader={loader}
       organization={organization}
+      preparation={convex.preparation}
     >
       {children}
     </OrganizationGate>
@@ -143,26 +141,27 @@ function SignedInConsole({
 }
 
 /** Onboarding or the console, for the active organization or for none. The
- *  member is prepared in the organization once, here above both of its
- *  views, so going from its onboarding to its console waits for nothing a
- *  second time. */
+ *  session prepares the member in an organization as it enters it, before
+ *  the page follows, so moving between organizations, or from one's
+ *  onboarding to its console, waits for nothing here. Only the first load
+ *  can find the member still being prepared. */
 function OrganizationGate({
   children,
   chrome,
   creating,
   loader,
   organization,
+  preparation,
 }: {
   children: (organizationId: string) => ReactNode
   chrome: "shell" | "none"
   creating: boolean
   loader: ReactNode
   organization: { id: string; metadata?: unknown } | undefined
+  preparation: ReturnType<typeof useConvexSession>["preparation"]
 }) {
-  const session = useOrganizationSession(organization?.id)
-
-  if (session.status === "failed") {
-    return <OrganizationSessionFailure onRetry={session.retry} />
+  if (preparation === "failed") {
+    return <OrganizationSessionFailure />
   }
 
   const onboarded = readOnboarded(organization?.metadata)
@@ -171,13 +170,13 @@ function OrganizationGate({
   if (organization === undefined || onboards) {
     return (
       <FirstRun
-        isPrepared={session.status === "ready"}
+        isPrepared={preparation === "ready"}
         organizationId={onboarded ? undefined : organization?.id}
       />
     )
   }
 
-  if (session.status === "pending") {
+  if (preparation === "pending") {
     return loader
   }
 
@@ -201,16 +200,15 @@ function OrganizationConsole({
   const content = (
     <OrganizationContext.Provider value={organizationId}>
       {chrome === "shell" ? <IntegrationCallbackToasts /> : null}
-      {children(organizationId)}
+      {/* The page starts over for another organization: what it had
+          selected, opened, or paged to was the last one's. */}
+      <Fragment key={organizationId}>{children(organizationId)}</Fragment>
     </OrganizationContext.Provider>
   )
 
-  return chrome === "shell" ? (
-    // Keyed, so one organization's console never carries into the next.
-    <ConsoleShell key={organizationId}>{content}</ConsoleShell>
-  ) : (
-    content
-  )
+  // The shell is one for every organization: switching swaps what it
+  // holds.
+  return chrome === "shell" ? <ConsoleShell>{content}</ConsoleShell> : content
 }
 
 function isResolving(
@@ -248,8 +246,9 @@ function FirstRun({
   return <Onboarding isPrepared={isPrepared} organizationId={organizationId} />
 }
 
-/** Signed in, but the workspace could not be prepared. */
-function OrganizationSessionFailure({ onRetry }: { onRetry: () => void }) {
+/** Signed in, but the workspace could not be prepared. Trying again mints
+ *  the token over, which is what prepares it. */
+function OrganizationSessionFailure() {
   return (
     <PublicConsoleFrame isSignedIn>
       <ConsoleEmptyState
@@ -257,7 +256,7 @@ function OrganizationSessionFailure({ onRetry }: { onRetry: () => void }) {
         description="You're signed in, but workspace setup didn't finish."
         icon={Building2}
         action={
-          <Button onClick={onRetry} variant="outline">
+          <Button onClick={retryOrganizationPreparation} variant="outline">
             Try again
           </Button>
         }

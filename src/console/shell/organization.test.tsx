@@ -25,8 +25,14 @@ const { auth, navigate, toast } = vi.hoisted(() => ({
   auth: {
     activateOrganization: vi.fn(),
     organizations: [
-      { id: "vedin", name: "Vedin Labs", slug: "vedin-labs" },
-      { id: "test", name: "test", slug: "test" },
+      {
+        id: "vedin",
+        metadata: { onboarded: true },
+        name: "Vedin Labs",
+        slug: "vedin-labs",
+      },
+      { id: "test", metadata: { onboarded: true }, name: "test", slug: "test" },
+      // Created and left: its onboarding was never finished.
       { id: "other", name: "Other organization", slug: "other" },
     ],
   },
@@ -41,7 +47,6 @@ vi.mock("@tanstack/react-router", async (importOriginal) => ({
 vi.mock("@/shared/session/auth", () => ({
   activateOrganization: auth.activateOrganization,
   useActiveOrganization: () => ({ data: auth.organizations[0] }),
-  useOrganizationSwitching: () => false,
   useListOrganizations: () => ({ data: auth.organizations }),
 }))
 
@@ -162,6 +167,23 @@ test("a new organization shows none as chosen, and going back needs no activatin
 
   await waitFor(() => expect(navigate).toHaveBeenCalledWith({ to: "/chat" }))
   expect(auth.activateOrganization).not.toHaveBeenCalled()
+})
+
+test("an organization left mid-onboarding says so, and only that one does", async () => {
+  render(<SidebarOrganizationSwitcher />)
+
+  fireEvent.pointerDown(screen.getByRole("button", { name: /Vedin Labs/ }), {
+    button: 0,
+    ctrlKey: false,
+  })
+
+  const unfinished = await screen.findByRole("menuitem", {
+    name: /Other organization/,
+  })
+  expect(unfinished.textContent).toContain("Finish setup")
+  expect(
+    screen.getByRole("menuitem", { name: /test/ }).textContent
+  ).not.toContain("Finish setup")
 })
 
 test("restores the switcher after a failed organization change", async () => {

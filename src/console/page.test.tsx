@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { useOrganizationId } from "./organization/context"
 import { ConsolePage } from "./page"
 
-const { loading, mutate, onboardingMounts, organization, session } = vi.hoisted(
+const { loading, onboardingMounts, organization, retry, session } = vi.hoisted(
   () => ({
-    mutate: vi.fn(async () => undefined),
+    retry: vi.fn(),
     loading: {
       activeOrganizationQueries: 0,
       organizationListQueries: 0,
@@ -16,6 +16,7 @@ const { loading, mutate, onboardingMounts, organization, session } = vi.hoisted(
       id: "organization",
       isResolved: false,
       onboarded: true,
+      preparation: "ready" as "pending" | "ready" | "failed",
     },
     onboardingMounts: { count: 0 },
     session: {
@@ -44,11 +45,15 @@ vi.mock("@/shared/session/auth", () => ({
       isPending: false,
     }
   },
+  retryOrganizationPreparation: retry,
   useConvexSession: () =>
     organization.isResolved
-      ? { isAuthenticated: true, isLoading: false }
-      : { isAuthenticated: false, isLoading: true },
-  useOrganizationSwitching: () => false,
+      ? {
+          isAuthenticated: true,
+          isLoading: false,
+          preparation: organization.preparation,
+        }
+      : { isAuthenticated: false, isLoading: true, preparation: "pending" },
   useListOrganizations: () => {
     loading.organizationListQueries += 1
 
@@ -70,7 +75,6 @@ vi.mock("@/shared/loading", () => ({
 }))
 
 vi.mock("convex/react", () => ({
-  useMutation: () => mutate,
   useQuery: () => ({ allowed: true, email: null }),
 }))
 vi.mock("@/shared/console/time", async (original) => ({
@@ -109,11 +113,12 @@ beforeEach(() => {
   organization.id = "organization"
   organization.onboarded = true
   organization.exists = true
+  organization.preparation = "ready"
+  retry.mockClear()
   onboardingMounts.count = 0
   session.isPending = false
   session.isSignedIn = true
   window.sessionStorage.clear()
-  mutate.mockReset().mockResolvedValue(undefined)
 })
 
 afterEach(cleanup)
@@ -225,58 +230,47 @@ test("outside a console there is no organization to read", () => {
 })
 
 test.each(["shell", "none"] as const)(
-  "holds the %s console and its render prop until identity sync commits",
+  "holds the %s console and its render prop until the member is prepared",
   async (chrome) => {
     organization.isResolved = true
-    const sync = pendingSync()
-    mutate.mockReturnValueOnce(sync.promise)
+    organization.preparation = "pending"
     const children = vi.fn(() => <div>Console</div>)
-
-    render(<ConsolePage chrome={chrome}>{children}</ConsolePage>)
+    const page = render(<ConsolePage chrome={chrome}>{children}</ConsolePage>)
 
     expect(screen.getByText("Loading console")).toBeDefined()
     expect(screen.queryByTestId("shell")).toBeNull()
     expect(children).not.toHaveBeenCalled()
-    await act(async () => sync.resolve(undefined))
+
+    organization.preparation = "ready"
+    page.rerender(<ConsolePage chrome={chrome}>{children}</ConsolePage>)
+
     expect(screen.getByText("Console")).toBeDefined()
     expect(children).toHaveBeenCalledWith("organization")
   }
 )
 
-test("failed initialization stays closed and can be retried", async () => {
+test("a failed preparation stays closed and offers to try again", () => {
   organization.isResolved = true
-  mutate.mockRejectedValueOnce(new Error("Identity transaction failed"))
+  organization.preparation = "failed"
   render(<ConsolePage>{() => <div>Console</div>}</ConsolePage>)
 
-  const retry = await screen.findByRole("button", { name: "Try again" })
   expect(screen.queryByTestId("shell")).toBeNull()
   expect(screen.queryByText("Console")).toBeNull()
-  fireEvent.click(retry)
-  expect(await screen.findByText("Console")).toBeDefined()
-  expect(mutate).toHaveBeenCalledTimes(2)
+  fireEvent.click(screen.getByRole("button", { name: "Try again" }))
+  expect(retry).toHaveBeenCalledOnce()
 })
 
-test("a previous organization's completion cannot open the next console", async () => {
+test("another organization takes over the console without it being torn down", async () => {
   organization.isResolved = true
-  const first = pendingSync()
-  const second = pendingSync()
-  mutate.mockReturnValueOnce(first.promise).mockReturnValueOnce(second.promise)
   const page = render(<ConsolePage>{(id) => <div>{id}</div>}</ConsolePage>)
+  const shell = await screen.findByTestId("shell")
 
+  // The session has prepared the member and moved the page by the time the
+  // organization reads differently here, so there is nothing to wait for.
   organization.id = "next-organization"
   page.rerender(<ConsolePage>{(id) => <div>{id}</div>}</ConsolePage>)
-  await act(async () => first.resolve(undefined))
-  expect(screen.getByText("Loading console")).toBeDefined()
-  expect(screen.queryByTestId("shell")).toBeNull()
-  await act(async () => second.resolve(undefined))
+
   expect(screen.getByText("next-organization")).toBeDefined()
+  expect(screen.getByTestId("shell")).toBe(shell)
+  expect(screen.queryByText("Loading console")).toBeNull()
 })
-
-function pendingSync() {
-  let resolve: (value: undefined) => void = () => undefined
-  const promise = new Promise<undefined>((complete) => {
-    resolve = complete
-  })
-
-  return { promise, resolve }
-}

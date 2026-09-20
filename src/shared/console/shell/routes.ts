@@ -161,6 +161,20 @@ export function isHeaderless(pathname: string) {
   return pathname.replace(/\/$/, "") === "/chat"
 }
 
+/** Where a page leads once its organization is left behind. A page about
+ *  one thing, a table, a folder, a conversation, belongs to the
+ *  organization that holds it, so it gives way to the list it came from;
+ *  every other page reads the same in the next organization. */
+export function organizationNeutralPath(pathname: string) {
+  const path = pathname.replace(/\/$/, "")
+
+  if (!isMaterialPage(path)) {
+    return path
+  }
+
+  return getMaterialSurface(path)?.to ?? `/${path.split("/")[1]}`
+}
+
 export function isMaterialPage(pathname: string) {
   const path = pathname.replace(/\/$/, "")
   return (

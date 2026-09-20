@@ -3,6 +3,7 @@ import {
   consoleDocumentTitle,
   isMaterialPage,
   isNavigationActive,
+  organizationNeutralPath,
 } from "./routes"
 
 test("titles the browser tab with the page, then the product", () => {
@@ -38,3 +39,14 @@ test.each(["/jobs/", "/tables/", "/stores/", "/files/", "/folders/", "/chat/"])(
     )
   }
 )
+
+test("a page about one organization's thing gives way to its list when the organization changes", () => {
+  expect(organizationNeutralPath("/tables/abc123")).toBe("/tables")
+  expect(organizationNeutralPath("/folders/abc123/usage")).toBe("/folders")
+  expect(organizationNeutralPath("/chat/abc123")).toBe("/chat")
+  // Every other page reads the same in the next organization.
+  expect(organizationNeutralPath("/tables")).toBe("/tables")
+  expect(organizationNeutralPath("/integrations/personal/")).toBe(
+    "/integrations/personal"
+  )
+})

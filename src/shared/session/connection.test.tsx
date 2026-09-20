@@ -12,6 +12,7 @@ const state = vi.hoisted(() => ({
   },
   refetch: vi.fn(async () => undefined),
   token: vi.fn(async () => ({ data: { token: "token" } })),
+  prepare: vi.fn(async (_token: string, _organizationId: string) => undefined),
   setActive: vi.fn(async () => undefined),
   setAuth: vi.fn(),
   clearAuth: vi.fn(),
@@ -31,6 +32,18 @@ vi.mock("../region/config", () => ({
 }))
 vi.mock("./client", () => ({
   convex: { setAuth: state.setAuth, clearAuth: state.clearAuth },
+  convexUrl: "https://convex.example",
+}))
+vi.mock("convex/browser", () => ({
+  ConvexHttpClient: class {
+    token = ""
+    setAuth(token: string) {
+      this.token = token
+    }
+    async mutation(_reference: unknown, args: { organizationId: string }) {
+      await state.prepare(this.token, args.organizationId)
+    }
+  },
 }))
 
 const unmount = vi.fn()
@@ -42,6 +55,7 @@ beforeEach(() => {
   state.refetch.mockReset().mockResolvedValue(undefined)
   state.token.mockReset().mockResolvedValue({ data: { token: "token" } })
   state.clearAuth.mockReset()
+  state.prepare.mockReset().mockResolvedValue(undefined)
   state.setAuth.mockReset().mockImplementation((fetchToken, reportAuth) => {
     state.reportAuth = reportAuth
     void fetchToken({ forceRefreshToken: true }).then((token: string | null) =>
@@ -105,28 +119,70 @@ test("a lost token closes protected queries and reconnects without reloading", a
   expect(screen.getByText("Workspace")).toBeDefined()
 })
 
-test("activating an organization swaps its token in place, with the workspace still mounted", async () => {
+/** A token as the server mints it, naming an organization or none. */
+function tokenFor(organizationId?: string) {
+  const payload = btoa(JSON.stringify({ org: organizationId }))
+
+  return { data: { token: `header.${payload}.signature` } }
+}
+
+test("an organization is entered before its token is: member prepared, page moved, workspace still mounted", async () => {
+  state.token.mockResolvedValue(tokenFor("first"))
   await openWorkspace()
   const workspace = screen.getByText("Workspace")
-  const refetchQueries = vi
-    .spyOn(authQueryClient, "refetchQueries")
-    .mockResolvedValue(undefined)
+  const order: string[] = []
+  state.prepare.mockImplementation(async () => {
+    order.push("prepare")
+  })
+  vi.spyOn(authQueryClient, "refetchQueries").mockImplementation(async () => {
+    order.push("follow")
+  })
+  state.token.mockResolvedValue(tokenFor("next"))
+  state.setAuth.mockImplementation((fetchToken, reportAuth) => {
+    void fetchToken({ forceRefreshToken: false }).then(() => {
+      order.push("token")
+      reportAuth(true)
+    })
+  })
 
-  await act(() => activateOrganization("next", { inPlace: true }))
+  await act(async () => {
+    const activation = activateOrganization("next")
+    await vi.advanceTimersByTimeAsync(0)
+    await activation
+  })
 
   expect(state.setActive).toHaveBeenCalledWith({
     organizationId: "next",
     fetchOptions: { throw: true },
   })
-  // A second token, minted for the new claim, and nothing torn down for it.
-  expect(state.token).toHaveBeenCalledTimes(2)
+  // Convex holds its socket until the fetcher answers, so by the time it
+  // sees the new claim the member is prepared and the page reads the new
+  // organization. Nothing was torn down for it.
+  expect(order).toEqual(["prepare", "follow", "token"])
+  expect(state.prepare).toHaveBeenLastCalledWith(
+    expect.stringContaining("header."),
+    "next"
+  )
   expect(screen.getByText("Workspace")).toBe(workspace)
   expect(unmount).not.toHaveBeenCalled()
-  // The organization is read again only once Convex holds the new token.
-  expect(refetchQueries).toHaveBeenCalledOnce()
-  expect(state.setAuth.mock.invocationCallOrder[1]).toBeLessThan(
-    refetchQueries.mock.invocationCallOrder[0]
+})
+
+test("a member who cannot be prepared closes the console without closing the session", async () => {
+  state.prepare.mockRejectedValueOnce(new Error("Identity transaction failed"))
+  state.token.mockResolvedValue(tokenFor("first"))
+
+  function Preparation() {
+    return <div>{useConvexSession().preparation}</div>
+  }
+  render(
+    <SessionConnection>
+      <Preparation />
+    </SessionConnection>
   )
+  await act(async () => {})
+
+  expect(screen.getByText("failed")).toBeDefined()
+  expect(state.clearAuth).not.toHaveBeenCalled()
 })
 
 test("routine token rotation preserves the mounted workspace", async () => {

@@ -11,13 +11,16 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
 import { Spinner } from "@/components/ui/spinner"
 import { billingSearch } from "@/console/billing/actions/return"
+import { readOnboarded } from "@/console/onboarding/state"
 import { BrandIcon } from "@/shared/brand"
 import { SidebarOrganization } from "@/shared/console/shell/organization"
+import { organizationNeutralPath } from "@/shared/console/shell/routes"
 import {
   activateOrganization,
   useActiveOrganization,
@@ -58,8 +61,14 @@ export function SidebarOrganizationSwitcher({
   // A new organization is left for the console, whichever organization is
   // picked; the one still active needs no activating to go back to.
   async function select(organizationId: string) {
+    // The page goes first, so the next organization never opens on a page
+    // about something of this one's.
+    const path = organizationNeutralPath(window.location.pathname)
+
     if (onboarding === "new") {
       await navigate({ to: "/chat" })
+    } else if (path !== window.location.pathname.replace(/\/$/, "")) {
+      await navigate({ to: path })
     }
 
     if (organizationId !== active.data?.id) {
@@ -261,6 +270,12 @@ function OrganizationOption({
         organization={organization}
         size="sm"
       />
+      {/* Picking it lands in its onboarding, so the row says so. */}
+      {switching || readOnboarded(organization.metadata) ? null : (
+        <DropdownMenuShortcut className="tracking-normal">
+          Finish setup
+        </DropdownMenuShortcut>
+      )}
       {switching ? (
         <Spinner
           aria-label={`Switching to ${organization.name}`}

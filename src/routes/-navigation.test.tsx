@@ -5,7 +5,7 @@ import { lazy } from "react"
 import { expect, test, vi } from "vitest"
 import { activeFolderId } from "@/shared/console/folders/tree"
 import { isNavigationActive } from "@/shared/console/shell/routes"
-import { setup, sync } from "../../test/navigation"
+import { setup } from "../../test/navigation"
 
 const paths = [
   "/runs",
@@ -28,7 +28,7 @@ const paths = [
   "/integrations/personal",
 ]
 
-test("one shell and identity sync survive navigation across every workspace section and browser history", async () => {
+test("one shell survives navigation across every workspace section and browser history", async () => {
   const router = setup()
   render(<RouterProvider router={router} />)
   await screen.findByTestId("page")
@@ -50,7 +50,6 @@ test("one shell and identity sync survive navigation across every workspace sect
     expect(
       screen.queryAllByRole("button", { name: "Page action" })
     ).toHaveLength(path === "/chat" ? 0 : 1)
-    expect(sync).toHaveBeenCalledTimes(1)
   }
   await act(async () => {
     router.history.back()
@@ -65,7 +64,6 @@ test("one shell and identity sync survive navigation across every workspace sect
     expect(router.state.location.pathname).toBe("/integrations/personal")
   )
   expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
-  expect(sync).toHaveBeenCalledTimes(1)
   await vi.waitFor(() =>
     expect(screen.queryByRole("status", { name: "Loading" })).toBeNull()
   )
@@ -103,7 +101,6 @@ test("a cold page chunk loads inside the shell and can be abandoned", async () =
     finish({ default: () => null })
   })
   expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
-  expect(sync).toHaveBeenCalledTimes(1)
 })
 
 test("page errors leave navigation usable and clear on the next route", async () => {
@@ -172,7 +169,6 @@ test("search-only navigation keeps the page and shell mounted", async () => {
   })
   expect(screen.getByTestId("page")).toBe(page)
   expect(document.querySelector('[data-slot="sidebar-inset"]')).toBe(frame)
-  expect(sync).toHaveBeenCalledTimes(1)
 })
 
 test("sign-in, marketing, and integration offers stay outside the workspace layout", () => {
