@@ -28,11 +28,20 @@ export function readBillingReturn() {
   }).billing
 }
 
+/** What a return from Polar puts in the address: Jori's own marker, and the
+ *  customer session token Polar adds to every success address. Jori never
+ *  reads the token, and a credential has no business in the address bar or
+ *  the history. */
+const returnParameters = ["billing", "customer_session_token"]
+
 /** Takes the return off the address once it has been acted on, so nothing
  *  later reads it again. */
 export function clearBillingReturn() {
   const url = new URL(window.location.href)
 
-  url.searchParams.delete("billing")
+  for (const parameter of returnParameters) {
+    url.searchParams.delete(parameter)
+  }
+
   window.history.replaceState(window.history.state, "", url)
 }
