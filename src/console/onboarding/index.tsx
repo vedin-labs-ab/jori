@@ -52,7 +52,7 @@ export function Onboarding({ organizationId }: { organizationId?: string }) {
           )
         }
         contentId={mainContentId}
-        organization={organization}
+        fresh={organizationId === undefined}
         pathname={pathname}
         switcher={
           alone ? undefined : (

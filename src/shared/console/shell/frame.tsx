@@ -53,12 +53,12 @@ export function ConsoleFrame({
   className,
   contentId,
   filterStorageKey,
+  header = true,
   heading = "h1",
   onSidebarOpenChange,
   pathname,
   sidebar,
   sidebarOpen,
-  title,
 }: {
   /** Draws the inset as the card it is beside a sidebar, when it stands
    *  alone in the window. */
@@ -69,6 +69,8 @@ export function ConsoleFrame({
   contentId?: string
   /** Where the filter panel's open state is kept; left out, it is not. */
   filterStorageKey?: string
+  /** Left off, the page has the inset to itself, top to bottom. */
+  header?: boolean
   /** Embedded consoles sit under their host section's heading, and as a
    *  section of its page rather than a second main landmark. */
   heading?: "h1" | "h3"
@@ -77,8 +79,6 @@ export function ConsoleFrame({
   /** Left out, a phone's header opens on the title: there is nothing to open. */
   sidebar?: ReactNode
   sidebarOpen?: boolean
-  /** Names the page when no route does. */
-  title?: string
 }) {
   const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null)
   const [published, setPublished] = useState<{
@@ -132,34 +132,35 @@ export function ConsoleFrame({
         {/* Constant compact height in the shadcn dashboard-block style;
             the sidebar-block h-16→h-12 dance made the chrome feel tall
             and shift with sidebar state. */}
-        <header
-          className={cn(
-            consoleFrame,
-            "flex h-12 shrink-0 items-center gap-2 border-b"
-          )}
-        >
-          {/* The sidebar folds from its own header. A phone has no sidebar
-              on screen to do that from, so there the way in stays here. */}
-          {sidebar === undefined ? null : (
-            <>
-              <SidebarTrigger className="-ml-1 md:hidden" />
-              <Separator
-                className="mr-2 data-vertical:h-4 data-vertical:self-auto md:hidden"
-                orientation="vertical"
-              />
-            </>
-          )}
-          <ConsoleHeaderTitle
-            heading={heading}
-            material={material}
-            pathname={pathname}
-            title={title}
-          />
-          <div
-            className="ml-auto flex shrink-0 items-center gap-2"
-            ref={setHeaderSlot}
-          />
-        </header>
+        {header ? (
+          <header
+            className={cn(
+              consoleFrame,
+              "flex h-12 shrink-0 items-center gap-2 border-b"
+            )}
+          >
+            {/* The sidebar folds from its own header. A phone has no sidebar
+                on screen to do that from, so there the way in stays here. */}
+            {sidebar === undefined ? null : (
+              <>
+                <SidebarTrigger className="-ml-1 md:hidden" />
+                <Separator
+                  className="mr-2 data-vertical:h-4 data-vertical:self-auto md:hidden"
+                  orientation="vertical"
+                />
+              </>
+            )}
+            <ConsoleHeaderTitle
+              heading={heading}
+              material={material}
+              pathname={pathname}
+            />
+            <div
+              className="ml-auto flex shrink-0 items-center gap-2"
+              ref={setHeaderSlot}
+            />
+          </header>
+        ) : null}
         <MaterialBreadcrumbContext.Provider value={setMaterial}>
           <ConsoleHeaderActionsProvider slot={headerSlot}>
             <ConsoleFiltersProvider storageKey={filterStorageKey}>
@@ -184,12 +185,10 @@ function ConsoleHeaderTitle({
   heading: Heading,
   material,
   pathname,
-  title,
 }: {
   heading: "h1" | "h3"
   material: MaterialBreadcrumb | undefined
   pathname: string
-  title: string | undefined
 }) {
   const shown =
     material === undefined
@@ -199,9 +198,9 @@ function ConsoleHeaderTitle({
   if (shown === undefined) {
     // A material page before anything published renders nothing — the
     // trail appears whole rather than assembling in front of the reader.
-    return title === undefined && isMaterialPage(pathname) ? null : (
+    return isMaterialPage(pathname) ? null : (
       <Heading className="min-w-0 truncate text-xs/relaxed">
-        {title ?? getPageTitle(pathname)}
+        {getPageTitle(pathname)}
       </Heading>
     )
   }

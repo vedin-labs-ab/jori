@@ -2,7 +2,8 @@ import { type ReactNode } from "react"
 import { type DiscoveryStepLayout } from "../context/organization/discovery/website"
 
 /** One onboarding step on the page: what it asks, the fields if any, then
- *  the way forward ahead of the way around. */
+ *  the way forward ahead of the way around. Onboarding has no header, so
+ *  the step's title is the page's heading. */
 export function OnboardingStep({
   title,
   description,
@@ -19,7 +20,7 @@ export function OnboardingStep({
   return (
     <div className="grid gap-6">
       <div className="grid gap-2">
-        <h2 className="font-medium text-2xl tracking-tight">{title}</h2>
+        <h1 className="font-medium text-2xl tracking-tight">{title}</h1>
         <p className="text-muted-foreground text-sm leading-relaxed">
           {description}
         </p>

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { type OrganizationDiscovery } from "@/console/context/organization/types"
 import { OnboardingFlow } from "@/console/onboarding/flow"
 import { OnboardingFrame } from "@/console/onboarding/frame"
@@ -27,29 +28,32 @@ export function OnboardingState({ state }: { state: string }) {
     })
 
   return (
-    <OnboardingFrame
-      account={switcher ? null : <Button size="icon" variant="ghost" />}
-      organization={created ? organization.name : undefined}
-      pathname="/chat"
-      switcher={
-        switcher ? (
-          <SidebarOrganization organization={organization} />
-        ) : undefined
-      }
-    >
-      <OnboardingFlow
-        discovery={discoveries[step] ?? null}
-        logo={<SidebarOrganization organization={organization} />}
-        name="Albin"
-        onCancel={switcher ? () => undefined : undefined}
-        onCreate={submit}
-        onDeclareTimezone={submit}
-        onDiscover={submit}
-        onFinish={() => undefined}
-        organization={created ? organization.name : undefined}
-        timezone={step === "details" ? undefined : "Europe/Stockholm"}
-      />
-    </OnboardingFrame>
+    // The app provides tooltips at its root; the fixture has no root.
+    <TooltipProvider>
+      <OnboardingFrame
+        account={switcher ? null : <Button size="icon" variant="ghost" />}
+        fresh={!created}
+        pathname="/chat"
+        switcher={
+          switcher ? (
+            <SidebarOrganization organization={organization} />
+          ) : undefined
+        }
+      >
+        <OnboardingFlow
+          discovery={discoveries[step] ?? null}
+          logo={<SidebarOrganization organization={organization} />}
+          name="Albin"
+          onCancel={switcher ? () => undefined : undefined}
+          onCreate={submit}
+          onDeclareTimezone={submit}
+          onDiscover={submit}
+          onFinish={() => undefined}
+          organization={created ? organization.name : undefined}
+          timezone={step === "details" ? undefined : "Europe/Stockholm"}
+        />
+      </OnboardingFrame>
+    </TooltipProvider>
   )
 }
 

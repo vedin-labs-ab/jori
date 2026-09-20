@@ -1,26 +1,27 @@
 import { type ReactNode, useEffect, useState } from "react"
-import { storedSidebarOpen } from "@/components/ui/sidebar"
-import { ConsoleHeaderActions } from "@/shared/console/layout"
+import { SidebarTrigger, storedSidebarOpen } from "@/components/ui/sidebar"
 import { ConsoleFrame } from "@/shared/console/shell/frame"
 import { ConsoleSidebarShell } from "@/shared/console/shell/navigation"
 
-/** The console around onboarding. With no other organization to go to, the
- *  main view stands alone and the account sits in its header. With others,
- *  the sidebar stays for its switcher and account and carries nothing else,
- *  so the one way out of onboarding is another organization. */
+/** The console around onboarding: the main view with no header, since there
+ *  is no page to name and nowhere to navigate. With no other organization to
+ *  go to it stands alone, the account in its corner. With others, the
+ *  sidebar stays for its switcher and account and carries nothing else, so
+ *  the one way out of onboarding is another organization; a phone, whose
+ *  sidebar is a sheet, gets the way into it in the same corner. */
 export function OnboardingFrame({
   account,
   children,
   contentId,
-  organization,
+  fresh,
   pathname,
   switcher,
 }: {
   account: ReactNode
   children: ReactNode
   contentId?: string
-  /** The organization being set up, by name, once it exists. */
-  organization: string | undefined
+  /** Whether the organization is yet to be created. */
+  fresh: boolean
   pathname: string
   /** The organization switcher, when there is another organization. */
   switcher?: ReactNode
@@ -31,7 +32,7 @@ export function OnboardingFrame({
   // person left it and folds from there; after that it starts folded. The
   // state is the frame's own, so the person's preference is left alone.
   const [sidebarOpen, setSidebarOpen] = useState(
-    () => organization === undefined && (storedSidebarOpen() ?? true)
+    () => fresh && (storedSidebarOpen() ?? true)
   )
 
   useEffect(() => setSidebarOpen(false), [])
@@ -40,6 +41,7 @@ export function OnboardingFrame({
     <ConsoleFrame
       card={alone}
       contentId={contentId}
+      header={false}
       onSidebarOpenChange={setSidebarOpen}
       pathname={pathname}
       sidebarOpen={sidebarOpen}
@@ -48,13 +50,12 @@ export function OnboardingFrame({
           <ConsoleSidebarShell account={account} organization={switcher} />
         )
       }
-      title={
-        organization === undefined
-          ? "New organization"
-          : `Set up ${organization}`
-      }
     >
-      {alone ? <ConsoleHeaderActions>{account}</ConsoleHeaderActions> : null}
+      {alone ? (
+        <div className="absolute top-3 right-3">{account}</div>
+      ) : (
+        <SidebarTrigger className="absolute top-3 left-3 md:hidden" />
+      )}
       {children}
     </ConsoleFrame>
   )
