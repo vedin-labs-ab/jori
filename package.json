@@ -58,7 +58,7 @@
     "@codemirror/language": "^6.12.4",
     "@codemirror/language-data": "^6.5.2",
     "@codemirror/state": "^6.7.5",
-    "@codemirror/view": "^6.43.12",
+    "@codemirror/view": "^6.43.13",
     "@convex-dev/better-auth": "^0.12.5",
     "@convex-dev/r2": "^0.10.2",
     "@convex-dev/rate-limiter": "^0.4.0",
